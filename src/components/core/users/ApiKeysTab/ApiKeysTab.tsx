@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { KeyRound, Plus } from "lucide-react";
 import "./ApiKeysTab.css";
@@ -33,33 +33,43 @@ function ApiKeysTable({
   keys,
   onToggleActive,
   isTogglingId,
+  onGenerateFirstKey,
+  canCreate,
 }: {
   keys: ApiKeyRecord[];
   onToggleActive: (key: ApiKeyRecord) => void;
   isTogglingId: string | null;
+  onGenerateFirstKey: () => void;
+  canCreate: boolean;
 }) {
   if (keys.length === 0) {
     return (
-      <div
-        className="flex flex-column align-items-center justify-content-center gap-3 py-6"
-        style={{ color: "var(--solid-text-secondary, #888)" }}
-      >
-        <KeyRound size={32} strokeWidth={1.5} />
+      <div className="solid-api-keys-empty">
+        <div className="solid-api-keys-empty-icon">
+          <KeyRound size={30} strokeWidth={1.6} />
+        </div>
         <div className="text-center">
-          <p className="m-0" style={{ fontSize: 14, fontWeight: 500 }}>
-            No API keys
-          </p>
-          <p className="m-0 mt-1" style={{ fontSize: 12 }}>
-            Generate a key to enable programmatic access.
+          <p className="solid-api-keys-empty-title m-0">No API keys yet</p>
+          <p className="solid-api-keys-empty-copy m-0">
+            {canCreate
+              ? "Generate a key to enable secure programmatic access for this user."
+              : "API key generation is disabled for this user account."}
           </p>
         </div>
+        {canCreate ? (
+          <SolidButton type="button" onClick={onGenerateFirstKey}>
+            <Plus size={14} />
+            Generate First Key
+          </SolidButton>
+        ) : null}
       </div>
     );
   }
 
   return (
-    <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+    <div className="solid-api-keys-table-shell">
+      <div className="solid-api-keys-table-wrap">
+        <table className="solid-api-keys-table">
         <colgroup>
           <col style={{ width: "18%" }} />
           <col style={{ width: "22%" }} />
@@ -75,7 +85,7 @@ function ApiKeysTable({
             <th className="solid-api-keys-th">Status</th>
             <th className="solid-api-keys-th">Expires</th>
             <th className="solid-api-keys-th">Last Used</th>
-            <th className="solid-api-keys-th" style={{ textAlign: "right" }}>Active</th>
+            <th className="solid-api-keys-th solid-api-keys-th--right">Active</th>
           </tr>
         </thead>
         <tbody>
@@ -86,21 +96,11 @@ function ApiKeysTable({
             return (
               <tr key={key.id} className={isExpired ? "solid-api-keys-row--expired" : undefined}>
                 <td className="solid-api-keys-td">
-                  <span style={{ fontWeight: 500 }}>{key.name}</span>
+                  <span className="solid-api-keys-name">{key.name}</span>
                 </td>
 
                 <td className="solid-api-keys-td">
-                  <code
-                    style={{
-                      fontFamily: "monospace",
-                      fontSize: 13,
-                      background: "var(--solid-surface-secondary, #f5f5f5)",
-                      padding: "2px 6px",
-                      borderRadius: 4,
-                    }}
-                  >
-                    {key.maskedKey}
-                  </code>
+                  <code className="solid-api-keys-code">{key.maskedKey}</code>
                 </td>
 
                 <td className="solid-api-keys-td">
@@ -115,29 +115,19 @@ function ApiKeysTable({
                   )}
                 </td>
 
-                <td
-                  className="solid-api-keys-td"
-                  style={{
-                    color:
-                      expiryStatus === "expired"
-                        ? "var(--solid-danger-color, #ef4444)"
-                        : expiryStatus === "expiring-soon"
-                        ? "var(--solid-warn-color, #f59e0b)"
-                        : undefined,
-                  }}
-                >
+                <td className={`solid-api-keys-td ${expiryStatus === "expired" ? "solid-api-keys-date--expired" : ""} ${expiryStatus === "expiring-soon" ? "solid-api-keys-date--warning" : ""}`}>
                   {expiryStatus === "never" ? (
-                    <span style={{ color: "var(--solid-text-secondary, #888)" }}>Never</span>
+                    <span className="solid-api-keys-muted">Never</span>
                   ) : (
                     formatDate(key.expiresAt)
                   )}
                 </td>
 
-                <td className="solid-api-keys-td" style={{ color: "var(--solid-text-secondary, #888)" }}>
+                <td className="solid-api-keys-td solid-api-keys-muted">
                   {formatDate(key.lastUsedAt)}
                 </td>
 
-                <td className="solid-api-keys-td" style={{ textAlign: "right" }}>
+                <td className="solid-api-keys-td solid-api-keys-td--right">
                   {isTogglingId === key.id ? (
                     <SolidSpinner />
                   ) : (
@@ -152,7 +142,8 @@ function ApiKeysTable({
             );
           })}
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   );
 }
@@ -164,13 +155,18 @@ interface ApiKeysTabProps {
 
 export function ApiKeysTab({ userId, canCreate = false }: ApiKeysTabProps) {
   const dispatch = useDispatch();
-  const { data, isLoading, isError } = useGetUserApiKeysQuery(userId);
+  const { data, isLoading, isError, refetch } = useGetUserApiKeysQuery(userId);
   const [updateApiKey] = useUpdateApiKeyMutation();
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [showGenerate, setShowGenerate] = useState(false);
   const [revealKey, setRevealKey] = useState<{ apiKey: string; keyName: string } | null>(null);
+  const [optimisticKeys, setOptimisticKeys] = useState<ApiKeyRecord[]>([]);
 
-  const keys: ApiKeyRecord[] = data?.data?.apiKeys ?? [];
+  const keys = useMemo(() => {
+    const serverKeys = data?.data?.apiKeys ?? [];
+    const merged = [...optimisticKeys.filter((key) => !serverKeys.some((serverKey) => serverKey.id === key.id)), ...serverKeys];
+    return merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [data?.data?.apiKeys, optimisticKeys]);
 
   const handleToggle = async (key: ApiKeyRecord) => {
     setTogglingId(key.id);
@@ -199,37 +195,41 @@ export function ApiKeysTab({ userId, canCreate = false }: ApiKeysTabProps) {
   return (
     <>
       <div className="solid-api-keys-tab">
-        <div className="flex align-items-center justify-content-between mb-4">
-          <div>
-            <p className="m-0" style={{ fontWeight: 600, fontSize: 14 }}>
-              API Keys
-            </p>
-            <p className="m-0 mt-1" style={{ fontSize: 12, color: "var(--solid-text-secondary, #888)" }}>
+        <div className="solid-api-keys-hero">
+          <div className="solid-api-keys-copy">
+            <p className="solid-api-keys-title m-0">API Keys</p>
+            <p className="solid-api-keys-subtitle m-0">
               Keys grant programmatic access. Store them securely — they are shown only once.
             </p>
           </div>
-          {canCreate && (
-            <SolidButton size="small" type="button" onClick={() => setShowGenerate(true)}>
-              <Plus size={14} />
-              Generate Key
-            </SolidButton>
-          )}
+          <div className="solid-api-keys-actions">
+            <span className="solid-api-keys-count">{keys.length} key{keys.length === 1 ? "" : "s"}</span>
+            {canCreate ? (
+              <SolidButton size="small" type="button" onClick={() => setShowGenerate(true)}>
+                <Plus size={14} />
+                Generate Key
+              </SolidButton>
+            ) : null}
+          </div>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-content-center py-5">
+          <div className="solid-api-keys-state">
             <SolidSpinner />
           </div>
         ) : isError && keys.length === 0 ? (
-          <div
-            className="flex flex-column align-items-center justify-content-center gap-2 py-5"
-            style={{ color: "var(--solid-text-secondary, #888)", fontSize: 13 }}
-          >
+          <div className="solid-api-keys-error">
             <p className="m-0">Something went wrong while loading API keys.</p>
             <p className="m-0">Please refresh the page and try again.</p>
           </div>
         ) : (
-          <ApiKeysTable keys={keys} onToggleActive={handleToggle} isTogglingId={togglingId} />
+          <ApiKeysTable
+            keys={keys}
+            onToggleActive={handleToggle}
+            isTogglingId={togglingId}
+            onGenerateFirstKey={() => setShowGenerate(true)}
+            canCreate={canCreate}
+          />
         )}
       </div>
 
@@ -237,8 +237,10 @@ export function ApiKeysTab({ userId, canCreate = false }: ApiKeysTabProps) {
         open={showGenerate}
         userId={Number(userId)}
         onClose={() => setShowGenerate(false)}
-        onCreated={(apiKey, keyName) => {
+        onCreated={(apiKey, keyName, record) => {
           setShowGenerate(false);
+          setOptimisticKeys((previous) => [record, ...previous.filter((existing) => existing.id !== record.id)]);
+          void refetch();
           setRevealKey({ apiKey, keyName });
         }}
       />

@@ -16,7 +16,7 @@ import { SolidImageViewer } from "../../../../../components/core/common/SolidIma
 import { fetchS3Url, type FetchS3UrlOptions } from "../../../../..//helpers/fetchS3Url";
 
 /**
- * SolidS3FileViewerWidget (PrimeReact version)
+ * SolidS3FileViewerWidget
  */
 export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;

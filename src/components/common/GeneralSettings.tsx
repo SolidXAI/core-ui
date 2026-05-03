@@ -49,7 +49,6 @@ export const GeneralSettings = () => {
         iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
         // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
         // shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
-        authPagesTheme: solidSettingsData?.data?.authPagesTheme ?? "light",
         authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
         defaultRole: solidSettingsData?.data?.defaultRole ?? "Admin",
         appLogoPosition: solidSettingsData?.data?.appLogoPosition ?? "in_form_view",
@@ -902,24 +901,6 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <SolidDivider className="my-4" />
-                                    {solidSettingsData?.data?.enableDarkMode === true &&
-                                        <>
-                                            <p className="solid-settings-heading">Authentication Screen Theme</p>
-                                            <div className='formgrid grid'>
-                                                <div className='col-12 lg:col-10 xl:col-8'>
-                                            <SolidSegmentedControl
-                                                className="solid-settings-segmented"
-                                                value={formik.values.authPagesTheme}
-                                                options={[
-                                                    { value: "light", label: "Solid Light" },
-                                                    { value: "dark", label: "Solid Dark" },
-                                                ]}
-                                                onChange={(value) => formik.setFieldValue("authPagesTheme", value)}
-                                            />
-                                                </div>
-                                            </div>
-                                        </>
-                                    }
                                 </>
                             }
 

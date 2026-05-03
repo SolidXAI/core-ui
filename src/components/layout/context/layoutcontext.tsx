@@ -13,7 +13,7 @@ export const LayoutProvider = ({ children }: ChildContainerProps) => {
             return stored;
         }
 
-        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        return "light";
     };
 
     const [themeMode, setThemeMode] = useState<"light" | "dark">(getInitialThemeMode);

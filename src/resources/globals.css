@@ -3195,76 +3195,6 @@ li.header-li-px {
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
 
-.solid-user-form-helper {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.45;
-  color: color-mix(in srgb, var(--foreground) 62%, transparent);
-}
-
-.solid-user-form-panel.solid-panel {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.solid-user-form-panel .solid-panel-header {
-  padding: 11px 12px;
-  background: color-mix(in srgb, var(--accent) 26%, transparent);
-}
-
-.solid-user-form-panel .solid-panel-title {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--foreground) 92%, transparent);
-}
-
-.solid-user-form-panel .solid-panel-content {
-  padding: 12px;
-}
-
-.solid-user-form-panel-copy {
-  margin: 0 0 10px;
-  font-size: 11px;
-  line-height: 1.4;
-  color: color-mix(in srgb, var(--foreground) 62%, transparent);
-}
-
-.solid-user-role-grid .solid-checkbox {
-  width: 100%;
-  gap: 9px;
-}
-
-.solid-user-role-item {
-  margin-bottom: 2px;
-}
-
-.solid-user-role-item .solid-checkbox {
-  min-height: 38px;
-  align-items: center;
-  padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--card) 98%, white 2%);
-  color: color-mix(in srgb, var(--foreground) 84%, transparent);
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.solid-user-role-item .solid-checkbox:hover {
-  border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
-  background: color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-.solid-user-role-item .solid-checkbox-box {
-  flex: 0 0 18px;
-}
-
-.solid-user-role-item .solid-checkbox-label {
-  font-size: 11.5px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: color-mix(in srgb, var(--foreground) 88%, transparent);
-}
-
 .solid-generate-code-popup__head {
   padding-bottom: 12px;
 }
@@ -5958,8 +5888,93 @@ html.dark .solid-empty-listview-secondary-action.solid-btn,
 
 .register-success-popup {
   border-radius: 1.25rem !important;
-  background: #fff !important;
+  background: color-mix(in srgb, var(--background) 72%, white 28%) !important;
+  backdrop-filter: blur(10px);
   z-index: 1000 !important;
+  padding: 20px;
+}
+
+.register-success-card {
+  width: min(100%, 320px);
+  margin: 0 auto;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--card) 92%, white 8%);
+  color: var(--card-foreground);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+  padding: 24px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.register-success-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-success-spinner.solid-spinner {
+  color: var(--primary);
+}
+
+.register-success-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.register-success-title {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.register-success-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.register-success-progress {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 18%, transparent);
+}
+
+.register-success-progress-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 60%, white 40%));
+  animation: register-success-progress 1.2s ease-in-out infinite;
+}
+
+@keyframes register-success-progress {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(290%);
+  }
 }
 
 /* ========================= Taost =================================== */

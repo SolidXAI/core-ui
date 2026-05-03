@@ -391,11 +391,18 @@ const SolidRegister = () => {
             <div className={`auth-container position-relative ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {showOverlay && (
                     <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
-                        <div className="inline-flex flex-column align-items-center justify-content-center text-center">
-                            <SolidSpinner className="auth-success-spinner" />
-                            <p className="mt-3 text-lg font-medium text-700">
-                                Registration successful,<br />you will be redirected...
-                            </p>
+                        <div className="register-success-card">
+                            <div className="register-success-badge">Account created</div>
+                            <SolidSpinner className="auth-success-spinner" size={32} />
+                            <div className="register-success-copy">
+                                <h3 className="register-success-title">Preparing your sign-in</h3>
+                                <p className="register-success-text">
+                                    Your profile has been created successfully. We&apos;re taking you to the login screen now.
+                                </p>
+                            </div>
+                            <div className="register-success-progress" aria-hidden="true">
+                                <span className="register-success-progress-bar" />
+                            </div>
                         </div>
                     </div>
                 )}

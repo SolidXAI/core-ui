@@ -4,6 +4,7 @@ import {
   SolidButton,
   SolidDialog,
   SolidDialogBody,
+  SolidDialogDescription,
   SolidDialogFooter,
   SolidDialogHeader,
   SolidDialogSeparator,
@@ -33,58 +34,40 @@ export function RevealApiKeyModal({ open, apiKey, keyName, onClose }: RevealApiK
   };
 
   return (
-    <SolidDialog open={open} onOpenChange={handleClose} dismissible={false} style={{ maxWidth: 520 }}>
-      <SolidDialogHeader>
+    <SolidDialog
+      open={open}
+      onOpenChange={handleClose}
+      dismissible={false}
+      style={{ maxWidth: 520 }}
+      className="solid-api-key-dialog solid-api-key-dialog--reveal"
+    >
+      <SolidDialogHeader className="solid-api-key-dialog-header">
         <SolidDialogTitle>API Key Created</SolidDialogTitle>
+        <SolidDialogDescription>
+          Copy this key now and store it in a secure place before closing this dialog.
+        </SolidDialogDescription>
       </SolidDialogHeader>
       <SolidDialogSeparator />
-      <SolidDialogBody>
-        <div className="solid-api-key-reveal-warning flex align-items-start gap-2 mb-4">
-          <AlertTriangle size={16} className="flex-shrink-0 mt-1" />
-          <p className="m-0" style={{ fontSize: 13 }}>
-            <strong>Copy this key now.</strong> It will not be shown again once you close this dialog. Store it somewhere secure.
+      <SolidDialogBody className="solid-api-key-dialog-body">
+        <div className="solid-api-key-reveal-warning">
+          <AlertTriangle size={16} className="solid-api-key-reveal-warning-icon" />
+          <p className="m-0">
+            <strong>Shown only once.</strong> After this dialog closes, the raw key cannot be retrieved again.
           </p>
         </div>
 
-        <p className="form-field-label mb-2">
-          {keyName}
-        </p>
+        <p className="form-field-label mb-2">{keyName}</p>
 
-        <div
-          className="solid-api-key-reveal-box flex align-items-center gap-2 p-3"
-          style={{
-            background: "var(--solid-surface-secondary, #f5f5f5)",
-            borderRadius: 6,
-            border: "1px solid var(--solid-border-color, #e0e0e0)",
-          }}
-        >
-          <code
-            className="flex-1"
-            style={{
-              fontFamily: "monospace",
-              fontSize: 13,
-              wordBreak: "break-all",
-              userSelect: "all",
-            }}
-          >
-            {apiKey}
-          </code>
+        <div className="solid-api-key-reveal-box">
+          <code className="solid-api-key-reveal-code">{apiKey}</code>
           <button
             type="button"
             title={copied ? "Copied!" : "Copy to clipboard"}
             onClick={handleCopy}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px",
-              display: "flex",
-              alignItems: "center",
-              flexShrink: 0,
-            }}
+            className="solid-api-key-reveal-copy"
           >
             {copied ? (
-              <CheckCircle size={16} style={{ color: "var(--solid-success-color, #22c55e)" }} />
+              <CheckCircle size={16} className="solid-api-key-reveal-copy-success" />
             ) : (
               <Copy size={16} />
             )}
@@ -92,13 +75,11 @@ export function RevealApiKeyModal({ open, apiKey, keyName, onClose }: RevealApiK
         </div>
 
         {copied && (
-          <p className="m-0 mt-2" style={{ fontSize: 12, color: "var(--solid-success-color, #22c55e)" }}>
-            Copied to clipboard!
-          </p>
+          <p className="solid-api-key-reveal-copied m-0 mt-2">Copied to clipboard.</p>
         )}
       </SolidDialogBody>
       <SolidDialogSeparator />
-      <SolidDialogFooter>
+      <SolidDialogFooter className="solid-api-key-dialog-footer">
         <SolidButton variant="outline" onClick={handleClose}>
           Close
         </SolidButton>

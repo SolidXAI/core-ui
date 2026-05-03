@@ -19,20 +19,19 @@ export const AuthTabs = ({ tabs, activeIndex, onChange }: AuthTabsProps) => {
   const activeValue = tabs[activeIndex]?.key || tabs[0].key;
 
   return (
-    <SolidTabGroup
-      className="solid-auth-tabs"
-      listClassName="solid-auth-tabs-list"
-      panelClassName="solid-auth-tabs-panel"
-      tabs={tabs.map((tab) => ({
-        value: tab.key,
-        label: tab.label,
-        content: tab.content,
-      }))}
-      value={activeValue}
-      onValueChange={(value) => {
-        const nextIndex = tabs.findIndex((tab) => tab.key === value);
-        if (nextIndex >= 0) onChange(nextIndex);
-      }}
-    />
+    <div className="solid-auth-tabs">
+      <SolidTabGroup
+        tabs={tabs.map((tab) => ({
+          value: tab.key,
+          label: tab.label,
+          content: tab.content,
+        }))}
+        value={activeValue}
+        onValueChange={(value) => {
+          const nextIndex = tabs.findIndex((tab) => tab.key === value);
+          if (nextIndex >= 0) onChange(nextIndex);
+        }}
+      />
+    </div>
   );
 };

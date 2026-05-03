@@ -1,42 +1,26 @@
 import Link from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
+import { LayoutContext } from "../layout/context/layoutcontext";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    const layoutContext = useContext(LayoutContext);
 
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
 
-    // const { changeTheme } = useContext(PrimeReactContext);
-    // const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
-    // const dispatch = useDispatch();
-    // const _changeTheme = (theme: string, colorScheme: string) => {
-    //     changeTheme?.(layoutConfig.theme, theme, 'theme-css', () => {
-    //         setLayoutConfig((prevState: LayoutConfig) => ({ ...prevState, theme, colorScheme }));
-    //     });
-    // };
-    // useEffect(() => {
-    //     const theme = solidSettingsData?.data?.authPagesTheme; // 'dark' or 'light'
-    //     if (theme) {
-    //         dispatch(toggleTheme()); // Dispatch Redux action
-    //         _changeTheme(
-    //             theme === "dark" ? "solid-dark-purple" : "solid-light-purple",
-    //             theme
-    //         );
-    //     }
-    // }, [solidSettingsData]);
     useEffect(() => {
         trigger("");
     }, [trigger]);
@@ -117,7 +101,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLayout = solidSettingsData?.data?.authPagesLayout || "center";
-    const authTheme = solidSettingsData?.data?.authPagesTheme === "dark" ? "dark" : "light";
+    const authTheme = layoutContext?.themeMode === "dark" ? "dark" : "light";
     const isCenter = authLayout === "center";
     const isLeft = authLayout === "left";
     const isRight = authLayout === "right";
