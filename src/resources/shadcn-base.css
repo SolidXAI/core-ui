@@ -2358,10 +2358,15 @@ body {
 .solid-auth-theme-wrapper .auth-container .solid-input:-webkit-autofill,
 .solid-auth-theme-wrapper .auth-container .solid-input:-webkit-autofill:hover,
 .solid-auth-theme-wrapper .auth-container .solid-input:-webkit-autofill:focus {
-  -webkit-text-fill-color: #fafafa !important;
-  -webkit-box-shadow: 0 0 0 1000px #18181b inset !important;
-  box-shadow: 0 0 0 1000px #18181b inset !important;
-  border-color: #2f2f37 !important;
+  -webkit-text-fill-color: var(--solid-text-primary) !important;
+  caret-color: var(--solid-text-primary) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--solid-surface-input) inset !important;
+  box-shadow: 0 0 0 1000px var(--solid-surface-input) inset !important;
+  border-color: var(--solid-border-strong) !important;
+  border-top-color: var(--solid-border-strong) !important;
+  border-right-color: var(--solid-border-strong) !important;
+  border-bottom-color: var(--solid-border-strong) !important;
+  border-left-color: var(--solid-border-strong) !important;
 }
 
 .solid-auth-theme-wrapper .auth-submit-button.solid-btn,
