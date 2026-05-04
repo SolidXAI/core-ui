@@ -4429,7 +4429,7 @@ li.header-li-px {
 
 @media (min-width: 1600px) and (max-width: 1699px) {
   html {
-    font-size: 95% !important;
+    font-size: 100% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4446,7 +4446,7 @@ li.header-li-px {
 /* 1500px - 1599px */
 @media (min-width: 1500px) and (max-width: 1599px) {
   html {
-    font-size: 90% !important;
+    font-size: 97.5% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4464,7 +4464,7 @@ li.header-li-px {
 /* 1400px - 1499px */
 @media (min-width: 1401px) and (max-width: 1499px) {
   html {
-    font-size: 85% !important;
+    font-size: 95% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4482,7 +4482,7 @@ li.header-li-px {
 /* 1300px - 1399px */
 @media (min-width: 1300px) and (max-width: 1400px) {
   html {
-    font-size: 80% !important;
+    font-size: 92.5% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4499,7 +4499,7 @@ li.header-li-px {
 /* 1200px - 1299px */
 @media (min-width: 1200px) and (max-width: 1299px) {
   html {
-    font-size: 75% !important;
+    font-size: 90% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4517,7 +4517,7 @@ li.header-li-px {
 /* 1024px - 1199px */
 @media (min-width: 991px) and (max-width: 1199px) {
   html {
-    font-size: 70% !important;
+    font-size: 87.5% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {

@@ -5,6 +5,7 @@ import {
   SolidDialogClose,
   SolidDialogFooter,
   SolidDialogHeader,
+  SolidDialogSeparator,
   SolidDialogTitle,
 } from "./SolidDialog";
 import { SolidButton } from "./SolidButton";
@@ -18,6 +19,11 @@ type SolidConfirmDialogProps = {
   onConfirm: () => void;
   onCancel: () => void;
   className?: string;
+  headerClassName?: string;
+  bodyClassName?: string;
+  footerClassName?: string;
+  separatorClassName?: string;
+  showSeparator?: boolean;
 };
 
 export function SolidConfirmDialog({
@@ -29,15 +35,21 @@ export function SolidConfirmDialog({
   onConfirm,
   onCancel,
   className,
+  headerClassName,
+  bodyClassName,
+  footerClassName,
+  separatorClassName,
+  showSeparator = false,
 }: SolidConfirmDialogProps) {
   return (
     <SolidDialog open={open} onOpenChange={(val) => !val && onCancel()} className={className}>
-      <SolidDialogHeader>
+      <SolidDialogHeader className={headerClassName}>
         <SolidDialogTitle>{title}</SolidDialogTitle>
         <SolidDialogClose aria-label="Close" />
       </SolidDialogHeader>
-      <SolidDialogBody>{message}</SolidDialogBody>
-      <SolidDialogFooter>
+      {showSeparator ? <SolidDialogSeparator className={separatorClassName} /> : null}
+      <SolidDialogBody className={bodyClassName}>{message}</SolidDialogBody>
+      <SolidDialogFooter className={footerClassName}>
         <SolidButton variant="outline" size="sm" onClick={onCancel}>
           {cancelLabel}
         </SolidButton>

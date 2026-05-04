@@ -628,6 +628,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
+    const entityDisplayName =
+        solidFormViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
     const [refreshChatterMessage, setRefreshChatterMessage] = useState<boolean>(true);
     useEffect(() => {
         if (
@@ -1741,23 +1743,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </div>
                 }
 
-                <SolidDialog
+                <SolidConfirmDialog
                     open={isDeleteDialogVisible}
-                    onOpenChange={setDeleteDialogVisible}
-                    className="solid-confirm-dialog"
-                >
-                    <SolidDialogHeader className="solid-field-confirm-header">
-                        <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
-                        <SolidDialogClose />
-                    </SolidDialogHeader>
-                    <SolidDialogBody className="solid-field-confirm-dialog-body">
-                        <p className="solid-field-confirm-message">Are you sure you want to delete?</p>
-                    </SolidDialogBody>
-                    <div className="solid-radix-dialog-footer solid-field-confirm-actions">
-                        <SolidButton label="Yes" icon="si si-check" variant="destructive" autoFocus onClick={() => handleDeleteEntity()} />
-                        <SolidButton label="No" icon="si si-times" variant="outline" onClick={onDeleteClose} />
-                    </div>
-                </SolidDialog>
+                    onCancel={onDeleteClose}
+                    onConfirm={() => handleDeleteEntity()}
+                    className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
+                    headerClassName="solid-shadcn-dialog-head"
+                    bodyClassName="solid-shadcn-dialog-body"
+                    footerClassName="solid-shadcn-dialog-actions"
+                    separatorClassName="solid-shadcn-dialog-sep"
+                    showSeparator
+                    title={`Delete ${entityDisplayName}`}
+                    message={<p className="solid-shadcn-dialog-text">{`Are you sure you want to delete this ${entityDisplayName}?`}</p>}
+                    confirmLabel="Delete"
+                    cancelLabel="Cancel"
+                />
                 <SolidDialog
                     open={isLayoutDialogVisible}
                     onOpenChange={setLayoutDialogVisible}

@@ -21,7 +21,7 @@ export const LayoutProvider = ({ children }: ChildContainerProps) => {
         inputStyle: 'outlined',
         colorScheme: themeMode,
         theme: 'solid-light-purple',
-        scale: 14,
+        scale: 15,
         authLayout: 'Center'
     });
 

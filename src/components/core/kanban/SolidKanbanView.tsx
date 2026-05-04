@@ -28,10 +28,10 @@ import { useSearchParams } from "../../../hooks/useSearchParams";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
   SolidButton,
+  SolidConfirmDialog,
   SolidDialog,
   SolidDialogBody,
   SolidDialogClose,
-  SolidDialogFooter,
   SolidDialogHeader,
   SolidDialogSeparator,
   SolidDialogTitle,
@@ -780,6 +780,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   }, [solidKanbanViewMetaData])
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
+  const entityDisplayName =
+    solidKanbanViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
   const headerRequestStatusLabel =
     isDeleteSolidEntitiesLoading
       ? "Deleting..."
@@ -884,32 +886,21 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         </div>
       </div>
 
-      <SolidDialog
+      <SolidConfirmDialog
         open={isDialogVisible}
-        onOpenChange={(open) => {
-          if (!open) {
-            onDeleteClose();
-          }
-        }}
+        onCancel={onDeleteClose}
+        onConfirm={deleteBulk}
         className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
-      >
-        <SolidDialogHeader className="solid-shadcn-dialog-head">
-          <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
-          <SolidDialogClose />
-        </SolidDialogHeader>
-        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
-        <SolidDialogBody className="solid-shadcn-dialog-body">
-          <p className="solid-shadcn-dialog-text">Are you sure you want to delete the selected records?</p>
-        </SolidDialogBody>
-        <SolidDialogFooter className="solid-shadcn-dialog-actions">
-          <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteBulk}>
-            Delete
-          </SolidButton>
-          <SolidButton variant="outline" size="sm" onClick={onDeleteClose}>
-            Cancel
-          </SolidButton>
-        </SolidDialogFooter>
-      </SolidDialog>
+        headerClassName="solid-shadcn-dialog-head"
+        bodyClassName="solid-shadcn-dialog-body"
+        footerClassName="solid-shadcn-dialog-actions"
+        separatorClassName="solid-shadcn-dialog-sep"
+        showSeparator
+        title={`Delete ${entityDisplayName}`}
+        message={<p className="solid-shadcn-dialog-text">{`Are you sure you want to delete the selected ${entityDisplayName} records?`}</p>}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+      />
       {openLightbox && (
         <SolidLightbox
           open={openLightbox}
