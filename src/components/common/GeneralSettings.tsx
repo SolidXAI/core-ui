@@ -100,7 +100,7 @@ export const GeneralSettings = () => {
             try {
 
                 const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
-                const currentSettings = solidSettingsData || {};
+                const currentSettings = solidSettingsData?.data || {};
 
                 const formData = new FormData();
 
@@ -108,13 +108,15 @@ export const GeneralSettings = () => {
                 Object.entries(values).forEach(([key, value]) => {
                     const currentValue = currentSettings[key];
 
+                    const wasCleared = currentValue != null && currentValue !== "" && (value === null || value === "");
+                    const isFile = value instanceof File;
                     const normalizedCurrent = currentValue ?? "";
                     const normalizedValue = value ?? "";
+                    const changed = isFile || wasCleared || normalizedCurrent !== normalizedValue;
 
-                    if (normalizedCurrent !== normalizedValue) {
-                        // If file, append to formData and use placeholder value in JSON
-                        if (value instanceof File) {
-                            formData.append(key, value);
+                    if (changed) {
+                        if (isFile) {
+                            formData.append(key, value as File);
                             updatedSettingsArray.push({
                                 key,
                                 value: "",
@@ -123,7 +125,7 @@ export const GeneralSettings = () => {
                         } else {
                             updatedSettingsArray.push({
                                 key,
-                                value: typeof value === "string" ? value : JSON.stringify(value),
+                                value: value === null || value === undefined ? "" : (typeof value === "string" ? value : JSON.stringify(value)),
                                 type: "system",
                             });
                         }
