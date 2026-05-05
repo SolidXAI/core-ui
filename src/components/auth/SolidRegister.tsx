@@ -8,12 +8,12 @@ import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { AuthTabs } from "./AuthTabs";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidDivider, SolidInput, SolidMessage, SolidPasswordInput, SolidSpinner } from "../shad-cn-ui";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 interface AuthModesProps {
     passwordBasedAuth: boolean;
@@ -24,11 +24,7 @@ interface AuthModesProps {
 const SolidRegister = () => {
     const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     const [activeIndex, setActiveIndex] = useState(0);
-
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    const { solidSettingsData } = useAuthSettings();
 
     const [showOverlay, setShowOverlay] = useState(false);
 

@@ -8,7 +8,6 @@ import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { AuthTabs } from "./AuthTabs";
@@ -16,17 +15,14 @@ import { loadSession } from "../../adapters/auth/storage";
 import { hasAnyRole } from "../../helpers/rolesHelper";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidDivider, SolidInput, SolidMessage, SolidPasswordInput, SolidRadioGroup } from "../shad-cn-ui";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 interface AuthModesProps {
     passwordBasedAuth: boolean;
     passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    const { solidSettingsData } = useAuthSettings();
 
     const [initiateLogin] = useInitateLoginMutation();
     const [activeIndex, setActiveIndex] = useState(0);

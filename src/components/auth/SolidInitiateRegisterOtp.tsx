@@ -6,10 +6,10 @@ import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { SolidButton, SolidIcon, SolidMessage, SolidOtpInput } from "../shad-cn-ui";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
@@ -19,10 +19,7 @@ const SolidInitiateRegisterOtp = () => {
     const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const username = searchParams.get('username') || '';
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    const { solidSettingsData } = useAuthSettings();
 
 
     const [initiateResendOTP] = useInitateRegisterMutation();
