@@ -2133,19 +2133,19 @@ body {
 
 .auth-submit-button.solid-btn {
   min-height: 36px;
-  background: #f4f4f5;
-  border-color: #f4f4f5;
-  color: #09090b;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .auth-submit-button.solid-btn .solid-btn-label {
-  color: #09090b;
+  color: var(--primary-foreground);
   font-weight: 600;
 }
 
 .auth-submit-button.solid-btn:not(:disabled):hover {
-  background: #e4e4e7;
-  border-color: #e4e4e7;
+  background: color-mix(in srgb, var(--primary) 90%, black);
+  border-color: color-mix(in srgb, var(--primary) 90%, black);
 }
 
 .auth-back-button.solid-btn.solid-btn--ghost {

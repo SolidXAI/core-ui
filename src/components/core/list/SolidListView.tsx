@@ -1359,7 +1359,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       type="button"
                       size="small"
                       variant="secondary"
-                      className="hidden lg:flex solid-icon-button "
+                      className="hidden lg:flex"
                       onClick={() => setRecoverDialogVisible(true)}
                       leftIcon={<RotateCcw size={14} />}
                     >
@@ -1652,7 +1652,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       <Column
                         frozen
                         alignFrozen="right"
-                        frozenBackground="transparent"
                         body={(rowData) =>
                           rowData?.deletedAt ? (
                             <a
