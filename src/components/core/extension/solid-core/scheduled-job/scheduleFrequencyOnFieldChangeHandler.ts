@@ -11,9 +11,8 @@ export const scheduleFrequencyOnFieldChangeHandler = async (event: SolidUiEvent)
 
         // Reset all
         layoutManager.updateNodeAttributes('dayOfMonth', { visible: false });
-        layoutManager.updateNodeAttributes('dayOfWeek', { visible: false });
+        layoutManager.updateNodeAttributes('dayOfWeek', { visible: false, multiSelect: true });
         layoutManager.updateNodeAttributes('cronExpression', { visible: false });
-
         switch (value) {
 
             case 'custom':
@@ -25,7 +24,7 @@ export const scheduleFrequencyOnFieldChangeHandler = async (event: SolidUiEvent)
                 break;
 
             case 'weekly':
-                layoutManager.updateNodeAttributes('dayOfWeek', { visible: true });
+                layoutManager.updateNodeAttributes('dayOfWeek', { visible: true, multiSelect: false });
                 break;
 
             case 'monthly':

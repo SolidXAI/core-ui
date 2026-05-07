@@ -100,6 +100,7 @@ export type LayoutAttribute = {
     editAction?: any;
     createAction?: any;
     required?: boolean;
+    multiSelect?: boolean;
 };
 
 // Generic representation of any node in our layout 
