@@ -67,7 +67,7 @@ import {
     type ExtensionFunctionType,
 } from "../types/extension-registry";
 
-import { scheduleFrequencyOnFieldChangeHandler } from "@/components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
+import { scheduleFrequencyOnFieldChangeHandler } from "../components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
 
 
 type ExtensionComponentMetadata = {
