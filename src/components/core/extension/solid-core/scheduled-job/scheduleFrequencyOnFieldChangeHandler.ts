@@ -1,5 +1,5 @@
-import { SolidViewLayoutManager } from "@/components/core/common/SolidViewLayoutManager";
-import { SolidUiEvent } from "@/types";
+import { SolidViewLayoutManager } from "../../../../../components/core/common/SolidViewLayoutManager";
+import { SolidUiEvent } from "../../../../../types";
 
 export const scheduleFrequencyOnFieldChangeHandler = async (event: SolidUiEvent) => {
     const { modifiedField, modifiedFieldValue, formViewLayout } = event;
