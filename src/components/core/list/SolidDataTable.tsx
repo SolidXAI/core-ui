@@ -84,14 +84,15 @@ function nextSortOrder(active: boolean, order: 1 | -1 | 0, removableSort = true)
 
 function getFrozenCellStyle(
   props: SolidColumnProps,
-  baseStyle?: React.CSSProperties
+  baseStyle?: React.CSSProperties,
+  isHeader: boolean = false
 ): React.CSSProperties {
   if (!props.frozen) return baseStyle ?? {};
 
   const stickyStyle: React.CSSProperties = {
     position: "sticky",
-    zIndex: 3,
-    background: props.frozenBackground ?? "var(--background)",
+    zIndex: isHeader ? 12 : 3,
+    background: props.frozenBackground ?? "var(--card)",
   };
 
   if (props.alignFrozen === "right") {
@@ -189,7 +190,7 @@ export function SolidDataTable({
     >
       <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
         <table className={cx("w-full text-sm border-collapse", tableClassName)}>
-          <thead className="solid-data-table-head sticky top-0 z-2">
+          <thead className="solid-data-table-head" style={{ position: "sticky", top: 0, zIndex: 11 }}>
             <tr>
               {columns.map((column, index) => {
                 const props = column.props;
@@ -208,7 +209,7 @@ export function SolidDataTable({
                       isSelectionColumn ? "solid-data-table-selection-col" : undefined,
                       props.headerClassName
                     )}
-                    style={getFrozenCellStyle(props, { ...props.style, ...props.headerStyle })}
+                    style={getFrozenCellStyle(props, { ...props.style, ...props.headerStyle }, true)}
                   >
                     {isSelectionColumn ? (
                       <input

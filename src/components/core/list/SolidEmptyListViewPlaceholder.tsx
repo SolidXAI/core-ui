@@ -109,6 +109,7 @@ export const SolidEmptyListViewPlaceholder = ({
                                     <SolidCreateButton
                                         createButtonUrl={createButtonUrl}
                                         createActionQueryParams={createActionQueryParams}
+                                        solidListViewLayout={solidListViewMetaData?.data?.solidView?.layout}
                                         title={solidListViewMetaData?.data?.solidView?.displayName}
                                     />
                                 </div>
