@@ -1,7 +1,7 @@
 
-import { pascalCase } from "change-case";
+import { camelCase, upperFirst } from "lodash";
 
 //Dynamic permission expression
 export const permissionExpression = (modelName: string, permissionName : string) => {
-    return `${pascalCase(modelName)}Controller.${permissionName}`
+    return `${upperFirst(camelCase(modelName))}Controller.${permissionName}`
 };

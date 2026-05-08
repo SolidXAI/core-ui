@@ -1,5 +1,5 @@
 import { SolidKanbanView } from "../../../../components/core/kanban/SolidKanbanView";
-import { camelCase } from "change-case";
+import { camelCase } from "lodash";
 import { useParams } from "react-router-dom";
 
 export function KanbanPage() {
