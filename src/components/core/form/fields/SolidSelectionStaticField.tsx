@@ -237,10 +237,10 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
                     fieldContext.onChange(syntheticEvent, "onFieldChange");
                 }}
-                onSelect={({ value }) => {
-                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
-                    fieldContext.onChange(syntheticEvent, "onFieldChange");
-                }}
+                // onSelect={({ value }) => {
+                //     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                //     fieldContext.onChange(syntheticEvent, "onFieldChange");
+                // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>

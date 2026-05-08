@@ -271,12 +271,14 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 onChange={({ value }) => {
                     if (formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled) return;
                     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                    // console.log(`SolidSelectionDynamicField > SolidAutocomplete > onChange`, syntheticEvent);
                     fieldContext.onChange(syntheticEvent, "onFieldChange");
                 }}
-                onSelect={({ value }) => {
-                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
-                    fieldContext.onChange(syntheticEvent, "onFieldChange");
-                }}
+                // onSelect={({ value }) => {
+                //     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                //     console.log(`SolidSelectionDynamicField > SolidAutocomplete > onSelect`, syntheticEvent);
+                //     fieldContext.onChange(syntheticEvent, "onFieldChange");
+                // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>

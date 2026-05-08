@@ -1306,6 +1306,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         });
 
         const formFieldOnXXX = async (event: ChangeEvent<HTMLInputElement>, eventType: string) => {
+            // console.log("formFieldOnXXX", eventType, event);
 
             // Invoke the formik change 
             if (eventType === 'onFieldChange') {
