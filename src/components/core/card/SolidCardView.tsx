@@ -342,7 +342,6 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   };
 
   const cardViewTitle = solidCardViewMetaDataResponse?.data?.solidView?.displayName;
-  const enableGlobalSearch = solidCardViewMetaDataResponse?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true;
   const showEmptyState = !loading && cards.length === 0;
   const headerRequestStatusLabel = loading || !queryDataLoaded ? "Loading..." : null;
 
@@ -359,35 +358,31 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   </div>
                 )}
                 <p className="m-0 view-title solid-text-wrapper">{cardViewTitle}</p>
-                {enableGlobalSearch && (
-                  <div className="hidden lg:flex">
-                    <SolidGlobalSearchElement
-                      viewType="card"
-                      showSaveFilterPopup={showSaveFilterPopup}
-                      setShowSaveFilterPopup={setShowSaveFilterPopup}
-                      ref={solidGlobalSearchElementRef}
-                      viewData={solidCardViewMetaDataResponse}
-                      handleApplyCustomFilter={handleApplyCustomFilter}
-                    />
-                  </div>
-                )}
+                <div className="hidden lg:flex">
+                  <SolidGlobalSearchElement
+                    viewType="card"
+                    showSaveFilterPopup={showSaveFilterPopup}
+                    setShowSaveFilterPopup={setShowSaveFilterPopup}
+                    ref={solidGlobalSearchElementRef}
+                    viewData={solidCardViewMetaDataResponse}
+                    handleApplyCustomFilter={handleApplyCustomFilter}
+                  />
+                </div>
               </div>
 
               <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                {enableGlobalSearch && (
-                  <div className="flex lg:hidden">
-                    <SolidButton
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="solid-icon-button"
-                      onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
-                      aria-label="Toggle search"
-                      leftIcon={<SolidIcon name="si-search" aria-hidden />}
-                    />
-                  </div>
-                )}
+                <div className="flex lg:hidden">
+                  <SolidButton
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="solid-icon-button"
+                    onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                    aria-label="Toggle search"
+                    leftIcon={<SolidIcon name="si-search" aria-hidden />}
+                  />
+                </div>
 
                 {actionsAllowed.includes(`${permissionExpression(params.modelName, "create")}`) &&
                   solidCardViewMetaDataResponse?.data?.solidView?.layout?.attrs?.create !== false && (
@@ -421,7 +416,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
               </div>
             </div>
 
-            {enableGlobalSearch && showGlobalSearchElement && (
+            {showGlobalSearchElement && (
               <div className="flex lg:hidden">
                 <SolidGlobalSearchElement
                   viewType="card"

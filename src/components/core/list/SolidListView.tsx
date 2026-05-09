@@ -1260,41 +1260,38 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       {solidListViewMetaData?.data?.solidView?.action?.displayName || solidListViewMetaData?.data?.solidView?.displayName}
                     </p>
                   </div>
-                  {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
-                    params.embeded === false && (
-                      <div className="hidden lg:flex">
-                        <SolidGlobalSearchElement
-                          key={params.modelName}
-                          viewType="list"
-                          showSaveFilterPopup={showSaveFilterPopup}
-                          setShowSaveFilterPopup={setShowSaveFilterPopup}
-                          ref={solidGlobalSearchElementRef}
-                          viewData={solidListViewMetaData}
-                          handleApplyCustomFilter={handleApplyCustomFilter}
-                          filterPredicates={filterPredicates}
-                        >
-                        </SolidGlobalSearchElement>
-                      </div>
-
-                    )}
+                  {params.embeded === false && (
+                    <div className="hidden lg:flex">
+                      {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
+                      <SolidGlobalSearchElement
+                        key={params.modelName}
+                        viewType="list"
+                        showSaveFilterPopup={showSaveFilterPopup}
+                        setShowSaveFilterPopup={setShowSaveFilterPopup}
+                        ref={solidGlobalSearchElementRef}
+                        viewData={solidListViewMetaData}
+                        handleApplyCustomFilter={handleApplyCustomFilter}
+                        filterPredicates={filterPredicates}
+                      >
+                      </SolidGlobalSearchElement>
+                    </div>
+                  )}
 
                 </div>
                 <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                  {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
-                    params.embeded === false && (
-                      <div className="flex lg:hidden">
-                        <SolidButton
-                          type="button"
-                          size="small"
-                          variant="outline"
-                          className="solid-icon-button"
-                          onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
-                          leftIcon={<Search size={14} />}
-                        />
-                      </div>
-
-                    )}
+                  {params.embeded === false && (
+                    <div className="flex lg:hidden">
+                      <SolidButton
+                        type="button"
+                        size="small"
+                        variant="outline"
+                        className="solid-icon-button"
+                        onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                        leftIcon={<Search size={14} />}
+                      />
+                    </div>
+                  )}
 
                   <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
                     {solidListViewLayout?.attrs?.headerButtons
@@ -1392,23 +1389,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 </div>
               </div>
               {/* </div> */}
-              {solidListViewLayout?.attrs?.enableGlobalSearch === true && showGlobalSearchElement &&
-                params.embeded === false && (
-                  <div className="flex lg:hidden">
-                    <SolidGlobalSearchElement
-                      viewType="list"
-                      showSaveFilterPopup={showSaveFilterPopup}
-                      setShowSaveFilterPopup={setShowSaveFilterPopup}
-                      ref={solidGlobalSearchElementRef}
-                      viewData={solidListViewMetaData}
-                      handleApplyCustomFilter={handleApplyCustomFilter}
-                      filterPredicates={filterPredicates}
-                    >
+              {showGlobalSearchElement && params.embeded === false && (
+                <div className="flex lg:hidden">
+                  <SolidGlobalSearchElement
+                    viewType="list"
+                    showSaveFilterPopup={showSaveFilterPopup}
+                    setShowSaveFilterPopup={setShowSaveFilterPopup}
+                    ref={solidGlobalSearchElementRef}
+                    viewData={solidListViewMetaData}
+                    handleApplyCustomFilter={handleApplyCustomFilter}
+                    filterPredicates={filterPredicates}
+                  >
 
-                    </SolidGlobalSearchElement>
-                  </div>
+                  </SolidGlobalSearchElement>
+                </div>
 
-                )}
+              )}
             </div>
           }
 

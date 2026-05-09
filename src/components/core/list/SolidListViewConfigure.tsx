@@ -254,7 +254,7 @@ export const SolidListViewConfigure = (
                                 <SolidDropdownMenuSub>
                                     <SolidDropdownMenuSubTrigger className="solid-header-dropdown-item">
                                         <SlidersHorizontal size={14} className="solid-header-action-button-icon" />
-                                        <span className="solid-header-action-button-label">Customize Layout</span>
+                                        <span className="solid-header-action-button-label">Layout</span>
                                     </SolidDropdownMenuSubTrigger>
                                     <SolidDropdownMenuSubContent className="customize-layout-panel">
                                         {showSwitchType && (
