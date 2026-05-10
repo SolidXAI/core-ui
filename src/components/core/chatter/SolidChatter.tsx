@@ -16,6 +16,14 @@ interface FilterState {
     endDate: Date | null;
 }
 
+const isEmptyAuditValue = (value: string | null | undefined) => {
+    if (value == null) return true;
+    if (typeof value !== 'string') return false;
+
+    const normalizedValue = value.trim().toLowerCase();
+    return normalizedValue === '' || normalizedValue === 'none' || normalizedValue === 'null';
+};
+
 export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed = [], title, modelUserKey }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void, actionsAllowed?: string[], title?: string, modelUserKey?: string }) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
@@ -123,7 +131,16 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         current: detail.newValue,
                         previousDisplay: detail.oldValueDisplay,
                         currentDisplay: detail.newValueDisplay,
-                    })) || [];
+                    })).filter((detail: any) => {
+                        const previousValue = detail.previousDisplay ?? detail.previous;
+                        const currentValue = detail.currentDisplay ?? detail.current;
+
+                        return !(isEmptyAuditValue(previousValue) && isEmptyAuditValue(currentValue));
+                    }) || [];
+
+                    if (auditRecord.length === 0) {
+                        return null;
+                    }
 
                     return {
                         id: msg.id,
@@ -139,7 +156,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         message: msg.messageBody,
                     };
                 }
-            });
+            }).filter(Boolean);
             setMessages(processedMessages);
             setTotalRecords(response?.data?.meta?.totalRecords || 0);
         } catch (error) {
