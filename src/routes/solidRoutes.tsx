@@ -80,7 +80,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />) },
     { path: "/admin/core/:moduleName/:modelName/card", element: pick("card", <CardPage />) },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />) },
-    { path: "/admin/core/:moduleName/settings/:settings", element: pick("settings", <SettingsPage />) },
+    { path: "/admin/core/settings", element: pick("settings", <SettingsPage />) },
     ...extraAdminRoutes,
   ];
 

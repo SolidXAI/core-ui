@@ -10,6 +10,7 @@ import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { solidGet } from "../../http/solidHttp";
 import { AuthSettingsContext } from "./AuthSettingsContext";
+import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
@@ -27,7 +28,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         setIsLoadingAuthSettings(true);
         try {
             const response = await solidGet("/setting/wrapped");
-            setSolidSettingsData(response?.data ?? null);
+            setSolidSettingsData(toLegacySettingsShape(response?.data ?? null));
         } catch (error) {
             console.error("Failed to load auth settings", error);
             setSolidSettingsData(null);

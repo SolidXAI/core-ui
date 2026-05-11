@@ -41,6 +41,7 @@ import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
@@ -490,15 +491,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const actionContext = searchParams.get('actionContext');
 
     const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [])
 
     useEffect(() => {
-        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
+        if (solidSettingsMap?.mcpEnabled && solidSettingsMap?.mcpServerUrl) {
             enableSolidXAiPanel();
         }
-    }, [solidSettingsData]);
+    }, [solidSettingsMap]);
 
 
     const enableSolidXAiPanel = async () => {

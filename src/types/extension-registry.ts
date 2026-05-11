@@ -8,6 +8,7 @@ export const ExtensionComponentTypes = {
     formWidget: "formWidget",
     kanbanCardWidget: "kanbanCardWidget",
     cardWidget: "cardWidget",
+    settingsWidgets: "settingsWidget"
 } as const;
 
 export type ExtensionComponentType =

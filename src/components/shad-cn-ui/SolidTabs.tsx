@@ -15,6 +15,7 @@ type SolidTabGroupProps = {
   listClassName?: string;
   panelClassName?: string;
   tabPosition?: "left" | "center" | "right";
+  orientation?: "horizontal" | "vertical";
   extra?: React.ReactNode;
 };
 
@@ -34,13 +35,23 @@ export function SolidTabGroup({
   listClassName,
   panelClassName,
   tabPosition = "left",
+  orientation = "horizontal",
   extra,
 }: SolidTabGroupProps) {
   return (
-    <div className={cx("solid-notebook", "solid-tabs", `solid-tabs--${tabPosition}`, className)}>
+    <div
+      className={cx(
+        "solid-notebook",
+        "solid-tabs",
+        `solid-tabs--${tabPosition}`,
+        orientation === "vertical" && "solid-tabs--vertical",
+        className,
+      )}
+    >
       <div
         className={cx("solid-notebook-tablist", "solid-tabs-list", listClassName)}
         role="tablist"
+        aria-orientation={orientation}
         style={extra ? { display: "flex", alignItems: "center", justifyContent: "space-between" } : undefined}
       >
         {extra ? (
