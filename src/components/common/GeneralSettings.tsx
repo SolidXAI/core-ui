@@ -46,6 +46,9 @@ export const GeneralSettings = () => {
         passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
         activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
         iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
+        iamMicrosoftOAuthEnabled: solidSettingsData?.data?.iamMicrosoftOAuthEnabled ?? false,
+        iamFacebookOAuthEnabled: solidSettingsData?.data?.iamFacebookOAuthEnabled ?? false,
+        iamAppleOAuthEnabled: solidSettingsData?.data?.iamAppleOAuthEnabled ?? false,
         // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
         // shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
         authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
@@ -1225,14 +1228,14 @@ export const GeneralSettings = () => {
                                                                 <SettingsImageRemoveButton onClick={removeAuthScreenCenterBackgroundImage} />
                                                             )}
                                                         </div>
-                                                    }
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <SolidDivider className="my-4" />
                                 </>
-                            }
+                            )}
 
               {pathname.includes("misc-settings") && (
                 <>
@@ -1316,7 +1319,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                 </>
-                            }
+                            )}
                             {pathname.includes("ai-settings") &&
                                 <AiSettingsSection
                                     aiConfig={formik.values.solidXGenAiCodeBuilderConfig as SolidAiConfig}
