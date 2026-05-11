@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { Search } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { env } from "../../adapters/env";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
+import { getExtensionComponent } from "../../helpers/registry";
 import {
   extractSettingsList,
   getSettingOptionLabel,
@@ -10,6 +11,7 @@ import {
   humanizeSettingToken,
   type AdminSettingDefinition,
 } from "../../helpers/settingsPayload";
+import type { SolidSettingsWidgetProps } from "../../types/solid-core";
 import { showToast } from "../../redux/features/toastSlice";
 import {
   useBulkUpdateSolidSettingsMutation,
@@ -34,6 +36,7 @@ import { SolidUploadedImage } from "./SolidSettings/SolidUploadedImage";
 import styles from "./SettingsComponent.module.css";
 
 type SettingsFormValue = string | number | boolean | null | File;
+type SettingsFilterMode = "all" | "read-only" | "editable";
 
 function normalizeAssetUrl(src?: string | null) {
   if (!src) return "";
@@ -86,11 +89,27 @@ function formatReadonlyValue(setting: AdminSettingDefinition, value: unknown) {
   return String(value);
 }
 
+function getSettingsWidgetName(setting: AdminSettingDefinition) {
+  return setting.settingsWidget || "";
+}
+
+function getCustomWidgetErrorText(setting: AdminSettingDefinition, widgetName: string, settingsWidget: ComponentType<any> | null) {
+  if (setting.controlType !== "custom") return null;
+  if (!widgetName) {
+    return `controlType is "custom" for setting "${setting.key}" but no settingsWidget is specified.`;
+  }
+  if (!settingsWidget) {
+    return `Widget "${widgetName}" is not registered for setting "${setting.key}".`;
+  }
+  return null;
+}
+
 export function SettingsComponent() {
   const dispatch = useDispatch();
   const { data: settingsResponse, refetch } = useGetSolidSettingsQuery(undefined);
   const [bulkUpdateSolidSettings] = useBulkUpdateSolidSettingsMutation();
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterMode, setFilterMode] = useState<SettingsFilterMode>("all");
   const [activeModule, setActiveModule] = useState("");
   const [formValues, setFormValues] = useState<Record<string, SettingsFormValue>>({});
   const [filePreviews, setFilePreviews] = useState<Record<string, string>>({});
@@ -115,10 +134,15 @@ export function SettingsComponent() {
   }, [settingsList, settingsMap]);
 
   const filteredSettings = useMemo(() => {
+    const scopedSettings = settingsList.filter((setting) => {
+      if (filterMode === "read-only") return !setting.editable;
+      if (filterMode === "editable") return setting.editable;
+      return true;
+    });
     const query = searchTerm.trim().toLowerCase();
-    if (!query) return settingsList;
+    if (!query) return scopedSettings;
 
-    return settingsList.filter((setting) => {
+    return scopedSettings.filter((setting) => {
       const haystack = [
         setting.moduleName,
         setting.group,
@@ -133,7 +157,7 @@ export function SettingsComponent() {
 
       return haystack.includes(query);
     });
-  }, [searchTerm, settingsList]);
+  }, [filterMode, searchTerm, settingsList]);
 
   const moduleEntries = useMemo(() => {
     const grouped = new Map<string, AdminSettingDefinition[]>();
@@ -308,6 +332,18 @@ export function SettingsComponent() {
                 <div className={styles.groupBody}>
                   {group.settings.map((setting) => {
                     const value = formValues[setting.key];
+                    const settingsWidgetName = getSettingsWidgetName(setting);
+                    const SettingsWidget = settingsWidgetName ? getExtensionComponent(settingsWidgetName) : null;
+                    const customWidgetErrorText = getCustomWidgetErrorText(setting, settingsWidgetName, SettingsWidget);
+                    const settingsWidgetProps: SolidSettingsWidgetProps = {
+                      setting,
+                      value,
+                      settingsMap,
+                      formValues,
+                      editable: Boolean(setting.editable),
+                      updateValue,
+                      updateFileValue,
+                    };
                     return (
                       <div key={setting.key} className={styles.settingRow}>
                         <div className={styles.settingLabelWrap}>
@@ -330,7 +366,18 @@ export function SettingsComponent() {
                         </div>
 
                         {!setting.editable ? (
-                          setting.controlType === "mediaSingle" && value ? (
+                          setting.controlType === "custom" ? (
+                            customWidgetErrorText ? (
+                              <div className={styles.readonlyValue}>
+                                <span className={styles.customWidgetError}>{customWidgetErrorText}</span>
+                              </div>
+                            ) : SettingsWidget ? (
+                              (() => {
+                                const ResolvedSettingsWidget = SettingsWidget as ComponentType<any>;
+                                return <ResolvedSettingsWidget {...settingsWidgetProps} />;
+                              })()
+                            ) : null
+                          ) : setting.controlType === "mediaSingle" && value ? (
                             <div className={styles.mediaPreview}>
                               <SolidUploadedImage src={normalizeAssetUrl(String(value))} />
                             </div>
@@ -342,7 +389,7 @@ export function SettingsComponent() {
                             </div>
                           )
                         ) : (
-                          <div className={styles.controlStack}>
+                          <div className={`${styles.controlStack} ${setting.controlType === "custom" ? styles.customControlStack : ""}`}>
                             {setting.controlType === "boolean" ? (
                               <div className={styles.boolRow}>
                                 <SolidSwitch checked={Boolean(value)} onChange={(checked) => updateValue(setting.key, checked)} />
@@ -420,6 +467,19 @@ export function SettingsComponent() {
                                 ) : null}
                               </div>
                             ) : null}
+
+                            {setting.controlType === "custom" ? (
+                              customWidgetErrorText ? (
+                                <div className={styles.readonlyValue}>
+                                  <span className={styles.customWidgetError}>{customWidgetErrorText}</span>
+                                </div>
+                              ) : SettingsWidget ? (
+                                (() => {
+                                  const ResolvedSettingsWidget = SettingsWidget as ComponentType<any>;
+                                  return <ResolvedSettingsWidget {...settingsWidgetProps} />;
+                                })()
+                              ) : null
+                            ) : null}
                           </div>
                         )}
                       </div>
@@ -445,7 +505,14 @@ export function SettingsComponent() {
           <div className={styles.summaryChips}>
             <span className={styles.summaryChip}>{moduleEntries.length} module{moduleEntries.length === 1 ? "" : "s"}</span>
             <span className={styles.summaryChip}>{totalSettingsCount} setting{totalSettingsCount === 1 ? "" : "s"}</span>
-            <span className={styles.summaryChip}>{editableSettingsCount} editable</span>
+            <button
+              type="button"
+              className={`${styles.summaryChip} ${styles.summaryChipButton} ${filterMode === "editable" ? styles.summaryChipActive : ""}`}
+              aria-pressed={filterMode === "editable"}
+              onClick={() => setFilterMode((current) => (current === "editable" ? "all" : "editable"))}
+            >
+              {editableSettingsCount} editable
+            </button>
           </div>
         </div>
         <div className={styles.headerSearch}>
@@ -466,8 +533,18 @@ export function SettingsComponent() {
         </div>
         <div className={styles.toolbarActions}>
           <div className={styles.legend}>
-            <SolidTag tone="warn">Read only</SolidTag>
-            <span>System-managed value</span>
+            <button
+              type="button"
+              className={`${styles.readonlyFilterButton} ${filterMode === "read-only" ? styles.readonlyFilterButtonActive : ""}`}
+              aria-pressed={filterMode === "read-only"}
+              aria-label={filterMode === "read-only" ? "Disable read-only filter" : "Enable read-only filter"}
+              onClick={() => setFilterMode((current) => (current === "read-only" ? "all" : "read-only"))}
+            >
+              <SolidTag tone="warn">Read only</SolidTag>
+            </button>
+            <span className={filterMode === "read-only" ? styles.legendLabelActive : undefined}>
+              {filterMode === "read-only" ? "Read-only filter active" : "System-managed value"}
+            </span>
             <SolidTooltip>
               <SolidTooltipTrigger asChild>
                 <button type="button" className={styles.legendButton} aria-label="Read-only legend details">

@@ -8,7 +8,8 @@ export type SettingsControlType =
   | "date"
   | "datetime"
   | "mediaSingle"
-  | "selectionStatic";
+  | "selectionStatic"
+  | "custom";
 
 export type SettingsLevel =
   | "system-env"
@@ -33,6 +34,7 @@ export type AdminSettingDefinition = {
   group?: string;
   sortOrder?: number;
   controlType?: SettingsControlType;
+  settingsWidget?: string;
   options?: SettingsOption[];
   editable?: boolean;
 };

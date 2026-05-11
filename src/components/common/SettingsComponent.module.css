@@ -45,6 +45,16 @@
   font-weight: 600;
 }
 
+.summaryChipButton {
+  cursor: pointer;
+}
+
+.summaryChipActive {
+  border-color: color-mix(in srgb, var(--primary-color, #7c3aed) 45%, transparent);
+  background: color-mix(in srgb, var(--primary-color, #7c3aed) 12%, #ffffff 88%);
+  color: var(--primary-color, #7c3aed);
+}
+
 .resultsMeta {
   display: inline-flex;
   align-items: center;
@@ -63,6 +73,36 @@
   gap: 0.45rem;
   color: var(--muted-foreground);
   font-size: 0.78rem;
+}
+
+.readonlyFilterButton {
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 0.12rem;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease, background-color 0.15s ease, border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.readonlyFilterButton:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, #f59e0b 36%, transparent);
+}
+
+.readonlyFilterButtonActive {
+  filter: saturate(1.18);
+  border-color: color-mix(in srgb, #f59e0b 50%, transparent);
+  background: color-mix(in srgb, #f59e0b 14%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, #f59e0b 22%, transparent);
+}
+
+.legendLabelActive {
+  color: color-mix(in srgb, #b45309 78%, var(--foreground));
+  font-weight: 700;
 }
 
 .legendButton {
@@ -268,11 +308,20 @@
   font-style: italic;
 }
 
+.customWidgetError {
+  color: var(--red-600, #dc2626);
+  font-style: normal;
+}
+
 .controlStack {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   max-width: 38rem;
+}
+
+.customControlStack {
+  max-width: none;
 }
 
 .mediaField {

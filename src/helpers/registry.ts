@@ -59,6 +59,7 @@ import { SolidChatterMessageCoModelEntityIdFormViewWidget } from "../components/
 import { SolidLovTypeChangeFormEditWidget } from "../components/core/extension/solid-core/listOfValues/form/SolidLovTypeChangeFormEditWidget";
 import mqMessageOnFormLoadHandler from "../components/core/extension/solid-core/mqMessage/form/mqMessageOnFormLoadHandler";
 import { SolidMqMessageStageFormViewWIdget } from "../components/core/extension/solid-core/mqMessage/form/SolidMqMessageStageFormViewWIdget";
+import solidXGenAiCodeBuilderConfigWidget from "../components/core/extension/solid-core/settings/solidXGenAiCodeBuilderConfigWidget";
 
 import {
     ExtensionComponentTypes,
@@ -344,6 +345,7 @@ registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, Exten
 
 // 7. form widget 
 registerExtensionComponent("CustomHtml", CustomHtml, ExtensionComponentTypes.formWidget);
+registerExtensionComponent("solidXGenAiCodeBuilderConfigWidget", solidXGenAiCodeBuilderConfigWidget, ExtensionComponentTypes.settingsWidgets);
 
 // Common
 registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ExtensionComponentTypes.formWidget, ["chart"]);

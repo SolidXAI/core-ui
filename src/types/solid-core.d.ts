@@ -285,6 +285,16 @@ export type SolidFormFieldWidgetProps = {
     fieldContext?: SolidFieldProps;
 }
 
+export type SolidSettingsWidgetProps = {
+    setting: any;
+    value: any;
+    settingsMap: Record<string, any>;
+    formValues: Record<string, any>;
+    editable: boolean;
+    updateValue: (key: string, value: any) => void;
+    updateFileValue: (key: string, file: File | null) => void;
+}
+
 export type SolidListFieldWidgetProps = {
     rowData: any;
     solidListViewMetaData: any
