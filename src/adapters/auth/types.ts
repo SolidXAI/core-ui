@@ -6,4 +6,5 @@ export type Session = {
     [key: string]: any;
   };
   error?: string | null;
+  refreshed?: boolean;
 } | null;

@@ -3,6 +3,7 @@ import { env } from "../env";
 import { saveSession } from "./storage";
 import { eventBus, AppEvents } from "../../helpers/eventBus";
 import { solidGet } from "../..//http/solidHttp";
+import { Session } from "./types";
 
 type SignInResponse = {
   ok: boolean;
@@ -56,7 +57,7 @@ export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCo
     const decoded = jwtDecode<{ exp?: number }>(accessToken);
     const accessTokenExpires = decoded.exp ? decoded.exp * 1000 : undefined;
 
-    const session = {
+    const session: Session = {
       user: {
         ...user,
         accessToken,
@@ -64,6 +65,7 @@ export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCo
         accessTokenExpires,
       },
       error: null,
+      refreshed: false,
     };
     saveSession(session);
     eventBus.emit(AppEvents.SessionUpdated, session);
