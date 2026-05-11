@@ -43,3 +43,4 @@ dist-tests
 *.tgz
 
 solid-ui
+.claude

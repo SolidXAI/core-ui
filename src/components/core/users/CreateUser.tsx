@@ -19,7 +19,10 @@ import {
   SolidMessage,
   SolidPanel,
   SolidPasswordInput,
+  SolidSwitch,
+  SolidTabGroup,
 } from "../../shad-cn-ui";
+import { ApiKeysTab, GenerateApiKeyModal, RevealApiKeyModal } from "./ApiKeysTab";
 
 interface ErrorResponseData {
   message: string;
@@ -35,8 +38,11 @@ const CreateUser = ({ data, params }: any) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("userDetails");
+  const [newUserIdForApiKey, setNewUserIdForApiKey] = useState<number | null>(null);
+  const [revealKey, setRevealKey] = useState<{ apiKey: string; keyName: string } | null>(null);
 
-  const [registerPrivate, { isLoading, error: userCreateError, isSuccess }] = useRegisterPrivateMutation();
+  const [registerPrivate, { isLoading, error: userCreateError }] = useRegisterPrivateMutation();
   const [
     updateUser,
     {
@@ -63,6 +69,7 @@ const CreateUser = ({ data, params }: any) => {
     password: "",
     confirmPassword: "",
     failedLoginAttempts: data?.failedLoginAttempts ?? 0,
+    isAllowedToGenerateApiKeys: data?.isAllowedToGenerateApiKeys ?? false,
   };
 
   const validationSchema = Yup.object({
@@ -103,6 +110,7 @@ const CreateUser = ({ data, params }: any) => {
           mobile: values.mobile,
           roles: selectedRoles,
           failedLoginAttempts: values.failedLoginAttempts,
+          isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
         };
 
         if (values.password) {
@@ -113,15 +121,29 @@ const CreateUser = ({ data, params }: any) => {
         return;
       }
 
-      registerPrivate({
-        fullName: values.fullName,
-        username: values.username,
-        email: values.email,
-        mobile: values.mobile,
-        password: values.password,
-        roles: selectedRoles,
-        failedLoginAttempts: values.failedLoginAttempts,
-      });
+      try {
+        const response = await registerPrivate({
+          fullName: values.fullName,
+          username: values.username,
+          email: values.email,
+          mobile: values.mobile,
+          password: values.password,
+          roles: selectedRoles,
+          failedLoginAttempts: values.failedLoginAttempts,
+          isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
+        }).unwrap();
+
+        if (values.isAllowedToGenerateApiKeys) {
+          const userId = (response as any)?.data?.id ?? (response as any)?.id;
+          if (userId) {
+            setNewUserIdForApiKey(userId);
+            return;
+          }
+        }
+        router.back();
+      } catch {
+        // error shown via userCreateError effect
+      }
     },
   });
 
@@ -157,13 +179,14 @@ const CreateUser = ({ data, params }: any) => {
   }, [dispatch, userCreateError, userUpdateError]);
 
   useEffect(() => {
-    if (isSuccess || isDeleteUserSuccess || isUpdateUserSuccess) {
+    if (isDeleteUserSuccess || isUpdateUserSuccess) {
       router.back();
     }
-  }, [isDeleteUserSuccess, isSuccess, isUpdateUserSuccess, router]);
+  }, [isDeleteUserSuccess, isUpdateUserSuccess, router]);
 
   const isEditMode = params.id !== "new";
   const isSaving = isLoading || isUserUpdating;
+
 
   return (
     <div className="solid-form-wrapper">
@@ -205,165 +228,268 @@ const CreateUser = ({ data, params }: any) => {
           <SolidFormHeader />
 
           <div className="px-4 py-3 md:p-4 solid-form-content">
-            <div className="grid">
-              <div className="col-12 lg:col-10 xl:col-8 mx-auto">
-                <SolidPanel header="Basic Info" className="solid-column-panel solid-user-form-panel">
-                  <div className="grid formgrid">
-                    <div className="field col-12 md:col-6 flex flex-column gap-2">
-                      <label htmlFor="fullName" className="form-field-label">
-                        Full Name
-                      </label>
-                      <SolidInput
-                        type="text"
-                        id="fullName"
-                        name="fullName"
-                        autoComplete="off"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.fullName}
-                        className={cx(fieldError("fullName") && "solid-user-form-input-invalid")}
+            {isEditMode ? (
+              <SolidTabGroup
+                value={activeTab}
+                onValueChange={setActiveTab}
+                tabs={[
+                  {
+                    value: "userDetails",
+                    label: "User Details",
+                    content: <UserDetailsContent
+                      formik={formik}
+                      fieldError={fieldError}
+                      rolesData={rolesData}
+                      selectedRoles={selectedRoles}
+                      handleCheckboxChange={handleCheckboxChange}
+                      isEditMode={isEditMode}
+                    />,
+                  },
+                  {
+                    value: "apiKeys",
+                    label: "API Keys",
+                    content: <div className="pt-4">
+                      <ApiKeysTab
+                        userId={data?.id}
+                        canCreate={data?.isAllowedToGenerateApiKeys ?? false}
                       />
-                      {fieldError("fullName") ? <SolidMessage severity="error" text={fieldError("fullName")} /> : null}
-                    </div>
-
-                    <div className="field col-12 md:col-6 flex flex-column gap-2">
-                      <label htmlFor="username" className="form-field-label">
-                        Username
-                      </label>
-                      <SolidInput
-                        type="text"
-                        id="username"
-                        name="username"
-                        autoComplete="off"
-                        disabled={Boolean(data)}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.username}
-                        className={cx(fieldError("username") && "solid-user-form-input-invalid")}
-                      />
-                      {fieldError("username") ? <SolidMessage severity="error" text={fieldError("username")} /> : null}
-                    </div>
-
-                    <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
-                      <label htmlFor="email" className="form-field-label">
-                        Email
-                      </label>
-                      <SolidInput
-                        type="email"
-                        id="email"
-                        name="email"
-                        autoComplete="off"
-                        disabled={Boolean(data)}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.email}
-                        className={cx(fieldError("email") && "solid-user-form-input-invalid")}
-                      />
-                      {fieldError("email") ? <SolidMessage severity="error" text={fieldError("email")} /> : null}
-                    </div>
-
-                    <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
-                      <label htmlFor="mobile" className="form-field-label">
-                        Mobile
-                      </label>
-                      <SolidInput
-                        type="text"
-                        id="mobile"
-                        name="mobile"
-                        autoComplete="off"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.mobile}
-                        className={cx(fieldError("mobile") && "solid-user-form-input-invalid")}
-                      />
-                      {fieldError("mobile") ? <SolidMessage severity="error" text={fieldError("mobile")} /> : null}
-                    </div>
-
-                    {!isEditMode ? (
-                      <>
-                        <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
-                          <label htmlFor="password" className="form-field-label">
-                            Password
-                          </label>
-                          <SolidPasswordInput
-                            id="password"
-                            name="password"
-                            autoComplete="off"
-                            value={formik.values.password}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            className={cx(fieldError("password") && "solid-user-form-input-invalid")}
-                          />
-                          {fieldError("password") ? <SolidMessage severity="error" text={fieldError("password")} /> : null}
-                        </div>
-
-                        <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
-                          <label htmlFor="confirmPassword" className="form-field-label">
-                            Confirm Password
-                          </label>
-                          <SolidPasswordInput
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            autoComplete="off"
-                            value={formik.values.confirmPassword}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            className={cx(fieldError("confirmPassword") && "solid-user-form-input-invalid")}
-                          />
-                          {fieldError("confirmPassword") ? (
-                            <SolidMessage severity="error" text={fieldError("confirmPassword")} />
-                          ) : null}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
-                        <label htmlFor="failedLoginAttempts" className="form-field-label">
-                          Failed Login Attempts
-                        </label>
-                        <SolidInput
-                          type="number"
-                          id="failedLoginAttempts"
-                          name="failedLoginAttempts"
-                          autoComplete="off"
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          value={formik.values.failedLoginAttempts}
-                          className={cx(fieldError("failedLoginAttempts") && "solid-user-form-input-invalid")}
-                        />
-                        {fieldError("failedLoginAttempts") ? (
-                          <SolidMessage severity="error" text={fieldError("failedLoginAttempts")} />
-                        ) : null}
-                        <p className="solid-user-form-helper">
-                          Your account has been locked due to repeated unsuccessful login attempts. Please contact your
-                          system admin.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </SolidPanel>
-
-                <SolidPanel toggleable header="Roles" className="solid-column-panel solid-user-form-panel mt-5">
-                  <p className="solid-user-form-panel-copy">Select the roles that should be assigned to this user.</p>
-                  <div className="formgrid grid solid-user-role-grid">
-                    {rolesData?.data?.records?.map((role: any) => (
-                      <div key={role.name} className="field col-12 md:col-6 solid-user-role-item">
-                        <SolidCheckbox
-                          id={role.name}
-                          checked={selectedRoles.includes(role.name)}
-                          onChange={() => handleCheckboxChange(role.name)}
-                          label={role.name}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </SolidPanel>
-              </div>
-            </div>
+                    </div>,
+                  },
+                ]}
+              />
+            ) : (
+              <UserDetailsContent
+                formik={formik}
+                fieldError={fieldError}
+                rolesData={rolesData}
+                selectedRoles={selectedRoles}
+                handleCheckboxChange={handleCheckboxChange}
+                isEditMode={isEditMode}
+              />
+            )}
           </div>
         </form>
       </div>
+
+      {newUserIdForApiKey !== null && (
+        <GenerateApiKeyModal
+          open={true}
+          userId={newUserIdForApiKey}
+          onClose={() => {
+            setNewUserIdForApiKey(null);
+            router.back();
+          }}
+          onCreated={(apiKey, keyName) => {
+            setNewUserIdForApiKey(null);
+            setRevealKey({ apiKey, keyName });
+          }}
+        />
+      )}
+
+      {revealKey && (
+        <RevealApiKeyModal
+          open={true}
+          apiKey={revealKey.apiKey}
+          keyName={revealKey.keyName}
+          onClose={() => {
+            setRevealKey(null);
+            router.back();
+          }}
+        />
+      )}
     </div>
   );
 };
+
+/** Extracted form body so it can be used both inside and outside the tab wrapper */
+function UserDetailsContent({
+  formik,
+  fieldError,
+  rolesData,
+  selectedRoles,
+  handleCheckboxChange,
+  isEditMode,
+}: {
+  formik: any;
+  fieldError: (field: any) => string;
+  rolesData: any;
+  selectedRoles: string[];
+  handleCheckboxChange: (roleName: string) => void;
+  isEditMode: boolean;
+}) {
+  return (
+    <div className="grid">
+      <div className="col-12 lg:col-10 xl:col-8 mx-auto">
+        <SolidPanel header="Basic Info" className="solid-column-panel solid-user-form-panel">
+          <div className="grid formgrid">
+            <div className="field col-12 md:col-6 flex flex-column gap-2">
+              <label htmlFor="fullName" className="form-field-label">
+                Full Name
+              </label>
+              <SolidInput
+                type="text"
+                id="fullName"
+                name="fullName"
+                autoComplete="off"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.fullName}
+                className={cx(fieldError("fullName") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("fullName") ? <SolidMessage severity="error" text={fieldError("fullName")} /> : null}
+            </div>
+
+            <div className="field col-12 md:col-6 flex flex-column gap-2">
+              <label htmlFor="username" className="form-field-label">
+                Username
+              </label>
+              <SolidInput
+                type="text"
+                id="username"
+                name="username"
+                autoComplete="off"
+                disabled={Boolean(formik.values.username) && isEditMode}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.username}
+                className={cx(fieldError("username") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("username") ? <SolidMessage severity="error" text={fieldError("username")} /> : null}
+            </div>
+
+            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+              <label htmlFor="email" className="form-field-label">
+                Email
+              </label>
+              <SolidInput
+                type="email"
+                id="email"
+                name="email"
+                autoComplete="off"
+                disabled={isEditMode}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.email}
+                className={cx(fieldError("email") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("email") ? <SolidMessage severity="error" text={fieldError("email")} /> : null}
+            </div>
+
+            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+              <label htmlFor="mobile" className="form-field-label">
+                Mobile
+              </label>
+              <SolidInput
+                type="text"
+                id="mobile"
+                name="mobile"
+                autoComplete="off"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.mobile}
+                className={cx(fieldError("mobile") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("mobile") ? <SolidMessage severity="error" text={fieldError("mobile")} /> : null}
+            </div>
+
+            {!isEditMode ? (
+              <>
+                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                  <label htmlFor="password" className="form-field-label">
+                    Password
+                  </label>
+                  <SolidPasswordInput
+                    id="password"
+                    name="password"
+                    autoComplete="off"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={cx(fieldError("password") && "solid-user-form-input-invalid")}
+                  />
+                  {fieldError("password") ? <SolidMessage severity="error" text={fieldError("password")} /> : null}
+                </div>
+
+                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                  <label htmlFor="confirmPassword" className="form-field-label">
+                    Confirm Password
+                  </label>
+                  <SolidPasswordInput
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    autoComplete="off"
+                    value={formik.values.confirmPassword}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={cx(fieldError("confirmPassword") && "solid-user-form-input-invalid")}
+                  />
+                  {fieldError("confirmPassword") ? (
+                    <SolidMessage severity="error" text={fieldError("confirmPassword")} />
+                  ) : null}
+                </div>
+              </>
+            ) : (
+              <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                <label htmlFor="failedLoginAttempts" className="form-field-label">
+                  Failed Login Attempts
+                </label>
+                <SolidInput
+                  type="number"
+                  id="failedLoginAttempts"
+                  name="failedLoginAttempts"
+                  autoComplete="off"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.failedLoginAttempts}
+                  className={cx(fieldError("failedLoginAttempts") && "solid-user-form-input-invalid")}
+                />
+                {fieldError("failedLoginAttempts") ? (
+                  <SolidMessage severity="error" text={fieldError("failedLoginAttempts")} />
+                ) : null}
+                <p className="solid-user-form-helper">
+                  Your account has been locked due to repeated unsuccessful login attempts. Please contact your
+                  system admin.
+                </p>
+              </div>
+            )}
+          </div>
+        </SolidPanel>
+
+        <SolidPanel toggleable header="Access" className="solid-column-panel solid-user-form-panel mt-5">
+          <div className="formgrid grid">
+            <div className="field col-12 flex align-items-center justify-content-between gap-3">
+              <div>
+                <p className="form-field-label m-0">Allow API Key Generation</p>
+                <p className="solid-user-form-helper m-0 mt-1">
+                  When enabled, this user can generate API keys for programmatic access.
+                </p>
+              </div>
+              <SolidSwitch
+                checked={formik.values.isAllowedToGenerateApiKeys}
+                onChange={(checked) => formik.setFieldValue("isAllowedToGenerateApiKeys", checked)}
+              />
+            </div>
+          </div>
+        </SolidPanel>
+
+        <SolidPanel toggleable header="Roles" className="solid-column-panel solid-user-form-panel mt-5">
+          <p className="solid-user-form-panel-copy">Select the roles that should be assigned to this user.</p>
+          <div className="formgrid grid solid-user-role-grid">
+            {rolesData?.data?.records?.map((role: any) => (
+              <div key={role.name} className="field col-12 md:col-6 solid-user-role-item">
+                <SolidCheckbox
+                  id={role.name}
+                  checked={selectedRoles.includes(role.name)}
+                  onChange={() => handleCheckboxChange(role.name)}
+                  label={role.name}
+                />
+              </div>
+            ))}
+          </div>
+        </SolidPanel>
+      </div>
+    </div>
+  );
+}
 
 export default CreateUser;

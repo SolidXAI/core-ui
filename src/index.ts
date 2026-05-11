@@ -517,6 +517,16 @@ export type {
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';
+export { ApiKeysTab } from './components/core/users/ApiKeysTab';
+export {
+    apiKeyApi,
+    useGetUserApiKeysQuery,
+    useCreateApiKeyMutation,
+    useUpdateApiKeyMutation,
+    type ApiKeyRecord,
+    type CreateApiKeyBody,
+    type CreateApiKeyResponse,
+} from './redux/api/apiKeyApi';
 export { SolidErrorPage } from './components/common/SolidErrorPage';
 export { SolidNotFoundPage } from './components/common/SolidNotFoundPage';
 
@@ -534,6 +544,7 @@ export type { SolidStore, SolidRootState, SolidDispatch, CreateSolidStoreOptions
 export { StoreProvider } from './redux/store/StoreProvider';
 export { solidAxios, solidGet, solidPost, solidPut, solidPatch, solidDelete } from './http/solidHttp';
 export { AuthGuard } from './routes/guards/AuthGuard';
+export { GuestGuard } from './routes/guards/GuestGuard';
 export { AdminLayoutWrapper } from './layouts/AdminLayoutWrapper';
 export { AuthLayoutWrapper } from './layouts/AuthLayoutWrapper';
 export { AppEventListener } from './routes/AppEventListener';

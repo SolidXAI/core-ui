@@ -26,6 +26,7 @@ import { solidSettingsApi } from "../api/solidSettingsApi";
 import { solidViewsApi } from "../api/solidViewApi";
 import { userApi } from "../api/userApi";
 import { dashboardLayoutApi } from "../api/dashboardLayoutApi";
+import { apiKeyApi } from "../api/apiKeyApi";
 
 // 1. Export all APIs in one array
 export const solidApiSlices = [
@@ -48,7 +49,8 @@ export const solidApiSlices = [
     dashboardApi,
     dashboardQuestionApi,
     aiInteractionApi,
-    dashboardLayoutApi
+    dashboardLayoutApi,
+    apiKeyApi,
 ];
 
 // 2. Export default reducers

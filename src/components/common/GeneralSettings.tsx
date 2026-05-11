@@ -1,122 +1,189 @@
-import { useFormik } from "formik";
-import { useCallback, useEffect, useState } from "react";
-import { CancelButton } from "./CancelButton";
-import {
-  SolidButton,
-  SolidDivider,
-  SolidInput,
-  SolidSegmentedControl,
-  SolidSwitch,
-  SolidTabGroup,
-  SolidTextarea,
-} from "../shad-cn-ui";
+import { useFormik } from 'formik';
+import { useCallback, useEffect, useState } from 'react'
+import { CancelButton } from './CancelButton';
+import { ApiKeysTab } from '../core/users/ApiKeysTab';
+import { useSession } from '../../hooks/useSession';
+import { SolidButton, SolidDivider, SolidInput, SolidSegmentedControl, SolidSwitch, SolidTabGroup, SolidTextarea } from '../shad-cn-ui';
 import { usePathname } from "../../hooks/usePathname";
-import SolidLogo from "../../resources/images/SolidXLogo.svg";
-import AuthScreenRightBackgroundImage from "../../resources/images/auth/solid-left-layout-bg.png";
-import AuthScreenLeftBackgroundImage from "../../resources/images/auth/solid-right-layout-bg.png";
-import AuthScreenCenterBackgroundImage from "../../resources/images/auth/solid-login-light.png";
-import { useDropzone } from "react-dropzone";
-import { SettingDropzoneActivePlaceholder } from "./SolidSettings/SettingDropzoneActivePlaceholder";
-import { SolidUploadedImage } from "./SolidSettings/SolidUploadedImage";
-import { SettingsImageRemoveButton } from "./SolidSettings/SettingsImageRemoveButton";
-import {
-  AiModelConfigTab,
-  ModelBehavior,
-  ModelEntry,
-  ProviderConfig,
-  SolidAiConfig,
-} from "./SolidSettings/LlmSettings/AiModelConfigTab";
-import { useDispatch, useSelector } from "react-redux";
-import { ERROR_MESSAGES } from "../../constants/error-messages";
-import {
-  useBulkUpdateSolidSettingsMutation,
-  useLazyGetSolidSettingsQuery,
-} from "../../redux/api/solidSettingsApi";
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
+import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
+import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
+import { useDropzone } from 'react-dropzone';
+import { SettingDropzoneActivePlaceholder } from './SolidSettings/SettingDropzoneActivePlaceholder';
+import { SolidUploadedImage } from './SolidSettings/SolidUploadedImage';
+import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveButton';
+import { ModelConfigTab, ProvidersTab, ModelBehavior, ModelEntry, SolidAiConfig, ensureBuiltInProviders } from './SolidSettings/LlmSettings/AiModelConfigTab';
+import { useDispatch, useSelector } from 'react-redux';
+import { ERROR_MESSAGES } from '../../constants/error-messages';
+import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 
 export const GeneralSettings = () => {
-  const [appLogoPreview, setAppLogoPreview] = useState<string | null>(null);
-  const [companyLogoPreview, setCompanyLogoPreview] = useState<string | null>(
-    null,
-  );
-  const [
-    authScreenRightBackgroundImagePreview,
-    setAuthScreenRightBackgroundImagePreview,
-  ] = useState<string | null>(null);
-  const [
-    authScreenLeftBackgroundImagePreview,
-    setAuthScreenLeftBackgroundImagePreview,
-  ] = useState<string | null>(null);
-  const [
-    authScreenCenterBackgroundImagePreview,
-    setAuthScreenCenterBackgroundImagePreview,
-  ] = useState<string | null>(null);
-  const dispatch = useDispatch();
+    const { data: session } = useSession();
+    const [appLogoPreview, setAppLogoPreview] = useState<string | null>(null);
+    const [companyLogoPreview, setCompanyLogoPreview] = useState<string | null>(null);
+    const [authScreenRightBackgroundImagePreview, setAuthScreenRightBackgroundImagePreview] = useState<string | null>(null);
+    const [authScreenLeftBackgroundImagePreview, setAuthScreenLeftBackgroundImagePreview] = useState<string | null>(null);
+    const [authScreenCenterBackgroundImagePreview, setAuthScreenCenterBackgroundImagePreview] = useState<string | null>(null);
+    const dispatch = useDispatch()
 
-  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
 
-  useEffect(() => {
-    trigger(""); // Fetch settings on mount
-  }, [trigger]);
-  const pathname = usePathname();
-  const [bulkUpdateSolidSettings] = useBulkUpdateSolidSettingsMutation();
-  const initialValues = {
-    appLogo: solidSettingsData?.data?.appLogo ?? null,
-    companylogo: solidSettingsData?.data?.companylogo ?? null,
-    passwordlessRegistrationValidateWhat:
-      solidSettingsData?.data?.passwordlessRegistrationValidateWhat ?? "email",
-    passwordlessLoginValidateWhat:
-      solidSettingsData?.data?.passwordlessLoginValidateWhat ?? "email",
-    allowPublicRegistration:
-      solidSettingsData?.data?.allowPublicRegistration ?? false,
-    passwordBasedAuth: solidSettingsData?.data?.passwordBasedAuth ?? false,
-    passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
-    activateUserOnRegistration:
-      solidSettingsData?.data?.activateUserOnRegistration ?? false,
-    iamGoogleOAuthEnabled:
-      solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
-    iamMicrosoftOAuthEnabled:
-      solidSettingsData?.data?.iamMicrosoftOAuthEnabled ?? false,
-    iamFacebookOAuthEnabled:
-      solidSettingsData?.data?.iamFacebookOAuthEnabled ?? false,
-    iamAppleOAuthEnabled:
-      solidSettingsData?.data?.iamAppleOAuthEnabled ?? false,
-    // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
-    // shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
-    authPagesTheme: solidSettingsData?.data?.authPagesTheme ?? "light",
-    authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
-    defaultRole: solidSettingsData?.data?.defaultRole ?? "Admin",
-    appLogoPosition: solidSettingsData?.data?.appLogoPosition ?? "in_form_view",
-    showAuthContent: solidSettingsData?.data?.showAuthContent ?? false,
-    appTitle: solidSettingsData?.data?.appTitle ?? "SolidX",
-    appSubtitle: solidSettingsData?.data?.appSubtitle ?? "Welcome To",
-    appDescription: solidSettingsData?.data?.appDescription ?? "appDescription",
-    showLegalLinks: solidSettingsData?.data?.showLegalLinks ?? false,
-    appTnc: solidSettingsData?.data?.appTnc ?? null,
-    appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy ?? null,
-    enableDarkMode: solidSettingsData?.data?.enableDarkMode ?? false,
-    copyright: solidSettingsData?.data?.copyright ?? null,
-    forceChangePasswordOnFirstLogin:
-      solidSettingsData?.data?.forceChangePasswordOnFirstLogin ?? false,
-    contactSupportEmail: solidSettingsData?.data?.contactSupportEmail ?? null,
-    contactSupportDisplayName:
-      solidSettingsData?.data?.contactSupportDisplayName ?? null,
-    contactSupportIcon: solidSettingsData?.data?.contactSupportIcon ?? null,
-    authScreenRightBackgroundImage:
-      solidSettingsData?.data?.authScreenRightBackgroundImage ?? null,
-    authScreenLeftBackgroundImage:
-      solidSettingsData?.data?.authScreenLeftBackgroundImage ?? null,
-    authScreenCenterBackgroundImage:
-      solidSettingsData?.data?.authScreenCenterBackgroundImage ?? null,
-    solidXGenAiCodeBuilderConfig: (() => {
-      const defaultAiConfig: SolidAiConfig = {
-        models: {
-          default: {
-            providerKey: "",
-            behavior: { streaming: false, custom: "" },
-          },
-          fast: { providerKey: "", behavior: { streaming: false, custom: "" } },
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
+    const pathname = usePathname();
+    const [bulkUpdateSolidSettings] = useBulkUpdateSolidSettingsMutation();
+    const initialValues = {
+        appLogo: solidSettingsData?.data?.appLogo ?? null,
+        companylogo: solidSettingsData?.data?.companylogo ?? null,
+        passwordlessRegistrationValidateWhat: solidSettingsData?.data?.passwordlessRegistrationValidateWhat ?? "email",
+        passwordlessLoginValidateWhat: solidSettingsData?.data?.passwordlessLoginValidateWhat ?? "email",
+        allowPublicRegistration: solidSettingsData?.data?.allowPublicRegistration ?? false,
+        passwordBasedAuth: solidSettingsData?.data?.passwordBasedAuth ?? false,
+        passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
+        activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
+        iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
+        iamMicrosoftOAuthEnabled: solidSettingsData?.data?.iamMicrosoftOAuthEnabled ?? false,
+        iamFacebookOAuthEnabled: solidSettingsData?.data?.iamFacebookOAuthEnabled ?? false,
+        // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
+        // shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
+        authPagesTheme: solidSettingsData?.data?.authPagesTheme ?? "light",
+        authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
+        defaultRole: solidSettingsData?.data?.defaultRole ?? "Admin",
+        appLogoPosition: solidSettingsData?.data?.appLogoPosition ?? "in_form_view",
+        showAuthContent: solidSettingsData?.data?.showAuthContent ?? false,
+        appTitle: solidSettingsData?.data?.appTitle ?? "SolidX",
+        appSubtitle: solidSettingsData?.data?.appSubtitle ?? "Welcome To",
+        appDescription: solidSettingsData?.data?.appDescription ?? "appDescription",
+        showLegalLinks: solidSettingsData?.data?.showLegalLinks ?? false,
+        appTnc: solidSettingsData?.data?.appTnc ?? null,
+        appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy ?? null,
+        enableDarkMode: solidSettingsData?.data?.enableDarkMode ?? false,
+        copyright: solidSettingsData?.data?.copyright ?? null,
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.forceChangePasswordOnFirstLogin ?? false,
+        contactSupportEmail: solidSettingsData?.data?.contactSupportEmail ?? null,
+        contactSupportDisplayName: solidSettingsData?.data?.contactSupportDisplayName ?? null,
+        contactSupportIcon: solidSettingsData?.data?.contactSupportIcon ?? null,
+        authScreenRightBackgroundImage: solidSettingsData?.data?.authScreenRightBackgroundImage ?? null,
+        authScreenLeftBackgroundImage: solidSettingsData?.data?.authScreenLeftBackgroundImage ?? null,
+        authScreenCenterBackgroundImage: solidSettingsData?.data?.authScreenCenterBackgroundImage ?? null,
+        solidXGenAiCodeBuilderConfig: (() => {
+            const defaultAiConfig: SolidAiConfig = {
+                models: {
+                    default: { providerId: "", model: "", behavior: { streaming: false, custom: "" } },
+                    fast: { providerId: "", model: "", behavior: { streaming: false, custom: "" } },
+                },
+                providers: {},
+            };
+            const raw = solidSettingsData?.data?.solidXGenAiCodeBuilderConfig;
+            if (!raw) return defaultAiConfig;
+            try {
+                const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+                return (parsed && typeof parsed === "object" ? parsed : defaultAiConfig) as SolidAiConfig;
+            } catch {
+                return defaultAiConfig;
+            }
+        })(),
+        // llmProvider: solidSettingsData?.data?.llmProvider ?? null,
+        // llModelName: solidSettingsData?.data?.llModelName ?? null,
+        // llmProviderApiKey: solidSettingsData?.data?.llmProviderApiKey ?? null,
+        // llmProviderBaseURL: solidSettingsData?.data?.llmProviderBaseURL ?? null,
+        // llmModelIdentifier: solidSettingsData?.data?.llmModelIdentifier ?? null
+
+
+    };
+    const formik = useFormik({
+        initialValues: initialValues,
+        enableReinitialize: true,
+        onSubmit: async (values) => {
+            try {
+
+                const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
+                const currentSettings = solidSettingsData || {};
+
+                const formData = new FormData();
+
+                // Compare changed fields
+                Object.entries(values).forEach(([key, value]) => {
+                    const currentValue = currentSettings[key];
+
+                    const normalizedCurrent = currentValue ?? "";
+                    const normalizedValue = value ?? "";
+
+                    if (normalizedCurrent !== normalizedValue) {
+                        // If file, append to formData and use placeholder value in JSON
+                        if (value instanceof File) {
+                            formData.append(key, value);
+                            updatedSettingsArray.push({
+                                key,
+                                value: "",
+                                type: "system",
+                            });
+                        } else {
+                            updatedSettingsArray.push({
+                                key,
+                                value: typeof value === "string" ? value : JSON.stringify(value),
+                                type: "system",
+                            });
+                        }
+                    }
+                });
+
+                if (updatedSettingsArray.length === 0) {
+                    dispatch(showToast({ severity: "success", summary: "No Changes", detail: "No settings were updated" }));
+                    return;
+                }
+
+                // Append settings array to formData
+                formData.append("settings", JSON.stringify(updatedSettingsArray));
+
+                // Call API
+                const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
+
+                if (response.statusCode === 200) {
+                    dispatch(showToast({ severity: "success", summary: "Updated", detail: "Settings updated" }));
+                    trigger("")
+                }
+
+            } catch (error: any) {
+                console.log("Error updating settings:", error);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG }));
+            }
+        },
+    });
+
+    const showError = async () => {
+        const errors = await formik.validateForm();
+        const errorMessages = Object.values(errors);
+
+        if (errorMessages.length > 0) {
+            dispatch(showToast({ severity: 'error', summary: 'Error', detail: Array.isArray(errorMessages) ? errorMessages.join(', ') : errorMessages }));
+        }
+    }
+    useEffect(() => {
+
+    }, [pathname])
+
+    const positionMap: Record<'left' | 'center' | 'right', string> = {
+        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side',
+        center: 'The form will be centered in the middle of the screen for balanced alignment',
+        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side'
+    };
+
+    const onAppLogoDrop = useCallback(
+        (acceptedFiles: File[]) => {
+            const file = acceptedFiles[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    dispatch(showToast({ severity: "error", summary: "File too large", detail: "Maximum file size is 2MB" }));
+                    return;
+                }
+                formik.setFieldValue("appLogo", file);
+                setAppLogoPreview(URL.createObjectURL(file));
+            }
         },
         providers: {},
       };
@@ -1355,49 +1422,61 @@ export const GeneralSettings = () => {
                                     </div>
                                     <Divider />
                                  */}
-                  <p className="solid-settings-heading">Contact Support</p>
-                  <div className="formgrid grid">
-                    <div className="col-12 lg:col-10 xl:col-8">
-                      <div className="formgrid grid">
-                        <div className="col-12 md:col-6 pb-3 md:pb-0">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-12 md:col-5 pb-2 md:pb-0">
-                              <label className="form-field-label">
-                                Contact Support Email
-                              </label>
-                            </div>
-                            <div className="col-12 md:col-7">
-                              <SolidInput
-                                type="text"
-                                id="contactSupportEmail"
-                                name="contactSupportEmail"
-                                onChange={formik.handleChange}
-                                value={formik.values.contactSupportEmail ?? ""}
-                                className="w-full"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="col-12 md:col-6">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-12 md:col-5 pb-2 md:pb-0">
-                              <label className="form-field-label">
-                                Display Name
-                              </label>
-                            </div>
-                            <div className="col-12 md:col-7">
-                              <SolidInput
-                                type="text"
-                                id="contactSupportDisplayName"
-                                name="contactSupportDisplayName"
-                                onChange={formik.handleChange}
-                                value={
-                                  formik.values.contactSupportDisplayName ?? ""
-                                }
-                                className="w-full"
-                              />
-                            </div>
-                          </div>
+                                    <p className="solid-settings-heading">Contact Support</p>
+                                    <div className='formgrid grid'>
+                                        <div className="col-12 lg:col-10 xl:col-8">
+                                            <div className='formgrid grid'>
+                                                <div className="col-12 md:col-6 pb-3 md:pb-0">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
+                                                            <label className="form-field-label">Contact Support Email</label>
+                                                        </div>
+                                                        <div className="col-12 md:col-7">
+                                                            <SolidInput
+                                                                type="text"
+                                                                id="contactSupportEmail"
+                                                                name="contactSupportEmail"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.contactSupportEmail ?? ''}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-12 md:col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
+                                                            <label className="form-field-label">Display Name</label>
+                                                        </div>
+                                                        <div className="col-12 md:col-7">
+                                                            <SolidInput
+                                                                type="text"
+                                                                id="contactSupportDisplayName"
+                                                                name="contactSupportDisplayName"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.contactSupportDisplayName ?? ''}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            }
+                            {pathname.includes("ai-settings") &&
+                                <AiSettingsSection
+                                    aiConfig={formik.values.solidXGenAiCodeBuilderConfig as SolidAiConfig}
+                                    onAiConfigChange={handleAiConfigChange}
+                                />
+                            }
+                            {pathname.includes("api-keys") && session?.user?.id &&
+                                <ApiKeysTab
+                                    userId={session.user.id}
+                                    canCreate={session?.user?.isAllowedToGenerateApiKeys ?? false}
+                                />
+                            }
                         </div>
                       </div>
                     </div>
@@ -1420,89 +1499,81 @@ export const GeneralSettings = () => {
   );
 };
 
-const AI_TABS = [
-  { key: "fast" as const, label: "Fast Model", title: "Fast Model" },
-  {
-    key: "default" as const,
-    label: "Intelligent Model",
-    title: "Intelligent Model (Reasoning & tool use)",
-  },
-];
-
 interface AiSettingsSectionProps {
   aiConfig: SolidAiConfig;
   onAiConfigChange: (config: SolidAiConfig) => void;
 }
 
 const DEFAULT_BEHAVIOR: ModelBehavior = { streaming: false, custom: "" };
+const DEFAULT_MODEL_ENTRY: ModelEntry = { providerId: "", model: "", behavior: DEFAULT_BEHAVIOR };
 
-const AiSettingsSection = ({
-  aiConfig,
-  onAiConfigChange,
-}: AiSettingsSectionProps) => {
-  const [activeTab, setActiveTab] = useState<"fast" | "default">("fast");
+const AiSettingsSection = ({ aiConfig, onAiConfigChange }: AiSettingsSectionProps) => {
+    const [activeTab, setActiveTab] = useState<"providers" | "default" | "fast">("providers");
+    const [showAddProvider, setShowAddProvider] = useState(false);
 
-  const tabItems = AI_TABS.map((tab) => {
-    const modelEntry: ModelEntry = aiConfig.models?.[tab.key] ?? {
-      providerKey: "",
-      behavior: DEFAULT_BEHAVIOR,
-    };
-    const providerKey = modelEntry.providerKey ?? "";
-    const providerConfig: ProviderConfig = aiConfig.providers?.[
-      providerKey
-    ] ?? { provider: providerKey, apiKey: "", model: "" };
-    const behavior: ModelBehavior = modelEntry.behavior ?? DEFAULT_BEHAVIOR;
+    const providers = ensureBuiltInProviders(aiConfig.providers ?? {});
 
-    return {
-      value: tab.key,
-      label: tab.label,
-      content: (
-        <AiModelConfigTab
-          providerKey={providerKey}
-          providerConfig={providerConfig}
-          behavior={behavior}
-          allProviders={aiConfig.providers ?? {}}
-          onProviderKeyChange={(newKey, newConfig) => {
-            onAiConfigChange({
-              ...aiConfig,
-              models: {
-                ...aiConfig.models,
-                [tab.key]: { ...modelEntry, providerKey: newKey },
-              },
-              providers: { ...aiConfig.providers, [newKey]: newConfig },
-            });
-          }}
-          onProviderConfigChange={(pk, config) => {
-            onAiConfigChange({
-              ...aiConfig,
-              providers: { ...aiConfig.providers, [pk]: config },
-            });
-          }}
-          onBehaviorChange={(newBehavior) => {
-            onAiConfigChange({
-              ...aiConfig,
-              models: {
-                ...aiConfig.models,
-                [tab.key]: { ...modelEntry, behavior: newBehavior },
-              },
-            });
-          }}
-        />
-      ),
-    };
-  });
+    const tabItems = [
+        {
+            value: "providers" as const,
+            label: "Providers",
+            content: (
+                <ProvidersTab
+                    providers={providers}
+                    onProvidersChange={(newProviders) => {
+                        onAiConfigChange({ ...aiConfig, providers: newProviders });
+                    }}
+                    showAddModal={showAddProvider}
+                    onAddModalClose={() => setShowAddProvider(false)}
+                />
+            ),
+        },
+        {
+            value: "default" as const,
+            label: "Intelligent Model",
+            content: (
+                <ModelConfigTab
+                    modelEntry={aiConfig.models?.default ?? DEFAULT_MODEL_ENTRY}
+                    providers={providers}
+                    onModelEntryChange={(entry) => {
+                        onAiConfigChange({ ...aiConfig, models: { ...aiConfig.models, default: entry } });
+                    }}
+                />
+            ),
+        },
+        {
+            value: "fast" as const,
+            label: "Fast Model",
+            content: (
+                <ModelConfigTab
+                    modelEntry={aiConfig.models?.fast ?? DEFAULT_MODEL_ENTRY}
+                    providers={providers}
+                    onModelEntryChange={(entry) => {
+                        onAiConfigChange({ ...aiConfig, models: { ...aiConfig.models, fast: entry } });
+                    }}
+                />
+            ),
+        },
+    ];
 
-  return (
-    <div>
-      <p className="solid-settings-heading" style={{ marginBottom: "1rem" }}>
-        AI Model Configuration
-      </p>
-      <SolidTabGroup
-        tabs={tabItems}
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as "fast" | "default")}
-        tabPosition="left"
-      />
-    </div>
-  );
+    return (
+        <div>
+            <p className="solid-settings-heading" style={{ marginBottom: "1rem" }}>
+                AI Model Configuration
+            </p>
+            <SolidTabGroup
+                tabs={tabItems}
+                value={activeTab}
+                onValueChange={(value) => setActiveTab(value as "providers" | "default" | "fast")}
+                tabPosition="left"
+                extra={
+                    activeTab === "providers" ? (
+                        <SolidButton size="sm" onClick={() => setShowAddProvider(true)}>
+                            Add
+                        </SolidButton>
+                    ) : undefined
+                }
+            />
+        </div>
+    );
 };
