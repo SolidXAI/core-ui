@@ -25,7 +25,7 @@ export class SolidSelectionStaticField implements ISolidField {
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldMetadata = this.fieldContext.fieldMetadata;
-        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
         if (isMultiSelect && Array.isArray(value)) {
             formData.append(fieldLayoutInfo.attrs.name, JSON.stringify(value.map(v => v.value)));
         } else if (value) {
@@ -38,10 +38,11 @@ export class SolidSelectionStaticField implements ISolidField {
 
     initialValue(): any {
         // Get field name and metadata
-        const fieldName = this.fieldContext.field.attrs.name;
+        const fieldLayoutInfo = this.fieldContext.field;
+        const fieldName = fieldLayoutInfo.attrs.name;
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldDefaultValue = fieldMetadata?.defaultValue;
-        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
         // Get existing value from form data
         const existingValue = this.fieldContext.data[fieldName];
 
@@ -65,6 +66,10 @@ export class SolidSelectionStaticField implements ISolidField {
 
         // Determine the final value to use (existing value or default value)
         const finalValue = existingValue ?? fieldDefaultValue ?? '';
+
+        if (finalValue === '' || finalValue === null || finalValue === undefined || (Array.isArray(finalValue) && finalValue.length === 0)) {
+            return null;
+        }
 
         if (isMultiSelect) {
             let values: string[] = [];
@@ -96,7 +101,7 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
 
         // let schema = Yup.object({
         //     value: Yup.string().required(`${fieldLabel} is required.`)
@@ -195,7 +200,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
 
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
 
     const [selectionStaticItems, setSelectionStaticItems] = useState([]);
     const selectionStaticSearch = (event: AutoCompleteCompleteEvent) => {
@@ -232,10 +237,10 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
                     fieldContext.onChange(syntheticEvent, "onFieldChange");
                 }}
-                onSelect={({ value }) => {
-                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
-                    fieldContext.onChange(syntheticEvent, "onFieldChange");
-                }}
+                // onSelect={({ value }) => {
+                //     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                //     fieldContext.onChange(syntheticEvent, "onFieldChange");
+                // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>
@@ -261,7 +266,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
     const formReadonly = fieldContext.solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     const fieldName = fieldLayoutInfo.attrs.name;
-    const isMultiSelect = fieldMetadata?.isMultiSelect;
+    const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
     // Convert selectionStaticValues to usable radio options
     const radioOptions = fieldMetadata.selectionStaticValues.map((i: string) => {
         const [value, label] = i.split(":");
@@ -320,7 +325,7 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
     const formReadonly = fieldContext.solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     const fieldName = fieldLayoutInfo.attrs.name;
-    const isMultiSelect = fieldMetadata?.isMultiSelect;
+    const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.errors[fieldName];
@@ -375,7 +380,7 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value = formik.values[fieldLayoutInfo.attrs.name];
-    const isMultiSelect = fieldMetadata?.isMultiSelect;
+    const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
         <div className={styles.fieldViewWrapper}>

@@ -27,9 +27,10 @@ export class SolidSelectionDynamicField implements ISolidField {
     initialValue(): any {
         // TODO: Use the field metadata to re-create the object in the valid format 
         // {label: '', value: ''}
-        const optionValue = this.fieldContext.data[this.fieldContext.field.attrs.name];
+        const fieldLayoutInfo = this.fieldContext.field;
+        const optionValue = this.fieldContext.data[fieldLayoutInfo.attrs.name];
         const fieldMetadata = this.fieldContext.fieldMetadata;
-        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
         // isMultiSelect: fieldMetaData ? fieldMetaData?.isMultiSelect : false,
 
         // return { label: optionValue || '', value: optionValue || '' };
@@ -49,6 +50,10 @@ export class SolidSelectionDynamicField implements ISolidField {
                 return { label: strVal, value: strVal };
             }
         };
+
+        if (optionValue === '' || optionValue === null || optionValue === undefined || (Array.isArray(optionValue) && optionValue.length === 0)) {
+            return null;
+        }
 
         if (isMultiSelect) {
             if (Array.isArray(optionValue)) {
@@ -74,7 +79,7 @@ export class SolidSelectionDynamicField implements ISolidField {
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldMetadata = this.fieldContext.fieldMetadata;
-        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
         const stripQuotes = (str: string) => str.replace(/^"+|"+$/g, '').replace(/^'+|'+$/g, '');
 
         if (value) {
@@ -108,7 +113,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         // }
 
         // return schema;
-        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
 
 
         const isRequired = fieldLayoutInfo.attrs?.required ?? fieldMetadata.required;
@@ -198,7 +203,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const whereClause = fieldLayoutInfo.attrs.whereClause;
 
-    const isMultiSelect = fieldMetadata?.isMultiSelect;
+    const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
 
     // selection dynamic specific code. 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
@@ -266,12 +271,14 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 onChange={({ value }) => {
                     if (formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled) return;
                     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                    // console.log(`SolidSelectionDynamicField > SolidAutocomplete > onChange`, syntheticEvent);
                     fieldContext.onChange(syntheticEvent, "onFieldChange");
                 }}
-                onSelect={({ value }) => {
-                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
-                    fieldContext.onChange(syntheticEvent, "onFieldChange");
-                }}
+                // onSelect={({ value }) => {
+                //     const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                //     console.log(`SolidSelectionDynamicField > SolidAutocomplete > onSelect`, syntheticEvent);
+                //     fieldContext.onChange(syntheticEvent, "onFieldChange");
+                // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>
@@ -292,7 +299,7 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const value = formik.values[fieldLayoutInfo.attrs.name];
-    const isMultiSelect = fieldMetadata?.isMultiSelect;
+    const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
 
     const toLabel = (val: any) => {
         if (!val) return '';

@@ -276,7 +276,7 @@ const SolidSheet = ({ children }: any) => (
 // Internal tab data carrier — SolidNotebook reads props from this
 const SolidPageTab = ({ children }: any) => <>{children}</>;
 
-const SolidNotebook = ({ children, activeTab, embeded }: any) => {
+const SolidNotebook = ({ children, activeTab, embeded, requestedTab, requestedTabVersion }: any) => {
     const childrenArray = React.Children.toArray(children).filter(child => !!child) as any[];
 
     const router = useRouter();
@@ -285,6 +285,19 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     const [localActiveTab, setLocalActiveTab] = useState(activeTab);
 
     const effectiveTab = embeded ? localActiveTab : activeTab;
+
+    useEffect(() => {
+        if (!requestedTab) return;
+        const exists = childrenArray.some((child: any) => child.props?.tabKey === requestedTab);
+        if (!exists) return;
+        if (embeded) {
+            setLocalActiveTab(requestedTab);
+        } else {
+            const queryParams = new URLSearchParams(searchParams.toString());
+            queryParams.set('activeTab', requestedTab);
+            router.push(`${pathname}?${queryParams.toString()}`);
+        }
+    }, [requestedTabVersion]);
 
     const activeIndex = useMemo(() => {
         const idx = childrenArray.findIndex((child: any) => child.props?.tabKey === effectiveTab);
@@ -349,6 +362,29 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, 
     )
 };
 
+
+const FormikSubmitWatcher = ({ formik, tabFieldsRef, embeded, searchParams, setRequestedTab, setRequestedTabVersion }: any) => {
+    const lastHandledRef = useRef(0);
+    useEffect(() => {
+        if (formik.submitCount === lastHandledRef.current) return;
+        if (formik.isSubmitting) return;
+        lastHandledRef.current = formik.submitCount;
+        const erroredKeys = Object.keys(formik.errors || {});
+        if (erroredKeys.length === 0) return;
+        if (!tabFieldsRef.current || tabFieldsRef.current.length === 0) return;
+        const currentActive = embeded ? null : (searchParams.get("activeTab") || "");
+        const currentHasError = currentActive
+            ? tabFieldsRef.current.find((t: any) => t.tabKey === currentActive)?.fields.some((f: string) => erroredKeys.includes(f))
+            : false;
+        if (currentHasError) return;
+        const firstErroredTab = tabFieldsRef.current.find((t: any) => t.fields.some((f: string) => erroredKeys.includes(f)));
+        if (firstErroredTab) {
+            setRequestedTab(firstErroredTab.tabKey);
+            setRequestedTabVersion((v: number) => v + 1);
+        }
+    }, [formik.submitCount, formik.isSubmitting]);
+    return null;
+};
 
 const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
     const fieldsName = fields.map((f: any) => f.attrs.name);
@@ -433,6 +469,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [chatterLocaleWidth, setChatterLocaleWidth] = useState(360);
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const tabFieldsRef = useRef<Array<{ tabKey: string; fields: string[] }>>([]);
+    const [requestedTab, setRequestedTab] = useState<string | null>(null);
+    const [requestedTabVersion, setRequestedTabVersion] = useState(0);
 
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
     const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
@@ -1266,6 +1306,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         });
 
         const formFieldOnXXX = async (event: ChangeEvent<HTMLInputElement>, eventType: string) => {
+            // console.log("formFieldOnXXX", eventType, event);
 
             // Invoke the formik change 
             if (eventType === 'onFieldChange') {
@@ -1443,12 +1484,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
+                        tabFieldsRef.current = [];
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded} requestedTab={requestedTab} requestedTabVersion={requestedTabVersion}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
                     }
                     break;
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
+                        tabFieldsRef.current.push({ tabKey: key, fields: fields.map((f: any) => f.attrs.name) });
                         const pageChildren = children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
@@ -1639,6 +1682,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
             <div className="solid-form-wrapper">
                 <div className="solid-form-section">
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
+                        <FormikSubmitWatcher
+                            formik={formik}
+                            tabFieldsRef={tabFieldsRef}
+                            embeded={params.embeded}
+                            searchParams={searchParams}
+                            setRequestedTab={setRequestedTab}
+                            setRequestedTabVersion={setRequestedTabVersion}
+                        />
                         <SolidFormActionHeader
                             formik={formik}
                             formData={solidFormViewData?.data}

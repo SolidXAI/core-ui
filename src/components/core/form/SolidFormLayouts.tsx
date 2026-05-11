@@ -7,7 +7,7 @@ import CreateModel from "../model/CreateModel";
 import CreateModule from "../module/CreateModule";
 import CreateUser from "../users/CreateUser";
 import SolidFormView from "./SolidFormView";
-import { camelCase } from "change-case";
+import { camelCase } from "lodash";
 
 type SolidViewParams = {
     params: {

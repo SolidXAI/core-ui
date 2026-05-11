@@ -67,6 +67,8 @@ import {
     type ExtensionFunctionType,
 } from "../types/extension-registry";
 
+import { scheduleFrequencyOnFieldChangeHandler } from "../components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
+
 
 type ExtensionComponentMetadata = {
     component: React.ComponentType<any>;
@@ -389,3 +391,6 @@ registerExtensionFunction("dashboardQuestionOnFormLoadHandler", dashboardQuestio
 // on change of model, apply a where clause on the field field...
 registerExtensionFunction("modelSequenceFormViewChangeHandler", hanldeModelSequenceFormViewChange, ExtensionFunctionTypes.onFieldChange);
 registerExtensionFunction("mqMessageOnFormLoadHandler", mqMessageOnFormLoadHandler, ExtensionFunctionTypes.onFormLoad);
+
+
+registerExtensionFunction("scheduleFrequencyOnFieldChangeHandler", scheduleFrequencyOnFieldChangeHandler, ExtensionFunctionTypes.onFieldChange);

@@ -2,14 +2,13 @@ import { useConfirmForgotPasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { useEffect } from "react";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { SolidButton, SolidMessage, SolidPasswordInput } from "../shad-cn-ui";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
@@ -17,10 +16,7 @@ const SolidResetPassword = () => {
     // const decodedUsername = searchParams.get('username');
     // const username = decodedUsername ? decodeURIComponent(decodedUsername) : '';
 
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    const { solidSettingsData } = useAuthSettings();
 
 
     const dispatch = useDispatch();

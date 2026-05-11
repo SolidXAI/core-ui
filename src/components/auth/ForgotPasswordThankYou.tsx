@@ -1,17 +1,12 @@
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
-import { useEffect } from "react";
 import { SolidButton } from "../shad-cn-ui";
 import { useRouter } from "../../hooks/useRouter";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 
 export const ForgotPasswordThankYou = () => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    const { solidSettingsData } = useAuthSettings();
     const router = useRouter();
-
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
 
     const searchParams = useSearchParams();
     const email = searchParams.get('email');

@@ -5655,15 +5655,15 @@ html.dark .solid-media-card-widget__kind,
 
 .solid-empty-listview-actions .solid-empty-listview-create-action .p-button,
 .solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn {
-  background: var(--foreground);
-  border-color: var(--foreground);
-  color: var(--background);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .solid-empty-listview-actions .solid-empty-listview-create-action .p-button:hover,
 .solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn:hover {
-  background: color-mix(in srgb, var(--foreground) 90%, transparent);
-  border-color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  background: color-mix(in srgb, var(--primary) 90%, black);
+  border-color: color-mix(in srgb, var(--primary) 90%, black);
 }
 
 .solid-empty-listview-import-button.p-button,

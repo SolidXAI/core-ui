@@ -1,4 +1,4 @@
-import { camelCase } from "change-case";
+import { camelCase } from "lodash";
 import { useParams } from "react-router-dom";
 import { SolidCardView } from "../../../../components/core/card/SolidCardView";
 

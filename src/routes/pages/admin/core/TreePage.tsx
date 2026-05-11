@@ -1,4 +1,4 @@
-import { camelCase } from "change-case";
+import { camelCase } from "lodash";
 import { useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import type { SolidTreeViewHandle } from "../../../../components/core/tree/SolidTreeView";

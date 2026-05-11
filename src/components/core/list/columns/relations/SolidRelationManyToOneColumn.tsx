@@ -3,7 +3,7 @@ import { Column } from "../../SolidDataTable";
 import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
 import { getExtensionComponent } from '../../../../../helpers/registry';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
-import { kebabCase } from 'change-case';
+import { kebabCase } from 'lodash';
 import { ExternalLink } from "lucide-react";
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {

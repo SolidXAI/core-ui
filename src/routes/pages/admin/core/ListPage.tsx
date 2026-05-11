@@ -1,5 +1,5 @@
 import { SolidListView } from "../../../../components/core/list/SolidListView";
-import { camelCase } from "change-case";
+import { camelCase } from "lodash";
 import { useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import type { SolidListViewHandle } from "../../../../components/core/list/SolidListView";

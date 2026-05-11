@@ -1,29 +1,44 @@
 import Link from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
 import { LayoutContext } from "../layout/context/layoutcontext";
+import { solidGet } from "../../http/solidHttp";
+import { AuthSettingsContext } from "./AuthSettingsContext";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
     const layoutContext = useContext(LayoutContext);
+    const [solidSettingsData, setSolidSettingsData] = useState<any>(null);
+    const [isLoadingAuthSettings, setIsLoadingAuthSettings] = useState(true);
 
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
 
+    const loadAuthSettings = useCallback(async () => {
+        setIsLoadingAuthSettings(true);
+        try {
+            const response = await solidGet("/setting/wrapped");
+            setSolidSettingsData(response?.data ?? null);
+        } catch (error) {
+            console.error("Failed to load auth settings", error);
+            setSolidSettingsData(null);
+        } finally {
+            setIsLoadingAuthSettings(false);
+        }
+    }, []);
+
     useEffect(() => {
-        trigger("");
-    }, [trigger]);
+        loadAuthSettings();
+    }, [loadAuthSettings]);
 
     useEffect(() => {
         const allowPublicRegistration = solidSettingsData?.data?.allowPublicRegistration;
@@ -40,12 +55,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         }
     }, [solidSettingsData, pathname]);
 
-    if (allowRegistration === null && pathname === "/auth/register") {
-        console.log(`AuthLayout returning null because allowRegistration is null for register route`);
+    if (isLoadingAuthSettings && pathname === "/auth/register") {
         return null;
     }
 
-    const authChildren = allowRegistration || pathname !== "/auth/register" ? children : null;
+    const authChildren = allowRegistration !== false || pathname !== "/auth/register" ? children : null;
     const handleRegistration = () => {
         router.push("/auth/login");
         setIsRestricted(false);
@@ -105,6 +119,14 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const isCenter = authLayout === "center";
     const isLeft = authLayout === "left";
     const isRight = authLayout === "right";
+    const authSettingsContextValue = useMemo(
+        () => ({
+            solidSettingsData,
+            isLoadingAuthSettings,
+            reloadAuthSettings: loadAuthSettings,
+        }),
+        [solidSettingsData, isLoadingAuthSettings, loadAuthSettings]
+    );
 
     const formPane = (
         <div className="solid-auth-form-pane solid-login-dark-bg">
@@ -145,6 +167,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     );
 
     return (
+        <AuthSettingsContext.Provider value={authSettingsContextValue}>
         <div className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`} data-auth-theme={authTheme}>
             {!isCenter && (
                 <div className="solid-auth-split">
@@ -209,5 +232,6 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
             </SolidDialog >
         </div >
+        </AuthSettingsContext.Provider>
     )
 }
