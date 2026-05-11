@@ -28,6 +28,7 @@ import { SolidSelectionDynamicField } from "./fields/SolidSelectionDynamicField"
 import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
 import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
+import { SolidComputedField } from "./fields/SolidComputedField";
 import { SolidUiEvent } from "../../../types";
 import { getExtensionComponent, getExtensionFunction } from "../../../helpers/registry";
 import { SolidFormWidgetProps, SolidUiEventResponse } from "../../../types/solid-core";
@@ -171,6 +172,9 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
     }
     if (type === 'email') {
         return new SolidEmailField(fieldContext);
+    }
+    if (type === 'computed') {
+        return new SolidComputedField(fieldContext);
     }
     return null;
 }
