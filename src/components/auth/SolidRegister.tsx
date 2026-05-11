@@ -381,6 +381,12 @@ const SolidRegister = () => {
             return <p>No authentication method available</p>;
         }
     };
+    const isAnyOAuthEnabled = !!(
+        solidSettingsData?.data?.iamGoogleOAuthEnabled ||
+        solidSettingsData?.data?.iamFacebookOAuthEnabled ||
+        solidSettingsData?.data?.iamAppleOAuthEnabled ||
+        solidSettingsData?.data?.iamMicrosoftOAuthEnabled
+    );
     return (
         <div className="">
             {/* Overlay UI */}
@@ -406,14 +412,19 @@ const SolidRegister = () => {
                 <p className="solid-auth-helper">Enter your details below to create your account</p>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
-                {solidSettingsData?.data?.iamGoogleOAuthEnabled && (
+                {isAnyOAuthEnabled && (
                     <>
                         <div className="solid-auth-divider flex align-items-center gap-2 my-4">
                             <SolidDivider className="flex-1" />
                             <span className="text-sm text-500">Or continue with</span>
                             <SolidDivider className="flex-1" />
                         </div>
-                        <SocialMediaLogin />
+                        <SocialMediaLogin
+                            googleEnabled={solidSettingsData?.data?.iamGoogleOAuthEnabled}
+                            facebookEnabled={solidSettingsData?.data?.iamFacebookOAuthEnabled}
+                            appleEnabled={solidSettingsData?.data?.iamAppleOAuthEnabled}
+                            microsoftEnabled={solidSettingsData?.data?.iamMicrosoftOAuthEnabled}
+                        />
                     </>
                 )}
             </div>
