@@ -118,6 +118,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         date: formatDate(msg.createdAt),
                         media: msg._media,
                         messageSubType: msg.messageSubType,
+                        status: msg.status,
                         modelDisplayName: msg.modelDisplayName,
                         modelUserKey: msg.modelUserKey
                     };
@@ -218,6 +219,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     <div key={message.id}>
                         {showDateDivider && <SolidChatterDateDivider date={message.date} />}
                         <SolidChatterMessageBox
+                            messageId={message.id}
                             user={message.user}
                             messageType={message.messageType}
                             message={message.message}
@@ -225,8 +227,10 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                             auditRecord={message.auditRecord}
                             media={message.media}
                             messageSubType={message.messageSubType}
+                            status={message.status}
                             modelDisplayName={message.modelDisplayName}
                             modelUserKey={message.modelUserKey}
+                            onRefresh={fetchData}
                         />
                     </div>
                 );
