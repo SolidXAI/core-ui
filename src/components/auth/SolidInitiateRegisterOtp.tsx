@@ -13,13 +13,24 @@ import { useAuthSettings } from "./AuthSettingsContext";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
+    const { solidSettingsData } = useAuthSettings();
+    const settingValidationType = solidSettingsData?.data?.passwordlessRegistrationValidateWhat === "mobile" ? "mobile" : "email";
+    const queryType = searchParams.get('type');
+    const validationType: "email" | "mobile" = queryType === "mobile" || queryType === "email"
+        ? (queryType as "email" | "mobile")
+        : settingValidationType;
     const tempEmail = searchParams.get('email');
     const email = tempEmail ? decodeURIComponent(tempEmail) : '';
-    const RESEND_OTP_KEY = `resendOtpRegister_${email}`;
+    const tempMobile = searchParams.get('mobile');
+    const mobile = tempMobile ? decodeURIComponent(tempMobile) : '';
+    const tempIdentifier = searchParams.get('identifier');
+    const identifier = tempIdentifier
+        ? decodeURIComponent(tempIdentifier)
+        : (validationType === "mobile" ? mobile : email);
+    const RESEND_OTP_KEY = `resendOtpRegister_${identifier}`;
     const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const username = searchParams.get('username') || '';
-    const { solidSettingsData } = useAuthSettings();
 
 
     const [initiateResendOTP] = useInitateRegisterMutation();
@@ -48,7 +59,7 @@ const SolidInitiateRegisterOtp = () => {
             setTimeLeft(0);
             setResendEnabled(true);
         }
-    }, [email]);
+    }, [identifier]);
 
     useEffect(() => {
         if (resendEnabled || timeLeft <= 0) return;
@@ -78,11 +89,15 @@ const SolidInitiateRegisterOtp = () => {
 
     const handleResendOtp = async () => {
         try {
-            const payload = {
+            const payload: Record<string, any> = {
                 username: username,
-                email: email,
-                validationSources: ["email"]
+                validationSources: [validationType],
             };
+            if (validationType === "mobile") {
+                payload.mobile = identifier;
+            } else {
+                payload.email = identifier;
+            }
 
             const response = await initiateResendOTP(payload).unwrap();
 
@@ -104,8 +119,8 @@ const SolidInitiateRegisterOtp = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 <h2 className="solid-auth-title">OTP verification</h2>
                 <p className="solid-auth-helper">
-                    Please enter the OTP sent to your email to complete verification{" "}
-                    <span className="solid-auth-helper-emphasis">{email}</span>
+                    Please enter the OTP sent to your {validationType === "mobile" ? "mobile" : "email"} to complete verification{" "}
+                    <span className="solid-auth-helper-emphasis">{identifier}</span>
                 </p>
                 <>
                     <Formik
@@ -116,15 +131,15 @@ const SolidInitiateRegisterOtp = () => {
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
                                 const payload = {
-                                    type: "email",
-                                    identifier: email,
+                                    type: validationType,
+                                    identifier,
                                     otp: values.otp
                                 };
 
                                 const response = await initiateOtpRegister(payload).unwrap(); // Call mutation trigger
 
                                 if (response?.statusCode === 200) {
-                                    localStorage.removeItem(`resendOtpRegister_${email}`);
+                                    localStorage.removeItem(`resendOtpRegister_${identifier}`);
                                     dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESSFULLY, detail: "Login" }));
                                     router.push(`/auth/login`);
                                 } else {

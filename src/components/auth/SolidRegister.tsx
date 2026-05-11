@@ -259,28 +259,45 @@ const SolidRegister = () => {
     }
 
     const PasswordLessSignup = () => {
+        const registrationValidationSource: "email" | "mobile" =
+            solidSettingsData?.data?.passwordlessRegistrationValidateWhat === "mobile" ? "mobile" : "email";
+        const isMobile = registrationValidationSource === "mobile";
+
         return (
             <Formik
                 initialValues={{
                     username: "",
                     email: "",
+                    mobile: "",
                 }}
                 validationSchema={Yup.object({
                     username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('"User Name')),
-                    email: Yup.string()
-                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
-                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+                    email: isMobile
+                        ? Yup.string().notRequired()
+                        : Yup.string()
+                            .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                            .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+                    mobile: isMobile
+                        ? Yup.string()
+                            .matches(/^[+0-9][0-9\s-]{6,}$/, ERROR_MESSAGES.FIELD_INVALID('mobile number'))
+                            .required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile'))
+                        : Yup.string().notRequired(),
                 })}
                 onSubmit={async (values, { setSubmitting }) => {
                     try {
-                        const RESEND_OTP_KEY = `resendOtpRegister_${values.email}`;
+                        const identifier = isMobile ? values.mobile : values.email;
+                        const RESEND_OTP_KEY = `resendOtpRegister_${identifier}`;
                         const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
                         const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
-                        const payload = {
+                        const payload: Record<string, any> = {
                             username: values.username,
-                            email: values.email,
-                            validationSources: ["email"]
+                            validationSources: [registrationValidationSource],
                         };
+                        if (isMobile) {
+                            payload.mobile = values.mobile;
+                        } else {
+                            payload.email = values.email;
+                        }
                         const storedTimeStr = localStorage.getItem(RESEND_OTP_KEY);
                         const now = Date.now();
                         if (storedTimeStr) {
@@ -299,9 +316,18 @@ const SolidRegister = () => {
 
                         if (response?.statusCode === 200) {
                             dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_SEND, detail: response?.data?.message }));
-                            const email = values.email;
-                            localStorage.setItem(`resendOtpRegister_${email}`, Date.now().toString());
-                            router.push(`/auth/initiate-register?email=${email}&username=${values.username}`);
+                            localStorage.setItem(`resendOtpRegister_${identifier}`, Date.now().toString());
+                            const params = new URLSearchParams({
+                                username: values.username,
+                                type: registrationValidationSource,
+                                identifier,
+                            });
+                            if (isMobile) {
+                                params.set("mobile", values.mobile);
+                            } else {
+                                params.set("email", values.email);
+                            }
+                            router.push(`/auth/initiate-register?${params.toString()}`);
                         } else {
                             dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                         }
@@ -315,7 +341,7 @@ const SolidRegister = () => {
                 {(formik) => (
                     <Form>
                         <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Username</label>
+                            <label htmlFor="username" className="solid-auth-input-label">Username</label>
                             <SolidInput
                                 id="username"
                                 name="username"
@@ -331,23 +357,43 @@ const SolidRegister = () => {
                                 text={formik?.errors?.username?.toString()}
                             />}
                         </div>
-                        <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Email</label>
-                            <SolidInput
-                                id="email"
-                                name="email"
-                                placeholder="Yourgmail@123.com"
-                                onChange={formik.handleChange}
-                                value={formik.values.email}
-                                aria-invalid={!!formik.errors.email}
-                                autoComplete="off"
-                            />
-                            {isFormFieldValid(formik, "email") && <SolidMessage
-                                className="text-red-500 text-sm"
-                                severity="error"
-                                text={formik?.errors?.email?.toString()}
-                            />}
-                        </div>
+                        {isMobile ? (
+                            <div className="flex flex-column gap-2 mt-3">
+                                <label htmlFor="mobile" className="solid-auth-input-label">Mobile</label>
+                                <SolidInput
+                                    id="mobile"
+                                    name="mobile"
+                                    placeholder="+1 555 123 4567"
+                                    onChange={formik.handleChange}
+                                    value={formik.values.mobile}
+                                    aria-invalid={!!formik.errors.mobile}
+                                    autoComplete="off"
+                                />
+                                {isFormFieldValid(formik, "mobile") && <SolidMessage
+                                    className="text-red-500 text-sm"
+                                    severity="error"
+                                    text={formik?.errors?.mobile?.toString()}
+                                />}
+                            </div>
+                        ) : (
+                            <div className="flex flex-column gap-2 mt-3">
+                                <label htmlFor="email" className="solid-auth-input-label">Email</label>
+                                <SolidInput
+                                    id="email"
+                                    name="email"
+                                    placeholder="Yourgmail@123.com"
+                                    onChange={formik.handleChange}
+                                    value={formik.values.email}
+                                    aria-invalid={!!formik.errors.email}
+                                    autoComplete="off"
+                                />
+                                {isFormFieldValid(formik, "email") && <SolidMessage
+                                    className="text-red-500 text-sm"
+                                    severity="error"
+                                    text={formik?.errors?.email?.toString()}
+                                />}
+                            </div>
+                        )}
                         <div className="mt-4">
                             <SolidButton className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} type="submit" />
                         </div>
