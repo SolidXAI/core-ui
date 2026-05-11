@@ -5,19 +5,23 @@ import { useMemo, useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidChatterCustomMessage } from './SolidChatterCustomMessage'
 import { SolidChatterAuditMessage } from './SolidChatterAuditMessage'
-import { GitBranch, MessageSquare } from 'lucide-react'
-import { SolidLightbox, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger, SolidIcon, type SolidIconName } from '../../shad-cn-ui'
+import { Check, GitBranch, MessageSquare } from 'lucide-react'
+import { SolidButton, SolidLightbox, SolidTag, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger, SolidIcon, type SolidIconName } from '../../shad-cn-ui'
 import type { SolidLightboxSlide } from '../../shad-cn-ui/SolidLightbox'
+import { usePatchChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
 
 interface Props {
+    messageId?: number | string,
     user: string,
     messageType?: string,
     message?: any,
     time?: string,
     auditRecord?: any,
     messageSubType?: string,
+    status?: string,
     modelDisplayName?: string,
     modelUserKey?: string,
+    onRefresh?: () => void,
     media?: {
         messageAttachments?: Array<{
             id: number;
@@ -50,9 +54,11 @@ const getFileIcon = (mimeType: string): SolidIconName => {
 };
 
 export const SolidChatterMessageBox = (props: Props) => {
-    const { user, messageType, message, time, auditRecord, media, messageSubType, modelDisplayName, modelUserKey } = props;
+    const { messageId, user, messageType, message, time, auditRecord, media, messageSubType, status, modelDisplayName, modelUserKey, onRefresh } = props;
     const [lightboxSlides, setLightboxSlides] = useState<SolidLightboxSlide[]>([]);
     const [openLightbox, setOpenLightbox] = useState(false);
+    const [taskStatus, setTaskStatus] = useState<string | undefined>(status);
+    const [patchChatterMessage, { isLoading: isUpdatingTaskStatus }] = usePatchChatterMessageMutation();
 
     const avatarStyle = useMemo(() => {
         const bg = stringToColor(user)
@@ -107,6 +113,20 @@ export const SolidChatterMessageBox = (props: Props) => {
         : "Internal note";
 
     const TypeIcon = messageType === 'audit' ? GitBranch : MessageSquare;
+
+    const isTaskMessage = messageSubType === 'task';
+    const isTaskCompleted = (taskStatus ?? '').toLowerCase() === 'completed';
+
+    const handleMarkTaskDone = async () => {
+        if (!messageId || isUpdatingTaskStatus) return;
+        try {
+            await patchChatterMessage({ id: messageId, data: { status: 'completed' } }).unwrap();
+            setTaskStatus('completed');
+            onRefresh?.();
+        } catch (e) {
+            // no-op (parent/global error handling if any)
+        }
+    };
 
     return (
         <div className={styles.solidChatterMessageBox}>
@@ -179,6 +199,28 @@ export const SolidChatterMessageBox = (props: Props) => {
                                         </div>
                                     );
                                 })}
+                            </div>
+                        )}
+                        {isTaskMessage && (
+                            <div className='flex align-items-center justify-content-end'>
+                                {isTaskCompleted ? (
+                                    <SolidTag tone="success" className="inline-flex align-items-center gap-1 text-xs px-2 py-1">
+                                        <Check size={12} aria-hidden />
+                                        <span className="font-medium">Done</span>
+                                    </SolidTag>
+                                ) : (
+                                    <SolidButton
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        className="text-xs px-2 py-1"
+                                        leftIcon={<Check size={12} />}
+                                        loading={isUpdatingTaskStatus}
+                                        onClick={handleMarkTaskDone}
+                                    >
+                                        <span className="font-semibold">Mark as done</span>
+                                    </SolidButton>
+                                )}
                             </div>
                         )}
                     </div>

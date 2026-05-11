@@ -18,8 +18,17 @@ export const solidChatterMessageApi = createApi({
                     body: data
                 }
             }
+        }),
+        patchChatterMessage: builder.mutation({
+            query: ({ id, data }) => {
+                return {
+                    url: `/chatter-message/${id}/complete`,
+                    method: 'PATCH',
+                    body: data
+                }
+            }
         })
     })
 });
 
-export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, useCreateChatterMessageMutation } = solidChatterMessageApi;
+export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, useCreateChatterMessageMutation, usePatchChatterMessageMutation } = solidChatterMessageApi;
