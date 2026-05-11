@@ -360,13 +360,6 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         }
     };
 
-    const isAnyOAuthEnabled = !!(
-        solidSettingsData?.data?.iamGoogleOAuthEnabled ||
-        solidSettingsData?.data?.iamFacebookOAuthEnabled ||
-        solidSettingsData?.data?.iamAppleOAuthEnabled ||
-        solidSettingsData?.data?.iamMicrosoftOAuthEnabled
-    );
-
     return (
         <div className="">
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
@@ -374,19 +367,14 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 <p className="solid-auth-helper">Enter your credentials below to login to your account</p>
 
                 <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
-                {isAnyOAuthEnabled && (
+                {solidSettingsData?.data?.iamGoogleOAuthEnabled && (
                     <>
                         <div className="solid-auth-divider flex align-items-center gap-2 my-4">
                             <SolidDivider className="flex-1" />
                             <span className="text-sm text-500">Or continue with</span>
                             <SolidDivider className="flex-1" />
                         </div>
-                        <SocialMediaLogin
-                            googleEnabled={solidSettingsData?.data?.iamGoogleOAuthEnabled}
-                            facebookEnabled={solidSettingsData?.data?.iamFacebookOAuthEnabled}
-                            appleEnabled={solidSettingsData?.data?.iamAppleOAuthEnabled}
-                            microsoftEnabled={solidSettingsData?.data?.iamMicrosoftOAuthEnabled}
-                        />
+                        <SocialMediaLogin />
                     </>
                 )}
             </div>
