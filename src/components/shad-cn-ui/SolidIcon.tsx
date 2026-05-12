@@ -161,7 +161,7 @@ function isSolidIconName(name: string): name is SolidIconName {
   return Object.prototype.hasOwnProperty.call(ICON_MAP, name);
 }
 
-export interface SolidIconProps extends React.ComponentPropsWithoutRef<"svg"> {
+export interface SolidIconProps extends React.SVGAttributes<SVGSVGElement> {
   name: SolidIconName;
   size?: number | string;
   spin?: boolean;
@@ -169,20 +169,17 @@ export interface SolidIconProps extends React.ComponentPropsWithoutRef<"svg"> {
 
 export const ICON_KEYS = Object.keys(ICON_MAP) as SolidIconName[];
 
-export const SolidIcon = React.forwardRef<SVGSVGElement, SolidIconProps>(
-  ({ name, size = "1em", spin, className, ...rest }, ref) => {
-    const IconComponent = ICON_MAP[name] ?? CircleHelp;
+export function SolidIcon({ name, size = "1em", spin, className, ...rest }: SolidIconProps) {
+  const IconComponent = ICON_MAP[name] ?? CircleHelp;
 
-    return (
-      <IconComponent
-        ref={ref}
-        size={size}
-        className={cx("solid-icon", spin && "solid-icon--spin", className)}
-        {...rest}
-      />
-    );
-  }
-);
+  return (
+    <IconComponent
+      size={size}
+      className={cx("solid-icon", spin && "solid-icon--spin", className)}
+      {...rest}
+    />
+  );
+}
 
 export type SolidIconMeta = {
   name: SolidIconName;

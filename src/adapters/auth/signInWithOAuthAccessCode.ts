@@ -15,10 +15,11 @@ type SignInResponse = {
 type SignInWithOAuthAccessCodeOptions = {
   accessCode: string;
   userAgent?: string;
+  provider?: "google" | "facebook" | "microsoft";
 };
 
 export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCodeOptions): Promise<SignInResponse> {
-  const { accessCode, userAgent } = options;
+  const { accessCode, userAgent, provider = "google" } = options;
   const apiUrl = env("API_URL");
 
   if (!apiUrl) {
@@ -35,7 +36,7 @@ export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCo
     }
 
     const response = await solidGet(
-      `${apiUrl}/api/iam/google/authenticate?accessCode=${encodeURIComponent(accessCode)}`,
+      `${apiUrl}/api/iam/${provider}/authenticate?accessCode=${encodeURIComponent(accessCode)}`,
       {
         headers,
       }

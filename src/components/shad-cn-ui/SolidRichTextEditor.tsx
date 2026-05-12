@@ -55,6 +55,7 @@ export function SolidRichTextEditor({
   formats = defaultFormats,
   style,
 }: SolidRichTextEditorProps) {
+  const parentRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const quillRef = useRef<Quill | null>(null);
   const lastHtmlRef = useRef<string>("");
@@ -98,6 +99,12 @@ export function SolidRichTextEditor({
     return () => {
       quill.off("text-change", handleChange);
       quillRef.current = null;
+      // Quill creates the toolbar as a sibling to the editor container.
+      // We need to remove it specifically to avoid duplication on remount.
+      const toolbar = parentRef.current?.querySelector(".ql-toolbar");
+      if (toolbar) {
+        toolbar.remove();
+      }
     };
   }, []);
 
@@ -139,7 +146,7 @@ export function SolidRichTextEditor({
   }, [placeholder]);
 
   return (
-    <div id={id} className={className} style={style}>
+    <div id={id} className={className} style={style} ref={parentRef}>
       <div ref={containerRef} />
     </div>
   );

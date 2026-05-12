@@ -92,7 +92,7 @@ const extensionRegistry: ExtensionRegistry = {
     functions: {},
 };
 
-export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, type: ExtensionComponentType, aliases: string[] = [], fieldType: string = '') => {
+export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, type: ExtensionComponentType = ExtensionComponentTypes.formFieldViewWidget, aliases: string[] = [], fieldType: string = '') => {
     extensionRegistry.components[name] = { 'component': component, 'type': type, 'fieldType': fieldType };
     for (let i = 0; i < aliases.length; i++) {
         const alias = aliases[i];
@@ -100,7 +100,7 @@ export const registerExtensionComponent = (name: string, component: React.Compon
     }
 };
 
-export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any, type: ExtensionFunctionType) => {
+export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any, type: ExtensionFunctionType = ExtensionFunctionTypes.onFieldChange) => {
     extensionRegistry.functions[name] = { fn, type };
 };
 

@@ -118,14 +118,23 @@ export class SolidSelectionDynamicField implements ISolidField {
 
         const isRequired = fieldLayoutInfo.attrs?.required ?? fieldMetadata.required;
     
-        if (!isRequired) {
-            return Yup.mixed();
-        }
-
         if (isMultiSelect) {
+            if (!isRequired) {
+                return Yup.array()
+                    .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }))
+                    .nullable();
+            }
+
             return Yup.array()
                 .min(1, ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
                 .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }));
+        }
+
+        if (!isRequired) {
+            return Yup.object().shape({
+                label: Yup.string(),
+                value: Yup.string(),
+            }).nullable();
         }
 
         return Yup.object().shape({
