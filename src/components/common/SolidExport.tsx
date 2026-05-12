@@ -315,11 +315,12 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                 Save Template
               </SolidButton>
               <SolidButton
-                variant="ghost"
+                variant="outline"
                 size="small"
                 leftIcon={<Trash2 size={14} />}
                 onClick={handleDeleteTemplate}
                 disabled={!selectedTemplate || isDeletingTemplate}
+                className="solid-export-delete-btn"
               >
                 Delete
               </SolidButton>

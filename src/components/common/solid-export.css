@@ -62,6 +62,23 @@
   opacity: 0.5;
 }
 
+.solid-export-toolbar-actions .solid-export-delete-btn {
+  --solid-btn-border: color-mix(in srgb, #dc2626 55%, var(--border));
+  color: #dc2626;
+  border: 1px solid color-mix(in srgb, #dc2626 55%, var(--border));
+}
+
+.solid-export-toolbar-actions .solid-export-delete-btn:not(:disabled):hover {
+  --solid-btn-border: #dc2626;
+  background: color-mix(in srgb, #dc2626 10%, var(--card));
+  border-color: #dc2626;
+  color: #b91c1c;
+}
+
+.solid-export-toolbar-actions .solid-export-delete-btn:disabled {
+  opacity: 0.5;
+}
+
 .solid-export-toolbar-actions .solid-btn--primary {
   box-shadow: 0 8px 16px color-mix(in srgb, var(--primary) 16%, transparent);
 }
@@ -75,6 +92,15 @@
 
 .solid-export-field--template {
   min-width: 240px;
+}
+
+.solid-export-field .solid-select {
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.solid-export-field .solid-select:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
 }
 
 .solid-export-field-label {
