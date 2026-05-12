@@ -41,7 +41,8 @@ export const SolidFormStepper = (props: Props) => {
             if (!containerRef.current || !solidFormViewWorkflowData || solidFormViewWorkflowData.length === 0) return;
 
             const containerWidth = containerRef.current.offsetWidth;
-            const overflowButtonWidth = 50;
+            const isMobile = window.innerWidth <= 767;
+            const overflowButtonWidth = isMobile ? 38 : 50;
             const arrowWidth = 30; // Width for arrow between buttons
             const spacing = 0; // No gap needed as arrows connect buttons
 

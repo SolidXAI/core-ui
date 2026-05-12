@@ -542,6 +542,23 @@
         gap: 5px !important;
     }
 
+    .overflow-button {
+        min-width: 2rem;
+        padding: 0.45rem 0.35rem;
+    }
+
+    .overflow-button .solid-icon {
+        font-size: 0.82rem;
+    }
+
+    .overflow-right-button {
+        min-width: 2rem;
+        width: 2rem;
+        padding-left: 0.3rem;
+        padding-right: 0.3rem;
+        flex-shrink: 0;
+    }
+
     .solid-mobile-text-wrapper {
         max-width: clamp(180px, 60vw, 600px);
         white-space: nowrap;
