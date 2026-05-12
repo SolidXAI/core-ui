@@ -5103,11 +5103,14 @@ flex-shrink: 0; */
 .solid-kanban-board-wrapper {
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   height: calc(100vh - 120px) !important;
   min-height: 0;
   min-width: 0;
   flex: 1 1 auto;
+  -webkit-overflow-scrolling: touch;
+  width: calc(100vw - 300px);
 }
 
 .solid-kanban-board-scroll-context {
@@ -5115,6 +5118,7 @@ flex-shrink: 0; */
   overflow: visible;
   flex: 0 0 auto;
   width: max-content;
+  max-width: none;
   min-width: 100%;
   min-height: 100%;
   height: auto;
