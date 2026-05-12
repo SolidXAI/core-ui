@@ -150,7 +150,7 @@ const SolidInitialLoginOtp = () => {
                                     });
                                 } else {
                                     localStorage.removeItem(`resendOtpLogin_${identifier}`);
-                                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
+                                    // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
                                     const session = loadSession();
                                     const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
                                     const isDev = env("VITE_SOLIDX_ENV") === "dev";

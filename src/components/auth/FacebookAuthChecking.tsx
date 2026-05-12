@@ -36,7 +36,7 @@ export const FacebookAuthChecking = () => {
                     dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
-                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
+                    // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
                     const session = loadSession();
                     const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
                     const isDev = env("VITE_SOLIDX_ENV") === "dev";
