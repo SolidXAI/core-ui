@@ -6268,4 +6268,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-list-toolbar-row{
   padding: 5px 15px 0 10px;
+  padding-left: 2.4rem;
+
 }

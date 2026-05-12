@@ -14,7 +14,7 @@ import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 import { SolidButton, SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui";
 import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting, headerRequestStatusLabel }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting, headerRequestStatusLabel, showMobileOpenChatter, onMobileOpenChatter }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -366,6 +366,19 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                     <FormActionDropdown />
                                 }
+                                {
+                                    showMobileOpenChatter &&
+                                    <div className="lg:hidden">
+                                        <SolidButton
+                                            type="button"
+                                            icon="si si-comments"
+                                            size="sm"
+                                            className="solid-icon-button"
+                                            onClick={onMobileOpenChatter}
+                                            aria-label="Open chatter"
+                                        />
+                                    </div>
+                                }
                             </div>
                         </>
                     ) : (
@@ -528,6 +541,19 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
 
                                     <FormActionDropdown />
+                                }
+                                {
+                                    showMobileOpenChatter &&
+                                    <div className="lg:hidden">
+                                        <SolidButton
+                                            type="button"
+                                            icon="si si-comments"
+                                            size="sm"
+                                            className="solid-icon-button"
+                                            onClick={onMobileOpenChatter}
+                                            aria-label="Open chatter"
+                                        />
+                                    </div>
                                 }
                             </div>
                         </>

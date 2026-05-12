@@ -474,6 +474,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [chatterLocaleWidth, setChatterLocaleWidth] = useState(360);
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
+    const solidFormWrapperRef = useRef<HTMLDivElement | null>(null);
 
     const tabFieldsRef = useRef<Array<{ tabKey: string; fields: string[] }>>([]);
     const [requestedTab, setRequestedTab] = useState<string | null>(null);
@@ -525,19 +527,34 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }
 
     const op = useRef(null);
+    const MIN_CHATTER_WIDTH = 320;
+    const MIN_FORM_SECTION_WIDTH = 420;
+
+    const getMaxChatterWidth = () => {
+        const wrapperWidth = solidFormWrapperRef.current?.getBoundingClientRect().width ?? window.innerWidth;
+        return Math.max(MIN_CHATTER_WIDTH, wrapperWidth - MIN_FORM_SECTION_WIDTH);
+    };
+
+    const clampChatterWidth = (width: number) => {
+        const maxWidth = getMaxChatterWidth();
+        return Math.max(MIN_CHATTER_WIDTH, Math.min(width, maxWidth));
+    };
+
     useEffect(() => {
         const stored = localStorage.getItem('chatter_locale_width');
         if (stored) {
             const parsed = parseInt(stored, 10);
-            const clampedWidth = Math.max(320, Math.min(parsed, 420));
+            const clampedWidth = clampChatterWidth(parsed);
             setChatterLocaleWidth(clampedWidth);
         }
     }, []);
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isResizingChatterLocale) return;
-            const newWidth = window.innerWidth - e.clientX;
-            const clampedWidth = Math.max(320, Math.min(newWidth, 420));
+            const wrapperRect = solidFormWrapperRef.current?.getBoundingClientRect();
+            const rightEdge = wrapperRect?.right ?? window.innerWidth;
+            const newWidth = rightEdge - e.clientX;
+            const clampedWidth = clampChatterWidth(newWidth);
             setChatterLocaleWidth(clampedWidth);
             localStorage.setItem('chatter_locale_width', clampedWidth.toString());
         };
@@ -556,6 +573,28 @@ const SolidFormView = (params: SolidFormViewProps) => {
             window.removeEventListener('mouseup', handleMouseUp);
         };
     }, [isResizingChatterLocale]);
+
+    useEffect(() => {
+        const updateViewportFlag = () => setIsMobileViewport(window.innerWidth <= 1199);
+        updateViewportFlag();
+        window.addEventListener('resize', updateViewportFlag);
+        return () => window.removeEventListener('resize', updateViewportFlag);
+    }, []);
+
+    useEffect(() => {
+        const handleWindowResize = () => {
+            setChatterLocaleWidth((currentWidth) => {
+                const clamped = clampChatterWidth(currentWidth);
+                if (clamped !== currentWidth) {
+                    localStorage.setItem('chatter_locale_width', clamped.toString());
+                }
+                return clamped;
+            });
+        };
+
+        window.addEventListener('resize', handleWindowResize);
+        return () => window.removeEventListener('resize', handleWindowResize);
+    }, []);
 
 
     useEffect(() => {
@@ -1248,7 +1287,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         });
 
         return (
-            <div className="solid-form-wrapper">
+            <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
                 <div className="solid-form-section">
                     <div className="page-header solid-list-toolbar flex-column lg:flex-row">
                         <div className="flex justify-content-between w-full solid-form-toolbar-row">
@@ -1685,7 +1724,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
 
         return (
-            <div className="solid-form-wrapper">
+            <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
                 <div className="solid-form-section">
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <FormikSubmitWatcher
@@ -1719,6 +1758,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
                             headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
+                            showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
+                            onMobileOpenChatter={() => setShowChatter(true)}
                         />
                         <div className={`px-4 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}

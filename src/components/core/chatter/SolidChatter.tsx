@@ -35,8 +35,16 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         startDate: null,
         endDate: null
     });
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
 
     const [getchatterMessage, { isLoading: isChatterLoading }] = useLazyGetchatterMessageQuery();
+
+    useEffect(() => {
+        const updateViewport = () => setIsMobileViewport(window.innerWidth <= 1199);
+        updateViewport();
+        window.addEventListener('resize', updateViewport);
+        return () => window.removeEventListener('resize', updateViewport);
+    }, []);
 
     useEffect(() => {
         if (refreshChatterMessage) {
@@ -266,11 +274,17 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
             />
             <div className='solid-chatter-body' style={{
                 height:
-                    visibleBox === 'email-message'
-                        ? 'calc(100vh - 196px)'
-                        : visibleBox === 'log'
-                            ? 'calc(100vh - 350px)'
-                            : 'calc(100vh - 170px)',
+                    isMobileViewport
+                        ? (visibleBox === 'email-message'
+                            ? 'calc(100dvh - 248px)'
+                            : visibleBox === 'log'
+                                ? 'calc(100dvh - 210px)'
+                                : 'calc(100dvh - 60px)')
+                        : (visibleBox === 'email-message'
+                            ? 'calc(100vh - 196px)'
+                            : visibleBox === 'log'
+                                ? 'calc(100vh - 292px)'
+                                : 'calc(100vh - 127px)'),
             }}>
                 {isChatterLoading
                     ? renderLoadingState()

@@ -76,14 +76,14 @@
 
     .chatter-section.open {
         position: absolute;
-        right: 12px;
+        right: 0;
         top: 0;
-        width: 320px !important;
+        width: 100% !important;
         height: 100%;
         z-index: 99;
         background-color: transparent;
         border-left: none;
-        max-width: calc(100% - 100px);
+        max-width: 100%;
     }
 
 
@@ -381,7 +381,8 @@
     }
 
     .chatter-section.collapsed {
-        width: 32px !important;
+        width: 0 !important;
+        display: none !important;
     }
 
 
