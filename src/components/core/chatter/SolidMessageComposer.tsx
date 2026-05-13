@@ -51,7 +51,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);
             formData.append('userId', user?.id || 1);
-            formData.append('status', 'pending');
+
             if (modelUserKey) formData.append('modelUserKey', modelUserKey);
             selectedFiles.forEach((file, index) => {
                 formData.append(`messageAttachments`, file);
