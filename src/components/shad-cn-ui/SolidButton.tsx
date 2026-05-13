@@ -27,7 +27,7 @@ function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-export function SolidButton({
+export const SolidButton = React.forwardRef<HTMLButtonElement, SolidButtonProps>(function SolidButton({
   variant,
   size = "md",
   fullWidth,
@@ -47,7 +47,7 @@ export function SolidButton({
   rounded,
   tooltip,
   ...props
-}: SolidButtonProps) {
+}, ref) {
   const isDisabled = disabled || loading;
   const resolvedVariant: SolidButtonVariant =
     variant
@@ -67,8 +67,28 @@ export function SolidButton({
   const resolvedChildren = label ?? children;
   const hasOnlyIcon = !loading && !resolvedChildren && !label && (leftIcon || rightIcon || iconNode);
 
+  // These are app-level config props sometimes spread into SolidButton.
+  // We intentionally drop them to avoid leaking invalid attributes to <button>.
+  const {
+    openInPopup,
+    popupWidth,
+    actionInContextMenu,
+    customComponentIsSystem,
+    closable,
+    visible,
+    ...domProps
+  } = props as SolidButtonProps & Record<string, unknown>;
+
+  void openInPopup;
+  void popupWidth;
+  void actionInContextMenu;
+  void customComponentIsSystem;
+  void closable;
+  void visible;
+
   return (
     <button
+      ref={ref}
       type={type}
       className={cx(
         "solid-btn",
@@ -81,7 +101,7 @@ export function SolidButton({
       )}
       disabled={isDisabled}
       title={tooltip}
-      {...props}
+      {...domProps}
     >
       {loading && (
         <span className="solid-btn-spinner" aria-hidden="true">
@@ -97,4 +117,4 @@ export function SolidButton({
       ) : null}
     </button>
   );
-}
+});
