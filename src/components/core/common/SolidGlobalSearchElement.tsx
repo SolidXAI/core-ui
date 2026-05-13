@@ -1894,7 +1894,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 )}
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel">
+                    <div ref={overlayRef} className="absolute w-full shadow-2 solid-search-overlay-pannel">
                         <div className="solid-search-overlay-scroll">
                             {inputValue ? (
                                 <>

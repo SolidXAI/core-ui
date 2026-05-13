@@ -211,6 +211,15 @@ a {
   border-left: 1px solid rgba(15, 23, 42, 0.1);
 }
 
+.react-datepicker-popper {
+  z-index: 10000 !important;
+}
+
+#solid-datepicker-portal .react-datepicker-popper,
+.react-datepicker__portal {
+  z-index: 10000;
+}
+
 /* Avatar */
 .avatar {
   display: inline-block;
@@ -3871,6 +3880,7 @@ li.header-li-px {
 
 .solid-search-overlay-pannel {
   top: calc(100% + 4px) !important;
+  z-index: 20;
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
   border-radius: 10px;

@@ -72,6 +72,8 @@ export function SolidDatePicker({
 
   return (
     <ReactDatePicker
+      popperProps={{ strategy: "fixed" }}
+      popperPlacement="bottom-start"
       {...props}
       selected={selected}
       showTimeSelect={resolvedShowTime}
