@@ -53,7 +53,7 @@ export class SolidShortTextField implements ISolidField {
         let existingValue = this.fieldContext.data[fieldName];
 
         if (editWidget === "PseudoRelationManyToOneFormWidget" && this.fieldContext.data[fieldName]) {
-            existingValue =  { solidManyToOneLabel: this.fieldContext.data[fieldName], solidManyToOneValue: this.fieldContext.data[fieldName] };
+            existingValue = { solidManyToOneLabel: this.fieldContext.data[fieldName], solidManyToOneValue: this.fieldContext.data[fieldName] };
 
         }
 
@@ -213,6 +213,8 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const autoComplete = fieldLayoutInfo?.attrs?.autoComplete || 'on';
+
     return (
         <div className={styles.fieldWrapper}>
             {showFieldLabel != false &&
@@ -233,6 +235,7 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
                 onBlur={(e: React.FocusEvent<HTMLInputElement>) => fieldContext.onBlur(e, 'onFieldBlur')}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                 className={styles.fieldInput}
+                autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
@@ -302,6 +305,8 @@ export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFor
 
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
     const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+    const autoComplete = fieldLayoutInfo?.attrs?.autoComplete || 'on';
+
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
@@ -325,6 +330,7 @@ export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                 className="w-full"
+                autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>

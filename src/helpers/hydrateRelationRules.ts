@@ -1,6 +1,6 @@
 import { FilterRule, FilterRuleType } from "../components/core/common/FilterComponent";
 import { createSolidEntityApi } from "../redux/api/solidEntityApi";
-import { kebabCase } from "change-case";
+import { kebabCase } from "lodash";
 import { getSession } from "../adapters/auth/index";
 import { env } from "../adapters/env";
 import { solidGet } from "../http/solidHttp";

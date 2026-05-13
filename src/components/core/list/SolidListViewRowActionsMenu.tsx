@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Ellipsis, SquarePen, Trash2 } from "lucide-react";
+import { EllipsisVertical, SquarePen, Trash2 } from "lucide-react";
 import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui/SolidPopover";
 import { SolidListViewRowActionMenuItem } from "./SolidListViewRowActionMenuItem";
 
@@ -49,7 +49,7 @@ export function SolidListViewRowActionsMenu({
           }}
           aria-label="Open row actions"
         >
-          <Ellipsis size={16} />
+          <EllipsisVertical size={16} />
         </button>
       </SolidPopoverTrigger>
       <SolidPopoverContent

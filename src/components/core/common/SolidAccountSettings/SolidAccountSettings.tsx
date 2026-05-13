@@ -4,6 +4,7 @@ import { SolidChangePassword } from "./SolidChangePassword";
 import { SolidVersionInfo } from "./SolidVersionInfo";
 import styles from "./SolidAccountSettings.module.css";
 import { useLazyGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
+import { toLegacySettingsShape } from "../../../../helpers/settingsPayload";
 
 export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfileSettingsDialog }: any) => {
   const [settingKey, setSettingKey] = useState("personal_info");
@@ -20,11 +21,12 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
   ];
 
   const renderSettingComponent = useMemo(() => {
+    const legacySettings = toLegacySettingsShape(solidSettingsData);
     switch (settingKey) {
       case "personal_info":
         return <SolidPersonalInfo />;
       case "change_password":
-        return <SolidChangePassword solidSettingsData={solidSettingsData} />;
+        return <SolidChangePassword solidSettingsData={legacySettings} />;
       case "about":
         return <SolidVersionInfo />;
       default:

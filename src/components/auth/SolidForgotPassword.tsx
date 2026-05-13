@@ -1,20 +1,15 @@
 import { useInitiateChangePasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
 import { useRouter } from "../../hooks/useRouter";
-import { useEffect } from "react";
 import * as Yup from "yup";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { showToast } from "../../redux/features/toastSlice";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidInput, SolidMessage } from "../shad-cn-ui";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
-
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    const { solidSettingsData } = useAuthSettings();
 
     const dispatch = useDispatch();
     const router = useRouter();
@@ -74,6 +69,7 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
                             value={formik.values.email}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
+                            autoComplete="off"
                         />
                         {isFormFieldValid(formik, "email") && (
                             <SolidMessage

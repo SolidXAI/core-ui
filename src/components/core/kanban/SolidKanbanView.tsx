@@ -25,24 +25,90 @@ import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { showToast } from "../../../redux/features/toastSlice";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
+import { solidGet } from "../../../http/solidHttp";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
   SolidButton,
+  SolidConfirmDialog,
   SolidDialog,
   SolidDialogBody,
   SolidDialogClose,
-  SolidDialogFooter,
   SolidDialogHeader,
   SolidDialogSeparator,
   SolidDialogTitle,
   SolidIcon,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
+import { kebabCase } from "lodash";
 
 type SolidKanbanViewParams = {
   moduleName: string;
   modelName: string;
   embeded: boolean;
+};
+
+type KanbanSwimlaneDefinition = {
+  value: string;
+  label: string;
+};
+
+const getKanbanSortParam = (sortValue?: string) => {
+  if (!sortValue) {
+    return "id:asc";
+  }
+
+  return sortValue.includes(":") ? sortValue : `${sortValue}:asc`;
+};
+
+const createEmptyKanbanGroup = (
+  definition: KanbanSwimlaneDefinition,
+  recordsInSwimlane: number
+) => ({
+  groupName: definition.value,
+  groupLabel: definition.label,
+  groupData: {
+    records: [],
+    meta: {
+      totalRecords: 0,
+      perPage: recordsInSwimlane,
+      currentPage: 1,
+      prevPage: null,
+      nextPage: null,
+    },
+  },
+});
+
+const mergeKanbanGroupsWithDefinitions = (
+  groupRecords: any[],
+  swimlaneDefinitions: KanbanSwimlaneDefinition[],
+  recordsInSwimlane: number
+) => {
+  if (!swimlaneDefinitions.length) {
+    return groupRecords;
+  }
+
+  const groupMap = new Map(
+    (groupRecords || []).map((group: any) => [
+      String(group?.groupName),
+      {
+        ...group,
+        groupName: String(group?.groupName ?? ""),
+      },
+    ])
+  );
+
+  return swimlaneDefinitions.map((definition) => {
+    const existingGroup = groupMap.get(definition.value);
+    if (existingGroup) {
+      return {
+        ...existingGroup,
+        groupName: definition.value,
+        groupLabel: definition.label,
+      };
+    }
+
+    return createEmptyKanbanGroup(definition, recordsInSwimlane);
+  });
 };
 
 
@@ -74,6 +140,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
+  const [swimlaneDefinitions, setSwimlaneDefinitions] = useState<KanbanSwimlaneDefinition[]>([]);
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
       .map((item: any) => {
@@ -161,10 +228,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   );
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
 
-  const {
-    data: solidKanbanViewMetaData } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
-
-
+  const { data: solidKanbanViewMetaData } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
 
   const initialFilterMethod = () => {
 
@@ -278,6 +342,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [maxSwimLanesCount, setMaxSwimLanesCount] = useState<number>(0);
+  const [rawKanbanGroupRecords, setRawKanbanGroupRecords] = useState<any[]>([]);
+  const [serverSwimLaneCount, setServerSwimLaneCount] = useState<number>(0);
   const pathname = usePathname();
   // @ts-ignore
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
@@ -303,28 +369,32 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // After data is fetched populate the kanban view state so as to be able to render the data. 
   useEffect(() => {
     if (solidEntityKanbanViewData) {
-      // Merge groupRecords by groupName: update existing, add new
-      setMaxSwimLanesCount(solidEntityKanbanViewData?.meta?.totalRecords || 0);
-      const groupRecords = solidEntityKanbanViewData?.groupRecords || [];
-      const groupMap = new Map((kanbanViewData || []).map((g: any) => [g.groupName, g]));
-      groupRecords.forEach((newGroup: any) => {
-        groupMap.set(newGroup.groupName, newGroup);
-      });
-      const latestKanbanGroupData = Array.from(groupMap.values());
-      setKanbanViewData(latestKanbanGroupData);
-      const loadmoredata = Object.entries(latestKanbanGroupData).reduce((acc: any, [, value]: any) => {
-        acc[value.groupName] = {
-          offset: (value.groupData.meta.currentPage - 1) * value.groupData.meta.perPage,
-          limit: value.groupData.meta.perPage,
-          count: value.groupData.meta.totalRecords
-        };
-        return acc;
-      }, {});
-
-      setKanbanLoadMoreData(loadmoredata)
+      setServerSwimLaneCount(solidEntityKanbanViewData?.meta?.totalRecords || 0);
+      setRawKanbanGroupRecords(solidEntityKanbanViewData?.groupRecords || []);
       setLoading(false);
     }
   }, [solidEntityKanbanViewData]);
+
+  useEffect(() => {
+    const mergedKanbanGroupData = mergeKanbanGroupsWithDefinitions(
+      rawKanbanGroupRecords,
+      swimlaneDefinitions,
+      recordsInSwimlane
+    );
+    setKanbanViewData(mergedKanbanGroupData);
+    setMaxSwimLanesCount(swimlaneDefinitions.length > 0 ? swimlaneDefinitions.length : serverSwimLaneCount);
+
+    const loadmoredata = Object.entries(mergedKanbanGroupData).reduce((acc: any, [, value]: any) => {
+      acc[value.groupName] = {
+        offset: ((value.groupData?.meta?.currentPage || 1) - 1) * (value.groupData?.meta?.perPage || recordsInSwimlane),
+        limit: value.groupData?.meta?.perPage || recordsInSwimlane,
+        count: value.groupData?.meta?.totalRecords || 0
+      };
+      return acc;
+    }, {});
+
+    setKanbanLoadMoreData(loadmoredata);
+  }, [rawKanbanGroupRecords, recordsInSwimlane, serverSwimLaneCount, swimlaneDefinitions]);
 
   useEffect(() => {
     if (solidKanbanViewMetaData) {
@@ -356,12 +426,74 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     }
   }, [solidKanbanViewMetaData])
 
+  useEffect(() => {
+    const loadSwimlaneDefinitions = async () => {
+      const fieldMeta = solidKanbanViewMetaData?.data?.solidFieldsMetadata?.[groupByFieldName];
+      const layoutAttrs = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs || {};
+
+      if (!groupByFieldName || !fieldMeta) {
+        setSwimlaneDefinitions([]);
+        return;
+      }
+
+      if (fieldMeta.type === "selectionStatic" && Array.isArray(fieldMeta.selectionStaticValues)) {
+        const staticDefinitions = fieldMeta.selectionStaticValues
+          .map((item: string) => {
+            const [rawValue, rawLabel] = String(item).split(":");
+            const value = (rawValue ?? "").trim();
+            const label = (rawLabel ?? rawValue ?? "").trim();
+            return { value, label };
+          })
+          .filter((item: KanbanSwimlaneDefinition) => item.value !== "");
+
+        setSwimlaneDefinitions(staticDefinitions);
+        return;
+      }
+
+      if (
+        fieldMeta.type === "relation" &&
+        fieldMeta.relationType === "many-to-one" &&
+        fieldMeta.relationCoModelSingularName
+      ) {
+        try {
+          const orderBy = getKanbanSortParam(layoutAttrs.swimlanesOrderBy);
+          const relationUserKeyField = fieldMeta?.relationModel?.userKeyField?.name || "id";
+          const response = await solidGet(`/${kebabCase(fieldMeta.relationCoModelSingularName)}`, {
+            params: {
+              offset: 0,
+              limit: 100,
+              sort: [orderBy],
+            },
+          });
+
+          const records = response?.data?.data?.records || [];
+          const relationDefinitions = records
+            .map((record: any) => ({
+              value: String(record?.id ?? ""),
+              label: String(record?.[relationUserKeyField] ?? record?.id ?? ""),
+            }))
+            .filter((item: KanbanSwimlaneDefinition) => item.value !== "");
+
+          setSwimlaneDefinitions(relationDefinitions);
+          return;
+        } catch (error) {
+          console.error(ERROR_MESSAGES.API_ERROR, error);
+        }
+      }
+
+      setSwimlaneDefinitions([]);
+    };
+
+    loadSwimlaneDefinitions();
+  }, [groupByFieldName, solidKanbanViewMetaData])
+
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
 
     if (solidKanbanViewMetaData) {
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
+      const resolvedSwimlanesCount = swimlaneDefinitions.length > 0 ? swimlaneDefinitions.length : swimlanesCount;
       if (groupByFieldName) {
 
         const queryObject = getFilterObjectFromLocalStorage();
@@ -387,7 +519,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
           const queryData = {
             offset: 0,
-            limit: Number(queryObject.limit) + Number(queryObject.offset),
+            limit: swimlaneDefinitions.length > 0 ? swimlaneDefinitions.length : Number(queryObject.limit) + Number(queryObject.offset),
             // fields: queryObject.fields || [`${groupByFieldName}`, `count(${groupByFieldName})`],
             groupBy: queryObject.groupBy || groupByFieldName,
             // @ts-ignore
@@ -421,7 +553,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           const { recordsInSwimlane, toPopulate, toPopulateMedia } = initialFilterMethod();
           const queryData = {
             offset: 0,
-            limit: swimlanesCount,
+            limit: resolvedSwimlanesCount,
             // fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
             groupBy: groupByFieldName,
             populateMedia: toPopulateMedia,
@@ -451,7 +583,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         setSelectedRecords([]);
       }
     }
-  }, [isDeleteSolidEntitiesSucess, groupByFieldName, solidKanbanViewMetaData]);
+  }, [groupByFieldName, isDeleteSolidEntitiesSucess, solidKanbanViewMetaData, swimlaneDefinitions]);
 
   // clickable link allowing one to open the detail / form view.
 
@@ -530,15 +662,15 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
       const updatedData = mergeData(kanbanViewData, newRecords, groupByField);
       setKanbanViewData(updatedData);
-      const loadmoredata = Object.entries(updatedData).reduce((acc: any, [, value]: any) => {
-        acc[value.groupName] = {
-          offset: (value.groupData.meta.currentPage - 1) * value.groupData.meta.perPage,
-          limit: value.groupData.meta.perPage,
-          count: value.groupData.meta.totalRecords
-        };
-        return acc;
-      }, {});
-      setKanbanLoadMoreData(loadmoredata)
+      setRawKanbanGroupRecords((previousGroups: any[]) => {
+        const existingGroups = Array.isArray(previousGroups) ? previousGroups : [];
+        return updatedData
+          .filter((group: any) => (group.groupData?.meta?.totalRecords || 0) > 0)
+          .map((group: any) => {
+            const existingGroup = existingGroups.find((item: any) => String(item.groupName) === String(group.groupName));
+            return existingGroup ? { ...existingGroup, ...group } : group;
+          });
+      })
 
     } catch (error) {
       console.error(ERROR_MESSAGES.LOAD_MORE_DATA, error);
@@ -596,7 +728,9 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     const [movedItem] = sourceRecords.splice(source.index, 1);
 
     // Create a mutable copy of the moved item
-    const updatedItem = { ...movedItem, status: destinationGroupName };
+    const updatedItem = groupByFieldName
+      ? { ...movedItem, [groupByFieldName]: destinationGroupName }
+      : movedItem;
 
     // Add the updated item to the destination
     destinationRecords.splice(destination.index, 0, updatedItem);
@@ -646,9 +780,10 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     if (solidKanbanViewMetaData) {
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
+      const resolvedSwimlanesCount = swimlaneDefinitions.length > 0 ? swimlaneDefinitions.length : swimlanesCount;
       const queryData = {
         offset: swimLaneCurrentPageNumber * swimlanesCount,
-        limit: swimlanesCount,
+        limit: resolvedSwimlanesCount,
         // fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populateMedia: toPopulateMedia,
@@ -671,8 +806,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
       const data: any = await triggerGetSolidEntities(queryString);
       if (data && data?.data?.groupRecords.length > 0) {
-        const updatedData = [...kanbanViewData, ...data.data.groupRecords];
-        setKanbanViewData(updatedData);
+        setRawKanbanGroupRecords((previousGroups: any[]) => {
+          const groupMap = new Map((previousGroups || []).map((group: any) => [String(group.groupName), group]));
+          data.data.groupRecords.forEach((group: any) => {
+            groupMap.set(String(group.groupName), group);
+          });
+          return Array.from(groupMap.values());
+        });
       }
       setSwimLaneCurrentPageNumber(swimLaneCurrentPageNumber + 1)
     }
@@ -713,11 +853,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
+      const resolvedSwimlanesCount = swimlaneDefinitions.length > 0 ? swimlaneDefinitions.length : swimlanesCount;
       // const { toPopulate, toPopulateMedia } = initialFilterMethod();
 
       const queryData = {
         offset: 0,
-        limit: swimlanesCount,
+        limit: resolvedSwimlanesCount,
         // fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populateMedia: toPopulateMedia,
@@ -756,8 +897,9 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       // Update the kanban view data with the new data based on filter
       setSwimLaneCurrentPageNumber(1);
       if (data && data?.data?.groupRecords.length > 0) {
-        const updatedData = [...data.data.groupRecords];
-        setKanbanViewData(updatedData);
+        setRawKanbanGroupRecords([...data.data.groupRecords]);
+      } else {
+        setRawKanbanGroupRecords([]);
       }
       setSelectedRecords([]);
 
@@ -780,15 +922,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   }, [solidKanbanViewMetaData])
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
-  const headerRequestStatusLabel =
-    isDeleteSolidEntitiesLoading
-      ? "Deleting..."
-      : isPatchKanbanViewLoading
-        ? "Updating..."
-        : loading || !queryDataLoaded
-          ? "Loading..."
-          : null;
-
+  const entityDisplayName = solidKanbanViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
+  const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : loading || !queryDataLoaded ? "Loading..." : null;
 
   const toggleBothSidebars = () => {
     if (visibleNavbar) {
@@ -798,12 +933,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     }
   };
 
+  console.log(`Logging kanban data: `, solidKanbanViewMetaData);  
+
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
       <div className="solid-list-content h-full flex flex-column flex-grow-1">
         <div className="solid-list-surface solid-kanban-surface flex flex-column flex-1 min-h-0">
           <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-column lg:flex-row">
-            <div className="flex justify-content-between w-full solid-list-toolbar-row">
+            <div className="flex justify-content-between w-full">
               <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                 {params.embeded !== true &&
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
@@ -812,28 +949,25 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 }
 
                 <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
-                {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-                  <div className="hidden lg:flex">
-                    <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
-                  </div>
-                }
+                <div className="hidden lg:flex">
+                  {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
+                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+                </div>
               </div>
 
               <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-                  <div className="flex lg:hidden">
-                    <SolidButton
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="solid-icon-button"
-                      onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
-                      aria-label="Toggle search"
-                      leftIcon={<SolidIcon name="si-search" aria-hidden />}
-                    />
-                  </div>
-                }
+                <div className="flex lg:hidden">
+                  <SolidButton
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="solid-icon-button"
+                    onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                    aria-label="Toggle search"
+                    leftIcon={<SolidIcon name="si-search" aria-hidden />}
+                  />
+                </div>
 
                 {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
                   <SolidCreateButton createButtonUrl={createButtonUrl} createActionQueryParams={createActionQueryParams} responsiveIconOnly={true} />
@@ -870,7 +1004,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 />
               </div>
             </div>
-            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && showGlobalSearchElement && (
+            {showGlobalSearchElement && (
               <div className="flex lg:hidden">
                 <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
               </div>
@@ -884,32 +1018,21 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         </div>
       </div>
 
-      <SolidDialog
+      <SolidConfirmDialog
         open={isDialogVisible}
-        onOpenChange={(open) => {
-          if (!open) {
-            onDeleteClose();
-          }
-        }}
+        onCancel={onDeleteClose}
+        onConfirm={deleteBulk}
         className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
-      >
-        <SolidDialogHeader className="solid-shadcn-dialog-head">
-          <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
-          <SolidDialogClose />
-        </SolidDialogHeader>
-        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
-        <SolidDialogBody className="solid-shadcn-dialog-body">
-          <p className="solid-shadcn-dialog-text">Are you sure you want to delete the selected records?</p>
-        </SolidDialogBody>
-        <SolidDialogFooter className="solid-shadcn-dialog-actions">
-          <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteBulk}>
-            Delete
-          </SolidButton>
-          <SolidButton variant="outline" size="sm" onClick={onDeleteClose}>
-            Cancel
-          </SolidButton>
-        </SolidDialogFooter>
-      </SolidDialog>
+        headerClassName="solid-shadcn-dialog-head"
+        bodyClassName="solid-shadcn-dialog-body"
+        footerClassName="solid-shadcn-dialog-actions"
+        separatorClassName="solid-shadcn-dialog-sep"
+        showSeparator
+        title={`Delete ${entityDisplayName}`}
+        message={<p className="solid-shadcn-dialog-text">{`Are you sure you want to delete the selected ${entityDisplayName} records?`}</p>}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+      />
       {openLightbox && (
         <SolidLightbox
           open={openLightbox}

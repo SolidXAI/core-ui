@@ -1624,7 +1624,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         <div className="solid-list-surface solid-tree-surface flex flex-column flex-1 min-h-0">
           {/* ── Header ── */}
           <div className="page-header solid-list-toolbar solid-tree-toolbar flex-column lg:flex-row">
-            <div className="flex justify-content-between w-full solid-list-toolbar-row">
+            <div className="flex justify-content-between w-full">
               <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                 <div className="flex align-items-center gap-2">
                   {params.embeded !== true && (

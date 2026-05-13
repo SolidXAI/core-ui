@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 type SolidDialogProps = {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   contentClassName?: string;
   overlayClassName?: string;

@@ -1,6 +1,6 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithAuth } from './fetchBaseQuery';
-import { kebabCase } from 'change-case';
+import { kebabCase } from 'lodash';
 
 export const createSolidEntityApi = (entityName: string) => {
     const kebabEntityName = kebabCase(entityName);

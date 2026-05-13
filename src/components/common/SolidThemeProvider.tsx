@@ -1,29 +1,11 @@
 
-
-import { useEffect, useState } from "react";
-import { usePathname } from "../../hooks/usePathname";
-import { useSelector } from "react-redux";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { useContext, useEffect } from "react";
+import { LayoutContext } from "../layout/context/layoutcontext";
 
 export const SolidThemeProvider = () => {
-    const pathname = usePathname();
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
-    useEffect(() => {
-        if (pathname.includes("/auth/")) {
-            trigger("");
-        }
-    }, [pathname, trigger]);
-
-    const [theme, setTheme] = useState("solid-light-purple");
-    useEffect(() => {
-        if (pathname.includes("/auth/") && solidSettingsData?.data?.authPagesTheme) {
-            const selectedTheme =
-                solidSettingsData?.data?.authPagesTheme === "dark" ? "solid-dark-purple" : "solid-light-purple";
-            setTheme(selectedTheme);
-        } else {
-            setTheme("solid-light-purple");
-        }
-    }, [pathname, solidSettingsData]);
+    const layoutContext = useContext(LayoutContext);
+    const themeMode = layoutContext?.themeMode === "dark" ? "dark" : "light";
+    const theme = themeMode === "dark" ? "solid-dark-purple" : "solid-light-purple";
 
     useEffect(() => {
         // Find or create <link> element
@@ -41,4 +23,4 @@ export const SolidThemeProvider = () => {
     }, [theme]);
 
     return null;
-}
+};

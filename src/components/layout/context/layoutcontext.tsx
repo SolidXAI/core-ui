@@ -13,7 +13,7 @@ export const LayoutProvider = ({ children }: ChildContainerProps) => {
             return stored;
         }
 
-        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        return "light";
     };
 
     const [themeMode, setThemeMode] = useState<"light" | "dark">(getInitialThemeMode);
@@ -21,7 +21,7 @@ export const LayoutProvider = ({ children }: ChildContainerProps) => {
         inputStyle: 'outlined',
         colorScheme: themeMode,
         theme: 'solid-light-purple',
-        scale: 14,
+        scale: 15,
         authLayout: 'Center'
     });
 

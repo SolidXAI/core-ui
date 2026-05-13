@@ -5,6 +5,21 @@ import { RightArrowSvg } from '../../../components/Svg/RightArrowSvg'
 
 const DATE_FIELD_TYPES = ['date', 'datetime', 'time']
 
+function isEmptyAuditValue(value: string | null | undefined): boolean {
+    if (value == null) return true
+    if (typeof value !== 'string') return false
+
+    const normalizedValue = value.trim().toLowerCase()
+    return normalizedValue === '' || normalizedValue === 'none' || normalizedValue === 'null'
+}
+
+function hasMeaningfulAuditChange(item: AuditRecord): boolean {
+    const previousValue = item.previousDisplay ?? item.previous
+    const currentValue = item.currentDisplay ?? item.current
+
+    return !(isEmptyAuditValue(previousValue) && isEmptyAuditValue(currentValue))
+}
+
 function formatAuditValue(
     value: string | null | undefined,
     displayValue: string | null | undefined,
@@ -38,9 +53,15 @@ interface SolidChatterAuditMessageProps {
 }
 
 export const SolidChatterAuditMessage: React.FC<SolidChatterAuditMessageProps> = ({ auditRecord }) => {
+    const visibleAuditRecord = auditRecord.filter(hasMeaningfulAuditChange)
+
+    if (visibleAuditRecord.length === 0) {
+        return null
+    }
+
     return (
         <div className='flex flex-column gap-2'>
-            {auditRecord.map((item: AuditRecord, index: number) => (
+            {visibleAuditRecord.map((item: AuditRecord, index: number) => (
                 <div key={index} className='flex gap-2'>
                     <span className='m-0 '>
                         {"(" + (item.fieldDisplayName || item.field) + ")"}

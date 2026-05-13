@@ -37,6 +37,7 @@ import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
   SolidButton,
+  SolidConfirmDialog,
   SolidDialog,
   SolidDialogBody,
   SolidDialogClose,
@@ -861,6 +862,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     // Then update state
     setFilters(updatedFilter);
     setFilterPredicates(updatedFilterPredicates);
+    setFirst(0);
     // Force synchronous state updates
   };
 
@@ -1246,7 +1248,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-column lg:flex-row">
               {/* <div> */}
-              <div className="flex justify-content-between w-full solid-list-toolbar-row">
+              <div className="flex justify-content-between w-full">
                 <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                   <div className='flex align-items-center gap-2'>
                     {params.embeded !== true &&
@@ -1258,41 +1260,38 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       {solidListViewMetaData?.data?.solidView?.action?.displayName || solidListViewMetaData?.data?.solidView?.displayName}
                     </p>
                   </div>
-                  {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
-                    params.embeded === false && (
-                      <div className="hidden lg:flex">
-                        <SolidGlobalSearchElement
-                          key={params.modelName}
-                          viewType="list"
-                          showSaveFilterPopup={showSaveFilterPopup}
-                          setShowSaveFilterPopup={setShowSaveFilterPopup}
-                          ref={solidGlobalSearchElementRef}
-                          viewData={solidListViewMetaData}
-                          handleApplyCustomFilter={handleApplyCustomFilter}
-                          filterPredicates={filterPredicates}
-                        >
-                        </SolidGlobalSearchElement>
-                      </div>
-
-                    )}
+                  {params.embeded === false && (
+                    <div className="hidden lg:flex">
+                      {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
+                      <SolidGlobalSearchElement
+                        key={params.modelName}
+                        viewType="list"
+                        showSaveFilterPopup={showSaveFilterPopup}
+                        setShowSaveFilterPopup={setShowSaveFilterPopup}
+                        ref={solidGlobalSearchElementRef}
+                        viewData={solidListViewMetaData}
+                        handleApplyCustomFilter={handleApplyCustomFilter}
+                        filterPredicates={filterPredicates}
+                      >
+                      </SolidGlobalSearchElement>
+                    </div>
+                  )}
 
                 </div>
                 <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                  {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
-                    params.embeded === false && (
-                      <div className="flex lg:hidden">
-                        <SolidButton
-                          type="button"
-                          size="small"
-                          variant="outline"
-                          className="solid-icon-button"
-                          onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
-                          leftIcon={<Search size={14} />}
-                        />
-                      </div>
-
-                    )}
+                  {params.embeded === false && (
+                    <div className="flex lg:hidden">
+                      <SolidButton
+                        type="button"
+                        size="small"
+                        variant="outline"
+                        className="solid-icon-button"
+                        onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                        leftIcon={<Search size={14} />}
+                      />
+                    </div>
+                  )}
 
                   <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
                     {solidListViewLayout?.attrs?.headerButtons
@@ -1357,7 +1356,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       type="button"
                       size="small"
                       variant="secondary"
-                      className="hidden lg:flex solid-icon-button "
+                      className="hidden lg:flex"
                       onClick={() => setRecoverDialogVisible(true)}
                       leftIcon={<RotateCcw size={14} />}
                     >
@@ -1390,23 +1389,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 </div>
               </div>
               {/* </div> */}
-              {solidListViewLayout?.attrs?.enableGlobalSearch === true && showGlobalSearchElement &&
-                params.embeded === false && (
-                  <div className="flex lg:hidden">
-                    <SolidGlobalSearchElement
-                      viewType="list"
-                      showSaveFilterPopup={showSaveFilterPopup}
-                      setShowSaveFilterPopup={setShowSaveFilterPopup}
-                      ref={solidGlobalSearchElementRef}
-                      viewData={solidListViewMetaData}
-                      handleApplyCustomFilter={handleApplyCustomFilter}
-                      filterPredicates={filterPredicates}
-                    >
+              {showGlobalSearchElement && params.embeded === false && (
+                <div className="flex lg:hidden">
+                  <SolidGlobalSearchElement
+                    viewType="list"
+                    showSaveFilterPopup={showSaveFilterPopup}
+                    setShowSaveFilterPopup={setShowSaveFilterPopup}
+                    ref={solidGlobalSearchElementRef}
+                    viewData={solidListViewMetaData}
+                    handleApplyCustomFilter={handleApplyCustomFilter}
+                    filterPredicates={filterPredicates}
+                  >
 
-                    </SolidGlobalSearchElement>
-                  </div>
+                  </SolidGlobalSearchElement>
+                </div>
 
-                )}
+              )}
             </div>
           }
 
@@ -1650,7 +1648,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       <Column
                         frozen
                         alignFrozen="right"
-                        frozenBackground="transparent"
                         body={(rowData) =>
                           rowData?.deletedAt ? (
                             <a
@@ -1713,32 +1710,21 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           )}
         </div>
       </div>
-      <SolidDialog
+      <SolidConfirmDialog
         open={isDialogVisible}
-        onOpenChange={(open) => {
-          if (!open) {
-            onDeleteClose();
-          }
-        }}
+        onCancel={onDeleteClose}
+        onConfirm={deleteBulk}
         className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
-      >
-        <SolidDialogHeader className="solid-shadcn-dialog-head">
-          <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
-          <SolidDialogClose />
-        </SolidDialogHeader>
-        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
-        <SolidDialogBody className="solid-shadcn-dialog-body">
-          <p className="solid-shadcn-dialog-text">Are you sure you want to delete the selected records?</p>
-        </SolidDialogBody>
-        <SolidDialogFooter className="solid-shadcn-dialog-actions">
-          <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteBulk}>
-            Delete
-          </SolidButton>
-          <SolidButton variant="outline" size="sm" onClick={onDeleteClose}>
-            Cancel
-          </SolidButton>
-        </SolidDialogFooter>
-      </SolidDialog>
+        headerClassName="solid-shadcn-dialog-head"
+        bodyClassName="solid-shadcn-dialog-body"
+        footerClassName="solid-shadcn-dialog-actions"
+        separatorClassName="solid-shadcn-dialog-sep"
+        showSeparator
+        title="Delete Records"
+        message={<p className="solid-shadcn-dialog-text">Are you sure you want to delete the selected records?</p>}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+      />
       <SolidDialog
         open={isRecoverDialogVisible}
         onOpenChange={(open) => {
@@ -1789,32 +1775,21 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           </SolidDialog>
         )
       }
-      <SolidDialog
+      <SolidConfirmDialog
         open={deleteEntity}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteEntity(false);
-          }
-        }}
+        onCancel={() => setDeleteEntity(false)}
+        onConfirm={handleDeleteEntity}
         className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
-      >
-        <SolidDialogHeader className="solid-shadcn-dialog-head">
-          <SolidDialogTitle>{`Delete ${entityDisplayName}`}</SolidDialogTitle>
-          <SolidDialogClose />
-        </SolidDialogHeader>
-        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
-        <SolidDialogBody className="solid-shadcn-dialog-body">
-          <p className="solid-shadcn-dialog-text">{`Are you sure you want to delete this ${entityDisplayName}?`}</p>
-        </SolidDialogBody>
-        <SolidDialogFooter className="solid-shadcn-dialog-actions">
-          <SolidButton variant="destructive" size="sm" onClick={handleDeleteEntity}>
-            Delete
-          </SolidButton>
-          <SolidButton variant="outline" size="sm" onClick={() => setDeleteEntity(false)}>
-            Cancel
-          </SolidButton>
-        </SolidDialogFooter>
-      </SolidDialog>
+        headerClassName="solid-shadcn-dialog-head"
+        bodyClassName="solid-shadcn-dialog-body"
+        footerClassName="solid-shadcn-dialog-actions"
+        separatorClassName="solid-shadcn-dialog-sep"
+        showSeparator
+        title={`Delete ${entityDisplayName}`}
+        message={<p className="solid-shadcn-dialog-text">{`Are you sure you want to delete this ${entityDisplayName}?`}</p>}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+      />
       {openLightbox && (
         <SolidLightbox
           open={openLightbox}

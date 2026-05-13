@@ -6,8 +6,6 @@ import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
-import { loadSession } from "../../adapters/auth/storage";
-import { hasAnyRole } from "../../helpers/rolesHelper";
 import { SolidSpinner } from "../shad-cn-ui";
 
 export const GoogleAuthChecking = () => {
@@ -34,11 +32,8 @@ export const GoogleAuthChecking = () => {
                     dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
-                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                    const session = loadSession();
-                    const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
-                    const isDev = env("VITE_SOLIDX_ENV") === "dev";
-                    const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
+                    // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
+                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
                     router.push(redirectUrl);
                 }
             } catch (err: any) {

@@ -109,6 +109,7 @@ export const SolidEmptyListViewPlaceholder = ({
                                     <SolidCreateButton
                                         createButtonUrl={createButtonUrl}
                                         createActionQueryParams={createActionQueryParams}
+                                        solidListViewLayout={solidListViewMetaData?.data?.solidView?.layout}
                                         title={solidListViewMetaData?.data?.solidView?.displayName}
                                     />
                                 </div>
@@ -126,11 +127,13 @@ export const SolidEmptyListViewPlaceholder = ({
                             )}
                         </div>
 
-                        <div className="solid-empty-listview-description">
-                            Click Create or Import to add {entityName} entities.
-                        </div>
-
                         <CustomActionButtons />
+
+                        {(canCreate || canImport) && (
+                            <div className="solid-empty-listview-description">
+                                Click Create or Import to add {entityName} entities.
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -179,6 +179,10 @@ export function SolidAutocomplete({
   };
 
   const clearAllSelected = () => {
+    if (multiple) {
+      const existing = Array.isArray(value) ? [...value] : [];
+      existing.forEach((item) => onUnselect?.({ value: item }));
+    }
     onChange?.({ value: multiple ? [] : null });
     setManageOpen(false);
   };
@@ -189,6 +193,7 @@ export function SolidAutocomplete({
       const exists = existing.some((entry) => toComparableKey(entry) === toComparableKey(item));
       if (!exists) {
         onChange?.({ value: [...existing, item] });
+        onSelect?.({ value: item });
       }
       setQuery("");
       setOpen(false);
@@ -340,7 +345,11 @@ export function SolidAutocomplete({
                 <button
                   type="button"
                   className="solid-autocomplete-chip-remove"
-                  onClick={() => removeSelectedAt(index)}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    onUnselect?.({ value: item });
+                    removeSelectedAt(index);
+                  }}
                   aria-label="Remove selection"
                 >
                   <X size={12} />

@@ -39,6 +39,7 @@ export async function getSession(): Promise<Session> {
         accessTokenExpires: (refreshed as any).accessTokenExpires,
       },
       error: null,
+      refreshed: true,
     };
     saveSession(nextSession);
     eventBus.emit(AppEvents.SessionUpdated, nextSession);

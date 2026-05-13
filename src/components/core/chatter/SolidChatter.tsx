@@ -16,6 +16,14 @@ interface FilterState {
     endDate: Date | null;
 }
 
+const isEmptyAuditValue = (value: string | null | undefined) => {
+    if (value == null) return true;
+    if (typeof value !== 'string') return false;
+
+    const normalizedValue = value.trim().toLowerCase();
+    return normalizedValue === '' || normalizedValue === 'none' || normalizedValue === 'null';
+};
+
 export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed = [], title, modelUserKey }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void, actionsAllowed?: string[], title?: string, modelUserKey?: string }) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
@@ -27,8 +35,16 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         startDate: null,
         endDate: null
     });
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
 
     const [getchatterMessage, { isLoading: isChatterLoading }] = useLazyGetchatterMessageQuery();
+
+    useEffect(() => {
+        const updateViewport = () => setIsMobileViewport(window.innerWidth <= 1199);
+        updateViewport();
+        window.addEventListener('resize', updateViewport);
+        return () => window.removeEventListener('resize', updateViewport);
+    }, []);
 
     useEffect(() => {
         if (refreshChatterMessage) {
@@ -110,6 +126,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         date: formatDate(msg.createdAt),
                         media: msg._media,
                         messageSubType: msg.messageSubType,
+                        status: msg.status,
                         modelDisplayName: msg.modelDisplayName,
                         modelUserKey: msg.modelUserKey
                     };
@@ -123,7 +140,16 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         current: detail.newValue,
                         previousDisplay: detail.oldValueDisplay,
                         currentDisplay: detail.newValueDisplay,
-                    })) || [];
+                    })).filter((detail: any) => {
+                        const previousValue = detail.previousDisplay ?? detail.previous;
+                        const currentValue = detail.currentDisplay ?? detail.current;
+
+                        return !(isEmptyAuditValue(previousValue) && isEmptyAuditValue(currentValue));
+                    }) || [];
+
+                    if (auditRecord.length === 0) {
+                        return null;
+                    }
 
                     return {
                         id: msg.id,
@@ -139,7 +165,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         message: msg.messageBody,
                     };
                 }
-            });
+            }).filter(Boolean);
             setMessages(processedMessages);
             setTotalRecords(response?.data?.meta?.totalRecords || 0);
         } catch (error) {
@@ -201,6 +227,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     <div key={message.id}>
                         {showDateDivider && <SolidChatterDateDivider date={message.date} />}
                         <SolidChatterMessageBox
+                            messageId={message.id}
                             user={message.user}
                             messageType={message.messageType}
                             message={message.message}
@@ -208,8 +235,10 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                             auditRecord={message.auditRecord}
                             media={message.media}
                             messageSubType={message.messageSubType}
+                            status={message.status}
                             modelDisplayName={message.modelDisplayName}
                             modelUserKey={message.modelUserKey}
+                            onRefresh={fetchData}
                         />
                     </div>
                 );
@@ -245,11 +274,17 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
             />
             <div className='solid-chatter-body' style={{
                 height:
-                    visibleBox === 'email-message'
-                        ? 'calc(100vh - 196px)'
-                        : visibleBox === 'log'
-                            ? 'calc(100vh - 350px)'
-                            : 'calc(100vh - 170px)',
+                    isMobileViewport
+                        ? (visibleBox === 'email-message'
+                            ? 'calc(100dvh - 248px)'
+                            : visibleBox === 'log'
+                                ? 'calc(100dvh - 210px)'
+                                : 'calc(100dvh - 60px)')
+                        : (visibleBox === 'email-message'
+                            ? 'calc(100vh - 196px)'
+                            : visibleBox === 'log'
+                                ? 'calc(100vh - 292px)'
+                                : 'calc(100vh - 127px)'),
             }}>
                 {isChatterLoading
                     ? renderLoadingState()

@@ -23,6 +23,7 @@ import {
   SolidTabGroup,
 } from "../../shad-cn-ui";
 import { ApiKeysTab, GenerateApiKeyModal, RevealApiKeyModal } from "./ApiKeysTab";
+import "./CreateUser.css";
 
 interface ErrorResponseData {
   message: string;
@@ -236,24 +237,25 @@ const CreateUser = ({ data, params }: any) => {
                   {
                     value: "userDetails",
                     label: "User Details",
-                    content: <UserDetailsContent
-                      formik={formik}
-                      fieldError={fieldError}
-                      rolesData={rolesData}
-                      selectedRoles={selectedRoles}
-                      handleCheckboxChange={handleCheckboxChange}
-                      isEditMode={isEditMode}
-                    />,
+                    content: (
+                      <UserDetailsContent
+                        formik={formik}
+                        fieldError={fieldError}
+                        rolesData={rolesData}
+                        selectedRoles={selectedRoles}
+                        handleCheckboxChange={handleCheckboxChange}
+                        isEditMode={isEditMode}
+                      />
+                    ),
                   },
                   {
                     value: "apiKeys",
                     label: "API Keys",
-                    content: <div className="pt-4">
-                      <ApiKeysTab
-                        userId={data?.id}
-                        canCreate={data?.isAllowedToGenerateApiKeys ?? false}
-                      />
-                    </div>,
+                    content: (
+                      <div className="solid-user-edit-api-keys-pane">
+                        <ApiKeysTab userId={data?.id} canCreate={data?.isAllowedToGenerateApiKeys ?? false} />
+                      </div>
+                    ),
                   },
                 ]}
               />
@@ -318,9 +320,9 @@ function UserDetailsContent({
   isEditMode: boolean;
 }) {
   return (
-    <div className="grid">
-      <div className="col-12 lg:col-10 xl:col-8 mx-auto">
-        <SolidPanel header="Basic Info" className="solid-column-panel solid-user-form-panel">
+    <div className="solid-user-details-layout">
+      <div className="solid-user-details-stack">
+        <SolidPanel header="Basic Info" className="solid-column-panel">
           <div className="grid formgrid">
             <div className="field col-12 md:col-6 flex flex-column gap-2">
               <label htmlFor="fullName" className="form-field-label">
@@ -446,7 +448,7 @@ function UserDetailsContent({
                 {fieldError("failedLoginAttempts") ? (
                   <SolidMessage severity="error" text={fieldError("failedLoginAttempts")} />
                 ) : null}
-                <p className="solid-user-form-helper">
+                <p className="solid-user-section-helper">
                   Your account has been locked due to repeated unsuccessful login attempts. Please contact your
                   system admin.
                 </p>
@@ -455,12 +457,12 @@ function UserDetailsContent({
           </div>
         </SolidPanel>
 
-        <SolidPanel toggleable header="Access" className="solid-column-panel solid-user-form-panel mt-5">
+        <SolidPanel toggleable header="Access" className="solid-column-panel">
           <div className="formgrid grid">
-            <div className="field col-12 flex align-items-center justify-content-between gap-3">
-              <div>
+            <div className="field col-12 solid-user-access-row">
+              <div className="solid-user-access-copy">
                 <p className="form-field-label m-0">Allow API Key Generation</p>
-                <p className="solid-user-form-helper m-0 mt-1">
+                <p className="solid-user-section-helper m-0 mt-1">
                   When enabled, this user can generate API keys for programmatic access.
                 </p>
               </div>
@@ -472,16 +474,20 @@ function UserDetailsContent({
           </div>
         </SolidPanel>
 
-        <SolidPanel toggleable header="Roles" className="solid-column-panel solid-user-form-panel mt-5">
-          <p className="solid-user-form-panel-copy">Select the roles that should be assigned to this user.</p>
-          <div className="formgrid grid solid-user-role-grid">
+        <SolidPanel toggleable header="Roles" className="solid-column-panel">
+          <p className="solid-user-section-copy">Select the roles that should be assigned to this user.</p>
+          <div className="solid-user-role-grid">
             {rolesData?.data?.records?.map((role: any) => (
-              <div key={role.name} className="field col-12 md:col-6 solid-user-role-item">
+              <div
+                key={role.name}
+                className={cx("solid-user-role-card", selectedRoles.includes(role.name) && "is-selected")}
+              >
                 <SolidCheckbox
                   id={role.name}
                   checked={selectedRoles.includes(role.name)}
                   onChange={() => handleCheckboxChange(role.name)}
                   label={role.name}
+                  className="solid-user-role-control"
                 />
               </div>
             ))}

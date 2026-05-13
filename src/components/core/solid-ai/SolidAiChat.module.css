@@ -864,7 +864,7 @@
 
 .InputBox:focus-within {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--ring, rgba(37, 99, 235, 0.18));
+    box-shadow: none !important;
 }
 
 .InputBoxDisabled {
@@ -1284,8 +1284,8 @@
 
 /* ── Status dot extra states ── */
 .StatusRunning {
-    background: #3b82f6;
-    box-shadow: 0 0 5px #3b82f666;
+    background: #722ED1;
+    box-shadow: 0 0 5px rgba(114, 46, 209, 0.4);
     animation: statusPulse 1.5s ease-in-out infinite;
 }
 

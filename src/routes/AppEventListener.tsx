@@ -18,7 +18,7 @@ export function AppEventListener() {
       if (payload?.message) {
         sessionStorage.setItem("solidx.globalError", payload.message);
       }
-      if (pathname !== "/error") {
+      if (pathname !== "/error" && pathname.startsWith("/admin")) {
         router.push("/error");
       }
     });

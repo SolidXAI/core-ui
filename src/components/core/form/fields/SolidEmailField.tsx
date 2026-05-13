@@ -49,10 +49,10 @@ export class SolidEmailField implements ISolidField {
 
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.max));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
@@ -67,7 +67,7 @@ export class SolidEmailField implements ISolidField {
                     regexPatternNotMatchingErrorMsg = ERROR_MESSAGES.FIELD_INAVLID_FORMAT(fieldLabel);
                 }
             }
-            
+
             schema = schema.matches(new RegExp(fieldMetadata.regexPattern), regexPatternNotMatchingErrorMsg);
         }
 
@@ -91,18 +91,18 @@ export class SolidEmailField implements ISolidField {
         const viewMode: string = this.fieldContext.viewMode;
         return (
             <>
-            <div className={className}>
-                {viewMode === "view" &&
-                    this.renderExtensionRenderMode(viewWidget, formik)
-                }
-                {viewMode === "edit" && (
-                    <>
-                        {editWidget &&
-                            this.renderExtensionRenderMode(editWidget, formik)
-                        }
-                    </>
-                )
-                }
+                <div className={className}>
+                    {viewMode === "view" &&
+                        this.renderExtensionRenderMode(viewWidget, formik)
+                    }
+                    {viewMode === "edit" && (
+                        <>
+                            {editWidget &&
+                                this.renderExtensionRenderMode(editWidget, formik)
+                            }
+                        </>
+                    )
+                    }
                 </div>
             </>
         );
@@ -137,6 +137,7 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
 
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
     const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+    const autoComplete = fieldLayoutInfo?.attrs?.autoComplete || 'on';
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
@@ -161,6 +162,7 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
                 onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                 className={styles.fieldInput}
+                autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>

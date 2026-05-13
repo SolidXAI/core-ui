@@ -4,6 +4,104 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.7] - 2026-04-22
+
+### Breaking / Major
+
+**UI Component System Migration**
+- Migrated the component library from PrimeReact to a Radix UI / shadcn-based system. All core UI primitives (dialogs, popovers, dropdowns, tooltips, accordions, etc.) are now backed by Radix UI. Icons moved to `lucide-react` and the internal `SolidIcon` system. `@tanstack/react-table` now powers the list view data table.
+
+---
+
+### Added
+
+**Solid Studio**
+- New studio landing page and home page (`StudioHomePage`, `StudioLandingPage`) with a dedicated AI studio layout (`SolidAiStudioLayout`) and DOM injection support.
+
+**API Keys Management**
+- New `ApiKeysTab` on the user screen with the ability to generate and reveal API keys, including dedicated modals for each flow.
+
+**Agent Settings Screen**
+- New settings page for configuring agents.
+
+**AI / LLM Provider Settings**
+- New settings section for configuring AI model providers (OpenAI, Anthropic), including per-provider component forms and a model config tab.
+
+**Card View**
+- New `card` collection view type added alongside the existing list, kanban, and tree views. Includes card grid, card item, and a card user view layout.
+
+**Lightbox**
+- New `SolidLightbox` primitive for media previewing.
+
+**Dynamic Auth Guard**
+- Auth guards are now more dynamic: dynamic token saving, configurable `AuthGuard`, plus new `GuestGuard` and `AdminGuard` route guards.
+
+**Layout Registry**
+- New `SolidLayoutRegistry` for registering and resolving layouts in a type-safe way.
+
+**Event System**
+- Event infrastructure added for solid-core, including MQ message header action events and kanban card events from message queues.
+
+---
+
+### Changed
+
+**Global Search**
+- Saved filters now surface in the global search overlay; added keyboard-based navigation with auto-scroll through results.
+
+**List View**
+- Refactored context menu, improved row action menu, added datetime column type support, removed shimmer loading placeholder, column selector improvements.
+
+**Form Views**
+- Improved field spacing, popup height handling, stepper layout fixes, form header action improvements. `SolidButton` in form view header now correctly forwards all button attributes.
+
+**Kanban View**
+- Scroll fix, general cleanup, new kanban card support from MQ messages.
+
+**Tree View**
+- Pagination bug fixed, layout fixes, tree table improvements.
+
+**Chatter**
+- UI polish pass, chatter message fixes, pagination fixes.
+
+**Import / Export**
+- Fixed broken import and export flows; export stepper and UI improved.
+
+**Dark Mode**
+- Improved dark mode styling across layout and component surfaces.
+
+**Error Pages**
+- New error state components and redesigned error pages.
+
+**`SolidSelect`**
+- Now accepts an `id` prop; additional shadcn components exposed; improved type safety on `Dialog` and `List` components.
+
+**Active Menu Item**
+- Active sidebar menu item is now visually highlighted.
+
+---
+
+### Fixed
+
+- Fixed redirect behaviour after login in `GuestGuard`
+- Fixed `DatePicker` rendering bug
+- Fixed `TreeView` pagination
+- Fixed JSON view mode rendering bug
+- Fixed stepper rendering issues
+- Fixed autocomplete field behaviour
+- Fixed CodeMirror integration (now uses `SolidCodeEditor` internally)
+- Fixed popover positioning and form layout popup issues
+
+---
+
+### Developer Experience
+
+- README added to the repository
+- Type-safe layout and component registry
+- Removed unused files and legacy docs migration folder
+
+---
+
 ## [1.5.0] - 2026-04-08
 
 ### Added

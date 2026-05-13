@@ -1,8 +1,6 @@
 import {
   SolidDialog,
   SolidDialogBody,
-  SolidDialogClose,
-  SolidDialogHeader,
 } from "../../../../../../shad-cn-ui/SolidDialog";
 import { camelCase } from "lodash";
 import SolidFormView from "../../../../../../../components/core/form/SolidFormView";
@@ -34,9 +32,6 @@ export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, 
       className="solid-dialog"
       style={{ width: dialogWidth, height: dialogHeight }}
     >
-      <SolidDialogHeader>
-        <SolidDialogClose aria-label="Close dialog" />
-      </SolidDialogHeader>
       <SolidDialogBody>
         <SolidFormView {...params} />
       </SolidDialogBody>

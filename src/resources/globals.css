@@ -211,6 +211,15 @@ a {
   border-left: 1px solid rgba(15, 23, 42, 0.1);
 }
 
+.react-datepicker-popper {
+  z-index: 10000 !important;
+}
+
+#solid-datepicker-portal .react-datepicker-popper,
+.react-datepicker__portal {
+  z-index: 10000;
+}
+
 /* Avatar */
 .avatar {
   display: inline-block;
@@ -1861,13 +1870,13 @@ li.header-li-px {
   background: color-mix(in srgb, var(--muted) 20%, var(--card) 80%);
   color: var(--muted-foreground);
   white-space: nowrap;
-  padding: 0.6rem 0.35rem;
+  padding: 0.6rem 0.38rem;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
   display: inline-block;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  width: 24px;
+  width: 28px;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
@@ -2066,11 +2075,16 @@ li.header-li-px {
   width: 100%;
   position: relative;
   gap: 0;
+  pointer-events: none;
+}
+
+.arrow-stepper-container > * {
+  pointer-events: auto;
 }
 
 .arrow-step-button {
   position: relative;
-  padding: 0.44rem 1.15rem;
+  padding: 0.55rem 1.30rem;
   border: none;
   background: color-mix(in srgb, var(--muted) 22%, var(--card) 78%);
   color: color-mix(in srgb, var(--foreground) 72%, transparent);
@@ -2079,7 +2093,7 @@ li.header-li-px {
   transition: all 0.3s ease;
   min-width: 96px;
   white-space: nowrap;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
   margin-right: -10px;
@@ -2156,7 +2170,7 @@ li.header-li-px {
 }
 
 .overflow-button {
-  padding: 0.35rem 0.5rem;
+  padding: 0.56rem 0.5rem;
   min-width: 2.25rem;
   height: 100%;
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
@@ -2188,7 +2202,7 @@ li.header-li-px {
 
 .overlay-step-button {
   width: 100%;
-  padding: 0.45rem 0.75rem;
+  padding: 0.70rem 0.85rem;
   border: none;
   background: transparent;
   text-align: left;
@@ -3195,76 +3209,6 @@ li.header-li-px {
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
 
-.solid-user-form-helper {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.45;
-  color: color-mix(in srgb, var(--foreground) 62%, transparent);
-}
-
-.solid-user-form-panel.solid-panel {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.solid-user-form-panel .solid-panel-header {
-  padding: 11px 12px;
-  background: color-mix(in srgb, var(--accent) 26%, transparent);
-}
-
-.solid-user-form-panel .solid-panel-title {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--foreground) 92%, transparent);
-}
-
-.solid-user-form-panel .solid-panel-content {
-  padding: 12px;
-}
-
-.solid-user-form-panel-copy {
-  margin: 0 0 10px;
-  font-size: 11px;
-  line-height: 1.4;
-  color: color-mix(in srgb, var(--foreground) 62%, transparent);
-}
-
-.solid-user-role-grid .solid-checkbox {
-  width: 100%;
-  gap: 9px;
-}
-
-.solid-user-role-item {
-  margin-bottom: 2px;
-}
-
-.solid-user-role-item .solid-checkbox {
-  min-height: 38px;
-  align-items: center;
-  padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--card) 98%, white 2%);
-  color: color-mix(in srgb, var(--foreground) 84%, transparent);
-  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.solid-user-role-item .solid-checkbox:hover {
-  border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
-  background: color-mix(in srgb, var(--accent) 30%, transparent);
-}
-
-.solid-user-role-item .solid-checkbox-box {
-  flex: 0 0 18px;
-}
-
-.solid-user-role-item .solid-checkbox-label {
-  font-size: 11.5px;
-  font-weight: 500;
-  line-height: 1.3;
-  color: color-mix(in srgb, var(--foreground) 88%, transparent);
-}
-
 .solid-generate-code-popup__head {
   padding-bottom: 12px;
 }
@@ -3936,6 +3880,7 @@ li.header-li-px {
 
 .solid-search-overlay-pannel {
   top: calc(100% + 4px) !important;
+  z-index: 20;
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
   border-radius: 10px;
@@ -4494,7 +4439,7 @@ li.header-li-px {
 
 @media (min-width: 1600px) and (max-width: 1699px) {
   html {
-    font-size: 95% !important;
+    font-size: 100% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4511,7 +4456,7 @@ li.header-li-px {
 /* 1500px - 1599px */
 @media (min-width: 1500px) and (max-width: 1599px) {
   html {
-    font-size: 90% !important;
+    font-size: 97.5% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4529,7 +4474,7 @@ li.header-li-px {
 /* 1400px - 1499px */
 @media (min-width: 1401px) and (max-width: 1499px) {
   html {
-    font-size: 85% !important;
+    font-size: 95% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4547,7 +4492,7 @@ li.header-li-px {
 /* 1300px - 1399px */
 @media (min-width: 1300px) and (max-width: 1400px) {
   html {
-    font-size: 80% !important;
+    font-size: 92.5% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4564,7 +4509,7 @@ li.header-li-px {
 /* 1200px - 1299px */
 @media (min-width: 1200px) and (max-width: 1299px) {
   html {
-    font-size: 75% !important;
+    font-size: 90% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -4582,7 +4527,7 @@ li.header-li-px {
 /* 1024px - 1199px */
 @media (min-width: 991px) and (max-width: 1199px) {
   html {
-    font-size: 70% !important;
+    font-size: 87.5% !important;
   }
 
   .customize-layout-panel.p-overlaypanel {
@@ -5168,11 +5113,14 @@ flex-shrink: 0; */
 .solid-kanban-board-wrapper {
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   height: calc(100vh - 120px) !important;
   min-height: 0;
   min-width: 0;
   flex: 1 1 auto;
+  -webkit-overflow-scrolling: touch;
+  width: calc(100vw - 300px);
 }
 
 .solid-kanban-board-scroll-context {
@@ -5180,6 +5128,7 @@ flex-shrink: 0; */
   overflow: visible;
   flex: 0 0 auto;
   width: max-content;
+  max-width: none;
   min-width: 100%;
   min-height: 100%;
   height: auto;
@@ -5720,15 +5669,15 @@ html.dark .solid-media-card-widget__kind,
 
 .solid-empty-listview-actions .solid-empty-listview-create-action .p-button,
 .solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn {
-  background: var(--foreground);
-  border-color: var(--foreground);
-  color: var(--background);
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
 }
 
 .solid-empty-listview-actions .solid-empty-listview-create-action .p-button:hover,
 .solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn:hover {
-  background: color-mix(in srgb, var(--foreground) 90%, transparent);
-  border-color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  background: color-mix(in srgb, var(--primary) 90%, black);
+  border-color: color-mix(in srgb, var(--primary) 90%, black);
 }
 
 .solid-empty-listview-import-button.p-button,
@@ -5784,7 +5733,7 @@ html.dark .solid-empty-listview-header,
 [data-theme="dark"] .solid-empty-listview-header {
   padding: 18px 22px 14px;
   border-bottom-color: color-mix(in srgb, var(--border) 70%, #334155 30%);
-  background: linear-gradient(180deg, rgba(96, 165, 250, 0.05), transparent);
+  background: linear-gradient(180deg, rgba(179, 127, 235, 0.05), transparent);
 }
 
 html.dark .solid-empty-listview-header-title,
@@ -5958,8 +5907,93 @@ html.dark .solid-empty-listview-secondary-action.solid-btn,
 
 .register-success-popup {
   border-radius: 1.25rem !important;
-  background: #fff !important;
+  background: color-mix(in srgb, var(--background) 72%, white 28%) !important;
+  backdrop-filter: blur(10px);
   z-index: 1000 !important;
+  padding: 20px;
+}
+
+.register-success-card {
+  width: min(100%, 320px);
+  margin: 0 auto;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  background: color-mix(in srgb, var(--card) 92%, white 8%);
+  color: var(--card-foreground);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+  padding: 24px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.register-success-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-success-spinner.solid-spinner {
+  color: var(--primary);
+}
+
+.register-success-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.register-success-title {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.register-success-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.register-success-progress {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 18%, transparent);
+}
+
+.register-success-progress-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 38%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 60%, white 40%));
+  animation: register-success-progress 1.2s ease-in-out infinite;
+}
+
+@keyframes register-success-progress {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(290%);
+  }
 }
 
 /* ========================= Taost =================================== */

@@ -28,6 +28,7 @@ import { SolidSelectionDynamicField } from "./fields/SolidSelectionDynamicField"
 import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
 import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
+import { SolidComputedField } from "./fields/SolidComputedField";
 import { SolidUiEvent } from "../../../types";
 import { getExtensionComponent, getExtensionFunction } from "../../../helpers/registry";
 import { SolidFormWidgetProps, SolidUiEventResponse } from "../../../types/solid-core";
@@ -41,6 +42,7 @@ import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
@@ -171,6 +173,9 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
     if (type === 'email') {
         return new SolidEmailField(fieldContext);
     }
+    if (type === 'computed') {
+        return new SolidComputedField(fieldContext);
+    }
     return null;
 }
 
@@ -276,7 +281,7 @@ const SolidSheet = ({ children }: any) => (
 // Internal tab data carrier — SolidNotebook reads props from this
 const SolidPageTab = ({ children }: any) => <>{children}</>;
 
-const SolidNotebook = ({ children, activeTab, embeded }: any) => {
+const SolidNotebook = ({ children, activeTab, embeded, requestedTab, requestedTabVersion }: any) => {
     const childrenArray = React.Children.toArray(children).filter(child => !!child) as any[];
 
     const router = useRouter();
@@ -285,6 +290,19 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     const [localActiveTab, setLocalActiveTab] = useState(activeTab);
 
     const effectiveTab = embeded ? localActiveTab : activeTab;
+
+    useEffect(() => {
+        if (!requestedTab) return;
+        const exists = childrenArray.some((child: any) => child.props?.tabKey === requestedTab);
+        if (!exists) return;
+        if (embeded) {
+            setLocalActiveTab(requestedTab);
+        } else {
+            const queryParams = new URLSearchParams(searchParams.toString());
+            queryParams.set('activeTab', requestedTab);
+            router.push(`${pathname}?${queryParams.toString()}`);
+        }
+    }, [requestedTabVersion]);
 
     const activeIndex = useMemo(() => {
         const idx = childrenArray.findIndex((child: any) => child.props?.tabKey === effectiveTab);
@@ -349,6 +367,29 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, 
     )
 };
 
+
+const FormikSubmitWatcher = ({ formik, tabFieldsRef, embeded, searchParams, setRequestedTab, setRequestedTabVersion }: any) => {
+    const lastHandledRef = useRef(0);
+    useEffect(() => {
+        if (formik.submitCount === lastHandledRef.current) return;
+        if (formik.isSubmitting) return;
+        lastHandledRef.current = formik.submitCount;
+        const erroredKeys = Object.keys(formik.errors || {});
+        if (erroredKeys.length === 0) return;
+        if (!tabFieldsRef.current || tabFieldsRef.current.length === 0) return;
+        const currentActive = embeded ? null : (searchParams.get("activeTab") || "");
+        const currentHasError = currentActive
+            ? tabFieldsRef.current.find((t: any) => t.tabKey === currentActive)?.fields.some((f: string) => erroredKeys.includes(f))
+            : false;
+        if (currentHasError) return;
+        const firstErroredTab = tabFieldsRef.current.find((t: any) => t.fields.some((f: string) => erroredKeys.includes(f)));
+        if (firstErroredTab) {
+            setRequestedTab(firstErroredTab.tabKey);
+            setRequestedTabVersion((v: number) => v + 1);
+        }
+    }, [formik.submitCount, formik.isSubmitting]);
+    return null;
+};
 
 const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
     const fieldsName = fields.map((f: any) => f.attrs.name);
@@ -433,6 +474,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [chatterLocaleWidth, setChatterLocaleWidth] = useState(360);
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isMobileViewport, setIsMobileViewport] = useState(false);
+    const solidFormWrapperRef = useRef<HTMLDivElement | null>(null);
+
+    const tabFieldsRef = useRef<Array<{ tabKey: string; fields: string[] }>>([]);
+    const [requestedTab, setRequestedTab] = useState<string | null>(null);
+    const [requestedTabVersion, setRequestedTabVersion] = useState(0);
 
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
     const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
@@ -450,15 +497,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const actionContext = searchParams.get('actionContext');
 
     const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [])
 
     useEffect(() => {
-        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
+        if (solidSettingsMap?.mcpEnabled && solidSettingsMap?.mcpServerUrl) {
             enableSolidXAiPanel();
         }
-    }, [solidSettingsData]);
+    }, [solidSettingsMap]);
 
 
     const enableSolidXAiPanel = async () => {
@@ -479,19 +527,34 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }
 
     const op = useRef(null);
+    const MIN_CHATTER_WIDTH = 320;
+    const MIN_FORM_SECTION_WIDTH = 420;
+
+    const getMaxChatterWidth = () => {
+        const wrapperWidth = solidFormWrapperRef.current?.getBoundingClientRect().width ?? window.innerWidth;
+        return Math.max(MIN_CHATTER_WIDTH, wrapperWidth - MIN_FORM_SECTION_WIDTH);
+    };
+
+    const clampChatterWidth = (width: number) => {
+        const maxWidth = getMaxChatterWidth();
+        return Math.max(MIN_CHATTER_WIDTH, Math.min(width, maxWidth));
+    };
+
     useEffect(() => {
         const stored = localStorage.getItem('chatter_locale_width');
         if (stored) {
             const parsed = parseInt(stored, 10);
-            const clampedWidth = Math.max(320, Math.min(parsed, 420));
+            const clampedWidth = clampChatterWidth(parsed);
             setChatterLocaleWidth(clampedWidth);
         }
     }, []);
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isResizingChatterLocale) return;
-            const newWidth = window.innerWidth - e.clientX;
-            const clampedWidth = Math.max(320, Math.min(newWidth, 420));
+            const wrapperRect = solidFormWrapperRef.current?.getBoundingClientRect();
+            const rightEdge = wrapperRect?.right ?? window.innerWidth;
+            const newWidth = rightEdge - e.clientX;
+            const clampedWidth = clampChatterWidth(newWidth);
             setChatterLocaleWidth(clampedWidth);
             localStorage.setItem('chatter_locale_width', clampedWidth.toString());
         };
@@ -510,6 +573,28 @@ const SolidFormView = (params: SolidFormViewProps) => {
             window.removeEventListener('mouseup', handleMouseUp);
         };
     }, [isResizingChatterLocale]);
+
+    useEffect(() => {
+        const updateViewportFlag = () => setIsMobileViewport(window.innerWidth <= 1199);
+        updateViewportFlag();
+        window.addEventListener('resize', updateViewportFlag);
+        return () => window.removeEventListener('resize', updateViewportFlag);
+    }, []);
+
+    useEffect(() => {
+        const handleWindowResize = () => {
+            setChatterLocaleWidth((currentWidth) => {
+                const clamped = clampChatterWidth(currentWidth);
+                if (clamped !== currentWidth) {
+                    localStorage.setItem('chatter_locale_width', clamped.toString());
+                }
+                return clamped;
+            });
+        };
+
+        window.addEventListener('resize', handleWindowResize);
+        return () => window.removeEventListener('resize', handleWindowResize);
+    }, []);
 
 
     useEffect(() => {
@@ -628,6 +713,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
+    const entityDisplayName =
+        solidFormViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
     const [refreshChatterMessage, setRefreshChatterMessage] = useState<boolean>(true);
     useEffect(() => {
         if (
@@ -1200,7 +1287,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         });
 
         return (
-            <div className="solid-form-wrapper">
+            <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
                 <div className="solid-form-section">
                     <div className="page-header solid-list-toolbar flex-column lg:flex-row">
                         <div className="flex justify-content-between w-full solid-form-toolbar-row">
@@ -1264,6 +1351,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         });
 
         const formFieldOnXXX = async (event: ChangeEvent<HTMLInputElement>, eventType: string) => {
+            // console.log("formFieldOnXXX", eventType, event);
 
             // Invoke the formik change 
             if (eventType === 'onFieldChange') {
@@ -1441,12 +1529,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
+                        tabFieldsRef.current = [];
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded} requestedTab={requestedTab} requestedTabVersion={requestedTabVersion}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
                     }
                     break;
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
+                        tabFieldsRef.current.push({ tabKey: key, fields: fields.map((f: any) => f.attrs.name) });
                         const pageChildren = children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
@@ -1634,9 +1724,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
 
         return (
-            <div className="solid-form-wrapper">
+            <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
                 <div className="solid-form-section">
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
+                        <FormikSubmitWatcher
+                            formik={formik}
+                            tabFieldsRef={tabFieldsRef}
+                            embeded={params.embeded}
+                            searchParams={searchParams}
+                            setRequestedTab={setRequestedTab}
+                            setRequestedTabVersion={setRequestedTabVersion}
+                        />
                         <SolidFormActionHeader
                             formik={formik}
                             formData={solidFormViewData?.data}
@@ -1660,6 +1758,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
                             headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
+                            showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
+                            onMobileOpenChatter={() => setShowChatter(true)}
                         />
                         <div className={`px-4 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
@@ -1741,23 +1841,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </div>
                 }
 
-                <SolidDialog
+                <SolidConfirmDialog
                     open={isDeleteDialogVisible}
-                    onOpenChange={setDeleteDialogVisible}
-                    className="solid-confirm-dialog"
-                >
-                    <SolidDialogHeader className="solid-field-confirm-header">
-                        <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
-                        <SolidDialogClose />
-                    </SolidDialogHeader>
-                    <SolidDialogBody className="solid-field-confirm-dialog-body">
-                        <p className="solid-field-confirm-message">Are you sure you want to delete?</p>
-                    </SolidDialogBody>
-                    <div className="solid-radix-dialog-footer solid-field-confirm-actions">
-                        <SolidButton label="Yes" icon="si si-check" variant="destructive" autoFocus onClick={() => handleDeleteEntity()} />
-                        <SolidButton label="No" icon="si si-times" variant="outline" onClick={onDeleteClose} />
-                    </div>
-                </SolidDialog>
+                    onCancel={onDeleteClose}
+                    onConfirm={() => handleDeleteEntity()}
+                    className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
+                    headerClassName="solid-shadcn-dialog-head"
+                    bodyClassName="solid-shadcn-dialog-body"
+                    footerClassName="solid-shadcn-dialog-actions"
+                    separatorClassName="solid-shadcn-dialog-sep"
+                    showSeparator
+                    title={`Delete ${entityDisplayName}`}
+                    message={<p className="solid-shadcn-dialog-text">{`Are you sure you want to delete this ${entityDisplayName}?`}</p>}
+                    confirmLabel="Delete"
+                    cancelLabel="Cancel"
+                />
                 <SolidDialog
                     open={isLayoutDialogVisible}
                     onOpenChange={setLayoutDialogVisible}

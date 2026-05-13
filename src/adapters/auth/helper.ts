@@ -1,6 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import { saveSession } from "./storage";
 import { eventBus, AppEvents } from "../../helpers/eventBus";
+import { Session } from "./types";
 
 type AuthResult = {
     ok: boolean;
@@ -22,7 +23,7 @@ export function handleAuthSuccess(accessToken:string , refreshToken: string , us
     const decoded = jwtDecode<{ exp?: number }>(accessToken);
     const accessTokenExpires = decoded.exp ? decoded.exp * 1000 : undefined;
 
-    const session = {
+    const session: Session = {
         user: {
             ...user,
             accessToken,
@@ -30,6 +31,7 @@ export function handleAuthSuccess(accessToken:string , refreshToken: string , us
             accessTokenExpires,
         },
         error: null,
+        refreshed: false,
     };
 
     saveSession(session);

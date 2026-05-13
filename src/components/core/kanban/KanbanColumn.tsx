@@ -1,6 +1,7 @@
 import React from "react";
-import { Droppable, DroppableProvided } from "@hello-pangea/dnd";
+import { DroppableProvided } from "@hello-pangea/dnd";
 import KanbanCard from "./KanbanCard";
+import { asCompatibleReactNode, CompatibleDroppable } from "../common/dndCompat";
 import {
   SolidButton,
   SolidDropdownMenu,
@@ -84,7 +85,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
         }
       </div>
       {!group.folded && (
-        <Droppable droppableId={groupByField} isDropDisabled={!isKanbanDragEnabled}>
+        <CompatibleDroppable droppableId={groupByField} isDropDisabled={!isKanbanDragEnabled}>
           {(provided: DroppableProvided) => (
             <div
               ref={provided.innerRef}
@@ -95,7 +96,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
                 // @ts-ignore
                 <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} />
               ))}
-              {provided.placeholder}
+              {asCompatibleReactNode(provided.placeholder)}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&
                 <SolidButton
                   type="button"
@@ -109,7 +110,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
               }
             </div>
           )}
-        </Droppable>
+        </CompatibleDroppable>
       )}
     </div>
   );

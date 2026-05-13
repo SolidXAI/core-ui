@@ -24,6 +24,8 @@ import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 import { InitiateLoginPage } from "./pages/auth/InitiateLoginPage";
 import { InitiateRegisterPage } from "./pages/auth/InitiateRegisterPage";
 import { InitiateGoogleOauthPage } from "./pages/auth/InitiateGoogleOauthPage";
+import { InitiateFacebookOauthPage } from "./pages/auth/InitiateFacebookOauthPage";
+import { InitiateMicrosoftOauthPage } from "./pages/auth/InitiateMicrosoftOauthPage";
 import { SsoPage } from "./pages/auth/SsoPage";
 import type { SolidRoutesOptions, SolidRouteKey } from "./types";
 import { TreePage } from "./pages/admin/core/TreePage";
@@ -67,6 +69,8 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/auth/reset-password", element: pick("resetPassword", <ResetPasswordPage />) },
 
     { path: "/auth/initiate-google-oauth", element: pick("initiateGoogleOauth", <InitiateGoogleOauthPage />) },
+    { path: "/auth/initiate-facebook-oauth", element: pick("initiateFacebookOauth", <InitiateFacebookOauthPage />) },
+    { path: "/auth/initiate-microsoft-oauth", element: pick("initiateMicrosoftOauth", <InitiateMicrosoftOauthPage />) },
     { path: "/auth/sso", element: pick("sso", <SsoPage />) },
     ...extraAuthRoutes,
   ];
@@ -80,7 +84,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />) },
     { path: "/admin/core/:moduleName/:modelName/card", element: pick("card", <CardPage />) },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />) },
-    { path: "/admin/core/:moduleName/settings/:settings", element: pick("settings", <SettingsPage />) },
+    { path: "/admin/core/settings", element: pick("settings", <SettingsPage />) },
     ...extraAdminRoutes,
   ];
 

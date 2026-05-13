@@ -3,6 +3,7 @@ import { env } from "../env";
 import { saveSession } from "./storage";
 import { eventBus, AppEvents } from "../../helpers/eventBus";
 import { solidGet } from "../..//http/solidHttp";
+import { Session } from "./types";
 
 type SignInResponse = {
   ok: boolean;
@@ -14,10 +15,11 @@ type SignInResponse = {
 type SignInWithOAuthAccessCodeOptions = {
   accessCode: string;
   userAgent?: string;
+  provider?: "google" | "facebook" | "microsoft";
 };
 
 export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCodeOptions): Promise<SignInResponse> {
-  const { accessCode, userAgent } = options;
+  const { accessCode, userAgent, provider = "google" } = options;
   const apiUrl = env("API_URL");
 
   if (!apiUrl) {
@@ -34,7 +36,7 @@ export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCo
     }
 
     const response = await solidGet(
-      `${apiUrl}/api/iam/google/authenticate?accessCode=${encodeURIComponent(accessCode)}`,
+      `${apiUrl}/api/iam/${provider}/authenticate?accessCode=${encodeURIComponent(accessCode)}`,
       {
         headers,
       }
@@ -56,7 +58,7 @@ export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCo
     const decoded = jwtDecode<{ exp?: number }>(accessToken);
     const accessTokenExpires = decoded.exp ? decoded.exp * 1000 : undefined;
 
-    const session = {
+    const session: Session = {
       user: {
         ...user,
         accessToken,
@@ -64,6 +66,7 @@ export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCo
         accessTokenExpires,
       },
       error: null,
+      refreshed: false,
     };
     saveSession(session);
     eventBus.emit(AppEvents.SessionUpdated, session);

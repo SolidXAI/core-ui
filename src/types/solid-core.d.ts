@@ -100,6 +100,7 @@ export type LayoutAttribute = {
     editAction?: any;
     createAction?: any;
     required?: boolean;
+    multiSelect?: boolean;
 };
 
 // Generic representation of any node in our layout 
@@ -282,6 +283,16 @@ export type SolidFormWidgetProps = {
 export type SolidFormFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
+}
+
+export type SolidSettingsWidgetProps = {
+    setting: any;
+    value: any;
+    settingsMap: Record<string, any>;
+    formValues: Record<string, any>;
+    editable: boolean;
+    updateValue: (key: string, value: any) => void;
+    updateFileValue: (key: string, file: File | null) => void;
 }
 
 export type SolidListFieldWidgetProps = {

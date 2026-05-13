@@ -111,7 +111,7 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
                 })} */}
                     {kanbanViewData.map((data: any) => {
                         // Find the displayName for the groupName from solidKanbanViewMetaData.solidFieldsMetadata
-                        let label = data.groupName;
+                        let label = data.groupLabel || data.groupName;
                         const fieldMeta = solidKanbanViewMetaData?.solidFieldsMetadata?.[groupByFieldName];
                         if (
                             fieldMeta &&

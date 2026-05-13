@@ -3,9 +3,6 @@
     border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
 }
 
-.chatterTitleWithLabel {
-    padding-left: 2.4rem;
-}
 
 .chatterMessageComposer .chatterMessageInput {
     background-color: var(--background);
@@ -88,14 +85,14 @@
 }
 
 :global(.solid-purple-button) {
-    --solid-btn-bg: #722ED1;
-    --solid-btn-border: #722ED1;
+    --solid-btn-bg: var(--primary-color, var(--primary));
+    --solid-btn-border: var(--primary-color, var(--primary));
     --solid-btn-fg: #fff;
 }
 
 :global(.solid-purple-button:hover) {
-    --solid-btn-bg: #5b1bb7;
-    --solid-btn-border: #5b1bb7;
+    --solid-btn-bg: color-mix(in srgb, var(--primary-color, var(--primary)) 86%, #0f172a);
+    --solid-btn-border: color-mix(in srgb, var(--primary-color, var(--primary)) 86%, #0f172a);
 }
 
 .solidChatterMessageBox {
@@ -250,9 +247,9 @@
 }
 
 .solidChatterBadge.custom {
-    color: #2563eb;
-    border-color: rgba(37, 99, 235, 0.2);
-    background: rgba(37, 99, 235, 0.08);
+    color: #722ED1;
+    border-color: rgba(114, 46, 209, 0.2);
+    background: rgba(114, 46, 209, 0.08);
 }
 
 :global(.solid-chatter-body) {

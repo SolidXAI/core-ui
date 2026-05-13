@@ -4,6 +4,7 @@ import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
 import { SolidButton } from "../../../shad-cn-ui/SolidButton";
 import styles from "./SolidAccountSettings.module.css";
+import { getSettingsMap } from "../../../../helpers/settingsPayload";
 
 type ToastState = {
   id: number;
@@ -14,6 +15,7 @@ type ToastState = {
 
 export const SolidNotifications = () => {
   const { data: solidSettingsData, refetch } = useGetSolidSettingsQuery(undefined);
+  const settingsMap = getSettingsMap(solidSettingsData);
   const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
   const [toast, setToast] = useState<ToastState>(null);
 
@@ -27,13 +29,13 @@ export const SolidNotifications = () => {
 
   const formik = useFormik({
     initialValues: {
-      enableNotification: solidSettingsData?.data?.enableNotification ?? true,
+      enableNotification: settingsMap?.enableNotification ?? settingsMap?.enabledNotification ?? true,
     },
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
         const updatedSettingsArray: Array<{ key: string; value: string | boolean; type: string }> = [];
-        const currentSettings = solidSettingsData?.data?.user || {};
+        const currentSettings = settingsMap || {};
         Object.entries(values).forEach(([key, value]) => {
           if ((currentSettings[key] ?? "") !== (value ?? "")) {
             updatedSettingsArray.push({ key, value, type: "user" });

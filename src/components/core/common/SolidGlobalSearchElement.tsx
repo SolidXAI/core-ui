@@ -1321,7 +1321,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 setShowGlobalSearchElement(true)
                             }
                             }>
-                            <rect width="20" height="20" rx="4" fill="#722ED1" />
+                            <rect width="20" height="20" rx="4" fill="var(--primary-color, var(--primary))" />
                             <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
                                 fill="white" />
                         </svg>
@@ -1395,7 +1395,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             }
                             }
                         >
-                            <rect width="20" height="20" rx="4" fill="#722ED1" />
+                            <rect width="20" height="20" rx="4" fill="var(--primary-color, var(--primary))" />
                             <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
                                 fill="white" />
                         </svg>
@@ -1427,7 +1427,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
                             onClick={() => setShowGroupFilterElement(true)}
                         >
-                            <rect width="20" height="20" rx="4" fill="#722ED1" />
+                            <rect width="20" height="20" rx="4" fill="var(--primary-color, var(--primary))" />
                             <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
                                 fill="white" />
                         </svg>
@@ -1894,7 +1894,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 )}
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel">
+                    <div ref={overlayRef} className="absolute w-full shadow-2 solid-search-overlay-pannel">
                         <div className="solid-search-overlay-scroll">
                             {inputValue ? (
                                 <>

@@ -1,45 +1,45 @@
 import Link from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
+import { LayoutContext } from "../layout/context/layoutcontext";
+import { solidGet } from "../../http/solidHttp";
+import { AuthSettingsContext } from "./AuthSettingsContext";
+import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    const layoutContext = useContext(LayoutContext);
+    const [solidSettingsData, setSolidSettingsData] = useState<any>(null);
+    const [isLoadingAuthSettings, setIsLoadingAuthSettings] = useState(true);
 
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
 
-    // const { changeTheme } = useContext(PrimeReactContext);
-    // const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
-    // const dispatch = useDispatch();
-    // const _changeTheme = (theme: string, colorScheme: string) => {
-    //     changeTheme?.(layoutConfig.theme, theme, 'theme-css', () => {
-    //         setLayoutConfig((prevState: LayoutConfig) => ({ ...prevState, theme, colorScheme }));
-    //     });
-    // };
-    // useEffect(() => {
-    //     const theme = solidSettingsData?.data?.authPagesTheme; // 'dark' or 'light'
-    //     if (theme) {
-    //         dispatch(toggleTheme()); // Dispatch Redux action
-    //         _changeTheme(
-    //             theme === "dark" ? "solid-dark-purple" : "solid-light-purple",
-    //             theme
-    //         );
-    //     }
-    // }, [solidSettingsData]);
+    const loadAuthSettings = useCallback(async () => {
+        setIsLoadingAuthSettings(true);
+        try {
+            const response = await solidGet("/setting/wrapped");
+            setSolidSettingsData(toLegacySettingsShape(response?.data ?? null));
+        } catch (error) {
+            console.error("Failed to load auth settings", error);
+            setSolidSettingsData(null);
+        } finally {
+            setIsLoadingAuthSettings(false);
+        }
+    }, []);
+
     useEffect(() => {
-        trigger("");
-    }, [trigger]);
+        loadAuthSettings();
+    }, [loadAuthSettings]);
 
     useEffect(() => {
         const allowPublicRegistration = solidSettingsData?.data?.allowPublicRegistration;
@@ -56,12 +56,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         }
     }, [solidSettingsData, pathname]);
 
-    if (allowRegistration === null && pathname === "/auth/register") {
-        console.log(`AuthLayout returning null because allowRegistration is null for register route`);
-        return null;
-    }
-
-    const authChildren = allowRegistration || pathname !== "/auth/register" ? children : null;
+    const authChildren =
+        pathname !== "/auth/register" || allowRegistration !== false || isLoadingAuthSettings
+            ? children
+            : null;
     const handleRegistration = () => {
         router.push("/auth/login");
         setIsRestricted(false);
@@ -97,28 +95,38 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
-    const appName = solidSettingsData?.data?.appTitle || "SolidX";
+    const appName = solidSettingsData?.data?.appTitle?.trim() || "";
 
-    const renderBrand = (align: "center" | "start" = "start") => (
-        <a href="#" className={`solid-auth-brand ${align === "center" ? "is-center" : ""}`} aria-label={appName}>
+    const renderBrand = (align: "center" | "start" = "start") => {
+        if (!authLogoSrc && !appName) return null;
+
+        const brandLabel = appName || "Application logo";
+
+        return (
+            <div className={`solid-auth-brand ${align === "center" ? "is-center" : ""}`} aria-label={brandLabel}>
                 {authLogoSrc ? (
                     <span className="solid-auth-brand-logo">
-                    <img src={authLogoSrc} alt={appName} />
+                        <img src={authLogoSrc} alt={brandLabel} />
                     </span>
-                ) : (
-                    <span className="solid-auth-brand-icon">
-                    <span className="solid-auth-brand-fallback">{appName.slice(0, 1).toUpperCase()}</span>
-                    <span className="solid-auth-brand-text">{appName}</span>
-                    </span>
-                )}
-        </a>
-    );
+                ) : null}
+                {appName ? <span className="solid-auth-brand-text">{appName}</span> : null}
+            </div>
+        );
+    };
 
     const authLayout = solidSettingsData?.data?.authPagesLayout || "center";
-    const authTheme = solidSettingsData?.data?.authPagesTheme === "dark" ? "dark" : "light";
+    const authTheme = layoutContext?.themeMode === "dark" ? "dark" : "light";
     const isCenter = authLayout === "center";
     const isLeft = authLayout === "left";
     const isRight = authLayout === "right";
+    const authSettingsContextValue = useMemo(
+        () => ({
+            solidSettingsData,
+            isLoadingAuthSettings,
+            reloadAuthSettings: loadAuthSettings,
+        }),
+        [solidSettingsData, isLoadingAuthSettings, loadAuthSettings]
+    );
 
     const formPane = (
         <div className="solid-auth-form-pane solid-login-dark-bg">
@@ -159,6 +167,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     );
 
     return (
+        <AuthSettingsContext.Provider value={authSettingsContextValue}>
         <div className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`} data-auth-theme={authTheme}>
             {!isCenter && (
                 <div className="solid-auth-split">
@@ -223,5 +232,6 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
             </SolidDialog >
         </div >
+        </AuthSettingsContext.Provider>
     )
 }

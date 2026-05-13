@@ -7,6 +7,7 @@ import {
   SolidDatePicker,
   SolidDialog,
   SolidDialogBody,
+  SolidDialogDescription,
   SolidDialogFooter,
   SolidDialogHeader,
   SolidDialogSeparator,
@@ -16,7 +17,7 @@ import {
   SolidSelect,
 } from "../../../shad-cn-ui";
 import { showToast } from "../../../../redux/features/toastSlice";
-import { useGenerateApiKeyForUserMutation } from "../../../../redux/api/apiKeyApi";
+import { type ApiKeyRecord, useGenerateApiKeyForUserMutation } from "../../../../redux/api/apiKeyApi";
 
 const EXPIRY_OPTIONS = [
   { label: "30 days", value: "30d" },
@@ -52,7 +53,7 @@ function resolveExpiresAt(expiryOption: string, customDate: Date | null): string
 interface GenerateApiKeyModalProps {
   open: boolean;
   onClose: () => void;
-  onCreated: (rawApiKey: string, keyName: string) => void;
+  onCreated: (rawApiKey: string, keyName: string, record: ApiKeyRecord) => void;
   userId?: number;
 }
 
@@ -86,7 +87,7 @@ export function GenerateApiKeyModal({ open, onClose, onCreated, userId }: Genera
         const body = { name: values.name.trim(), ...(expiresAt ? { expiresAt } : {}) };
         const response = await generateApiKeyForUser({ userId: userId!, body }).unwrap();
 
-        onCreated(response.data.apiKey, values.name.trim());
+        onCreated(response.data.apiKey, values.name.trim(), response.data.record);
         handleClose();
       } catch (err: any) {
         const detail = err?.data?.message || "Failed to generate API key. Please try again.";
@@ -117,15 +118,18 @@ export function GenerateApiKeyModal({ open, onClose, onCreated, userId }: Genera
       : "";
 
   return (
-    <SolidDialog open={open} onOpenChange={handleClose} style={{ maxWidth: 480 }}>
-      <SolidDialogHeader>
+    <SolidDialog open={open} onOpenChange={handleClose} style={{ maxWidth: 480 }} className="solid-api-key-dialog">
+      <SolidDialogHeader className="solid-api-key-dialog-header">
         <SolidDialogTitle>Generate API Key</SolidDialogTitle>
+        <SolidDialogDescription>
+          Create a named key for this user. The raw key will be shown only once after generation.
+        </SolidDialogDescription>
       </SolidDialogHeader>
       <SolidDialogSeparator />
-      <SolidDialogBody>
+      <SolidDialogBody className="solid-api-key-dialog-body">
         <form id="generate-api-key-form" onSubmit={formik.handleSubmit}>
-          <div className="flex flex-column gap-3">
-            <div className="flex flex-column gap-2">
+          <div className="solid-api-key-dialog-fields">
+            <div className="solid-api-key-dialog-field">
               <label htmlFor="api-key-name" className="form-field-label">
                 Key Name <span style={{ color: "var(--solid-danger-color, #ef4444)" }}>*</span>
               </label>
@@ -141,7 +145,7 @@ export function GenerateApiKeyModal({ open, onClose, onCreated, userId }: Genera
               {nameError && <SolidMessage severity="error" text={nameError} />}
             </div>
 
-            <div className="flex flex-column gap-2">
+            <div className="solid-api-key-dialog-field">
               <label htmlFor="api-key-expiry" className="form-field-label">
                 Expires
               </label>
@@ -164,13 +168,16 @@ export function GenerateApiKeyModal({ open, onClose, onCreated, userId }: Genera
                   dateFormat="dd/MM/yyyy"
                 />
               )}
+              {formik.values.expiryOption !== "custom" ? (
+                <p className="solid-api-key-dialog-hint m-0">Choose how long this key should remain valid.</p>
+              ) : null}
               {expiryError && <SolidMessage severity="error" text={expiryError} />}
             </div>
           </div>
         </form>
       </SolidDialogBody>
       <SolidDialogSeparator />
-      <SolidDialogFooter>
+      <SolidDialogFooter className="solid-api-key-dialog-footer">
         <SolidButton variant="outline" type="button" onClick={handleClose} disabled={isLoading}>
           Cancel
         </SolidButton>

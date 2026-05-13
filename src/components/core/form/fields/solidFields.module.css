@@ -44,7 +44,6 @@
 .fieldInput:focus-visible {
     outline: none !important;
     border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
-    box-shadow: 0 0 0 3px var(--ring) !important;
 }
 
 .fieldInput:disabled {
@@ -71,7 +70,6 @@
 .fieldTextarea:focus-visible {
     outline: none !important;
     border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
-    box-shadow: 0 0 0 3px var(--ring) !important;
 }
 
 .fieldTextarea:disabled {
@@ -105,7 +103,6 @@
 .fieldNumberWrapper :global(.p-inputnumber-input):focus {
     outline: none !important;
     border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
-    box-shadow: 0 0 0 3px var(--ring) !important;
 }
 
 .fieldNumberWrapper :global(.p-inputnumber-input):disabled {

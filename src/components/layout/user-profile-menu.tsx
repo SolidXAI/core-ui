@@ -6,6 +6,7 @@ import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { useSession } from "../../hooks/useSession";
 import { SolidButton } from "../shad-cn-ui/SolidButton";
 import { SolidIcon, parseSolidIconMeta } from "../shad-cn-ui/SolidIcon";
+import { getSettingsMap } from "../../helpers/settingsPayload";
 
 type InlineToast = {
   id: number;
@@ -26,6 +27,7 @@ const UserProfileMenu = () => {
   useEffect(() => {
     trigger("") // Fetch settings on mount
   }, [trigger])
+  const settingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
 
   const session = useSession();
   const userId = session?.data?.user?.id;
@@ -96,7 +98,7 @@ const UserProfileMenu = () => {
     ?.filter((role: any) => role.name !== "Internal User")
     .map((role: any) => role.name)
     .join(" | ");
-  const displayName = solidSettingsData?.data?.enableUsername
+  const displayName = settingsMap?.enableUsername
     ? userData?.data?.username
     : userData?.data?.email;
   const primaryRole = roleLabel?.split("|")?.[0]?.trim() || "User";
@@ -192,24 +194,24 @@ const UserProfileMenu = () => {
               <span>Account Settings</span>
             </button>
 
-            {solidSettingsData?.data?.contactSupportEmail && (
+            {settingsMap?.contactSupportEmail && (
               <button
                 type="button"
                 className="solid-user-menu-item"
                 onClick={() => {
                   setMenuOpen(false);
-                  window.location.href = `mailto:${solidSettingsData?.data?.contactSupportEmail}`;
+                  window.location.href = `mailto:${settingsMap?.contactSupportEmail}`;
                 }}
               >
-                {solidSettingsData?.data?.contactSupportIcon ? (
-                  (() => { const m = parseSolidIconMeta(solidSettingsData?.data?.contactSupportIcon); return m ? <SolidIcon name={m.name} spin={m.spin} aria-hidden="true" /> : <i className={solidSettingsData?.data?.contactSupportIcon} aria-hidden="true" />; })()
+                {settingsMap?.contactSupportIcon ? (
+                  (() => { const m = parseSolidIconMeta(settingsMap?.contactSupportIcon); return m ? <SolidIcon name={m.name} spin={m.spin} aria-hidden="true" /> : <i className={settingsMap?.contactSupportIcon} aria-hidden="true" />; })()
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                     <path d="M3 4.5C3 3.67157 3.67157 3 4.5 3H13.5C14.3284 3 15 3.67157 15 4.5V13.5C15 14.3284 14.3284 15 13.5 15H4.5C3.67157 15 3 14.3284 3 13.5V4.5Z" stroke="currentColor" strokeWidth="1.25" />
                     <path d="M4.125 5.25L9 9L13.875 5.25" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
-                <span>{solidSettingsData?.data?.contactSupportDisplayName || "Contact Support"}</span>
+                <span>{settingsMap?.contactSupportDisplayName || "Contact Support"}</span>
               </button>
             )}
 

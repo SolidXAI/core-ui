@@ -7,12 +7,10 @@ import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
 import { signInWithOtp } from "../../adapters/auth/index";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { SolidButton, SolidIcon, SolidMessage, SolidOtpInput } from "../shad-cn-ui";
-import { loadSession } from "../../adapters/auth/storage";
-import { hasAnyRole } from "../../helpers/rolesHelper";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 
 const SolidInitialLoginOtp = () => {
@@ -24,10 +22,7 @@ const SolidInitialLoginOtp = () => {
     const RESEND_OTP_KEY = `resendOtpLogin_${identifier}`;
     const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    const { solidSettingsData } = useAuthSettings();
 
     const [initiateResendOTP] = useInitateLoginMutation();
     const dispatch = useDispatch();
@@ -153,11 +148,8 @@ const SolidInitialLoginOtp = () => {
                                     });
                                 } else {
                                     localStorage.removeItem(`resendOtpLogin_${identifier}`);
-                                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                                    const session = loadSession();
-                                    const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
-                                    const isDev = env("VITE_SOLIDX_ENV") === "dev";
-                                    const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
+                                    // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
+                                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
                                     router.push(redirectUrl);
                                 }
                             } catch (err: any) {

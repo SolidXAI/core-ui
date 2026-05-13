@@ -1,3 +1,7 @@
 <svg width="522" height="40" viewBox="0 0 522 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M521 20.1399L508 0H0V40H508L521 20.1399Z" fill="#722ED1" stroke="#CFD6DC" stroke-linejoin="round"/>
+<style>
+  :root { --solid-svg-accent: #722ED1; }
+  html.dark :root, [data-theme="dark"] :root { --solid-svg-accent: #b37feb; }
+</style>
+<path d="M521 20.1399L508 0H0V40H508L521 20.1399Z" fill="var(--solid-svg-accent, #722ED1)" stroke="#CFD6DC" stroke-linejoin="round"/>
 </svg>

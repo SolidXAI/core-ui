@@ -8,25 +8,19 @@ import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { AuthTabs } from "./AuthTabs";
-import { loadSession } from "../../adapters/auth/storage";
-import { hasAnyRole } from "../../helpers/rolesHelper";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidDivider, SolidInput, SolidMessage, SolidPasswordInput, SolidRadioGroup } from "../shad-cn-ui";
+import { useAuthSettings } from "./AuthSettingsContext";
 
 interface AuthModesProps {
     passwordBasedAuth: boolean;
     passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    const { solidSettingsData } = useAuthSettings();
 
     const [initiateLogin] = useInitateLoginMutation();
     const [activeIndex, setActiveIndex] = useState(0);
@@ -88,11 +82,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 password: ERROR_MESSAGES.INVALID_CREDENTIALS,
                             });
                         } else {
-                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                            const session = loadSession();
-                            const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
-                            const isDev = env("VITE_SOLIDX_ENV") === "dev";
-                            const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
+                            // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
+                            const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
                             router.push(redirectUrl);
                         }
                     } catch (error: any) {
@@ -115,6 +106,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 onBlur={formik.handleBlur}
                                 aria-invalid={!!isFormFieldValid(formik, "identifier")}
                                 className="w-full"
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "identifier") && (
                                 <SolidMessage
@@ -137,6 +129,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 toggle
                                 className="w-full"
                                 aria-invalid={!!isFormFieldValid(formik, "password")}
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "password") && (
                                 <SolidMessage
@@ -315,6 +308,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 onBlur={formik.handleBlur}
                                 aria-invalid={!!isFormFieldValid(formik, "identifier")}
                                 className="w-full"
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "identifier") && (
                                 <SolidMessage
@@ -360,6 +354,13 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         }
     };
 
+    const isAnyOAuthEnabled = !!(
+        solidSettingsData?.data?.iamGoogleOAuthEnabled ||
+        solidSettingsData?.data?.iamFacebookOAuthEnabled ||
+        solidSettingsData?.data?.iamAppleOAuthEnabled ||
+        solidSettingsData?.data?.iamMicrosoftOAuthEnabled
+    );
+
     return (
         <div className="">
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
@@ -367,14 +368,19 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 <p className="solid-auth-helper">Enter your credentials below to login to your account</p>
 
                 <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
-                {solidSettingsData?.data?.iamGoogleOAuthEnabled && (
+                {isAnyOAuthEnabled && (
                     <>
                         <div className="solid-auth-divider flex align-items-center gap-2 my-4">
                             <SolidDivider className="flex-1" />
                             <span className="text-sm text-500">Or continue with</span>
                             <SolidDivider className="flex-1" />
                         </div>
-                        <SocialMediaLogin />
+                        <SocialMediaLogin
+                            googleEnabled={solidSettingsData?.data?.iamGoogleOAuthEnabled}
+                            facebookEnabled={solidSettingsData?.data?.iamFacebookOAuthEnabled}
+                            appleEnabled={solidSettingsData?.data?.iamAppleOAuthEnabled}
+                            microsoftEnabled={solidSettingsData?.data?.iamMicrosoftOAuthEnabled}
+                        />
                     </>
                 )}
             </div>

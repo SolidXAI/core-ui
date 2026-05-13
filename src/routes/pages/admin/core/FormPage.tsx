@@ -1,4 +1,4 @@
-import { camelCase } from "change-case";
+import { camelCase } from "lodash";
 import SolidFormLayouts from "../../../../components/core/form/SolidFormLayouts";
 import { useParams } from "react-router-dom";
 
