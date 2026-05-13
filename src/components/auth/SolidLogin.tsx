@@ -11,8 +11,6 @@ import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { AuthTabs } from "./AuthTabs";
-import { loadSession } from "../../adapters/auth/storage";
-import { hasAnyRole } from "../../helpers/rolesHelper";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidDivider, SolidInput, SolidMessage, SolidPasswordInput, SolidRadioGroup } from "../shad-cn-ui";
 import { useAuthSettings } from "./AuthSettingsContext";
@@ -85,10 +83,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             });
                         } else {
                             // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                            const session = loadSession();
-                            const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
-                            const isDev = env("VITE_SOLIDX_ENV") === "dev";
-                            const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
+                            const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
                             router.push(redirectUrl);
                         }
                     } catch (error: any) {
