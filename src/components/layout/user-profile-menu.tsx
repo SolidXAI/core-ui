@@ -5,6 +5,7 @@ import { handleLogout } from "../../adapters/auth/handleLogout";
 import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { useSession } from "../../hooks/useSession";
 import { SolidButton } from "../shad-cn-ui/SolidButton";
+import { SolidDialog } from "../shad-cn-ui/SolidDialog";
 import { SolidIcon, parseSolidIconMeta } from "../shad-cn-ui/SolidIcon";
 import { getSettingsMap } from "../../helpers/settingsPayload";
 
@@ -234,35 +235,29 @@ const UserProfileMenu = () => {
         )}
       </div>
       {confirmLogout && (
-        <div
-          className="solid-dialog-backdrop"
-          role="presentation"
-          onClick={() => setConfirmLogout(false)}
+        <SolidDialog
+          open={confirmLogout}
+          onOpenChange={setConfirmLogout}
+          showHeader={false}
+          className="solid-confirm-dialog solid-shadcn-confirm-dialog"
+          style={{ width: "min(320px, calc(100vw - 40px))" }}
         >
-          <div
-            className="solid-confirm-dialog solid-shadcn-confirm-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="solid-logout-dialog-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="solid-shadcn-dialog-head">
-              <h3 id="solid-logout-dialog-title">Logout</h3>
-            </div>
-            <div className="solid-shadcn-dialog-sep" />
-            <div className="solid-shadcn-dialog-body">
-              <p className="solid-shadcn-dialog-text">Are you sure you want to log out?</p>
-            </div>
-            <div className="solid-shadcn-dialog-actions">
-              <SolidButton size="sm" variant="destructive" onClick={() => handleLogout({ toast: toastRef })}>
-                Logout
-              </SolidButton>
-              <SolidButton size="sm" variant="outline" onClick={() => setConfirmLogout(false)}>
-                Cancel
-              </SolidButton>
-            </div>
+          <div className="solid-shadcn-dialog-head">
+            <h3 id="solid-logout-dialog-title">Logout</h3>
           </div>
-        </div>
+          <div className="solid-shadcn-dialog-sep" />
+          <div className="solid-shadcn-dialog-body">
+            <p className="solid-shadcn-dialog-text">Are you sure you want to log out?</p>
+          </div>
+          <div className="solid-shadcn-dialog-actions">
+            <SolidButton size="sm" variant="destructive" onClick={() => handleLogout({ toast: toastRef })}>
+              Logout
+            </SolidButton>
+            <SolidButton size="sm" variant="outline" onClick={() => setConfirmLogout(false)}>
+              Cancel
+            </SolidButton>
+          </div>
+        </SolidDialog>
       )}
       {showProfileSettingsDialog &&
         <SolidAccountSettings
