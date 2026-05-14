@@ -2753,6 +2753,10 @@ li.header-li-px {
   height: auto;
 }
 
+.solid-custom-filter-wrapper {
+  z-index: 85;
+}
+
 .custom-filter-button {
   border-right: 0;
   border-top: 0;
@@ -2897,6 +2901,7 @@ li.header-li-px {
 .solid-chip-manager-panel {
   top: calc(100% + 6px);
   left: 0;
+  z-index: 90 !important;
   width: min(360px, 100%);
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
