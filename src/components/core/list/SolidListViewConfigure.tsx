@@ -140,7 +140,39 @@ export const SolidListViewConfigure = (
         window.location.reload();
     };
 
-    const visibleViewModes = Array.isArray(viewModes) ? viewModes : [];
+    const visibleViewModes = (() => {
+        if (!Array.isArray(viewModes)) return [];
+
+        const uniqueByType = new Map<string, ViewMode>();
+        const currentActionId = String(params?.actionId ?? "");
+        const currentMenuItemId = String(params?.menuItemId ?? "");
+
+        for (const mode of viewModes) {
+            if (!mode || typeof mode.type !== "string") continue;
+
+            const existing = uniqueByType.get(mode.type);
+            if (!existing) {
+                uniqueByType.set(mode.type, mode);
+                continue;
+            }
+
+            const modeActionId = String(mode.actionId ?? "");
+            const modeMenuItemId = String(mode.menuItemId ?? "");
+            const existingActionId = String(existing.actionId ?? "");
+            const existingMenuItemId = String(existing.menuItemId ?? "");
+
+            const modeIsCurrent = (currentActionId && modeActionId === currentActionId) ||
+                (currentMenuItemId && modeMenuItemId === currentMenuItemId);
+            const existingIsCurrent = (currentActionId && existingActionId === currentActionId) ||
+                (currentMenuItemId && existingMenuItemId === currentMenuItemId);
+
+            if (modeIsCurrent && !existingIsCurrent) {
+                uniqueByType.set(mode.type, mode);
+            }
+        }
+
+        return Array.from(uniqueByType.values());
+    })();
     const showSwitchType = visibleViewModes.length > 1;
     const handleViewTypeChange = (nextType: string) => {
         const nextView = visibleViewModes.find((option: ViewMode) => option.type === nextType);
