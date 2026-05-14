@@ -173,7 +173,7 @@ export const SolidListViewConfigure = (
 
         return Array.from(uniqueByType.values());
     })();
-    const showSwitchType = visibleViewModes.length > 1;
+    const showSwitchType = visibleViewModes.length > 0;
     const handleViewTypeChange = (nextType: string) => {
         const nextView = visibleViewModes.find((option: ViewMode) => option.type === nextType);
         if (nextView) {
