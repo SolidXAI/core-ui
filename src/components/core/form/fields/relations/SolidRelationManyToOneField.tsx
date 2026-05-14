@@ -456,7 +456,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                                 'onFieldChange'
                             )
                         }
-                        className="w-full solid-standard-autocomplete"
+                        className="w-full min-w-0 solid-standard-autocomplete"
                         // virtualScrollerOptions={{
                         //     itemSize: 38,
                         //     lazy: true,
@@ -992,7 +992,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                                 'onFieldChange'
                             )
                         }
-                        className="w-full solid-standard-autocomplete"
+                        className="w-full min-w-0 solid-standard-autocomplete"
                         // virtualScrollerOptions={{
                         //     itemSize: 38,
                         //     lazy: true,
