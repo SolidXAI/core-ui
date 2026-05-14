@@ -3880,7 +3880,8 @@ li.header-li-px {
 
 .solid-search-overlay-pannel {
   top: calc(100% + 4px) !important;
-  z-index: 20;
+  /* Keep above datatable sticky headers/columns and other elevated surfaces. */
+  z-index: 1004 !important;
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
   border-radius: 10px;
