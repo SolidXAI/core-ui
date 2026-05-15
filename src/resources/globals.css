@@ -211,6 +211,15 @@ a {
   border-left: 1px solid rgba(15, 23, 42, 0.1);
 }
 
+.react-datepicker-popper {
+  z-index: 10000 !important;
+}
+
+#solid-datepicker-portal .react-datepicker-popper,
+.react-datepicker__portal {
+  z-index: 10000;
+}
+
 /* Avatar */
 .avatar {
   display: inline-block;
@@ -2744,6 +2753,10 @@ li.header-li-px {
   height: auto;
 }
 
+.solid-custom-filter-wrapper {
+  z-index: 85;
+}
+
 .custom-filter-button {
   border-right: 0;
   border-top: 0;
@@ -2888,6 +2901,7 @@ li.header-li-px {
 .solid-chip-manager-panel {
   top: calc(100% + 6px);
   left: 0;
+  z-index: 90 !important;
   width: min(360px, 100%);
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
@@ -3871,6 +3885,8 @@ li.header-li-px {
 
 .solid-search-overlay-pannel {
   top: calc(100% + 4px) !important;
+  /* Keep above datatable sticky headers/columns and other elevated surfaces. */
+  z-index: 1004 !important;
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
   border-radius: 10px;

@@ -553,6 +553,7 @@ export type { Session } from './adapters/auth';
 export { createSolidStore } from './redux/store/createSolidStore';
 export type { SolidStore, SolidRootState, SolidDispatch, CreateSolidStoreOptions } from './redux/store/createSolidStore';
 export { StoreProvider } from './redux/store/StoreProvider';
+export { getSolidEntityApiPoolSnapshot, SOLID_ENTITY_API_POOL_LIMIT } from './redux/store/solidEntityApiPool';
 export { solidAxios, solidGet, solidPost, solidPut, solidPatch, solidDelete } from './http/solidHttp';
 export { AuthGuard } from './routes/guards/AuthGuard';
 export { GuestGuard } from './routes/guards/GuestGuard';

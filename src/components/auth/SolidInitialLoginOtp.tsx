@@ -10,8 +10,6 @@ import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { SolidButton, SolidIcon, SolidMessage, SolidOtpInput } from "../shad-cn-ui";
-import { loadSession } from "../../adapters/auth/storage";
-import { hasAnyRole } from "../../helpers/rolesHelper";
 import { useAuthSettings } from "./AuthSettingsContext";
 
 
@@ -151,10 +149,7 @@ const SolidInitialLoginOtp = () => {
                                 } else {
                                     localStorage.removeItem(`resendOtpLogin_${identifier}`);
                                     // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                                    const session = loadSession();
-                                    const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
-                                    const isDev = env("VITE_SOLIDX_ENV") === "dev";
-                                    const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
+                                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
                                     router.push(redirectUrl);
                                 }
                             } catch (err: any) {

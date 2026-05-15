@@ -56,11 +56,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         }
     }, [solidSettingsData, pathname]);
 
-    if (isLoadingAuthSettings && pathname === "/auth/register") {
-        return null;
-    }
-
-    const authChildren = allowRegistration !== false || pathname !== "/auth/register" ? children : null;
+    const authChildren =
+        pathname !== "/auth/register" || allowRegistration !== false || isLoadingAuthSettings
+            ? children
+            : null;
     const handleRegistration = () => {
         router.push("/auth/login");
         setIsRestricted(false);

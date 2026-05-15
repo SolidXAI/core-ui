@@ -1,8 +1,24 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithAuth } from './fetchBaseQuery';
 import { kebabCase } from 'lodash';
+import { ensureSolidEntityApiRegistered } from '../store/solidEntityApiPool';
+
+const solidEntityApiCache = new Map<string, ReturnType<typeof createSolidEntityApiInternal>>();
 
 export const createSolidEntityApi = (entityName: string) => {
+    const cachedApi = solidEntityApiCache.get(entityName);
+    if (cachedApi) {
+        ensureSolidEntityApiRegistered(entityName, cachedApi);
+        return cachedApi;
+    }
+
+    const api = createSolidEntityApiInternal(entityName);
+    solidEntityApiCache.set(entityName, api);
+    ensureSolidEntityApiRegistered(entityName, api);
+    return api;
+};
+
+const createSolidEntityApiInternal = (entityName: string) => {
     const kebabEntityName = kebabCase(entityName);
 
     return createApi({
