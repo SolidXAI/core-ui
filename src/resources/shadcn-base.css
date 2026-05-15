@@ -1351,6 +1351,7 @@ body {
 .solid-autocomplete {
   position: relative;
   width: 100%;
+  min-width: 0;
 }
 
 .solid-autocomplete-control {
@@ -1358,6 +1359,7 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
+  min-width: 0;
 }
 
 .solid-autocomplete-chip-control {
@@ -1385,6 +1387,8 @@ body {
   min-height: 24px;
   height: 24px;
   flex: 1 1 110px;
+  min-width: 0;
+  max-width: 100%;
   padding: 0 4px;
 }
 
@@ -1458,6 +1462,8 @@ body {
   align-items: center;
   gap: 4px;
   min-height: 22px;
+  min-width: 0;
+  max-width: 100%;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
   background: color-mix(in srgb, var(--primary) 10%, transparent);
@@ -1467,6 +1473,8 @@ body {
 }
 
 .solid-autocomplete-chip-label {
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
