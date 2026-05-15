@@ -96,7 +96,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
-    const appName = solidSettingsData?.data?.appTitle?.trim() || "";
+    const appName = solidSettingsData?.data?.appTitle || "";
 
     const renderBrand = (align: "center" | "start" = "start") => {
         if (!authLogoSrc && !appName) return null;
