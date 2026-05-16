@@ -31,8 +31,10 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const isPublished = publish && publish !== 'null';   // record is published if publish has value
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
-    const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
-
+    // const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
+    const hasUserInteraction = Object.keys(formik?.touched || {}).length > 0;
+    const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty && hasUserInteraction;
+    
     useEffect(() => {
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];

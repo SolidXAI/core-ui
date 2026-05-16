@@ -1356,6 +1356,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             // Invoke the formik change
             if (eventType === 'onFieldChange') {
                 formik.handleChange(event);
+                formik.setFieldTouched(event.target.name, true, false);
             } else if (eventType === 'onFieldBlur') {
                 formik.handleBlur(event);
             }
