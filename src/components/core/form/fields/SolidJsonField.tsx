@@ -127,7 +127,10 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                         if (typeof val === "string") return val;
                         return JSON.stringify(val, null, 2);
                     })()}
-                    onChange={(next) => formik.setFieldValue(fieldLayoutInfo.attrs.name, next)}
+                    onChange={(next) => {
+                        formik.setFieldValue(fieldLayoutInfo.attrs.name, next);
+                        formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
+                    }}
                     height={fieldLayoutInfo.attrs?.height}
                     fontSize={fieldLayoutInfo.attrs?.fontSize}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
