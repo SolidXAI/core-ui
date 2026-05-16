@@ -12,6 +12,7 @@ export type SolidFieldProps = {
     viewMode?: any
     onChange?: any,
     onBlur?: any,
+    updateFieldValue?: (fieldName: string, value: any, markTouched?: boolean) => void,
     parentFieldName?: string,
     parentData?: any,
     onEmbeddedFormSave?: () => void,

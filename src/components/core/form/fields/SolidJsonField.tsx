@@ -128,8 +128,12 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                         return JSON.stringify(val, null, 2);
                     })()}
                     onChange={(next) => {
-                        formik.setFieldValue(fieldLayoutInfo.attrs.name, next);
-                        formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
+                        if (fieldContext.updateFieldValue) {
+                            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, next);
+                        } else {
+                            formik.setFieldValue(fieldLayoutInfo.attrs.name, next);
+                            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
+                        }
                     }}
                     height={fieldLayoutInfo.attrs?.height}
                     fontSize={fieldLayoutInfo.attrs?.fontSize}

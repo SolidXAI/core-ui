@@ -301,7 +301,11 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
 
     // Sync currentValues to Formik state for validation
     useEffect(() => {
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, currentValues);
+        if (fieldContext.updateFieldValue) {
+            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, currentValues, false);
+        } else {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, currentValues);
+        }
     }, [currentValues]);
 
     useEffect(() => {
