@@ -10,10 +10,10 @@ type SocialMediaLoginProps = {
 };
 
 export const SocialMediaLogin = ({
-  googleEnabled = true,
-  facebookEnabled = true,
-  appleEnabled = true,
-  microsoftEnabled = true,
+  googleEnabled = false,
+  facebookEnabled = false,
+  appleEnabled = false,
+  microsoftEnabled = false,
 }: SocialMediaLoginProps) => {
   const router = useRouter();
 

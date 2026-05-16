@@ -1871,15 +1871,20 @@ body {
 }
 
 .solid-auth-social-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: 8px;
+  width: 100%;
+  margin-inline: auto;
 }
 
 .solid-auth-social-btn.solid-btn {
-  width: 100%;
+  width: 88px;
   height: 36px;
   min-height: 36px;
+  flex: 0 0 88px;
   border-radius: 8px;
   padding: 0;
   display: inline-flex;
