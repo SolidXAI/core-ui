@@ -106,7 +106,7 @@ const SolidInitialLoginOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
+                // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
