@@ -271,7 +271,7 @@ const SolidRegister = () => {
                     mobile: "",
                 }}
                 validationSchema={Yup.object({
-                    username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('"User Name')),
+                    username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('User Name')),
                     email: isMobile
                         ? Yup.string().notRequired()
                         : Yup.string()
