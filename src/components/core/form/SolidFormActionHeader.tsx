@@ -31,8 +31,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const isPublished = publish && publish !== 'null';   // record is published if publish has value
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
-    const hasUserInteraction = Object.keys(formik?.touched || {}).length > 0;
-    const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty && hasUserInteraction;
+    const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
 
     useEffect(() => {
         if (solidView) {
