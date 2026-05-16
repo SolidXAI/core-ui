@@ -193,7 +193,12 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         }
         e.stopPropagation();
         setFileDetails(null);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+        if (fieldContext.updateFieldValue) {
+            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, null);
+        } else {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
+        }
         setDeleteImageDialogVisible(false);
     };
 
@@ -221,7 +226,12 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, file);
+        if (fieldContext.updateFieldValue) {
+            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, file);
+        } else {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, file);
+            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
+        }
     };
 
     const handleReplaceFile = () => {
@@ -230,7 +240,12 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             deleteMedia(imageToBeDeletedData);
         }
         setFileDetails(null);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+        if (fieldContext.updateFieldValue) {
+            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, null);
+        } else {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
+        }
 
         // Proceed with uploading new file
         if (newFileToUpload) {
@@ -270,7 +285,11 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             setImageToBeDeletedData(fieldValue.id);
 
             // Ensure formik has the correct value
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+            if (fieldContext.updateFieldValue) {
+                fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, fieldValue, false);
+            } else {
+                formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+            }
         }
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
@@ -497,7 +516,11 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                 fileSize
             });
             // Ensure formik has the correct value
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+            if (fieldContext.updateFieldValue) {
+                fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, fieldValue, false);
+            } else {
+                formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+            }
         }
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 

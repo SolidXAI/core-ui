@@ -311,7 +311,11 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
     const handleAllChange = (updated: any) => {
         setData(updated);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
+        if (fieldContext.updateFieldValue) {
+            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
+        } else {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
+        }
     }
 
     const handleChange = (index: number, key: string, value: any) => {
@@ -485,7 +489,13 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
             <div className="border border-gray-300 rounded overflow-hidden">
                 <SolidCodeEditor
                     value={value}
-                    onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
+                    onChange={(val) => {
+                        if (fieldContext.updateFieldValue) {
+                            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, val);
+                        } else {
+                            formik.setFieldValue(fieldLayoutInfo.attrs.name, val);
+                        }
+                    }}
                     height={fieldLayoutInfo.attrs?.height ?? "200px"}
                     fontSize={fieldLayoutInfo.attrs?.fontSize ?? "14px"}
                     readOnly={readOnly || disabled}
@@ -518,7 +528,11 @@ export const DynamicSelectionStaticEditWidget = ({
     const handleChange = (key: string, value: any) => {
         const updated = { ...data, [key]: value };
         setData(updated);
-        formik.setFieldValue(name, JSON.stringify(updated));
+        if (fieldContext.updateFieldValue) {
+            fieldContext.updateFieldValue(name, JSON.stringify(updated));
+        } else {
+            formik.setFieldValue(name, JSON.stringify(updated));
+        }
     };
 
     const renderInput = (key: string) => {

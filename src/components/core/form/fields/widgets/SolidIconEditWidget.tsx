@@ -48,19 +48,28 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
             // setIconVariant(formik.values.iconVariant ?? "outlined");
         }
     }, [openIconDialog]);
+    const updateFieldValue = (value: string, markTouched = true) => {
+        if (fieldContext.updateFieldValue) {
+            fieldContext.updateFieldValue(fieldName, value, markTouched);
+            return;
+        }
+        if (markTouched) {
+            formik.setFieldTouched(fieldName, true);
+        }
+        formik.setFieldValue(fieldName, value, true);
+    };
 
     const handleSelectIcon = (icon: string) => {
         setSelectedIcon(icon);
         // setIconVariant(variant)
-        formik.setFieldValue(fieldName, icon);
+        updateFieldValue(icon);
         // formik.setFieldValue("iconVariant", variant);
     };
 
     const handleRemoveIcon = () => {
         setSelectedIcon("");
         // setIconVariant(null)
-        formik.setFieldTouched(fieldName, true);
-        formik.setFieldValue(fieldName, "", true);
+        updateFieldValue("");
         // formik.setFieldValue("iconVariant", null);
     };
 

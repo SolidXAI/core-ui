@@ -169,7 +169,11 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                     onChange={(e: any) => {
                         const nextVal = typeof e.value === "number" ? e.value : null;
-                        formik.setFieldValue(fieldLayoutInfo.attrs.name, nextVal);
+                        if (fieldContext.updateFieldValue) {
+                            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, nextVal);
+                        } else {
+                            formik.setFieldValue(fieldLayoutInfo.attrs.name, nextVal);
+                        }
                     }}
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     autoComplete={autoComplete}
@@ -213,7 +217,11 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
                     max={max}
                     values={[currentValue]}
                     onChange={(values) => {
-                        formik.setFieldValue(fieldName, values[0]);
+                        if (fieldContext.updateFieldValue) {
+                            fieldContext.updateFieldValue(fieldName, values[0]);
+                        } else {
+                            formik.setFieldValue(fieldName, values[0]);
+                        }
                     }}
                     renderTrack={({ props, children }) => {
                         const percent = ((currentValue - min) / (max - min)) * 100;
