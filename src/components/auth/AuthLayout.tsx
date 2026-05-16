@@ -11,6 +11,7 @@ import { LayoutContext } from "../layout/context/layoutcontext";
 import { solidGet } from "../../http/solidHttp";
 import { AuthSettingsContext } from "./AuthSettingsContext";
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
+import { SolidToastProvider } from "../common/SolidToastProvider";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
@@ -95,7 +96,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
-    const appName = solidSettingsData?.data?.appTitle?.trim() || "";
+    const appName = solidSettingsData?.data?.appTitle || "";
 
     const renderBrand = (align: "center" | "start" = "start") => {
         if (!authLogoSrc && !appName) return null;
@@ -169,6 +170,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <AuthSettingsContext.Provider value={authSettingsContextValue}>
         <div className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`} data-auth-theme={authTheme}>
+            <SolidToastProvider />
             {!isCenter && (
                 <div className="solid-auth-split">
                     {isLeft && formPane}

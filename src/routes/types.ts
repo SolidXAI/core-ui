@@ -1,6 +1,14 @@
 import type { ReactNode } from "react";
 import type { RouteObject } from "react-router-dom";
 
+export type SolidPageMeta = {
+  title?: string;
+  description?: string;
+  titlePrefix?: string;
+  titleSuffix?: string;
+  manageDocumentMeta?: boolean;
+};
+
 export type SolidRouteKey =
   | "error"
   | "notFound"

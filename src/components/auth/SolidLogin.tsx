@@ -259,7 +259,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
+                            // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
                             const identifier = values.identifier;
                             localStorage.setItem(`resendOtpLogin_${identifier}`, Date.now().toString());
                             router.push(`/auth/initiate-login?identifier=${encodeURIComponent(identifier)}&type=${authType}`);

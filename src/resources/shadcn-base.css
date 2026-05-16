@@ -846,13 +846,16 @@ body {
 
 .solid-toast-viewport {
   position: fixed;
-  top: 18px;
-  right: 18px;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: calc(var(--z-overlay) + 6);
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 10px;
-  width: min(360px, calc(100vw - 24px));
+  width: calc(100vw - 24px);
+  max-width: 100%;
   pointer-events: none;
 }
 
@@ -860,7 +863,7 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  width: 100%;
+  width: min(420px, 100%);
   padding: 12px;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
@@ -1351,6 +1354,7 @@ body {
 .solid-autocomplete {
   position: relative;
   width: 100%;
+  min-width: 0;
 }
 
 .solid-autocomplete-control {
@@ -1358,6 +1362,7 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
+  min-width: 0;
 }
 
 .solid-autocomplete-chip-control {
@@ -1385,6 +1390,8 @@ body {
   min-height: 24px;
   height: 24px;
   flex: 1 1 110px;
+  min-width: 0;
+  max-width: 100%;
   padding: 0 4px;
 }
 
@@ -1458,6 +1465,8 @@ body {
   align-items: center;
   gap: 4px;
   min-height: 22px;
+  min-width: 0;
+  max-width: 100%;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
   background: color-mix(in srgb, var(--primary) 10%, transparent);
@@ -1467,6 +1476,8 @@ body {
 }
 
 .solid-autocomplete-chip-label {
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1860,15 +1871,20 @@ body {
 }
 
 .solid-auth-social-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   gap: 8px;
+  width: 100%;
+  margin-inline: auto;
 }
 
 .solid-auth-social-btn.solid-btn {
-  width: 100%;
+  width: 88px;
   height: 36px;
   min-height: 36px;
+  flex: 0 0 88px;
   border-radius: 8px;
   padding: 0;
   display: inline-flex;
@@ -2826,7 +2842,7 @@ body {
   opacity: 0.34;
 }
 
-.solid-auth-theme-wrapper > * {
+.solid-auth-theme-wrapper > *:not(.solid-toast-viewport) {
   position: relative;
   z-index: 1;
 }
@@ -4141,7 +4157,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-popover-content[data-side="bottom"][data-align="end"] {
   right: 0;
-  left: 0;
+  left: auto;
 }
 
 .solid-popover-content[data-side="top"] {

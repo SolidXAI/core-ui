@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { ArrowDownWideNarrow, ArrowUpDown, ArrowUpWideNarrow, ChevronRight, Loader2, Minus } from "lucide-react";
+import { ArrowDownWideNarrow, ArrowUpDown, ArrowUpWideNarrow, ChevronRight, Minus } from "lucide-react";
 
 export type SolidTreeNode = {
   key?: string | number;
@@ -196,7 +196,6 @@ function parseWidthValue(value: unknown): number | null {
 export function SolidTreeTable({
   value = [],
   children,
-  loading = false,
   expandedKeys = {},
   onToggle,
   onExpand,
@@ -507,14 +506,6 @@ export function SolidTreeTable({
             </tbody>
           </table>
 
-          {loading ? (
-            <div className="solid-tree-table-loading-overlay" aria-live="polite" aria-busy="true">
-              <div className="solid-tree-table-loading-pill">
-                <Loader2 size={14} className="animate-spin" />
-                <span>Loading tree…</span>
-              </div>
-            </div>
-          ) : null}
         </div>
       </div>
     </div>

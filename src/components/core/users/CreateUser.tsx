@@ -70,6 +70,7 @@ const CreateUser = ({ data, params }: any) => {
     password: "",
     confirmPassword: "",
     failedLoginAttempts: data?.failedLoginAttempts ?? 0,
+    active: data?.active ?? true,
     isAllowedToGenerateApiKeys: data?.isAllowedToGenerateApiKeys ?? false,
   };
 
@@ -85,7 +86,7 @@ const CreateUser = ({ data, params }: any) => {
       then: (schema) => schema.oneOf([Yup.ref("password")], ERROR_MESSAGES.FIELD_MUST_MATCH("Password")).nullable(),
       otherwise: (schema) => schema.notRequired().nullable(),
     }),
-    mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED("Mobile")),
+    mobile: Yup.string().nullable(),
     failedLoginAttempts: Yup.number()
       .typeError("Failed Login Attempts must be a number")
       .nullable()
@@ -111,6 +112,7 @@ const CreateUser = ({ data, params }: any) => {
           mobile: values.mobile,
           roles: selectedRoles,
           failedLoginAttempts: values.failedLoginAttempts,
+          active: values.active,
           isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
         };
 
@@ -458,7 +460,21 @@ function UserDetailsContent({
         </SolidPanel>
 
         <SolidPanel toggleable header="Access" className="solid-column-panel">
-          <div className="formgrid grid">
+          <div className="formgrid grid solid-user-access-grid">
+            {isEditMode ? (
+              <div className="field col-12 solid-user-access-row">
+                <div className="solid-user-access-copy">
+                  <p className="form-field-label m-0">Active User</p>
+                  <p className="solid-user-section-helper m-0 mt-1">
+                    Control whether this user account is active and allowed to sign in.
+                  </p>
+                </div>
+                <SolidSwitch
+                  checked={formik.values.active}
+                  onChange={(checked) => formik.setFieldValue("active", checked)}
+                />
+              </div>
+            ) : null}
             <div className="field col-12 solid-user-access-row">
               <div className="solid-user-access-copy">
                 <p className="form-field-label m-0">Allow API Key Generation</p>

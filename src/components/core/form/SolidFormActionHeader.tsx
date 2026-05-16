@@ -31,7 +31,10 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const isPublished = publish && publish !== 'null';   // record is published if publish has value
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
-
+    // const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
+    const hasUserInteraction = Object.keys(formik?.touched || {}).length > 0;
+    const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty && hasUserInteraction;
+    
     useEffect(() => {
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];
@@ -484,7 +487,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     params.embeded !== true &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
-                                    formik.dirty &&
+                                    shouldShowSaveForExistingRecord &&
 
                                     <div>
                                         <SolidButton label="Save" size="sm" type="submit" className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting} />
@@ -498,7 +501,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     params.embeded == true &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
-                                    formik.dirty &&
+                                    shouldShowSaveForExistingRecord &&
 
                                     <div>
                                         <SolidButton label="Save" size="sm" type="submit" className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting} />

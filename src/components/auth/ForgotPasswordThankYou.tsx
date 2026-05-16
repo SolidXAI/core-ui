@@ -14,10 +14,10 @@ export const ForgotPasswordThankYou = () => {
     return (
         <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
             <h2 className="solid-auth-title">Check your inbox</h2>
-            <p className="solid-auth-helper">We sent reset instructions to your registered email address.</p>
+            <p className="solid-auth-helper"><br></br>Please note that you will receive an email with password reset instructions if an account exists for the corresponding masked email address.</p>
             <p className="solid-auth-input-label mt-3" style={{ fontWeight: 600 }}>{decodedEmail}</p>
             <p className="solid-auth-helper">
-                Please follow the instructions in the email to continue.
+                If you receive the email, follow the instructions there to continue.
             </p>
             <div className="mt-4">
                 <SolidButton className="w-full" onClick={() => router.push("/auth/login")}>

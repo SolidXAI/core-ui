@@ -136,7 +136,7 @@ const SolidRegister = () => {
                         const response = await register(userData).unwrap();
 
                         if (response?.statusCode === 200) {
-                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.USER_REGISTER, detail: response?.data?.message }));
+                            // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.USER_REGISTER, detail: response?.data?.message }));
                             setShowOverlay(true);
                             setTimeout(() => {
                                 router.push(`/auth/login`);
@@ -271,7 +271,7 @@ const SolidRegister = () => {
                     mobile: "",
                 }}
                 validationSchema={Yup.object({
-                    username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('"User Name')),
+                    username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('User Name')),
                     email: isMobile
                         ? Yup.string().notRequired()
                         : Yup.string()
