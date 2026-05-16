@@ -50,6 +50,11 @@ import { FilterMatchMode } from "../filter/filterMatchMode";
 import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, SquarePen, Trash2 } from "lucide-react";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
+const RETURN_OFFSET_PARAM = "listOffset";
+const RETURN_LIMIT_PARAM = "listLimit";
+const RETURN_SORT_FIELD_PARAM = "listSortField";
+const RETURN_SORT_ORDER_PARAM = "listSortOrder";
+
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
@@ -244,6 +249,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
+  const isInitialListHydrationRef = useRef(true);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
@@ -253,6 +259,43 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
+
+  const rememberListReturnState = () => {
+    if (typeof window === "undefined") return;
+    try {
+      const returnUrl = new URL(window.location.href);
+      returnUrl.searchParams.set(RETURN_OFFSET_PARAM, String(first));
+      returnUrl.searchParams.set(RETURN_LIMIT_PARAM, String(rows));
+      if (sortField && (sortOrder === 1 || sortOrder === -1)) {
+        returnUrl.searchParams.set(RETURN_SORT_FIELD_PARAM, sortField);
+        returnUrl.searchParams.set(RETURN_SORT_ORDER_PARAM, String(sortOrder));
+      } else {
+        returnUrl.searchParams.delete(RETURN_SORT_FIELD_PARAM);
+        returnUrl.searchParams.delete(RETURN_SORT_ORDER_PARAM);
+      }
+
+      const currentQueryObject = {
+        offset: first,
+        limit: rows,
+        filters: latestFiltersRef.current ?? { $and: [] },
+        populate: toPopulate,
+        populateMedia: toPopulateMedia,
+        sort:
+          sortField && (sortOrder === 1 || sortOrder === -1)
+            ? [`${sortField}:${sortOrder === 1 ? "asc" : "desc"}`]
+            : ["id:desc"],
+        custom_filter_predicate: latestFilterPredicatesRef.current?.custom_filter_predicate || null,
+        search_predicate: latestFilterPredicatesRef.current?.search_predicate || null,
+        saved_filter_predicate: latestFilterPredicatesRef.current?.saved_filter_predicate || null,
+        predefined_search_predicate: latestFilterPredicatesRef.current?.predefined_search_predicate || null,
+      };
+      setFilterObjectToLocalStorage(currentQueryObject);
+      sessionStorage.setItem("fromView", "list");
+      sessionStorage.setItem("fromViewUrl", `${returnUrl.pathname}${returnUrl.search}`);
+    } catch (e) {
+      // ignore storage errors
+    }
+  };
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -537,6 +580,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       // setListViewData(solidEntityListViewData?.records);
       setTotalRecords(solidEntityListViewData?.meta.totalRecords);
       setLoading(false);
+      isInitialListHydrationRef.current = false;
     }
   }, [solidEntityListViewData]);
 
@@ -562,26 +606,42 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     setQueryDataLoaded(false)
     if (solidListViewMetaData && solidListViewLayout) {
       const queryObject = getFilterObjectFromLocalStorage();
+      const offsetFromUrl = searchParams.get(RETURN_OFFSET_PARAM);
+      const limitFromUrl = searchParams.get(RETURN_LIMIT_PARAM);
+      const sortFieldFromUrl = searchParams.get(RETURN_SORT_FIELD_PARAM);
+      const sortOrderFromUrl = searchParams.get(RETURN_SORT_ORDER_PARAM);
+      const hasPaginationFromUrl = offsetFromUrl !== null || limitFromUrl !== null;
+      const hasSortFromUrl = sortFieldFromUrl !== null && sortOrderFromUrl !== null;
 
-      if (queryObject) {
+      if (queryObject || hasPaginationFromUrl || hasSortFromUrl) {
+        const normalizedOffset = hasPaginationFromUrl
+          ? Number(offsetFromUrl ?? queryObject?.offset ?? 0)
+          : Number(queryObject?.offset ?? 0);
+        const normalizedLimit = hasPaginationFromUrl
+          ? Number(limitFromUrl ?? queryObject?.limit ?? 25)
+          : Number(queryObject?.limit ?? 25);
+
         const queryData = {
-          offset: queryObject.offset || 0,
-          limit: queryObject.limit || 25,
-          populate: queryObject.populate,
-          populateMedia: queryObject.populateMedia,
-          sort: queryObject.sort,
-          filters: queryObject.filters,
+          offset: normalizedOffset,
+          limit: normalizedLimit,
+          populate: queryObject?.populate,
+          populateMedia: queryObject?.populateMedia,
+          sort: queryObject?.sort,
+          filters: queryObject?.filters,
         };
 
         setRows(Number(queryData.limit));
         setFirst(Number(queryData?.offset));
         let restoredSortField = "id";
         let restoredSortOrder: 1 | -1 | 0 = -1;
-        if (Array.isArray(queryData.sort) && queryData.sort.length > 0) {
+        if (hasSortFromUrl) {
+          restoredSortField = String(sortFieldFromUrl);
+          restoredSortOrder = sortOrderFromUrl === "1" ? 1 : sortOrderFromUrl === "-1" ? -1 : -1;
+        } else if (Array.isArray(queryData.sort) && queryData.sort.length > 0) {
           const [field, order] = String(queryData.sort[0]).split(":");
           restoredSortField = field || "id";
           restoredSortOrder = order === "asc" ? 1 : -1;
-        } else if (queryObject.sortField) {
+        } else if (queryObject?.sortField) {
           restoredSortField = String(queryObject.sortField);
           restoredSortOrder = queryObject.sortOrder === 1 || queryObject.sortOrder === -1 ? queryObject.sortOrder : -1;
         }
@@ -862,7 +922,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     // Then update state
     setFilters(updatedFilter);
     setFilterPredicates(updatedFilterPredicates);
-    setFirst(0);
+    // During initial hydration (e.g. back navigation restore), avoid snapping to page 1.
+    // After the first list payload is loaded, regular filter behavior resets to page 1.
+    if (!isInitialListHydrationRef.current) {
+      setFirst(0);
+    }
     // Force synchronous state updates
   };
 
@@ -1486,17 +1550,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       if (params.embeded === true) {
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
-                        if (typeof window !== "undefined") {
-                          // store a simple marker for the caller
-
-                          // also store the full current URL so Back can restore exact state (including action params)
-                          try {
-                            sessionStorage.setItem("fromView", "list");
-                            sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                          } catch (e) {
-                            // ignore storage errors
-                          }
-                        }
+                        rememberListReturnState();
                         router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                       }
                     }
@@ -1586,12 +1640,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       if (params.embeded == true) {
                                         params.handleEditClickForEmbeddedView(rowData?.id);
                                       } else {
-                                        if (typeof window !== "undefined") {
-                                          try {
-                                            sessionStorage.setItem("fromView", "list");
-                                            sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                          } catch (e) { }
-                                        }
+                                        rememberListReturnState();
                                         router.push(
                                           `${editBaseUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                         );
@@ -1682,10 +1731,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         if (params.embeded == true) {
                                           params.handleEditClickForEmbeddedView(selectedRow?.id);
                                         } else {
-                                          try {
-                                            sessionStorage.setItem("fromView", "list");
-                                            sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                          } catch (e) { }
+                                          rememberListReturnState();
                                           router.push(
                                             `${editBaseUrl}/${selectedRow?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                           );
