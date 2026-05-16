@@ -123,6 +123,8 @@ export {
 } from './modules/solidUiModule';
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
+export { SolidRouteMetadataBoundary } from './routes/SolidRouteMetadataBoundary';
+export type { SolidPageMeta } from './routes/types';
 
 export {
     authApi,
