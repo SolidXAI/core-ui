@@ -87,6 +87,17 @@ export const AdminTopHeader = () => {
 
   const showBack = /\/admin\/core\/[^/]+\/[^/]+\/form\/[^/]+/.test(pathname);
 
+  const handleTopBack = () => {
+    if (typeof window !== "undefined") {
+      const storedFullUrl = sessionStorage.getItem("fromViewUrl");
+      if (storedFullUrl) {
+        router.push(storedFullUrl);
+        return;
+      }
+    }
+    router.back();
+  };
+
   const triggerSidebar = () => {
     window.dispatchEvent(new CustomEvent(SIDEBAR_TOGGLE_EVENT));
   };
@@ -189,7 +200,7 @@ export const AdminTopHeader = () => {
             <button
               type="button"
               className="solid-admin-back-btn"
-              onClick={() => router.back()}
+              onClick={handleTopBack}
               aria-label="Go back"
             >
               Back
