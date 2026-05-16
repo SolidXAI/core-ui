@@ -57,11 +57,11 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
         <>
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 <h2 className="solid-auth-title">Forgot password</h2>
-                <p className="solid-auth-helper">Enter your email to receive reset instructions</p>
+                <p className="solid-auth-helper">Enter your email. <br></br>Please note that you will receive an email with password reset instructions if an account exists for the corresponding masked email address.</p>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">
-                        <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
+                        <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Email"}</label>
                         <SolidInput
                             id="email"
                             name="email"
