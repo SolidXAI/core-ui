@@ -241,11 +241,18 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     value={formik.values[`${fieldLayoutInfo.attrs.name}Confirm`] || ''}
                     onChange={(e) => {
                         const confirmFieldName = `${fieldLayoutInfo.attrs.name}Confirm`;
-                        if (fieldContext.updateFieldValue) {
-                            fieldContext.updateFieldValue(confirmFieldName, e.target.value);
-                        } else {
-                            formik.setFieldValue(confirmFieldName, e.target.value);
-                        }
+                        fieldContext.onChange(
+                            {
+                                ...e,
+                                target: {
+                                    ...e.target,
+                                    name: confirmFieldName,
+                                    value: e.target.value,
+                                    type: "text",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
                     }}
                     onBlur={(e) => {
                         formik.setFieldTouched(`${fieldLayoutInfo.attrs.name}Confirm`, true);

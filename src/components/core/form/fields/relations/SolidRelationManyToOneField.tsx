@@ -421,11 +421,10 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             },
         ];
 
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
-        }
+        fieldContext.onChange(
+            buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, updatedRelationData, "text"),
+            'onFieldChange'
+        );
 
     }
     return (
@@ -658,11 +657,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         }
                     });
                     if (formattedRecords.length > 0) {
-                        if (fieldContext.updateFieldValue) {
-                            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, formattedRecords[0], false);
-                        } else {
-                            formik.setFieldValue(fieldLayoutInfo.attrs.name, formattedRecords[0]);
-                        }
+                        formik.setFieldValue(fieldLayoutInfo.attrs.name, formattedRecords[0]);
                     }
                 }
             }
@@ -965,11 +960,10 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             },
         ];
 
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
-        }
+        fieldContext.onChange(
+            buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, updatedRelationData, "text"),
+            'onFieldChange'
+        );
 
     }
     return (

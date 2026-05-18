@@ -193,12 +193,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         }
         e.stopPropagation();
         setFileDetails(null);
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, null);
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
-            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
-        }
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: null,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
         setDeleteImageDialogVisible(false);
     };
 
@@ -226,12 +230,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, file);
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, file);
-            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
-        }
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: file,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     };
 
     const handleReplaceFile = () => {
@@ -240,12 +248,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             deleteMedia(imageToBeDeletedData);
         }
         setFileDetails(null);
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, null);
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
-            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
-        }
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: null,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
 
         // Proceed with uploading new file
         if (newFileToUpload) {
@@ -285,11 +297,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             setImageToBeDeletedData(fieldValue.id);
 
             // Ensure formik has the correct value
-            if (fieldContext.updateFieldValue) {
-                fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, fieldValue, false);
-            } else {
-                formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
-            }
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
         }
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
@@ -516,11 +524,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                 fileSize
             });
             // Ensure formik has the correct value
-            if (fieldContext.updateFieldValue) {
-                fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, fieldValue, false);
-            } else {
-                formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
-            }
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
         }
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 

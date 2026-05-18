@@ -238,12 +238,16 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
 
         setFileDetails(newFileDetails);
 
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, acceptedFiles);
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, acceptedFiles);
-            formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
-        }
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: acceptedFiles,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     };
 
     const confirmDeleteFile = (fileId: any, deleteId: number) => {
@@ -262,12 +266,16 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 .then(() => {
                     // Update form state
                     const nextValue = fileDetails.filter((file) => `${file.name}-${file.size}` !== selectedFileId);
-                    if (fieldContext.updateFieldValue) {
-                        fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, nextValue);
-                    } else {
-                        formik.setFieldValue(fieldLayoutInfo.attrs.name, nextValue);
-                        formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
-                    }
+                    fieldContext.onChange(
+                        {
+                            target: {
+                                name: fieldLayoutInfo.attrs.name,
+                                value: nextValue,
+                                type: "text",
+                            },
+                        } as any,
+                        "onFieldChange"
+                    );
                 })
                 .catch((error) => {
                     console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);

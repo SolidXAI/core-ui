@@ -311,11 +311,16 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
     const handleAllChange = (updated: any) => {
         setData(updated);
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
-        }
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: JSON.stringify(updated),
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     }
 
     const handleChange = (index: number, key: string, value: any) => {
@@ -490,11 +495,16 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
                 <SolidCodeEditor
                     value={value}
                     onChange={(val) => {
-                        if (fieldContext.updateFieldValue) {
-                            fieldContext.updateFieldValue(fieldLayoutInfo.attrs.name, val);
-                        } else {
-                            formik.setFieldValue(fieldLayoutInfo.attrs.name, val);
-                        }
+                        fieldContext.onChange(
+                            {
+                                target: {
+                                    name: fieldLayoutInfo.attrs.name,
+                                    value: val,
+                                    type: "text",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
                     }}
                     height={fieldLayoutInfo.attrs?.height ?? "200px"}
                     fontSize={fieldLayoutInfo.attrs?.fontSize ?? "14px"}
@@ -528,11 +538,16 @@ export const DynamicSelectionStaticEditWidget = ({
     const handleChange = (key: string, value: any) => {
         const updated = { ...data, [key]: value };
         setData(updated);
-        if (fieldContext.updateFieldValue) {
-            fieldContext.updateFieldValue(name, JSON.stringify(updated));
-        } else {
-            formik.setFieldValue(name, JSON.stringify(updated));
-        }
+        fieldContext.onChange(
+            {
+                target: {
+                    name,
+                    value: JSON.stringify(updated),
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     };
 
     const renderInput = (key: string) => {

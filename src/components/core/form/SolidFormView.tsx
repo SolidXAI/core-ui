@@ -180,7 +180,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, updateFieldValue, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -194,8 +194,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         readOnly: readOnly,
         viewMode: viewMode,
         onChange: onChange,
-        onBlur: onBlur,
-        updateFieldValue: updateFieldValue
+        onBlur: onBlur
     }
     if (parentData) {
         fieldContext.parentData = parentData;
@@ -1351,13 +1350,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             onSubmit: onFormikSubmit,
         });
 
-        const updateFieldValue = (fieldName: string, value: any, markTouched = true) => {
-            formik.setFieldValue(fieldName, value);
-            if (markTouched) {
-                formik.setFieldTouched(fieldName, true, false);
-            }
-        };
-
         const formFieldOnXXX = async (event: ChangeEvent<HTMLInputElement>, eventType: string) => {
             // console.log("formFieldOnXXX", eventType, event);
 
@@ -1411,7 +1403,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // This does one field at a time.
                         // TODO: does the below fire change events again?
                         Object.entries(updatedFormInfo.newFormData).forEach(([key, newValue]) => {
-                            updateFieldValue(key, newValue, false);
+                            formik.setFieldValue(key, newValue);
+                        });
+                        const currentValues = { ...formik.values, ...updatedFormInfo.newFormData };
+                        const changedKeys = Object.keys(currentValues).filter((key) => {
+                            return JSON.stringify(currentValues[key]) !== JSON.stringify(formik.initialValues[key]);
                         });
 
                         // This does all at once.
@@ -1529,7 +1525,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             viewMode={viewMode}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
-                            updateFieldValue={updateFieldValue}
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
                             parentFieldName={params.parentFieldName}
