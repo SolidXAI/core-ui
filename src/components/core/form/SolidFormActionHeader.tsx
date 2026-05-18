@@ -34,7 +34,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     // const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
     const hasUserInteraction = Object.keys(formik?.touched || {}).length > 0;
     const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty && hasUserInteraction;
-
+    
     useEffect(() => {
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];

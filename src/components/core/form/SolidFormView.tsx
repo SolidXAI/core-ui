@@ -1405,10 +1405,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         Object.entries(updatedFormInfo.newFormData).forEach(([key, newValue]) => {
                             formik.setFieldValue(key, newValue);
                         });
-                        const currentValues = { ...formik.values, ...updatedFormInfo.newFormData };
-                        const changedKeys = Object.keys(currentValues).filter((key) => {
-                            return JSON.stringify(currentValues[key]) !== JSON.stringify(formik.initialValues[key]);
-                        });
 
                         // This does all at once.
                         // formik.setValues({
