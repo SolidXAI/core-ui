@@ -39,6 +39,7 @@ const CreateUser = ({ data, params }: any) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [failedAttempts, setFailedAttempts] = useState<number>(data?.failedLoginAttempts ?? 0);
   const [activeTab, setActiveTab] = useState("userDetails");
   const [newUserIdForApiKey, setNewUserIdForApiKey] = useState<number | null>(null);
   const [revealKey, setRevealKey] = useState<{ apiKey: string; keyName: string } | null>(null);
@@ -60,6 +61,7 @@ const CreateUser = ({ data, params }: any) => {
     if (data?.roles) {
       setSelectedRoles(data.roles.map((role: any) => role.name));
     }
+    setFailedAttempts(data?.failedLoginAttempts ?? 0);
   }, [data]);
 
   const initialValues = {
@@ -69,7 +71,6 @@ const CreateUser = ({ data, params }: any) => {
     mobile: data?.mobile ?? "",
     password: "",
     confirmPassword: "",
-    failedLoginAttempts: data?.failedLoginAttempts ?? 0,
     active: data?.active ?? true,
     isAllowedToGenerateApiKeys: data?.isAllowedToGenerateApiKeys ?? false,
   };
@@ -87,10 +88,6 @@ const CreateUser = ({ data, params }: any) => {
       otherwise: (schema) => schema.notRequired().nullable(),
     }),
     mobile: Yup.string().nullable(),
-    failedLoginAttempts: Yup.number()
-      .typeError("Failed Login Attempts must be a number")
-      .nullable()
-      .transform((value, originalValue) => (originalValue === "" ? null : value)),
   });
 
   function isFetchBaseQueryErrorWithErrorResponse(
@@ -111,7 +108,6 @@ const CreateUser = ({ data, params }: any) => {
           email: values.email,
           mobile: values.mobile,
           roles: selectedRoles,
-          failedLoginAttempts: values.failedLoginAttempts,
           active: values.active,
           isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
         };
@@ -132,7 +128,6 @@ const CreateUser = ({ data, params }: any) => {
           mobile: values.mobile,
           password: values.password,
           roles: selectedRoles,
-          failedLoginAttempts: values.failedLoginAttempts,
           isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
         }).unwrap();
 
@@ -190,6 +185,26 @@ const CreateUser = ({ data, params }: any) => {
   const isEditMode = params.id !== "new";
   const isSaving = isLoading || isUserUpdating;
 
+  const handleUnblockUser = async () => {
+    if (!data?.id) return;
+
+    try {
+      await updateUser({
+        id: data.id,
+        data: { failedLoginAttempts: 0 },
+      }).unwrap();
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Success",
+          detail: "User is unblocked.",
+        })
+      );
+      setFailedAttempts(0);
+    } catch {
+      // error shown via userUpdateError effect
+    }
+  };
 
   return (
     <div className="solid-form-wrapper">
@@ -208,6 +223,11 @@ const CreateUser = ({ data, params }: any) => {
               </div>
             </div>
             <div className="gap-3 flex flex-wrap">
+              {isEditMode && failedAttempts > 0 ? (
+                <SolidButton size="small" type="button" variant="outline" loading={isUserUpdating} onClick={handleUnblockUser}>
+                  Unblock User
+                </SolidButton>
+              ) : null}
               {formik.dirty ? (
                 <SolidButton size="small" type="submit" loading={isSaving}>
                   Save
@@ -432,30 +452,7 @@ function UserDetailsContent({
                   ) : null}
                 </div>
               </>
-            ) : (
-              <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
-                <label htmlFor="failedLoginAttempts" className="form-field-label">
-                  Failed Login Attempts
-                </label>
-                <SolidInput
-                  type="number"
-                  id="failedLoginAttempts"
-                  name="failedLoginAttempts"
-                  autoComplete="off"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.failedLoginAttempts}
-                  className={cx(fieldError("failedLoginAttempts") && "solid-user-form-input-invalid")}
-                />
-                {fieldError("failedLoginAttempts") ? (
-                  <SolidMessage severity="error" text={fieldError("failedLoginAttempts")} />
-                ) : null}
-                <p className="solid-user-section-helper">
-                  Your account has been locked due to repeated unsuccessful login attempts. Please contact your
-                  system admin.
-                </p>
-              </div>
-            )}
+            ) : null}
           </div>
         </SolidPanel>
 
