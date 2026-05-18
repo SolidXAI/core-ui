@@ -5,7 +5,7 @@ import { useGetAuthSettingsQuery } from "../redux/api/solidSettingsApi";
 import type { SolidPageMeta } from "./types";
 
 function normalizePart(value?: string): string | undefined {
-  const trimmed = value?.trim();
+  const trimmed = value;
   return trimmed ? trimmed : undefined;
 }
 
