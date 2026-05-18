@@ -238,7 +238,16 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
 
         setFileDetails(newFileDetails);
 
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, acceptedFiles);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: acceptedFiles,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     };
 
     const confirmDeleteFile = (fileId: any, deleteId: number) => {
@@ -256,9 +265,16 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 .unwrap()
                 .then(() => {
                     // Update form state
-                    formik.setFieldValue(
-                        fieldLayoutInfo.attrs.name,
-                        fileDetails.filter((file) => `${file.name}-${file.size}` !== selectedFileId)
+                    const nextValue = fileDetails.filter((file) => `${file.name}-${file.size}` !== selectedFileId);
+                    fieldContext.onChange(
+                        {
+                            target: {
+                                name: fieldLayoutInfo.attrs.name,
+                                value: nextValue,
+                                type: "text",
+                            },
+                        } as any,
+                        "onFieldChange"
                     );
                 })
                 .catch((error) => {

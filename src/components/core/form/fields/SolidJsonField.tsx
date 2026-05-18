@@ -128,8 +128,16 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                         return JSON.stringify(val, null, 2);
                     })()}
                     onChange={(next) => {
-                        formik.setFieldValue(fieldLayoutInfo.attrs.name, next);
-                        formik.setFieldTouched(fieldLayoutInfo.attrs.name, true, false);
+                        fieldContext.onChange(
+                            {
+                                target: {
+                                    name: fieldLayoutInfo.attrs.name,
+                                    value: next,
+                                    type: "text",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
                     }}
                     height={fieldLayoutInfo.attrs?.height}
                     fontSize={fieldLayoutInfo.attrs?.fontSize}

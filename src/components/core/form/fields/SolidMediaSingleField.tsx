@@ -193,7 +193,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         }
         e.stopPropagation();
         setFileDetails(null);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: null,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
         setDeleteImageDialogVisible(false);
     };
 
@@ -221,7 +230,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, file);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: file,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     };
 
     const handleReplaceFile = () => {
@@ -230,7 +248,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             deleteMedia(imageToBeDeletedData);
         }
         setFileDetails(null);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: null,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
 
         // Proceed with uploading new file
         if (newFileToUpload) {

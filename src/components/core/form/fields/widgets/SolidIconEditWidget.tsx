@@ -52,15 +52,32 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
     const handleSelectIcon = (icon: string) => {
         setSelectedIcon(icon);
         // setIconVariant(variant)
-        formik.setFieldValue(fieldName, icon);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldName,
+                    value: icon,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
         // formik.setFieldValue("iconVariant", variant);
     };
 
     const handleRemoveIcon = () => {
         setSelectedIcon("");
         // setIconVariant(null)
-        formik.setFieldTouched(fieldName, true);
-        formik.setFieldValue(fieldName, "", true);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldName,
+                    value: "",
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
         // formik.setFieldValue("iconVariant", null);
     };
 

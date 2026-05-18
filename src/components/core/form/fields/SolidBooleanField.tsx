@@ -215,7 +215,19 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
                 options={booleanOptions}
                 value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name].toString() : "false"}
                 disabled={formDisabled || fieldDisabled || formReadonly || fieldReadonly || readOnlyPermission}
-                onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
+                onChange={(val) => {
+                    fieldContext.onChange(
+                        {
+                            target: {
+                                name: fieldLayoutInfo.attrs.name,
+                                value: val,
+                                checked: val === "true" || val === true,
+                                type: "checkbox",
+                            },
+                        } as any,
+                        "onFieldChange"
+                    );
+                }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
