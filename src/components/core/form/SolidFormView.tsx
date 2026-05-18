@@ -1362,7 +1362,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
 
             // get details from the form event
-            const { name: fieldName, value, type, checked } = event.target;
+            const { name: fieldName, value } = event.target;
 
             // TODO: check if there is a change handler registered with this form view, load it and fire it.
             let changeHandler = solidView.layout.attrs[eventType];

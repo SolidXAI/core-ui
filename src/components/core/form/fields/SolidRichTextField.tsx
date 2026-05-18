@@ -142,7 +142,18 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                 id={fieldLayoutInfo.attrs.name}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ""}
-                onChange={(value) => formik.setFieldValue(fieldLayoutInfo.attrs.name, value ?? "")}
+                onChange={(value) => {
+                    fieldContext.onChange(
+                        {
+                            target: {
+                                name: fieldLayoutInfo.attrs.name,
+                                value: value ?? "",
+                                type: "text",
+                            },
+                        } as any,
+                        "onFieldChange"
+                    );
+                }}
                 className="solid-custom-editor"
                 style={{ minHeight: 180 }}
             />

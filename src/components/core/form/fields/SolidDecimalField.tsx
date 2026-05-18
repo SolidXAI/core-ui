@@ -155,7 +155,16 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                     onChange={(e: any) => {
                         const nextVal = typeof e.value === "number" ? e.value : null;
-                        formik.setFieldValue(fieldLayoutInfo.attrs.name, nextVal);
+                        fieldContext.onChange(
+                            {
+                                target: {
+                                    name: fieldLayoutInfo.attrs.name,
+                                    value: nextVal,
+                                    type: "number",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
                     }}
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                 />

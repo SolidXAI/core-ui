@@ -244,6 +244,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
+  const suppressNextFilterPaginationResetRef = useRef(false);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
@@ -564,6 +565,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       const queryObject = getFilterObjectFromLocalStorage();
 
       if (queryObject) {
+        suppressNextFilterPaginationResetRef.current = true;
         const queryData = {
           offset: queryObject.offset || 0,
           limit: queryObject.limit || 25,
@@ -822,8 +824,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
 
-    if (latestFilterPredicatesRef.current && latestFilterPredicatesRef.current.persistFilter) {
+    if (latestFilterPredicatesRef.current) {
       const fileterTobeStored = structuredClone(queryData);
+      fileterTobeStored.finalFullFilter = fileterTobeStored.filters;
       delete fileterTobeStored.filters;
       fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
@@ -853,6 +856,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
     const updatedFilter = queryfilter;
 
+    const previousPredicates = latestFilterPredicatesRef.current;
+    const nextPredicatesComparable = {
+      custom_filter_predicate: filterPredicates?.custom_filter_predicate || null,
+      search_predicate: filterPredicates?.search_predicate || null,
+      saved_filter_predicate: filterPredicates?.saved_filter_predicate || null,
+      predefined_search_predicate: filterPredicates?.predefined_search_predicate || null,
+    };
+    const previousPredicatesComparable = {
+      custom_filter_predicate: previousPredicates?.custom_filter_predicate || null,
+      search_predicate: previousPredicates?.search_predicate || null,
+      saved_filter_predicate: previousPredicates?.saved_filter_predicate || null,
+      predefined_search_predicate: previousPredicates?.predefined_search_predicate || null,
+    };
+    const hasPredicateChanged =
+      JSON.stringify(previousPredicatesComparable) !== JSON.stringify(nextPredicatesComparable);
+
     // Update refs IMMEDIATELY (synchronously)
     latestFiltersRef.current = updatedFilter;
     const updatedFilterPredicates = structuredClone(filterPredicates);
@@ -862,7 +881,53 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     // Then update state
     setFilters(updatedFilter);
     setFilterPredicates(updatedFilterPredicates);
-    setFirst(0);
+    const hasMeaningfulFilterValueLocal = (value: any): boolean => {
+      if (value === null || value === undefined) return false;
+      if (typeof value === "string") return value.trim().length > 0;
+      if (typeof value === "number" || typeof value === "boolean") return true;
+      if (Array.isArray(value)) return value.some((item) => hasMeaningfulFilterValueLocal(item));
+      if (typeof value === "object") return hasAppliedFiltersLocal(value);
+      return false;
+    };
+
+    const hasAppliedFiltersLocal = (filterObject: any): boolean => {
+      if (!filterObject || typeof filterObject !== "object") return false;
+
+      if (Array.isArray(filterObject)) {
+        return filterObject.some((item) => hasAppliedFiltersLocal(item) || hasMeaningfulFilterValueLocal(item));
+      }
+
+      return Object.entries(filterObject).some(([key, val]) => {
+        if (key === "matchMode" || key === "operator") return false;
+        if (key === "value") return hasMeaningfulFilterValueLocal(val);
+        if ((key === "$and" || key === "$or") && Array.isArray(val)) {
+          return val.some((item) => hasAppliedFiltersLocal(item) || hasMeaningfulFilterValueLocal(item));
+        }
+        if (typeof val === "object") return hasAppliedFiltersLocal(val);
+        return hasMeaningfulFilterValueLocal(val);
+      });
+    };
+
+    const hasCurrentMeaningfulPredicates =
+      hasAppliedFiltersLocal(updatedFilterPredicates?.custom_filter_predicate) ||
+      hasAppliedFiltersLocal(updatedFilterPredicates?.search_predicate) ||
+      hasAppliedFiltersLocal(updatedFilterPredicates?.saved_filter_predicate) ||
+      hasAppliedFiltersLocal(updatedFilterPredicates?.predefined_search_predicate);
+
+    const hasPreviousMeaningfulPredicates =
+      hasAppliedFiltersLocal(previousPredicates?.custom_filter_predicate) ||
+      hasAppliedFiltersLocal(previousPredicates?.search_predicate) ||
+      hasAppliedFiltersLocal(previousPredicates?.saved_filter_predicate) ||
+      hasAppliedFiltersLocal(previousPredicates?.predefined_search_predicate);
+
+    const shouldResetPagination =
+      hasPredicateChanged && (hasCurrentMeaningfulPredicates || hasPreviousMeaningfulPredicates);
+
+    if (suppressNextFilterPaginationResetRef.current) {
+      suppressNextFilterPaginationResetRef.current = false;
+    } else if (shouldResetPagination) {
+      setFirst(0);
+    }
     // Force synchronous state updates
   };
 

@@ -421,7 +421,10 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             },
         ];
 
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
+        fieldContext.onChange(
+            buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, updatedRelationData, "text"),
+            'onFieldChange'
+        );
 
     }
     return (
@@ -957,7 +960,10 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             },
         ];
 
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
+        fieldContext.onChange(
+            buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, updatedRelationData, "text"),
+            'onFieldChange'
+        );
 
     }
     return (

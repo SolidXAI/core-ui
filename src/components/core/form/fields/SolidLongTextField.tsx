@@ -311,7 +311,16 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
     const handleAllChange = (updated: any) => {
         setData(updated);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: JSON.stringify(updated),
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     }
 
     const handleChange = (index: number, key: string, value: any) => {
@@ -485,7 +494,18 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
             <div className="border border-gray-300 rounded overflow-hidden">
                 <SolidCodeEditor
                     value={value}
-                    onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
+                    onChange={(val) => {
+                        fieldContext.onChange(
+                            {
+                                target: {
+                                    name: fieldLayoutInfo.attrs.name,
+                                    value: val,
+                                    type: "text",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
+                    }}
                     height={fieldLayoutInfo.attrs?.height ?? "200px"}
                     fontSize={fieldLayoutInfo.attrs?.fontSize ?? "14px"}
                     readOnly={readOnly || disabled}
@@ -518,7 +538,16 @@ export const DynamicSelectionStaticEditWidget = ({
     const handleChange = (key: string, value: any) => {
         const updated = { ...data, [key]: value };
         setData(updated);
-        formik.setFieldValue(name, JSON.stringify(updated));
+        fieldContext.onChange(
+            {
+                target: {
+                    name,
+                    value: JSON.stringify(updated),
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     };
 
     const renderInput = (key: string) => {
