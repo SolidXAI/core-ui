@@ -244,6 +244,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
+  const suppressNextFilterPaginationResetRef = useRef(false);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
@@ -564,6 +565,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       const queryObject = getFilterObjectFromLocalStorage();
 
       if (queryObject) {
+        suppressNextFilterPaginationResetRef.current = true;
         const queryData = {
           offset: queryObject.offset || 0,
           limit: queryObject.limit || 25,
@@ -824,6 +826,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
     if (latestFilterPredicatesRef.current) {
       const fileterTobeStored = structuredClone(queryData);
+      fileterTobeStored.finalFullFilter = fileterTobeStored.filters;
       delete fileterTobeStored.filters;
       fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
@@ -920,7 +923,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const shouldResetPagination =
       hasPredicateChanged && (hasCurrentMeaningfulPredicates || hasPreviousMeaningfulPredicates);
 
-    if (shouldResetPagination) {
+    if (suppressNextFilterPaginationResetRef.current) {
+      suppressNextFilterPaginationResetRef.current = false;
+    } else if (shouldResetPagination) {
       setFirst(0);
     }
     // Force synchronous state updates
