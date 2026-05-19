@@ -92,6 +92,13 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     // Fetch navigation data
     // -----------------------------
     useEffect(() => {
+        if (params.embeded === true) {
+            setPrevNav(null);
+            setNextNav(null);
+            setMeta(null);
+            return;
+        }
+
         if (params.id !== "new") {
 
             const fetchNavigation = async () => {
@@ -127,7 +134,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             };
             fetchNavigation();
         }
-    }, [params.id]);
+    }, [params.id, params.embeded]);
 
     // -----------------------------
     // UI
