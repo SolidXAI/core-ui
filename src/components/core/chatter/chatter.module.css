@@ -1,5 +1,5 @@
 .chatterTitle {
-    padding: 0.2rem 0 0.55rem;
+    padding: 0.2rem 0 0.55rem 2.75rem;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
 }
 

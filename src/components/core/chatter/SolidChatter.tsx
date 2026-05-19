@@ -92,17 +92,27 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 queryData.filters = queryData.filters || {};
                 queryData.filters['user'] = { fullName: { $containsi: filters.name }};
             }
+            const startOfDay = (d: Date) => {
+                const x = new Date(d);
+                x.setHours(0, 0, 0, 0);
+                return x;
+            };
+            const endOfDay = (d: Date) => {
+                const x = new Date(d);
+                x.setHours(23, 59, 59, 999);
+                return x;
+            };
             if (filters.startDate && filters.endDate) {
                 queryData.filters = queryData.filters || {};
                 queryData.filters.createdAt = {
-                    $between: [filters.startDate.toISOString(), filters.endDate.toISOString()]
+                    $between: [startOfDay(filters.startDate).toISOString(), endOfDay(filters.endDate).toISOString()]
                 };
             } else if (filters.startDate) {
                 queryData.filters = queryData.filters || {};
-                queryData.filters.createdAt = { $gte: filters.startDate.toISOString() };
+                queryData.filters.createdAt = { $gte: startOfDay(filters.startDate).toISOString() };
             } else if (filters.endDate) {
                 queryData.filters = queryData.filters || {};
-                queryData.filters.createdAt = { $lte: filters.endDate.toISOString() };
+                queryData.filters.createdAt = { $lte: endOfDay(filters.endDate).toISOString() };
             }
 
             const queryString = qs.stringify(queryData, {

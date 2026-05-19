@@ -220,6 +220,11 @@ a {
   z-index: 10000;
 }
 
+#solid-datepicker-portal,
+#solid-datepicker-portal * {
+  pointer-events: auto;
+}
+
 /* Avatar */
 .avatar {
   display: inline-block;
