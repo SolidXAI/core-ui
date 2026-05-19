@@ -114,7 +114,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
                     offset: defaultQueryObject.offset || 0,
                     limit: defaultQueryObject.limit || 25,
                     filters: defaultQueryObject.finalFullFilter || null,
-                    fields: ["id"],
+                    // fields: ["id"],
                     modelName: params.modelName,
                     recordId: params.id,
                     sort: defaultQueryObject.sort
