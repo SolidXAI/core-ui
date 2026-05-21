@@ -1160,9 +1160,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
              * ----------------------------- */
             let workingLayout = params.customLayout ?? solidFormViewMetaData?.data?.solidView?.layout;
             let workingFormData = solidFormViewData?.data;
+            let solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
+
             const baseEvent = {
                 parentData: params?.parentData,
-                fieldsMetadata: solidFormViewMetaData,
+                fieldsMetadata: solidFieldsMetadata,
                 viewMetadata: solidFormViewMetaData?.data?.solidView,
                 queryParams: {
                     actionName,
