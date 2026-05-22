@@ -39,6 +39,7 @@
   --z-app: 1;
   --z-overlay: 1000;
   --z-studio: 9999;
+  --solid-danger: #ef4444;
 }
 
 html.dark,
@@ -2417,6 +2418,15 @@ body {
   color: var(--solid-danger, #ef4444) !important;
 }
 
+.solid-shell .text-red-500,
+.solid-auth-theme-wrapper .text-red-500 {
+  color: var(--solid-danger, #ef4444) !important;
+}
+
+.solid-auth-theme-wrapper .auth-container .solid-message.text-red-500 {
+  color: #ef4444 !important;
+}
+
 /* Side auth layout shell (left/right) */
 .solid-auth-theme-wrapper.left,
 .solid-auth-theme-wrapper.right {
@@ -3196,8 +3206,22 @@ html.dark .solid-header-cog-trigger:hover,
   border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   padding: 0 2px;
   gap: 0;
+  width: calc(100vw - 370px) !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
+.solid-notebook-tablist::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1199px) {
+  .solid-notebook-tablist {
+    width: calc(100vw - 115px) !important;
+  }
+}
 .chatter-section .solid-locale-tabs-list {
   padding-left: 2.7rem;
 }
