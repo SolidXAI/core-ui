@@ -6,7 +6,7 @@ import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { kebabCase } from 'lodash';
 import { ExternalLink } from "lucide-react";
 
-const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
+const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded, disabled }: SolidListViewColumnParams) => {
 
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
@@ -27,7 +27,9 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
                     rowData,
                     solidListViewMetaData,
                     fieldMetadata,
-                    column
+                    column,
+                    embeded,
+                    disabled
                 }
                 return (
                     <>
@@ -47,7 +49,7 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
 export default SolidRelationManyToOneColumn;
 
 
-export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, embeded, disabled }: SolidListFieldWidgetProps) => {
     const manyToOneFieldData = rowData[column.attrs.name];
 
     // This is the userkey that will be present within the rowData.
@@ -56,6 +58,14 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
         const userKeyField = column?.attrs?.coModelFieldToDisplay ? column?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
 
         const manyToOneColVal = manyToOneFieldData[userKeyField];
+
+        if (embeded === true || disabled === true) {
+            return (
+                <span className="solid-list-external-link-text">
+                    {manyToOneColVal}
+                </span>
+            );
+        }
 
         return (
             <button
