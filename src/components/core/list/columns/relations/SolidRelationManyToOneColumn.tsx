@@ -6,7 +6,7 @@ import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { kebabCase } from 'lodash';
 import { ExternalLink } from "lucide-react";
 
-const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded, disabled }: SolidListViewColumnParams) => {
+const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded }: SolidListViewColumnParams) => {
 
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
@@ -28,8 +28,7 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
                     solidListViewMetaData,
                     fieldMetadata,
                     column,
-                    embeded,
-                    disabled
+                    embeded
                 }
                 return (
                     <>
@@ -49,9 +48,8 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
 export default SolidRelationManyToOneColumn;
 
 
-export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, embeded, disabled }: SolidListFieldWidgetProps) => {
+export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, embeded }: SolidListFieldWidgetProps) => {
     const manyToOneFieldData = rowData[column.attrs.name];
-
     // This is the userkey that will be present within the rowData.
     if (manyToOneFieldData) {
         // Since this is a many-to-one field, we fetch the user key field of the associated model.
@@ -59,7 +57,7 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
 
         const manyToOneColVal = manyToOneFieldData[userKeyField];
 
-        if (embeded === true || disabled === true) {
+        if (embeded === true || column.attrs.disabled === true) {
             return (
                 <span className="solid-list-external-link-text">
                     {manyToOneColVal}

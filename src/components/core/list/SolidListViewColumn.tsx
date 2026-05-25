@@ -25,8 +25,7 @@ export type SolidListViewColumnParams = {
     column: any,
     setLightboxUrls?: any,
     setOpenLightbox?: any,
-    embeded?: boolean;
-    disabled?: boolean;
+    embeded?: boolean;    
 };
 
 export const getNumberOfInputs = (matchMode: any): number | null => {
@@ -74,7 +73,7 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
 //     }
 // };
 
-export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox, embeded, disabled }: SolidListViewColumnParams) => {
+export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox, embeded }: SolidListViewColumnParams) => {
 
     // And finally we can implement additional switching logic based on certain special fields. 
     if (fieldMetadata.name === 'id') {
@@ -118,7 +117,7 @@ export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, colu
         return SolidTimeColumn({ solidListViewMetaData, fieldMetadata, column });
     }
     if (fieldMetadata.type === 'relation') {
-        return SolidRelationColumn({ solidListViewMetaData, fieldMetadata, column, embeded, disabled });
+        return SolidRelationColumn({ solidListViewMetaData, fieldMetadata, column, embeded });
     }
     if (fieldMetadata.type === 'mediaSingle') {
         return SolidMediaSingleColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });

@@ -1115,8 +1115,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             column,
             setLightboxUrls,
             setOpenLightbox,
-            embeded: params.embeded,
-            disabled: column?.attrs?.disabled
+            embeded: params.embeded
           });
         } else {
           return null;
@@ -1128,8 +1127,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           column,
           setLightboxUrls,
           setOpenLightbox,
-          embeded: params.embeded,
-          disabled: column?.attrs?.disabled
+          embeded: params.embeded
         });
       }
     });
