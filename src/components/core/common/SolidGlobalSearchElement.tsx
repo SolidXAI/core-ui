@@ -172,8 +172,17 @@ const transformRulesToFilters = (input: any, viewData: any) => {
     const processRule = (rule: any) => {
         if (rule.value !== undefined && rule.value !== null) {
 
-            // Ensure rule.value is always an array
-            let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i?.value ? i?.value : i) : rule?.value;
+            // Ensure rule.value is always an array of primitive values.
+            // Mixed arrays like ["failed", { label: "pending", value: "pending" }]
+            // must be normalized before query serialization.
+            const rawValues = Array.isArray(rule?.value) ? rule.value : [rule?.value];
+            let values = rawValues.map((item: any) => {
+                if (item && typeof item === "object") {
+                    if (Object.prototype.hasOwnProperty.call(item, "value")) return item.value;
+                    if (Object.prototype.hasOwnProperty.call(item, "label")) return item.label;
+                }
+                return item;
+            });
             if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between' && rule.matchMode !== '$null' && rule.matchMode !== '$notNull') {
                 values = values[0];
             }
