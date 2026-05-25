@@ -57,7 +57,9 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
 
         const manyToOneColVal = manyToOneFieldData[userKeyField];
 
-        if (embeded === true || column.attrs.disabled === true) {
+        const isDisabled = column?.attrs?.disabled === true;
+
+        if (embeded === true || isDisabled) {
             return (
                 <span className="solid-list-external-link-text">
                     {manyToOneColVal}
