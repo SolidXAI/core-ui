@@ -24,11 +24,6 @@ type SolidAutocompleteProps = {
   multiple?: boolean;
   maxVisibleChips?: number;
   style?: React.CSSProperties;
-  /**
-   * Render the suggestions panel through a portal attached to document.body so it
-   * can escape clipping ancestors (e.g. a dialog with overflow:auto/transform).
-   * Opt-in to avoid altering positioning for existing inline usages.
-   */
   portal?: boolean;
 };
 

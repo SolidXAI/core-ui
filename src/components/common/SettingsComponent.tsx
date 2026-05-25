@@ -498,7 +498,7 @@ export function SettingsComponent() {
 
   return (
     <div className={styles.page}>
-      <div className="page-header secondary-border-bottom">
+      <div className={`page-header secondary-border-bottom ${styles.pageHeader}`}>
         <div className={styles.headerIntro}>
           <div className="form-wrapper-title">Settings</div>
           <div className={styles.subtitle}>Manage platform configuration across modules from a single workspace.</div>
