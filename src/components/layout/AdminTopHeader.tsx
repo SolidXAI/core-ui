@@ -70,7 +70,11 @@ export const AdminTopHeader = () => {
       const moduleName = segments[2];
       const modelName = segments[3];
       const viewName = segments[4];
-      const next = [moduleName, modelName, viewName].filter(Boolean).map((item) => toLabel(item!));
+      const next = [
+        moduleName ? toLabel(moduleName) : null,
+        modelFromApi ? decodeURIComponent(modelFromApi) : modelName ? toLabel(modelName) : null,
+        viewName ? toLabel(viewName) : null,
+      ].filter(Boolean) as string[];
       return next.length ? next : ["Admin"];
     }
 
