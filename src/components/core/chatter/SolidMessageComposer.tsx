@@ -46,7 +46,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
         try {
             const formData = new FormData();
             formData.append('messageType', "custom");
-            formData.append('messageSubType', "custom");
+            formData.append('messageSubType', "note");
             formData.append('messageBody', message);
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);
@@ -111,7 +111,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={type === 'email' ? 'Send a message to followers' : 'Log an internal note.'}
-                    className="w-full p-1"
+                    className="w-full p-2"
                     rows={4}
                 />
                 <div className='flex align-items-center justify-content-between flex-wrap gap-2'>

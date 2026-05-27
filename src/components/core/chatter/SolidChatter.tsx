@@ -115,15 +115,17 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
             }).unwrap();
             const processedMessages = response.data.records.map((msg: any) => {
                 if (msg.messageType === 'custom') {
+                    const displayTimeSource = msg.updatedAt || msg.createdAt;
                     // Custom message
                     return {
                         id: msg.id,
                         user: msg.user?.fullName || "System",
+                        userId: msg.user?.id,
                         messageType: "custom",
                         message: msg.messageBody,
-                        time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        createdAt: msg.createdAt,
-                        date: formatDate(msg.createdAt),
+                        time: new Date(displayTimeSource).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        createdAt: displayTimeSource,
+                        date: formatDate(displayTimeSource),
                         media: msg._media,
                         messageSubType: msg.messageSubType,
                         status: msg.status,
@@ -154,6 +156,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     return {
                         id: msg.id,
                         user: msg.user?.fullName || "System",
+                        userId: msg.user?.id,
                         messageType: "audit",
                         time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         auditRecord: auditRecord,
@@ -229,6 +232,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         <SolidChatterMessageBox
                             messageId={message.id}
                             user={message.user}
+                            userId={message.userId}
                             messageType={message.messageType}
                             message={message.message}
                             time={message.time}
