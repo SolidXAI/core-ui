@@ -32,6 +32,39 @@ function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
+const DATEPICKER_OUTSIDE_SAFE_SELECTOR =
+  "#solid-datepicker-portal, .react-datepicker, .react-datepicker-popper, .react-datepicker__portal, [class*='react-datepicker']";
+
+function isDatePickerInteractionTarget(target: EventTarget | null): boolean {
+  if (!target) return false;
+
+  if (target instanceof Element) {
+    return Boolean(target.closest(DATEPICKER_OUTSIDE_SAFE_SELECTOR));
+  }
+
+  if (target instanceof Node) {
+    return Boolean(target.parentElement?.closest(DATEPICKER_OUTSIDE_SAFE_SELECTOR));
+  }
+
+  return false;
+}
+
+function shouldPreventOutsideDismiss(event: any): boolean {
+  const original = event?.detail?.originalEvent ?? event;
+  const target = original?.target as EventTarget | null;
+
+  if (isDatePickerInteractionTarget(target)) {
+    return true;
+  }
+
+  if (typeof original?.composedPath === "function") {
+    const path = original.composedPath() as EventTarget[];
+    return path.some((node) => isDatePickerInteractionTarget(node));
+  }
+
+  return false;
+}
+
 export function SolidDialog({
   open,
   onOpenChange,
@@ -51,7 +84,6 @@ export function SolidDialog({
 }: SolidDialogProps) {
   const controlledOpen = open ?? visible ?? false;
   const handleOpenChange = (next: boolean) => {
-    if (!dismissible && !next) return;
     onOpenChange?.(next);
     if (!next) onHide?.();
   };
@@ -67,10 +99,22 @@ export function SolidDialog({
             if (!dismissible) event.preventDefault();
           }}
           onPointerDownOutside={(event: any) => {
-            if (!dismissible) event.preventDefault();
+            if (!dismissible) {
+              event.preventDefault();
+              return;
+            }
+            if (shouldPreventOutsideDismiss(event)) {
+              event.preventDefault();
+            }
           }}
           onInteractOutside={(event: any) => {
-            if (!dismissible) event.preventDefault();
+            if (!dismissible) {
+              event.preventDefault();
+              return;
+            }
+            if (shouldPreventOutsideDismiss(event)) {
+              event.preventDefault();
+            }
           }}
         >
           {showHeader && (header || onHide) ? (

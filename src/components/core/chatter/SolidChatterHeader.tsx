@@ -185,6 +185,7 @@ export const SolidChatterHeader = (props: Props) => {
                 className='solid-filter-dialog-shell solid-chatter-filter-main'
                 style={{ width: 500 }}
                 showHeader={false}
+                dismissible={false}
             >
                 <SolidDialogHeader className="solid-filter-dialog-head">
                     <div>
@@ -207,6 +208,7 @@ export const SolidChatterHeader = (props: Props) => {
                                 placeholder="Filter by user"
                                 className="w-full"
                                 inputClassName="w-full"
+                                portal
                             />
                         </div>
                         <div className="flex flex-column gap-2">
@@ -220,6 +222,7 @@ export const SolidChatterHeader = (props: Props) => {
                                         className="w-full"
                                         wrapperClassName="w-full"
                                         inputClassName="w-full"
+                                        portalId="solid-datepicker-portal"
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -230,6 +233,7 @@ export const SolidChatterHeader = (props: Props) => {
                                         className="w-full"
                                         wrapperClassName="w-full"
                                         inputClassName="w-full"
+                                        portalId="solid-datepicker-portal"
                                     />
                                 </div>
                             </div>

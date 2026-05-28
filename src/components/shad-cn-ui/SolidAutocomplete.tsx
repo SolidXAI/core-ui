@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 type SolidAutocompleteProps = {
@@ -23,6 +24,7 @@ type SolidAutocompleteProps = {
   multiple?: boolean;
   maxVisibleChips?: number;
   style?: React.CSSProperties;
+  portal?: boolean;
 };
 
 function cx(...parts: Array<string | false | undefined>) {
@@ -61,8 +63,10 @@ export function SolidAutocomplete({
   maxVisibleChips = 2,
   style,
   onBlur,
+  portal,
 }: SolidAutocompleteProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const completeTimerRef = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -70,6 +74,7 @@ export function SolidAutocomplete({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
   const [hasCustomQuery, setHasCustomQuery] = useState(false);
+  const [portalStyle, setPortalStyle] = useState<React.CSSProperties | null>(null);
 
   useEffect(() => {
     if (multiple) return;
@@ -102,8 +107,10 @@ export function SolidAutocomplete({
 
   useEffect(() => {
     function handleOutsideClick(event: MouseEvent) {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const insideRoot = rootRef.current?.contains(target);
+      const insidePanel = panelRef.current?.contains(target);
+      if (!insideRoot && !insidePanel) {
         setOpen(false);
         setManageOpen(false);
         setIsFocused(false);
@@ -112,6 +119,35 @@ export function SolidAutocomplete({
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  useLayoutEffect(() => {
+    if (!portal || !open) {
+      setPortalStyle(null);
+      return;
+    }
+    const updatePosition = () => {
+      const el = rootRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setPortalStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        right: "auto",
+        width: rect.width,
+        minWidth: rect.width,
+        zIndex: 100000,
+        pointerEvents: "auto",
+      });
+    };
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [portal, open]);
 
   const normalizedSuggestions = useMemo(
     () =>
@@ -360,25 +396,35 @@ export function SolidAutocomplete({
         </div>
       )}
 
-      {open && normalizedSuggestions.length > 0 && (
-        <div className="solid-autocomplete-panel" role="listbox">
-          {normalizedSuggestions.map((item, index) => (
-            <button
-              key={`${item.label}-${index}`}
-              type="button"
-              className={cx(
-                "solid-autocomplete-option",
-                activeIndex === index && "is-active"
-              )}
-              onMouseEnter={() => setActiveIndex(index)}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => commitSelection(item.raw)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
+      {open && normalizedSuggestions.length > 0 && (() => {
+        const panel = (
+          <div
+            ref={panelRef}
+            className="solid-autocomplete-panel"
+            role="listbox"
+            style={portal ? (portalStyle ?? { visibility: "hidden" }) : undefined}
+          >
+            {normalizedSuggestions.map((item, index) => (
+              <button
+                key={`${item.label}-${index}`}
+                type="button"
+                className={cx(
+                  "solid-autocomplete-option",
+                  activeIndex === index && "is-active"
+                )}
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => commitSelection(item.raw)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        );
+        return portal && typeof document !== "undefined"
+          ? createPortal(panel, document.body)
+          : panel;
+      })()}
     </div>
   );
 }
