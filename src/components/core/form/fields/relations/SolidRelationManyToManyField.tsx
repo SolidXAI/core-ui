@@ -5,7 +5,7 @@ import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidAutocomplete } from "../../../../shad-cn-ui/SolidAutocomplete";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
 import { SolidCheckbox } from "../../../../shad-cn-ui/SolidCheckbox";
-import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { SolidPanel } from "../../../../shad-cn-ui/SolidPanel";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
@@ -635,6 +635,9 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
             >
                 <SolidDialogHeader>
                     <SolidDialogTitle>{`Link existing ${fieldLabel}`}</SolidDialogTitle>
+                    <SolidDialogDescription>
+                        {`Search and link an existing ${fieldLabel} record to this item.`}
+                    </SolidDialogDescription>
                     <SolidDialogClose />
                 </SolidDialogHeader>
                 <SolidDialogBody>
@@ -682,6 +685,11 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
             >
                 <SolidDialogHeader className="solid-field-confirm-header">
                     <SolidDialogTitle>Save Required</SolidDialogTitle>
+                    <SolidDialogDescription>
+                        {`Save the current ${solidFormViewMetaData?.data?.solidView?.model?.displayName
+                            ? solidFormViewMetaData.data.solidView.model.displayName
+                            : capitalize(fieldContext.modelName)} before creating ${fieldLabel}.`}
+                    </SolidDialogDescription>
                     <SolidDialogClose />
                 </SolidDialogHeader>
                 <SolidDialogBody className="solid-field-confirm-dialog-body">

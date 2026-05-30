@@ -2,7 +2,7 @@
 import { createSolidEntityApi } from "../../../../../redux/api/solidEntityApi";
 import { SolidAutocomplete } from "../../../../shad-cn-ui/SolidAutocomplete";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
-import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidDialog, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import qs from "qs";
 import React, { useEffect, useState } from "react";
@@ -493,6 +493,8 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
     const parentFieldName = fieldLayoutInfo?.attrs?.parentFieldName;
     const childFieldName = fieldLayoutInfo?.attrs?.childFieldName;
     const parentModuleName = fieldLayoutInfo?.attrs?.parentModuleName;
+    const dialogTitle = `${formViewParams?.id && formViewParams.id !== "new" ? "Edit" : "Create"} ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"}`;
+    const dialogDescription = `Manage the ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"} form in this dialog.`;
 
 
     const params = {
@@ -536,6 +538,10 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >
+                <SolidDialogHeader className="solid-sr-only">
+                    <SolidDialogTitle>{dialogTitle}</SolidDialogTitle>
+                    <SolidDialogDescription>{dialogDescription}</SolidDialogDescription>
+                </SolidDialogHeader>
                 <SolidFormView {...params} />
 
             </SolidDialog>

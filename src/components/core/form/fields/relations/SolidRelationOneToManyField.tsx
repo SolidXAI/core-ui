@@ -11,7 +11,7 @@ import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "../../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
-import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import styles from "../solidFields.module.css";
@@ -496,6 +496,8 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
 export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose }: any) => {
     const router = useRouter();
+    const dialogTitle = `${formViewParams?.id && formViewParams.id !== "new" ? "Edit" : "Create"} ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"}`;
+    const dialogDescription = `Manage the ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"} form in this dialog.`;
 
     const params: FormViewParams = {
         moduleName: formViewParams.moduleName,
@@ -536,6 +538,10 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >
+                <SolidDialogHeader className="solid-sr-only">
+                    <SolidDialogTitle>{dialogTitle}</SolidDialogTitle>
+                    <SolidDialogDescription>{dialogDescription}</SolidDialogDescription>
+                </SolidDialogHeader>
                 {params &&
                     <SolidFormView {...params} />
                 }
