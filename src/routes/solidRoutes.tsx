@@ -29,7 +29,6 @@ import { InitiateMicrosoftOauthPage } from "./pages/auth/InitiateMicrosoftOauthP
 import { SsoPage } from "./pages/auth/SsoPage";
 import type { SolidRoutesOptions, SolidRouteKey } from "./types";
 import { TreePage } from "./pages/admin/core/TreePage";
-import { DashboardPage } from "./pages/admin/core/DashboardPage";
 import { StudioHomePage } from "./pages/studio/StudioHomePage";
 import { StudioLandingPage } from "./pages/studio/StudioLandingPage";
 import { _solidRegisterExtraRoutes } from "./SolidLayoutRegistry";
@@ -79,7 +78,6 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
   const adminChildren: RouteObject[] = [
     { path: "/admin", element: pick("admin", <AdminPage />), handle: { title: "Admin", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/home", element: pick("moduleHome", <ModuleHomePage />), handle: { title: "Module Home", manageDocumentMeta: true } },
-    { path: "/admin/core/:moduleName/dashboards/:dashboardName", element: pick("dashboard", <DashboardPage />), handle: { title: "Dashboard", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />), handle: { title: "List", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />), handle: { title: "Tree", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />), handle: { title: "Kanban", manageDocumentMeta: true } },

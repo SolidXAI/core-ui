@@ -40,7 +40,6 @@ import { SolidManyToOneRelationAvatarListWidget } from "../components/core/list/
 import { SolidUserBlockedStatusListWidget } from "../components/core/list/widgets/SolidUserBlockedStatusListWidget";
 import { SolidShortTextFieldAvatarWidget } from "../components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "../components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
-import ChartFormPreviewWidget from "../components/core/extension/solid-core/dashboardQuestion/ChartFormPreviewWidget";
 import { DefaultTimeFormEditWidget, DefaultTimeFormViewWidget } from "../components/core/form/fields/SolidTimeField";
 import { SolidAiInteractionMetadataFieldFormWidget } from "../components/core/form/fields/widgets/SolidAiInteractionMetadataFieldFormWidget";
 import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
@@ -48,9 +47,6 @@ import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
 import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
 import { DefaultDateListWidget, DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
-import dashboardFormViewChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardFormViewChangeHandler";
-import dashboardQuestionFieldChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionFieldChangeHandler";
-import dashboardQuestionOnFormLoadHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionOnFormLoadHandler";
 import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanCardWidget";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
@@ -351,9 +347,6 @@ registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, Exten
 registerExtensionComponent("CustomHtml", CustomHtml, ExtensionComponentTypes.formWidget);
 registerExtensionComponent("solidXGenAiCodeBuilderConfigWidget", solidXGenAiCodeBuilderConfigWidget, ExtensionComponentTypes.settingsWidgets);
 
-// Common
-registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ExtensionComponentTypes.formWidget, ["chart"]);
-
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdFormViewWidget", SolidChatterMessageCoModelEntityIdFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
 registerExtensionComponent("SolidLovTypeChangeFormEditWidget", SolidLovTypeChangeFormEditWidget, ExtensionComponentTypes.formFieldEditWidget);
 
@@ -385,11 +378,6 @@ registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponen
 // Email Template
 registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange, ExtensionFunctionTypes.onFieldChange);
 registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad, ExtensionFunctionTypes.onFormLayoutLoad);
-
-// Dashboard
-registerExtensionFunction("dashboardFormViewChangeHandler", dashboardFormViewChangeHandler, ExtensionFunctionTypes.onFieldChange);
-registerExtensionFunction("dashboardQuestionFieldChangeHandler", dashboardQuestionFieldChangeHandler, ExtensionFunctionTypes.onFieldChange);
-registerExtensionFunction("dashboardQuestionOnFormLoadHandler", dashboardQuestionOnFormLoadHandler, ExtensionFunctionTypes.onFormLoad);
 
 // Model Sequence 
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"
