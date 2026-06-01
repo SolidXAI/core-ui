@@ -57,6 +57,12 @@ import { SolidLovTypeChangeFormEditWidget } from "../components/core/extension/s
 import mqMessageOnFormLoadHandler from "../components/core/extension/solid-core/mqMessage/form/mqMessageOnFormLoadHandler";
 import { SolidMqMessageStageFormViewWIdget } from "../components/core/extension/solid-core/mqMessage/form/SolidMqMessageStageFormViewWIdget";
 import solidXGenAiCodeBuilderConfigWidget from "../components/core/extension/solid-core/settings/solidXGenAiCodeBuilderConfigWidget";
+import { DefaultDashboardKpiWidget } from "../components/core/dashboard/widgets/DefaultDashboardKpiWidget";
+import { DefaultDashboardLineChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardLineChartWidget";
+import { DefaultDashboardBarChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardBarChartWidget";
+import { DefaultDashboardPieChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardPieChartWidget";
+import { DefaultDashboardTableWidget } from "../components/core/dashboard/widgets/DefaultDashboardTableWidget";
+import { DefaultDashboardUnknownWidget } from "../components/core/dashboard/widgets/DefaultDashboardUnknownWidget";
 
 import {
     ExtensionComponentTypes,
@@ -372,6 +378,14 @@ registerExtensionComponent("SolidMqMessageStageFormViewWIdget", SolidMqMessageSt
 // Kanban
 registerExtensionComponent("MqMessageKanbanCardWidget", MqMessageKanbanCardWidget, ExtensionComponentTypes.kanbanCardWidget);
 registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.cardWidget);
+
+// Dashboard widgets (default first-party set)
+registerExtensionComponent("DefaultDashboardKpiWidget", DefaultDashboardKpiWidget, ExtensionComponentTypes.dashboardWidget);
+registerExtensionComponent("DefaultDashboardLineChartWidget", DefaultDashboardLineChartWidget, ExtensionComponentTypes.dashboardWidget);
+registerExtensionComponent("DefaultDashboardBarChartWidget", DefaultDashboardBarChartWidget, ExtensionComponentTypes.dashboardWidget);
+registerExtensionComponent("DefaultDashboardPieChartWidget", DefaultDashboardPieChartWidget, ExtensionComponentTypes.dashboardWidget);
+registerExtensionComponent("DefaultDashboardTableWidget", DefaultDashboardTableWidget, ExtensionComponentTypes.dashboardWidget);
+registerExtensionComponent("DefaultDashboardUnknownWidget", DefaultDashboardUnknownWidget, ExtensionComponentTypes.dashboardWidget);
 
 
 // # Extension functions 

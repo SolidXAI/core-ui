@@ -32,6 +32,7 @@ export type SolidRouteKey =
   | "tree"
   | "kanban"
   | "card"
+  | "dashboard"
   | "form"
   | "settings"
   | "authLayout"

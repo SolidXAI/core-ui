@@ -109,6 +109,7 @@ export {
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "./types/extension-registry";
+export type { DashboardWidgetComponentProps } from "./types/dashboard";
 export {
     createSolidUiModuleRuntime,
     getSolidUiModules,
@@ -272,6 +273,15 @@ export {
     useLazyGetSolidMenusQuery,
     useUpdateSolidMenuMutation
 } from './redux/api/solidMenuApi';
+
+export {
+    dashboardRuntimeApi,
+    useGetDashboardDefinitionQuery,
+    useGetDashboardLayoutQuery,
+    useSaveDashboardLayoutMutation,
+    useGetDashboardDataMutation,
+    useLazyGetDashboardVariableOptionsQuery,
+} from './redux/api/dashboardRuntimeApi';
 
 export {
     solidViewsApi,
@@ -559,6 +569,7 @@ export { AdminPage } from './routes/pages/admin/AdminPage';
 export { ModuleHomePage } from './routes/pages/admin/core/ModuleHomePage';
 export { ListPage as AdminListPage } from './routes/pages/admin/core/ListPage';
 export { KanbanPage as AdminKanbanPage } from './routes/pages/admin/core/KanbanPage';
+export { DashboardPage as AdminDashboardPage } from './routes/pages/admin/core/DashboardPage';
 export { FormPage as AdminFormPage } from './routes/pages/admin/core/FormPage';
 export { SettingsPage as AdminSettingsPage } from './routes/pages/admin/core/SettingsPage';
 export { LoginPage as AuthLoginPage } from './routes/pages/auth/LoginPage';

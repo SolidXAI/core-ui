@@ -14,6 +14,7 @@ import { KanbanPage } from "./pages/admin/core/KanbanPage";
 import { CardPage } from "./pages/admin/core/CardPage";
 import { FormPage } from "./pages/admin/core/FormPage";
 import { SettingsPage } from "./pages/admin/core/SettingsPage";
+import { DashboardPage } from "./pages/admin/core/DashboardPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
@@ -82,6 +83,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />), handle: { title: "Tree", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />), handle: { title: "Kanban", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/card", element: pick("card", <CardPage />), handle: { title: "Card", manageDocumentMeta: true } },
+    { path: "/admin/core/:moduleName/dashboard/:dashboardName", element: pick("dashboard", <DashboardPage />), handle: { title: "Dashboard", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />), handle: { title: "Form", manageDocumentMeta: true } },
     { path: "/admin/core/settings", element: pick("settings", <SettingsPage />), handle: { title: "Settings", manageDocumentMeta: true } },
     ...extraAdminRoutes,
