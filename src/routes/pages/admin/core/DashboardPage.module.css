@@ -14,7 +14,40 @@
 
 .headerActions {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.iconButton {
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filterButtonWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.filterCountBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #fff;
 }
 
 .titleBlock {
@@ -35,17 +68,20 @@
   font-size: 0.9rem;
 }
 
-.filterPanel {
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: #ffffff;
+.filterDialogContent {
+  width: min(540px, calc(100vw - 32px));
 }
 
-.filterGrid {
+.filterModalColumn {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
+}
+
+.filterModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .filterField {
@@ -67,18 +103,12 @@
 
 .multiSelect {
   width: 100%;
-  min-height: 76px;
+  min-height: 84px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #fff;
   padding: 6px;
   font-size: 0.9rem;
-}
-
-.actions {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
 }
 
 .gridStack {
@@ -106,36 +136,6 @@
   min-height: 0;
 }
 
-.kpiValue {
-  font-size: 1.8rem;
-  font-weight: 700;
-}
-
-.tableWrap {
-  overflow: auto;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  text-align: left;
-  border-bottom: 1px solid #eceff3;
-  padding: 6px 8px;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.seriesList {
-  margin: 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 4px;
-}
-
 .error {
   color: #b91c1c;
   font-size: 0.9rem;
@@ -144,4 +144,15 @@
 .muted {
   color: #6b7280;
   font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dateRange {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Filter, RefreshCw, Save } from "lucide-react";
 import { GridStack, type GridStackNode } from "gridstack";
 import "gridstack/dist/gridstack.min.css";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { SolidButton, SolidDatePicker, SolidSelect, SolidSpinner } from "../../../../components/shad-cn-ui";
+import {
+  SolidButton,
+  SolidDatePicker,
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogFooter,
+  SolidSelect,
+  SolidSpinner,
+} from "../../../../components/shad-cn-ui";
 import { resolveChartType } from "../../../../components/core/dashboard/mappers/echartsOptionMapper";
 import {
   useGetDashboardDataMutation,
@@ -31,7 +40,7 @@ const normalizeType = (value: unknown): string => `${value ?? ""}`.toLowerCase()
 
 const isDateRangeVariable = (variable: any): boolean => {
   const type = normalizeType(variable?.type);
-  return type === "daterange" || type === "date_range";
+  return type === "date" || type === "daterange" || type === "date_range";
 };
 
 const isDynamicVariable = (variable: any): boolean => {
@@ -46,7 +55,7 @@ const isStaticVariable = (variable: any): boolean => {
 
 const isMultiValueVariable = (variable: any): boolean => {
   const type = normalizeType(variable?.type);
-  return type === "multiselect" || !!variable?.multiple || !!variable?.allowMultiple;
+  return type === "multiselect" || !!variable?.multiple || !!variable?.allowMultiple || !!variable?.isMultiSelect;
 };
 
 const toOptions = (options: any[]): Option[] =>
@@ -58,7 +67,7 @@ const toOptions = (options: any[]): Option[] =>
       }
       return {
         value: `${entry?.value ?? entry?.id ?? ""}`,
-        label: `${entry?.label ?? entry?.name ?? entry?.value ?? entry?.id ?? ""}`,
+        label: `${entry?.label ?? entry?.name ?? entry?.displayName ?? entry?.value ?? entry?.id ?? ""}`,
       };
     })
     .filter((entry) => !!entry.value);
@@ -91,6 +100,49 @@ const toLayoutItems = (items: any[]): DashboardGridLayoutItem[] =>
       minH: item?.minH !== undefined ? Number(item?.minH) : undefined,
     }));
 
+const getAllLayoutItemsFromGrid = (grid: GridStack | null): DashboardGridLayoutItem[] => {
+  if (!grid) return [];
+  const snapshot = grid.save(false, false, (node: any, widget: any) => {
+    if (!widget.id) {
+      widget.id =
+        node?.id ??
+        node?.el?.getAttribute?.("gs-id") ??
+        node?.el?.getAttribute?.("id") ??
+        "";
+    }
+  });
+  const widgets = Array.isArray(snapshot) ? snapshot : [];
+  const fromSave = toLayoutItems(
+    widgets.map((item: any) => ({
+      widgetId: item?.id ?? item?.widgetId,
+      x: item?.x,
+      y: item?.y,
+      w: item?.w ?? item?.width,
+      h: item?.h ?? item?.height,
+      minW: item?.minW,
+      minH: item?.minH,
+    }))
+  );
+
+  if (fromSave.length > 0) return fromSave;
+
+  const nodes = Array.isArray((grid as any)?.engine?.nodes) ? (grid as any).engine.nodes : [];
+  return toLayoutItems(
+    nodes.map((node: any) => ({
+      widgetId:
+        node?.id ??
+        node?.el?.getAttribute?.("gs-id") ??
+        node?.el?.getAttribute?.("id"),
+      x: node?.x,
+      y: node?.y,
+      w: node?.w ?? node?.width,
+      h: node?.h ?? node?.height,
+      minW: node?.minW,
+      minH: node?.minH,
+    }))
+  );
+};
+
 const resolveDefaultDashboardWidgetComponentName = (definition: any, runtime: any): string => {
   const runtimeData = runtime?.data ?? runtime ?? {};
   if (runtimeData?.value !== undefined) return "DefaultDashboardKpiWidget";
@@ -111,6 +163,135 @@ const getPreferredWidgetComponentName = (definition: any, runtime: any): string 
     definition?.ui?.componentName;
   return explicit || resolveDefaultDashboardWidgetComponentName(definition, runtime);
 };
+
+const resolvePresetRange = (preset: string | undefined): DateRangeValue => {
+  if (!preset) return { start: null, end: null };
+  const now = new Date();
+  const end = new Date(now);
+
+  if (preset === "today") {
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    return { start, end };
+  }
+
+  if (preset === "last_24_hours") {
+    const start = new Date(now);
+    start.setHours(start.getHours() - 24);
+    return { start, end };
+  }
+
+  if (preset === "last_7_days") {
+    const start = new Date(now);
+    start.setDate(start.getDate() - 7);
+    return { start, end };
+  }
+
+  if (preset === "last_30_days") {
+    const start = new Date(now);
+    start.setDate(start.getDate() - 30);
+    return { start, end };
+  }
+
+  return { start: null, end: null };
+};
+
+const parseDateValue = (value: any): Date | null => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const buildDefaultFilterValues = (variables: any[]): Record<string, DashboardVariableValue> => {
+  const defaults: Record<string, DashboardVariableValue> = {};
+
+  variables.forEach((variable: any) => {
+    const name = variable?.name;
+    if (!name) return;
+
+    if (isDateRangeVariable(variable)) {
+      const presetRange = resolvePresetRange(variable?.defaultValue?.preset ?? variable?.defaultValuePreset);
+      const start = parseDateValue(variable?.defaultValue?.start ?? variable?.defaultValue?.from) ?? presetRange.start;
+      const end = parseDateValue(variable?.defaultValue?.end ?? variable?.defaultValue?.to) ?? presetRange.end;
+      defaults[name] = { start, end };
+      return;
+    }
+
+    if (isMultiValueVariable(variable)) {
+      const base = variable?.defaultValue;
+      defaults[name] = Array.isArray(base) ? base.map((entry: any) => `${entry}`) : [];
+      return;
+    }
+
+    if (variable?.defaultValue !== undefined && variable?.defaultValue !== null) {
+      defaults[name] = `${variable.defaultValue}`;
+      return;
+    }
+
+    defaults[name] = "";
+  });
+
+  return defaults;
+};
+
+const buildClearedFilterValues = (variables: any[]): Record<string, DashboardVariableValue> => {
+  const cleared: Record<string, DashboardVariableValue> = {};
+
+  variables.forEach((variable: any) => {
+    const name = variable?.name;
+    if (!name) return;
+
+    if (isDateRangeVariable(variable)) {
+      cleared[name] = { start: null, end: null };
+      return;
+    }
+
+    if (isMultiValueVariable(variable)) {
+      cleared[name] = [];
+      return;
+    }
+
+    cleared[name] = "";
+  });
+
+  return cleared;
+};
+
+const isFilterValueApplied = (variable: any, value: DashboardVariableValue): boolean => {
+  if (isDateRangeVariable(variable)) {
+    const range = value as DateRangeValue | undefined;
+    return !!range?.start || !!range?.end;
+  }
+
+  if (isMultiValueVariable(variable)) {
+    return Array.isArray(value) && value.length > 0;
+  }
+
+  return value !== undefined && value !== null && `${value}`.trim() !== "";
+};
+
+const isSameFilterValue = (variable: any, left: DashboardVariableValue, right: DashboardVariableValue): boolean => {
+  if (isDateRangeVariable(variable)) {
+    const leftRange = (left as DateRangeValue | undefined) ?? { start: null, end: null };
+    const rightRange = (right as DateRangeValue | undefined) ?? { start: null, end: null };
+    return toIso(leftRange.start) === toIso(rightRange.start) && toIso(leftRange.end) === toIso(rightRange.end);
+  }
+
+  if (isMultiValueVariable(variable)) {
+    const leftArr = Array.isArray(left) ? left.map((v) => `${v}`).sort() : [];
+    const rightArr = Array.isArray(right) ? right.map((v) => `${v}`).sort() : [];
+    if (leftArr.length !== rightArr.length) return false;
+    return leftArr.every((value, index) => value === rightArr[index]);
+  }
+
+  return `${left ?? ""}` === `${right ?? ""}`;
+};
+
+const getDashboardTitle = (definition: any, fallback: string) =>
+  definition?.displayName ?? definition?.title ?? definition?.name ?? fallback;
+
+const getWidgetTitle = (widget: any, fallback: string) =>
+  widget?.displayName ?? widget?.title ?? widget?.name ?? fallback;
 
 export function DashboardPage() {
   const params = useParams();
@@ -133,50 +314,31 @@ export function DashboardPage() {
   const [saveDashboardLayout, { isLoading: saveLayoutLoading }] = useSaveDashboardLayoutMutation();
   const [getVariableOptions] = useLazyGetDashboardVariableOptionsQuery();
 
-  const [variableValues, setVariableValues] = useState<Record<string, DashboardVariableValue>>({});
+  const [appliedVariableValues, setAppliedVariableValues] = useState<Record<string, DashboardVariableValue>>({});
+  const [filterDraftValues, setFilterDraftValues] = useState<Record<string, DashboardVariableValue>>({});
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, Option[]>>({});
   const [draftLayoutItems, setDraftLayoutItems] = useState<DashboardGridLayoutItem[] | null>(null);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const bootstrappedRef = useRef(false);
 
   const variables = useMemo(() => (Array.isArray(definition?.variables) ? definition.variables : []), [definition]);
   const definitionWidgets = useMemo(() => (Array.isArray(definition?.widgets) ? definition.widgets : []), [definition]);
-  const effectiveLayoutItems = useMemo(
-    () => toLayoutItems(layoutData?.effectiveLayout?.items ?? []),
-    [layoutData]
-  );
+  const effectiveLayoutItems = useMemo(() => toLayoutItems(layoutData?.effectiveLayout?.items ?? []), [layoutData]);
   const gridColumns = Number(layoutData?.effectiveLayout?.columns ?? 12) || 12;
+
+  const defaultFilterValues = useMemo(() => buildDefaultFilterValues(variables), [variables]);
 
   useEffect(() => {
     if (!definition || bootstrappedRef.current) return;
-    const defaults: Record<string, DashboardVariableValue> = {};
-    variables.forEach((variable: any) => {
-      const name = variable?.name;
-      if (!name) return;
-
-      if (isDateRangeVariable(variable)) {
-        const start = variable?.defaultValue?.start ? new Date(variable.defaultValue.start) : null;
-        const end = variable?.defaultValue?.end ? new Date(variable.defaultValue.end) : null;
-        defaults[name] = { start, end };
-        return;
-      }
-
-      if (isMultiValueVariable(variable)) {
-        const base = variable?.defaultValue;
-        defaults[name] = Array.isArray(base) ? base.map((entry: any) => `${entry}`) : [];
-        return;
-      }
-
-      if (variable?.defaultValue !== undefined && variable?.defaultValue !== null) {
-        defaults[name] = `${variable.defaultValue}`;
-        return;
-      }
-
-      defaults[name] = "";
-    });
-
-    setVariableValues(defaults);
+    setAppliedVariableValues(defaultFilterValues);
+    setFilterDraftValues(defaultFilterValues);
     bootstrappedRef.current = true;
-  }, [definition, variables]);
+  }, [definition, defaultFilterValues]);
+
+  useEffect(() => {
+    if (!isFilterDialogOpen) return;
+    setFilterDraftValues(appliedVariableValues);
+  }, [appliedVariableValues, isFilterDialogOpen]);
 
   useEffect(() => {
     if (!moduleName || !dashboardName || variables.length === 0) return;
@@ -197,7 +359,7 @@ export function DashboardPage() {
 
   useEffect(() => {
     if (!bootstrappedRef.current || !moduleName || !dashboardName) return;
-    void handleRefresh();
+    void handleRefresh(appliedVariableValues);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [moduleName, dashboardName, bootstrappedRef.current]);
 
@@ -249,6 +411,17 @@ export function DashboardPage() {
     return map;
   }, [effectiveLayoutItems]);
 
+  const appliedFilterCount = useMemo(() => {
+    return variables.reduce((count: number, variable: any) => {
+      const name = variable?.name;
+      if (!name) return count;
+      const value = appliedVariableValues[name];
+      const defaultValue = defaultFilterValues[name];
+      if (!isFilterValueApplied(variable, value)) return count;
+      return isSameFilterValue(variable, value, defaultValue) ? count : count + 1;
+    }, 0);
+  }, [appliedVariableValues, defaultFilterValues, variables]);
+
   useEffect(() => {
     if (!gridRef.current || orderedWidgets.length === 0) return;
 
@@ -256,6 +429,26 @@ export function DashboardPage() {
       gridInstanceRef.current.destroy(false);
       gridInstanceRef.current = null;
     }
+
+    const initialLayout: DashboardGridLayoutItem[] = effectiveLayoutItems.length
+      ? effectiveLayoutItems
+      : orderedWidgets.map((widget: any, index: number) => ({
+          widgetId: widget?.id ?? widget?.name ?? `widget-${index}`,
+          x: 0,
+          y: index * 3,
+          w: 4,
+          h: 3,
+        }));
+
+    const gridWidgets = initialLayout.map((item: DashboardGridLayoutItem) => ({
+      id: item.widgetId,
+      x: item.x,
+      y: item.y,
+      w: item.w,
+      h: item.h,
+      minW: item.minW,
+      minH: item.minH,
+    }));
 
     const instance = GridStack.init(
       {
@@ -267,21 +460,21 @@ export function DashboardPage() {
       gridRef.current
     );
 
-    instance.on("change", (_event: Event, items: GridStackNode[]) => {
-      const normalized = toLayoutItems(
-        (items ?? []).map((item) => ({
-          widgetId:
-            item?.id ??
-            (item as any)?.el?.getAttribute?.("gs-id") ??
-            (item as any)?.el?.getAttribute?.("id"),
-          x: item?.x,
-          y: item?.y,
-          w: item?.w,
-          h: item?.h,
-          minW: item?.minW,
-          minH: item?.minH,
-        }))
-      );
+    // React renders the DOM; make sure Gridstack converts every item node to a widget,
+    // then explicitly apply layout from API to avoid attribute-parsing or timing issues.
+    instance.batchUpdate();
+    const domItems = Array.from(gridRef.current.querySelectorAll(".grid-stack-item")) as HTMLElement[];
+    domItems.forEach((itemEl) => {
+      if (!(itemEl as any).gridstackNode) {
+        instance.makeWidget(itemEl as any);
+      }
+    });
+    instance.column(gridColumns, "none");
+    instance.load(gridWidgets as any, false);
+    instance.batchUpdate(false);
+
+    instance.on("change", (_event: Event, _items: GridStackNode[]) => {
+      const normalized = getAllLayoutItemsFromGrid(instance);
       setDraftLayoutItems(normalized);
     });
 
@@ -290,25 +483,25 @@ export function DashboardPage() {
       instance.destroy(false);
       if (gridInstanceRef.current === instance) gridInstanceRef.current = null;
     };
-  }, [orderedWidgets, gridColumns]);
+  }, [orderedWidgets, gridColumns, effectiveLayoutItems]);
 
-  const handleVariableChange = (variableName: string, value: DashboardVariableValue) => {
-    setVariableValues((prev) => ({ ...prev, [variableName]: value }));
+  const handleDraftVariableChange = (variableName: string, value: DashboardVariableValue) => {
+    setFilterDraftValues((prev) => ({ ...prev, [variableName]: value }));
   };
 
-  const buildPayloadVariables = (): Record<string, any> => {
+  const buildPayloadVariables = (values: Record<string, DashboardVariableValue>): Record<string, any> => {
     const payload: Record<string, any> = {};
     variables.forEach((variable: any) => {
       const name = variable?.name;
       if (!name) return;
-      const value = variableValues[name];
+      const value = values[name];
 
       if (isDateRangeVariable(variable)) {
         const range = value as DateRangeValue | undefined;
-        const start = toIso(range?.start ?? null);
-        const end = toIso(range?.end ?? null);
-        if (!start && !end) return;
-        payload[name] = { start, end };
+        const from = toIso(range?.start ?? null);
+        const to = toIso(range?.end ?? null);
+        if (!from && !to) return;
+        payload[name] = { from, to };
         return;
       }
 
@@ -325,19 +518,40 @@ export function DashboardPage() {
     return payload;
   };
 
-  async function handleRefresh() {
+  async function handleRefresh(values = appliedVariableValues) {
     if (!moduleName || !dashboardName) return;
     await getDashboardData({
       moduleName,
       dashboardName,
-      variables: buildPayloadVariables(),
+      variables: buildPayloadVariables(values),
     }).unwrap();
+  }
+
+  async function handleApplyFilters() {
+    const nextValues = { ...filterDraftValues };
+    setAppliedVariableValues(nextValues);
+    setIsFilterDialogOpen(false);
+    await handleRefresh(nextValues);
+  }
+
+  async function handleClearFilters() {
+    const clearedValues = buildClearedFilterValues(variables);
+    setFilterDraftValues(clearedValues);
+    setAppliedVariableValues(clearedValues);
+    setIsFilterDialogOpen(false);
+    await handleRefresh(clearedValues);
   }
 
   async function handleSaveLayout() {
     if (!moduleName || !dashboardName) return;
+    const liveGridLayout = getAllLayoutItemsFromGrid(gridInstanceRef.current);
     const baseLayout = effectiveLayoutItems.length ? effectiveLayoutItems : [];
-    const items = draftLayoutItems && draftLayoutItems.length ? draftLayoutItems : baseLayout;
+    const items = liveGridLayout.length
+      ? liveGridLayout
+      : draftLayoutItems && draftLayoutItems.length
+        ? draftLayoutItems
+        : baseLayout;
+
     await saveDashboardLayout({
       moduleName,
       dashboardName,
@@ -347,6 +561,7 @@ export function DashboardPage() {
         items,
       },
     }).unwrap();
+
     setDraftLayoutItems(null);
   }
 
@@ -354,8 +569,8 @@ export function DashboardPage() {
     const variableName = variable?.name;
     if (!variableName) return null;
 
-    const value = variableValues[variableName];
-    const label = variable?.label ?? variableName;
+    const value = filterDraftValues[variableName];
+    const label = variable?.displayName ?? variable?.label ?? variableName;
 
     if (isDateRangeVariable(variable)) {
       const range = (value as DateRangeValue | undefined) ?? { start: null, end: null };
@@ -366,7 +581,7 @@ export function DashboardPage() {
             <SolidDatePicker
               selected={range.start ?? null}
               onChange={(next: Date | null) =>
-                handleVariableChange(variableName, { start: next ?? null, end: range.end ?? null })
+                handleDraftVariableChange(variableName, { start: next ?? null, end: range.end ?? null })
               }
               placeholderText="Start date"
               dateFormat="yyyy-MM-dd"
@@ -374,7 +589,7 @@ export function DashboardPage() {
             <SolidDatePicker
               selected={range.end ?? null}
               onChange={(next: Date | null) =>
-                handleVariableChange(variableName, { start: range.start ?? null, end: next ?? null })
+                handleDraftVariableChange(variableName, { start: range.start ?? null, end: next ?? null })
               }
               placeholderText="End date"
               dateFormat="yyyy-MM-dd"
@@ -398,7 +613,7 @@ export function DashboardPage() {
             value={selectedValues}
             onChange={(event) => {
               const selected = Array.from(event.target.selectedOptions).map((option) => option.value);
-              handleVariableChange(variableName, selected);
+              handleDraftVariableChange(variableName, selected);
             }}
           >
             {baseOptions.map((option) => (
@@ -426,7 +641,7 @@ export function DashboardPage() {
           optionLabel="label"
           optionValue="value"
           placeholder={`Select ${label}`}
-          onChange={(event) => handleVariableChange(variableName, event.value ? `${event.value}` : "")}
+          onChange={(event) => handleDraftVariableChange(variableName, event.value ? `${event.value}` : "")}
         />
       </div>
     );
@@ -438,11 +653,11 @@ export function DashboardPage() {
     if (!ExtensionWidget) {
       const UnknownWidget = getExtensionComponent("DefaultDashboardUnknownWidget");
       if (!UnknownWidget) return <pre>{JSON.stringify(runtime?.data ?? runtime ?? {}, null, 2)}</pre>;
-      return <UnknownWidget definition={widgetDefinition} runtime={runtime} variables={variableValues} />;
+      return <UnknownWidget definition={widgetDefinition} runtime={runtime} variables={appliedVariableValues} />;
     }
     return (
       <ExtensionWidget
-        {...({ definition: widgetDefinition, runtime, variables: variableValues } satisfies DashboardWidgetComponentProps)}
+        {...({ definition: widgetDefinition, runtime, variables: appliedVariableValues } satisfies DashboardWidgetComponentProps)}
       />
     );
   };
@@ -459,29 +674,60 @@ export function DashboardPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <div className={styles.titleBlock}>
-          <h1 className={styles.title}>{definition?.title ?? dashboardName}</h1>
-          <p className={styles.subtitle}>
-            {definition?.description ?? `${moduleName} / ${dashboardName}`}
-          </p>
+          <h1 className={styles.title}>{getDashboardTitle(definition, dashboardName)}</h1>
+          <p className={styles.subtitle}>{definition?.description ?? `${moduleName} / ${dashboardName}`}</p>
         </div>
+
         <div className={styles.headerActions}>
-          <SolidButton onClick={() => void handleRefresh()} disabled={dataLoading}>
-            {dataLoading ? "Refreshing..." : "Refresh"}
-          </SolidButton>
-          <SolidButton onClick={() => void handleSaveLayout()} disabled={saveLayoutLoading}>
-            {saveLayoutLoading ? "Saving..." : "Save Layout"}
-          </SolidButton>
+          <div className={styles.filterButtonWrap}>
+            <SolidButton
+              className={styles.iconButton}
+              leftIcon={<Filter size={16} />}
+              onClick={() => setIsFilterDialogOpen(true)}
+              tooltip="Filters"
+              aria-label="Filters"
+            />
+            {appliedFilterCount > 0 ? <span className={styles.filterCountBadge}>{appliedFilterCount}</span> : null}
+          </div>
+
+          <SolidButton
+            className={styles.iconButton}
+            leftIcon={<RefreshCw size={16} />}
+            onClick={() => void handleRefresh()}
+            disabled={dataLoading}
+            tooltip="Refresh"
+            aria-label="Refresh"
+          />
+
+          <SolidButton
+            className={styles.iconButton}
+            leftIcon={<Save size={16} />}
+            onClick={() => void handleSaveLayout()}
+            disabled={saveLayoutLoading}
+            tooltip="Save Layout"
+            aria-label="Save Layout"
+          />
         </div>
       </div>
 
-      <div className={styles.filterPanel}>
-        <div className={styles.filterGrid}>{variables.map(renderVariable)}</div>
-        <div className={styles.actions}>
-          <SolidButton onClick={() => void handleRefresh()} disabled={dataLoading}>
-            Apply Filters
+      <SolidDialog
+        open={isFilterDialogOpen}
+        onOpenChange={setIsFilterDialogOpen}
+        header="Dashboard Filters"
+        contentClassName={styles.filterDialogContent}
+      >
+        <SolidDialogBody>
+          <div className={styles.filterModalColumn}>{variables.map(renderVariable)}</div>
+        </SolidDialogBody>
+        <SolidDialogFooter className={styles.filterModalActions}>
+          <SolidButton variant="outline" onClick={() => void handleClearFilters()}>
+            Clear
           </SolidButton>
-        </div>
-      </div>
+          <SolidButton onClick={() => void handleApplyFilters()}>
+            Apply
+          </SolidButton>
+        </SolidDialogFooter>
+      </SolidDialog>
 
       {dataError ? <p className={styles.error}>Failed to load dashboard data.</p> : null}
 
@@ -490,6 +736,7 @@ export function DashboardPage() {
           const widgetName = widget?.id ?? widget?.name;
           const runtime = widgetDataMap.get(widgetName);
           const slot = widgetLayoutMap.get(widgetName);
+
           return (
             <div
               key={widgetName}
@@ -503,7 +750,7 @@ export function DashboardPage() {
               gs-min-h={slot?.minH ?? 2}
             >
               <div className={`grid-stack-item-content ${styles.widgetCard}`}>
-                <h3 className={styles.widgetTitle}>{widget?.title ?? widgetName}</h3>
+                <h3 className={styles.widgetTitle}>{getWidgetTitle(widget, widgetName)}</h3>
                 <div className={styles.widgetBody}>
                   {runtime ? renderWidgetBody(widget, runtime) : <p className={styles.muted}>No data</p>}
                 </div>
