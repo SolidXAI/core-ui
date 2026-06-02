@@ -63,6 +63,7 @@ import { DefaultDashboardBarChartWidget } from "../components/core/dashboard/wid
 import { DefaultDashboardPieChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardPieChartWidget";
 import { DefaultDashboardTableWidget } from "../components/core/dashboard/widgets/DefaultDashboardTableWidget";
 import { DefaultDashboardUnknownWidget } from "../components/core/dashboard/widgets/DefaultDashboardUnknownWidget";
+import { QueueSlaHeatmapWidget } from "../components/core/dashboard/widgets/QueueSlaHeatmapWidget";
 
 import {
     ExtensionComponentTypes,
@@ -386,6 +387,7 @@ registerExtensionComponent("DefaultDashboardBarChartWidget", DefaultDashboardBar
 registerExtensionComponent("DefaultDashboardPieChartWidget", DefaultDashboardPieChartWidget, ExtensionComponentTypes.dashboardWidget);
 registerExtensionComponent("DefaultDashboardTableWidget", DefaultDashboardTableWidget, ExtensionComponentTypes.dashboardWidget);
 registerExtensionComponent("DefaultDashboardUnknownWidget", DefaultDashboardUnknownWidget, ExtensionComponentTypes.dashboardWidget);
+registerExtensionComponent("QueueSlaHeatmapWidget", QueueSlaHeatmapWidget, ExtensionComponentTypes.dashboardWidget);
 
 
 // # Extension functions 

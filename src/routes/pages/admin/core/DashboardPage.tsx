@@ -5,6 +5,7 @@ import { GridStack, type GridStackNode } from "gridstack";
 import "gridstack/dist/gridstack.min.css";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import {
+  SolidAutocomplete,
   SolidButton,
   SolidDatePicker,
   SolidDialog,
@@ -32,6 +33,7 @@ type Option = {
 type DateRangeValue = {
   start: Date | null;
   end: Date | null;
+  preset?: string;
 };
 
 type DashboardVariableValue = string | string[] | DateRangeValue | null | undefined;
@@ -202,6 +204,37 @@ const parseDateValue = (value: any): Date | null => {
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const getDatePresetOptions = (variable: any): Option[] => {
+  const metadataPresets = variable?.presetValues ?? variable?.presets ?? variable?.datePresets;
+  const builtIns: Option[] = [
+    { value: "today", label: "Today" },
+    { value: "last_24_hours", label: "Last 24 Hours" },
+    { value: "last_7_days", label: "Last 7 Days" },
+    { value: "last_30_days", label: "Last 30 Days" },
+  ];
+
+  const source = Array.isArray(metadataPresets) && metadataPresets.length ? metadataPresets : builtIns;
+  const normalized = source
+    .map((entry: any) => {
+      if (typeof entry === "string") {
+        const [value, label] = entry.split(":");
+        const cleaned = `${value ?? ""}`.trim();
+        if (!cleaned) return null;
+        return { value: cleaned, label: `${label ?? cleaned}` };
+      }
+      const value = `${entry?.value ?? entry?.id ?? ""}`.trim();
+      if (!value) return null;
+      const label = `${entry?.label ?? entry?.displayName ?? value}`;
+      return { value, label };
+    })
+    .filter(Boolean) as Option[];
+
+  if (!normalized.find((entry) => entry.value === "custom")) {
+    normalized.push({ value: "custom", label: "Custom" });
+  }
+  return normalized;
+};
+
 const buildDefaultFilterValues = (variables: any[]): Record<string, DashboardVariableValue> => {
   const defaults: Record<string, DashboardVariableValue> = {};
 
@@ -213,7 +246,10 @@ const buildDefaultFilterValues = (variables: any[]): Record<string, DashboardVar
       const presetRange = resolvePresetRange(variable?.defaultValue?.preset ?? variable?.defaultValuePreset);
       const start = parseDateValue(variable?.defaultValue?.start ?? variable?.defaultValue?.from) ?? presetRange.start;
       const end = parseDateValue(variable?.defaultValue?.end ?? variable?.defaultValue?.to) ?? presetRange.end;
-      defaults[name] = { start, end };
+      const preset =
+        `${variable?.defaultValue?.preset ?? variable?.defaultValuePreset ?? ""}`.trim() ||
+        (start || end ? "custom" : "custom");
+      defaults[name] = { start, end, preset };
       return;
     }
 
@@ -242,7 +278,7 @@ const buildClearedFilterValues = (variables: any[]): Record<string, DashboardVar
     if (!name) return;
 
     if (isDateRangeVariable(variable)) {
-      cleared[name] = { start: null, end: null };
+      cleared[name] = { start: null, end: null, preset: "custom" };
       return;
     }
 
@@ -356,6 +392,16 @@ export function DashboardPage() {
         });
     });
   }, [dashboardName, getVariableOptions, moduleName, variables]);
+
+  const handleDynamicOptionsSearch = async (variableName: string, query: string) => {
+    if (!moduleName || !dashboardName || !variableName) return;
+    try {
+      const response = await getVariableOptions({ moduleName, dashboardName, variableName, query, limit: 100 }).unwrap();
+      setDynamicOptions((prev) => ({ ...prev, [variableName]: toOptions(Array.isArray(response) ? response : []) }));
+    } catch {
+      setDynamicOptions((prev) => ({ ...prev, [variableName]: [] }));
+    }
+  };
 
   useEffect(() => {
     if (!bootstrappedRef.current || !moduleName || !dashboardName) return;
@@ -574,27 +620,65 @@ export function DashboardPage() {
 
     if (isDateRangeVariable(variable)) {
       const range = (value as DateRangeValue | undefined) ?? { start: null, end: null };
+      const presetOptions = getDatePresetOptions(variable);
+      const preset = range?.preset && presetOptions.some((entry) => entry.value === range.preset) ? range.preset : "custom";
       return (
         <div key={variableName} className={styles.filterField}>
           <label className={styles.filterLabel}>{label}</label>
+          <SolidSelect
+            value={preset}
+            options={presetOptions}
+            optionLabel="label"
+            optionValue="value"
+            placeholder={`Select ${label} preset`}
+            onChange={(event) => {
+              const selectedPreset = `${event?.value ?? "custom"}`;
+              if (selectedPreset === "custom") {
+                handleDraftVariableChange(variableName, {
+                  start: range.start ?? null,
+                  end: range.end ?? null,
+                  preset: "custom",
+                });
+                return;
+              }
+              const nextRange = resolvePresetRange(selectedPreset);
+              handleDraftVariableChange(variableName, {
+                start: nextRange.start ?? null,
+                end: nextRange.end ?? null,
+                preset: selectedPreset,
+              });
+            }}
+          />
+          {preset === "custom" ? (
           <div className={styles.dateRange}>
             <SolidDatePicker
               selected={range.start ?? null}
+              inputClassName="w-full"
               onChange={(next: Date | null) =>
-                handleDraftVariableChange(variableName, { start: next ?? null, end: range.end ?? null })
+                handleDraftVariableChange(variableName, {
+                  start: next ?? null,
+                  end: range.end ?? null,
+                  preset: "custom",
+                })
               }
               placeholderText="Start date"
               dateFormat="yyyy-MM-dd"
             />
             <SolidDatePicker
               selected={range.end ?? null}
+              inputClassName="w-full"
               onChange={(next: Date | null) =>
-                handleDraftVariableChange(variableName, { start: range.start ?? null, end: next ?? null })
+                handleDraftVariableChange(variableName, {
+                  start: range.start ?? null,
+                  end: next ?? null,
+                  preset: "custom",
+                })
               }
               placeholderText="End date"
               dateFormat="yyyy-MM-dd"
             />
           </div>
+          ) : null}
         </div>
       );
     }
@@ -607,21 +691,52 @@ export function DashboardPage() {
       return (
         <div key={variableName} className={styles.filterField}>
           <label className={styles.filterLabel}>{label}</label>
-          <select
+          <SolidAutocomplete
             multiple
-            className={styles.multiSelect}
-            value={selectedValues}
-            onChange={(event) => {
-              const selected = Array.from(event.target.selectedOptions).map((option) => option.value);
+            dropdown
+            field="label"
+            className="w-full"
+            inputClassName="w-full"
+            value={baseOptions.filter((option) => selectedValues.includes(option.value))}
+            suggestions={baseOptions}
+            completeMethod={() => Promise.resolve()}
+            placeholder={`Select ${label}`}
+            onChange={(event: { value: any }) => {
+              const selected = Array.isArray(event?.value)
+                ? event.value
+                    .map((entry: any) => `${entry?.value ?? entry?.id ?? entry ?? ""}`)
+                    .filter((entry: string) => !!entry)
+                : [];
               handleDraftVariableChange(variableName, selected);
             }}
-          >
-            {baseOptions.map((option) => (
-              <option key={`${variableName}-${option.value}`} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
+        </div>
+      );
+    }
+
+    if (isDynamicVariable(variable)) {
+      const options = dynamicOptions[variableName] ?? [];
+      const selectedValue = typeof value === "string" ? value : "";
+      const selectedOption = options.find((entry) => `${entry.value}` === selectedValue) ?? null;
+
+      return (
+        <div key={variableName} className={styles.filterField}>
+          <label className={styles.filterLabel}>{label}</label>
+          <SolidAutocomplete
+            dropdown
+            field="label"
+            className="w-full"
+            inputClassName="w-full"
+            value={selectedOption}
+            suggestions={options}
+            completeMethod={({ query }) => handleDynamicOptionsSearch(variableName, query)}
+            placeholder={`Select ${label}`}
+            onChange={(event: { value: any }) => {
+              const selected = event?.value;
+              const nextValue = selected?.value ?? selected?.id ?? "";
+              handleDraftVariableChange(variableName, nextValue ? `${nextValue}` : "");
+            }}
+          />
         </div>
       );
     }

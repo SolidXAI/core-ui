@@ -103,6 +103,7 @@ export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export { QueueSlaHeatmapWidget } from './components/core/dashboard/widgets/QueueSlaHeatmapWidget';
 export {
     ExtensionComponentTypes,
     ExtensionFunctionTypes,

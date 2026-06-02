@@ -101,6 +101,11 @@
   gap: 8px;
 }
 
+.dateRange :global(.react-datepicker-wrapper),
+.dateRange :global(.react-datepicker__input-container) {
+  width: 100%;
+}
+
 .multiSelect {
   width: 100%;
   min-height: 84px;
