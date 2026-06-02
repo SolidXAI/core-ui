@@ -139,6 +139,29 @@
 .widgetBody {
   flex: 1;
   min-height: 0;
+  display: flex;
+}
+
+.widgetUnauthorizedState {
+  flex: 1;
+  width: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.widgetUnauthorizedIcon {
+  color: #f59e0b;
+}
+
+.widgetUnauthorizedText {
+  font-size: 0.92rem;
+  font-weight: 500;
 }
 
 .error {

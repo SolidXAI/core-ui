@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Filter, RefreshCw, Save } from "lucide-react";
+import { AlertTriangle, Filter, RefreshCw, Save } from "lucide-react";
 import { GridStack, type GridStackNode } from "gridstack";
 import "gridstack/dist/gridstack.min.css";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -166,6 +166,13 @@ const getPreferredWidgetComponentName = (definition: any, runtime: any): string 
   return explicit || resolveDefaultDashboardWidgetComponentName(definition, runtime);
 };
 
+const notifyDashboardChartsToResize = () => {
+  if (typeof window === "undefined") return;
+  window.requestAnimationFrame(() => {
+    window.dispatchEvent(new Event("resize"));
+  });
+};
+
 const resolvePresetRange = (preset: string | undefined): DateRangeValue => {
   if (!preset) return { start: null, end: null };
   const now = new Date();
@@ -328,6 +335,9 @@ const getDashboardTitle = (definition: any, fallback: string) =>
 
 const getWidgetTitle = (widget: any, fallback: string) =>
   widget?.displayName ?? widget?.title ?? widget?.name ?? fallback;
+
+const isUnauthorizedWidgetRuntime = (runtime: any): boolean =>
+  !!(runtime?.meta?.unauthorized || runtime?.uiHints?.state === "unauthorized");
 
 export function DashboardPage() {
   const params = useParams();
@@ -518,11 +528,16 @@ export function DashboardPage() {
     instance.column(gridColumns, "none");
     instance.load(gridWidgets as any, false);
     instance.batchUpdate(false);
+    notifyDashboardChartsToResize();
+    window.setTimeout(notifyDashboardChartsToResize, 60);
 
     instance.on("change", (_event: Event, _items: GridStackNode[]) => {
       const normalized = getAllLayoutItemsFromGrid(instance);
       setDraftLayoutItems(normalized);
+      notifyDashboardChartsToResize();
     });
+    instance.on("resizestop", () => notifyDashboardChartsToResize());
+    instance.on("dragstop", () => notifyDashboardChartsToResize());
 
     gridInstanceRef.current = instance;
     return () => {
@@ -763,6 +778,17 @@ export function DashboardPage() {
   };
 
   const renderWidgetBody = (widgetDefinition: any, runtime: any) => {
+    if (isUnauthorizedWidgetRuntime(runtime)) {
+      return (
+        <div className={styles.widgetUnauthorizedState}>
+          <AlertTriangle size={18} className={styles.widgetUnauthorizedIcon} />
+          <span className={styles.widgetUnauthorizedText}>
+            {runtime?.uiHints?.message ?? "Unauthorized"}
+          </span>
+        </div>
+      );
+    }
+
     const componentName = getPreferredWidgetComponentName(widgetDefinition, runtime);
     const ExtensionWidget = getExtensionComponent(componentName);
     if (!ExtensionWidget) {

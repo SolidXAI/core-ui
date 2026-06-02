@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import ReactECharts from "echarts-for-react";
 import type { DashboardWidgetComponentProps } from "../../../../types/dashboard";
 
@@ -40,6 +41,8 @@ const formatMetric = (value: number | undefined, unit = "ms"): string => {
 };
 
 export function QueueSlaHeatmapWidget({ runtime }: DashboardWidgetComponentProps) {
+  const chartRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const data = runtime?.data ?? runtime ?? {};
   const xCategories: string[] = Array.isArray(data?.xCategories) ? data.xCategories : [];
   const yCategories: string[] = Array.isArray(data?.yCategories) ? data.yCategories : [];
@@ -154,5 +157,49 @@ export function QueueSlaHeatmapWidget({ runtime }: DashboardWidgetComponentProps
     ],
   };
 
-  return <ReactECharts option={option} style={{ width: "100%", height: "100%", minHeight: 280 }} notMerge lazyUpdate />;
+  useEffect(() => {
+    const resizeChart = () => {
+      try {
+        chartRef.current?.getEchartsInstance?.()?.resize?.({ width: "auto", height: "auto" });
+      } catch {
+        // no-op: chart may not be ready yet
+      }
+    };
+
+    const observedElement =
+      containerRef.current?.closest(".grid-stack-item-content") as HTMLElement | null ??
+      containerRef.current;
+
+    const observer = typeof ResizeObserver !== "undefined" && observedElement
+      ? new ResizeObserver(() => resizeChart())
+      : null;
+
+    if (observer && observedElement) {
+      observer.observe(observedElement);
+    }
+
+    const rafId = window.requestAnimationFrame(resizeChart);
+    const timeoutId = window.setTimeout(resizeChart, 120);
+    const timeoutIdLong = window.setTimeout(resizeChart, 320);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.clearTimeout(timeoutId);
+      window.clearTimeout(timeoutIdLong);
+      observer?.disconnect();
+    };
+  }, [option]);
+
+  return (
+    <div ref={containerRef} style={{ width: "100%", height: "100%", minHeight: 280, flex: 1 }}>
+      <ReactECharts
+        ref={chartRef}
+        option={option}
+        style={{ width: "100%", height: "100%", minHeight: 280 }}
+        notMerge
+        lazyUpdate
+        autoResize
+      />
+    </div>
+  );
 }
