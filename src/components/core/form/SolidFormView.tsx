@@ -1329,6 +1329,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (params.parentData) {
                 fieldContext.parentData = params.parentData;
             }
+            if (params.parentFieldName) {
+                fieldContext.parentFieldName = params.parentFieldName;
+            }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
                 const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label : formLayoutField.attrs.name;

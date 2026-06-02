@@ -51,13 +51,11 @@ export class SolidRelationManyToOneField implements ISolidField {
         if (manyToOneColVal) {
             return { solidManyToOneLabel: manyToOneColVal || '', solidManyToOneValue: manyToOneFieldData?.id || '', ...manyToOneFieldData };
         }
-        if (this.fieldContext.parentData) {
+        const fieldName = this.fieldContext?.field?.attrs?.name;
+        if (this.fieldContext.parentData && this.fieldContext.parentFieldName === fieldName) {
             const parentDataForKey = this.fieldContext.parentData[userKeyField];
             if (parentDataForKey && typeof parentDataForKey === 'object') {
-                const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
-                if (key && value !== undefined) {
-                    return { solidManyToOneLabel: value.solidManyToOneLabel, solidManyToOneValue: value.solidManyToOneValue };
-                }
+                return { solidManyToOneLabel: parentDataForKey.solidManyToOneLabel, solidManyToOneValue: parentDataForKey.solidManyToOneValue };
             }
         }
         return {}
