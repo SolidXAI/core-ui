@@ -130,7 +130,7 @@ export const SolidChatterMessageBox = (props: Props) => {
     const isTaskMessage = messageSubType === 'task';
     const isTaskCompleted = (taskStatus ?? '').toLowerCase() === 'completed';
     const isCustomMessage = messageType === 'custom';
-    const isEditableSubtype = messageSubType === 'custom' || messageSubType === 'note';
+    const isEditableSubtype = messageSubType === 'note';
     const isCurrentUserAuthor = !!(session?.user?.id && userId && Number(session.user.id) === Number(userId));
     const canEditNote = Boolean(messageId && isCustomMessage && isEditableSubtype && isCurrentUserAuthor);
 
