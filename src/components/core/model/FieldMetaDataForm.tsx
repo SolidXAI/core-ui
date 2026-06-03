@@ -3553,7 +3553,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
                           </div>
                         )}
-                        {currentFields.includes("isPrimaryKey") && (modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId) && (
+                        {currentFields.includes("isPrimaryKey") && modelMetaData?.isLegacyTable && (
                           <div className="field col-6 flex-flex-column gap-2 mt-2">
                             <div className="flex align-items-center gap-2">
                               <SolidCheckbox

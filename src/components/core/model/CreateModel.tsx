@@ -89,10 +89,10 @@ const CreateModel = ({ data, params }: any) => {
 
   useEffect(() => {
     if (data) {
-      const isLegacyTable = data.isLegacyTableWithId || data.isLegacyTable
-      const isLegacyTableWithId = data.isLegacyTable;
+      const isLegacyTable = data.legacyTableType !== 'none'
+      const hasExistingId = data.legacyTableType === 'existing_id'
       const modelData = {
-        ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel, isLegacyTable, isLegacyTableWithId
+        ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel, isLegacyTable, hasExistingId
       }
 
       setIsLoadingData(false);
@@ -194,27 +194,15 @@ const CreateModel = ({ data, params }: any) => {
 
     let legacyTableConfig = {};
 
-    if (modelMetaData?.isLegacyTable && modelMetaData?.isLegacyTableWithId) {
-      // UI: Both checked → Backend: both true
-      legacyTableConfig = {
-        isLegacyTable: true,
-        isLegacyTableWithId: false
-      };
-    } else if (modelMetaData?.isLegacyTable && !modelMetaData?.isLegacyTableWithId) {
-      // UI: Only isLegacyTable checked → Backend: only isLegacyTableWithId true
-      legacyTableConfig = {
-        isLegacyTable: false,
-        isLegacyTableWithId: true
-      };
-    } else {
-      // UI: Neither checked → Backend: both false
-      legacyTableConfig = {
-        isLegacyTable: false,
-        isLegacyTableWithId: false
-      };
+    let legacyTableType = 'none';
+    if (modelMetaData?.isLegacyTable && modelMetaData?.hasExistingId) {
+      legacyTableType = 'existing_id';
+    } else if (modelMetaData?.isLegacyTable) {
+      legacyTableType = 'generated_id';
     }
+    legacyTableConfig = { legacyTableType };
 
-    if (modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId) {
+    if (modelMetaData?.isLegacyTable) {
       const hasPrimaryKey = fieldMetaData.some(
         (field: any) => field.isPrimaryKey === true
       );
