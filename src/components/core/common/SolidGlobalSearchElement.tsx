@@ -542,7 +542,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     type OverlayOption =
         | { id: string; kind: "field"; field: any }
         | { id: string; kind: "predefined"; predefined: any }
-        | { id: string; kind: "saved"; saved: any };
+        | { id: string; kind: "saved"; saved: any }
+        | { id: string; kind: "custom" }
+        | { id: string; kind: "grouping" };
     type ManagedChipItem = {
         id: string;
         type: "saved" | "search" | "predefined" | "custom" | "grouping";
@@ -657,9 +659,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
     const [showOverlay, setShowOverlay] = useState(false);
     const overlayRef = useRef<HTMLDivElement | null>(null);
+    const searchInputRef = useRef<HTMLInputElement | null>(null);
     const [showChipManager, setShowChipManager] = useState(false);
     const chipManagerRef = useRef<HTMLDivElement | null>(null);
     const chipManagerTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+    const focusSearchInput = () => {
+        requestAnimationFrame(() => {
+            searchInputRef.current?.focus();
+        });
+    };
 
     useEffect(() => {
         if (focusedIndex >= 0 && showOverlay) {
@@ -1602,9 +1611,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             kind: "saved" as const,
             saved: s,
         }));
+        const custom: OverlayOption[] = [{
+            id: "footer:custom",
+            kind: "custom" as const,
+        }];
+        const grouping: OverlayOption[] =
+            viewType === "tree"
+                ? [{
+                    id: "footer:grouping",
+                    kind: "grouping" as const,
+                }]
+                : [];
 
-        return [...fields, ...predefined, ...saved];
-    }, [inputValue, searchableFields, predefinedSearches, savedFilters]);
+        return [...fields, ...predefined, ...saved, ...custom, ...grouping];
+    }, [inputValue, searchableFields, predefinedSearches, savedFilters, viewType]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const currentValue = inputValue?.trim() || "";
@@ -1649,6 +1669,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     handlePredefinedSearch(activeOption.predefined);
                 } else if (activeOption?.kind === "saved") {
                     applySavedFilter(activeOption.saved);
+                } else if (activeOption?.kind === "custom") {
+                    openCustomFilterDialog();
+                } else if (activeOption?.kind === "grouping") {
+                    openGroupingDialog();
                 } else if (currentValue) {
                     handleAddChip();
                     setShowOverlay(false);
@@ -1831,6 +1855,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <li ref={chipsRef} className="solid-global-search-input-item">
                             <div className="relative solid-global-search-element-wrapper">
                                 <SolidInput
+                                    ref={searchInputRef}
                                     className="solid-global-search-input"
                                     value={inputValue || ""}
                                     placeholder="Search."
@@ -1854,9 +1879,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 <SolidButton
                                     variant="outline"
                                     size="sm"
+                                    onMouseDown={(e) => {
+                                        // Preserve input focus so overlay keyboard navigation continues to work.
+                                        e.preventDefault();
+                                    }}
                                     onClick={() => {
                                         setShowChipManager(false);
                                         setShowOverlay(true);
+                                        focusSearchInput();
                                     }}
                                     className="custom-filter-button solid-global-search-trigger"
                                 >
@@ -2044,8 +2074,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <div className="solid-search-overlay-footer">
                             <button
                                 type="button"
-                                className="px-3 py-2 flex flex-column solid-search-overlay-footer-action"
+                                className={`px-3 py-2 flex flex-column solid-search-overlay-footer-action ${overlayOptions[focusedIndex]?.id === "footer:custom" ? "solid-search-overlay-option-active" : ""}`}
                                 onClick={openCustomFilterDialog}
+                                onMouseEnter={() => {
+                                    const optIndex = overlayOptions.findIndex((o) => o.id === "footer:custom");
+                                    if (optIndex !== -1) setFocusedIndex(optIndex);
+                                }}
                             >
                                 <div className="solid-search-overlay-footer-action-main">
                                     <div className="solid-search-overlay-panel-callout-icon">
@@ -2064,8 +2098,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             {viewType === "tree" && (
                                 <button
                                     type="button"
-                                    className="px-3 py-2 flex flex-column solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary"
+                                    className={`px-3 py-2 flex flex-column solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary ${overlayOptions[focusedIndex]?.id === "footer:grouping" ? "solid-search-overlay-option-active" : ""}`}
                                     onClick={openGroupingDialog}
+                                    onMouseEnter={() => {
+                                        const optIndex = overlayOptions.findIndex((o) => o.id === "footer:grouping");
+                                        if (optIndex !== -1) setFocusedIndex(optIndex);
+                                    }}
                                 >
                                     <div className="solid-search-overlay-footer-action-main">
                                         <div className="solid-search-overlay-panel-callout-icon">

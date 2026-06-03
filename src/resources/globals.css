@@ -3945,7 +3945,7 @@ li.header-li-px {
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
 }
 
-.solid-search-overlay-option.p-button {
+.solid-search-overlay-option {
   justify-content: flex-start;
   text-align: left;
   border-radius: 6px;
@@ -3959,26 +3959,28 @@ li.header-li-px {
   box-shadow: none !important;
 }
 
-.solid-search-overlay-option.p-button:hover {
+.solid-search-overlay-option:hover {
   background: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-.solid-search-overlay-option.p-button:focus {
+.solid-search-overlay-option:focus {
   box-shadow: none;
 }
 
-.solid-search-overlay-option-active.p-button {
+.solid-search-overlay-option-active {
   background: color-mix(in srgb, var(--accent) 85%, transparent) !important;
   border: 1px solid var(--primary-color) !important;
   box-shadow: 0 0 0 1px var(--primary-color) !important;
 }
 
-.solid-search-overlay-option-active.p-button .p-button-label {
-  color: #fff !important;
+.solid-search-overlay-option-active .solid-btn-label,
+.solid-search-overlay-option-active .p-button-label,
+.solid-search-overlay-option-active {
+  color: var(--accent-foreground, var(--foreground)) !important;
   font-weight: 600 !important;
 }
 
-.solid-search-overlay-option-stacked.p-button {
+.solid-search-overlay-option-stacked {
   align-items: flex-start;
 }
 
