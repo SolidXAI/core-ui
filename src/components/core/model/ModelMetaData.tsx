@@ -60,20 +60,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
     isLegacyTable: modelMetaData ? modelMetaData?.isLegacyTable : false,
-    isLegacyTableWithId: modelMetaData ? modelMetaData?.isLegacyTableWithId : false,
-  //   isLegacyTable: modelMetaData 
-  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId && params.id !== 'new') 
-  //     ? true  
-  //     : modelMetaData.isLegacyTableWithId 
-  //       ? true  
-  //       : false 
-  //   : false,
-    
-  // isLegacyTableWithId: modelMetaData 
-  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId &&  params.id !== 'new') 
-  //     ? true  
-  //     : false  
-  //   : false,
+    hasExistingId: modelMetaData ? modelMetaData?.hasExistingId : false,
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
@@ -135,7 +122,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       }
     }),
     isLegacyTable: Yup.boolean(),
-    isLegacyTableWithId: Yup.boolean(),
+    hasExistingId: Yup.boolean(),
   });
 
 
@@ -208,8 +195,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
           }),
-          isLegacyTable:values.isLegacyTable === true ? true : false,
-          isLegacyTableWithId:values.isLegacyTableWithId === true ? true :false
+          isLegacyTable: values.isLegacyTable === true ? true : false,
+          hasExistingId: values.hasExistingId === true ? true : false,
            
         };
         setModelMetaData(modelData);
@@ -571,7 +558,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       const isChecked = event.currentTarget.checked;
                       formik.setFieldValue("isLegacyTable", isChecked);
                       if (!isChecked) {
-                        formik.setFieldValue("isLegacyTableWithId", false);
+                        formik.setFieldValue("hasExistingId", false);
                       }
                     }}
                     label="Is Legacy Table"
@@ -582,10 +569,10 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   <>
                     <div className="ml-4 mt-2">
                       <SolidCheckbox
-                        name="isLegacyTableWithId"
-                        checked={!!formik.values.isLegacyTableWithId}
+                        name="hasExistingId"
+                        checked={!!formik.values.hasExistingId}
                         onChange={(event) => {
-                          formik.setFieldValue("isLegacyTableWithId", event.currentTarget.checked);
+                          formik.setFieldValue("hasExistingId", event.currentTarget.checked);
                         }}
                         label="Has existing Id"
                       />
