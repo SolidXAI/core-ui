@@ -62,8 +62,16 @@ export const SolidButton = React.forwardRef<HTMLButtonElement, SolidButtonProps>
               : "primary");
   const resolvedSize: "sm" | "md" | "lg" =
     size === "small" ? "sm" : size === "large" ? "lg" : size === "medium" ? "md" : size === "lg" ? "lg" : size === "sm" ? "sm" : "md";
-  const iconMeta = icon ? parseSolidIconMeta(icon) : undefined;
-  const iconNode = iconMeta ? <SolidIcon name={iconMeta.name} spin={iconMeta.spin} aria-hidden /> : null;
+  const normalizedIcon = typeof icon === "string" ? icon.trim() : "";
+  const iconMeta = normalizedIcon ? parseSolidIconMeta(normalizedIcon) : undefined;
+  const looksLikeCssIconClass = /\b[a-z0-9_-]+-[a-z0-9_-]+\b/i.test(normalizedIcon);
+  const iconNode = normalizedIcon
+    ? (iconMeta
+      ? <SolidIcon name={iconMeta.name} spin={iconMeta.spin} aria-hidden />
+      : looksLikeCssIconClass
+        ? <i className={normalizedIcon} aria-hidden />
+        : <SolidIcon name="si-pencil" aria-hidden />)
+    : null;
   const resolvedChildren = label ?? children;
   const hasOnlyIcon = !loading && !resolvedChildren && !label && (leftIcon || rightIcon || iconNode);
 

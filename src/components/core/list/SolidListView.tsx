@@ -23,6 +23,7 @@ import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
+import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
@@ -47,7 +48,7 @@ import {
   SolidDialogTitle,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
-import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, SquarePen, Trash2 } from "lucide-react";
+import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -1600,12 +1601,19 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                               header={button.attrs.label}
                               body={(rowData) => {
                                 return (
+                                  (() => {
+                                    const presentation = resolveButtonPresentation(button?.attrs);
+                                    if (!presentation.showIcon && !presentation.showLabel) return null;
+                                    return (
                                   <SolidButton
                                     type="button"
-                                    icon={button?.attrs?.icon}
-                                    leftIcon={!button?.attrs?.icon ? <SquarePen size={14} /> : undefined}
-                                    className={`solid-inline-row-button w-full text-left gap-2 ${button?.attrs?.className
-                                      ? button?.attrs?.className
+                                    icon={presentation.icon}
+                                    iconPos={presentation.iconPos}
+                                    label={presentation.label}
+                                    tooltip={presentation.tooltip}
+                                    aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
+                                    className={`solid-inline-row-button w-full text-left gap-2 ${presentation.buttonClassName
+                                      ? presentation.buttonClassName
                                       : ""
                                       }`}
                                     size="small"
@@ -1619,11 +1627,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       };
                                       handleCustomButtonClick(button.attrs, event);
                                     }}
-                                  >
-                                    {button.attrs.showLabel !== false
-                                      ? button.attrs.label
-                                      : ""}
-                                  </SolidButton>
+                                  />
+                                    );
+                                  })()
                                 );
                               }}
                             />

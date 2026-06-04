@@ -1,6 +1,6 @@
 import { hasAnyRole } from "../../../helpers/rolesHelper";
+import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useSession } from "../../../hooks/useSession";
-import { SquarePen } from "lucide-react";
 import { SolidDropdownMenuItem } from "../../shad-cn-ui";
 import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
@@ -10,12 +10,22 @@ export const SolidListViewHeaderContextMenuButton = ({ button, params, solidList
     const user = session?.user;
 
     const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
+    const presentation = resolveButtonPresentation(button?.attrs);
+    const iconNode = presentation.showIcon
+        ? (() => {
+            const m = parseSolidIconMeta(presentation.icon);
+            return m
+                ? <SolidIcon name={m.name} spin={m.spin} className="solid-header-action-button-icon" />
+                : <i className={`${presentation.icon} solid-header-action-button-icon`} />;
+        })()
+        : null;
 
     if (!hasRole) return null;
+    if (!presentation.showIcon && !presentation.showLabel) return null;
 
     return (
         <SolidDropdownMenuItem
-            className="solid-header-dropdown-item"
+            className={`solid-header-dropdown-item ${presentation.buttonClassName ?? ""}`}
             onSelect={() => {
                 const event = {
                     params,
@@ -24,11 +34,12 @@ export const SolidListViewHeaderContextMenuButton = ({ button, params, solidList
                 handleCustomButtonClick(button.attrs, event);
                 onActionComplete?.();
             }}
+            title={presentation.tooltip}
+            aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
         >
-            {button?.attrs?.icon
-                ? (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-header-action-button-icon" /> : <i className={`${button.attrs.icon} solid-header-action-button-icon`} />; })()
-                : <SquarePen size={14} className="solid-header-action-button-icon" />}
-            <span className="solid-header-action-button-label">{button.attrs.label}</span>
+            {presentation.iconPos === "left" ? iconNode : null}
+            {presentation.showLabel ? <span className="solid-header-action-button-label">{presentation.label}</span> : null}
+            {presentation.iconPos === "right" ? iconNode : null}
         </SolidDropdownMenuItem>
     );
 };

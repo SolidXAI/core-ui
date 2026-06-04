@@ -1,6 +1,6 @@
 import { useSession } from "../../../hooks/useSession";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
-import { SquarePen } from "lucide-react";
+import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { SolidButton } from "../../shad-cn-ui";
 
 export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, selectedRecords, filters }: any) => {
@@ -8,16 +8,21 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
     const user = session?.user;
 
     const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
+    const presentation = resolveButtonPresentation(button?.attrs);
 
     if (!hasRole) return null;
+    if (!presentation.showIcon && !presentation.showLabel) return null;
 
     return (
         <SolidButton
             type="button"
-            className={`text-left ${button?.attrs?.className ?? "gap-2"}`}
+            className={`text-left ${presentation.buttonClassName ?? "gap-2"}`}
             size="small"
-            icon={button?.attrs?.icon}
-            leftIcon={!button?.attrs?.icon ? <SquarePen size={14} /> : undefined}
+            icon={presentation.icon}
+            iconPos={presentation.iconPos}
+            label={presentation.label}
+            tooltip={presentation.tooltip}
+            aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
             onClick={() => {
                 const event = {
                     params,
@@ -27,8 +32,6 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
                 };
                 handleCustomButtonClick(button.attrs, event);
             }}
-        >
-            {button.attrs.label}
-        </SolidButton>
+        />
     );
 };

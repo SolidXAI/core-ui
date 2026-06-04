@@ -1,5 +1,6 @@
 import { hasAnyRole } from '../../../helpers/rolesHelper';
 import { useSession } from "../../../hooks/useSession";
+import { resolveButtonPresentation } from '../../../helpers/buttonPresentation';
 import { SolidButton } from '../../shad-cn-ui';
 import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
@@ -29,9 +30,11 @@ export function SolidFormViewNormalHeaderButton({
     const user = session?.user;
 
     const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
+    const presentation = resolveButtonPresentation(button?.attrs);
 
     if (!hasRole) return null;
     if (button?.attrs?.visible == false) return null
+    if (!presentation.showIcon && !presentation.showLabel) return null;
     const handleClick = () => {
         const event = {
             action: button.attrs.action,
@@ -45,16 +48,23 @@ export function SolidFormViewNormalHeaderButton({
     };
 
     if (variant === "menu") {
+        const iconMeta = presentation.icon ? parseSolidIconMeta(presentation.icon) : undefined;
+        const iconNode = presentation.showIcon
+            ? (iconMeta
+                ? <SolidIcon name={iconMeta.name} spin={iconMeta.spin} className="solid-row-action-button-icon" />
+                : <i className={`${presentation.icon} solid-row-action-button-icon`} />)
+            : null;
         return (
             <button
                 type="button"
-                className={`solid-row-action-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                className={`solid-row-action-button ${presentation.buttonClassName ? presentation.buttonClassName : ''}`}
                 onClick={handleClick}
+                title={presentation.tooltip}
+                aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
             >
-                {button?.attrs?.icon && (
-                    (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" /> : <i className={`${button.attrs.icon} solid-row-action-button-icon`} />; })()
-                )}
-                <span className="solid-row-action-button-label">{button.attrs.label}</span>
+                {presentation.iconPos === "left" ? iconNode : null}
+                {presentation.showLabel ? <span className="solid-row-action-button-label">{presentation.label}</span> : null}
+                {presentation.iconPos === "right" ? iconNode : null}
             </button>
         );
     }
@@ -63,12 +73,14 @@ export function SolidFormViewNormalHeaderButton({
         <div>
             <SolidButton
                 type="button"
-                className={`w-full text-left gap-2 solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                className={`w-full text-left gap-2 solid-icon-button ${presentation.buttonClassName ? presentation.buttonClassName : ''}`}
                 {...button.attrs}
-                label={button.attrs.label}
+                label={presentation.label}
                 size="sm"
-                iconPos="left"
-                icon={button?.attrs?.icon ? button?.attrs?.icon : ""}
+                iconPos={presentation.iconPos}
+                icon={presentation.icon}
+                tooltip={presentation.tooltip}
+                aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
                 onClick={handleClick}
             />
         </div>

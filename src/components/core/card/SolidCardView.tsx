@@ -347,7 +347,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className="solid-list-content h-full flex flex-column flex-grow-1">
+      <div className="solid-list-content h-full flex way to  flex-grow-1">
         <div className="solid-list-surface solid-card-surface flex flex-column flex-1 min-h-0">
           <div className="page-header solid-list-toolbar solid-card-toolbar flex-column lg:flex-row">
             <div className="flex justify-content-between w-full">
