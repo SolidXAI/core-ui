@@ -60,6 +60,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
             await createChatterMessage(formData).unwrap();
             setMessage('');
             setSelectedFiles([]);
+            onCancel?.();
         } catch (error) {
             console.error(ERROR_MESSAGES.FETCHING_MESSAGE, error);
         }
@@ -142,6 +143,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                             className='gap-2 solid-purple-button'
                             variant='primary'
                             loading={isLoading}
+                            disabled={!message.trim() && selectedFiles.length === 0}
                         >
                             {type === 'email' ? 'Send' : 'Log'}
                         </SolidButton>

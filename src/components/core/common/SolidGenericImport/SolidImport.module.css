@@ -321,7 +321,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    cursor: pointer;
+    cursor: default;
     transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 

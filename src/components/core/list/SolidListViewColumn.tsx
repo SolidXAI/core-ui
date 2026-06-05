@@ -28,6 +28,15 @@ export type SolidListViewColumnParams = {
     embeded?: boolean;    
 };
 
+export const isFieldSortable = (fieldMetadata: any): boolean => {
+    if (!fieldMetadata) return false;
+    const type = fieldMetadata.type;
+    if (type === 'mediaSingle' || type === 'mediaMultiple') return false;
+    if (type === 'computed') return false;
+    if (type === 'relation') return fieldMetadata.relationType === 'many-to-one';
+    return true;
+};
+
 export const getNumberOfInputs = (matchMode: any): number | null => {
     if (matchMode.label && matchMode.label === 'Not In') {
         matchMode = 'notIn';
@@ -74,6 +83,10 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
 // };
 
 export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox, embeded }: SolidListViewColumnParams) => {
+
+    if (!isFieldSortable(fieldMetadata) && column?.attrs?.sortable) {
+        column = { ...column, attrs: { ...column.attrs, sortable: false } };
+    }
 
     // And finally we can implement additional switching logic based on certain special fields. 
     if (fieldMetadata.name === 'id') {

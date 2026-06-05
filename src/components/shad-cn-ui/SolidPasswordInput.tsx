@@ -22,6 +22,7 @@ export function SolidPasswordInput({ className, toggle = true, ...props }: Solid
           className="solid-password-toggle"
           onClick={() => setShown((prev) => !prev)}
           aria-label={shown ? "Hide password" : "Show password"}
+          tabIndex={-1}
         >
           {shown ? "Hide" : "Show"}
         </button>

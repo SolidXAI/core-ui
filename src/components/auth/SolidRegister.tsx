@@ -476,7 +476,7 @@ const SolidRegister = () => {
             </div>
             <div className="text-center mt-3 md:mt-4">
                 <div className="text-sm text-400 secondary-dark-color">
-                    Already have an account? <Link className="font-bold" href="/auth/login">Sign In</Link>
+                    Already have an account? <Link className="font-bold" href="/auth/login" tabIndex={-1}>Sign In</Link>
                 </div>
             </div>
         </div>

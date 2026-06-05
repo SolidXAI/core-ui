@@ -158,6 +158,19 @@ export function SolidAutocomplete({
     [suggestions, field]
   );
 
+  useEffect(() => {
+    if (!portal || !open) return;
+    const el = panelRef.current;
+    if (!el) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (el.scrollHeight <= el.clientHeight) return;
+      event.preventDefault();
+      el.scrollTop += event.deltaY;
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [portal, open, normalizedSuggestions.length]);
+
   const selectedItems = useMemo(() => {
     const isRenderable = (item: any) => {
       if (item === null || item === undefined || item === "") return false;

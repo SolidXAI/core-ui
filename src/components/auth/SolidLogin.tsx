@@ -119,7 +119,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         <div className="flex flex-column gap-1 mt-4" style={{}}>
                             <div className="flex align-items-center justify-content-between">
                                 <label htmlFor="password" className="solid-auth-input-label">Password</label>
-                                <Link href={"/auth/initiate-forgot-password"} className="solid-auth-inline-link">Forgot your password?</Link>
+                                <Link href={"/auth/initiate-forgot-password"} className="solid-auth-inline-link" tabIndex={-1}>Forgot your password?</Link>
                             </div>
                             <SolidPasswordInput
                                 id="password"
@@ -386,7 +386,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             </div>
             {solidSettingsData?.data?.allowPublicRegistration && <div className="mt-3 md:mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">
-                    Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
+                    Don’t have an account ? <Link className="font-bold" href="/auth/register" tabIndex={-1}>Sign Up</Link>
                 </div>
             </div>}
         </div>
