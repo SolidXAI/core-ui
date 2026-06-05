@@ -51,6 +51,8 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
             'text/csv': ['.csv']
         },
         multiple: false,
+        noClick: true,
+        noKeyboard: true,
     });
 
     const rootProps = getRootProps({ className: 'solid-import-dropzone-shell' });
