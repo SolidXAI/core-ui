@@ -99,6 +99,7 @@ export { AppTitle } from './helpers/AppTitle';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from './helpers/helpers';
 export { fetchS3Url } from './helpers/fetchS3Url';
 export type { FetchS3UrlOptions } from './helpers/fetchS3Url';
+export { getFileTypeIconTone, SolidFileTypeIcon } from './helpers/fileTypeIcon';
 export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
