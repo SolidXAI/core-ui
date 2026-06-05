@@ -1305,9 +1305,11 @@ body {
   appearance: none;
 }
 
-.solid-select:focus-visible {
+.solid-select:focus-visible,
+.solid-select:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 20%, transparent);
 }
 
 .solid-select:disabled {
@@ -2169,11 +2171,11 @@ body {
 }
 
 .auth-back-button.solid-btn.solid-btn--ghost {
-  color: #a1a1aa;
+  color: var(--muted-foreground);
 }
 
 .auth-back-button.solid-btn.solid-btn--ghost:hover {
-  color: #fafafa;
+  color: var(--foreground);
 }
 
 .solid-auth-center-stack {
@@ -2298,6 +2300,13 @@ body {
 
 .solid-auth-theme-wrapper.center .solid-center-layout {
   width: min(388px, calc(100vw - 24px)) !important;
+}
+
+.solid-auth-theme-wrapper.center .solid-auth-footer {
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  padding: 0 24px;
 }
 
 .solid-auth-theme-wrapper .auth-container form .mt-3 {
@@ -4918,6 +4927,17 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   .solid-studio-island {
     top: 0;
     bottom: auto;
+  }
+
+  .solid-studio-trigger-btn {
+    gap: 0;
+    padding: 0;
+    width: 32px;
+    justify-content: center;
+  }
+
+  .solid-studio-trigger-label {
+    display: none;
   }
 }
 

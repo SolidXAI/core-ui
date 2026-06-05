@@ -39,7 +39,6 @@ export const SolidSaveCustomFilterForm: React.FC<SolidSaveCustomFilterFormProps>
                     placeholder="Filter Title"
                     value={formValues.name}
                     onChange={handleChange}
-                    readOnly={currentSavedFilterData}
                     className="solid-save-filter-input"
                 />
             </div>

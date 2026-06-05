@@ -102,6 +102,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
               completeMethod={searchFields}
               field="name"
               dropdown
+              portal
               forceSelection // only values from list
               placeholder="Select Field"
               className="w-full solid-filter-auto-complete-field solid-filter-compact-control"
@@ -111,6 +112,8 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
                   onChange(rule.id, 'fieldName', e.value.value); // send value to parent
                 } else {
                   onChange(rule.id, 'fieldName', '');
+                  onChange(rule.id, 'matchMode', null);
+                  onChange(rule.id, 'value', '');
                 }
               }}
             />
@@ -123,13 +126,13 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
               : <div className='solid-filter-empty-pair'>
                 <SolidInput
                   disabled
-                  value={rule.value || ''}
+                  value=""
                   placeholder="Operator"
                   className='w-full solid-filter-compact-control'
                 />
                 <SolidInput
                   disabled
-                  value={rule.value || ''}
+                  value=""
                   placeholder="Value"
                   className='w-full solid-filter-compact-control'
                 />

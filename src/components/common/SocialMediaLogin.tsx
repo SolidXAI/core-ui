@@ -30,6 +30,7 @@ export const SocialMediaLogin = ({
           type="button"
           variant="outline"
           className="solid-auth-social-btn"
+          tabIndex={-1}
           onClick={() => router.push(appleApiConnectRedirectUrl)}
           aria-label="Login with Apple"
         >
@@ -50,6 +51,7 @@ export const SocialMediaLogin = ({
           type="button"
           variant="outline"
           className="solid-auth-social-btn"
+          tabIndex={-1}
           onClick={() => router.push(googleApiConnectRedirectUrl)}
           aria-label="Login with Google"
         >
@@ -85,6 +87,7 @@ export const SocialMediaLogin = ({
           type="button"
           variant="outline"
           className="solid-auth-social-btn"
+          tabIndex={-1}
           onClick={() => router.push(facebookApiConnectRedirectUrl)}
           aria-label="Login with Meta"
         >
@@ -111,6 +114,7 @@ export const SocialMediaLogin = ({
           type="button"
           variant="outline"
           className="solid-auth-social-btn"
+          tabIndex={-1}
           onClick={() => router.push(microsoftApiConnectRedirectUrl)}
           aria-label="Login with Microsoft"
         >

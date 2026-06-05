@@ -3,7 +3,7 @@ import { SolidDataTable as DataTable, DataTableStateEvent, Column } from "./Soli
 import qs from "qs";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
-import { SolidListViewColumn } from "./SolidListViewColumn";
+import { SolidListViewColumn, isFieldSortable } from "./SolidListViewColumn";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -774,11 +774,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const currentSortOrder = latestSortOrderRef.current;
     if (currentSortField && (currentSortOrder === 1 || currentSortOrder === -1)) {
       const meta = solidFieldsMetadata?.[currentSortField];
-      let resolvedField = currentSortField;
-      if (meta?.type === "relation" && meta?.relationType === "many-to-one") {
-        resolvedField = `${currentSortField}.${meta?.relationModel?.userKeyField?.name}`;
+      if (!isFieldSortable(meta)) {
+        queryData.sort = [`id:desc`];
+      } else {
+        let resolvedField = currentSortField;
+        if (meta?.type === "relation" && meta?.relationType === "many-to-one") {
+          resolvedField = `${currentSortField}.${meta?.relationModel?.userKeyField?.name}`;
+        }
+        queryData.sort = [`${resolvedField}:${currentSortOrder === 1 ? "asc" : "desc"}`];
       }
-      queryData.sort = [`${resolvedField}:${currentSortOrder === 1 ? "asc" : "desc"}`];
     } else {
       queryData.sort = [`id:desc`];
     }

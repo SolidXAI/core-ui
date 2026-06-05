@@ -166,9 +166,10 @@ export const AdminTopHeader = () => {
               className="solid-studio-trigger-btn"
               onClick={() => { dispatch(enterStudioMode()); router.push("/studio"); }}
               title="Enter SolidX Studio"
+              aria-label="Enter SolidX Studio"
             >
               <StudioSparkleIcon />
-              Studio
+              <span className="solid-studio-trigger-label">Studio</span>
             </button>
           )}
 

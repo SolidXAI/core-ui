@@ -884,7 +884,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         const baseFormPath = normalizeSolidFormActionPath(pathname, "form");
                         const queryParams = new URLSearchParams(searchParams.toString());
                         queryParams.set("viewMode", "view");
-                        router.push(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
+                        router.replace(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
                         setViewMode("view")
                     }
                     return result;

@@ -295,6 +295,9 @@ export function SettingsComponent() {
 
       if (response?.statusCode === 200) {
         dispatch(showToast({ severity: "success", summary: "Updated", detail: "Settings updated" }));
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("solid:settings-updated"));
+        }
       } else {
         dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.SOMETHING_WRONG }));
       }

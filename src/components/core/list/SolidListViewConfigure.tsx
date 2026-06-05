@@ -343,7 +343,7 @@ export const SolidListViewConfigure = (
                                 }}
                             >
                                 <Trash2 size={14} className="solid-header-action-button-icon" />
-                                <span className="solid-header-action-button-label">Clear cache</span>
+                                <span className="solid-header-action-button-label">Reset View</span>
                             </SolidDropdownMenuItem>
                         </>
                     )}

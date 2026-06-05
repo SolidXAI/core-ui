@@ -545,6 +545,7 @@ export { SolidNotFoundPage } from './components/common/SolidNotFoundPage';
 
 export { SolidThemeLink } from './components/common/SolidThemeLink';
 export { SolidThemeProvider } from './components/common/SolidThemeProvider';
+export { SolidFaviconProvider, SOLID_SETTINGS_UPDATED_EVENT } from './components/common/SolidFaviconProvider';
 export { eventBus, AppEvents } from './helpers/eventBus';
 export { useSession } from './hooks/useSession';
 export { useRouter } from './hooks/useRouter';
