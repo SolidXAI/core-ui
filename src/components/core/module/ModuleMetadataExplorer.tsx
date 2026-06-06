@@ -31,6 +31,9 @@ import "./ModuleMetadataExplorer.css";
 type ModuleMetadataExplorerProps = {
   moduleName?: string;
   moduleId?: number;
+  modelSingularName?: string;
+  readOnly?: boolean;
+  allowSeed?: boolean;
 };
 
 type MetadataIssue = {
@@ -273,9 +276,10 @@ function filterIssuesForPath(issues: MetadataIssue[], path: string) {
 const JsonEditorSurface = React.forwardRef<JsonEditorHandle, {
   value: any;
   resetToken: string;
+  readOnly?: boolean;
   onValueChange: (value: any) => void;
   onErrorChange: (message: string | null) => void;
-}>(function JsonEditorSurface({ value, resetToken, onValueChange, onErrorChange }, ref) {
+}>(function JsonEditorSurface({ value, resetToken, readOnly = false, onValueChange, onErrorChange }, ref) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<any>(null);
 
@@ -319,6 +323,10 @@ const JsonEditorSurface = React.forwardRef<JsonEditorHandle, {
       onChange: () => emitState(),
     });
 
+    if (editorRef.current?.aceEditor?.setReadOnly) {
+      editorRef.current.aceEditor.setReadOnly(readOnly);
+    }
+
     return () => {
       editorRef.current?.destroy?.();
       editorRef.current = null;
@@ -331,7 +339,12 @@ const JsonEditorSurface = React.forwardRef<JsonEditorHandle, {
     emitState();
   }, [resetToken, value]);
 
-  return <div ref={containerRef} className="solid-module-explorer-editor-host solid-module-explorer-jsoneditor" />;
+  useEffect(() => {
+    if (!editorRef.current?.aceEditor?.setReadOnly) return;
+    editorRef.current.aceEditor.setReadOnly(readOnly);
+  }, [readOnly]);
+
+  return <div ref={containerRef} className={`solid-module-explorer-editor-host solid-module-explorer-jsoneditor ${readOnly ? "is-readonly" : ""}`} />;
 });
 
 function MetadataTree({
@@ -398,7 +411,13 @@ function MetadataTree({
   );
 }
 
-export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataExplorerProps) {
+export function ModuleMetadataExplorer({
+  moduleName,
+  moduleId,
+  modelSingularName,
+  readOnly = false,
+  allowSeed = true,
+}: ModuleMetadataExplorerProps) {
   const dispatch = useDispatch();
   const editorRef = useRef<JsonEditorHandle | null>(null);
   const explorerRef = useRef<HTMLDivElement | null>(null);
@@ -436,6 +455,7 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
   const [updateSection, { isLoading: isSavingSection }] = useUpdateModuleMetadataExplorerSectionMutation();
   const [validateSection, { isLoading: isValidatingSection }] = useValidateModuleMetadataExplorerSectionMutation();
   const [seedModuleMetadata, { isLoading: isSeedingModule }] = useSeedModuleMetadataMutation();
+  const isReadOnlyExplorer = readOnly || moduleName?.toLowerCase() === "solid-core";
 
   const sections = (manifestData?.sections ?? []) as ExplorerSectionDefinition[];
   const fullDocument = documentData?.value ?? {};
@@ -446,9 +466,23 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
     [sections, fullDocument],
   );
 
+  const scopedRootPath = useMemo(() => {
+    if (!modelSingularName) return "";
+    const models = getValueAtJsonPath(fullDocument, "moduleMetadata.models");
+    if (!Array.isArray(models)) return "";
+    const modelIndex = models.findIndex((model) => model?.singularName === modelSingularName);
+    return modelIndex >= 0 ? `moduleMetadata.models[${modelIndex}]` : "";
+  }, [fullDocument, modelSingularName]);
+
+  const scopedTreeNodes = useMemo(() => {
+    if (!scopedRootPath) return treeNodes;
+    const scopedNode = nodeMap.get(scopedRootPath);
+    return scopedNode ? [scopedNode] : [];
+  }, [nodeMap, scopedRootPath, treeNodes]);
+
   const filteredTreeNodes = useMemo(
-    () => filterTreeNodes(treeNodes, treeFilter),
-    [treeNodes, treeFilter],
+    () => filterTreeNodes(scopedTreeNodes, treeFilter),
+    [scopedTreeNodes, treeFilter],
   );
 
   const visibleExpandedPaths = useMemo(() => {
@@ -472,6 +506,7 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
   const savedSerialized = serializeJson(savedValue);
   const editorSerialized = serializeJson(editorValue);
   const isDirty = editorError ? true : savedSerialized !== editorSerialized;
+  const hasMutableChanges = !isReadOnlyExplorer && isDirty;
   const hasValidationFailure = Boolean(editorError) || activeValidationIssues.length > 0;
   const validationSummary = editorError
     ? editorError
@@ -507,14 +542,20 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
   }, []);
 
   useEffect(() => {
-    if (!treeNodes.length) return;
+    if (!scopedTreeNodes.length) return;
 
-    if (!activePath || !nodeMap.has(activePath)) {
-      const defaultPath = treeNodes[0].path;
+    const isPathInsideScope =
+      !scopedRootPath ||
+      activePath === scopedRootPath ||
+      activePath.startsWith(`${scopedRootPath}.`) ||
+      activePath.startsWith(`${scopedRootPath}[`);
+
+    if (!activePath || !nodeMap.has(activePath) || !isPathInsideScope) {
+      const defaultPath = scopedTreeNodes[0].path;
       setActivePath(defaultPath);
       setExpandedPaths(new Set([defaultPath]));
     }
-  }, [activePath, nodeMap, treeNodes]);
+  }, [activePath, nodeMap, scopedRootPath, scopedTreeNodes]);
 
   useEffect(() => {
     if (!activePath) return;
@@ -549,7 +590,7 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
 
   const selectPath = (path: string) => {
     if (path === activePath) return;
-    if (isDirty) {
+    if (!isReadOnlyExplorer && isDirty) {
       const shouldProceed = window.confirm("You have unsaved metadata changes. Switch nodes and discard them?");
       if (!shouldProceed) return;
     }
@@ -699,8 +740,8 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
             <div className="solid-module-explorer-sidebar-section solid-module-explorer-sidebar-sections">
               <div className="solid-module-explorer-sidebar-heading">
                 <div className="solid-module-explorer-sidebar-heading-main">
-                  <div className="solid-module-explorer-sidebar-title">Sections</div>
-                  <SolidTag tone="info">{sections.length}</SolidTag>
+                  <div className="solid-module-explorer-sidebar-title">{modelSingularName ? "Explorer" : "Sections"}</div>
+                  <SolidTag tone="info">{modelSingularName ? scopedTreeNodes.length : sections.length}</SolidTag>
                 </div>
                 <button
                   type="button"
@@ -754,21 +795,29 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
                     {validationSummary}
                   </div>
                 )}
+                {isReadOnlyExplorer && (
+                  <div className="solid-module-explorer-readonly-note">
+                    This metadata is browse-only in the explorer.
+                  </div>
+                )}
               </div>
               <div className="solid-module-explorer-main-actions">
                 <div className="solid-module-explorer-main-meta">
-                  {isDirty && <SolidTag tone="warn">Unsaved changes</SolidTag>}
+                  {hasMutableChanges && <SolidTag tone="warn">Unsaved changes</SolidTag>}
                   {editorError && <SolidTag tone="danger">Invalid JSON</SolidTag>}
+                  {isReadOnlyExplorer && <SolidTag tone="info">Read only</SolidTag>}
                 </div>
-                <SolidButton
-                  size="sm"
-                  leftIcon={<Save size={14} />}
-                  onClick={handleSave}
-                  loading={isSavingSection}
-                  disabled={!isDirty && !editorError}
-                >
-                  Save Section
-                </SolidButton>
+                {!isReadOnlyExplorer && (
+                  <SolidButton
+                    size="sm"
+                    leftIcon={<Save size={14} />}
+                    onClick={handleSave}
+                    loading={isSavingSection}
+                    disabled={!isDirty && !editorError}
+                  >
+                    Save Section
+                  </SolidButton>
+                )}
                 <SolidDropdownMenu>
                   <SolidDropdownMenuTrigger asChild>
                     <SolidButton
@@ -781,12 +830,14 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
                     </SolidButton>
                   </SolidDropdownMenuTrigger>
                   <SolidDropdownMenuContent className="solid-module-explorer-actions-menu">
-                    <SolidDropdownMenuItem onSelect={handleFormat}>
-                      <div className="solid-module-explorer-actions-item">
-                        <Wand2 size={14} />
-                        <span>Format</span>
-                      </div>
-                    </SolidDropdownMenuItem>
+                    {!isReadOnlyExplorer && (
+                      <SolidDropdownMenuItem onSelect={handleFormat}>
+                        <div className="solid-module-explorer-actions-item">
+                          <Wand2 size={14} />
+                          <span>Format</span>
+                        </div>
+                      </SolidDropdownMenuItem>
+                    )}
                     <SolidDropdownMenuItem onSelect={handleValidate} disabled={isValidatingSection}>
                       <div className="solid-module-explorer-actions-item">
                         <FileSearch size={14} />
@@ -799,12 +850,14 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
                         <span>Context</span>
                       </div>
                     </SolidDropdownMenuItem>
-                    <SolidDropdownMenuItem onSelect={() => setIsSeedDialogOpen(true)} disabled={!moduleId || isSeedingModule}>
-                      <div className="solid-module-explorer-actions-item">
-                        <DatabaseZap size={14} />
-                        <span>{isSeedingModule ? "Seeding..." : "Seed"}</span>
-                      </div>
-                    </SolidDropdownMenuItem>
+                    {allowSeed && (
+                      <SolidDropdownMenuItem onSelect={() => setIsSeedDialogOpen(true)} disabled={!moduleId || isSeedingModule}>
+                        <div className="solid-module-explorer-actions-item">
+                          <DatabaseZap size={14} />
+                          <span>{isSeedingModule ? "Seeding..." : "Seed"}</span>
+                        </div>
+                      </SolidDropdownMenuItem>
+                    )}
                   </SolidDropdownMenuContent>
                 </SolidDropdownMenu>
               </div>
@@ -821,6 +874,7 @@ export function ModuleMetadataExplorer({ moduleName, moduleId }: ModuleMetadataE
                     ref={editorRef}
                     value={savedValue}
                     resetToken={editorResetToken}
+                    readOnly={isReadOnlyExplorer}
                     onValueChange={setEditorValue}
                     onErrorChange={setEditorError}
                   />

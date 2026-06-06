@@ -275,6 +275,13 @@
   max-width: 100%;
 }
 
+.solid-module-explorer-readonly-note {
+  margin-top: 0.35rem;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
 .solid-module-explorer-main-meta {
   display: flex;
   align-items: center;
@@ -587,6 +594,10 @@
 
 .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_cursor {
   border-left-width: 1px !important;
+}
+
+.solid-module-explorer-jsoneditor.is-readonly .ace-jsoneditor .ace_cursor {
+  opacity: 0.45;
 }
 
 @media (max-width: 1200px) {
