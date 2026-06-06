@@ -567,6 +567,28 @@
   font-size: 12px;
 }
 
+.solid-module-explorer-jsoneditor textarea.jsoneditor-text,
+.solid-module-explorer-jsoneditor .ace-jsoneditor,
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_gutter,
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_scroller,
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_content,
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_text-layer,
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_line,
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_gutter-layer {
+  font-family: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_line,
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_gutter-cell {
+  line-height: 1.5 !important;
+}
+
+.solid-module-explorer-jsoneditor .ace-jsoneditor .ace_cursor {
+  border-left-width: 1px !important;
+}
+
 @media (max-width: 1200px) {
   .solid-module-explorer-workspace {
     grid-template-columns: 1fr !important;
