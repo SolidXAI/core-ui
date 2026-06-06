@@ -203,12 +203,22 @@ export {
     useDeletemoduleMutation,
     useGenerateCodeFormoduleMutation,
     useGetDefaultDataSourceQuery,
+    useGetModuleMetadataExplorerDocumentQuery,
+    useGetModuleMetadataExplorerManifestQuery,
+    useGetModuleMetadataExplorerSectionQuery,
     useGetmoduleByIdQuery,
     useGetmodulesQuery,
     useLazyGetDefaultDataSourceQuery,
+    useLazyGetModuleMetadataExplorerDocumentQuery,
+    useLazyGetModuleMetadataExplorerManifestQuery,
+    useLazyGetModuleMetadataExplorerReferencesQuery,
+    useLazyGetModuleMetadataExplorerSectionQuery,
+    useLazySearchModuleMetadataExplorerQuery,
     useLazyGetmoduleByIdQuery,
     useLazyGetmodulesQuery,
     useRefreshPermissionsMutation,
+    useUpdateModuleMetadataExplorerSectionMutation,
+    useValidateModuleMetadataExplorerSectionMutation,
     useUpdatemoduleMutation
 } from './redux/api/moduleApi';
 
