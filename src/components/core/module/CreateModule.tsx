@@ -238,12 +238,12 @@ const CreateModule = ({ params, data }: any) => {
       //   //@ts-ignore
       //   content: (props) => (
       //     <div
-      //       className="flex flex-column align-items-left"
+      //       className="flex flex-col items-start"
       //       style={{ flex: "1" }}
       //     >
       //       {errorMessages.map((m: any, index) => (
-      //         <div className="flex align-items-center gap-2" key={index}>
-      //           <span className="font-bold text-900">{m}</span>
+      //         <div className="flex items-center gap-2" key={index}>
+      //           <span className="font-bold text-surface-900">{m}</span>
       //         </div>
       //       ))}
       //     </div>
@@ -357,18 +357,18 @@ const CreateModule = ({ params, data }: any) => {
     <div className="solid-form-wrapper">
       <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
         <form style={{ width: '100%', background: "#fff" }} onSubmit={formik.handleSubmit}>
-          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
-            <div className="flex flex-column gap-1">
+          <div className="solid-form-header flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex flex-col gap-1">
               {/* <span className="text-sm text-color-secondary uppercase tracking-wider">Module</span> */}
               {/* <div className="form-wrapper-title m-0">{headerTitle}</div> */}
             </div>
-            <div className="flex align-items-center gap-2">
+            <div className="flex items-center gap-2">
               <SolidButton
                 variant="outline"
                 size="sm"
                 type="button"
                 onClick={handleCancel}
-                className="bg-primary-reverse"
+                className="solid-bg-primary-reverse"
               >
                 Cancel
               </SolidButton>
@@ -384,8 +384,8 @@ const CreateModule = ({ params, data }: any) => {
           <div className="solid-form-content">
             {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
             <SolidPanel header={"Basic Info"} className="solid-column-panel">
-              <div className="formgrid grid mt-3">
-                <div className="field col-12 pb-3 lg:pb-0 lg:col-6">
+              <div className="flex flex-wrap mt-4">
+                <div className="field w-full pb-4 lg:pb-0 lg:w-1/2">
                   <div className={styles.fieldWrapper}>
                     <label htmlFor="displayName" className={`${styles.fieldLabel} form-field-label`}>
                       Display Name <span className="text-red-500">*</span>
@@ -410,7 +410,7 @@ const CreateModule = ({ params, data }: any) => {
                     )}
                   </div>
                 </div>
-                <div className="field col-12 lg:col-6">
+                <div className="field w-full lg:w-1/2">
                   <div className={styles.fieldWrapper}>
                     <label htmlFor="name" className={`${styles.fieldLabel} form-field-label`}>
                       Name <span className="text-red-500">*</span>
@@ -430,8 +430,8 @@ const CreateModule = ({ params, data }: any) => {
                   </div>
                 </div>
               </div>
-              <div className="formgrid grid mt-4">
-                <div className="field col-12 pb-3 ld:pb-0 lg:col-6">
+              <div className="flex flex-wrap mt-6">
+                <div className="field w-full pb-4 ld:pb-0 lg:w-1/2">
                   <div className={styles.fieldWrapper}>
                     <label htmlFor="menuSequenceNumber" className={`${styles.fieldLabel} form-field-label`}>
                       Menu Sequence Number
@@ -449,7 +449,7 @@ const CreateModule = ({ params, data }: any) => {
                     )}
                   </div>
                 </div>
-                <div className="field col-12 lg:col-6">
+                <div className="field w-full lg:w-1/2">
                   <div className={styles.fieldWrapper}>
                     <label htmlFor="description" className={`${styles.fieldLabel} form-field-label`}>
                       Description <span className="text-red-500">*</span>
@@ -472,9 +472,9 @@ const CreateModule = ({ params, data }: any) => {
             </SolidPanel>
             {/* <Divider /> */}
             {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Configurations</p> */}
-            <SolidPanel header={"Configurations"} className="solid-column-panel mt-4">
-              <div className="formgrid grid mt-3">
-                <div className="field col-12 pb-3 lg:pb-0 lg:col-6">
+            <SolidPanel header={"Configurations"} className="solid-column-panel mt-6">
+              <div className="flex flex-wrap mt-4">
+                <div className="field w-full pb-4 lg:pb-0 lg:w-1/2">
                   <div className={styles.fieldWrapper}>
                     <label htmlFor="defaultDataSource" className={`${styles.fieldLabel} form-field-label`}>
                       Default Data Source
@@ -496,7 +496,7 @@ const CreateModule = ({ params, data }: any) => {
                     )}
                   </div>
                 </div>
-                <div className="field col-12 lg:col-6">
+                <div className="field w-full lg:w-1/2">
                   <div className={`${styles.fieldWrapper} relative`}>
                     <label htmlFor="menuIconUrl" className={`${styles.fieldLabel} form-field-label`}>
                       Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
@@ -510,11 +510,11 @@ const CreateModule = ({ params, data }: any) => {
                     )}
 
                     {fileDetails && (
-                      <div className="solid-file-upload-wrapper mt-4">
-                        <div className="flex align-items-center gap-2">
+                      <div className="solid-file-upload-wrapper mt-6">
+                        <div className="flex items-center gap-2">
                           <FileReaderExt fileDetails={fileDetails} />
-                          <div className="w-full flex flex-column gap-1">
-                            <div className="flex align-items-center justify-content-between">
+                          <div className="w-full flex flex-col gap-1">
+                            <div className="flex items-center justify-between">
                               <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
                               <button
                                 type="button"
@@ -525,7 +525,7 @@ const CreateModule = ({ params, data }: any) => {
                               </button>
                             </div>
                             {uploadCompleted ? (
-                              <div className="flex align-items-center gap-2 text-sm">
+                              <div className="flex items-center gap-2 text-sm">
                                 {totalSize} of {totalSize}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
                                   <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
@@ -541,7 +541,7 @@ const CreateModule = ({ params, data }: any) => {
                                 Completed
                               </div>
                             ) : (
-                              <div className="flex align-items-center gap-2 text-sm">
+                              <div className="flex items-center gap-2 text-sm">
                                 {uploadedSize} of {totalSize}
                                 <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
                                   <circle cx="2" cy="2" r="2" fill="#C1C1C1" />

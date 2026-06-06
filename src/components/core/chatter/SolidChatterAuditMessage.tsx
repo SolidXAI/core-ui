@@ -60,7 +60,7 @@ export const SolidChatterAuditMessage: React.FC<SolidChatterAuditMessageProps> =
     }
 
     return (
-        <div className='flex flex-column gap-2'>
+        <div className='flex flex-col gap-2'>
             {visibleAuditRecord.map((item: AuditRecord, index: number) => (
                 <div key={index} className='flex gap-2'>
                     <span className='m-0 '>

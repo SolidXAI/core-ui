@@ -122,7 +122,7 @@ npm install @solidxai/core-ui
 ```bash
 npm install react react-dom react-router-dom \
   @reduxjs/toolkit react-redux \
-  bootstrap primereact primeicons primeflex
+  bootstrap primereact primeicons
 ```
 
 

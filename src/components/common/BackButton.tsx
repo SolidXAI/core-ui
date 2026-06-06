@@ -67,7 +67,7 @@ export const BackButton = () => {
             type="button"
             aria-label="Back"
             onClick={handleGoBack}
-            className='max-w-2rem bg-primary-reverse text-color solid-icon-button'
+            className='max-w-8 solid-bg-primary-reverse text-color solid-icon-button'
         />
     )
 }

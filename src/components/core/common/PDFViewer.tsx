@@ -60,7 +60,7 @@ export default function PDFViewer({ url }: any) {
     }
 
     return (
-        <div className="flex flex-col items-center space-y-4 p-4">
+        <div className="flex flex-col items-center space-y-6 p-4">
             {loading && (
                 <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg w-full">
                     <p className="text-gray-600">Loading PDF...</p>
@@ -90,11 +90,11 @@ export default function PDFViewer({ url }: any) {
             )}
 
             {numPages && (
-                <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
+                <div className="flex items-center space-x-6 bg-white p-4 rounded-lg shadow-md">
                     <button
                         onClick={goToPrevPage}
                         disabled={pageNumber <= 1}
-                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                         Previous
                     </button>
@@ -106,7 +106,7 @@ export default function PDFViewer({ url }: any) {
                     <button
                         onClick={goToNextPage}
                         disabled={pageNumber >= numPages}
-                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                         Next
                     </button>

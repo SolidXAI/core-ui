@@ -53,7 +53,7 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
                         formik.setFieldValue("layoutString", value);
                     }}
                 />
-                <div className="pt-3 flex gap-2">
+                <div className="pt-4 flex gap-2">
                     <SolidButton type="submit" label="Apply" size="sm" />
                     <SolidButton
                         type="button"

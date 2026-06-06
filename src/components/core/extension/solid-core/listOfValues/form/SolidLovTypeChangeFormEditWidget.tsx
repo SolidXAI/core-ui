@@ -67,7 +67,7 @@ export const SolidLovTypeChangeFormEditWidget = ({
 
     return (
         <div className="solid-lov-type-change-widget w-full">
-            <div className="flex align-items-center justify-between  mb-2">
+            <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                     {fieldLabel}
                 </label>

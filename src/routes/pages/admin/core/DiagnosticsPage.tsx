@@ -108,7 +108,7 @@ export function DiagnosticsPage() {
             <h3 className="solid-studio-card-title">Runtime</h3>
           </div>
           <div className="solid-studio-card-content">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
+            <div style={{ display: "flex flex-wrap", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px" }}>
               <div><strong>Environment:</strong> {envName}</div>
               <div><strong>Pool Limit:</strong> {SOLID_ENTITY_API_POOL_LIMIT}</div>
               <div><strong>Active Entity APIs:</strong> {activeCount}</div>

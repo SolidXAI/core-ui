@@ -33,7 +33,7 @@
 //   return (
 //     <div>
 //       {resPerPage < filteredRoomsCount && (
-//         <div className="d-flex justify-content-center mt-5">
+//         <div className="d-flex justify-center mt-8">
 //           <Pagination
 //             activePage={page}
 //             itemsCountPerPage={resPerPage}

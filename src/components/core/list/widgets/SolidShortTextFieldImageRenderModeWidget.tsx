@@ -6,7 +6,7 @@ export const SolidShortTextFieldImageListWidget = ({ rowData, solidListViewMetaD
         <img
             src={rowData[fieldMetadata.name]}
             alt="product-image-single"
-            className="shadow-2 border-round"
+            className="shadow-lg rounded"
             width={40}
             height={40}
             style={{ objectFit: "cover" }}

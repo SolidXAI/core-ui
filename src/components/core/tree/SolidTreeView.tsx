@@ -1330,7 +1330,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const end = total === 0 ? 0 : Math.min(offset + limit, total);
 
     return (
-      <div className="w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background">
+      <div className="w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-4 text-sm rounded-md border border-border/60 px-4 py-1.5 bg-background">
         <div className="solid-paginator-meta flex items-center gap-2 ml-auto">
           <span className="solid-paginator-label">Rows</span>
           <select
@@ -1480,7 +1480,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       customContextMenuButtons.length > 0;
 
     return (
-      <div className="flex align-items-center justify-content-end gap-1" onClick={(event) => event.stopPropagation()}>
+      <div className="flex items-center justify-end gap-1" onClick={(event) => event.stopPropagation()}>
 
         {/* ---------------- CUSTOM ROW BUTTONS ---------------- */}
         {solidTreeViewLayout?.attrs?.rowButtons &&
@@ -1624,9 +1624,9 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         <div className="solid-list-surface solid-tree-surface flex flex-column flex-1 min-h-0">
           {/* ── Header ── */}
           <div className="page-header solid-list-toolbar solid-tree-toolbar flex-column lg:flex-row">
-            <div className="flex justify-content-between w-full">
-              <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
-                <div className="flex align-items-center gap-2">
+            <div className="flex justify-between w-full">
+              <div className="flex gap-4 items-center w-full solid-list-toolbar-left">
+                <div className="flex items-center gap-2">
                   {params.embeded !== true && (
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                       <SolidIcon name="si-th-large" />
@@ -1649,7 +1649,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 )}
               </div>
 
-              <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                 {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (

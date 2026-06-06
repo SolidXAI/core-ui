@@ -47,7 +47,7 @@ export class SolidJsonField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full';
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -98,7 +98,7 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -160,7 +160,7 @@ export const DefaultJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFie
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;

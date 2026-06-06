@@ -90,7 +90,7 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
                 </div>
             ) : (
             <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex gap-3 px-3 md:px-4 py-2 md:py-3 solid-kanban-board-scroll-context">
+                <div className="flex gap-4 px-4 md:px-6 py-2 md:py-4 solid-kanban-board-scroll-context">
                     {/* {Object.entries(kanbanViewData).map(([groupVal, data]) => {
                     const group = {
                         label: groupVal,

@@ -20,7 +20,7 @@ export const CancelButton = () => {
     };
     return (
         <div>
-            <SolidButton variant="outline" size="small" type="button" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}>
+            <SolidButton variant="outline" size="small" type="button" onClick={handleGoBack} className='solid-bg-primary-reverse' style={{ minWidth: 66 }}>
                 Close
             </SolidButton>
         </div>
@@ -55,12 +55,12 @@ export const SolidCancelButton = () => {
         <>
             {/* <div className="hidden lg:flex"> */}
             {/* <div> */}
-            <SolidButton variant="outline" size="small" type="button" onClick={handleGoBack} className='bg-primary-reverse hidden lg:flex' style={{ minWidth: 66 }}>
+            <SolidButton variant="outline" size="small" type="button" onClick={handleGoBack} className='solid-bg-primary-reverse hidden lg:flex' style={{ minWidth: 66 }}>
                 Close
             </SolidButton>
             {/* </div> */}
             {/* </div> */}
-            <SolidButton size="small" type="button" leftIcon={<X size={14} />} onClick={handleGoBack} className='bg-primary-reverse solid-icon-button flex lg:hidden' />
+            <SolidButton size="small" type="button" leftIcon={<X size={14} />} onClick={handleGoBack} className='solid-bg-primary-reverse solid-icon-button flex lg:hidden' />
         </>
     )
 }

@@ -130,7 +130,7 @@ export const SolidAdmin = () => {
             <img
               alt="solid logo"
               src={SolidLogo}
-              className="mb-2 w-4rem flex-shrink-0"
+              className="mb-2 w-16 flex-shrink-0"
               style={{ opacity: 0.9 }}
             />
 

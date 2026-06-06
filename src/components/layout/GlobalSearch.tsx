@@ -23,7 +23,7 @@ export const GlobalSearch = () => {
             <span className="pi pi-search" />
             <SolidInput
                 placeholder={getPlaceholder()}
-                className='border-cyan-200 border-1 max-h-2rem w-25rem'
+                className='border border-cyan-200 max-h-8 w-[25rem]'
             />
         </div>
     )

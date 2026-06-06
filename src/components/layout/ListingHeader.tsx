@@ -132,10 +132,10 @@ const ListingHeader = () => {
   return (
     <>
       <div
-        className="flex justify-content-between align-items-center px-5 relative lg:static"
+        className="flex justify-between items-center px-8 relative lg:static"
         style={{ height: "60px", minHeight: 60, backgroundColor: '#f6f6f9' }}
       >
-        <div className="flex align-items-center">
+        <div className="flex items-center">
           {/* <i className="pi pi-users" style={{backgroundColor:"#1D6CBC"}}></i> */}
           {/* <img src="/images/icons/icon-users.svg" />
                 <span className="listHead ml-2">Employees</span> */}
@@ -154,7 +154,7 @@ const ListingHeader = () => {
           </div>
         </div>
         {/* <GlobalSearch /> */}
-        <div className="flex align-items-center">
+        <div className="flex items-center">
 
           {/* <Button label="Show" icon="pi pi-external-link" onClick={() => setVisible(true)} /> */}
 
@@ -173,7 +173,7 @@ const ListingHeader = () => {
             /> */}
           </div>
         </div>
-        <div className="flex align-items-center">
+        <div className="flex items-center">
           {/* <div>
             {contextMenuOptions.map((option) => (
               <Tooltip

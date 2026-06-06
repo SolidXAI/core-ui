@@ -227,7 +227,7 @@ export const ModuleListViewData = () => {
 
   return (
     <div className="solid-module-list w-full">
-      <div className="flex gap-3 mb-4 align-items-center flex-wrap">
+      <div className="flex gap-4 mb-6 items-center flex-wrap">
         <CreateButton />
         <SolidButton className="small-button" onClick={handleRefreshPermission} label="Refresh Permissions" />
         {selectedMenus.length > 0 && (
@@ -242,21 +242,21 @@ export const ModuleListViewData = () => {
         )}
       </div>
 
-      <div className="flex flex-column md:flex-row align-items-start gap-3 mb-3">
+      <div className="flex flex-col md:flex-row items-start gap-4 mb-4">
         <SolidInput
           value={pendingFilters.displayName.value ?? ""}
           onChange={(event) => handleFilterInputChange("displayName", event.currentTarget.value)}
           placeholder="Search module by name"
-          className="w-full md:w-20rem"
+          className="w-full md:w-80"
         />
-        <div className="flex align-items-center gap-2">
+        <div className="flex items-center gap-2">
           <SolidButton size="small" onClick={applyFilters} label="Apply" />
           <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
         </div>
       </div>
 
       {(loading || isLoading) && (
-        <div className="flex justify-content-center my-3">
+        <div className="flex justify-center my-4">
           <SolidSpinner />
         </div>
       )}
@@ -300,7 +300,7 @@ export const ModuleListViewData = () => {
         onHide={() => setDialogVisible(false)}
       >
         <p>Are you sure you want to delete the selected Modules?</p>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={deleteBulk} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setDialogVisible(false)} />
         </div>
@@ -317,7 +317,7 @@ export const ModuleListViewData = () => {
         }}
       >
         <p className="text-center">Proceed with module code generation? Existing files will be overwritten.</p>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={handleGenerateCode} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setGenerateCodeVisible(false)} />
         </div>

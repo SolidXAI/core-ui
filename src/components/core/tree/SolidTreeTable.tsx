@@ -370,7 +370,7 @@ export function SolidTreeTable({
               {visibleRows.length === 0 ? (
                 <tr>
                   <td
-                    className="px-3 py-10 text-center text-muted-foreground"
+                    className="px-4 py-10 text-center text-muted-foreground"
                     colSpan={Math.max(columns.length + selectionColSpan, 1)}
                   >
                     {emptyMessage || "No records found"}

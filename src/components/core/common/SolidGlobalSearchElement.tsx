@@ -1333,7 +1333,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         return (
             <li>
                 <div className="custom-filter-chip-type">
-                    <div className="flex align-items-center gap-2 text-base">
+                    <div className="flex items-center gap-2 text-base">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"
                             onClick={() => {
                                 setShowGlobalSearchElement(true)
@@ -1395,7 +1395,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         return (
             <li>
                 <div className="custom-filter-chip-type">
-                    <div className="flex align-items-center gap-2 text-base">
+                    <div className="flex items-center gap-2 text-base">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"
                             onClick={() => {
                                 const fn = async () => {
@@ -1439,8 +1439,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const GroupingChip = () => {
         return (
             <li className="solid-global-search-chip">
-                <div className="flex align-items-center gap-2">
-                    <div className="flex align-items-center gap-2">
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
 
                             onClick={() => setShowGroupFilterElement(true)}
@@ -1789,7 +1789,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const PredefinedSearchChip = () => (
         <li>
             <div className="search-filter-chip-type">
-                <div className="flex align-items-center gap-2">
+                <div className="flex items-center gap-2">
                     <strong>{predefinedSearchChip?.name}:</strong>
                     <span className="custom-chip-value">{predefinedSearchChip?.value}</span>
                 </div>
@@ -1805,7 +1805,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     return (
         <>
-            <div className="flex justify-content-center solid-custom-filter-wrapper relative">
+            <div className="flex justify-center solid-custom-filter-wrapper relative">
                 <div className="solid-global-search-element">
                     <ul className="solid-global-search-chip-list">
                         {visibleChipItems.map((chip) => (
@@ -1933,11 +1933,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 )}
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full shadow-2 solid-search-overlay-pannel">
+                    <div ref={overlayRef} className="absolute w-full shadow-lg solid-search-overlay-pannel">
                         <div className="solid-search-overlay-scroll">
                             {inputValue ? (
                                 <>
-                                    <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
+                                    <div className="custom-filter-search-options solid-search-overlay-section px-4 py-1 flex flex-col">
                                         <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
                                             <Search size={13} />
                                             <span>Search by fields</span>
@@ -1949,7 +1949,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         key={index}
                                                         variant="ghost"
                                                         size="sm"
-                                                        className={`flex gap-1 text-color solid-search-overlay-option ${focusedIndex === index ? "solid-search-overlay-option-active" : ""} justify-content-start`}
+                                                        className={`flex gap-1 text-color solid-search-overlay-option ${focusedIndex === index ? "solid-search-overlay-option-active" : ""} justify-start`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             const currentValue = inputValue?.trim();
@@ -1989,21 +1989,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     {predefinedSearches && predefinedSearches.length > 0 && (
                                         <>
                                             <div className="solid-filter-dialog-sep" />
-                                            <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
+                                            <div className="custom-filter-search-options solid-search-overlay-section px-4 py-1 flex flex-col">
                                                 <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title">Predefined searches</h6>
                                                 {predefinedSearches.map((predefinedSearch: any, index: number) => (
                                                     <SolidButton
                                                         key={index}
                                                         variant="ghost"
                                                         size="sm"
-                                                        className={`flex flex-column align-items-start gap-1 text-color solid-search-overlay-option solid-search-overlay-option-stacked ${focusedIndex === searchableFields.length + index ? "solid-search-overlay-option-active" : ""}`}
+                                                        className={`flex flex-col items-start gap-1 text-color solid-search-overlay-option solid-search-overlay-option-stacked ${focusedIndex === searchableFields.length + index ? "solid-search-overlay-option-active" : ""}`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             handlePredefinedSearch(predefinedSearch);
                                                         }}
                                                         onMouseEnter={() => setFocusedIndex(searchableFields.length + index)}
                                                     >
-                                                        <div className="flex gap-1 align-items-center">
+                                                        <div className="flex gap-1 items-center">
                                                             <strong>{predefinedSearch.name}:</strong>
                                                             <span className="font-bold text-color">{inputValue}</span>
                                                         </div>
@@ -2048,7 +2048,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="flex flex-column solid-search-overlay-saved-list">
+                                        <div className="flex flex-col solid-search-overlay-saved-list">
                                             {savedFilters.map((savedfilter: any, index: number) => (
                                                 <SavedFilterList
                                                     key={savedfilter.id}
@@ -2074,7 +2074,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <div className="solid-search-overlay-footer">
                             <button
                                 type="button"
-                                className={`px-3 py-2 flex flex-column solid-search-overlay-footer-action ${overlayOptions[focusedIndex]?.id === "footer:custom" ? "solid-search-overlay-option-active" : ""}`}
+                                className={`px-4 py-2 flex flex-col solid-search-overlay-footer-action ${overlayOptions[focusedIndex]?.id === "footer:custom" ? "solid-search-overlay-option-active" : ""}`}
                                 onClick={openCustomFilterDialog}
                                 onMouseEnter={() => {
                                     const optIndex = overlayOptions.findIndex((o) => o.id === "footer:custom");
@@ -2098,7 +2098,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             {viewType === "tree" && (
                                 <button
                                     type="button"
-                                    className={`px-3 py-2 flex flex-column solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary ${overlayOptions[focusedIndex]?.id === "footer:grouping" ? "solid-search-overlay-option-active" : ""}`}
+                                    className={`px-4 py-2 flex flex-col solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary ${overlayOptions[focusedIndex]?.id === "footer:grouping" ? "solid-search-overlay-option-active" : ""}`}
                                     onClick={openGroupingDialog}
                                     onMouseEnter={() => {
                                         const optIndex = overlayOptions.findIndex((o) => o.id === "footer:grouping");
@@ -2201,7 +2201,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <SolidDialogClose />
                     </SolidDialogHeader>
                     <SolidDialogSeparator />
-                    <SolidDialogFooter className="justify-content-center">
+                    <SolidDialogFooter className="justify-center">
                         <SolidButton variant="destructive" size="sm" onClick={deleteSavedFilter}>
                             <Check size={14} />
                             Yes

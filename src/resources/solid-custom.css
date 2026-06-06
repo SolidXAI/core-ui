@@ -2300,11 +2300,11 @@ body {
   width: min(388px, calc(100vw - 24px)) !important;
 }
 
-.solid-auth-theme-wrapper .auth-container form .mt-3 {
+.solid-auth-theme-wrapper .auth-container form .mt-4 {
   margin-top: 0.9rem !important;
 }
 
-.solid-auth-theme-wrapper .auth-container form .mt-4 {
+.solid-auth-theme-wrapper .auth-container form .mt-6 {
   margin-top: 1.1rem !important;
 }
 
@@ -3094,6 +3094,15 @@ body {
   width: 32px !important;
   min-width: 32px !important;
   padding: 0 !important;
+}
+
+.solid-bg-primary-reverse {
+  background: color-mix(in srgb, var(--background) 88%, var(--card) 12%);
+}
+
+.solid-bg-primary-reverse:hover,
+.solid-bg-primary-reverse:focus-visible {
+  background: color-mix(in srgb, var(--accent) 48%, var(--background) 52%);
 }
 
 html.dark .solid-list-page-wrapper,
@@ -5940,6 +5949,18 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 .solid-form-layout-row,
 .solid-form-layout-column {
   min-width: 0;
+}
+
+.solid-form-layout-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  margin: -0.5rem;
+}
+
+.solid-form-layout-grid > * {
+  min-width: 0;
+  padding: 0.5rem;
 }
 
 .solid-form-layout-label {

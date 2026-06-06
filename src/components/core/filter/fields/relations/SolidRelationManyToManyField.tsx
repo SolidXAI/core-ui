@@ -23,9 +23,9 @@ const SolidRelationManyToManyField = ({
     const numberOfInputs = needsInput ? getNumberOfInputs(rule.matchMode) : 0;
 
     return (
-        <div className="flex flex-column md:flex-row align-items-start gap-6 md:gap-1">
+        <div className="flex flex-col md:flex-row items-start gap-12 md:gap-1">
             {/* Operator */}
-            <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
+            <div className="w-full md:w-1/2 px-0 md:pr-0 md:pl-0 p-0">
                 <SolidSelect
                     value={rule.matchMode}
                     onChange={(e) => {
@@ -44,7 +44,7 @@ const SolidRelationManyToManyField = ({
             </div>
 
             {/* MultiSelect input */}
-            <div className="flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-2 md:pr-0">
+            <div className="flex flex-col gap-2 w-full md:w-1/2 px-0 md:pl-2 md:pr-0">
                 <SolidVarInputsFilterElement
                     values={rule.value}
                     onChange={(value: any) => {

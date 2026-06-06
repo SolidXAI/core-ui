@@ -196,7 +196,7 @@ const SolidInitialLoginOtp = () => {
                                                 .padStart(2, "0")}:${(timeLeft % 60).toString().padStart(2, "0")}`}
                                     </p>
                                 </div>
-                                <div className="mt-4">
+                                <div className="mt-6">
                                     <SolidButton
                                         type="submit"
                                         className="w-full font-light auth-submit-button"
@@ -217,8 +217,8 @@ const SolidInitialLoginOtp = () => {
                     </Formik>
                 </>
             </div>
-            {/* <div className="text-center mt-5">
-                <div className="text-sm text-400 secondary-dark-color">
+            {/* <div className="text-center mt-8">
+                <div className="text-sm text-surface-400 secondary-dark-color">
                     {'<'} Back to <Link className="font-bold" href="/auth/login">Back</Link>
                 </div>
             </div> */}

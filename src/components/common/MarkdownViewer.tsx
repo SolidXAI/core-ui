@@ -26,7 +26,7 @@ const CodeBlock = ({ inline, className, children, ...props }: any) => {
 
   // Fenced code block
   return (
-    <div className="relative group my-4">
+    <div className="relative group my-6">
       <button
         className="absolute right-2 top-2 px-2 py-1 text-xs rounded bg-white text-black transition"
         style={{ cursor: 'pointer',right:0  }}
@@ -59,19 +59,19 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ data }) => (
     components={{
       code: CodeBlock,
       table: (props) => (
-        <div className="overflow-x-auto my-4">
+        <div className="overflow-x-auto my-6">
           <table className="min-w-full border border-gray-700 text-sm">
             {props.children}
           </table>
         </div>
       ),
       th: (props) => (
-        <th className="border border-gray-700 px-3 py-1 font-semibold text-left bg-gray-800" style={{color:"#fff"}}>
+        <th className="border border-gray-700 px-4 py-1 font-semibold text-left bg-gray-800" style={{color:"#fff"}}>
           {props.children}
         </th>
       ),
       td: (props) => (
-        <td className="border border-gray-700 px-3 py-1 align-top">
+        <td className="border border-gray-700 px-4 py-1 align-top">
           {props.children}
         </td>
       ),

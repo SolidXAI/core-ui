@@ -144,7 +144,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
 
             {value ? (
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-4 items-center">
                     {(isImage || isPDF) && (
                         <SolidButton
                             icon="si si-eye"

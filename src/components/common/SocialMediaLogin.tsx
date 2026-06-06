@@ -23,7 +23,7 @@ export const SocialMediaLogin = ({
   const microsoftApiConnectRedirectUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/microsoft/connect`;
 
   return (
-    <div className="mt-4">
+    <div className="mt-6">
       <div className="solid-auth-social-grid">
         {appleEnabled && (
         <SolidButton

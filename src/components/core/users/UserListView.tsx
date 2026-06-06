@@ -198,7 +198,7 @@ export const UserListView = () => {
 
   return (
     <div className="solid-user-list w-full">
-      <div className="flex gap-3 mb-4 align-items-center flex-wrap">
+      <div className="flex gap-4 mb-6 items-center flex-wrap">
         <CreateButton />
         {selectedUsers.length > 0 && (
           <SolidButton
@@ -212,14 +212,14 @@ export const UserListView = () => {
         )}
       </div>
 
-      <div className="grid formgrid mb-3">
+      <div className="flex flex-wrap mb-4">
         {[
           { key: "fullName", placeholder: "Search by full name" },
           { key: "username", placeholder: "Search by username" },
           { key: "email", placeholder: "Search by email" },
           { key: "mobile", placeholder: "Search by mobile" },
         ].map((filter) => (
-          <div className="field col-12 md:col-3" key={filter.key}>
+          <div className="field w-full md:w-1/4" key={filter.key}>
             <SolidInput
               value={pendingFilters[filter.key as keyof FilterMeta].value ?? ""}
               onChange={(event) =>
@@ -229,14 +229,14 @@ export const UserListView = () => {
             />
           </div>
         ))}
-        <div className="field col-12 flex align-items-center gap-2">
+        <div className="field w-full flex items-center gap-2">
           <SolidButton size="small" onClick={applyFilters} label="Apply" />
           <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
         </div>
       </div>
 
       {(loading || isLoading) && (
-        <div className="flex justify-content-center my-3">
+        <div className="flex justify-center my-4">
           <SolidSpinner />
         </div>
       )}
@@ -306,7 +306,7 @@ export const UserListView = () => {
         onHide={() => setDialogVisible(false)}
       >
         <p>Are you sure you want to delete the selected Users?</p>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={deleteBulk} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setDialogVisible(false)} />
         </div>

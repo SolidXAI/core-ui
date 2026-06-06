@@ -150,7 +150,7 @@ export class SolidShortTextField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full';
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;

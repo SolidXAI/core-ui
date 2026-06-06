@@ -51,7 +51,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
                 <img
                     src={src}
                     alt={alt}
-                    className="shadow-2 border-round"
+                    className="shadow-lg rounded"
                     width={40}
                     height={40}
                     style={{ objectFit: "cover", cursor: "pointer" }}
@@ -67,7 +67,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
                     src={src}
                     width={40}
                     height={40}
-                    className="shadow-2 border-round"
+                    className="shadow-lg rounded"
                     style={{ objectFit: "cover", cursor: "pointer" }}
                     onError={() => setIsBroken(true)}
                     onClick={handleClick}
@@ -79,7 +79,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
         if (isAudioFile(src)) {
             return (
                 <div
-                    className="shadow-2 border-round flex align-items-center justify-content-center bg-gray-100"
+                    className="shadow-lg rounded flex items-center justify-center bg-gray-100"
                     style={{ width: 40, height: 40, cursor: "pointer" }}
                     onClick={handleClick}
                 >

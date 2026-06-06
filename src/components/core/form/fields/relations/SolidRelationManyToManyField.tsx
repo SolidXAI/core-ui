@@ -76,7 +76,7 @@ export class SolidRelationManyToManyField implements ISolidField {
 
     render(formik: FormikObject) {
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full';
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
@@ -206,10 +206,10 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                 )}
                 {isUnsaved && (
                     <div className="mb-2">
-                        <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                        <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-start" />
                     </div>
                 )}
-                <div className="flex align-items-center gap-3">
+                <div className="flex items-center gap-4">
                     <SolidAutocomplete
                         readOnly={readOnly || readOnlyPermission || isUnsaved}
                         disabled={disabled || readOnlyPermission || isUnsaved}
@@ -357,8 +357,8 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
     };
 
     const panelHeader = (
-        <div className="flex align-items-center gap-3 justify-content-space-between">
-            <div className="flex align-items-center gap-3">
+        <div className="flex items-center gap-4 justify-between">
+            <div className="flex items-center gap-4">
                 {showFieldLabel !== false && (
                     <label className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}
@@ -395,14 +395,14 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         <div>
             {isUnsaved && (
                 <div className="mb-2">
-                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-start" />
                 </div>
             )}
             {panelHeader}
             <SolidPanel>
-                <div className="formgrid grid">
+                <div className="flex flex-wrap">
                     {allOptions.map((item: any, i: number) => (
-                        <div key={item.value} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
+                        <div key={item.value} className={`field w-1/2 flex gap-2 ${i >= 2 ? 'mt-4' : ''}`}>
                             <SolidCheckbox
                                 disabled={readOnlyPermission || isUnsaved}
                                 id={item.label}
@@ -611,7 +611,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
             )}
             {isUnsaved && (
                 <div className="mb-2">
-                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-start" />
                 </div>
             )}
             {listViewParams && (
@@ -641,7 +641,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     <SolidDialogClose />
                 </SolidDialogHeader>
                 <SolidDialogBody>
-                    <div className="flex flex-column gap-2 pt-2">
+                    <div className="flex flex-col gap-2 pt-2">
                         <label className="form-field-label">
                             Search {fieldLabel}
                         </label>
@@ -658,7 +658,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                         />
                     </div>
                 </SolidDialogBody>
-                <div className="solid-radix-dialog-footer flex gap-2 justify-content-end">
+                <div className="solid-radix-dialog-footer flex gap-2 justify-end">
                     <SolidButton
                         label="Link"
                         size="sm"
@@ -670,7 +670,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                         label="Cancel"
                         size="sm"
                         variant="outline"
-                        className="bg-primary-reverse"
+                        className="solid-bg-primary-reverse"
                         onClick={() => setVisibleLinkDialog(false)}
                     />
                 </div>

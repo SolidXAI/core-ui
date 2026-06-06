@@ -46,7 +46,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
       <div className="kaban-heading-area">
         {group.folded &&
           <a onClick={e => toggleFold(groupByField)}>
-            <div className="flex align-items-center">
+            <div className="flex items-center">
               <div className="kanban-arrow-icon-container">
                 <SolidIcon name="si-sort-up-fill" aria-hidden />
                 <SolidIcon name="si-sort-down-fill" aria-hidden />
@@ -57,7 +57,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
         }
 
         {!group.folded &&
-          <div className="flex align-items-center">
+          <div className="flex items-center">
             <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
           </div>
         }

@@ -218,18 +218,18 @@ const SolidGroup = ({ children, attrs }: any) => {
     return (
         <div className={className}>
             {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
-            <div className="grid">{children}</div>
+            <div className="solid-form-layout-grid">{children}</div>
         </div>
         // <div className={className}>
         //     <div className="s_group">
         //         <fieldset>
         //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-        //             <div className="grid">{children}</div>
+        //             <div className="flex flex-wrap">{children}</div>
         //         </fieldset>
         //     </div>
 
         // </div>
-        // <div className="formgrid grid">
+        // <div className="flex flex-wrap">
         //     {children}
         // </div>
     );
@@ -246,14 +246,14 @@ const SolidRow = ({ children, attrs }: any) => {
         //     <div className="s_group">
         //         <fieldset>
         //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-        //             <div className="grid">{children}</div>
+        //             <div className="flex flex-wrap">{children}</div>
         //         </fieldset>
         //     </div>
 
         // </div>
         <div className={className}>
             {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
-            <div className="grid">{children}</div>
+            <div className="solid-form-layout-grid">{children}</div>
         </div>
         // <div>{children}</div>
     );
@@ -267,13 +267,13 @@ const SolidColumn = ({ children, attrs }: any) => {
     return (
         <div className={className}>
             {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
-            <div className="grid">{children}</div>
+            <div className="solid-form-layout-grid">{children}</div>
         </div>
     );
 };
 
 const SolidSheet = ({ children }: any) => (
-    <div className="p-fluid p-grid">
+    <div className="w-full solid-form-layout-grid">
         {children}
     </div>
 );
@@ -398,7 +398,7 @@ const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
 
     return (
         <SolidPageTab key={key} label={label} tabKey={key} hasError={errorCount > 0}>
-            <div className="p-fluid">{children}</div>
+            <div className="w-full">{children}</div>
         </SolidPageTab>
     );
 };
@@ -411,7 +411,7 @@ const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
 //             element.attrs = {
 //                 ...element.attrs,
 //                 level: level,  // Add level information to the attrs
-//                 // className: level === 1 ? 'col-12' : 'col-6',  // Assign className based on level
+//                 // className: level === 1 ? 'w-full' : 'w-1/2',  // Assign className based on level
 //             };
 //         } else {
 //             element.children = addLevelToGroups(element.children, level);
@@ -1291,12 +1291,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
         return (
             <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
                 <div className="solid-form-section">
-                    <div className="page-header solid-list-toolbar flex-column lg:flex-row">
-                        <div className="flex justify-content-between w-full solid-form-toolbar-row">
-                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                    <div className="page-header solid-list-toolbar flex-col lg:flex-row">
+                        <div className="flex justify-between w-full solid-form-toolbar-row">
+                            <div className="flex gap-4 items-center solid-form-toolbar-left">
                                 <p className="m-0 view-title solid-text-wrapper">Loading form</p>
                             </div>
-                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                            <div className="flex items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
                                 <SolidHeaderRequestStatus label="Loading..." />
                             </div>
                         </div>
@@ -1769,7 +1769,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
                             onMobileOpenChatter={() => setShowChatter(true)}
                         />
-                        <div className={`px-4 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-6 py-4 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1810,7 +1810,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             />
                         }
                         {isShowChatter === false ?
-                            <div className="flex flex-column gap-2 justify-content-center p-1">
+                            <div className="flex flex-col gap-2 justify-center p-1">
                                 {/*if solidview Internationalisation is enabled then show the locale tab */}
                                 {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
@@ -1894,7 +1894,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     onConfirm={handleConfirmAccept}
                     onCancel={handleConfirmReject}
                     message={
-                        <div className="flex flex-col items-center justify-center text-center space-y-3">
+                        <div className="flex flex-col items-center justify-center text-center space-y-4">
                             <p className="text-gray-800 text-base">
                                 Are you sure you want to {published !== null ? 'unpublish' : 'publish'}?
                             </p>

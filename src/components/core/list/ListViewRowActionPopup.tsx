@@ -27,7 +27,7 @@ export const ListViewRowActionPopup = ({ context }: any) => {
                     <>
                         <h1>{context?.modelName}</h1>
                         <h1>{context?.moduleName}</h1>
-                        <div className="flex justify-content-center">
+                        <div className="flex justify-center">
                             <SolidButton className='small-button' variant="destructive" autoFocus onClick={triggerServerAction} leftIcon={<Check size={14} />}>
                                 Confirm
                             </SolidButton>

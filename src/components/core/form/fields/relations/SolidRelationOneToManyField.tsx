@@ -80,7 +80,7 @@ export class SolidRelationOneToManyField implements ISolidField {
 
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full';
 
         const userKeyFieldName = fieldMetadata.relationModel?.userKeyField?.name;
 
@@ -188,7 +188,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
     const router = useRouter();
 
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -320,7 +320,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
     return (
         <div>
-            {/* <div className="justify-content-center align-items-center"> */}
+            {/* <div className="justify-center items-center"> */}
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
@@ -375,7 +375,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
     const fieldMetadata = fieldContext.fieldMetadata;
 
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -472,7 +472,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
     return (
         <div>
-            {/* <div className="justify-content-center align-items-center"> */}
+            {/* <div className="justify-center items-center"> */}
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
@@ -554,7 +554,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
 export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetadata, viewMetadata, formViewData }: SolidFormWidgetProps) => {
 
     const fieldLayoutInfo = field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full';
     const fieldLabel = fieldLayoutInfo.attrs.label;
     const fieldDescription = fieldLayoutInfo.attrs.description;
     const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
@@ -687,7 +687,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
 
     return (
         <div>
-            {/* <div className="justify-content-center align-items-center"> */}
+            {/* <div className="justify-center items-center"> */}
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                     {/* {fieldMetadata.required && <span className="text-red-500"> *</span>} */}

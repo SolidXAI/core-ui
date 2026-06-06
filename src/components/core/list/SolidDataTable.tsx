@@ -243,7 +243,7 @@ export function SolidDataTable({
           <tbody>
             {pageRows.length === 0 ? (
               <tr>
-                <td className="px-3 py-6 text-center text-muted-foreground" colSpan={Math.max(columns.length, 1)}>
+                <td className="px-4 py-12 text-center text-muted-foreground" colSpan={Math.max(columns.length, 1)}>
                   {emptyMessage || "No records found"}
                 </td>
               </tr>
@@ -306,7 +306,7 @@ export function SolidDataTable({
 
       {typeof onPage === "function" ? (
         <div
-          className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background", paginatorClassName)}
+          className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-4 text-sm rounded-md border border-border/60 px-4 py-1.5 bg-background", paginatorClassName)}
         >
           <div className="solid-paginator-meta flex items-center gap-2 ml-auto">
             <span className="solid-paginator-label">Rows</span>

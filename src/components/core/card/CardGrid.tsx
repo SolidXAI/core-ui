@@ -55,7 +55,7 @@ export const CardGrid = ({
           <div className="solid-kanban-config-placeholder-hint">
             {cardConfigurationIssue.type === "missing_widget"
               ? "Register the widget in the extension registry or update the card metadata to point at a valid component."
-              : "Configure attrs.cardWidget on the card metadata so the grid can render each record."}
+              : "Configure attrs.cardWidget on the card metadata so the flex flex-wrap can render each record."}
           </div>
         </div>
       </div>

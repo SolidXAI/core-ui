@@ -203,7 +203,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
           >
             <SolidDialogHeader className="solid-field-confirm-header">
               <SolidDialogTitle>
-                <span className="flex align-items-center gap-2">
+                <span className="flex items-center gap-2">
                   <AlertTriangle size={18} className="text-yellow-500" />
                   <span>Warning</span>
                 </span>
@@ -232,7 +232,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
           >
             <SolidDialogHeader className="solid-shadcn-dialog-head solid-field-delete-flow-head">
               <SolidDialogTitle>
-                <span className="flex align-items-center gap-2 justify-content-center">
+                <span className="flex items-center gap-2 justify-center">
                   <AlertTriangle size={18} className="text-yellow-500" />
                   <span>Remove Field</span>
                 </span>

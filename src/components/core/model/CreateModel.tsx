@@ -281,16 +281,16 @@ const CreateModel = ({ data, params }: any) => {
   //     life: 3000,
   //     //@ts-ignore
   //     content: (props) => (
-  //       <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
+  //       <div className="flex flex-col items-start" style={{ flex: "1" }}>
   //         {Array.isArray(errorMessage) ? (
   //           errorMessage.map((message, index) => (
-  //             <div className="flex align-items-center gap-2" key={index}>
-  //               <span className="font-bold text-900">{message.trim()}</span>
+  //             <div className="flex items-center gap-2" key={index}>
+  //               <span className="font-bold text-surface-900">{message.trim()}</span>
   //             </div>
   //           ))
   //         ) : (
-  //           <div className="flex align-items-center gap-2">
-  //             <span className="font-bold text-900">{errorMessage?.trim()}</span>
+  //           <div className="flex items-center gap-2">
+  //             <span className="font-bold text-surface-900">{errorMessage?.trim()}</span>
   //           </div>
   //         )}
   //       </div>
@@ -368,18 +368,18 @@ const CreateModel = ({ data, params }: any) => {
     <div className="solid-form-wrapper">
       <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
         <div>
-          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
-            <div className="flex flex-column gap-1">
+          <div className="solid-form-header flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex flex-col gap-1">
               {/* <span className="text-sm text-color-secondary uppercase tracking-wider">Model</span>
             <div className="form-wrapper-title solid-long-text-wrapper m-0">{headerTitle}</div> */}
             </div>
-            <div className="flex align-items-center gap-2">
+            <div className="flex items-center gap-2">
               <SolidButton
                 variant="outline"
                 size="sm"
                 type="button"
                 onClick={handleCancel}
-                className="bg-primary-reverse"
+                className="solid-bg-primary-reverse"
               >
                 Cancel
               </SolidButton>
@@ -392,7 +392,7 @@ const CreateModel = ({ data, params }: any) => {
             </div>
           </div>
           {/* <SolidFormHeader /> */}
-          <div className="px-4 py-3 md:p-4 solid-form-content">
+          <div className="px-6 py-4 md:p-4 solid-form-content">
           <SolidTabGroup
             className="relative"
             panelClassName="px-0"
@@ -452,7 +452,7 @@ const CreateModel = ({ data, params }: any) => {
             Are you sure you want to delete this Model?
           </p>
           <p className="" style={{ color: 'var{--solid-grey-500}' }}>{modelMetaData?.singularName}</p>
-          <div className="flex align-items-center gap-2 mt-3">
+          <div className="flex items-center gap-2 mt-4">
             <SolidButton size="sm" onClick={deleteModelFunction}>
               Delete
             </SolidButton>

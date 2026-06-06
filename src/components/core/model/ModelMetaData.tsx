@@ -396,8 +396,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     <>
       <form onSubmit={formik.handleSubmit}>
         <div className="">
-          <div className="grid formgrid">
-            <div className="field col-12 lg:col-6 lg:pr-3">
+          <div className="flex flex-wrap">
+            <div className="field w-full lg:w-1/2 lg:pr-4">
               <SolidPanel header={"Basic Info"} className="solid-column-panel">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="moduleId" className={styles.fieldLabel}>
@@ -453,7 +453,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 </div>
               </SolidPanel>
 
-              <SolidPanel header={"Configurations"} className="solid-column-panel mt-3 mb-3 lg:mt-5">
+              <SolidPanel header={"Configurations"} className="solid-column-panel mt-4 mb-4 lg:mt-8">
                 <div className="mt-2">
                   <SolidCheckbox
                     name="enableSoftDelete"
@@ -472,7 +472,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {renderFieldError("enableSoftDelete")}
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-4">
                   <SolidCheckbox
                     name="isChild"
                     disabled={params.id !== "new"}
@@ -516,7 +516,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   </div>
                 )}
 
-                <div className="mt-3">
+                <div className="mt-4">
                   <SolidCheckbox
                     name="enableAuditTracking"
                     checked={!!formik.values.enableAuditTracking}
@@ -528,7 +528,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {renderFieldError("enableAuditTracking")}
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-4">
                   <SolidCheckbox
                     name="internationalisation"
                     checked={!!formik.values.internationalisation}
@@ -539,7 +539,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   />
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-4">
                   <SolidCheckbox
                     name="draftPublishWorkflow"
                     checked={!!formik.values.draftPublishWorkflow}
@@ -550,7 +550,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   />
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-4">
                   <SolidCheckbox
                     name="isLegacyTable"
                     checked={!!formik.values.isLegacyTable}
@@ -567,7 +567,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
 
                 {formik.values.isLegacyTable && (
                   <>
-                    <div className="ml-4 mt-2">
+                    <div className="ml-6 mt-2">
                       <SolidCheckbox
                         name="hasExistingId"
                         checked={!!formik.values.hasExistingId}
@@ -584,7 +584,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 )}
               </SolidPanel>
             </div>
-            <div className="field col-12 lg:col-6 lg:pl-3">
+            <div className="field w-full lg:w-1/2 lg:pl-4">
               <SolidPanel header={"Basic Settings"} className="solid-column-panel">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="displayName" className={styles.fieldLabel}>
@@ -674,7 +674,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
               </SolidPanel>
             </div>
 
-            {/* <div className="md:col-6 sm:col-12">
+            {/* <div className="md:w-1/2 sm:w-full">
                   <div className="field">
                     <label htmlFor="pluralName" className="form-label form-field-label">
                       Plural Name
@@ -696,7 +696,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 </div> */}
 
 
-            {/* <div className="md:col-6 sm:col-12">
+            {/* <div className="md:w-1/2 sm:w-full">
                   <div className="field form-dropdown-select">
                     <label htmlFor="dataSourceType" className="form-labe form-field-label">
                       Data Source

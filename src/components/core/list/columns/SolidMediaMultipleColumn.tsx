@@ -55,7 +55,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
                 <img
                     src={src}
                     alt="media"
-                    className="shadow-2 border-round"
+                    className="shadow-lg rounded"
                     width={40}
                     height={40}
                     style={{ objectFit: "cover" }}
@@ -71,7 +71,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
                     src={src}
                     width={40}
                     height={40}
-                    className="shadow-2 border-round"
+                    className="shadow-lg rounded"
                     style={{ objectFit: "cover" }}
                     onError={() => setIsBroken(true)}
                     onClick={handleClick}
@@ -83,7 +83,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
         if (isAudioFile(src)) {
             return (
                 <div
-                    className="shadow-2 border-round flex align-items-center justify-content-center bg-gray-100"
+                    className="shadow-lg rounded flex items-center justify-center bg-gray-100"
                     style={{ width: 40, height: 40 }}
                     onClick={handleClick}
                 >
@@ -179,7 +179,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
 
     return fullrecord.length > 0 ? (
-        <div className='flex gap-2 align-items-end'>
+        <div className='flex gap-2 items-end'>
 
             {/* THUMBNAIL - FIXED BEHAVIOR */}
             <MediaPreview
@@ -247,16 +247,16 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 {fullrecord?.map((file: any) => {
                     const fileId = `${file.name}-${file.size}`;
                     return (
-                        <div key={fileId} className="solid-file-upload-wrapper mb-3">
-                            <div className="flex align-items-center gap-2">
+                        <div key={fileId} className="solid-file-upload-wrapper mb-4">
+                            <div className="flex items-center gap-2">
 
                                 <FileReaderExt fileDetails={file} />
 
-                                <div className="w-full flex flex-column gap-1">
-                                    <div className="flex align-items-center justify-content-between">
+                                <div className="w-full flex flex-col gap-1">
+                                    <div className="flex items-center justify-between">
 
                                         <p
-                                            className="font-normal w-11 text-primary m-0"
+                                            className="font-normal w-[91.666667%] text-primary m-0"
                                             style={{ cursor: "pointer" }}
                                             onClick={() => handleFileView(file)}
                                         >

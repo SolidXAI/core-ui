@@ -68,7 +68,7 @@ export class SolidDateField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -120,7 +120,7 @@ export class SolidDateField implements ISolidField {
 export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
