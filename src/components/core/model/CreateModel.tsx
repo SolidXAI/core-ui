@@ -261,157 +261,99 @@ const CreateModel = ({ data, params }: any) => {
     data?.isSystem ||
     explorerModuleName.toLowerCase() === "solid-core"
   );
-  const shouldShowTabSave = !isCreateMode && activeTab !== "explorer" && isDirty;
-  const handleCancel = () => router.back();
+  const shouldShowTabSave = activeTab !== "explorer" && isDirty;
+
+  const modelTabContent = (
+    <div className="solid-model-form-content is-tabbed">
+      {shouldShowTabSave && activeTab === "model" && (
+        <div className="solid-model-form-actions">
+          <SolidButton size="sm" type="button" onClick={handleSubmit}>
+            Save
+          </SolidButton>
+        </div>
+      )}
+      <ModelMetaData
+        modelMetaData={modelMetaData}
+        setModelMetaData={setModelMetaData}
+        allModelsNames={allModelsNames}
+        deleteModelFunction={deleteModelFunction}
+        nextTab={nextTab}
+        formikModelMetadataRef={formikModelMetadataRef}
+        params={params}
+        formErrors={formErrors}
+        setIsDirty={setIsDirty}
+      />
+    </div>
+  );
+
+  const fieldsTabContent = (
+    <div className="solid-model-form-content is-tabbed">
+      {shouldShowTabSave && activeTab === "fields" && (
+        <div className="solid-model-form-actions">
+          <SolidButton size="sm" type="button" onClick={handleSubmit}>
+            Save
+          </SolidButton>
+        </div>
+      )}
+      <FieldMetaData
+        modelMetaData={modelMetaData}
+        fieldMetaData={fieldMetaData}
+        setFieldMetaData={setFieldMetaData}
+        deleteModelFunction={deleteModelFunction}
+        nextTab={nextTab}
+        formikFieldsMetadataRef={formikFieldsMetadataRef}
+        params={params}
+        setIsDirty={setIsDirty}
+      />
+    </div>
+  );
 
 
   return (
     <div className="solid-form-wrapper">
       <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
-        {isCreateMode ? (
-          <div>
-            <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
-              <div className="flex flex-column gap-1" />
-              <div className="flex align-items-center gap-2">
-                <SolidButton
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  onClick={handleCancel}
-                  className="bg-primary-reverse"
-                >
-                  Cancel
-                </SolidButton>
-                {isDirty && (
-                  <SolidButton size="sm" type="button" onClick={handleSubmit}>
-                    Save
-                  </SolidButton>
-                )}
-              </div>
-            </div>
-            <div className="solid-model-form-content solid-form-content">
-              <SolidTabGroup
-                className="relative"
-                panelClassName="px-0"
-                tabs={[
-                  {
-                    value: "model",
-                    label: <span className={tabErrors.model ? "tab-error-heading" : ""}>Model</span>,
-                    content: (
-                      <ModelMetaData
-                        modelMetaData={modelMetaData}
-                        setModelMetaData={setModelMetaData}
-                        allModelsNames={allModelsNames}
-                        deleteModelFunction={deleteModelFunction}
-                        nextTab={nextTab}
-                        formikModelMetadataRef={formikModelMetadataRef}
-                        params={params}
-                        formErrors={formErrors}
-                        setIsDirty={setIsDirty}
-                      />
-                    ),
-                  },
-                  {
-                    value: "fields",
-                    label: <span className={tabErrors.fields ? "tab-error-heading" : ""}>Fields</span>,
-                    content: (
-                      <FieldMetaData
-                        modelMetaData={modelMetaData}
-                        fieldMetaData={fieldMetaData}
-                        setFieldMetaData={setFieldMetaData}
-                        deleteModelFunction={deleteModelFunction}
-                        nextTab={nextTab}
-                        formikFieldsMetadataRef={formikFieldsMetadataRef}
-                        params={params}
-                        setIsDirty={setIsDirty}
-                      />
-                    ),
-                  },
-                ]}
-                value={activeTab}
-                onValueChange={(value) => {
-                  const next = availableTabs.find((tab) => tab === value);
-                  if (next) {
-                    handleTabChange(next);
-                  }
-                }}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="solid-model-form-workspace">
-            {shouldShowTabSave && (
-              <div className="solid-model-form-actions">
-                <SolidButton size="sm" type="button" onClick={handleSubmit}>
-                  Save
-                </SolidButton>
-              </div>
-            )}
-            <SolidTabGroup
-              className="solid-model-form-tabs"
-              listClassName="solid-model-form-tablist"
-              panelClassName="solid-model-form-tabpanel"
-              tabs={[
-                {
-                  value: "model",
-                  label: <span className={`solid-model-form-tab-label ${tabErrors.model ? "tab-error-heading" : ""}`}>Model</span>,
-                  content: (
-                    <div className="solid-model-form-content is-tabbed">
-                      <ModelMetaData
-                        modelMetaData={modelMetaData}
-                        setModelMetaData={setModelMetaData}
-                        allModelsNames={allModelsNames}
-                        deleteModelFunction={deleteModelFunction}
-                        nextTab={nextTab}
-                        formikModelMetadataRef={formikModelMetadataRef}
-                        params={params}
-                        formErrors={formErrors}
-                        setIsDirty={setIsDirty}
-                      />
-                    </div>
-                  ),
-                },
-                {
-                  value: "fields",
-                  label: <span className={`solid-model-form-tab-label ${tabErrors.fields ? "tab-error-heading" : ""}`}>Fields</span>,
-                  content: (
-                    <div className="solid-model-form-content is-tabbed">
-                      <FieldMetaData
-                        modelMetaData={modelMetaData}
-                        fieldMetaData={fieldMetaData}
-                        setFieldMetaData={setFieldMetaData}
-                        deleteModelFunction={deleteModelFunction}
-                        nextTab={nextTab}
-                        formikFieldsMetadataRef={formikFieldsMetadataRef}
-                        params={params}
-                        setIsDirty={setIsDirty}
-                      />
-                    </div>
-                  ),
-                },
-                {
-                  value: "explorer",
-                  label: <span className="solid-model-form-tab-label">Explorer</span>,
-                  content: (
-                    <ModuleMetadataExplorer
-                      moduleName={explorerModuleName}
-                      modelSingularName={explorerModelSingularName}
-                      readOnly={isReadOnlyModelExplorer}
-                      allowSeed={false}
-                    />
-                  ),
-                },
-              ]}
-              value={activeTab}
-              onValueChange={(value) => {
-                const next = availableTabs.find((tab) => tab === value);
-                if (next) {
-                  handleTabChange(next);
-                }
-              }}
-            />
-          </div>
-        )}
+        <div className="solid-model-form-workspace">
+          <SolidTabGroup
+            className="solid-model-form-tabs"
+            listClassName="solid-model-form-tablist"
+            panelClassName="solid-model-form-tabpanel"
+            tabs={[
+              {
+                value: "model",
+                label: <span className={`solid-model-form-tab-label ${tabErrors.model ? "tab-error-heading" : ""}`}>Model</span>,
+                content: modelTabContent,
+              },
+              {
+                value: "fields",
+                label: <span className={`solid-model-form-tab-label ${tabErrors.fields ? "tab-error-heading" : ""}`}>Fields</span>,
+                content: fieldsTabContent,
+              },
+              ...(!isCreateMode
+                ? [
+                    {
+                      value: "explorer",
+                      label: <span className="solid-model-form-tab-label">Explorer</span>,
+                      content: (
+                        <ModuleMetadataExplorer
+                          moduleName={explorerModuleName}
+                          modelSingularName={explorerModelSingularName}
+                          readOnly={isReadOnlyModelExplorer}
+                          allowSeed={false}
+                        />
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+            value={activeTab}
+            onValueChange={(value) => {
+              const next = availableTabs.find((tab) => tab === value);
+              if (next) {
+                handleTabChange(next);
+              }
+            }}
+          />
+        </div>
         <SolidFormFooter params={params}></SolidFormFooter>
       </div>
     </div>

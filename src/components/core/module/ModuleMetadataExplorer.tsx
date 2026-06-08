@@ -507,6 +507,7 @@ export function ModuleMetadataExplorer({
   const editorSerialized = serializeJson(editorValue);
   const isDirty = editorError ? true : savedSerialized !== editorSerialized;
   const hasMutableChanges = !isReadOnlyExplorer && isDirty;
+  const canSave = !isReadOnlyExplorer && isDirty && !editorError;
   const hasValidationFailure = Boolean(editorError) || activeValidationIssues.length > 0;
   const validationSummary = editorError
     ? editorError
@@ -633,8 +634,13 @@ export function ModuleMetadataExplorer({
     if (!moduleName || !activePath || !activeSection) return;
 
     if (editorError) {
-      setValidationIssues([{ path: activePath, message: editorError, severity: "error" }]);
       setLocalActionSummary("Validation blocked because the JSON is currently invalid.");
+      dispatch(showToast({
+        severity: "error",
+        summary: "Metadata Explorer",
+        detail: "Fix the invalid JSON before validating.",
+        life: 3500,
+      }));
       return;
     }
 
@@ -662,7 +668,6 @@ export function ModuleMetadataExplorer({
     if (!moduleName || !activePath || !activeSection) return;
 
     if (editorError) {
-      setValidationIssues([{ path: activePath, message: editorError, severity: "error" }]);
       dispatch(showToast({
         severity: "error",
         summary: "Metadata Explorer",
@@ -813,7 +818,7 @@ export function ModuleMetadataExplorer({
                     leftIcon={<Save size={14} />}
                     onClick={handleSave}
                     loading={isSavingSection}
-                    disabled={!isDirty && !editorError}
+                    disabled={!canSave}
                   >
                     Save Section
                   </SolidButton>

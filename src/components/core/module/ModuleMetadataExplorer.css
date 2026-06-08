@@ -481,6 +481,28 @@
   opacity: 0.6;
 }
 
+.solid-module-explorer-jsoneditor .ace_tooltip {
+  max-width: 13rem;
+  width: max-content;
+  min-width: 0;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.65rem;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--surface-card, #ffffff) 96%, #111827 4%);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+  color: var(--foreground);
+  font-size: 0.76rem;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: hidden;
+}
+
+.solid-module-explorer-jsoneditor .ace_tooltip.ace_dark {
+  background: color-mix(in srgb, #111827 92%, var(--primary-color, #4f46e5) 8%);
+  border-color: color-mix(in srgb, var(--primary-color, #4f46e5) 26%, transparent);
+  color: #f8fafc;
+}
+
 .solid-module-explorer-jsoneditor .jsoneditor-navigation-bar {
   border-bottom: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
 }
