@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { File, Volume2 } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
+import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
 
 const getCleanUrl = (url: string) => url.split("?")[0];
 
@@ -95,7 +96,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
             onClick={handleClick}
         >
-            <File size={24} className="text-gray-400" />
+            <SolidFileTypeIcon fileUrl={src} size={24} />
         </div>
     );
 };
