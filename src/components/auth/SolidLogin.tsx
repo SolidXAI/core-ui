@@ -358,7 +358,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         solidSettingsData?.data?.iamGoogleOAuthEnabled ||
         solidSettingsData?.data?.iamFacebookOAuthEnabled ||
         solidSettingsData?.data?.iamAppleOAuthEnabled ||
-        solidSettingsData?.data?.iamMicrosoftOAuthEnabled
+        solidSettingsData?.data?.iamMicrosoftOAuthEnabled ||
+        solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled
     );
 
     return (
@@ -380,6 +381,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             facebookEnabled={solidSettingsData?.data?.iamFacebookOAuthEnabled}
                             appleEnabled={solidSettingsData?.data?.iamAppleOAuthEnabled}
                             microsoftEnabled={solidSettingsData?.data?.iamMicrosoftOAuthEnabled}
+                            microsoftActiveDirectoryEnabled={solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled}
                         />
                     </>
                 )}
