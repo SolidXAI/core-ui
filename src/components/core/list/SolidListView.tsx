@@ -21,6 +21,7 @@ import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
@@ -251,6 +252,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
 
+  const visibleHeaderButtons = useMemo(
+    () =>
+      (solidListViewLayout?.attrs?.headerButtons ?? []).filter(
+        (button: any) => isButtonVisibleInCurrentEnv(button?.attrs),
+      ),
+    [solidListViewLayout?.attrs?.headerButtons],
+  );
+
   const editBaseUrl = useMemo(
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
@@ -284,7 +293,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     };
     fetchPermissions();
   }, [params.modelName]);
-
 
   const isFilterApplied = filters ? true : false;
 
@@ -1366,7 +1374,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   )}
 
                   <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
-                    {solidListViewLayout?.attrs?.headerButtons
+                    {visibleHeaderButtons
                       ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                       ?.map((button: any, index: number) => (
                         <SolidListViewHeaderButton

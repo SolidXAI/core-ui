@@ -165,6 +165,10 @@ export const modulesApi = createApi({
             query: ({ transactionKey }) => `/module-packages/import/${transactionKey}/status`,
             transformResponse: (response: any) => response?.data ?? response,
         }),
+        getLatestResumableModulePackageImport: builder.query({
+            query: () => `/module-packages/import/resumable/latest`,
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
         runModulePackageBuild: builder.mutation({
             query: ({ transactionKey, ...body }) => ({
                 url: `/module-packages/import/${transactionKey}/build`,
@@ -178,6 +182,13 @@ export const modulesApi = createApi({
                 url: `/module-packages/import/${transactionKey}/seed`,
                 method: 'POST',
                 body,
+            }),
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
+        dismissModulePackageImport: builder.mutation({
+            query: ({ transactionKey }) => ({
+                url: `/module-packages/import/${transactionKey}/dismiss`,
+                method: 'POST',
             }),
             transformResponse: (response: any) => response?.data ?? response,
         }),
@@ -225,7 +236,9 @@ export const {
     useValidateModulePackageImportMutation,
     useConfirmModulePackageImportMutation,
     useLazyGetModulePackageImportStatusQuery,
+    useLazyGetLatestResumableModulePackageImportQuery,
     useRunModulePackageBuildMutation,
     useRunModulePackageSeedMutation,
+    useDismissModulePackageImportMutation,
     useExportModulePackageMutation,
 } = modulesApi

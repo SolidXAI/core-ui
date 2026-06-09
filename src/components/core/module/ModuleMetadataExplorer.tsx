@@ -310,24 +310,33 @@ const JsonEditorSurface = React.forwardRef<JsonEditorHandle, {
   useEffect(() => {
     if (!containerRef.current || editorRef.current) return;
 
-    const JSONEditor = require("jsoneditor");
-    editorRef.current = new JSONEditor(containerRef.current, {
-      mode: "code",
-      modes: ["code"],
-      mainMenuBar: true,
-      navigationBar: true,
-      statusBar: true,
-      search: true,
-      enableSort: false,
-      enableTransform: false,
-      onChange: () => emitState(),
+    let destroyed = false;
+
+    void import("jsoneditor").then((jsonEditorModule: any) => {
+      if (destroyed || !containerRef.current || editorRef.current) {
+        return;
+      }
+
+      const JSONEditor = jsonEditorModule?.default ?? jsonEditorModule;
+      editorRef.current = new JSONEditor(containerRef.current, {
+        mode: "code",
+        modes: ["code"],
+        mainMenuBar: true,
+        navigationBar: true,
+        statusBar: true,
+        search: true,
+        enableSort: false,
+        enableTransform: false,
+        onChange: () => emitState(),
+      });
+
+      if (editorRef.current?.aceEditor?.setReadOnly) {
+        editorRef.current.aceEditor.setReadOnly(readOnly);
+      }
     });
 
-    if (editorRef.current?.aceEditor?.setReadOnly) {
-      editorRef.current.aceEditor.setReadOnly(readOnly);
-    }
-
     return () => {
+      destroyed = true;
       editorRef.current?.destroy?.();
       editorRef.current = null;
     };

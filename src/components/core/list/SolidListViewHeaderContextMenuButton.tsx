@@ -1,4 +1,5 @@
 import { hasAnyRole } from "../../../helpers/rolesHelper";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useSession } from "../../../hooks/useSession";
 import { SolidDropdownMenuItem } from "../../shad-cn-ui";
@@ -21,6 +22,7 @@ export const SolidListViewHeaderContextMenuButton = ({ button, params, solidList
         : null;
 
     if (!hasRole) return null;
+    if (!isButtonVisibleInCurrentEnv(button?.attrs)) return null;
     if (!presentation.showIcon && !presentation.showLabel) return null;
 
     return (

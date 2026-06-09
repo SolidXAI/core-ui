@@ -8,6 +8,8 @@ type ModuleImportListHeaderActionProps = {
     moduleName?: string;
     modelName?: string;
   };
+  resumeTransactionKey?: string | null;
+  autoResume?: boolean;
 };
 
 function refreshMatchingListViews(moduleName = "solid-core", modelName = "moduleMetadata") {
@@ -20,11 +22,13 @@ function refreshMatchingListViews(moduleName = "solid-core", modelName = "module
     });
 }
 
-export function ModuleImportListHeaderAction({ params }: ModuleImportListHeaderActionProps) {
+export function ModuleImportListHeaderAction({ params, resumeTransactionKey, autoResume }: ModuleImportListHeaderActionProps) {
   const dispatch = useDispatch();
 
   return (
     <ModulePackageImportContent
+      initialTransactionKey={resumeTransactionKey}
+      autoResume={autoResume}
       onClose={() => dispatch(closePopup())}
       onImported={() => refreshMatchingListViews(params?.moduleName, params?.modelName)}
     />

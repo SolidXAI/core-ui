@@ -1,9 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { FileArchive, FolderTree, Sparkles, UploadCloud, X } from "lucide-react";
 import { env } from "../../../adapters/env";
 import {
   useConfirmModulePackageImportMutation,
+  useDismissModulePackageImportMutation,
+  useLazyGetModulePackageImportStatusQuery,
   useRunModulePackageBuildMutation,
   useRunModulePackageSeedMutation,
   useValidateModulePackageImportMutation,
@@ -35,6 +37,8 @@ type ModulePackageDialogProps = {
 type ModulePackageImportContentProps = {
   onClose: () => void;
   onImported?: () => void;
+  initialTransactionKey?: string | null;
+  autoResume?: boolean;
 };
 
 type StepState = {
@@ -94,6 +98,102 @@ function formatBytes(bytes: number) {
   return `${value.toFixed(exponent === 0 ? 0 : 2)} ${units[exponent]}`;
 }
 
+function isResumableModulePackageStatus(status?: string | null) {
+  return [
+    "import_running",
+    "awaiting_restart",
+    "build_running",
+    "build_failed",
+    "build_succeeded",
+    "seed_running",
+    "seed_failed",
+  ].includes(String(status ?? ""));
+}
+
+function shouldStartFromBuild(status?: string | null) {
+  return status === "build_running";
+}
+
+function shouldStartFromSeed(status?: string | null) {
+  return ["build_succeeded", "build_failed", "seed_running"].includes(String(status ?? ""));
+}
+
+function getBuildStepStatusFromTransaction(transaction: any): StepState["status"] {
+  if (transaction?.status === "build_running") return "running";
+  if (transaction?.outputs?.build) {
+    return String(transaction.outputs.build).includes("[failed]") ? "warning" : "success";
+  }
+  return "pending";
+}
+
+function hydrateStepsFromTransaction(transaction: any): StepMap {
+  const nextSteps = createInitialSteps();
+  const status = transaction?.status;
+
+  if (transaction?.outputs?.import || ["awaiting_restart", "build_running", "build_failed", "build_succeeded", "seed_running", "seed_failed", "completed"].includes(String(status ?? ""))) {
+    nextSteps.upload = {
+      ...nextSteps.upload,
+      status: "success",
+      description: "Archive extracted and files were placed in the target module folders.",
+      output: transaction?.outputs?.import ?? undefined,
+    };
+  }
+
+  if (["build_running", "build_failed", "build_succeeded", "seed_running", "seed_failed", "completed"].includes(String(status ?? ""))) {
+    nextSteps.restart = {
+      ...nextSteps.restart,
+      status: "success",
+      description: "The backend is available again and the workflow moved beyond restart verification.",
+    };
+  } else if (status === "awaiting_restart") {
+    nextSteps.restart = {
+      ...nextSteps.restart,
+      status: "pending",
+      description: "Waiting to verify that the backend is up again.",
+    };
+  }
+
+  const buildStatus = getBuildStepStatusFromTransaction(transaction);
+  if (buildStatus !== "pending") {
+    nextSteps.build = {
+      ...nextSteps.build,
+      status: buildStatus,
+      description:
+        buildStatus === "running"
+          ? "Build was in progress and will be resumed."
+          : buildStatus === "warning"
+            ? transaction?.errorMessage || "The build step completed with warnings."
+            : "Both build targets completed successfully.",
+      output: transaction?.outputs?.build ?? undefined,
+    };
+  }
+
+  if (status === "seed_running") {
+    nextSteps.seed = {
+      ...nextSteps.seed,
+      status: "running",
+      description: "Seed was in progress and will be resumed.",
+      output: transaction?.outputs?.seed ?? undefined,
+    };
+  } else if (status === "seed_failed") {
+    nextSteps.seed = {
+      ...nextSteps.seed,
+      status: "warning",
+      description: transaction?.errorMessage || "The seed step finished with warnings.",
+      output: transaction?.outputs?.seed ?? undefined,
+    };
+  } else if (status === "completed") {
+    nextSteps.seed = {
+      ...nextSteps.seed,
+      status: "success",
+      description: "Module metadata seeding completed successfully.",
+      output: transaction?.outputs?.seed ?? undefined,
+    };
+  }
+
+  return nextSteps;
+}
+
 async function pingBackendWithRetry(retries = 40, delay = 1500) {
   for (let index = 0; index < retries; index += 1) {
     try {
@@ -145,7 +245,7 @@ export function ModulePackageDialog({ open, onOpenChange, onImported }: ModulePa
   );
 }
 
-export function ModulePackageImportContent({ onClose, onImported }: ModulePackageImportContentProps) {
+export function ModulePackageImportContent({ onClose, onImported, initialTransactionKey = null, autoResume = false }: ModulePackageImportContentProps) {
   const dispatch = useDispatch();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewResponse, setPreviewResponse] = useState<any | null>(null);
@@ -158,8 +258,11 @@ export function ModulePackageImportContent({ onClose, onImported }: ModulePackag
 
   const [validateModulePackageImport] = useValidateModulePackageImportMutation();
   const [confirmModulePackageImport] = useConfirmModulePackageImportMutation();
+  const [dismissModulePackageImport] = useDismissModulePackageImportMutation();
+  const [fetchModulePackageImportStatus] = useLazyGetModulePackageImportStatusQuery();
   const [runModulePackageBuild] = useRunModulePackageBuildMutation();
   const [runModulePackageSeed] = useRunModulePackageSeedMutation();
+  const hasResumedTransactionRef = useRef(false);
 
   const updateStep = useCallback((key: keyof StepMap, nextState: Partial<StepState>) => {
     setSteps((current) => ({
@@ -225,73 +328,96 @@ export function ModulePackageImportContent({ onClose, onImported }: ModulePackag
     }
   };
 
-  const runRestartBuildAndSeedFlow = useCallback(async () => {
-    if (!transactionKey) return;
+  const executeBuildStep = useCallback(async (activeTransactionKey: string) => {
+    updateStep("build", {
+      status: "running",
+      description: "Building solid-api and solid-ui now.",
+    });
 
-    let activeStep: keyof StepMap = "restart";
+    const buildResponse = await runModulePackageBuild({
+      transactionKey: activeTransactionKey,
+      buildSolidApi: true,
+      buildSolidUi: true,
+    }).unwrap();
+
+    const buildFailed = buildResponse?.status === "build_failed";
+    updateStep("build", {
+      status: buildFailed ? "warning" : "success",
+      description: buildFailed
+        ? buildResponse?.errorMessage || "The module was imported, but one or more build targets failed."
+        : "Both build targets completed successfully.",
+      output: buildResponse?.outputs?.build,
+    });
+
+    return buildResponse;
+  }, [runModulePackageBuild, updateStep]);
+
+  const executeSeedStep = useCallback(async (activeTransactionKey: string) => {
+    updateStep("seed", {
+      status: "running",
+      description: "Seeding module metadata from the imported archive.",
+    });
+
+    const seedResponse = await runModulePackageSeed({
+      transactionKey: activeTransactionKey,
+      seedGlobalMetadata: false,
+    }).unwrap();
+
+    const seedFailed = seedResponse?.status === "seed_failed";
+    updateStep("seed", {
+      status: seedFailed ? "warning" : "success",
+      description: seedFailed
+        ? seedResponse?.errorMessage || "The seed step finished with warnings."
+        : "Module metadata seeding completed successfully.",
+      output: seedResponse?.outputs?.seed,
+    });
+
+    return seedResponse;
+  }, [runModulePackageSeed, updateStep]);
+
+  const runContinuationFlow = useCallback(async (startAt: "restart" | "build" | "seed", activeTransactionKey?: string | null, transactionSnapshot?: any) => {
+    const effectiveTransactionKey = activeTransactionKey ?? transactionKey;
+    if (!effectiveTransactionKey) return;
+
+    let activeStep: keyof StepMap = startAt === "restart" ? "restart" : startAt;
 
     try {
-      updateStep("restart", {
-        status: "running",
-        description: "Polling /api/ping until the backend is back online.",
-      });
+      setIsProcessing(true);
+      setFinalSummary(null);
 
-      const backendAlive = await pingBackendWithRetry();
-      if (!backendAlive) {
+      if (startAt === "restart" || startAt === "build" || startAt === "seed") {
         updateStep("restart", {
-          status: "error",
-          description: "The backend did not come back within the retry window.",
+          status: "running",
+          description: "Polling /api/ping until the backend is back online.",
         });
-        setFinalSummary("Module files were imported, but the backend restart check timed out.");
-        setIsProcessing(false);
-        return;
+
+        const backendAlive = await pingBackendWithRetry();
+        if (!backendAlive) {
+          updateStep("restart", {
+            status: "error",
+            description: "The backend did not come back within the retry window.",
+          });
+          setFinalSummary("Module files were imported, but the backend restart check timed out.");
+          setIsProcessing(false);
+          return;
+        }
+
+        updateStep("restart", {
+          status: "success",
+          description: "The backend responded to ping and is ready for the next steps.",
+        });
       }
 
-      updateStep("restart", {
-        status: "success",
-        description: "The backend responded to ping and is ready for the next steps.",
-      });
-
-      activeStep = "build";
-      updateStep("build", {
-        status: "running",
-        description: "Building solid-api and solid-ui now.",
-      });
-
-      const buildResponse = await runModulePackageBuild({
-        transactionKey,
-        buildSolidApi: true,
-        buildSolidUi: true,
-      }).unwrap();
-
-      const buildFailed = buildResponse?.status === "build_failed";
-      updateStep("build", {
-        status: buildFailed ? "warning" : "success",
-        description: buildFailed
-          ? buildResponse?.errorMessage || "The module was imported, but one or more build targets failed."
-          : "Both build targets completed successfully.",
-        output: buildResponse?.outputs?.build,
-      });
+      let buildResponse: any = transactionSnapshot ?? previewResponse;
+      if (startAt === "restart" || startAt === "build") {
+        activeStep = "build";
+        buildResponse = await executeBuildStep(effectiveTransactionKey);
+      }
 
       activeStep = "seed";
-      updateStep("seed", {
-        status: "running",
-        description: "Seeding module metadata from the imported archive.",
-      });
-
-      const seedResponse = await runModulePackageSeed({
-        transactionKey,
-        seedGlobalMetadata: false,
-      }).unwrap();
-
+      const seedResponse = await executeSeedStep(effectiveTransactionKey);
+      const buildFailed = buildResponse?.status === "build_failed" || String(buildResponse?.outputs?.build ?? "").includes("[failed]");
       const seedFailed = seedResponse?.status === "seed_failed";
-      updateStep("seed", {
-        status: seedFailed ? "warning" : "success",
-        description: seedFailed
-          ? seedResponse?.errorMessage || "The seed step finished with warnings."
-          : "Module metadata seeding completed successfully.",
-        output: seedResponse?.outputs?.seed,
-      });
 
       setIsProcessing(false);
 
@@ -318,7 +444,54 @@ export function ModulePackageImportContent({ onClose, onImported }: ModulePackag
       setFinalSummary("The module import finished partially and needs manual follow-up.");
       setIsProcessing(false);
     }
-  }, [onImported, runModulePackageBuild, runModulePackageSeed, transactionKey, updateStep]);
+  }, [executeBuildStep, executeSeedStep, onImported, previewResponse, transactionKey, updateStep]);
+
+  useEffect(() => {
+    if (!initialTransactionKey || hasResumedTransactionRef.current) {
+      return;
+    }
+
+    hasResumedTransactionRef.current = true;
+
+    const loadTransaction = async () => {
+      try {
+        const transaction = await fetchModulePackageImportStatus({ transactionKey: initialTransactionKey }).unwrap();
+        setPreviewResponse(transaction);
+        setTransactionKey(transaction?.transactionKey ?? null);
+        setSteps(hydrateStepsFromTransaction(transaction));
+
+        if (transaction?.status === "completed") {
+          setFinalSummary("Module import completed successfully.");
+          return;
+        }
+
+        if (transaction?.status === "seed_failed") {
+          setFinalSummary("Module imported, but the seed step needs attention.");
+          return;
+        }
+
+        if (!autoResume || !isResumableModulePackageStatus(transaction?.status)) {
+          return;
+        }
+
+        if (shouldStartFromBuild(transaction?.status)) {
+          await runContinuationFlow("build", transaction?.transactionKey, transaction);
+          return;
+        }
+
+        if (shouldStartFromSeed(transaction?.status)) {
+          await runContinuationFlow("seed", transaction?.transactionKey, transaction);
+          return;
+        }
+
+        await runContinuationFlow("restart", transaction?.transactionKey, transaction);
+      } catch (error: any) {
+        dispatch(showToast({ severity: "error", summary: "Unable to resume import", detail: getErrorMessage(error) }));
+      }
+    };
+
+    void loadTransaction();
+  }, [autoResume, dispatch, fetchModulePackageImportStatus, initialTransactionKey, runContinuationFlow]);
 
   const handleStartImport = async () => {
     if (!transactionKey) {
@@ -345,7 +518,7 @@ export function ModulePackageImportContent({ onClose, onImported }: ModulePackag
         output: response?.outputs?.import,
       });
 
-      await runRestartBuildAndSeedFlow();
+      await runContinuationFlow("restart", transactionKey);
     } catch (error: any) {
       updateStep("upload", {
         status: "error",
@@ -358,6 +531,9 @@ export function ModulePackageImportContent({ onClose, onImported }: ModulePackag
 
   const handleClose = () => {
     if (isProcessing) return;
+    if (finalSummary && transactionKey) {
+      void dismissModulePackageImport({ transactionKey });
+    }
     onClose();
   };
 
@@ -585,7 +761,7 @@ export function ModulePackageImportContent({ onClose, onImported }: ModulePackag
           <SolidButton type="button" size="small" onClick={() => {
             setFinalSummary(null);
             setIsProcessing(true);
-            runRestartBuildAndSeedFlow().catch((error) => {
+            runContinuationFlow("restart").catch((error: any) => {
               setIsProcessing(false);
               dispatch(showToast({ severity: "error", summary: "Restart check failed", detail: getErrorMessage(error) }));
             });
