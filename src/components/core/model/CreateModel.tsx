@@ -254,6 +254,7 @@ const CreateModel = ({ data, params }: any) => {
   }, [isCreateModelError, isUpdateModelError])
 
   const [isDirty, setIsDirty] = useState(false);
+  const [fieldDeleted, setFieldDeleted] = useState(false);
   const explorerModuleName = data?.module?.name ?? modelMetaData?.module?.name ?? "";
   const explorerModelSingularName = data?.singularName ?? modelMetaData?.singularName ?? "";
   const isReadOnlyModelExplorer = Boolean(
@@ -261,17 +262,10 @@ const CreateModel = ({ data, params }: any) => {
     data?.isSystem ||
     explorerModuleName.toLowerCase() === "solid-core"
   );
-  const shouldShowTabSave = activeTab !== "explorer" && isDirty;
+  const shouldShowTabSave = !isCreateMode ? activeTab === "fields" && fieldDeleted : activeTab !== "explorer" && isDirty;
 
   const modelTabContent = (
     <div className="solid-model-form-content is-tabbed">
-      {shouldShowTabSave && activeTab === "model" && (
-        <div className="solid-model-form-actions">
-          <SolidButton size="sm" type="button" onClick={handleSubmit}>
-            Save
-          </SolidButton>
-        </div>
-      )}
       <ModelMetaData
         modelMetaData={modelMetaData}
         setModelMetaData={setModelMetaData}
@@ -288,13 +282,6 @@ const CreateModel = ({ data, params }: any) => {
 
   const fieldsTabContent = (
     <div className="solid-model-form-content is-tabbed">
-      {shouldShowTabSave && activeTab === "fields" && (
-        <div className="solid-model-form-actions">
-          <SolidButton size="sm" type="button" onClick={handleSubmit}>
-            Save
-          </SolidButton>
-        </div>
-      )}
       <FieldMetaData
         modelMetaData={modelMetaData}
         fieldMetaData={fieldMetaData}
@@ -304,6 +291,7 @@ const CreateModel = ({ data, params }: any) => {
         formikFieldsMetadataRef={formikFieldsMetadataRef}
         params={params}
         setIsDirty={setIsDirty}
+        setFieldDeleted={setFieldDeleted}
       />
     </div>
   );
@@ -354,6 +342,13 @@ const CreateModel = ({ data, params }: any) => {
             }}
           />
         </div>
+        {shouldShowTabSave && (
+          <div className="solid-model-form-actions">
+            <SolidButton type="button" onClick={handleSubmit}>
+              Save
+            </SolidButton>
+          </div>
+        )}
         <SolidFormFooter params={params}></SolidFormFooter>
       </div>
     </div>
