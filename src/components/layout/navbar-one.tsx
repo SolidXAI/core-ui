@@ -68,7 +68,7 @@ const NavbarOne = () => {
 
 
     return (
-        <div className="flex flex-column md:flex-row justify-content-between navBar">
+        <div className="flex flex-col md:flex-row justify-between navBar">
 
             {/* commented this as this is not working properly @Jenendar to figure this out... */}
             {currentMainMenu && (
@@ -117,7 +117,7 @@ const NavbarOne = () => {
             </div>
             {currentMenu && (
                 <div className={visibleNavbar ? "show navBarTwo" : "hide navBarTwo"}>
-                    <div className="flex relative justify-content-between align-items-center pt-4 px-3 pb-3 mb-3">
+                    <div className="flex relative justify-between items-center pt-6 px-4 pb-4 mb-4">
                         <div className="absolute bottom-0" style={{ width: 50, height: 0.8, background: '#d8e2ea' }}></div>
                         {!isSearchShow && <div className="text-base font-semibold">{currentMainMenu && currentMainMenu}</div>}
                         {isSearchShow === false && (
@@ -137,7 +137,7 @@ const NavbarOne = () => {
                                     <input
                                         type="text"
                                         placeholder="Search"
-                                        className="small-input text-sm w-full pr-6"
+                                        className="small-input text-sm w-full pr-12"
                                         value={searchTerm}
                                         onChange={(event) => setSearchTerm(event.target.value)}
                                     />
@@ -152,7 +152,7 @@ const NavbarOne = () => {
                             </div>
                         )}
                         {/* <div className="input-icon inputDiv navtwo-searchbox">
-                            <i className="pi pi-search " style={{ color: '#8D9199' }}></i>
+                            <i className="pi pi-search" style={{ color: '#8D9199' }}></i>
                             <input
                                 type="text"
                                 placeholder="Jump to."
@@ -169,7 +169,7 @@ const NavbarOne = () => {
                             />
                         </div> */}
                     </div>
-                    {/* <div className="flex flex-column md:flex-row  navtwo-header justify-content-between">
+                    {/* <div className="flex flex-col md:flex-row navtwo-header justify-between">
             <div className="text-sm font-semibold">{currentMainMenu && currentMainMenu}</div> */}
                     {/* <a
               className={
@@ -190,7 +190,7 @@ const NavbarOne = () => {
                     {/* <div className="p-inputgroup navtwo-searchbox">
               
               <span className="p-inputgroup-addon">
-                <i className="pi pi-search "></i>
+                <i className="pi pi-search"></i>
               </span>
               <InputText
                 placeholder="Search"
@@ -199,7 +199,7 @@ const NavbarOne = () => {
               <span className="p-inputgroup-addon">⌘+k</span>
             </div> */}
                     {/* <div className="input-icon inputDiv navtwo-searchbox">
-              <i className="pi pi-search " style={{ color: '#8D9199' }}></i>
+              <i className="pi pi-search" style={{ color: '#8D9199' }}></i>
               <input
                 type="text"
                 placeholder="Jump to."

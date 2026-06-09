@@ -137,7 +137,7 @@ Changed from returning `null` to returning `<SolidStudioPanel />`. This is the m
 
 Added the Studio trigger button. Visible only to users with the `admin` role (checked via `hasAnyRole(user?.roles, ["Admin"])`). Dispatches `enterStudioMode()` on click.
 
-**`src/resources/shadcn-base.css`**
+**`src/resources/solid-custom.css`**
 
 Added Studio panel CSS classes. All values use existing CSS custom properties (`--primary`, `--border`, `--background`, etc.) so the panel automatically adapts to light/dark theme.
 

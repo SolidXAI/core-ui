@@ -66,9 +66,9 @@ const FilterMenu = () => {
                     />
                 </SolidPopoverTrigger>
                 <SolidPopoverContent className="filterDropdown" side="bottom" align="start">
-                    <div className="grid m-0">
+                    <div className="flex flex-wrap -mx-2 -mt-2 m-0">
                     {/* Column 1: Filters */}
-                    <div className="col-12 md:col-4 lg:col-4">
+                    <div className="w-full md:w-1/3 px-2 pt-2">
                         <h3><span className=" pi pi-filter"></span> Filters</h3>
                         <ul className="custom-list">
                             {filters.map((item, index) => (
@@ -80,7 +80,7 @@ const FilterMenu = () => {
                     </div>
 
                     {/* Column 2: Group By */}
-                    <div className="col-12 md:col-4 lg:col-4">
+                    <div className="w-full md:w-1/3 px-2 pt-2">
                         <h3><span className=" pi pi-clone"></span> Group by</h3>
                         <ul className="custom-list">
                             {groupBy.map((item, index) => (
@@ -92,7 +92,7 @@ const FilterMenu = () => {
                     </div>
 
                     {/* Column 3: Favourites */}
-                    <div className="col-12 md:col-4 lg:col-4">
+                    <div className="w-full md:w-1/3 px-2 pt-2">
                         <h3> <span className=" pi pi-star"></span> Favourites</h3>
                         <ul className="custom-list">
                             {favourites.map((item, index) => (
