@@ -10,6 +10,12 @@ const toQueryString = (args: Record<string, any>) => {
     return searchParams.toString();
 };
 
+const getDownloadFileName = (contentDisposition?: string | null) => {
+    if (!contentDisposition) return 'module-package.sldx';
+    const match = contentDisposition.match(/filename="?([^"]+)"?/i);
+    return match?.[1] || 'module-package.sldx';
+};
+
 export const modulesApi = createApi({
     reducerPath: 'moduleApi',
     baseQuery: baseQueryWithAuth,
@@ -139,6 +145,54 @@ export const modulesApi = createApi({
             },
             transformResponse: (response: any) => response?.data ?? response,
         }),
+        validateModulePackageImport: builder.mutation({
+            query: (formData) => ({
+                url: '/module-packages/import/validate',
+                method: 'POST',
+                body: formData,
+            }),
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
+        confirmModulePackageImport: builder.mutation({
+            query: ({ transactionKey, ...body }) => ({
+                url: `/module-packages/import/${transactionKey}/confirm`,
+                method: 'POST',
+                body,
+            }),
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
+        getModulePackageImportStatus: builder.query({
+            query: ({ transactionKey }) => `/module-packages/import/${transactionKey}/status`,
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
+        runModulePackageBuild: builder.mutation({
+            query: ({ transactionKey, ...body }) => ({
+                url: `/module-packages/import/${transactionKey}/build`,
+                method: 'POST',
+                body,
+            }),
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
+        runModulePackageSeed: builder.mutation({
+            query: ({ transactionKey, ...body }) => ({
+                url: `/module-packages/import/${transactionKey}/seed`,
+                method: 'POST',
+                body,
+            }),
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
+        exportModulePackage: builder.mutation({
+            query: ({ moduleName }) => ({
+                url: `/module-packages/export/${moduleName}`,
+                method: 'GET',
+                responseHandler: async (response) => response.blob(),
+                cache: 'no-store',
+            }),
+            transformResponse: (response: Blob, meta: any) => ({
+                blob: response,
+                fileName: getDownloadFileName(meta?.response?.headers?.get('Content-Disposition')),
+            }),
+        }),
     })
 })
 
@@ -168,4 +222,10 @@ export const {
     useValidateModuleMetadataExplorerSectionMutation,
     useLazySearchModuleMetadataExplorerQuery,
     useLazyGetModuleMetadataExplorerReferencesQuery,
+    useValidateModulePackageImportMutation,
+    useConfirmModulePackageImportMutation,
+    useLazyGetModulePackageImportStatusQuery,
+    useRunModulePackageBuildMutation,
+    useRunModulePackageSeedMutation,
+    useExportModulePackageMutation,
 } = modulesApi

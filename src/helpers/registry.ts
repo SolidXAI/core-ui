@@ -7,6 +7,7 @@ import { SolidShortTextFieldImageListWidget } from "../components/core/list/widg
 import { SolidShortTextAvatarWidget } from "../components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "../components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "../components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
+import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
 import { DefaultDateFormEditWidget, DefaultDateFormViewWidget, PublishedStatusListViewWidget } from "../components/core/form/fields/SolidDateField";
 import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "../components/core/form/fields/SolidDateTimeField";
@@ -179,6 +180,7 @@ registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, Exten
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", SolidChatterMessageCoModelEntityIdListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 
 // ...
 

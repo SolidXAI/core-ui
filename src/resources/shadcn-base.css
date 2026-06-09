@@ -941,6 +941,8 @@ body {
   font-size: 11.5px;
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .solid-toast-close {
