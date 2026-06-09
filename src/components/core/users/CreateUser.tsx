@@ -210,8 +210,8 @@ const CreateUser = ({ data, params }: any) => {
     <div className="solid-form-wrapper">
       <div className="solid-form-section">
         <form onSubmit={formik.handleSubmit}>
-          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
-            <div className="solid-user-form-titleblock flex align-items-center gap-3">
+          <div className="solid-form-header flex items-center justify-between gap-4 flex-wrap">
+            <div className="solid-user-form-titleblock flex items-center gap-4">
               <BackButton />
               <div>
                 <div className="form-wrapper-title">{isEditMode ? "Update User" : "Create User"}</div>
@@ -222,7 +222,7 @@ const CreateUser = ({ data, params }: any) => {
                 </p>
               </div>
             </div>
-            <div className="gap-3 flex flex-wrap">
+            <div className="flex gap-4 flex-wrap">
               {isEditMode && failedAttempts > 0 ? (
                 <SolidButton size="small" type="button" variant="outline" loading={isUserUpdating} onClick={handleUnblockUser}>
                   Unblock User
@@ -345,8 +345,8 @@ function UserDetailsContent({
     <div className="solid-user-details-layout">
       <div className="solid-user-details-stack">
         <SolidPanel header="Basic Info" className="solid-column-panel">
-          <div className="grid formgrid">
-            <div className="field col-12 md:col-6 flex flex-column gap-2">
+          <div className="flex flex-wrap -mx-2 -mt-2">
+            <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="fullName" className="form-field-label">
                 Full Name
               </label>
@@ -363,7 +363,7 @@ function UserDetailsContent({
               {fieldError("fullName") ? <SolidMessage severity="error" text={fieldError("fullName")} /> : null}
             </div>
 
-            <div className="field col-12 md:col-6 flex flex-column gap-2">
+            <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="username" className="form-field-label">
                 Username
               </label>
@@ -381,7 +381,7 @@ function UserDetailsContent({
               {fieldError("username") ? <SolidMessage severity="error" text={fieldError("username")} /> : null}
             </div>
 
-            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="email" className="form-field-label">
                 Email
               </label>
@@ -399,7 +399,7 @@ function UserDetailsContent({
               {fieldError("email") ? <SolidMessage severity="error" text={fieldError("email")} /> : null}
             </div>
 
-            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="mobile" className="form-field-label">
                 Mobile
               </label>
@@ -418,7 +418,7 @@ function UserDetailsContent({
 
             {!isEditMode ? (
               <>
-                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                   <label htmlFor="password" className="form-field-label">
                     Password
                   </label>
@@ -434,7 +434,7 @@ function UserDetailsContent({
                   {fieldError("password") ? <SolidMessage severity="error" text={fieldError("password")} /> : null}
                 </div>
 
-                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                   <label htmlFor="confirmPassword" className="form-field-label">
                     Confirm Password
                   </label>
@@ -457,9 +457,9 @@ function UserDetailsContent({
         </SolidPanel>
 
         <SolidPanel toggleable header="Access" className="solid-column-panel">
-          <div className="formgrid grid solid-user-access-grid">
+          <div className="flex flex-wrap -mx-2 -mt-2 solid-user-access-grid">
             {isEditMode ? (
-              <div className="field col-12 solid-user-access-row">
+              <div className="field w-full px-2 pt-2 solid-user-access-row">
                 <div className="solid-user-access-copy">
                   <p className="form-field-label m-0">Active User</p>
                   <p className="solid-user-section-helper m-0 mt-1">
@@ -472,7 +472,7 @@ function UserDetailsContent({
                 />
               </div>
             ) : null}
-            <div className="field col-12 solid-user-access-row">
+            <div className="field w-full px-2 pt-2 solid-user-access-row">
               <div className="solid-user-access-copy">
                 <p className="form-field-label m-0">Allow API Key Generation</p>
                 <p className="solid-user-section-helper m-0 mt-1">

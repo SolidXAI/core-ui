@@ -274,26 +274,6 @@ const CreateModel = ({ data, params }: any) => {
   //     errorMessage = ['Something went wrong'];
   //   }
 
-  //   toast?.current?.show({
-  //     severity: 'error',
-  //     summary: 'Error',
-  //     detail: errorMessage,
-  //     life: 3000,
-  //     //@ts-ignore
-  //     content: (props) => (
-  //       <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
-  //         {Array.isArray(errorMessage) ? (
-  //           errorMessage.map((message, index) => (
-  //             <div className="flex align-items-center gap-2" key={index}>
-  //               <span className="font-bold text-900">{message.trim()}</span>
-  //             </div>
-  //           ))
-  //         ) : (
-  //           <div className="flex align-items-center gap-2">
-  //             <span className="font-bold text-900">{errorMessage?.trim()}</span>
-  //           </div>
-  //         )}
-  //       </div>
   //     ),
   //   });
   // };
@@ -368,12 +348,12 @@ const CreateModel = ({ data, params }: any) => {
     <div className="solid-form-wrapper">
       <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
         <div>
-          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
-            <div className="flex flex-column gap-1">
+          <div className="solid-form-header flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex flex-col gap-1">
               {/* <span className="text-sm text-color-secondary uppercase tracking-wider">Model</span>
             <div className="form-wrapper-title solid-long-text-wrapper m-0">{headerTitle}</div> */}
             </div>
-            <div className="flex align-items-center gap-2">
+            <div className="flex items-center gap-2">
               <SolidButton
                 variant="outline"
                 size="sm"
@@ -452,7 +432,7 @@ const CreateModel = ({ data, params }: any) => {
             Are you sure you want to delete this Model?
           </p>
           <p className="" style={{ color: 'var{--solid-grey-500}' }}>{modelMetaData?.singularName}</p>
-          <div className="flex align-items-center gap-2 mt-3">
+          <div className="mt-4 flex items-center gap-2">
             <SolidButton size="sm" onClick={deleteModelFunction}>
               Delete
             </SolidButton>

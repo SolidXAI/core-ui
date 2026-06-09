@@ -141,7 +141,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     // -----------------------------
     return (
         <div
-            className="flex justify-content-end align-items-center gap-2 p-1"
+            className="flex justify-end items-center gap-2 p-1"
         >{meta &&
             <span className="solid-form-footer-pagination-meta">{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
             }

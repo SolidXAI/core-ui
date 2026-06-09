@@ -78,7 +78,7 @@ export class SolidEmailField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;

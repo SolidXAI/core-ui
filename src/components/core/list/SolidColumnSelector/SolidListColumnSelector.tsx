@@ -154,14 +154,14 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
 
     return (
         <>
-            <form onSubmit={formik.handleSubmit} className="flex flex-column gap-1 px-0">
+            <form onSubmit={formik.handleSubmit} className="flex flex-col gap-1 px-0">
                 <DragDropContext onDragEnd={onDragEnd} onDragStart={() => setIsDragging(true)}>
                     <CompatibleDroppable droppableId="columns">
                         {(provided): any => (
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
-                                className={`flex flex-column cogwheel-column-filter px-0 ${isDragging ? styles.SolidColumnDragContextActive : ''}`}
+                                className={`flex flex-col cogwheel-column-filter px-0 ${isDragging ? styles.SolidColumnDragContextActive : ''}`}
                                 style={{ maxHeight: 400, overflowY: 'auto' }}
                             >
                                 {fields.map((column, index) => (
@@ -171,7 +171,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className={`flex align-items-center justify-content-between gap-3 px-2 py-2 ${snapshot.isDragging ? styles.SolidColumnDraggedActiveElement : ''}`}
+                                                className={`flex items-center justify-between gap-4 px-2 py-2 ${snapshot.isDragging ? styles.SolidColumnDraggedActiveElement : ''}`}
                                                 style={{
                                                     ...provided.draggableProps.style,
                                                 }}

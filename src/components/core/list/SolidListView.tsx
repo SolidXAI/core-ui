@@ -1314,15 +1314,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   };
   return (
-    <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className={`solid-list-content h-full flex flex-column flex-grow-1 ${styles.ListContentWrapper}`}>
-        <div className="solid-list-surface flex flex-column flex-1 min-h-0">
+    <div className={`page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden ${params.embeded ? "solid-list-page-wrapper-embedded" : ""}`}>
+      <div className={`solid-list-content h-full flex flex-col flex-grow-1 ${styles.ListContentWrapper}`}>
+        <div className="solid-list-surface flex flex-col flex-1 min-h-0">
           {solidListViewInitialMetaData &&
-            <div className="page-header solid-list-toolbar flex-column lg:flex-row">
+            <div className="page-header solid-list-toolbar flex-col lg:flex-row">
               {/* <div> */}
-              <div className="flex justify-content-between w-full">
-                <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
-                  <div className='flex align-items-center gap-2'>
+              <div className="flex justify-between w-full">
+                <div className="flex gap-4 items-center w-full solid-list-toolbar-left">
+                  <div className='flex items-center gap-2'>
                     {params.embeded !== true &&
                       <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                         <LayoutGrid size={18} />
@@ -1350,7 +1350,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   )}
 
                 </div>
-                <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {params.embeded === false && (
                     <div className="flex lg:hidden">
@@ -1365,7 +1365,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </div>
                   )}
 
-                  <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
+                  <div className="hidden lg:flex items-center solid-header-buttons-wrapper">
                     {solidListViewLayout?.attrs?.headerButtons
                       ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                       ?.map((button: any, index: number) => (
@@ -1740,7 +1740,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             <>
                               {solidListViewLayout?.attrs?.showRowContextMenu !==
                                 false && (
-                                  <div className="flex justify-content-end" data-no-row-click="true">
+                                  <div className="flex justify-end" data-no-row-click="true">
                                     <SolidListViewRowActionsMenu
                                       rowData={rowData}
                                       hasEditInContextMenu={hasEditInContextMenu}

@@ -131,7 +131,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
         let isVisible = fieldLayoutInfo.attrs?.visible || true;
         if (this.fieldContext.parentData && this.fieldContext.parentFieldName === fieldLayoutInfo.attrs.name) {
@@ -182,7 +182,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
@@ -435,7 +435,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
                 }
-                <div className="flex align-items-center gap-3">
+                <div className="flex items-center gap-4">
                     <SolidAutocomplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission}
@@ -485,7 +485,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams }: any) => {
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-6';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-1/2 px-2 pt-2';
     const parentModelName = fieldLayoutInfo?.attrs?.parentModelName;
     const childModelName = fieldLayoutInfo?.attrs?.childModelName;
     const parentFieldName = fieldLayoutInfo?.attrs?.parentFieldName;
@@ -576,7 +576,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
@@ -980,7 +980,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
                 }
-                <div className="flex align-items-center gap-3" >
+                <div className="flex items-center gap-4" >
                     <SolidAutocomplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission || viewMode === "view"}

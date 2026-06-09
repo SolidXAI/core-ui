@@ -18,7 +18,7 @@ export const SolidLayoutViews = ({ sizeOptions, setSize, size, viewModes, setVie
         currentValue: string,
         onSelect: (value: string) => void
     ) => (
-        <label key={option.value} className={`flex align-items-center ${option.value === currentValue ? 'solid-active-view' : 'solid-view'}`}>
+        <label key={option.value} className={`flex items-center ${option.value === currentValue ? 'solid-active-view' : 'solid-view'}`}>
             <input
                 type="radio"
                 name={groupName}
@@ -27,7 +27,7 @@ export const SolidLayoutViews = ({ sizeOptions, setSize, size, viewModes, setVie
                 onChange={() => onSelect(option.value)}
                 className="solid-radio-native"
             />
-            <span className="ml-2 flex align-items-center justify-content-between w-full">
+            <span className="ml-2 flex w-full items-center justify-between">
                 {option.label}
                 <img
                     src={option.image}
@@ -57,13 +57,13 @@ export const SolidLayoutViews = ({ sizeOptions, setSize, size, viewModes, setVie
             <SolidPopoverContent className='solid-header-dropdown-panel'>
                 <div className='secondary-border-bottom p-1'>
                     <p className='px-3 pt-2'>Density</p>
-                    <div className="flex flex-column gap-1">
+                    <div className="flex flex-col gap-1">
                         {sizeOptions.map((option) => renderOption(option, "sizes", size, setSize))}
                     </div>
                 </div>
                 <div className='p-1'>
                     <p className='px-3 pt-2'>View Mode</p>
-                    <div className="flex flex-column gap-1">
+                    <div className="flex flex-col gap-1">
                         {viewModes.map((option) => renderOption(option, "views", view, setView))}
                     </div>
                 </div>

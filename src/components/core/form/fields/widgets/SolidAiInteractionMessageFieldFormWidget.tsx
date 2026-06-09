@@ -34,7 +34,7 @@ export const SolidAiInteractionMessageFieldFormWidget = ({ formik, fieldContext 
     }
 
     return (
-        <div className="mt-2 flex-column">
+        <div className="mt-2 flex flex-col">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             {value && renderContent()}
         </div>

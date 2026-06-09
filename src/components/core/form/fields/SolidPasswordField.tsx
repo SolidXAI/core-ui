@@ -99,7 +99,7 @@ export class SolidPasswordField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
         let createWidget = fieldLayoutInfo?.attrs?.createWidget;
@@ -170,7 +170,7 @@ export const DefaultPasswordFormViewWidget = ({ formik, fieldContext }: SolidFor
             {showFieldLabel !== false && (
                 <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
-            <div className="flex align-items-center gap-3">
+            <div className="flex items-center gap-4">
                 <p className={styles.fieldViewValue}>
                     {isText ? formik.values[fieldLayoutInfo.attrs.name] : "••••••••"}
                 </p>
@@ -362,7 +362,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     <SolidDialogClose />
                 </SolidDialogHeader>
                 <SolidDialogBody>
-                    <form onSubmit={modalFormik.handleSubmit} className="p-fluid">
+                    <form onSubmit={modalFormik.handleSubmit} className="solid-fluid">
                         <div className={styles.fieldWrapper}>
                             <label htmlFor={fieldName} className={`${styles.fieldLabel} form-field-label`}>New {fieldLabel}</label>
                             <SolidPasswordInput

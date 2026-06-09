@@ -13,7 +13,7 @@ export const SolidFormFieldRender = ({ formik, fieldContext }: any) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
 
     let viewWidget = fieldLayoutInfo.attrs.viewWidget;

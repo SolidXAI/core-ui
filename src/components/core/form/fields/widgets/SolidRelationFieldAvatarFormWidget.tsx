@@ -33,7 +33,7 @@ export const SolidRelationFieldAvatarFormWidget = ({ formik, fieldContext }: Sol
 
 
     return (
-        <div className="mt-2 flex-column">
+        <div className="mt-2 flex flex-col">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             <div className="flex flex-wrap gap-2 mt-2">
                 {fieldValue.map((v: any) => (

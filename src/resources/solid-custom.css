@@ -2877,6 +2877,10 @@ body {
   padding: 12px;
 }
 
+.solid-list-page-wrapper-embedded{
+  height: calc(100dvh - 225px) !important;
+  max-height: calc(100dvh - 225px) !important;
+}
 .solid-list-page-wrapper .page-header {
   flex-shrink: 0;
 }

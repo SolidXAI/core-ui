@@ -153,7 +153,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
         </SolidDialogTitle>
       </SolidDialogHeader>
       <SolidDialogBody>
-        <div className="flex flex-column gap-3">
+        <div className="flex flex-col gap-4">
           {!(isEdit && BUILT_IN_TYPES.includes(editKey!)) && (
             <div>
               <label className="form-field-label">Provider Type</label>
@@ -209,7 +209,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
         </div>
       </SolidDialogBody>
       <SolidDialogFooter>
-        <div className="flex justify-content-between w-full">
+        <div className="flex justify-between w-full">
           <div>
             {isEdit && !BUILT_IN_TYPES.includes(editKey!) && (
               <SolidButton variant="ghost" onClick={handleRemove} style={{ color: "var(--solid-danger-color, #ef4444)" }}>
@@ -337,10 +337,10 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
   });
 
   return (
-    <div className="flex flex-column gap-4">
+    <div className="flex flex-col gap-6">
       <div style={{ ...cardStyle, width: "50%" }}>
         <p className="solid-settings-subheading">Model Config</p>
-        <div className="flex flex-column gap-3 mt-3">
+        <div className="flex flex-col gap-4 mt-4">
           <div>
             <label className="form-field-label">Provider</label>
             <SolidSelect
@@ -365,8 +365,8 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
 
       <div style={{ ...cardStyle, width: "50%" }}>
         <p className="solid-settings-subheading">Behavior</p>
-        <div className="flex flex-column gap-3 mt-3">
-          <div className="flex align-items-center gap-2">
+        <div className="flex flex-col gap-4 mt-4">
+          <div className="flex items-center gap-2">
             <SolidSwitch
               checked={modelEntry.behavior.streaming}
               onChange={(val) =>

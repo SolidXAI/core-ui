@@ -11,7 +11,7 @@ export const SolidListViewOptions = ({ }: any) => {
     const [componentsToRender, setComponentsToRender] = useState(["Header", "NonExistentComponent"]);
 
     return (
-        <div className="card flex justify-content-center">
+        <div className="card flex justify-center">
             <SolidIcon name="si-cog" onClick={() => setVisible(true)} style={{ cursor: 'pointer' }} />
 
             <SolidDialog header="Header" visible={visible} onHide={() => setVisible(false)} contentClassName="w-full" className="solid-dialog-lg">

@@ -348,10 +348,10 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
       <div className="solid-list-content h-full flex way to  flex-grow-1">
-        <div className="solid-list-surface solid-card-surface flex flex-column flex-1 min-h-0">
-          <div className="page-header solid-list-toolbar solid-card-toolbar flex-column lg:flex-row">
-            <div className="flex justify-content-between w-full">
-              <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
+        <div className="solid-list-surface solid-card-surface flex flex-col flex-1 min-h-0">
+          <div className="page-header solid-list-toolbar solid-card-toolbar flex-col lg:flex-row">
+            <div className="flex justify-between w-full">
+              <div className="flex gap-4 items-center w-full solid-list-toolbar-left">
                 {params.embeded !== true && (
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
@@ -370,7 +370,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                 </div>
               </div>
 
-              <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                 <div className="flex lg:hidden">
                   <SolidButton

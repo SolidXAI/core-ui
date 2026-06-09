@@ -23,6 +23,8 @@ export function SolidCodeEditor({
     <div
       className={className}
       style={{
+        width: "100%",
+        minWidth: 0,
         border: "1px solid var(--surface-border, #d0d7de)",
         borderRadius: "0.5rem",
         overflow: "hidden",
@@ -30,6 +32,7 @@ export function SolidCodeEditor({
       }}
     >
       <Editor
+        width="100%"
         height={height}
         language={language}
         value={value}

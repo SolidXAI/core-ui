@@ -396,8 +396,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     <>
       <form onSubmit={formik.handleSubmit}>
         <div className="">
-          <div className="grid formgrid">
-            <div className="field col-12 lg:col-6 lg:pr-3">
+          <div className="flex flex-wrap -mx-2 -mt-2">
+            <div className="field w-full px-2 pt-2 lg:w-1/2 lg:pr-4">
               <SolidPanel header={"Basic Info"} className="solid-column-panel">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="moduleId" className={styles.fieldLabel}>
@@ -584,7 +584,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 )}
               </SolidPanel>
             </div>
-            <div className="field col-12 lg:col-6 lg:pl-3">
+            <div className="field w-full px-2 pt-2 lg:w-1/2 lg:pl-4">
               <SolidPanel header={"Basic Settings"} className="solid-column-panel">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="displayName" className={styles.fieldLabel}>
@@ -673,61 +673,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 </div>
               </SolidPanel>
             </div>
-
-            {/* <div className="md:col-6 sm:col-12">
-                  <div className="field">
-                    <label htmlFor="pluralName" className="form-label form-field-label">
-                      Plural Name
-                    </label>
-                    <InputText
-                      type="text"
-                      id="pluralName"
-                      name="pluralName"
-                      onChange={formik.handleChange}
-                      value={formik.values.pluralName}
-                      className={cx("p-inputtext-sm w-full small-input", {
-                        "p-invalid": isFormFieldValid(formik, "pluralName"),
-                      })}
-                    />
-                    {isFormFieldValid(formik, "pluralName") && (
-                      <Message severity="error" text={formik?.errors?.pluralName?.toString()} />
-                    )}
-                  </div>
-                </div> */}
-
-
-            {/* <div className="md:col-6 sm:col-12">
-                  <div className="field form-dropdown-select">
-                    <label htmlFor="dataSourceType" className="form-labe form-field-label">
-                      Data Source
-                    </label>
-                    <Dropdown
-                      id="dataSourceType"
-                      name="dataSourceType"
-                      value={formik.values.dataSourceType}
-                      options={dataSourceTypes}
-                      onChange={(e) => {
-                        formik.setFieldValue("dataSourceType", e.value);
-                        // if (e.value == "mariadb") {
-                        //   formik.setFieldValue("dataSourceType", "mongodb");
-                        // }
-                        // else {
-                        //   formik.setFieldValue("dataSourceType", "rdbms");
-                        // }
-                      }
-                      }
-                      placeholder="Select a Data Source"
-                      className={cx("p-inputtext-sm w-full", {
-                        "p-invalid": isFormFieldValid(formik, "dataSource"),
-                      })}
-                    />
-                    {isFormFieldValid(formik, "dataSource") && (
-                      <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
-                    )}
-                  </div>
-                </div> */}
-
-
           </div>
         </div>
       </form>

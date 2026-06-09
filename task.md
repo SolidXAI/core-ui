@@ -6,6 +6,50 @@
 - Preserve the current UI exactly; do not do textual class swaps.
 - Use this file as the source of truth for phase 2 replacement work.
 - Second-pass audit status: rescanned with broader class-context extraction and updated the inventory with missed conditional, fallback, width, height, padding, margin, and gap utilities.
+- Tracking status update: this file now also acts as the active migration tracker for completed and pending replacement batches.
+
+## Migration Status
+
+- Overall status: `Mostly Complete`
+- Build status after latest completed batches: `npm run build` passes
+- PrimeFlex package dependency status: `Removed`
+- Remaining work status: live PrimeFlex migration hotspots are completed; only optional cleanup and final documentation reconciliation remain
+- Final hygiene verification: repo-wide grep for live PrimeFlex-style utility patterns in `src/components` and `src/routes` is clean after comment cleanup; remaining `p-fluid` references exist only in the intentional `solid-fluid` compatibility alias inside `src/resources/solid-primereact.css`
+
+## Completed Batches
+
+- `Done` Tailwind/PostCSS build pipeline and shipped generated stylesheet setup
+- `Done` PrimeFlex package removal and stylesheet import updates
+- `Done` auth/layout migration batch:
+  `src/components/auth/AuthLayout.tsx`, `src/components/auth/SolidLogin.tsx`, `src/components/auth/SolidRegister.tsx`, `src/routes/pages/auth/SsoPage.tsx`, `src/components/layout/FilterMenu.tsx`, `src/components/layout/navbar-two-menu.tsx`
+- `Done` shared form/settings batch:
+  `src/components/common/GeneralSettings.tsx`, `src/components/common/SolidFormHeader.tsx`, `src/components/common/SolidSettings/LlmSettings/OpenAiProviderComponent.tsx`, `src/components/common/SolidSettings/LlmSettings/AnthropicProviderComponent.tsx`, `src/components/common/SolidSettings/LlmSettings/AiModelConfigTab.tsx`
+- `Done` core form/list/card/chatter batch:
+  `src/components/core/form/SolidFormFooter.tsx`, `src/components/core/form/SolidFormActionHeader.tsx`, `src/components/core/form/SolidFormViewShimmerLoading.tsx`, `src/components/core/card/SolidCardView.tsx`, `src/components/core/chatter/SolidChatterHeader.tsx`, `src/components/core/chatter/SolidChatterMessageBox.tsx`, `src/components/core/chatter/SolidChatter.tsx`
+- `Done` model/module/list/tree/kanban shell batch:
+  `src/components/core/module/CreateModule.tsx`, `src/components/core/model/CreateModel.tsx`, `src/components/core/model/ModelMetaData.tsx`, `src/components/core/list/SolidListView.tsx`, `src/components/core/tree/SolidTreeView.tsx`, `src/components/core/kanban/SolidKanbanView.tsx`, `src/components/core/kanban/KanbanColumn.tsx`
+- `Done` user-management batch:
+  `src/components/core/users/CreateUser.tsx`, `src/components/core/users/CreateUserRole.tsx`, `src/components/core/users/UserListView.tsx`
+- `Done` locale/search/list-helper batch:
+  `src/components/core/locales/SolidLocale.tsx`, `src/components/core/common/SolidGlobalSearchElement.tsx`, `src/components/core/list/SolidListingHeader.tsx`, `src/components/core/list/SolidColumnSelector/SolidListColumnSelector.tsx`, `src/components/core/common/SolidPasswordHelperText.tsx`, `src/components/core/common/SolidLayoutViews.tsx`, `src/components/core/common/SolidXAiIframe.tsx`
+- `Done` smaller widget/helper cleanup batch:
+  `src/components/core/list/columns/SolidMediaSingleColumn.tsx`, `src/components/core/list/columns/SolidMediaMultipleColumn.tsx`, `src/components/core/list/SolidTableRowCell.tsx`, `src/components/core/list/widgets/SolidManyToManyRelationAvatarListWidget.tsx`, `src/components/core/list/ListViewRowActionPopup.tsx`, `src/components/core/common/SolidSearchBox.tsx`, `src/components/core/common/SolidListViewOptions.tsx`, `src/components/core/common/SolidGenericImport/SolidImportDropzone.tsx`, `src/components/core/extension/solid-core/listOfValues/form/SolidLovTypeChangeFormEditWidget.tsx`, `src/components/core/model/FieldMetaData.tsx`, `src/components/core/chatter/SolidChatterAuditMessage.tsx`
+- `Done` filter field layout batch:
+  `src/components/core/filter/fields/*` including relation filter field variants migrated from PrimeFlex column/grid semantics to Tailwind equivalents
+- `Done` many fallback `field col-12` and `field col-6` defaults already replaced in shared form field renderers and field components
+- `Done` final large hotspot batch:
+  `src/components/core/model/FieldMetaDataForm.tsx`
+- `Done` `p-fluid` cleanup batch:
+  `src/components/core/form/SolidFormView.tsx`, `src/components/core/form/fields/SolidPasswordField.tsx`, `src/components/core/model/FieldMetaDataForm.tsx`, plus `solid-fluid` compatibility alias support in `src/resources/solid-primereact.css`
+- `Done` final small leftover:
+  `src/components/core/chatter/SolidMessageComposer.tsx`
+
+## Pending Batches
+
+- `Pending` tracker cleanup:
+  update the lower file inventory sections over time so they reflect migrated status instead of pure audit-only state
+- `Pending` optional final sweep:
+  repo-wide pass after `FieldMetaDataForm.tsx` is done to remove stale commented/example PrimeFlex references where useful
 
 ## Current Audit Totals
 
@@ -31,9 +75,9 @@
 
 ## Dependency Touchpoints
 
-- `package.json`: still declares `primeflex@^3.3.1`.
-- `src/styles.ts`: currently imports the shipped repo CSS, but there is no standalone replacement utility layer proving PrimeFlex can be removed yet.
-- PrimeFlex layout classes are still referenced across `src/components`, `src/routes`, and generated/form field defaults in code.
+- `package.json`: `primeflex` has already been removed.
+- `src/styles.ts`: imports the shipped Tailwind-generated stylesheet plus `solid-custom.css`.
+- PrimeFlex-style layout classes still remain in some source files and generated/form field defaults, so package removal is done but source migration is still in progress.
 
 ## Replacement Rules
 
@@ -59,33 +103,59 @@
 - `col-12`, `col-10`, `col-8`, `col-6`, `col-3`, and `col-2` need percentage width mapping, not Tailwind CSS Grid columns.
 - Responsive column helpers such as `md:col-6` or `lg:col-5` need custom responsive width utilities or arbitrary-value widths.
 
+## Form View Fields Review
+
+- Review scope: shared form field renderers and default form widgets inside `src/components/core/form/fields/*` and `src/components/core/form/SolidFormFieldRender.tsx`.
+- Git baseline contract:
+  `git show HEAD:src/components/core/form/SolidFormFieldRender.tsx` used `field col-12` as the fallback wrapper class.
+- Git baseline contract:
+  `git show HEAD:src/components/core/form/fields/relations/SolidRelationManyToOneField.tsx` used `field col-6` for the embedded relation form dialog wrapper.
+- PrimeFlex behavior that must be preserved:
+  `field col-12` and `field col-6` inherited the PrimeFlex grid gutter through column padding, so replacing them with bare `field w-full` or `field w-1/2` is not equivalent.
+- Tailwind equivalent contract:
+  `field col-12 -> field w-full px-2 pt-2`
+- Tailwind equivalent contract:
+  `field col-6 -> field w-1/2 px-2 pt-2`
+- Container dependency:
+  these field wrappers assume the parent form rows use the PrimeFlex-equivalent gutter container pattern such as `flex flex-wrap -mx-2 -mt-2`.
+- Regression note:
+  the prior migration left several widgets with `field w-full` fallbacks, which removed the old half-rem column padding and made view/edit fields feel flush to the wrapper edges.
+- `Done` shared fallback wrapper restore:
+  `src/components/core/form/SolidFormFieldRender.tsx`
+- `Done` default field widget wrapper restore:
+  `src/components/core/form/fields/SolidDateTimeField.tsx`, `SolidComputedField.tsx`, `SolidShortTextField.tsx`, `SolidMediaMultipleField.tsx`, `SolidEmailField.tsx`, `SolidTimeField.tsx`, `SolidDateField.tsx`, `SolidMediaSingleField.tsx`, `SolidLongTextField.tsx`, `SolidSelectionDynamicField.tsx`, `SolidPasswordField.tsx`, `SolidJsonField.tsx`, `SolidDecimalField.tsx`, `SolidBooleanField.tsx`, `SolidIntegerField.tsx`, `SolidSelectionStaticField.tsx`, `SolidRichTextField.tsx`
+- `Done` relation field wrapper restore:
+  `src/components/core/form/fields/relations/SolidRelationManyToOneField.tsx`, `SolidRelationOneToManyField.tsx`, `SolidRelationManyToManyField.tsx`
+- Verification:
+  repo-wide field-layer grep is now clean for bare fallback wrappers like `field w-full` and `field w-1/2` without the restored gutter classes.
+
 ## Hotspots
 
-- src/components/common/GeneralSettings.tsx — 140 class-bearing occurrences, 38 unique PrimeFlex tokens.
-- src/components/core/model/FieldMetaDataForm.tsx — 112 class-bearing occurrences, 29 unique PrimeFlex tokens.
-- src/components/core/form/SolidFormViewShimmerLoading.tsx — 35 class-bearing occurrences, 19 unique PrimeFlex tokens.
-- src/components/core/common/SolidGlobalSearchElement.tsx — 35 class-bearing occurrences, 16 unique PrimeFlex tokens.
-- src/components/core/form/fields/SolidMediaMultipleField.tsx — 32 class-bearing occurrences, 14 unique PrimeFlex tokens.
-- src/components/auth/AuthLayout.tsx — 26 class-bearing occurrences, 27 unique PrimeFlex tokens.
-- src/components/core/form/fields/widgets/SolidIconEditWidget.tsx — 25 class-bearing occurrences, 31 unique PrimeFlex tokens.
-- src/components/core/form/fields/SolidLongTextField.tsx — 24 class-bearing occurrences, 19 unique PrimeFlex tokens.
-- src/components/core/module/CreateModule.tsx — 23 class-bearing occurrences, 20 unique PrimeFlex tokens.
-- src/components/core/form/SolidFormActionHeader.tsx — 22 class-bearing occurrences, 12 unique PrimeFlex tokens.
-- src/components/core/tree/SolidTreeView.tsx — 21 class-bearing occurrences, 16 unique PrimeFlex tokens.
-- src/components/core/users/CreateUser.tsx — 19 class-bearing occurrences, 18 unique PrimeFlex tokens.
-- src/components/core/form/fields/relations/SolidRelationManyToManyField.tsx — 19 class-bearing occurrences, 18 unique PrimeFlex tokens.
-- src/components/auth/SolidRegister.tsx — 17 class-bearing occurrences, 11 unique PrimeFlex tokens.
-- src/components/core/chatter/SolidChatterHeader.tsx — 17 class-bearing occurrences, 10 unique PrimeFlex tokens.
-- src/components/core/list/SolidListView.tsx — 16 class-bearing occurrences, 12 unique PrimeFlex tokens.
-- src/components/core/form/SolidFormView.tsx — 15 class-bearing occurrences, 20 unique PrimeFlex tokens.
-- src/components/auth/SolidLogin.tsx — 15 class-bearing occurrences, 14 unique PrimeFlex tokens.
-- src/components/core/chatter/SolidChatterMessageBox.tsx — 15 class-bearing occurrences, 14 unique PrimeFlex tokens.
-- src/components/core/model/CreateModel.tsx — 11 class-bearing occurrences, 17 unique PrimeFlex tokens.
-- src/components/core/card/SolidCardView.tsx — 14 class-bearing occurrences, 13 unique PrimeFlex tokens.
-- src/components/core/form/fields/SolidMediaSingleField.tsx — 14 class-bearing occurrences, 12 unique PrimeFlex tokens.
-- src/components/common/SolidSettings/LlmSettings/AiModelConfigTab.tsx — 14 class-bearing occurrences, 9 unique PrimeFlex tokens.
-- src/components/auth/SolidChangeForcePassword.tsx — 13 class-bearing occurrences, 14 unique PrimeFlex tokens.
-- src/components/core/users/CreateUserRole.tsx — 13 class-bearing occurrences, 14 unique PrimeFlex tokens.
+- `Done` src/components/common/GeneralSettings.tsx — 140 class-bearing occurrences, 38 unique PrimeFlex tokens.
+- `Done` src/components/core/model/FieldMetaDataForm.tsx — 112 class-bearing occurrences, 29 unique PrimeFlex tokens.
+- `Done` src/components/core/form/SolidFormViewShimmerLoading.tsx — 35 class-bearing occurrences, 19 unique PrimeFlex tokens.
+- `Done` src/components/core/common/SolidGlobalSearchElement.tsx — 35 class-bearing occurrences, 16 unique PrimeFlex tokens.
+- `Partial` src/components/core/form/fields/SolidMediaMultipleField.tsx — field-level cleanup done in earlier batches, but verify against final sweep after `FieldMetaDataForm` work.
+- `Done` src/components/auth/AuthLayout.tsx — 26 class-bearing occurrences, 27 unique PrimeFlex tokens.
+- `Done` src/components/core/form/fields/widgets/SolidIconEditWidget.tsx — 25 class-bearing occurrences, 31 unique PrimeFlex tokens.
+- `Partial` src/components/core/form/fields/SolidLongTextField.tsx — significant cleanup done, final verification still pending.
+- `Done` src/components/core/module/CreateModule.tsx — 23 class-bearing occurrences, 20 unique PrimeFlex tokens.
+- `Done` src/components/core/form/SolidFormActionHeader.tsx — 22 class-bearing occurrences, 12 unique PrimeFlex tokens.
+- `Done` src/components/core/tree/SolidTreeView.tsx — 21 class-bearing occurrences, 16 unique PrimeFlex tokens.
+- `Done` src/components/core/users/CreateUser.tsx — 19 class-bearing occurrences, 18 unique PrimeFlex tokens.
+- `Partial` src/components/core/form/fields/relations/SolidRelationManyToManyField.tsx — major cleanup done, final verification still pending.
+- `Done` src/components/auth/SolidRegister.tsx — 17 class-bearing occurrences, 11 unique PrimeFlex tokens.
+- `Done` src/components/core/chatter/SolidChatterHeader.tsx — 17 class-bearing occurrences, 10 unique PrimeFlex tokens.
+- `Done` src/components/core/list/SolidListView.tsx — 16 class-bearing occurrences, 12 unique PrimeFlex tokens.
+- `Done` src/components/core/form/SolidFormView.tsx — main layout wrappers converted and `p-fluid` replaced with `solid-fluid`.
+- `Done` src/components/auth/SolidLogin.tsx — 15 class-bearing occurrences, 14 unique PrimeFlex tokens.
+- `Done` src/components/core/chatter/SolidChatterMessageBox.tsx — 15 class-bearing occurrences, 14 unique PrimeFlex tokens.
+- `Done` src/components/core/model/CreateModel.tsx — 11 class-bearing occurrences, 17 unique PrimeFlex tokens.
+- `Done` src/components/core/card/SolidCardView.tsx — 14 class-bearing occurrences, 13 unique PrimeFlex tokens.
+- `Partial` src/components/core/form/fields/SolidMediaSingleField.tsx — major cleanup done, final verification still pending.
+- `Done` src/components/common/SolidSettings/LlmSettings/AiModelConfigTab.tsx — 14 class-bearing occurrences, 9 unique PrimeFlex tokens.
+- `Partial` src/components/auth/SolidChangeForcePassword.tsx — not yet rechecked in the latest end-state sweep.
+- `Done` src/components/core/users/CreateUserRole.tsx — 13 class-bearing occurrences, 14 unique PrimeFlex tokens.
 
 ## Second-Pass Delta
 
