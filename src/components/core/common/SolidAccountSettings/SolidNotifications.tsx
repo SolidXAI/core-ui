@@ -1,30 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
+import { showToast } from "../../../../redux/features/toastSlice";
 import { SolidButton } from "../../../shad-cn-ui/SolidButton";
 import styles from "./SolidAccountSettings.module.css";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 
-type ToastState = {
-  id: number;
-  severity: "success" | "error" | "info" | "warn";
-  summary: string;
-  detail: string;
-} | null;
-
 export const SolidNotifications = () => {
+  const dispatch = useDispatch();
   const { data: solidSettingsData, refetch } = useGetSolidSettingsQuery(undefined);
   const settingsMap = getSettingsMap(solidSettingsData);
   const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
-  const [toast, setToast] = useState<ToastState>(null);
 
   useEffect(() => {
     refetch();
   }, [refetch]);
 
   const notify = (severity: "success" | "error" | "info" | "warn", summary: string, detail: string) => {
-    setToast({ id: Date.now(), severity, summary, detail });
+    dispatch(showToast({ severity, summary, detail }));
   };
 
   const formik = useFormik({
@@ -62,29 +57,8 @@ export const SolidNotifications = () => {
     },
   });
 
-  const severityClass =
-    toast?.severity === "error"
-      ? styles.toastError
-      : toast?.severity === "success"
-        ? styles.toastSuccess
-        : toast?.severity === "warn"
-          ? styles.toastWarn
-          : styles.toastInfo;
-
   return (
     <form onSubmit={formik.handleSubmit} className={styles.accountForm}>
-      {toast ? (
-        <div className={`${styles.toast} ${severityClass}`} role="status" aria-live="polite">
-          <div>
-            <div className={styles.toastTitle}>{toast.summary}</div>
-            <div className={styles.toastBody}>{toast.detail}</div>
-          </div>
-          <button type="button" className={styles.toastClose} onClick={() => setToast(null)} aria-label="Close notification">
-            ×
-          </button>
-        </div>
-      ) : null}
-
       <div className={styles.accountScroll}>
         <div className={styles.switchRow}>
           <div>
