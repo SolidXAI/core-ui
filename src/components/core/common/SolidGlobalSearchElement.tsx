@@ -927,12 +927,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const fieldElements = extractFields(layoutChildren);
 
 
-            const fieldsList = Object.entries(fieldsData ?? {}).map(([key, value]: any) => {
+            // Build one entry per layout column (not per field name), so multiple columns
+            // sharing the same field name (e.g. several viewMetadata columns with different
+            // searchFields/labels) each appear as a separate searchable option.
+            const seenKeys = new Set<string>();
+            const fieldsList: any[] = [];
+
+            // First pass: one entry per unique field name (for non-searchable / filter use)
+            Object.entries(fieldsData ?? {}).forEach(([key, value]: any) => {
                 const viewFieldElement = fieldElements.find(
                     (f: any) => f?.attrs?.name === key
                 );
-                return {
-                    name: value.displayName,
+                seenKeys.add(key);
+                fieldsList.push({
+                    name: viewFieldElement?.attrs?.label ?? value.displayName,
                     value: key,
                     type: value.type,
                     ormType: value.ormType,
@@ -940,7 +948,33 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     searchField: viewFieldElement?.attrs?.searchField ?? null,
                     isSearchable: viewFieldElement?.attrs?.isSearchable ?? false,
                     relationType: value?.relationType ?? null,
-                };
+                });
+            });
+
+            // Second pass: for any layout column that shares a field name but has a
+            // distinct searchField, add it as an additional searchable entry.
+            fieldElements.forEach((fieldElement: any) => {
+                const key = fieldElement?.attrs?.name;
+                const searchField = fieldElement?.attrs?.searchField;
+                const isSearchable = fieldElement?.attrs?.isSearchable ?? false;
+                if (!isSearchable || !searchField) return;
+                // Already covered by the first pass entry for this key?
+                const existingEntry = fieldsList.find(
+                    (e: any) => e.value === key && e.searchField === searchField
+                );
+                if (existingEntry) return; // already in list
+                const value: any = (fieldsData ?? {})[key];
+                if (!value) return;
+                fieldsList.push({
+                    name: fieldElement?.attrs?.label ?? value.displayName,
+                    value: key,
+                    type: value.type,
+                    ormType: value.ormType,
+                    matchMode: fieldElement?.attrs?.searchMatchMode,
+                    searchField: searchField,
+                    isSearchable: true,
+                    relationType: value?.relationType ?? null,
+                });
             });
 
             const filterableFieldsList = fieldsList.filter((field: any) => {
