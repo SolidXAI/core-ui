@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { FileArchive, FolderTree, Sparkles, UploadCloud, X } from "lucide-react";
+import { FileArchive, FolderTree, RefreshCw, Sparkles, UploadCloud, X } from "lucide-react";
 import {
   useConfirmModulePackageImportMutation,
   useDismissModulePackageImportMutation,
@@ -11,7 +11,6 @@ import {
 } from "../../../redux/api/moduleApi";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch } from "react-redux";
-import { waitForBackendAvailability } from "../../../helpers/waitForBackendAvailability";
 import {
   SolidButton,
   SolidCheckbox,
@@ -40,7 +39,7 @@ type ModulePackageImportContentProps = {
 };
 
 type StepStatus = "pending" | "running" | "success" | "warning" | "error";
-type StepKey = "preview" | "import" | "restart" | "build" | "seed";
+type StepKey = "preview" | "import" | "build" | "seed";
 
 type StepState = {
   title: string;
@@ -51,7 +50,7 @@ type StepState = {
 
 type StepMap = Record<StepKey, StepState>;
 
-const STEP_ORDER: StepKey[] = ["preview", "import", "restart", "build", "seed"];
+const STEP_ORDER: StepKey[] = ["preview", "import", "build", "seed"];
 
 function createInitialSteps(): StepMap {
   return {
@@ -62,17 +61,12 @@ function createInitialSteps(): StepMap {
     },
     import: {
       title: "Import",
-      description: "Place the module files into the local `solid-api` and `solid-ui` folders.",
-      status: "pending",
-    },
-    restart: {
-      title: "Wait for backend",
-      description: "Check when the backend is available again after the import reboot.",
+      description: "Import the files locally. This may restart the UI and API, dismiss the popup, and require a page refresh before you continue.",
       status: "pending",
     },
     build: {
       title: "Build",
-      description: "Run `solidctl build` and `solidctl build --ui-only` after the backend is back up.",
+      description: "After the services restart and you refresh this module list page, continue with the build step.",
       status: "pending",
     },
     seed: {
@@ -142,22 +136,8 @@ function hydrateStepsFromTransaction(transaction: any): StepMap {
     nextSteps.import = {
       ...nextSteps.import,
       status: "success",
-      description: "Archive extracted and files were placed in the target module folders.",
+      description: "Archive extracted. Wait for the UI and API to finish restarting, then refresh this page to continue.",
       output: transaction?.outputs?.import ?? undefined,
-    };
-  }
-
-  if (["build_running", "build_failed", "build_succeeded", "seed_running", "seed_failed", "completed"].includes(status)) {
-    nextSteps.restart = {
-      ...nextSteps.restart,
-      status: "success",
-      description: "The backend is available again and the workflow moved beyond restart verification.",
-    };
-  } else if (status === "awaiting_restart") {
-    nextSteps.restart = {
-      ...nextSteps.restart,
-      status: "pending",
-      description: "The services are rebooting. Click Refresh when you want to check backend availability.",
     };
   }
 
@@ -173,6 +153,12 @@ function hydrateStepsFromTransaction(transaction: any): StepMap {
             ? transaction?.errorMessage || "The build step completed with warnings."
             : "Both build targets completed successfully.",
       output: transaction?.outputs?.build ?? undefined,
+    };
+  } else if (status === "awaiting_restart") {
+    nextSteps.build = {
+      ...nextSteps.build,
+      status: "pending",
+      description: "Import completed. Once the UI and API are back, refresh this module list page and continue with Build Now.",
     };
   }
 
@@ -205,7 +191,6 @@ function hydrateStepsFromTransaction(transaction: any): StepMap {
 function getSuggestedStepFromSteps(steps: StepMap, hasPreview: boolean, isArchiveValid: boolean): StepKey {
   if (!hasPreview || !isArchiveValid) return "preview";
   if (steps.import.status !== "success") return "import";
-  if (steps.restart.status !== "success") return "restart";
   if (steps.build.status !== "success" && steps.build.status !== "warning") return "build";
   if (steps.seed.status !== "success" && steps.seed.status !== "warning") return "seed";
   return "seed";
@@ -298,8 +283,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
   const suggestedStep = getSuggestedStepFromSteps(steps, Boolean(previewResponse), isArchiveValid);
 
   const canImport = steps.preview.status !== "pending" && isArchiveValid && steps.import.status !== "success" && !isProcessing && !isPreviewing;
-  const canCheckBackendAvailability = steps.import.status === "success" && !isProcessing;
-  const canRunBuild = steps.restart.status === "success" && !isProcessing;
+  const canRunBuild = steps.import.status === "success" && !isProcessing;
   const canRunSeed = (steps.build.status === "success" || steps.build.status === "warning") && !isProcessing;
   const canContinueFromPreview = Boolean(previewResponse) && isArchiveValid && !isPreviewing;
 
@@ -308,11 +292,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       return suggestedStep;
     }
 
-    if (selectedStep === "build" && !(steps.restart.status === "success" || steps.build.status !== "pending")) {
-      return suggestedStep;
-    }
-
-    if (selectedStep === "restart" && !(steps.import.status === "success" || steps.restart.status !== "pending")) {
+    if (selectedStep === "build" && !(steps.import.status === "success" || steps.build.status !== "pending")) {
       return suggestedStep;
     }
 
@@ -326,7 +306,6 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
     selectedStep,
     steps.build.status,
     steps.import.status,
-    steps.restart.status,
     steps.seed.status,
     suggestedStep,
   ]);
@@ -335,10 +314,9 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
   const maxUnlockedStepIndex = useMemo(() => {
     if (!previewResponse || !isArchiveValid) return 0;
     if (steps.import.status !== "success") return 1;
-    if (steps.restart.status !== "success") return 2;
-    if (steps.build.status !== "success" && steps.build.status !== "warning") return 3;
-    return 4;
-  }, [isArchiveValid, previewResponse, steps.build.status, steps.import.status, steps.restart.status]);
+    if (steps.build.status !== "success" && steps.build.status !== "warning") return 2;
+    return 3;
+  }, [isArchiveValid, previewResponse, steps.build.status, steps.import.status]);
 
   const handlePreviewArchive = useCallback(async () => {
     if (!selectedFile) {
@@ -434,37 +412,6 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
 
     return seedResponse;
   }, [runModulePackageSeed, updateStep]);
-
-  const handleCheckBackendAvailability = useCallback(async () => {
-    setIsProcessing(true);
-    setFinalSummary(null);
-    updateStep("restart", {
-      status: "running",
-      description: "Polling /api/ping until the backend is back online.",
-    });
-
-    const backendAlive = await waitForBackendAvailability({
-      retries: 80,
-      delayMs: 1500,
-    });
-
-    if (!backendAlive) {
-      updateStep("restart", {
-        status: "error",
-        description: "The backend did not come back within the retry window.",
-      });
-      setFinalSummary("Module files were imported, but the backend restart check timed out.");
-      setIsProcessing(false);
-      return;
-    }
-
-    updateStep("restart", {
-      status: "success",
-      description: "The backend responded to ping and is ready for the build step.",
-    });
-    setSelectedStep("build");
-    setIsProcessing(false);
-  }, [updateStep]);
 
   const handleRunBuild = useCallback(async () => {
     if (!transactionKey) {
@@ -589,16 +536,19 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
 
       updateStep("import", {
         status: "success",
-        description: "Archive extracted and files were placed in the target module folders.",
+        description: "Archive extracted. The local UI/API may restart now, so refresh this page once both services are back.",
         output: response?.outputs?.import,
       });
-      updateStep("restart", {
-        status: "pending",
-        description: "The services are rebooting. Click Refresh when you want to check backend availability.",
-      });
       setPreviewResponse(response);
-      setSelectedStep("restart");
       setIsProcessing(false);
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Module imported",
+          detail: "The module files were placed locally. Wait for the UI and API to restart, then refresh this module list page to continue with build and seed.",
+        }),
+      );
+      onClose();
     } catch (error: any) {
       updateStep("import", {
         status: "error",
@@ -800,21 +750,6 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       );
     }
 
-    if (activeStep === "restart") {
-      return (
-        <SolidButton
-          type="button"
-          size="small"
-          variant="outline"
-          onClick={handleCheckBackendAvailability}
-          disabled={!canCheckBackendAvailability}
-          loading={isProcessing && steps.restart.status === "running"}
-        >
-          {steps.restart.status === "success" ? "Refresh Again" : "Refresh"}
-        </SolidButton>
-      );
-    }
-
     if (activeStep === "build") {
       return (
         <SolidButton
@@ -853,8 +788,20 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       return renderPreviewContent();
     }
 
-    if (activeStep === "import" && steps.import.output) {
-      return <pre className="solid-module-package-step__output">{steps.import.output}</pre>;
+    if (activeStep === "import") {
+      return (
+        <div className="solid-module-package-step-stack">
+          <div className="solid-module-package-notice is-warning">
+            <div className="solid-module-package-notice__title">What happens after import</div>
+            <ul className="solid-module-package-inline-list">
+              <li>Depending on the files in this archive, both the UI and API services may restart immediately.</li>
+              <li>This popup may get dismissed as part of that restart.</li>
+              <li>Wait for both services to come back, then refresh this module list page to continue with build and seed.</li>
+            </ul>
+          </div>
+          {steps.import.output ? <pre className="solid-module-package-step__output">{steps.import.output}</pre> : null}
+        </div>
+      );
     }
 
     if (activeStep === "build" && steps.build.output) {
@@ -874,7 +821,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
         <div>
           <SolidDialogTitle className="solid-filter-dialog-title m-0">Import Module Package</SolidDialogTitle>
           <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
-            Upload a `.sldx` archive, let SolidX preview it automatically, then move through import, restart verification, build, and seed.
+            Upload a `.sldx` archive, let SolidX preview it automatically, then move through import, build, and seed.
           </SolidDialogDescription>
         </div>
         {!isProcessing ? (
@@ -937,7 +884,20 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
               <div className="solid-module-package-stage__cta">{renderActiveStepCta()}</div>
             </div>
 
-            {finalSummary ? <div className="solid-module-package-summary">{finalSummary}</div> : null}
+            {finalSummary ? (
+              <div className="solid-module-package-summary">
+                <span className="solid-module-package-summary__copy">{finalSummary}</span>
+                <SolidButton
+                  type="button"
+                  size="small"
+                  variant="outline"
+                  leftIcon={<RefreshCw size={14} />}
+                  onClick={() => window.location.reload()}
+                >
+                  Reload
+                </SolidButton>
+              </div>
+            ) : null}
           </div>
         </section>
       </SolidDialogBody>

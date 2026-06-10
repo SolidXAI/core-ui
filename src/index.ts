@@ -198,6 +198,7 @@ export {
 
 export {
     modulesApi,
+    useClearModulePackageRuntimeMutation,
     useConfirmModulePackageImportMutation,
     useCreatemoduleMutation,
     useDeleteMultiplemodulesMutation,

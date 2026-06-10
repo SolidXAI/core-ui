@@ -169,6 +169,13 @@ export const modulesApi = createApi({
             query: () => `/module-packages/import/resumable/latest`,
             transformResponse: (response: any) => response?.data ?? response,
         }),
+        clearModulePackageRuntime: builder.mutation({
+            query: () => ({
+                url: '/module-packages/runtime/clear',
+                method: 'POST',
+            }),
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
         runModulePackageBuild: builder.mutation({
             query: ({ transactionKey, ...body }) => ({
                 url: `/module-packages/import/${transactionKey}/build`,
@@ -237,6 +244,7 @@ export const {
     useConfirmModulePackageImportMutation,
     useLazyGetModulePackageImportStatusQuery,
     useLazyGetLatestResumableModulePackageImportQuery,
+    useClearModulePackageRuntimeMutation,
     useRunModulePackageBuildMutation,
     useRunModulePackageSeedMutation,
     useDismissModulePackageImportMutation,

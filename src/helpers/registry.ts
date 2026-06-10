@@ -7,6 +7,7 @@ import { SolidShortTextFieldImageListWidget } from "../components/core/list/widg
 import { SolidShortTextAvatarWidget } from "../components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "../components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "../components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
+import { ClearModulePackageRuntimeHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ClearModulePackageRuntimeHeaderAction";
 import ExportModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/ExportModulePackageRowAction";
 import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
@@ -183,6 +184,7 @@ registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", S
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);
 
 // ...
 
