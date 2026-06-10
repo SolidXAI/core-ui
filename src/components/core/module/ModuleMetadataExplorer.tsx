@@ -312,6 +312,7 @@ const JsonEditorSurface = React.forwardRef<JsonEditorHandle, {
 
     let destroyed = false;
 
+    // @ts-ignore
     void import("jsoneditor").then((jsonEditorModule: any) => {
       if (destroyed || !containerRef.current || editorRef.current) {
         return;
