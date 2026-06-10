@@ -1308,7 +1308,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasCustomContextMenuButtons =
     solidListViewLayout?.attrs?.rowButtons?.some(
-      (rb: any) => rb?.attrs?.actionInContextMenu === true
+      (rb: any) => rb?.attrs?.actionInContextMenu === true && isButtonVisibleInCurrentEnv(rb?.attrs)
     );
 
   const hasAnyContextMenuActions =
@@ -1602,8 +1602,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             hasAnyRole(user?.roles, roles);
 
                           const isVisible = rb?.attrs?.visible !== false;
+                          const isVisibleInCurrentEnv = isButtonVisibleInCurrentEnv(rb?.attrs);
 
-                          return !isInContextMenu && isAllowed && isVisible;
+                          return !isInContextMenu && isAllowed && isVisible && isVisibleInCurrentEnv;
                         })
                         .map((button: any, index: number) => {
 

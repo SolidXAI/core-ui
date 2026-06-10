@@ -7,6 +7,7 @@ import { SolidShortTextFieldImageListWidget } from "../components/core/list/widg
 import { SolidShortTextAvatarWidget } from "../components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "../components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "../components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
+import ExportModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/ExportModulePackageRowAction";
 import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
@@ -350,6 +351,7 @@ registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRela
 // 4. list row action 
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, ExtensionComponentTypes.listRowAction);
+registerExtensionComponent("ExportModulePackageRowAction", ExportModulePackageRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, ExtensionComponentTypes.listRowAction);
 
