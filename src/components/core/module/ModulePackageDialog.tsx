@@ -620,35 +620,35 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
   const renderPreviewContent = () => {
     return (
       <div className="solid-module-package-preview">
-        <div
-          {...getRootProps({
-            className: `solid-module-package-dropzone${isDragActive ? " is-active" : ""}`,
-          })}
-        >
-          <input {...getInputProps()} />
-          <div className="solid-module-package-dropzone__icon">
-            <UploadCloud size={22} />
+        {!selectedFile ? (
+          <div
+            {...getRootProps({
+              className: `solid-module-package-dropzone${isDragActive ? " is-active" : ""}`,
+            })}
+          >
+            <input {...getInputProps()} />
+            <div className="solid-module-package-dropzone__icon">
+              <UploadCloud size={22} />
+            </div>
+            <div className="solid-module-package-dropzone__copy">
+              <div className="solid-module-package-dropzone__title">Upload `.sldx` archive</div>
+              <p>Choose a packaged SolidX module archive from the local file system. Preview starts automatically after upload.</p>
+            </div>
+            <div className="solid-module-package-dropzone__actions">
+              <SolidButton
+                type="button"
+                size="small"
+                variant="outline"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  openFilePicker();
+                }}
+              >
+                Browse archive
+              </SolidButton>
+            </div>
           </div>
-          <div className="solid-module-package-dropzone__copy">
-            <div className="solid-module-package-dropzone__title">Upload `.sldx` archive</div>
-            <p>Choose a packaged SolidX module archive from the local file system. Preview starts automatically after upload.</p>
-          </div>
-          <div className="solid-module-package-dropzone__actions">
-            <SolidButton
-              type="button"
-              size="small"
-              variant="outline"
-              onClick={(event) => {
-                event.stopPropagation();
-                openFilePicker();
-              }}
-            >
-              Browse archive
-            </SolidButton>
-          </div>
-        </div>
-
-        {selectedFile ? (
+        ) : (
           <div className="solid-module-package-file-card">
             <div className="solid-module-package-file-card__main">
               <div className="solid-module-package-file-card__icon">
@@ -680,7 +680,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
               Remove
             </SolidButton>
           </div>
-        ) : null}
+        )}
 
         {!previewResponse ? (
           <div className="solid-module-package-empty">
