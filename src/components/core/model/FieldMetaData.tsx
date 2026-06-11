@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
 import FieldMetaDataForm from "./FieldMetaDataForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { AlertTriangle, Info, Pencil, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Info, Trash2 } from "lucide-react";
 import {
   SolidButton,
   SolidDialog,
@@ -18,7 +18,7 @@ import {
 } from "../../shad-cn-ui";
 
 
-const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {
+const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const [visiblePopup, setVisiblePopup] = useState(false);
@@ -32,27 +32,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
 
   };
 
-  // Template for the pencil icon column
-  const editTemplate = (rowData: any) => {
-    return (
-      <>
 
-        {rowData.isSystem !== true && rowData.isMarkedForRemoval !== true &&
-          <SolidButton
-            variant="ghost"
-            size="sm"
-            className="solid-icon-button"
-            aria-label="Edit field"
-            leftIcon={<Pencil size={14} />}
-            onClick={() => {
-              setSelectedFieldMetaData(rowData);
-              setVisiblePopup(true);
-            }}
-          />
-        }
-      </>
-    )
-  };
   const bodyTemplate = (rowData: any) => {
     return (
       <>
@@ -79,6 +59,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     setFieldMetaData((prevData: any) => {
       const updatedData = prevData.filter((item: any) => item.name !== rowData.name);
       setIsDirty(true); // Ensure dirty state is updated immediately
+      if (setFieldDeleted) setFieldDeleted(true);
       return updatedData;
     });
   };
@@ -137,25 +118,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
         </div>
         :
         <>
-          <div className="absolute" style={{ top: -3, right: 0 }}>
-            {/* <h3>All Fields</h3> */}
-            {modelMetaData.isSystem !== true &&
-              <SolidButton
-                size="sm"
-                leftIcon={<Plus size={14} />}
-                onClick={() => {
-                  if (!modelMetaData?.dataSourceType) {
-                    dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail: ERROR_MESSAGES.ORM_TYPE_REQUIRED }));
-                  } else {
-                    setSelectedFieldMetaData(null);
-                    setVisiblePopup(true)
-                  }
-                }}
-              >
-                Add
-              </SolidButton>
-            }
-          </div>
+
           <div className="solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden">
             <DataTable
               value={fieldMetaData}
@@ -168,9 +131,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               <Column field="name" header="Name"></Column>
               <Column field="type" header="Type"></Column>
 
-              {modelMetaData.isSystem !== true &&
-                <Column body={editTemplate} header="Edit" style={{ width: '80px' }} />
-              }
+
               {modelMetaData.isSystem !== true &&
                 <Column body={deleteTemplate} header="Delete" style={{ width: '90px' }} />
               }
@@ -232,7 +193,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
           >
             <SolidDialogHeader className="solid-shadcn-dialog-head solid-field-delete-flow-head">
               <SolidDialogTitle>
-                <span className="flex align-items-center gap-2 justify-content-center">
+                <span className="flex align-items-center gap-2">
                   <AlertTriangle size={18} className="text-yellow-500" />
                   <span>Remove Field</span>
                 </span>

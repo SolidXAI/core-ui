@@ -3397,6 +3397,62 @@ li.header-li-px {
   color: color-mix(in srgb, var(--foreground) 72%, transparent);
 }
 
+.solid-generate-code-popup__command-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.solid-generate-code-popup__command-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card) 98%, var(--background) 2%);
+}
+
+.solid-generate-code-popup__command-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.solid-generate-code-popup__command-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
+.solid-generate-code-popup__command-code {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #101828;
+  color: #f8fafc;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: "SFMono-Regular", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.solid-generate-code-popup__command-help {
+  font-size: 13px;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.solid-generate-code-popup__command-copy {
+  flex-shrink: 0;
+}
+
 .solid-filter-dialog-shell-grouping .solid-filter-dialog-body {
   padding: 10px 12px 12px;
 }

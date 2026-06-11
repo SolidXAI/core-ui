@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { EllipsisVertical, SquarePen, Trash2 } from "lucide-react";
 import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui/SolidPopover";
 import { SolidListViewRowActionMenuItem } from "./SolidListViewRowActionMenuItem";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 
 export function SolidListViewRowActionsMenu({
   rowData,
@@ -28,7 +29,10 @@ export function SolidListViewRowActionsMenu({
 
   const visibleCustomButtons =
     solidListViewLayout?.attrs?.rowButtons?.filter(
-      (rb: any) => rb?.attrs?.actionInContextMenu === true && rb?.attrs?.visible !== false
+      (rb: any) =>
+        rb?.attrs?.actionInContextMenu === true &&
+        rb?.attrs?.visible !== false &&
+        isButtonVisibleInCurrentEnv(rb?.attrs)
     ) ?? [];
 
   const hasAnyItems =

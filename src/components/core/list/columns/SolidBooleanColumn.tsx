@@ -45,11 +45,9 @@ const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: So
 export default SolidBooleanColumn;
 
 export const DefaultBooleanListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
-    const fieldKey = column.attrs.label ?? fieldMetadata.name;
     const trueLabel = column.attrs.trueLabel ?? 'Yes';
     const falseLabel = column.attrs.falseLabel ?? 'No';
-    // console.log(`rendering boolean column ${fieldKey} with value ${rowData[fieldKey]}, trueLabel=${trueLabel}, falseLabel=${falseLabel}`);
-    const value = rowData[fieldKey];
+    const value = rowData[fieldMetadata.name];
     if (value === true) {
         return trueLabel;
     }

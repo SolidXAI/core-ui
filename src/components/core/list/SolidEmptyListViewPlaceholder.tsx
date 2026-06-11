@@ -1,6 +1,7 @@
 import { permissionExpression } from '../../../helpers/permissions'
 import { SolidCreateButton } from '../common/SolidCreateButton'
 import { useHandleListCustomButtonClick } from '../../../components/common/useHandleListCustomButtonClick'
+import { isButtonVisibleInCurrentEnv } from '../../../helpers/buttonEnvironment'
 import { hasAnyRole } from '../../../helpers/rolesHelper'
 import { env } from "../../../adapters/env";
 import { useSession } from "../../../hooks/useSession";
@@ -60,6 +61,7 @@ export const SolidEmptyListViewPlaceholder = ({
                 {headerButtons.map((button: any) => {
                     const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
                     if (!hasRole) return null;
+                    if (!isButtonVisibleInCurrentEnv(button?.attrs)) return null;
 
                     return (
                         <SolidButton
