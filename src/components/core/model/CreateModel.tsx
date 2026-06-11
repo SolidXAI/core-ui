@@ -1,9 +1,6 @@
 
-
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
-import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "../../../redux/api/modelApi";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import { usePathname } from "../../../hooks/usePathname";
+import { useCreatemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "../../../redux/api/modelApi";
 import { useRouter } from "../../../hooks/useRouter";
 import qs from "qs";
 import { useEffect, useRef, useState } from "react";
@@ -11,69 +8,57 @@ import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
 import FieldMetaData from "./FieldMetaData";
 import ModelMetaData from "./ModelMetaData";
-import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
-import { SolidBreadcrumb } from "../../../components/common/SolidBreadcrumb";
-import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { SolidButton, SolidDialog, SolidDivider, SolidPopover, SolidPopoverContent, SolidPopoverTrigger, SolidTabGroup } from "../../shad-cn-ui";
-import { Settings, Trash2 } from "lucide-react";
+import { SolidButton, SolidTabGroup } from "../../shad-cn-ui";
 import { SolidFormFooter } from "../form/SolidFormFooter";
+import { ModuleMetadataExplorer } from "../module/ModuleMetadataExplorer";
+import "./CreateModel.css";
 
-interface ErrorResponseData {
-  message: string;
-  statusCode: number;
-  error: string;
-}
-
-const TABS = ["model", "fields"] as const;
+const TABS = ["model", "fields", "explorer"] as const;
 type TabValue = typeof TABS[number];
 
 const getTabErrorState = (tab?: TabValue): Record<TabValue, boolean> => ({
   model: tab === "model",
   fields: tab === "fields",
+  explorer: false,
 });
 
 const CreateModel = ({ data, params }: any) => {
 
   const dispatch = useDispatch();
   const router = useRouter();
-  const pathname = usePathname();
-  const [deleteEntity, setDeleteEntity] = useState(false);
-  const [isLoadingData, setIsLoadingData] = useState(data ? true : false);
+  const isCreateMode = params.id === "new";
   const formikModelMetadataRef = useRef<any>();
   const formikFieldsMetadataRef = useRef();
 
   const [modelMetaData, setModelMetaData] = useState<any>();
   const [fieldMetaData, setFieldMetaData] = useState<any>([]);
 
-  const { data: fieldDefaultMetaData, refetch } = useGetFieldDefaultMetaDataQuery(null);
+  useGetFieldDefaultMetaDataQuery(null);
   const [allModelsNames, setAllModelsNames] = useState([]);
 
-  const [triggerGetModels, { data: allmodels, isLoading: isAllModelsLoaded, error: allModelsError }] =
+  const [triggerGetModels, { data: allmodels }] =
     useLazyGetModelsQuery();
 
 
   const [
     createModel,
-    { isLoading: isCreateModelLoading, isSuccess: isCreateModelSuccess, isError: isCreateModelError, error: createModelError, data: newModel },
+    { isSuccess: isCreateModelSuccess, isError: isCreateModelError, error: createModelError },
   ] = useCreatemodelMutation();
 
   const [
     updateModel,
-    { isLoading: isUpdatedModelUpdating, isSuccess: isUpdatedModelSuceess, isError: isUpdateModelError, error: updateModelError, data: updatedModel },
+    { isSuccess: isUpdatedModelSuceess, isError: isUpdateModelError, error: updateModelError },
   ] = useUpdatemodelMutation();
-  const [
-    deleteModel,
-    { isLoading: isModelDeleted, isSuccess: isDeleteModelSuceess, isError: isDeleteModelError, error: deleteModelError, data: DeletedModel },
-  ] = useDeletemodelMutation();
-
   const [activeTab, setActiveTab] = useState<TabValue>("model");
   const [tabErrors, setTabErrors] = useState<Record<TabValue, boolean>>(getTabErrorState());
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const deleteModelFunction = async () => {};
+  const availableTabs: readonly TabValue[] = isCreateMode ? ["model", "fields"] : TABS;
 
   const nextTab = () => {
-    const currentIndex = TABS.indexOf(activeTab);
-    const nextValue = TABS[Math.min(currentIndex + 1, TABS.length - 1)];
+    const currentIndex = availableTabs.indexOf(activeTab as (typeof availableTabs)[number]);
+    const nextValue = availableTabs[Math.min(Math.max(currentIndex, 0) + 1, availableTabs.length - 1)];
     setActiveTab(nextValue);
   };
 
@@ -95,7 +80,6 @@ const CreateModel = ({ data, params }: any) => {
         ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel, isLegacyTable, hasExistingId
       }
 
-      setIsLoadingData(false);
       setModelMetaData(modelData);
       const fieldData = data.fields.map((f: any) => {
         const fieldCopy = { ...f }; // Create a shallow copy of the field object
@@ -120,7 +104,7 @@ const CreateModel = ({ data, params }: any) => {
       encodeValuesOnly: true
     });
     triggerGetModels(queryString);
-  }, [isDeleteModelSuceess]);
+  }, []);
 
   useEffect(() => {
     if (allmodels) {
@@ -242,70 +226,16 @@ const CreateModel = ({ data, params }: any) => {
     }
   };
 
-  const deleteModelFunction = async () => {
-    deleteModel(data?.id);
-  }
-
   useEffect(() => {
-    if (isCreateModelSuccess == true || isUpdatedModelSuceess == true || isDeleteModelSuceess == true) {
+    if (isCreateModelSuccess == true || isUpdatedModelSuceess == true) {
       // router.push(`/admin/app-builder/model/all`);
       router.back();
     }
-  }, [isCreateModelSuccess, isUpdatedModelSuceess, isDeleteModelSuceess])
-
-  const showError = async (errors: any) => {
-    const errorMessages = Object.values(errors);
-
-    if (errorMessages.length > 0) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.map(String).join(', '), life: 3000 }));
-    }
-  };
-
-  const isFetchBaseQueryErrorWithErrorResponse = (error: any): error is FetchBaseQueryError & { data: ErrorResponseData } => {
-    return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
-  }
-
-  // const handleError = (errorToast: any) => {
-  //   let errorMessage: any = ['An error occurred'];
-
-  //   if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
-  //     errorMessage = errorToast.data.message;
-  //   } else {
-  //     errorMessage = ['Something went wrong'];
-  //   }
-
-  //   toast?.current?.show({
-  //     severity: 'error',
-  //     summary: 'Error',
-  //     detail: errorMessage,
-  //     life: 3000,
-  //     //@ts-ignore
-  //     content: (props) => (
-  //       <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
-  //         {Array.isArray(errorMessage) ? (
-  //           errorMessage.map((message, index) => (
-  //             <div className="flex align-items-center gap-2" key={index}>
-  //               <span className="font-bold text-900">{message.trim()}</span>
-  //             </div>
-  //           ))
-  //         ) : (
-  //           <div className="flex align-items-center gap-2">
-  //             <span className="font-bold text-900">{errorMessage?.trim()}</span>
-  //           </div>
-  //         )}
-  //       </div>
-  //     ),
-  //   });
-  // };
-
-
-  // Error Handler 
-  // Added useEffect to remove active tab class border color if error is there.
+  }, [isCreateModelSuccess, isUpdatedModelSuceess])
 
   useEffect(() => {
     const errors = [
       { isError: isCreateModelError, error: createModelError },
-      { isError: isDeleteModelError, error: deleteModelError },
       { isError: isUpdateModelError, error: updateModelError },
     ];
     if (errors.length > 0) {
@@ -321,148 +251,106 @@ const CreateModel = ({ data, params }: any) => {
       });
     }
 
-  }, [isCreateModelError, isDeleteModelError, isUpdateModelError])
-  const [formActionsMenuOpen, setFormActionsMenuOpen] = useState(false);
-  const formActionDropdown = () => (
-    <SolidPopover open={formActionsMenuOpen} onOpenChange={setFormActionsMenuOpen}>
-      <SolidPopoverTrigger asChild>
-        <SolidButton
-          variant="ghost"
-          size="sm"
-          className="solid-icon-button"
-          aria-label="Model actions"
-        >
-          <Settings size={16} />
-        </SolidButton>
-      </SolidPopoverTrigger>
-      <SolidPopoverContent
-        side="bottom"
-        align="end"
-        className="solid-form-actions-popover"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          className="solid-row-action-button solid-row-action-button-danger"
-          onClick={() => {
-            setFormActionsMenuOpen(false);
-            setDeleteEntity(true);
-          }}
-        >
-          <Trash2 size={14} className="solid-row-action-button-icon" />
-          <span className="solid-row-action-button-label">Delete</span>
-        </button>
-      </SolidPopoverContent>
-    </SolidPopover>
-  );
+  }, [isCreateModelError, isUpdateModelError])
 
   const [isDirty, setIsDirty] = useState(false);
-  const isCreateMode = params.id === "new";
-  const headerTitleBase = isCreateMode ? "Create Model" : "Edit Model";
-  const headerTitle = `${headerTitleBase}${modelMetaData?.displayName ? ` - ${modelMetaData.displayName}` : ""}`;
-  const canShowActionsMenu = !isCreateMode && data?.isSystem !== true;
-  const handleCancel = () => router.back();
+  const [fieldDeleted, setFieldDeleted] = useState(false);
+  const explorerModuleName = data?.module?.name ?? modelMetaData?.module?.name ?? "";
+  const explorerModelSingularName = data?.singularName ?? modelMetaData?.singularName ?? "";
+  const isReadOnlyModelExplorer = Boolean(
+    modelMetaData?.isSystem ||
+    data?.isSystem ||
+    explorerModuleName.toLowerCase() === "solid-core"
+  );
+  const shouldShowTabSave = !isCreateMode ? activeTab === "fields" && fieldDeleted : activeTab !== "explorer" && isDirty;
+
+  const modelTabContent = (
+    <div className="solid-model-form-content is-tabbed">
+      <ModelMetaData
+        modelMetaData={modelMetaData}
+        setModelMetaData={setModelMetaData}
+        allModelsNames={allModelsNames}
+        deleteModelFunction={deleteModelFunction}
+        nextTab={nextTab}
+        formikModelMetadataRef={formikModelMetadataRef}
+        params={params}
+        formErrors={formErrors}
+        setIsDirty={setIsDirty}
+      />
+    </div>
+  );
+
+  const fieldsTabContent = (
+    <div className="solid-model-form-content is-tabbed">
+      <FieldMetaData
+        modelMetaData={modelMetaData}
+        fieldMetaData={fieldMetaData}
+        setFieldMetaData={setFieldMetaData}
+        deleteModelFunction={deleteModelFunction}
+        nextTab={nextTab}
+        formikFieldsMetadataRef={formikFieldsMetadataRef}
+        params={params}
+        setIsDirty={setIsDirty}
+        setFieldDeleted={setFieldDeleted}
+      />
+    </div>
+  );
 
 
   return (
     <div className="solid-form-wrapper">
       <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
-        <div>
-          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
-            <div className="flex flex-column gap-1">
-              {/* <span className="text-sm text-color-secondary uppercase tracking-wider">Model</span>
-            <div className="form-wrapper-title solid-long-text-wrapper m-0">{headerTitle}</div> */}
-            </div>
-            <div className="flex align-items-center gap-2">
-              <SolidButton
-                variant="outline"
-                size="sm"
-                type="button"
-                onClick={handleCancel}
-                className="bg-primary-reverse"
-              >
-                Cancel
-              </SolidButton>
-              {isDirty && (
-                <SolidButton size="sm" type="button" onClick={handleSubmit}>
-                  Save
-                </SolidButton>
-              )}
-              {canShowActionsMenu && formActionDropdown()}
-            </div>
-          </div>
-          {/* <SolidFormHeader /> */}
-          <div className="px-4 py-3 md:p-4 solid-form-content">
+        <div className="solid-model-form-workspace">
           <SolidTabGroup
-            className="relative"
-            panelClassName="px-0"
+            className="solid-model-form-tabs"
+            listClassName="solid-model-form-tablist"
+            panelClassName="solid-model-form-tabpanel"
             tabs={[
               {
                 value: "model",
-                label: <span className={tabErrors.model ? "tab-error-heading" : ""}>Model</span>,
-                content: (
-                  <ModelMetaData
-                    modelMetaData={modelMetaData}
-                    setModelMetaData={setModelMetaData}
-                    allModelsNames={allModelsNames}
-                    deleteModelFunction={deleteModelFunction}
-                    nextTab={nextTab}
-                    formikModelMetadataRef={formikModelMetadataRef}
-                    params={params}
-                    formErrors={formErrors}
-                    setIsDirty={setIsDirty}
-                  ></ModelMetaData>
-                ),
+                label: <span className={`solid-model-form-tab-label ${tabErrors.model ? "tab-error-heading" : ""}`}>Model</span>,
+                content: modelTabContent,
               },
               {
                 value: "fields",
-                label: <span className={tabErrors.fields ? "tab-error-heading" : ""}>Fields</span>,
-                content: (
-                  <FieldMetaData
-                    modelMetaData={modelMetaData}
-                    fieldMetaData={fieldMetaData}
-                    setFieldMetaData={setFieldMetaData}
-                    deleteModelFunction={deleteModelFunction}
-                    nextTab={nextTab}
-                    formikFieldsMetadataRef={formikFieldsMetadataRef}
-                    params={params}
-                    setIsDirty={setIsDirty}
-                  ></FieldMetaData>
-                ),
+                label: <span className={`solid-model-form-tab-label ${tabErrors.fields ? "tab-error-heading" : ""}`}>Fields</span>,
+                content: fieldsTabContent,
               },
+              ...(!isCreateMode
+                ? [
+                    {
+                      value: "explorer",
+                      label: <span className="solid-model-form-tab-label">Explorer</span>,
+                      content: (
+                        <ModuleMetadataExplorer
+                          moduleName={explorerModuleName}
+                          modelSingularName={explorerModelSingularName}
+                          readOnly={isReadOnlyModelExplorer}
+                          allowSeed={false}
+                        />
+                      ),
+                    },
+                  ]
+                : []),
             ]}
             value={activeTab}
             onValueChange={(value) => {
-              const next = TABS.find((tab) => tab === value);
+              const next = availableTabs.find((tab) => tab === value);
               if (next) {
                 handleTabChange(next);
               }
             }}
           />
-          </div>
         </div>
+        {shouldShowTabSave && (
+          <div className="solid-model-form-actions">
+            <SolidButton type="button" onClick={handleSubmit}>
+              Save
+            </SolidButton>
+          </div>
+        )}
         <SolidFormFooter params={params}></SolidFormFooter>
-
       </div>
-      {/* <div style={{ width: '22.5%' }}></div> */}
-      <SolidDialog header="Delete Model" headerClassName="py-2" className="solid-confirm-dialog" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
-        <SolidDivider className="m-0" />
-        <div className="p-4">
-          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-            Are you sure you want to delete this Model?
-          </p>
-          <p className="" style={{ color: 'var{--solid-grey-500}' }}>{modelMetaData?.singularName}</p>
-          <div className="flex align-items-center gap-2 mt-3">
-            <SolidButton size="sm" onClick={deleteModelFunction}>
-              Delete
-            </SolidButton>
-            <SolidButton size="sm" variant="outline" onClick={() => setDeleteEntity(false)}>
-              Cancel
-            </SolidButton>
-          </div>
-        </div>
-      </SolidDialog>
-
     </div>
   );
 };

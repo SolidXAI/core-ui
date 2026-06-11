@@ -941,6 +941,8 @@ body {
   font-size: 11.5px;
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .solid-toast-close {
@@ -1036,10 +1038,12 @@ body {
   width: min(560px, calc(100vw - 32px));
 }
 
+.solid-field-delete-flow-dialog .solid-shadcn-dialog-head,
 .solid-field-delete-flow-head {
   text-align: left;
 }
 
+.solid-field-delete-flow-dialog .solid-shadcn-dialog-body,
 .solid-field-delete-flow-body {
   text-align: left;
 }
@@ -1075,6 +1079,7 @@ body {
   color: var(--muted-foreground);
 }
 
+.solid-field-delete-flow-dialog .solid-shadcn-dialog-actions,
 .solid-field-delete-flow-actions {
   justify-content: flex-end;
 }

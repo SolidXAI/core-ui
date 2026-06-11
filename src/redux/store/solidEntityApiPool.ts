@@ -122,6 +122,10 @@ export function setSolidEntityApiStore(store: SolidEntityApiStore) {
   activeStore = store;
 }
 
+export function getSolidStoreDispatch() {
+  return activeStore?.dispatch ?? null;
+}
+
 export function ensureSolidEntityApiRegistered(entityName: string, api: SolidEntityApi) {
   const timestamp = nextTimestamp();
   const existingEntry = pool.get(entityName);
