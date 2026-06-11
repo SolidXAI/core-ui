@@ -32,6 +32,9 @@ type ModuleMetadataExplorerProps = {
   moduleName?: string;
   moduleId?: number;
   modelSingularName?: string;
+  scopedArrayPath?: string;
+  scopedItemValue?: string;
+  scopedItemField?: string;
   readOnly?: boolean;
   allowSeed?: boolean;
 };
@@ -282,6 +285,11 @@ const JsonEditorSurface = React.forwardRef<JsonEditorHandle, {
 }>(function JsonEditorSurface({ value, resetToken, readOnly = false, onValueChange, onErrorChange }, ref) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const editorRef = useRef<any>(null);
+  // Keep a ref to the latest value so the async init can seed the editor correctly
+  const latestValueRef = useRef<any>(value);
+
+  // Sync latest value into ref so async editor init can use it
+  useEffect(() => { latestValueRef.current = value; }, [value]);
 
   const emitState = () => {
     const editor = editorRef.current;
@@ -330,6 +338,10 @@ const JsonEditorSurface = React.forwardRef<JsonEditorHandle, {
         enableTransform: false,
         onChange: () => emitState(),
       });
+
+      // Seed editor with current value (which may already be set before async init resolved)
+      try { editorRef.current.set(latestValueRef.current); } catch (_e) {}
+      emitState();
 
       if (editorRef.current?.aceEditor?.setReadOnly) {
         editorRef.current.aceEditor.setReadOnly(readOnly);
@@ -425,6 +437,9 @@ export function ModuleMetadataExplorer({
   moduleName,
   moduleId,
   modelSingularName,
+  scopedArrayPath,
+  scopedItemValue,
+  scopedItemField,
   readOnly = false,
   allowSeed = true,
 }: ModuleMetadataExplorerProps) {
@@ -477,12 +492,23 @@ export function ModuleMetadataExplorer({
   );
 
   const scopedRootPath = useMemo(() => {
-    if (!modelSingularName) return "";
-    const models = getValueAtJsonPath(fullDocument, "moduleMetadata.models");
-    if (!Array.isArray(models)) return "";
-    const modelIndex = models.findIndex((model) => model?.singularName === modelSingularName);
-    return modelIndex >= 0 ? `moduleMetadata.models[${modelIndex}]` : "";
-  }, [fullDocument, modelSingularName]);
+    // Scope to a specific model definition
+    if (modelSingularName) {
+      const models = getValueAtJsonPath(fullDocument, "moduleMetadata.models");
+      if (!Array.isArray(models)) return "";
+      const modelIndex = models.findIndex((model) => model?.singularName === modelSingularName);
+      return modelIndex >= 0 ? `moduleMetadata.models[${modelIndex}]` : "";
+    }
+    // Scope to a specific item in a root-level array (e.g. views, actions, menus)
+    if (scopedArrayPath && scopedItemValue) {
+      const arr = getValueAtJsonPath(fullDocument, scopedArrayPath);
+      if (!Array.isArray(arr)) return "";
+      const matchField = scopedItemField ?? "name";
+      const itemIndex = arr.findIndex((item) => item?.[matchField] === scopedItemValue);
+      return itemIndex >= 0 ? `${scopedArrayPath}[${itemIndex}]` : "";
+    }
+    return "";
+  }, [fullDocument, modelSingularName, scopedArrayPath, scopedItemValue, scopedItemField]);
 
   const scopedTreeNodes = useMemo(() => {
     if (!scopedRootPath) return treeNodes;

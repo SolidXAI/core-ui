@@ -77,6 +77,7 @@ import {
 } from "../types/extension-registry";
 
 import { scheduleFrequencyOnFieldChangeHandler } from "../components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
+import { MetadataExplorerFormWidget } from "../components/core/extension/solid-core/metadata/MetadataExplorerFormWidget";
 
 
 type ExtensionComponentMetadata = {
@@ -359,6 +360,7 @@ registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, Exten
 
 // 7. form widget 
 registerExtensionComponent("CustomHtml", CustomHtml, ExtensionComponentTypes.formWidget);
+registerExtensionComponent("MetadataExplorerFormWidget", MetadataExplorerFormWidget, ExtensionComponentTypes.formWidget);
 registerExtensionComponent("solidXGenAiCodeBuilderConfigWidget", solidXGenAiCodeBuilderConfigWidget, ExtensionComponentTypes.settingsWidgets);
 
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdFormViewWidget", SolidChatterMessageCoModelEntityIdFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
