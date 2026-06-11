@@ -48,7 +48,7 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
     // const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
-        <div className='flex flex-column md:flex-row align-items-start gap-6 md:gap-1'>
+        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-1'>
             <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
 
             <SolidSelect

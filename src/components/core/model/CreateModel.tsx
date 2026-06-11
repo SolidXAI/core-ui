@@ -392,7 +392,7 @@ const CreateModel = ({ data, params }: any) => {
             </div>
           </div>
           {/* <SolidFormHeader /> */}
-          <div className="px-4 py-3 md:p-4 solid-form-content">
+          <div className="px-3 py-3 md:p-4 solid-form-content">
           <SolidTabGroup
             className="relative"
             panelClassName="px-0"

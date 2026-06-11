@@ -1,21 +1,25 @@
-@media(max-width:1399px){
+@media(max-width:1399px) {
 
-.kanban-ungrouped-column-content {
-    column-gap: 20px;
-  }
-  
-  .kanban-card-container {
-    margin-top: 1.5rem;
-  }
-  
-  .kanban-ungrouped-column .kanban-card-container {
-    flex: 1 1 calc(20% - 20px);
-    max-width: calc(20% - 20px);
-  }
+    .kanban-ungrouped-column-content {
+        column-gap: 20px;
+    }
 
-  .solid-card-view-grid {
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  }
+    .kanban-card-container {
+        margin-top: 1.5rem;
+    }
+
+    .kanban-ungrouped-column .kanban-card-container {
+        flex: 1 1 calc(20% - 20px);
+        max-width: calc(20% - 20px);
+    }
+
+    .solid-card-view-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+
+    .solid-kanban-board-wrapper {
+        width: calc(100vw - 315px) !important;
+    }
 }
 
 @media (max-width: 1199px) {
@@ -149,12 +153,15 @@
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 calc(33.33% - 20px);
         max-width: calc(33.33% - 20px);
-      }
+    }
 
     .solid-card-view-grid {
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      }
+    }
 
+    .solid-kanban-board-wrapper {
+        width: calc(100vw - 40px) !important;
+    }
 }
 
 
@@ -223,12 +230,12 @@
     }
 
     .solid-custom-filter-wrapper .p-inputtext {
-        width: 100%;
+        width: 100% !important;
     }
 
     .solid-global-search-element {
         min-height: 36px;
-        height: auto;
+        height: auto !important;
     }
 
     .solid-global-search-element input {
@@ -302,9 +309,18 @@
     .solid-form-header {
         padding: 10px 16px 16px 20px !important;
     }
-    .solid-form-wrapper .solid-form-content {
-        height: calc(100vh - 139px) !important;
-      }
+
+    /* .solid-form-wrapper .solid-form-content {
+        height: calc(100vh - 165px) !important;
+    } */
+
+    .solid-form-wrapper .solid-form-content.solid-form-view {
+        height: calc(100vh - 167px) !important;
+    }
+
+    .solid-form-wrapper .solid-form-content.solid-form-edit {
+        height: calc(100vh - 135px) !important;
+    }
 
 
     .solid-text-wrapper {
@@ -327,6 +343,21 @@
     }
 
 
+    .solid-list-surface {
+        height: calc(100vh - 70px) !important;
+    }
+
+    .solid-export-summary-chip {
+        max-height: 16px;
+    }
+
+    .solid-radix-dialog-content {
+        width: 85vw !important;
+    }
+
+    .solid-file-upload-wrapper {
+        padding: 6px 6px 6px 0px;
+    }
 
 }
 
@@ -415,7 +446,7 @@
     }
 
     .p-dialog .p-dialog-header {
-        padding: 1rem 1.5rem ;
+        padding: 1rem 1.5rem;
     }
 
     .solid-icon-dialog {
@@ -447,7 +478,7 @@
     }
 
 
-    
+
     /* =================  cog wheel ================== */
     .customize-layout-panel.p-overlaypanel {
         top: 16% !important;
@@ -487,9 +518,9 @@
         width: calc(100vw - 80px);
     }
 
-     .solid-global-search-element input {
+    .solid-global-search-element input {
         height: 28px;
-    } 
+    }
 
     .solid-filter-auto-complete-field button {
         height: 2.5rem !important;
@@ -530,9 +561,13 @@
         padding: 10px 16px 12px 16px !important;
     }
 
-    .solid-form-wrapper .solid-form-content {
-        height: calc(100vh - 132px) !important;
-      }
+    .solid-form-wrapper .solid-form-content.solid-form-view {
+        height: calc(100vh - 167px) !important;
+    }
+
+    .solid-form-wrapper .solid-form-content.solid-form-edit {
+        height: calc(100vh - 135px) !important;
+    }
 
     .form-wrapper-title {
         font-size: 14px !important;
@@ -566,7 +601,7 @@
         text-overflow: ellipsis;
     }
 
-    .solid-module-mobile-text-wrapper{
+    .solid-module-mobile-text-wrapper {
         max-width: clamp(180px, 65vw, 600px);
         white-space: nowrap;
         overflow: hidden;
@@ -576,18 +611,97 @@
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 calc(50% - 20px);
         max-width: calc(50% - 20px);
-      }
+    }
 
-      .solid-card-view-grid {
+    .solid-card-view-grid {
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      }
+    }
 
-      .solid-img-text-wrapper{
+    .solid-img-text-wrapper {
         max-width: clamp(180px, 60vw, 600px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+    .solid-popover-content.solid-custom-overlay.solid-form-stepper-overlay {
+        left: -86px !important;
+    }
+
+    .solid-list-page-wrapper {
+        padding: 8px;
+    }
+
+    .solid-global-search-element {
+        padding: 0px !important;
+    }
+
+    .solid-global-search-element ul {
+        /* padding: 3px !important; */
+    }
+
+    .solid-autocomplete-chip {
+        min-height: 22px !important;
+        height: 22px !important;
+    }
+
+    .solid-filter-builder,
+    .solid-filter-rule-row,
+    .solid-filter-control-wrap {
+        overflow: visible;
+    }
+
+    .dialog-content {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .solid-select-wrap {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .solid-select {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .solid-filter-rule-field,
+    .solid-filter-rule-value {
+        min-width: 0;
+    }
+
+    .solid-radix-dialog-content {
+        width: 95vw !important;
+    }
+
+    .solid-media-column-text-wrapper {
+        max-width: clamp(200px, 34vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .solid-list-view-text-wrapper {
+        max-width: clamp(200px, 50vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .solid-bread-crum-text-wrapper {
+        max-width: clamp(150px, 35vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
+    .solid-form-actions-menu {
+        gap: 0px;
+    }
+
 }
 
 
@@ -649,20 +763,26 @@
         width: 90% !important;
     }
 
-    .solid-module-mobile-text-wrapper{
+    .solid-module-mobile-text-wrapper {
         max-width: clamp(120px, 52vw, 600px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    .solid-img-text-wrapper{
+    .solid-img-text-wrapper {
         max-width: clamp(180px, 50vw, 600px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
+    .solid-permisson-text-wrapper {
+        max-width: clamp(150px, 65vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
 }
 
@@ -670,11 +790,11 @@
 
     /* ===================== Solid Kanban ==================== */
 
-    .kanban-column:not(.kanban-column-folded) {
+    /* .kanban-column:not(.kanban-column-folded) {
         min-width: 72% !important;
         max-width: 80% !important;
         width: 72% !important;
-    }
+    } */
 
     .kanban-column-folded {
         min-width: fit-content !important;
@@ -686,18 +806,18 @@
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 100%;
         max-width: 100%;
-      }
+    }
 
     .solid-card-view-body {
         padding-left: 12px;
         padding-right: 12px;
-      }
+    }
 
     .solid-card-view-grid {
         grid-template-columns: 1fr;
         gap: 12px;
-      }
-    
+    }
+
 
 
 
@@ -726,16 +846,42 @@
 
 
 
-    .solid-text-wrapper {
+    /* .solid-text-wrapper {
         max-width: clamp(80px, 23vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    } */
+
+
+    .solid-img-text-wrapper {
+        max-width: clamp(170px, 40vw, 600px);
+    }
+
+    .solid-form-stepper-overlay {
+        width: max-content;
+        min-width: 208px;
+        max-width: min(300px, calc(100vw - 40px));
+    }
+
+    .solid-popover-content.solid-custom-overlay.solid-form-stepper-overlay {
+        left: -86px !important;
+    }
+
+
+    .solid-list-view-text-wrapper {
+        max-width: clamp(100px, 43vw, 600px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
 
-    .solid-img-text-wrapper{
-        max-width: clamp(170px, 40vw, 600px);
+    .solid-bread-crum-text-wrapper {
+        max-width: clamp(110px, 30vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 
@@ -757,9 +903,9 @@
 }
 
 
-@media(max-width:400px){
-    .solid-img-text-wrapper{
+@media(max-width:400px) {
+    .solid-img-text-wrapper {
         max-width: clamp(137px, 34vw, 600px);
-    
+
     }
 }

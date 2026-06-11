@@ -599,6 +599,37 @@ body {
   padding: 6px 6px 8px;
 }
 
+.solid-sidebar-mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.solid-sidebar-mobile-action {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--sidebar-foreground);
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.35;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.solid-sidebar-mobile-action:hover {
+  background: color-mix(in srgb, var(--sidebar-accent) 75%, transparent);
+}
+
+.solid-sidebar-mobile-action:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--sidebar-accent) 75%, transparent);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
 .solid-user-menu {
   position: relative;
 }
@@ -1183,8 +1214,7 @@ body {
   transition: border-color 120ms ease, background 120ms ease, color 120ms ease, box-shadow 120ms ease;
 }
 
-.solid-btn:hover {
-}
+.solid-btn:hover {}
 
 .solid-btn:focus-visible {
   outline: none;
@@ -1977,8 +2007,8 @@ body {
     padding: 14px;
   }
 
-  .solid-auth-theme-wrapper.left > .grid,
-  .solid-auth-theme-wrapper.right > .grid {
+  .solid-auth-theme-wrapper.left>.grid,
+  .solid-auth-theme-wrapper.right>.grid {
     grid-template-columns: 1fr;
     min-height: auto;
     border-radius: 14px;
@@ -2027,8 +2057,8 @@ body {
   margin: 0 auto;
 }
 
-.solid-auth-theme-wrapper.left > .grid,
-.solid-auth-theme-wrapper.right > .grid {
+.solid-auth-theme-wrapper.left>.grid,
+.solid-auth-theme-wrapper.right>.grid {
   width: 100%;
   min-height: 100vh;
   display: grid !important;
@@ -2064,8 +2094,8 @@ body {
   background: rgba(24, 24, 27, 0.62);
 }
 
-.solid-auth-theme-wrapper.left .solid-left-layout > *,
-.solid-auth-theme-wrapper.right .solid-right-layout > * {
+.solid-auth-theme-wrapper.left .solid-left-layout>*,
+.solid-auth-theme-wrapper.right .solid-right-layout>* {
   position: relative;
   z-index: 2;
 }
@@ -2197,11 +2227,13 @@ body {
 .solid-auth-brand.is-center {
   align-self: center;
 }
+
 .solid-auth-brand-logo img {
   width: 100%;
   max-width: 125px;
   align-items: center;
 }
+
 .solid-auth-brand-icon {
   width: 24px;
   height: 24px;
@@ -2259,8 +2291,8 @@ body {
     padding: 16px;
   }
 
-  .solid-auth-theme-wrapper.left > .grid,
-  .solid-auth-theme-wrapper.right > .grid {
+  .solid-auth-theme-wrapper.left>.grid,
+  .solid-auth-theme-wrapper.right>.grid {
     grid-template-columns: 1fr;
   }
 
@@ -2861,7 +2893,7 @@ body {
   opacity: 0.34;
 }
 
-.solid-auth-theme-wrapper > *:not(.solid-toast-viewport) {
+.solid-auth-theme-wrapper>*:not(.solid-toast-viewport) {
   position: relative;
   z-index: 1;
 }
@@ -2886,7 +2918,9 @@ body {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
+  /* height: 100%; */
+  height: calc(100vh - 70px) !important;
+
 }
 
 .solid-list-surface {
@@ -2988,7 +3022,7 @@ body {
 
 .solid-list-toolbar .solid-global-search-element-wrapper,
 .solid-kanban-toolbar .solid-global-search-element-wrapper {
-  width: min(460px, 42vw);
+  min-width: min(460px, 42vw);
 }
 
 .solid-list-toolbar .solid-global-search-element input,
@@ -3108,25 +3142,19 @@ body {
 html.dark .solid-list-page-wrapper,
 [data-theme="dark"] .solid-list-page-wrapper {
   background:
-    radial-gradient(
-      circle at top right,
+    radial-gradient(circle at top right,
       color-mix(in srgb, var(--primary) 10%, transparent),
-      transparent 26%
-    ),
-    linear-gradient(
-      180deg,
+      transparent 26%),
+    linear-gradient(180deg,
       color-mix(in srgb, var(--background) 98%, #020617 2%),
-      color-mix(in srgb, var(--background) 94%, #020617 6%)
-    ) !important;
+      color-mix(in srgb, var(--background) 94%, #020617 6%)) !important;
 }
 
 html.dark .solid-list-surface,
 [data-theme="dark"] .solid-list-surface {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--card) 96%, #0b1220 4%),
-    color-mix(in srgb, var(--card) 90%, #020617 10%)
-  );
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--card) 96%, #0b1220 4%),
+      color-mix(in srgb, var(--card) 90%, #020617 10%));
   border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
   box-shadow:
     0 18px 40px rgba(2, 6, 23, 0.42),
@@ -3135,11 +3163,9 @@ html.dark .solid-list-surface,
 
 html.dark .solid-list-toolbar,
 [data-theme="dark"] .solid-list-toolbar {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--card) 94%, #172554 6%),
-    color-mix(in srgb, var(--card) 88%, #0b1220 12%)
-  );
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--card) 94%, #172554 6%),
+      color-mix(in srgb, var(--card) 88%, #0b1220 12%));
   border-bottom-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
   box-shadow:
     inset 0 -1px 0 rgba(15, 23, 42, 0.55),
@@ -3163,14 +3189,8 @@ html.dark .solid-kanban-toolbar .solid-global-search-element,
 
 html.dark .solid-list-toolbar .solid-global-search-element input::placeholder,
 html.dark .solid-kanban-toolbar .solid-global-search-element input::placeholder,
-[data-theme="dark"]
-  .solid-list-toolbar
-  .solid-global-search-element
-  input::placeholder,
-[data-theme="dark"]
-  .solid-kanban-toolbar
-  .solid-global-search-element
-  input::placeholder {
+[data-theme="dark"] .solid-list-toolbar .solid-global-search-element input::placeholder,
+[data-theme="dark"] .solid-kanban-toolbar .solid-global-search-element input::placeholder {
   color: color-mix(in srgb, var(--muted-foreground) 64%, transparent);
 }
 
@@ -3231,6 +3251,7 @@ html.dark .solid-header-cog-trigger:hover,
     width: calc(100vw - 115px) !important;
   }
 }
+
 .chatter-section .solid-locale-tabs-list {
   padding-left: 2.7rem;
 }
@@ -3335,12 +3356,12 @@ html.dark .solid-header-cog-trigger:hover,
   min-width: 0;
 }
 
-.solid-list-table-area > .solid-data-table-root {
+.solid-list-table-area>.solid-data-table-root {
   flex: 1 1 auto;
   min-height: 0;
 }
 
-.solid-tree-table-area > .solid-tree-table-root {
+.solid-tree-table-area>.solid-tree-table-root {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -3540,20 +3561,16 @@ html.dark .solid-list-table-area,
 html.dark .solid-data-table-viewport,
 [data-theme="dark"] .solid-data-table-viewport {
   border-radius: 0 0 12px 12px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--card) 90%, #0b1220 10%),
-    color-mix(in srgb, var(--card) 84%, #020617 16%)
-  );
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--card) 90%, #0b1220 10%),
+      color-mix(in srgb, var(--card) 84%, #020617 16%));
 }
 
 html.dark .solid-data-table-head,
 [data-theme="dark"] .solid-data-table-head {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--card) 96%, #172554 4%),
-    color-mix(in srgb, var(--card) 88%, #0b1220 12%)
-  );
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--card) 96%, #172554 4%),
+      color-mix(in srgb, var(--card) 88%, #0b1220 12%));
   backdrop-filter: blur(10px);
   box-shadow:
     inset 0 -1px 0 color-mix(in srgb, var(--border) 70%, #334155 30%),
@@ -3602,14 +3619,8 @@ html.dark .solid-data-table-row:has(input[type="checkbox"]:checked),
   box-shadow: inset 2px 0 0 color-mix(in srgb, var(--primary) 86%, white 14%);
 }
 
-html.dark
-  .solid-datatable-wrapper
-  td
-  a:not(.solid-inline-row-button):not(.solid-row-menu-trigger),
-[data-theme="dark"]
-  .solid-datatable-wrapper
-  td
-  a:not(.solid-inline-row-button):not(.solid-row-menu-trigger) {
+html.dark .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger),
+[data-theme="dark"] .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger) {
   color: color-mix(in srgb, var(--primary) 68%, var(--foreground) 32%);
   text-decoration: none;
   transition:
@@ -3617,14 +3628,8 @@ html.dark
     opacity 120ms ease;
 }
 
-html.dark
-  .solid-datatable-wrapper
-  td
-  a:not(.solid-inline-row-button):not(.solid-row-menu-trigger):hover,
-[data-theme="dark"]
-  .solid-datatable-wrapper
-  td
-  a:not(.solid-inline-row-button):not(.solid-row-menu-trigger):hover {
+html.dark .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger):hover,
+[data-theme="dark"] .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger):hover {
   color: color-mix(in srgb, var(--primary) 82%, white 18%);
 }
 
@@ -3662,9 +3667,7 @@ html.dark .solid-data-table-root input[type="checkbox"]:hover,
 }
 
 html.dark .solid-data-table-root input[type="checkbox"]:focus-visible,
-[data-theme="dark"]
-  .solid-data-table-root
-  input[type="checkbox"]:focus-visible {
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"]:focus-visible {
   outline: none;
   border-color: var(--primary);
   box-shadow: none !important;
@@ -3680,19 +3683,15 @@ html.dark .solid-data-table-root input[type="checkbox"]:checked,
 }
 
 html.dark .solid-data-table-root input[type="checkbox"]:checked::before,
-[data-theme="dark"]
-  .solid-data-table-root
-  input[type="checkbox"]:checked::before {
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"]:checked::before {
   transform: scale(1);
 }
 
 html.dark .solid-table-paginator,
 [data-theme="dark"] .solid-table-paginator {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--card) 90%, #0b1220 10%),
-    color-mix(in srgb, var(--card) 84%, #020617 16%)
-  );
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--card) 90%, #0b1220 10%),
+      color-mix(in srgb, var(--card) 84%, #020617 16%));
   border-color: color-mix(in srgb, var(--border) 72%, #334155 28%) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
@@ -3747,7 +3746,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   overscroll-behavior: contain;
 }
 
-.solid-tree-table-root .solid-data-table-viewport > .relative {
+.solid-tree-table-root .solid-data-table-viewport>.relative {
   min-height: 100%;
   min-width: max-content;
 }
@@ -3919,11 +3918,9 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   align-items: flex-start;
   justify-content: center;
   padding-top: 1rem;
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--background) 84%, transparent),
-    transparent 35%
-  );
+  background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--background) 84%, transparent),
+      transparent 35%);
   pointer-events: none;
 }
 
@@ -4065,8 +4062,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-data-table-viewport {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--foreground) 26%, transparent)
-    color-mix(in srgb, var(--background) 86%, transparent);
+  scrollbar-color: color-mix(in srgb, var(--foreground) 26%, transparent) color-mix(in srgb, var(--background) 86%, transparent);
 }
 
 .solid-data-table-viewport::-webkit-scrollbar {
@@ -4384,7 +4380,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   text-align: left;
 }
 
-.solid-dropdown-menu-item > a {
+.solid-dropdown-menu-item>a {
   display: inline-flex;
   align-items: center;
   width: 100%;
@@ -5632,11 +5628,9 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   overflow: auto;
   border-radius: 18px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--card) 96%, white 4%),
-    var(--card)
-  );
+  background: linear-gradient(180deg,
+      color-mix(in srgb, var(--card) 96%, white 4%),
+      var(--card));
   color: var(--foreground);
   box-shadow: 0 28px 60px rgba(15, 23, 42, 0.24);
 }
@@ -5685,12 +5679,32 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 .solid-field-confirm-header {
   width: 100%;
   display: flex;
+  position: relative;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 6px;
+  padding-right: 54px;
   font-size: 1.05rem;
   font-weight: 600;
   text-align: center;
   color: var(--card-foreground);
+}
+
+.solid-field-confirm-header .solid-radix-dialog-title,
+.solid-field-confirm-header .solid-radix-dialog-description {
+  width: 100%;
+  text-align: center;
+}
+
+.solid-field-confirm-header .solid-radix-dialog-description {
+  margin-top: 0;
+}
+
+.solid-field-confirm-header .solid-radix-dialog-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
 }
 
 .solid-field-confirm-dialog .solid-field-confirm-message {
@@ -5713,10 +5727,15 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-field-confirm-actions {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   gap: 12px;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
+
+
 
 .solid-radix-dialog-close {
   width: 32px;
@@ -5745,6 +5764,21 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+@media (max-width: 640px) {
+  .solid-field-confirm-header {
+    padding: 18px 52px 10px 18px;
+  }
+
+  .solid-field-confirm-dialog .solid-radix-dialog-body {
+    padding: 20px 18px 8px;
+  }
+
+  .solid-field-confirm-dialog .solid-radix-dialog-footer {
+    padding: 4px 18px 18px;
+  }
+
+}
+
 /* ==== Solid form primitives (shadcn/radix replacements) ==== */
 .solid-select-button {
   display: inline-flex;
@@ -5765,16 +5799,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-select-button-item.is-active {
-  border-color: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 70%,
-    var(--border)
-  );
-  background: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 12%,
-    var(--background)
-  );
+  border-color: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 70%,
+      var(--border));
+  background: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 12%,
+      var(--background));
   color: var(--foreground);
 }
 
@@ -5826,16 +5856,16 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
     box-shadow 0.15s ease;
 }
 
-.solid-checkbox-input:focus-visible + .solid-checkbox-box {
+.solid-checkbox-input:focus-visible+.solid-checkbox-box {
   box-shadow: 0 0 0 3px var(--ring);
 }
 
-.solid-checkbox-input:checked + .solid-checkbox-box {
+.solid-checkbox-input:checked+.solid-checkbox-box {
   background: var(--primary-color, var(--primary));
   border-color: var(--primary-color, var(--primary));
 }
 
-.solid-checkbox-input:checked + .solid-checkbox-box::after {
+.solid-checkbox-input:checked+.solid-checkbox-box::after {
   content: "";
   width: 8px;
   height: 4px;
@@ -5864,16 +5894,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-switch.is-on {
-  background: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 50%,
-    var(--muted)
-  );
-  border-color: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 70%,
-    var(--border)
-  );
+  background: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 50%,
+      var(--muted));
+  border-color: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 70%,
+      var(--border));
 }
 
 .solid-switch-thumb {
@@ -5970,10 +5996,8 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   font-size: 14px;
   line-height: 1.3;
   font-weight: 650;
-  color: var(
-    --solid-form-title,
-    color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground) 12%)
-  );
+  color: var(--solid-form-title,
+      color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground) 12%));
   letter-spacing: -0.015em;
 }
 
@@ -6021,11 +6045,9 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 16%,
-    transparent
-  );
+  background: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 16%,
+      transparent);
   color: var(--primary-color, var(--primary));
   display: inline-flex;
   align-items: center;
@@ -6102,13 +6124,10 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-field-selector-card.is-active {
-  border-color: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 45%,
-    var(--border)
-  );
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--primary-color, var(--primary)) 22%, transparent);
+  border-color: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 45%,
+      var(--border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color, var(--primary)) 22%, transparent);
 }
 
 .solid-field-selector-card-inner {
@@ -6128,11 +6147,9 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-field-selector-icon-blue {
-  background: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 16%,
-    transparent
-  );
+  background: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 16%,
+      transparent);
   color: color-mix(in srgb, var(--primary-color, var(--primary)) 68%, #0f172a);
 }
 
@@ -6211,16 +6228,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-tag-info {
-  background: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 12%,
-    transparent
-  );
-  border-color: color-mix(
-    in srgb,
-    var(--primary-color, var(--primary)) 36%,
-    var(--border)
-  );
+  background: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 12%,
+      transparent);
+  border-color: color-mix(in srgb,
+      var(--primary-color, var(--primary)) 36%,
+      var(--border));
 }
 
 .solid-tag-warn {
@@ -6302,17 +6315,13 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-segmented-item:not(.is-active):hover {
-  background: color-mix(
-    in srgb,
-    var(--primary-color, #4f46e5) 12%,
-    transparent
-  );
+  background: color-mix(in srgb,
+      var(--primary-color, #4f46e5) 12%,
+      transparent);
   color: var(--primary-color, #4f46e5);
-  border-color: color-mix(
-    in srgb,
-    var(--primary-color, #4f46e5) 35%,
-    transparent
-  );
+  border-color: color-mix(in srgb,
+      var(--primary-color, #4f46e5) 35%,
+      transparent);
 }
 
 .solid-segmented-item:focus-visible {
@@ -6326,7 +6335,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   cursor: not-allowed;
 }
 
-.solid-list-toolbar-row{
+.solid-list-toolbar-row {
   padding: 5px 15px 0 10px;
   padding-left: 2.4rem;
 

@@ -511,7 +511,7 @@ const CreateModule = ({ params, data }: any) => {
 
                     {fileDetails && (
                       <div className="solid-file-upload-wrapper mt-4">
-                        <div className="flex align-items-center gap-2">
+                        <div className="flex align-items-center gap-1 md:gap-2">
                           <FileReaderExt fileDetails={fileDetails} />
                           <div className="w-full flex flex-column gap-1">
                             <div className="flex align-items-center justify-content-between">

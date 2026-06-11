@@ -306,9 +306,9 @@ export function SolidDataTable({
 
       {typeof onPage === "function" ? (
         <div
-          className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background", paginatorClassName)}
+          className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background", paginatorClassName)}
         >
-          <div className="solid-paginator-meta flex items-center gap-2 ml-auto">
+          <div className="solid-paginator-meta flex items-center gap-2 sm:ml-auto">
             <span className="solid-paginator-label">Rows</span>
             <select
               value={rows}

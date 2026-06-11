@@ -89,6 +89,90 @@ const sortLayoutItems = (items: DashboardGridLayoutItem[]): DashboardGridLayoutI
     return (a?.x ?? 0) - (b?.x ?? 0);
   });
 
+const MOBILE_DASHBOARD_BREAKPOINT = 960;
+const TABLET_DASHBOARD_BREAKPOINT = 1280;
+
+const getResponsiveDashboardColumns = (viewportWidth: number, baseColumns: number): number => {
+  const safeBaseColumns = Math.max(1, baseColumns || 1);
+  if (viewportWidth < MOBILE_DASHBOARD_BREAKPOINT) return 1;
+  if (viewportWidth < TABLET_DASHBOARD_BREAKPOINT) return Math.min(6, safeBaseColumns);
+  return safeBaseColumns;
+};
+
+const compactLayoutItemsForColumns = (items: DashboardGridLayoutItem[],sourceColumns: number,targetColumns: number): DashboardGridLayoutItem[] => {
+  const normalizedSourceColumns = Math.max(1, sourceColumns || 1);
+  const normalizedTargetColumns = Math.max(1, targetColumns || 1);
+
+  if (normalizedTargetColumns >= normalizedSourceColumns) {
+    return sortLayoutItems(items);
+  }
+
+  const sortedItems = sortLayoutItems(items);
+  const compactedItems: DashboardGridLayoutItem[] = [];
+  let cursorX = 0;
+  let cursorY = 0;
+  let rowHeight = 0;
+
+  sortedItems.forEach((item) => {
+    const widthRatio = normalizedSourceColumns > 0 ? (item.w ?? 1) / normalizedSourceColumns : 1;
+    const sourceHeight = Math.max(1, item.h ?? 1);
+    const nextWidth =
+      normalizedTargetColumns === 1
+        ? 1
+        : Math.max(
+            1,
+            Math.min(
+              normalizedTargetColumns,
+              item.w >= normalizedSourceColumns ? normalizedTargetColumns : Math.round(widthRatio * normalizedTargetColumns)
+            )
+          );
+    const nextHeight = normalizedTargetColumns === 1 && sourceHeight <= 2 ? 1 : sourceHeight;
+
+    if (cursorX > 0 && cursorX + nextWidth > normalizedTargetColumns) {
+      cursorY += Math.max(rowHeight, 1);
+      cursorX = 0;
+      rowHeight = 0;
+    }
+
+    const scaledMinWidth =
+      item.minW !== undefined
+        ? Math.max(
+            1,
+            Math.min(
+              nextWidth,
+              Math.round((Math.max(item.minW, 1) / normalizedSourceColumns) * normalizedTargetColumns) || 1
+            )
+          )
+        : undefined;
+    const scaledMinHeight =
+      item.minH !== undefined
+        ? Math.max(1, Math.min(nextHeight, Math.max(item.minH, 1)))
+        : undefined;
+
+    const normalizedItem: DashboardGridLayoutItem = {
+      ...item,
+      x: cursorX,
+      y: cursorY,
+      w: nextWidth,
+      h: nextHeight,
+      minW: scaledMinWidth,
+      minH: scaledMinHeight,
+    };
+
+    compactedItems.push(normalizedItem);
+    cursorX += nextWidth;
+    rowHeight = Math.max(rowHeight, nextHeight);
+
+    if (cursorX >= normalizedTargetColumns) {
+      cursorY += Math.max(rowHeight, 1);
+      cursorX = 0;
+      rowHeight = 0;
+    }
+  });
+
+  return compactedItems;
+};
+
 const toLayoutItems = (items: any[]): DashboardGridLayoutItem[] =>
   (items ?? [])
     .filter((item) => !!(item?.widgetId ?? item?.id))
@@ -365,14 +449,32 @@ export function DashboardPage() {
   const [dynamicOptions, setDynamicOptions] = useState<Record<string, Option[]>>({});
   const [draftLayoutItems, setDraftLayoutItems] = useState<DashboardGridLayoutItem[] | null>(null);
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState<number>(() =>
+    typeof window === "undefined" ? TABLET_DASHBOARD_BREAKPOINT : window.innerWidth
+  );
   const bootstrappedRef = useRef(false);
 
   const variables = useMemo(() => (Array.isArray(definition?.variables) ? definition.variables : []), [definition]);
   const definitionWidgets = useMemo(() => (Array.isArray(definition?.widgets) ? definition.widgets : []), [definition]);
   const effectiveLayoutItems = useMemo(() => toLayoutItems(layoutData?.effectiveLayout?.items ?? []), [layoutData]);
   const gridColumns = Number(layoutData?.effectiveLayout?.columns ?? 12) || 12;
+  const activeGridColumns = useMemo(
+    () => getResponsiveDashboardColumns(viewportWidth, gridColumns),
+    [gridColumns, viewportWidth]
+  );
+  const isCompactLayout = activeGridColumns !== gridColumns;
 
   const defaultFilterValues = useMemo(() => buildDefaultFilterValues(variables), [variables]);
+
+  useEffect(() => {
+    const handleViewportResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    handleViewportResize();
+    window.addEventListener("resize", handleViewportResize);
+    return () => window.removeEventListener("resize", handleViewportResize);
+  }, []);
 
   useEffect(() => {
     if (!definition || bootstrappedRef.current) return;
@@ -467,6 +569,33 @@ export function DashboardPage() {
     return map;
   }, [effectiveLayoutItems]);
 
+  const baseLayoutItems = useMemo(() => {
+    if (effectiveLayoutItems.length) return effectiveLayoutItems;
+    return orderedWidgets.map((widget: any, index: number) => ({
+      widgetId: widget?.id ?? widget?.name ?? `widget-${index}`,
+      x: 0,
+      y: index * 3,
+      w: 4,
+      h: 3,
+    }));
+  }, [effectiveLayoutItems, orderedWidgets]);
+
+  const renderedLayoutItems = useMemo(
+    () =>
+      compactLayoutItemsForColumns(
+        baseLayoutItems,
+        gridColumns,
+        activeGridColumns
+      ),
+    [activeGridColumns, baseLayoutItems, gridColumns]
+  );
+
+  const renderedWidgetLayoutMap = useMemo(() => {
+    const map = new Map<string, DashboardGridLayoutItem>();
+    renderedLayoutItems.forEach((item) => map.set(item.widgetId, item));
+    return map;
+  }, [renderedLayoutItems]);
+
   const appliedFilterCount = useMemo(() => {
     return variables.reduce((count: number, variable: any) => {
       const name = variable?.name;
@@ -486,15 +615,7 @@ export function DashboardPage() {
       gridInstanceRef.current = null;
     }
 
-    const initialLayout: DashboardGridLayoutItem[] = effectiveLayoutItems.length
-      ? effectiveLayoutItems
-      : orderedWidgets.map((widget: any, index: number) => ({
-          widgetId: widget?.id ?? widget?.name ?? `widget-${index}`,
-          x: 0,
-          y: index * 3,
-          w: 4,
-          h: 3,
-        }));
+    const initialLayout: DashboardGridLayoutItem[] = renderedLayoutItems.length ? renderedLayoutItems : baseLayoutItems;
 
     const gridWidgets = initialLayout.map((item: DashboardGridLayoutItem) => ({
       id: item.widgetId,
@@ -508,10 +629,12 @@ export function DashboardPage() {
 
     const instance = GridStack.init(
       {
-        column: gridColumns,
-        cellHeight: 92,
-        margin: 8,
+        column: activeGridColumns,
+        cellHeight: activeGridColumns === 1 ? 90 : 92,
+        margin: activeGridColumns === 1 ? 10 : 8,
         float: true,
+        disableDrag: isCompactLayout,
+        disableResize: isCompactLayout,
       },
       gridRef.current
     );
@@ -525,7 +648,7 @@ export function DashboardPage() {
         instance.makeWidget(itemEl as any);
       }
     });
-    instance.column(gridColumns, "none");
+    instance.column(activeGridColumns, "none");
     instance.load(gridWidgets as any, false);
     instance.batchUpdate(false);
     notifyDashboardChartsToResize();
@@ -544,7 +667,7 @@ export function DashboardPage() {
       instance.destroy(false);
       if (gridInstanceRef.current === instance) gridInstanceRef.current = null;
     };
-  }, [orderedWidgets, gridColumns, effectiveLayoutItems]);
+  }, [activeGridColumns, baseLayoutItems, isCompactLayout, orderedWidgets, renderedLayoutItems]);
 
   const handleDraftVariableChange = (variableName: string, value: DashboardVariableValue) => {
     setFilterDraftValues((prev) => ({ ...prev, [variableName]: value }));
@@ -605,6 +728,7 @@ export function DashboardPage() {
 
   async function handleSaveLayout() {
     if (!moduleName || !dashboardName) return;
+    if (isCompactLayout) return;
     const liveGridLayout = getAllLayoutItemsFromGrid(gridInstanceRef.current);
     const baseLayout = effectiveLayoutItems.length ? effectiveLayoutItems : [];
     const items = liveGridLayout.length
@@ -844,7 +968,7 @@ export function DashboardPage() {
             className={styles.iconButton}
             leftIcon={<Save size={16} />}
             onClick={() => void handleSaveLayout()}
-            disabled={saveLayoutLoading}
+            disabled={saveLayoutLoading || isCompactLayout}
             tooltip="Save Layout"
             aria-label="Save Layout"
           />
@@ -872,11 +996,14 @@ export function DashboardPage() {
 
       {dataError ? <p className={styles.error}>Failed to load dashboard data.</p> : null}
 
-      <div ref={gridRef} className={`grid-stack ${styles.gridStack}`}>
+      <div
+        ref={gridRef}
+        className={`grid-stack ${styles.gridStack} ${isCompactLayout ? styles.gridStackCompact : ""}`}
+      >
         {orderedWidgets.map((widget: any) => {
           const widgetName = widget?.id ?? widget?.name;
           const runtime = widgetDataMap.get(widgetName);
-          const slot = widgetLayoutMap.get(widgetName);
+          const slot = renderedWidgetLayoutMap.get(widgetName) ?? widgetLayoutMap.get(widgetName);
 
           return (
             <div

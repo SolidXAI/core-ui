@@ -1306,16 +1306,16 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
 
-  const toggleBothSidebars = () => {
-    if (visibleNavbar) {
-      dispatch(toggleNavbar());   // close both
-    } else {
-      dispatch(showNavbar());     // open both
-    }
-  };
+  // const toggleBothSidebars = () => {
+  //   if (visibleNavbar) {
+  //     dispatch(toggleNavbar());   // close both
+  //   } else {
+  //     dispatch(showNavbar());     // open both
+  //   }
+  // };
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className={`solid-list-content h-full flex flex-column flex-grow-1 ${styles.ListContentWrapper}`}>
+      <div className={`solid-list-content  flex flex-column flex-grow-1 ${styles.ListContentWrapper}`}>
         <div className="solid-list-surface flex flex-column flex-1 min-h-0">
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-column lg:flex-row">
@@ -1323,12 +1323,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
               <div className="flex justify-content-between w-full">
                 <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                   <div className='flex align-items-center gap-2'>
-                    {params.embeded !== true &&
+                    {/* {params.embeded !== true &&
                       <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                         <LayoutGrid size={18} />
                       </div>
-                    }
-                    <p className="m-0 view-title solid-text-wrapper">
+                    } */}
+                    <p className="m-0 view-title solid-list-view-text-wrapper">
                       {solidListViewMetaData?.data?.solidView?.action?.displayName || solidListViewMetaData?.data?.solidView?.displayName}
                     </p>
                   </div>
@@ -1500,7 +1500,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 >
                   <DataTable
                     value={listViewData}
-                    viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 128px)"}
+                    // viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 128px)"}
                     rowClassName={(rowData) => {
                       return rowData.deletedAt ? "greyed-out-row" : "";
                     }}
