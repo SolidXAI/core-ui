@@ -29,7 +29,7 @@ export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, 
     <SolidDialog
       open={visible}
       onOpenChange={setVisible}
-      className="solid-dialog"
+      className="solid-dialog solid-inline-relation-dialog"
       style={{ width: dialogWidth, height: dialogHeight }}
     >
       <SolidDialogBody>
