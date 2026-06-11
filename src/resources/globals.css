@@ -1905,6 +1905,14 @@ li.header-li-px {
   height: calc(100vh - 140px) !important;
 }
 
+.solid-inline-relation-dialog .solid-form-content,
+.solid-inline-relation-dialog .solid-create-mode-form-content {
+  height: auto !important;
+  min-height: 0;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
 .chatter-collapse-btn {
   position: absolute;
   top: 10px;

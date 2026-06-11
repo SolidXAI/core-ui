@@ -310,6 +310,7 @@
         padding: 10px 16px 16px 20px !important;
     }
 
+
     /* .solid-form-wrapper .solid-form-content {
         height: calc(100vh - 165px) !important;
     } */
@@ -320,6 +321,19 @@
 
     .solid-form-wrapper .solid-form-content.solid-form-edit {
         height: calc(100vh - 135px) !important;
+    }
+
+    /* .solid-form-wrapper .solid-form-content {
+        height: calc(100vh - 139px) !important;
+    }
+        */
+
+    .solid-inline-relation-dialog .solid-form-content,
+    .solid-inline-relation-dialog .solid-create-mode-form-content {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+
     }
 
 
@@ -569,6 +583,17 @@
         height: calc(100vh - 135px) !important;
     }
 
+    /* .solid-form-wrapper .solid-form-content {
+        height: calc(100vh - 132px) !important;
+    } */
+
+    .solid-inline-relation-dialog .solid-form-content,
+    .solid-inline-relation-dialog .solid-create-mode-form-content {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
     .form-wrapper-title {
         font-size: 14px !important;
     }
@@ -731,6 +756,20 @@
 
     .p-component {
         font-size: 0.9rem !important;
+    }
+
+    .solid-inline-relation-dialog {
+        width: calc(100vw - 12px) !important;
+        max-width: calc(100vw - 12px) !important;
+        max-height: calc(100dvh - 12px) !important;
+        border-radius: 16px !important;
+    }
+
+    .solid-inline-relation-dialog .solid-form-content,
+    .solid-inline-relation-dialog .solid-create-mode-form-content {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
 
     .text-base {

@@ -246,12 +246,18 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               </p>
               <ol className="solid-field-delete-flow-list">
                 <li>
-                  Delete the field and save the model form.
-                  <span>This marks the field for removal.</span>
+                  <span className="solid-field-delete-flow-index">1.</span>
+                  <div className="solid-field-delete-flow-step">
+                    <p className="solid-field-delete-flow-step-title">Delete the field and save the model form.</p>
+                    <span className="solid-field-delete-flow-step-note">This marks the field for removal.</span>
+                  </div>
                 </li>
                 <li>
-                  Generate code for this model.
-                  <span>This removes the field from generated code, metadata tables, and JSON.</span>
+                  <span className="solid-field-delete-flow-index">2.</span>
+                  <div className="solid-field-delete-flow-step">
+                    <p className="solid-field-delete-flow-step-title">Generate code for this model.</p>
+                    <span className="solid-field-delete-flow-step-note">This removes the field from generated code, metadata tables, and JSON.</span>
+                  </div>
                 </li>
               </ol>
             </SolidDialogBody>

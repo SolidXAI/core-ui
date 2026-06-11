@@ -53,6 +53,7 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
 
             <SolidSelect
                 value={rule.matchMode}
+                native={false}
                 onChange={(e: any) => {
                     onChange(rule.id, 'matchMode', e.value)
                 }}

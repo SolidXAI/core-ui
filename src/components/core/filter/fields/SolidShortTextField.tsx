@@ -27,6 +27,7 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
             <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
                 <SolidSelect
                     value={rule.matchMode}
+                    native={false}
                     onChange={(e: any) => {
                         onChange(rule.id, 'matchMode', e.value)
                     }}

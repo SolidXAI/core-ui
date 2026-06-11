@@ -1067,47 +1067,78 @@ body {
   width: min(560px, calc(100vw - 32px));
 }
 
-.solid-field-delete-flow-head {
+.solid-field-delete-flow-dialog .solid-field-delete-flow-head {
   text-align: left;
 }
 
-.solid-field-delete-flow-body {
+.solid-field-delete-flow-dialog .solid-field-delete-flow-body {
   text-align: left;
+  padding: 18px 22px 8px;
 }
 
-.solid-field-delete-flow-intro {
-  margin-bottom: 12px;
+.solid-field-delete-flow-dialog .solid-field-delete-flow-intro {
+  text-align: left;
+  margin-bottom: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.solid-field-delete-flow-dialog .solid-field-delete-flow-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.solid-field-delete-flow-dialog .solid-field-delete-flow-list li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: start;
+  column-gap: 12px;
   font-size: 13px;
   line-height: 1.55;
   color: var(--foreground);
 }
 
-.solid-field-delete-flow-list {
-  margin: 0;
-  padding-left: 18px;
+.solid-field-delete-flow-dialog .solid-field-delete-flow-index {
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--foreground);
+  display: inline-block;
+  text-align: left;
+}
+
+.solid-field-delete-flow-dialog .solid-field-delete-flow-step {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  color: var(--foreground);
+  gap: 2px;
+  text-align: left;
 }
 
-.solid-field-delete-flow-list li {
+.solid-field-delete-flow-dialog .solid-field-delete-flow-step-title {
+  margin: 0;
   font-size: 13px;
-  line-height: 1.55;
-  font-weight: 500;
+  line-height: 1.5;
+  font-weight: 600;
+  color: var(--foreground);
+  text-align: left;
 }
 
-.solid-field-delete-flow-list li span {
+.solid-field-delete-flow-dialog .solid-field-delete-flow-step-note {
   display: block;
-  margin-top: 2px;
   font-size: 12px;
   line-height: 1.55;
   font-weight: 400;
   color: var(--muted-foreground);
+  text-align: left;
 }
 
-.solid-field-delete-flow-actions {
+.solid-field-delete-flow-dialog .solid-field-delete-flow-actions {
   justify-content: flex-end;
+  padding: 6px 22px 20px;
 }
 
 .solid-delete-confirm-dialog .solid-shadcn-dialog-head {
@@ -1322,6 +1353,10 @@ body {
   width: 100%;
 }
 
+.solid-select-wrap-custom {
+  overflow: visible;
+}
+
 .solid-select {
   width: 100%;
   min-height: 32px;
@@ -1333,6 +1368,30 @@ body {
   line-height: 1.2;
   padding: 0 30px 0 10px;
   appearance: none;
+}
+
+.solid-select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  cursor: pointer;
+}
+
+.solid-select-trigger:disabled {
+  cursor: not-allowed;
+}
+
+.solid-select-trigger-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.solid-select-placeholder {
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
 }
 
 .solid-select:focus-visible,
@@ -1355,6 +1414,45 @@ body {
   pointer-events: none;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
   font-size: 10px;
+}
+
+.solid-select-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-overlay) + 3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 14px 30px color-mix(in srgb, hsl(222 47% 11%) 16%, transparent);
+  max-height: min(240px, calc(100vh - 32px));
+  overflow-y: auto;
+}
+
+.solid-select-menu-top {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.solid-select-menu-item {
+  border: 0;
+  background: transparent;
+  color: var(--card-foreground);
+  text-align: left;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.solid-select-menu-item:hover,
+.solid-select-menu-item.is-selected {
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
 }
 
 .solid-input {
@@ -3520,7 +3618,56 @@ html.dark .solid-header-cog-trigger:hover,
   font-size: 0.75rem;
   font-weight: 500;
   line-height: 1;
-  padding: 0 12px 0 8px;
+  /* padding: 0 12px 0 8px; */
+}
+
+.solid-select-wrap.solid-paginator-select {
+  display: inline-block;
+  width: auto;
+  min-width: 46px;
+  flex: 0 0 auto;
+}
+
+.solid-select-wrap.solid-paginator-select .solid-select-trigger {
+  width: auto;
+  min-height: 24px;
+  height: 24px;
+  min-width: 58px;
+  /* padding: 0 26px 0 10px; */
+  /* border-radius: 8px; */
+  border-color: color-mix(in srgb, var(--border) 0%, transparent);
+  background: transparent;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.solid-select-wrap.solid-paginator-select .solid-select-trigger-label {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.solid-select-wrap.solid-paginator-select .solid-select-icon {
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.solid-select-wrap.solid-paginator-select .solid-select-menu {
+  min-width: 100%;
+  left: 0;
+  right: auto;
+}
+
+.solid-select-wrap.solid-paginator-select .solid-select-trigger:hover,
+.solid-select-wrap.solid-paginator-select .solid-select-trigger:focus-visible,
+.solid-select-wrap.solid-paginator-select .solid-select-trigger:focus {
+  background: transparent;
+  box-shadow: none;
 }
 
 .solid-paginator-btn {
@@ -5762,6 +5909,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 .solid-radix-dialog-close:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px var(--ring);
+}
+
+.solid-inline-relation-dialog {
+  width: min(var(--solid-inline-dialog-width, 720px), calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  height: auto !important;
 }
 
 @media (max-width: 640px) {
