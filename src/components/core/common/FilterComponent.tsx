@@ -176,6 +176,7 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
             { label: "OR", value: FilterOperator.OR },
             { label: "AND", value: FilterOperator.AND },
           ]}
+          native={false}
           placeholder="Operator"
           className="solid-filter-group-operator-select"
           onChange={(event) => onChange(group.id, 'matchOperator', event.value)}

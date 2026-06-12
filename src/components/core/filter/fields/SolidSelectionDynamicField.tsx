@@ -17,10 +17,11 @@ const SolidSelectionDynamicField = ({ fieldMetadata, onChange, index, rule }: So
 
 
     return (
-        <div className='flex flex-column md:flex-row align-items-start gap-6 md:gap-1'>
+        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-1'>
             <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
                 <SolidSelect
                     value={rule.matchMode}
+                    native={false}
                     onChange={(e: any) => {
                         onChange(rule.id, 'matchMode', e.value)
                     }}

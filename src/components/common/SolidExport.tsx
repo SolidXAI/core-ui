@@ -283,6 +283,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                   if (next) setSelectedFormat(next);
                 }}
                 placeholder="Select format"
+                native={false}
               />
             </label>
 
@@ -293,6 +294,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                 options={resolvedTemplateOptions.map((option) => ({ label: option.name, value: option.code }))}
                 onChange={(event) => handleTemplateSelect(event.value)}
                 placeholder={resolvedTemplateOptions.length ? "Choose template" : "No saved templates"}
+                native={false}
               />
             </label>
           </div>

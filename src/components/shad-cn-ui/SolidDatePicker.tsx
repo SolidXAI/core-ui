@@ -63,6 +63,8 @@ export function SolidDatePicker({
   inputClassName,
   selected,
   dateFormat,
+  calendarClassName,
+  popperClassName,
   className,
   ...props
 }: SolidDatePickerProps) {
@@ -78,6 +80,8 @@ export function SolidDatePicker({
       selected={selected}
       showTimeSelect={resolvedShowTime}
       showTimeSelectOnly={timeOnly}
+      calendarClassName={cx("solid-react-datepicker-calendar", calendarClassName)}
+      popperClassName={cx("solid-react-datepicker-popper", popperClassName)}
       customInput={<SolidDatePickerInput className={inputClassName} displayValue={displayValue} />}
       className={cx("solid-datepicker", className)}
     />

@@ -35,7 +35,7 @@ export const toEChartsOption = (definition: any, runtimeData: any): EChartsOptio
     const items = Array.isArray(runtimeData?.items) ? runtimeData.items : [];
     return {
       tooltip: { trigger: "item" },
-      legend: { top: 0 },
+      legend: { top: 0, type: "scroll" },
       series: [
         {
           type: "pie",
@@ -55,12 +55,15 @@ export const toEChartsOption = (definition: any, runtimeData: any): EChartsOptio
   if (chartType === "line" || chartType === "bar") {
     return {
       tooltip: { trigger: "axis" },
-      legend: { top: 0 },
+      legend: { top: 0, type: "scroll" },
       grid: { left: 20, right: 20, bottom: 24, top: 36, containLabel: true },
       xAxis: {
         type: "category",
         boundaryGap: chartType === "bar",
         data: Array.isArray(runtimeData?.categories) ? runtimeData.categories : [],
+        axisLabel: {
+          hideOverlap: true,
+        },
       },
       yAxis: { type: "value" },
       series: seriesFromRuntime(runtimeData, chartType),

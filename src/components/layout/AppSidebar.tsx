@@ -4,6 +4,7 @@ import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { useSession } from "../../hooks/useSession";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { AdminHeaderActions } from "./AdminHeaderActions";
 import UserProfileMenu from "./user-profile-menu";
 import SolidLink from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
@@ -388,6 +389,7 @@ const AppSidebar = () => {
                 )}
 
                 <div className="solid-sidebar-footer">
+                    <AdminHeaderActions variant="sidebar" />
                     <UserProfileMenu />
                 </div>
             </aside>

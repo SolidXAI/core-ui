@@ -1330,8 +1330,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const end = total === 0 ? 0 : Math.min(offset + limit, total);
 
     return (
-      <div className="w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background">
-        <div className="solid-paginator-meta flex items-center gap-2 ml-auto">
+      <div className="w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background">
+        <div className="solid-paginator-meta flex items-center gap-2 sm:ml-auto">
           <span className="solid-paginator-label">Rows</span>
           <select
             value={limit}
@@ -1620,7 +1620,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper solid-tree-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className="solid-list-content h-full flex flex-column flex-grow-1">
+      <div className="solid-list-content flex flex-column flex-grow-1">
         <div className="solid-list-surface solid-tree-surface flex flex-column flex-1 min-h-0">
           {/* ── Header ── */}
           <div className="page-header solid-list-toolbar solid-tree-toolbar flex-column lg:flex-row">

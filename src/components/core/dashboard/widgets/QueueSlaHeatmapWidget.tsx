@@ -21,6 +21,16 @@ type HeatmapLegendThreshold = {
   gt?: number;
 };
 
+const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
+
+const escapeHtml = (value: unknown): string =>
+  `${value ?? ""}`
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+
 const formatBucketLabel = (value: string): string => {
   if (!value) return "";
   const date = new Date(value);
@@ -43,6 +53,8 @@ const formatMetric = (value: number | undefined, unit = "ms"): string => {
 export function QueueSlaHeatmapWidget({ runtime }: DashboardWidgetComponentProps) {
   const chartRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const viewportWidth = typeof window === "undefined" ? 1280 : window.innerWidth;
+  const isMobileViewport = viewportWidth < 768;
   const data = runtime?.data ?? runtime ?? {};
   const xCategories: string[] = Array.isArray(data?.xCategories) ? data.xCategories : [];
   const yCategories: string[] = Array.isArray(data?.yCategories) ? data.yCategories : [];
@@ -73,6 +85,12 @@ export function QueueSlaHeatmapWidget({ runtime }: DashboardWidgetComponentProps
         orient: "horizontal" as const,
         left: "center" as const,
         bottom: 0,
+        itemWidth: isMobileViewport ? 12 : 18,
+        itemHeight: isMobileViewport ? 10 : 14,
+        itemGap: isMobileViewport ? 8 : 12,
+        textStyle: {
+          fontSize: isMobileViewport ? 10 : 11,
+        },
         pieces: legendThresholds.map((threshold) => ({
           label: threshold.label,
           color: threshold.color,
@@ -92,35 +110,58 @@ export function QueueSlaHeatmapWidget({ runtime }: DashboardWidgetComponentProps
 
   const option = {
     tooltip: {
-      position: "top" as const,
+      confine: true,
+      extraCssText: `max-width:${isMobileViewport ? 190 : 260}px;white-space:normal;word-break:break-word;overflow-wrap:anywhere;`,
+      position: (point: number[], _params: any, _dom: HTMLElement, _rect: any, size: any) => {
+        const [pointX, pointY] = point;
+        const boxWidth = Number(size?.contentSize?.[0] ?? 0);
+        const boxHeight = Number(size?.contentSize?.[1] ?? 0);
+        const viewWidth = Number(size?.viewSize?.[0] ?? 0);
+        const viewHeight = Number(size?.viewSize?.[1] ?? 0);
+        const offset = 12;
+
+        const nextLeft = clamp(pointX - (boxWidth / 2), 8, Math.max(8, viewWidth - boxWidth - 8));
+        const preferredTop = pointY - boxHeight - offset;
+        const fallbackTop = pointY + offset;
+        const nextTop = preferredTop < 8
+          ? clamp(fallbackTop, 8, Math.max(8, viewHeight - boxHeight - 8))
+          : preferredTop;
+
+        return [nextLeft, nextTop];
+      },
       formatter: (params: any) => {
         const point = Array.isArray(params?.data) ? params.data : [];
         const xIndex = Number(point?.[0] ?? -1);
         const yIndex = Number(point?.[1] ?? -1);
         const metricValue = Number(point?.[2] ?? 0);
         const detail = detailMap.get(`${xIndex}:${yIndex}`);
+        const queueName = escapeHtml(detail?.queueName ?? yCategories[yIndex] ?? "");
+        const bucketLabel = escapeHtml(formatBucketLabel(detail?.bucket ?? xCategories[xIndex] ?? ""));
+        const averageElapsed = escapeHtml(formatMetric(detail?.avgElapsedMillis ?? metricValue));
 
         const rows = [
-          `<div style="font-weight:600;margin-bottom:4px;">${detail?.queueName ?? yCategories[yIndex] ?? ""}</div>`,
-          `<div>Bucket: ${formatBucketLabel(detail?.bucket ?? xCategories[xIndex] ?? "")}</div>`,
-          `<div>Average Elapsed: ${formatMetric(detail?.avgElapsedMillis ?? metricValue)}</div>`,
+          `<div style="max-width:${isMobileViewport ? 180 : 240}px;line-height:1.4;white-space:normal;word-break:break-word;overflow-wrap:anywhere;">`,
+          `<div style="font-weight:600;margin-bottom:4px;word-break:break-word;overflow-wrap:anywhere;">${queueName}</div>`,
+          `<div>Bucket: ${bucketLabel}</div>`,
+          `<div>Average Elapsed: ${averageElapsed}</div>`,
         ];
 
         if (tooltipFields.includes("messageCount") && detail?.messageCount !== undefined) {
-          rows.push(`<div>Message Count: ${new Intl.NumberFormat("en-GB").format(detail.messageCount)}</div>`);
+          rows.push(`<div>Message Count: ${escapeHtml(new Intl.NumberFormat("en-GB").format(detail.messageCount))}</div>`);
         }
         if (tooltipFields.includes("peakElapsedMillis") && detail?.peakElapsedMillis !== undefined) {
-          rows.push(`<div>Peak Elapsed: ${formatMetric(detail.peakElapsedMillis)}</div>`);
+          rows.push(`<div>Peak Elapsed: ${escapeHtml(formatMetric(detail.peakElapsedMillis))}</div>`);
         }
 
+        rows.push("</div>");
         return rows.join("");
       },
     },
     grid: {
-      left: 110,
-      right: 20,
+      left: isMobileViewport ? 82 : 110,
+      right: isMobileViewport ? 10 : 20,
       top: 18,
-      bottom: 70,
+      bottom: isMobileViewport ? 92 : 70,
       containLabel: true,
     },
     xAxis: {
@@ -129,7 +170,9 @@ export function QueueSlaHeatmapWidget({ runtime }: DashboardWidgetComponentProps
       splitArea: { show: true },
       axisLabel: {
         formatter: (value: string) => formatBucketLabel(value),
-        rotate: 30,
+        rotate: isMobileViewport ? 45 : 30,
+        fontSize: isMobileViewport ? 10 : 11,
+        hideOverlap: true,
       },
     },
     yAxis: {
@@ -138,6 +181,9 @@ export function QueueSlaHeatmapWidget({ runtime }: DashboardWidgetComponentProps
       splitArea: { show: true },
       axisLabel: {
         interval: 0,
+        width: isMobileViewport ? 78 : 100,
+        overflow: "truncate" as const,
+        fontSize: isMobileViewport ? 10 : 11,
       },
     },
     visualMap,

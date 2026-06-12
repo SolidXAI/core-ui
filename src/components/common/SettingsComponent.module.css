@@ -11,6 +11,10 @@
   top: 0;
   z-index: 20;
   background: var(--background);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 28rem) auto;
+  align-items: end;
+  gap: 0.9rem 1rem;
 }
 
 .headerIntro {
@@ -25,8 +29,8 @@
   align-items: center;
   gap: 0.75rem;
   flex: 1 1 22rem;
-  justify-content: center;
-  min-width: min(100%, 24rem);
+  justify-content: flex-start;
+  min-width: 0;
 }
 
 .subtitle {
@@ -134,6 +138,7 @@
   gap: 0.65rem;
   flex-wrap: wrap;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .searchIcon {
@@ -183,6 +188,8 @@
   border-right: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   overflow-y: auto;
   min-height: 0;
+  width: 100% !important;
+  max-width: 100%;
 }
 
 .tabPanel {
@@ -409,6 +416,11 @@
 }
 
 @media (max-width: 960px) {
+  .pageHeader {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
   .tabGroup {
     grid-template-columns: 1fr;
   }
@@ -418,10 +430,21 @@
     min-width: 100%;
   }
 
+  .toolbarActions {
+    justify-content: space-between;
+  }
+
   .tabList {
+    flex-direction: row;
+    align-items: stretch;
     border-right: none;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+    overflow-y: hidden;
     overflow-x: auto;
+  }
+
+  .moduleTab {
+    min-width: 12rem;
   }
 
   .settingRow {
@@ -434,5 +457,58 @@
 
   .mediaPreview {
     width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    height: auto;
+    min-height: calc(100dvh - 46px);
+  }
+
+  .pageHeader {
+    gap: 0.75rem;
+  }
+
+  .subtitle {
+    max-width: none;
+    line-height: 1.45;
+  }
+
+  .searchIcon {
+    width: 100%;
+  }
+
+  .toolbarActions {
+    justify-content: flex-start;
+  }
+
+  .legend {
+    flex-wrap: wrap;
+  }
+
+  .tabList {
+    padding: 0.7rem;
+  }
+
+  .tabPanel {
+    padding: 0.75rem;
+  }
+
+  .moduleTab {
+    min-width: 10.5rem;
+  }
+
+  .groupHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .groupBody {
+    padding-inline: 0.75rem;
+  }
+
+  .readonlyValue {
+    min-height: 2.3rem;
   }
 }
