@@ -204,7 +204,7 @@ export const ModelListViewData = () => {
     return (
       <button
         type="button"
-        className="text-primary border-0 bg-transparent cursor-pointer"
+        className="border-0 bg-transparent text-[var(--primary-color)] cursor-pointer"
         onClick={() => {
           setGenerateCodeForModel(record.id);
           setGenerateCodeVisible(true);

@@ -56,7 +56,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
                 <img
                     src={src}
                     alt="media"
-                    className="shadow-2 border-round"
+                    className="rounded shadow-md"
                     width={40}
                     height={40}
                     style={{ objectFit: "cover" }}
@@ -72,7 +72,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
                     src={src}
                     width={40}
                     height={40}
-                    className="shadow-2 border-round"
+                    className="rounded shadow-md"
                     style={{ objectFit: "cover" }}
                     onError={() => setIsBroken(true)}
                     onClick={handleClick}
@@ -84,7 +84,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
         if (isAudioFile(src)) {
             return (
                 <div
-                    className="shadow-2 border-round flex items-center justify-center bg-gray-100"
+                    className="flex items-center justify-center rounded bg-gray-100 shadow-md"
                     style={{ width: 40, height: 40 }}
                     onClick={handleClick}
                 >
@@ -257,7 +257,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                     <div className="flex items-center justify-between">
 
                                         <p
-                                            className="font-normal w-11 text-primary m-0 solid-media-column-text-wrapper"
+                                            className="m-0 w-11 font-normal text-[var(--primary-color)] solid-media-column-text-wrapper"
                                             style={{ cursor: "pointer" }}
                                             onClick={() => handleFileView(file)}
                                         >

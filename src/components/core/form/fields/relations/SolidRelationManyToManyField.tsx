@@ -402,7 +402,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
             <SolidPanel>
                 <div className="flex flex-wrap -mx-2 -mt-2">
                     {allOptions.map((item: any, i: number) => (
-                        <div key={item.value} className={`field col-12 sm:col-6 flex gap-2 ${i >= 2 ? 'mt-1 md:mt-3' : 'mt-1 md:mt-0'}`}>
+                        <div key={item.value} className={`field flex w-full gap-2 sm:w-1/2 ${i >= 2 ? 'mt-1 md:mt-3' : 'mt-1 md:mt-0'}`}>
                             <SolidCheckbox
                                 disabled={readOnlyPermission || isUnsaved}
                                 id={item.label}
@@ -672,7 +672,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                         label="Cancel"
                         size="sm"
                         variant="outline"
-                        className="bg-primary-reverse"
+                        className="bg-[var(--primary-color-text)]"
                         onClick={() => setVisibleLinkDialog(false)}
                     />
                 </div>

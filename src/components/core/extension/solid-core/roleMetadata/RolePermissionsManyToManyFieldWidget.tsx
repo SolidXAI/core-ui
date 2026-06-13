@@ -71,7 +71,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                     key={controllerName}
                     toggleable
                     header={
-                        <div className="flex align-items-center gap-3 justify-content-between w-full">
+                        <div className="flex w-full items-center justify-between gap-3">
                             <span className="form-field-label text-base lg:text-lg font-bold solid-permisson-text-wrapper">
                                 {controllerName}
                             </span>

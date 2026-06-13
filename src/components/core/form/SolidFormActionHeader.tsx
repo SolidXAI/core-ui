@@ -126,7 +126,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             type="button"
                             icon={'si si-cog'}
                             size="sm"
-                            className="surface-card solid-icon-button hidden md:flex"
+                            className="solid-icon-button hidden bg-[var(--surface-card)] md:flex"
                         />
                     </SolidPopoverTrigger>
                     <SolidPopoverTrigger asChild>
@@ -135,7 +135,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             type="button"
                             icon={'si si-cog'}
                             size="sm"
-                            className="surface-card solid-icon-button md:hidden"
+                            className="solid-icon-button bg-[var(--surface-card)] md:hidden"
                         />
                     </SolidPopoverTrigger>
                 </div>
@@ -352,11 +352,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     <>
                                         <div className="hidden lg:flex">
                                             <div>
-                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-[var(--primary-color-text)]' style={{ minWidth: 66 }} />
                                             </div>
                                         </div>
                                         <div className="lg:hidden">
-                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
+                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='solid-icon-button bg-[var(--primary-color-text)]' />
                                         </div>
                                     </>
                                 }
@@ -525,11 +525,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     <>
                                         <div className="hidden lg:flex">
                                             <div>
-                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-[var(--primary-color-text)]' style={{ minWidth: 66 }} />
                                             </div>
                                         </div>
                                         <div className="lg:hidden">
-                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
+                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='solid-icon-button bg-[var(--primary-color-text)]' />
                                         </div>
                                     </>
                                 }

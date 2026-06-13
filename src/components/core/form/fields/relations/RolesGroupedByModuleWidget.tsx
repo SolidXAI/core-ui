@@ -141,12 +141,12 @@ export const RolesGroupedByModuleWidget = ({ formik, fieldContext }: SolidFormFi
                     <SolidMessage
                         severity="warn"
                         text={`Please save the ${entityName} first to assign ${fieldLabel}.`}
-                        className="w-full justify-content-start"
+                        className="w-full justify-start"
                     />
                 </div>
             )}
 
-            <div className="flex align-items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2">
                 {showFieldLabel !== false && (
                     <label className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}
@@ -200,11 +200,11 @@ export const RolesGroupedByModuleWidget = ({ formik, fieldContext }: SolidFormFi
                             <SolidAccordionItem key={key} value={key}>
                                 <SolidAccordionTrigger>{title}</SolidAccordionTrigger>
                                 <SolidAccordionContent>
-                                    <div className="formgrid grid pt-1">
+                                    <div className="flex flex-wrap -mx-2 -mt-2 pt-1">
                                         {group.roles.map((item, i) => (
                                             <div
                                                 key={item.value}
-                                                className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}
+                                                className={`field flex w-1/2 gap-2 ${i >= 2 ? 'mt-3' : ''}`}
                                             >
                                                 <SolidCheckbox
                                                     disabled={readOnlyPermission || isUnsaved}

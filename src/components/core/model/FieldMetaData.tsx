@@ -193,7 +193,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
           >
             <SolidDialogHeader className="solid-shadcn-dialog-head solid-field-delete-flow-head">
               <SolidDialogTitle>
-                <span className="flex align-items-center gap-2">
+                <span className="flex items-center gap-2">
                   <AlertTriangle size={18} className="text-yellow-500" />
                   <span>Remove Field</span>
                 </span>

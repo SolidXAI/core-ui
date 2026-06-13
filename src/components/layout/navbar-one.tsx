@@ -125,7 +125,7 @@ const NavbarOne = () => {
                                 variant="ghost"
                                 size="sm"
                                 aria-label="Search"
-                                className="transparent-background min-w-0 px-2 py-1 border-1 border-round border-200"
+                                className="transparent-background min-w-0 rounded border border-[var(--surface-200)] px-2 py-1"
                                 onClick={() => setSearchShow(true)}
                                 leftIcon={<SolidIcon name="si-search" />}
                             />

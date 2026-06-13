@@ -203,7 +203,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
 
     const renderLoadingState = () => (
         <div className='flex h-full flex-col items-center justify-center gap-2 text-center text-color-secondary'>
-            <Loader2 size={20} className='text-primary animate-spin' />
+            <Loader2 size={20} className='animate-spin text-[var(--primary-color)]' />
             <span className='text-sm'>Loading recent activity…</span>
         </div>
     );
@@ -213,7 +213,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         return (
         <div className='flex h-full items-center justify-center'>
             <div className='flex flex-col items-center gap-2 px-3 text-center text-color-secondary'>
-                <div className='p-2 border-round bg-primary-reverse text-primary'>
+                <div className='rounded bg-[var(--primary-color-text)] p-2 text-[var(--primary-color)]'>
                     <Inbox size={20} />
                 </div>
                 <p className='m-0 text-base font-medium text-color'>No activity yet</p>

@@ -386,7 +386,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         <FileReaderExt fileDetails={fileDetails[0]} />
                         <div className="w-full flex flex-col gap-1">
                                 <div className="flex items-center justify-between">
-                                    <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
+                                    <p className="m-0 w-9 font-normal text-[var(--primary-color)] solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
                                     <div className="flex items-center gap-2">
                                         <button
                                             type="button"
@@ -448,7 +448,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                     <FileReaderExt fileDetails={file} />
                                     <div className="w-full flex flex-col gap-1">
                                         <div className="flex items-center justify-between">
-                                            <p className="font-normal w-11 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
+                                            <p className="m-0 w-11 font-normal text-[var(--primary-color)] solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
                                             <div className="flex items-center gap-2">
                                                 <button
                                                     type="button"
@@ -603,7 +603,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         <FileReaderExt fileDetails={fileDetails[0]} />
                         <div className="w-full flex flex-col gap-1">
                             <div className="flex items-center justify-between">
-                                <p className="font-normal w-11 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
+                                <p className="m-0 w-11 font-normal text-[var(--primary-color)] solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
                                 <div className="flex items-center md:gap-2">
                     <div>
                         <SolidButton

@@ -240,7 +240,7 @@ export const ModuleListViewData = () => {
     return (
       <button
         type="button"
-        className="text-primary border-0 bg-transparent cursor-pointer"
+        className="border-0 bg-transparent text-[var(--primary-color)] cursor-pointer"
         onClick={() => {
           setGenerateCodeForModule(record.id);
           setGenerateCodeVisible(true);
@@ -254,7 +254,7 @@ export const ModuleListViewData = () => {
   const exportBodyTemplate = (record: ModelMetaData) => (
     <button
       type="button"
-      className="text-primary border-0 bg-transparent cursor-pointer disabled:opacity-50"
+      className="border-0 bg-transparent text-[var(--primary-color)] cursor-pointer disabled:opacity-50"
       onClick={() => handleExportModule(record.id)}
       disabled={exportingModuleId === record.id}
       title="Export module package"

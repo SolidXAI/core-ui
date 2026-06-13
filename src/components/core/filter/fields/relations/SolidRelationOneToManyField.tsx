@@ -21,7 +21,7 @@ const SolidRelationOneToManyField = ({
     const numberOfInputs = needsInput ? getNumberOfInputs(rule.matchMode) : 0;
 
     return (
-        <div className="flex flex-column md:flex-row align-items-start gap-2 md:gap-1">
+        <div className="flex flex-col items-start gap-2 md:flex-row md:gap-1">
             {/* Operator */}
             <div className="w-full md:w-1/2 px-0 md:pr-0 md:pl-0 p-0">
                 <SolidSelect

@@ -34,7 +34,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
     };
 
     return (
-        <div className="h-screen surface-0 overflow-y-auto">
+        <div className="h-screen overflow-y-auto bg-[var(--surface-0)]">
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
                 <div className='flex items-center gap-2'>
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>

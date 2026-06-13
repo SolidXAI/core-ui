@@ -70,7 +70,7 @@ export const SolidChatterAuditMessage: React.FC<SolidChatterAuditMessageProps> =
                         {formatAuditValue(item.previous, item.previousDisplay, item.fieldType)}
                     </span>
                     <RightArrowSvg />
-                    <span className='m-0 font-bold text-primary'>
+                    <span className='m-0 font-bold text-[var(--primary-color)]'>
                         {formatAuditValue(item.current, item.currentDisplay, item.fieldType)}
                     </span>
                 </div>

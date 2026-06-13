@@ -13,8 +13,8 @@ const SolidTimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
     // const header = column.attrs.label ?? fieldMetadata.displayName;
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
     return (
-        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-1'>
-            <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
+        <div className='flex flex-col items-start gap-2 md:flex-row md:gap-1'>
+            <div className="w-full p-0 px-0 md:w-1/2 md:pl-0 md:pr-0">
                 <SolidSelect
                     value={rule.matchMode}
                     native={false}
