@@ -1406,7 +1406,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         });
 
         return (
-            <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
+            <div className={`solid-form-wrapper ${viewMode=="edit"?"solid-form-edit":"solid-form-view"}`} ref={solidFormWrapperRef}>
                 <div className="solid-form-section">
                     <div className="page-header solid-list-toolbar flex-col lg:flex-row">
                         <div className="flex justify-between w-full solid-form-toolbar-row">
@@ -1888,7 +1888,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
                             onMobileOpenChatter={() => setShowChatter(true)}
                         />
-                        <div className={`px-6 py-3 md:p-6 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-3 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : 'solid-edit-mode-form-content'} ${params.embeded === true ? 'h-auto' : ''}`}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />

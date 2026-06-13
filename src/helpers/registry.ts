@@ -7,6 +7,10 @@ import { SolidShortTextFieldImageListWidget } from "../components/core/list/widg
 import { SolidShortTextAvatarWidget } from "../components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "../components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "../components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
+import { ClearModulePackageRuntimeHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ClearModulePackageRuntimeHeaderAction";
+import ExportModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/ExportModulePackageRowAction";
+import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
+import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
 import { DefaultDateFormEditWidget, DefaultDateFormViewWidget, PublishedStatusListViewWidget } from "../components/core/form/fields/SolidDateField";
 import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "../components/core/form/fields/SolidDateTimeField";
@@ -73,6 +77,7 @@ import {
 } from "../types/extension-registry";
 
 import { scheduleFrequencyOnFieldChangeHandler } from "../components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
+import { MetadataExplorerFormWidget } from "../components/core/extension/solid-core/metadata/MetadataExplorerFormWidget";
 
 
 type ExtensionComponentMetadata = {
@@ -179,6 +184,8 @@ registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, Exten
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", SolidChatterMessageCoModelEntityIdListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);
 
 // ...
 
@@ -347,11 +354,13 @@ registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRela
 // 4. list row action 
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, ExtensionComponentTypes.listRowAction);
+registerExtensionComponent("ExportModulePackageRowAction", ExportModulePackageRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, ExtensionComponentTypes.listRowAction);
 
 // 7. form widget 
 registerExtensionComponent("CustomHtml", CustomHtml, ExtensionComponentTypes.formWidget);
+registerExtensionComponent("MetadataExplorerFormWidget", MetadataExplorerFormWidget, ExtensionComponentTypes.formWidget);
 registerExtensionComponent("solidXGenAiCodeBuilderConfigWidget", solidXGenAiCodeBuilderConfigWidget, ExtensionComponentTypes.settingsWidgets);
 
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdFormViewWidget", SolidChatterMessageCoModelEntityIdFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
@@ -394,6 +403,7 @@ registerExtensionComponent("QueueSlaHeatmapWidget", QueueSlaHeatmapWidget, Exten
 // Email Template
 registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange, ExtensionFunctionTypes.onFieldChange);
 registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad, ExtensionFunctionTypes.onFormLayoutLoad);
+registerExtensionFunction("moduleMetadataListOnLoad", moduleMetadataListOnLoad, ExtensionFunctionTypes.onListLoad);
 
 // Model Sequence 
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"

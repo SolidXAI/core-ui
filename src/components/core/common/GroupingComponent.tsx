@@ -266,6 +266,7 @@ const GroupingComponent = ({
                         placeholder="Format"
                         className="solid-grouping-row-select"
                         onChange={(e) => updateGroup(rule.id, "dateGrouping", e.value)}
+                        native={false}
                       />
                     </div>
                   ) : (
@@ -342,6 +343,7 @@ const GroupingComponent = ({
                     placeholder="Op"
                     className="solid-grouping-row-select solid-aggregation-row-select"
                     onChange={(e) => updateAggregation(rule.id, "operator", e.value)}
+                    native={false}
                   />
                 </div>
                 {!rule.locked ? (

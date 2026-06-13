@@ -23,11 +23,12 @@ const SolidRelationManyToManyField = ({
     const numberOfInputs = needsInput ? getNumberOfInputs(rule.matchMode) : 0;
 
     return (
-        <div className="flex flex-col md:flex-row items-start gap-12 md:gap-1">
+        <div className="flex flex-column md:flex-row align-items-start gap-2 md:gap-1">
             {/* Operator */}
             <div className="w-full md:w-1/2 px-0 md:pr-0 md:pl-0 p-0">
                 <SolidSelect
                     value={rule.matchMode}
+                    native={false}
                     onChange={(e) => {
                         onChange(rule.id, 'matchMode', e.value);
                         // Clear value if switching to no-input operator

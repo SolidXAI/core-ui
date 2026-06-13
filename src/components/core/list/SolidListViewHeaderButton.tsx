@@ -1,4 +1,5 @@
 import { useSession } from "../../../hooks/useSession";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { SolidButton } from "../../shad-cn-ui";
@@ -11,6 +12,7 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
     const presentation = resolveButtonPresentation(button?.attrs);
 
     if (!hasRole) return null;
+    if (!isButtonVisibleInCurrentEnv(button?.attrs)) return null;
     if (!presentation.showIcon && !presentation.showLabel) return null;
 
     return (

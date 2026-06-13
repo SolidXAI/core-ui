@@ -532,7 +532,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
                 }}
                 showHeader={false}
-                className="solid-dialog"
+                className="solid-dialog solid-inline-relation-dialog"
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >

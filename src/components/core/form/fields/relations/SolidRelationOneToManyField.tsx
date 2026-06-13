@@ -525,7 +525,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
             <SolidDialog
                 open={visibleCreateRelationEntity}
                 onOpenChange={setvisibleCreateRelationEntity}
-                className="solid-dialog"
+                className="solid-dialog solid-inline-relation-dialog"
                 style={{
                     width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"

@@ -7,6 +7,7 @@ import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSe
 import { SolidExport } from "../../../components/common/SolidExport";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
@@ -203,7 +204,7 @@ export const SolidListViewConfigure = (
                         isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
                         isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
                         (solidListViewLayout?.attrs?.headerButtons
-                            ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
+                            ?.some((rb: any) => rb.attrs.actionInContextMenu === true && isButtonVisibleInCurrentEnv(rb?.attrs))) ||
                         viewData?.data?.solidView?.model?.enableSoftDelete
                     ) && (
                         <>
@@ -244,6 +245,7 @@ export const SolidListViewConfigure = (
                                 </SolidDropdownMenuItem>
                             )}
                             {solidListViewLayout?.attrs?.headerButtons
+                                ?.filter((rb: any) => isButtonVisibleInCurrentEnv(rb?.attrs))
                                 ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
                                 ?.map((button: any, index: number) => (
                                     <SolidListViewHeaderContextMenuButton

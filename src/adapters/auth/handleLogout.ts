@@ -2,7 +2,7 @@ import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { getSession, signOut } from "./index";
 import { solidPost } from "../../http/solidHttp";
 
-export async function handleLogout({ toast }: any) {
+export async function handleLogout(): Promise<boolean> {
     const session = await getSession();
     const refreshToken = session?.user?.refreshToken;
     try {
@@ -16,24 +16,17 @@ export async function handleLogout({ toast }: any) {
 
         if (response?.data?.statusCode === 200) {
             await signOut({ callbackUrl: '/auth/login' });
-        } else {
-            toast?.current?.show({
-                severity: 'error',
-                summary: ERROR_MESSAGES.LOGOUT_FAILED,
-                detail: `${response?.data?.data?.status}`,
-                life: 3000,
-            });
+            return true;
         }
+
+        console.error(ERROR_MESSAGES.LOGOUT_FAILED, `${response?.data?.data?.status}`);
+        return false;
     } catch (error) {
         const err = error as any;
         const message =
             err.response?.data?.data?.message || err.message || ERROR_MESSAGES.LOGOUT_FAILED;
 
-        toast?.current?.show({
-            severity: 'error',
-            summary: ERROR_MESSAGES.LOGOUT_FAILED,
-            detail: message,
-            life: 3000,
-        });
+        console.error(ERROR_MESSAGES.LOGOUT_FAILED, message);
+        return false;
     }
 }

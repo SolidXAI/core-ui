@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Download, File, Volume2 } from "lucide-react";
+import { Download, Volume2 } from "lucide-react";
 import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 import { FileReaderExt } from '../../../../components/common/FileReaderExt';
 import { SolidButton, SolidDialog } from "../../../shad-cn-ui";
+import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
 
 const getCleanUrl = (url: string) => url.split("?")[0];
 
@@ -98,7 +99,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={handleClick}
         >
-            <File size={24} className="text-gray-400" />
+            <SolidFileTypeIcon fileUrl={src} size={24} />
         </div>
     );
 };
@@ -256,7 +257,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                     <div className="flex items-center justify-between">
 
                                         <p
-                                            className="font-normal w-11 text-primary m-0"
+                                            className="font-normal w-11 text-primary m-0 solid-media-column-text-wrapper"
                                             style={{ cursor: "pointer" }}
                                             onClick={() => handleFileView(file)}
                                         >

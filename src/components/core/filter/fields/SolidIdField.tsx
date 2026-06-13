@@ -24,6 +24,7 @@ const SolidIdField = ({ fieldMetadata, onChange, index, rule }: SolidFilterField
         <div className='flex items-start gap-4 w-full'>
             <SolidSelect
                 value={rule.matchMode}
+                native={false}
                 onChange={(e: any) => {
                     onChange(rule.id, 'matchMode', e.value)
                 }}

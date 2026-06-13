@@ -402,7 +402,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
             <SolidPanel>
                 <div className="flex flex-wrap -mx-2 -mt-2">
                     {allOptions.map((item: any, i: number) => (
-                        <div key={item.value} className={`field w-1/2 px-2 pt-2 flex gap-2 ${i >= 2 ? 'mt-4' : ''}`}>
+                        <div key={item.value} className={`field col-12 sm:col-6 flex gap-2 ${i >= 2 ? 'mt-1 md:mt-3' : 'mt-1 md:mt-0'}`}>
                             <SolidCheckbox
                                 disabled={readOnlyPermission || isUnsaved}
                                 id={item.label}

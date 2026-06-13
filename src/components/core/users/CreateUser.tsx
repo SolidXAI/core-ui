@@ -250,7 +250,7 @@ const CreateUser = ({ data, params }: any) => {
 
           <SolidFormHeader />
 
-          <div className="px-4 py-3 md:p-4 solid-form-content">
+          <div className="px-3 py-3 md:p-4 solid-form-content">
             {isEditMode ? (
               <SolidTabGroup
                 value={activeTab}
