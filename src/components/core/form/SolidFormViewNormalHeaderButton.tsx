@@ -73,7 +73,11 @@ export function SolidFormViewNormalHeaderButton({
         <div>
             <SolidButton
                 type="button"
-                className={`w-full text-left gap-2 solid-icon-button ${presentation.buttonClassName ? presentation.buttonClassName : ''}`}
+                className={[
+                    "w-full text-left gap-2",
+                    presentation.isIconOnly ? "solid-icon-button" : "",
+                    presentation.buttonClassName ? presentation.buttonClassName : ""
+                ].filter(Boolean).join(" ")}
                 {...button.attrs}
                 label={presentation.label}
                 size="sm"

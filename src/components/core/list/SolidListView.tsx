@@ -1616,10 +1616,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     label={presentation.label}
                                     tooltip={presentation.tooltip}
                                     aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
-                                    className={`solid-inline-row-button w-full text-left gap-2 ${presentation.buttonClassName
-                                      ? presentation.buttonClassName
-                                      : ""
-                                      }`}
+                                    className={[
+                                      "solid-inline-row-button w-full text-left gap-2",
+                                      presentation.isIconOnly ? "solid-icon-button" : "",
+                                      presentation.buttonClassName ? presentation.buttonClassName : ""
+                                    ].filter(Boolean).join(" ")}
                                     size="small"
                                     variant="ghost"
                                     onClick={() => {

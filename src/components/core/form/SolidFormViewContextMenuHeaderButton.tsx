@@ -73,7 +73,11 @@ export function SolidFormViewContextMenuHeaderButton({
             <SolidButton
                 text
                 type="button"
-                className={`w-full text-left gap-2 ${presentation.buttonClassName ? presentation.buttonClassName : ''}`}
+                className={[
+                    "w-full text-left gap-2",
+                    presentation.isIconOnly ? "solid-icon-button" : "",
+                    presentation.buttonClassName ? presentation.buttonClassName : ""
+                ].filter(Boolean).join(" ")}
                 label={presentation.label}
                 size="sm"
                 icon={presentation.icon}
