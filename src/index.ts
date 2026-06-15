@@ -230,6 +230,12 @@ export {
     useUpdatemoduleMutation
 } from './redux/api/moduleApi';
 
+export {
+    datasourceManagementApi,
+    useCreateDatasourceMutation,
+    useGetDatasourcesQuery,
+} from './redux/api/datasourceManagementApi';
+
 export { solidServiceApi, useSeederMutation } from './redux/api/solidServiceApi';
 export { solidChatterMessageApi, useGetchatterMessageQuery, useLazyGetchatterMessageQuery } from './redux/api/solidChatterMessageApi';
 
