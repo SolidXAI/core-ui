@@ -18,6 +18,23 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
     };
 
     const createPath = resolveCreatePath();
+    const storeCurrentViewContext = () => {
+        if (typeof window === "undefined") return;
+
+        const currentUrl = `${window.location.pathname}${window.location.search}`;
+        const currentSegments = window.location.pathname.split("/").filter(Boolean);
+        const currentView = currentSegments[currentSegments.length - 1];
+        const normalizedView =
+            currentView === "list" ||
+                currentView === "kanban" ||
+                currentView === "card" ||
+                currentView === "tree"
+                ? currentView
+                : "list";
+
+        sessionStorage.setItem("fromView", normalizedView);
+        sessionStorage.setItem("fromViewUrl", currentUrl);
+    };
 
     const icon = solidListViewLayout?.attrs?.addButtonIcon;
     const label = solidListViewLayout?.attrs?.addButtonTitle || "Add";
@@ -26,7 +43,7 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
 
     return (
         <div>
-            <Link href={createPath}>
+            <Link href={createPath} onClick={storeCurrentViewContext}>
                 {responsiveIconOnly ? (
                     <>
                         <SolidButton

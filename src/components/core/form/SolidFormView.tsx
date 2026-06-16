@@ -1765,7 +1765,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
-                            headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
+                            // headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
                             showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
                             onMobileOpenChatter={() => setShowChatter(true)}
                         />

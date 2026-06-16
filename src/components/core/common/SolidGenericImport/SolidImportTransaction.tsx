@@ -1,5 +1,4 @@
-
-import { CircleX, MoveRight } from 'lucide-react'
+import { AlertTriangle, CircleX, MoveRight } from 'lucide-react'
 import styles from './SolidImport.module.css'
 import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
 import React, { useEffect, useState } from 'react';
@@ -7,9 +6,84 @@ import { useDispatch } from 'react-redux';
 import { showToast } from '../../../../redux/features/toastSlice';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { SolidButton, SolidSelect, SolidSpinner } from '../../../shad-cn-ui';
+
+
+const getImportMessage = (value: unknown, fallback: string): string => {
+    if (Array.isArray(value)) {
+        const normalized: string[] = value.map((item) => getImportMessage(item, "")).filter((item) => item.trim() !== "");
+        return normalized.length > 0 ? normalized.join(", ") : fallback;
+    }
+
+    if (value && typeof value === "object") {
+        const errorValue = (value as any).error ?? (value as any).message ?? (value as any).detail;
+        if (errorValue !== undefined) {
+            return getImportMessage(errorValue, fallback);
+        }
+
+        try {
+            return JSON.stringify(value);
+        } catch {
+            return fallback;
+        }
+    }
+
+    if (value === undefined || value === null || value === "") {
+        return fallback;
+    }
+
+    return String(value);
+};
+
+const getSampleCellPreview = (value: unknown): string => {
+    if (value === undefined || value === null || value === "") {
+        return ERROR_MESSAGES.IMPORT_NO_SAMPLE_VALUE;
+    }
+
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") {
+        return String(value);
+    }
+
+    if (Array.isArray(value)) {
+        const normalized: string[] = value
+            .map((item) => getSampleCellPreview(item))
+            .filter((item) => item !== ERROR_MESSAGES.IMPORT_NO_SAMPLE_VALUE);
+        return normalized.length > 0 ? normalized.join(", ") : ERROR_MESSAGES.IMPORT_NO_SAMPLE_VALUE;
+    }
+
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+
+    if (typeof value === "object") {
+        if ("result" in (value as any) && (value as any).result !== undefined && (value as any).result !== null) {
+            return getSampleCellPreview((value as any).result);
+        }
+
+        if ("value" in (value as any) && (value as any).value !== undefined && (value as any).value !== null) {
+            return getSampleCellPreview((value as any).value);
+        }
+
+        if ("label" in (value as any) && typeof (value as any).label === "string") {
+            return (value as any).label;
+        }
+
+        if ("formula" in (value as any) && typeof (value as any).formula === "string") {
+            return (value as any).formula;
+        }
+
+        try {
+            return JSON.stringify(value);
+        } catch {
+            return ERROR_MESSAGES.IMPORT_UNSUPPORTED_SAMPLE_VALUE;
+        }
+    }
+
+    return String(value);
+};
+
 export const SolidImportTransaction = ({ setImportStatusResult, transactionId, setImportStep }: any) => {
     const dispatch = useDispatch();
-    const [trigger, { data: mappingInfo, isLoading }] = useLazyGetImportMappingInfoQuery();
+    const [trigger, { data: mappingInfo, isLoading, isError: isMappingInfoError, error: mappingInfoError }] = useLazyGetImportMappingInfoQuery();
     const [patchUpdateImportTransaction] = usePatchUpdateImportTransactionMutation();
     const [createImportSync, { isLoading: isImporting }] = useCreateImportSyncMutation();
     const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
@@ -33,7 +107,8 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
     }, [mappingInfo?.data]);
 
 
-    const dropdownOptions = (mappingInfo?.data?.importableFields ?? []).map((field: any) => ({
+    const importableFields = mappingInfo?.data?.importableFields ?? [];
+    const dropdownOptions = importableFields.map((field: any) => ({
         label: field.displayName,
         value: field.name,
     }));
@@ -55,8 +130,29 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
     };
 
     const handleImportTransaction = async () => {
+        const visibleMappingEntries = Object.entries(fieldMapping).filter(([header]) => visibleHeaders.includes(header));
+        const mappedEntries = visibleMappingEntries.filter(([, fieldName]) => typeof fieldName === "string" && fieldName.trim() !== "");
+
+        if (mappedEntries.length === 0) {
+            dispatch(showToast({
+                severity: "error",
+                summary: ERROR_MESSAGES.IMPORT_ERROR,
+                detail: ERROR_MESSAGES.IMPORT_NO_MATCHED_COLUMNS,
+            }));
+            return;
+        }
+
+        if (mappedEntries.length !== visibleMappingEntries.length) {
+            dispatch(showToast({
+                severity: "error",
+                summary: ERROR_MESSAGES.IMPORT_ERROR,
+                detail: ERROR_MESSAGES.IMPORT_UNMAPPED_COLUMNS,
+            }));
+            return;
+        }
+
         try {
-            const mappingArray = Object.entries(fieldMapping).map(([header, fieldName]) => ({
+            const mappingArray = mappedEntries.map(([header, fieldName]) => ({
                 header,
                 fieldName,
             }));
@@ -98,12 +194,48 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
     const sampleRecords = mappingInfo?.data?.sampleImportedRecordInfo ?? [];
     const visibleSampleRecords = sampleRecords?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader));
 
+    const mappedVisibleCount = visibleSampleRecords.filter((sample: any) => {
+        const mappedField = fieldMapping[sample.cellHeader];
+        return typeof mappedField === "string" && mappedField.trim() !== "";
+    }).length;
+
+    const unmappedVisibleCount = visibleSampleRecords.length - mappedVisibleCount;
+    const autoMappedCount = sampleRecords.filter((sample: any) =>
+        typeof sample?.defaultMappedFieldName === "string" && sample.defaultMappedFieldName.trim() !== ""
+    ).length;
+    
+    const mappingWarningMessage =
+        visibleSampleRecords.length === 0
+            ? null
+            : autoMappedCount === 0 && mappedVisibleCount === 0
+                ? ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_MESSAGE
+                : unmappedVisibleCount > 0
+                    ? ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_MESSAGE(unmappedVisibleCount)
+                    : null;
+    const mappingWarningTitle =
+        visibleSampleRecords.length === 0
+            ? null
+            : autoMappedCount === 0 && mappedVisibleCount === 0
+                ? ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_TITLE
+                : unmappedVisibleCount > 0
+                    ? ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_TITLE
+                    : null;
+
+    const mappingErrorMessage = getImportMessage(
+        (mappingInfoError as any)?.data?.error ?? (mappingInfoError as any)?.data?.message,
+        ERROR_MESSAGES.IMPORT_FILE_READ_FAILED
+    );
     return (
         <div>
             <div className={styles.SolidImportContextWrapper}>
                 {isLoading ? (
                     <div className="solid-import-loading-state">
                         <SolidSpinner size={22} label="Loading mapping info" />
+                    </div>
+                ) : isMappingInfoError ? (
+                    <div className='solid-import-empty-state solid-import-empty-state-danger'>
+                        <h4 className='text-center px-2'>{ERROR_MESSAGES.IMPORT_UNABLE_TO_READ_FILE}</h4>
+                        <p>{mappingErrorMessage}</p>
                     </div>
                 ) : visibleSampleRecords.length > 0 ? (
                     <div className='solid-import-mapping-shell'>
@@ -116,6 +248,19 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                                 {visibleSampleRecords.length} column{visibleSampleRecords.length > 1 ? 's' : ''}
                             </div>
                         </div>
+                        {mappingWarningMessage ? (
+                            <div className="solid-import-mapping-alert" role="alert">
+                                <div className="solid-import-mapping-alert-icon">
+                                    <AlertTriangle size={16} />
+                                </div>
+                                <div className="solid-import-mapping-alert-copy">
+                                    {mappingWarningTitle ? (
+                                        <p className="solid-import-mapping-alert-title">{mappingWarningTitle}</p>
+                                    ) : null}
+                                    <p className="solid-import-mapping-alert-text">{mappingWarningMessage}</p>
+                                </div>
+                            </div>
+                        ) : null}
                         <div className='solid-import-mapping-table'>
                             <div className={`solid-import-mapping-head ${styles.ImportTableHeader}`}>
                                 <div className="solid-import-mapping-head-cell">File Column</div>
@@ -123,16 +268,17 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                             </div>
                             <div className="solid-import-mapping-body">
                                 {visibleSampleRecords.map((sample: any) => {
-                                    const fieldMeta = mappingInfo.data.importableFields.find(
+                                    const fieldMeta = importableFields.find(
                                         (f: any) => f.name === fieldMapping[sample.cellHeader]
                                     );
                                     const isRequired = fieldMeta?.required;
+                                    const samplePreview = getSampleCellPreview(sample.cellValue);
 
                                     return (
                                         <div key={sample.cellHeader} className="solid-import-mapping-row">
                                             <div className="solid-import-mapping-source">
                                                 <div className="solid-import-mapping-source-title">{sample.cellHeader}</div>
-                                                <div className="solid-import-mapping-source-value">{sample.cellValue || "No sample value"}</div>
+                                                <div className="solid-import-mapping-source-value" title={samplePreview}>{samplePreview}</div>
                                             </div>
                                             <div className="solid-import-mapping-target">
                                                 <div className="solid-import-mapping-target-controls">
@@ -177,7 +323,7 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                     size='small'
                     onClick={handleImportTransaction}
                     loading={isImporting}
-                    disabled={isImporting || mappingInfo?.data?.sampleImportedRecordInfo?.length === 0}
+                    disabled={isImporting || isMappingInfoError || mappingInfo?.data?.sampleImportedRecordInfo?.length === 0}
                     rightIcon={<MoveRight size={14} />}
                 >
                     Import

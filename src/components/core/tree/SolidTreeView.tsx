@@ -1570,7 +1570,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 <EllipsisVertical size={16} />
               </button>
             </SolidDropdownMenuTrigger>
-            <SolidDropdownMenuContent className="solid-tree-row-menu">
+            <SolidDropdownMenuContent
+              className="solid-tree-row-menu"
+              side="left"
+              align="center"
+            >
               {canEditRow(rowData, true) ? (
                 <SolidDropdownMenuItem onSelect={() => openRowForEdit(rowData, "edit")}>
                   <Pencil size={14} />
@@ -1579,7 +1583,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               ) : null}
               {canDeleteRow(rowData, true) && !params.embeded ? (
                 <SolidDropdownMenuItem
-                  className="is-danger"
+                  className="is-danger solid-header-dropdown-item-danger"
                   onSelect={() => {
                     setSelectedSolidViewData(rowData);
                     setDeleteEntity(true);

@@ -299,7 +299,7 @@ export function SolidTreeTable({
       <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
         <div className="relative min-h-full">
           <table className={cx("w-full text-sm border-collapse", tableClassName)} style={tableStyle}>
-            <thead className="solid-data-table-head sticky top-0 z-2">
+            <thead className="solid-data-table-head ">
               <tr>
                 {selectionMode === "checkbox" ? (
                   <th
