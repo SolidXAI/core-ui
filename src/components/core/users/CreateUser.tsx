@@ -9,12 +9,11 @@ import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useRouter } from "../../../hooks/useRouter";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "../../../redux/api/authApi";
-import { useGetrolesQuery } from "../../../redux/api/roleApi";
 import { useDeleteUserMutation } from "../../../redux/api/userApi";
+import { RolesGroupedByModuleWidget } from "../../core/form/fields/relations/RolesGroupedByModuleWidget";
 import { showToast } from "../../../redux/features/toastSlice";
 import {
   SolidButton,
-  SolidCheckbox,
   SolidInput,
   SolidMessage,
   SolidPanel,
@@ -55,7 +54,6 @@ const CreateUser = ({ data, params }: any) => {
   ] = useUpdateUserMutation();
 
   const [deleteUser, { isLoading: isUserDeleting, isSuccess: isDeleteUserSuccess }] = useDeleteUserMutation();
-  const { data: rolesData } = useGetrolesQuery("");
 
   useEffect(() => {
     if (data?.roles) {
@@ -263,7 +261,6 @@ const CreateUser = ({ data, params }: any) => {
                       <UserDetailsContent
                         formik={formik}
                         fieldError={fieldError}
-                        rolesData={rolesData}
                         selectedRoles={selectedRoles}
                         handleCheckboxChange={handleCheckboxChange}
                         isEditMode={isEditMode}
@@ -285,7 +282,6 @@ const CreateUser = ({ data, params }: any) => {
               <UserDetailsContent
                 formik={formik}
                 fieldError={fieldError}
-                rolesData={rolesData}
                 selectedRoles={selectedRoles}
                 handleCheckboxChange={handleCheckboxChange}
                 isEditMode={isEditMode}
@@ -329,14 +325,12 @@ const CreateUser = ({ data, params }: any) => {
 function UserDetailsContent({
   formik,
   fieldError,
-  rolesData,
   selectedRoles,
   handleCheckboxChange,
   isEditMode,
 }: {
   formik: any;
   fieldError: (field: any) => string;
-  rolesData: any;
   selectedRoles: string[];
   handleCheckboxChange: (roleName: string) => void;
   isEditMode: boolean;
@@ -489,22 +483,10 @@ function UserDetailsContent({
 
         <SolidPanel toggleable header="Roles" className="solid-column-panel">
           <p className="solid-user-section-copy">Select the roles that should be assigned to this user.</p>
-          <div className="solid-user-role-grid">
-            {rolesData?.data?.records?.map((role: any) => (
-              <div
-                key={role.name}
-                className={cx("solid-user-role-card", selectedRoles.includes(role.name) && "is-selected")}
-              >
-                <SolidCheckbox
-                  id={role.name}
-                  checked={selectedRoles.includes(role.name)}
-                  onChange={() => handleCheckboxChange(role.name)}
-                  label={role.name}
-                  className="solid-user-role-control"
-                />
-              </div>
-            ))}
-          </div>
+          <RolesGroupedByModuleWidget
+            selectedRoles={selectedRoles}
+            onToggle={handleCheckboxChange}
+          />
         </SolidPanel>
       </div>
     </div>
