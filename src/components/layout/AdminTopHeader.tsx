@@ -1,9 +1,7 @@
 import { useContext, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { usePathname } from "../../hooks/usePathname";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { useRouter } from "../../hooks/useRouter";
-import { useSession } from "../../hooks/useSession";
 import { useGetSolidActionByIdQuery } from "../../redux/api/solidActionApi";
 import { useGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { LayoutContext } from "./context/layoutcontext";
@@ -11,6 +9,9 @@ import { enterStudioMode } from "../../redux/features/solidStudioSlice";
 import { hasAnyRole } from "../../helpers/rolesHelper";
 import { getSettingsMap } from "../../helpers/settingsPayload";
 import { env } from "../../adapters/env";
+import { AdminHeaderActions, StudioSparkleIcon } from "./AdminHeaderActions";
+import { useDispatch, useSelector } from "react-redux";
+import { useSession } from "@/hooks/useSession";
 
 const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
 
@@ -18,13 +19,6 @@ const toLabel = (value: string) =>
   decodeURIComponent(value)
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (m) => m.toUpperCase());
-
-const StudioSparkleIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.93 2.93l1.41 1.41M9.66 9.66l1.41 1.41M2.93 11.07l1.41-1.41M9.66 4.34l1.41-1.41" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.4" />
-  </svg>
-);
 
 export const AdminTopHeader = () => {
   const pathname = usePathname();
@@ -158,7 +152,7 @@ export const AdminTopHeader = () => {
                   {crumb}
                 </button>
               ) : (
-                <span>{crumb}</span>
+                <span className="solid-bread-crum-text-wrapper">{crumb}</span>
               )}
             </span>
           ))}
@@ -208,6 +202,7 @@ export const AdminTopHeader = () => {
             </button>
           )}
         </div>
+        <AdminHeaderActions variant="header" />
       </div>
     </header>
   );

@@ -519,6 +519,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="enableAuditTracking"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.enableAuditTracking}
                     onChange={(event) => {
                       formik.setFieldValue("enableAuditTracking", event.currentTarget.checked);
@@ -531,6 +532,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="internationalisation"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.internationalisation}
                     onChange={(event) => {
                       formik.setFieldValue("internationalisation", event.currentTarget.checked);
@@ -542,6 +544,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="draftPublishWorkflow"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.draftPublishWorkflow}
                     onChange={(event) => {
                       formik.setFieldValue("draftPublishWorkflow", event.currentTarget.checked);
@@ -553,6 +556,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="isLegacyTable"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.isLegacyTable}
                     onChange={(event) => {
                       const isChecked = event.currentTarget.checked;
@@ -570,6 +574,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     <div className="ml-4 mt-2">
                       <SolidCheckbox
                         name="hasExistingId"
+                        disabled={params.id !== "new"}
                         checked={!!formik.values.hasExistingId}
                         onChange={(event) => {
                           formik.setFieldValue("hasExistingId", event.currentTarget.checked);
@@ -596,6 +601,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     name="displayName"
                     className={styles.fieldInput}
                     value={formik.values.displayName}
+                    disabled={params.id !== "new"}
                     onChange={(e) => {
                       formik.handleChange(e);
                       const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
@@ -667,6 +673,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     className={styles.fieldTextarea}
                     value={formik.values.description}
                     rows={5}
+                    disabled={params.id !== "new"}
                     onChange={formik.handleChange}
                   />
                   {renderFieldError("description")}

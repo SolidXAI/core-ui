@@ -257,7 +257,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                     <div className="flex align-items-center justify-content-between">
 
                                         <p
-                                            className="font-normal w-11 text-primary m-0"
+                                            className="font-normal w-11 text-primary m-0 solid-media-column-text-wrapper"
                                             style={{ cursor: "pointer" }}
                                             onClick={() => handleFileView(file)}
                                         >

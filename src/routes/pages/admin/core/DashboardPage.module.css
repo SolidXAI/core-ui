@@ -120,6 +120,10 @@
   width: 100%;
 }
 
+.gridStackCompact {
+  min-height: 0;
+}
+
 .widgetCard {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
@@ -175,12 +179,41 @@
 }
 
 @media (max-width: 768px) {
+  .page {
+    padding: 12px;
+    gap: 12px;
+  }
+
   .header {
     align-items: flex-start;
     flex-direction: column;
   }
 
+  .headerActions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .title {
+    font-size: 1.08rem;
+  }
+
+  .subtitle {
+    font-size: 0.82rem;
+  }
+
   .dateRange {
     grid-template-columns: 1fr;
+  }
+
+  .widgetCard {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .widgetTitle {
+    margin-bottom: 8px;
+    font-size: 0.94rem;
   }
 }

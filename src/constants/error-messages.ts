@@ -136,6 +136,21 @@ export const ERROR_MESSAGES = {
 
   /* ----------------------------- IMPORT / EXPORT ----------------------------- */
   IMPORT_ERROR: 'Import Error',
+  IMPORT_FILE_READ_FAILED: "We couldn't read the uploaded file. Please verify the headers and sample data, then try again.",
+  IMPORT_NO_SAMPLE_VALUE: 'No sample value',
+  IMPORT_UNSUPPORTED_SAMPLE_VALUE: 'Unsupported sample value',
+  IMPORT_NO_MATCHED_COLUMNS: "We couldn't match any columns from this file. Upload the correct template or map at least one column before importing.",
+  IMPORT_UNMAPPED_COLUMNS: 'Some file columns are still unmapped. Map them to a SolidX field or remove them before importing.',
+  IMPORT_DUPLICATE_FIELD_MAPPING: 'Each SolidX field can only be mapped once. Update duplicate mappings before importing.',
+  IMPORT_REQUIRED_FIELD_MAPPING_TITLE: 'Required fields are still unmapped',
+  IMPORT_REQUIRED_FIELD_MAPPING_MESSAGE: (count: number) =>
+    `${count} required field${count > 1 ? 's are' : ' is'} still unmapped. Map ${count > 1 ? 'them' : 'it'} before importing.`,
+  IMPORT_TEMPLATE_MISMATCH_TITLE: 'Template mismatch detected',
+  IMPORT_TEMPLATE_MISMATCH_MESSAGE: "We couldn't auto-match any columns from this file. This usually means the uploaded file headers don't match the expected import template.",
+  IMPORT_MAPPING_INCOMPLETE_TITLE: 'Mapping still incomplete',
+  IMPORT_MAPPING_INCOMPLETE_MESSAGE: (count: number) =>
+    `${count} importable field${count > 1 ? 's are' : ' is'} still unmapped. Map ${count > 1 ? 'them' : 'it'} before importing.`,
+  IMPORT_UNABLE_TO_READ_FILE: 'Unable to read import file',
   EXPORT_SUCCESSFULLY: 'File Exported Successfully',
   SEND_REPORT: 'Can you send me the report?',
 

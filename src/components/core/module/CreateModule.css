@@ -1,0 +1,44 @@
+.solid-module-form-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.solid-module-form-workspace .solid-module-form-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.solid-module-form-workspace .solid-module-form-tablist {
+  width: 100% !important;
+  padding: 0 0.25rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+}
+
+.solid-module-form-workspace .solid-module-form-tabpanel {
+  padding-top: 0.65rem;
+}
+
+.solid-module-form-tab-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.solid-module-form-workspace .solid-module-form-tablist .solid-notebook-tab-trigger {
+  padding: 0.9rem 0.95rem 0.8rem;
+}
+
+.solid-module-general-info-content.is-tabbed {
+  padding: 0 0.9rem 1rem;
+}
+
+.solid-module-general-info-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}

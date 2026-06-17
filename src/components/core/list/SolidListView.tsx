@@ -21,6 +21,7 @@ import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
@@ -251,6 +252,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
 
+  const visibleHeaderButtons = useMemo(
+    () =>
+      (solidListViewLayout?.attrs?.headerButtons ?? []).filter(
+        (button: any) => isButtonVisibleInCurrentEnv(button?.attrs),
+      ),
+    [solidListViewLayout?.attrs?.headerButtons],
+  );
+
   const editBaseUrl = useMemo(
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
@@ -284,7 +293,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     };
     fetchPermissions();
   }, [params.modelName]);
-
 
   const isFilterApplied = filters ? true : false;
 
@@ -1189,6 +1197,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     hasAppliedFilters(filterPredicates?.predefined_search_predicate);
 
   const hasAppliedFilterValues = hasAppliedFilters(filters);
+  const hasAnyActiveFilters = hasAppliedFilterValues || hasFilterPredicatesApplied;
+
+  useEffect(() => {
+    if (params.embeded === false && hasAnyActiveFilters) {
+      setShowGlobalSearchElement(true);
+    }
+  }, [hasAnyActiveFilters, params.embeded]);
 
   const isListViewEmptyWithoutFilters =
     !loading &&
@@ -1300,22 +1315,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasCustomContextMenuButtons =
     solidListViewLayout?.attrs?.rowButtons?.some(
-      (rb: any) => rb?.attrs?.actionInContextMenu === true
+      (rb: any) => rb?.attrs?.actionInContextMenu === true && isButtonVisibleInCurrentEnv(rb?.attrs)
     );
 
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
 
-  const toggleBothSidebars = () => {
-    if (visibleNavbar) {
-      dispatch(toggleNavbar());   // close both
-    } else {
-      dispatch(showNavbar());     // open both
-    }
-  };
+  // const toggleBothSidebars = () => {
+  //   if (visibleNavbar) {
+  //     dispatch(toggleNavbar());   // close both
+  //   } else {
+  //     dispatch(showNavbar());     // open both
+  //   }
+  // };
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className={`solid-list-content h-full flex flex-column flex-grow-1 ${styles.ListContentWrapper}`}>
+      <div className={`solid-list-content  flex flex-column flex-grow-1 ${styles.ListContentWrapper}`}>
         <div className="solid-list-surface flex flex-column flex-1 min-h-0">
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-column lg:flex-row">
@@ -1323,12 +1338,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
               <div className="flex justify-content-between w-full">
                 <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                   <div className='flex align-items-center gap-2'>
-                    {params.embeded !== true &&
+                    {/* {params.embeded !== true &&
                       <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                         <LayoutGrid size={18} />
                       </div>
-                    }
-                    <p className="m-0 view-title solid-text-wrapper">
+                    } */}
+                    <p className="m-0 view-title solid-list-view-text-wrapper">
                       {solidListViewMetaData?.data?.solidView?.action?.displayName || solidListViewMetaData?.data?.solidView?.displayName}
                     </p>
                   </div>
@@ -1366,7 +1381,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   )}
 
                   <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
-                    {solidListViewLayout?.attrs?.headerButtons
+                    {visibleHeaderButtons
                       ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                       ?.map((button: any, index: number) => (
                         <SolidListViewHeaderButton
@@ -1500,7 +1515,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 >
                   <DataTable
                     value={listViewData}
-                    viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 128px)"}
+                    // viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 128px)"}
                     rowClassName={(rowData) => {
                       return rowData.deletedAt ? "greyed-out-row" : "";
                     }}
@@ -1594,8 +1609,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             hasAnyRole(user?.roles, roles);
 
                           const isVisible = rb?.attrs?.visible !== false;
+                          const isVisibleInCurrentEnv = isButtonVisibleInCurrentEnv(rb?.attrs);
 
-                          return !isInContextMenu && isAllowed && isVisible;
+                          return !isInContextMenu && isAllowed && isVisible && isVisibleInCurrentEnv;
                         })
                         .map((button: any, index: number) => {
 

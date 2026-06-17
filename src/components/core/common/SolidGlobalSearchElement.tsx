@@ -927,12 +927,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const fieldElements = extractFields(layoutChildren);
 
 
-            const fieldsList = Object.entries(fieldsData ?? {}).map(([key, value]: any) => {
+            // Build one entry per layout column (not per field name), so multiple columns
+            // sharing the same field name (e.g. several viewMetadata columns with different
+            // searchFields/labels) each appear as a separate searchable option.
+            const seenKeys = new Set<string>();
+            const fieldsList: any[] = [];
+
+            // First pass: one entry per unique field name (for non-searchable / filter use)
+            Object.entries(fieldsData ?? {}).forEach(([key, value]: any) => {
                 const viewFieldElement = fieldElements.find(
                     (f: any) => f?.attrs?.name === key
                 );
-                return {
-                    name: value.displayName,
+                seenKeys.add(key);
+                fieldsList.push({
+                    name: viewFieldElement?.attrs?.label ?? value.displayName,
                     value: key,
                     type: value.type,
                     ormType: value.ormType,
@@ -940,7 +948,33 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     searchField: viewFieldElement?.attrs?.searchField ?? null,
                     isSearchable: viewFieldElement?.attrs?.isSearchable ?? false,
                     relationType: value?.relationType ?? null,
-                };
+                });
+            });
+
+            // Second pass: for any layout column that shares a field name but has a
+            // distinct searchField, add it as an additional searchable entry.
+            fieldElements.forEach((fieldElement: any) => {
+                const key = fieldElement?.attrs?.name;
+                const searchField = fieldElement?.attrs?.searchField;
+                const isSearchable = fieldElement?.attrs?.isSearchable ?? false;
+                if (!isSearchable || !searchField) return;
+                // Already covered by the first pass entry for this key?
+                const existingEntry = fieldsList.find(
+                    (e: any) => e.value === key && e.searchField === searchField
+                );
+                if (existingEntry) return; // already in list
+                const value: any = (fieldsData ?? {})[key];
+                if (!value) return;
+                fieldsList.push({
+                    name: fieldElement?.attrs?.label ?? value.displayName,
+                    value: key,
+                    type: value.type,
+                    ormType: value.ormType,
+                    matchMode: fieldElement?.attrs?.searchMatchMode,
+                    searchField: searchField,
+                    isSearchable: true,
+                    relationType: value?.relationType ?? null,
+                });
             });
 
             const filterableFieldsList = fieldsList.filter((field: any) => {
@@ -1562,6 +1596,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const hiddenChipItems = managedChipItems.slice(MAX_VISIBLE_CHIPS);
     const hiddenChipCount = hiddenChipItems.length;
 
+    const handleManagedChipOpen = (chip: ManagedChipItem) => {
+        if (!chip.onOpen) return;
+        chip.onOpen();
+    };
+
     const clearAllAppliedChips = () => {
         if (managedChipItems.length === 0) return;
 
@@ -1811,9 +1850,29 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         {visibleChipItems.map((chip) => (
                             <li key={chip.id}>
                                 <div className={`search-filter-chip-type solid-chip-pill solid-chip-tone-${chip.type}`}>
-                                    <span className="custom-chip-value solid-chip-pill-label" title={chip.label}>
-                                        {chip.label}
-                                    </span>
+                                    {chip.onOpen ? (
+                                        <>
+                                            <button
+                                                type="button"
+                                                className="solid-chip-open-button"
+                                                title={chip.label}
+                                                aria-label={`Open ${chip.label}`}
+                                                onMouseDown={(e) => e.preventDefault()}
+                                                onClick={() => handleManagedChipOpen(chip)}
+                                            >
+                                                <span className="solid-chip-open-icon" aria-hidden="true">
+                                                    <Filter size={12} />
+                                                </span>
+                                            </button>
+                                            <span className="custom-chip-value solid-chip-pill-label solid-chip-open-label" title={chip.label}>
+                                                {chip.label}
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <span className="custom-chip-value solid-chip-pill-label" title={chip.label}>
+                                            {chip.label}
+                                        </span>
+                                    )}
                                     <button
                                         type="button"
                                         className="solid-chip-pill-remove"
@@ -1839,7 +1898,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 </button>
                             </li>
                         )}
-                        {managedChipItems.length > 0 && hiddenChipCount === 0 && (
+                        {/* {managedChipItems.length > 0 && hiddenChipCount === 0 && (
                             <li>
                                 <button
                                     type="button"
@@ -1851,7 +1910,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     Manage
                                 </button>
                             </li>
-                        )}
+                        )} */}
                         <li ref={chipsRef} className="solid-global-search-input-item">
                             <div className="relative solid-global-search-element-wrapper">
                                 <SolidInput
@@ -1897,7 +1956,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </ul>
                 </div>
 
-                {showChipManager && managedChipItems.length > 0 && (
+                {/* {showChipManager && managedChipItems.length > 0 && (
                     <div ref={chipManagerRef} className="absolute z-5 solid-chip-manager-panel">
                         <div className="solid-chip-manager-header">
                             <div className="solid-chip-manager-title">Applied chips ({managedChipItems.length})</div>
@@ -1930,7 +1989,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             ))}
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {showOverlay && (
                     <div ref={overlayRef} className="absolute w-full shadow-2 solid-search-overlay-pannel">
@@ -1971,7 +2030,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         }}
                                                         onMouseEnter={() => setFocusedIndex(index)}
                                                     >
-                                                        Search <strong style={{paddingLeft:"2px"}}>{value.displayName}</strong> &nbsp; for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
+                                                        Search <strong style={{paddingLeft:"2px"}}>{value.displayName.trim()}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
                                                     </SolidButton>
                                                 )
                                             })

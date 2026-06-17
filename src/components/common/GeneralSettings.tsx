@@ -447,7 +447,7 @@ export const GeneralSettings = () => {
                 {/* <CancelButton /> */}
               </div>
             </div>
-            <div className="px-4 py-3 md:p-4 solid-form-content">
+            <div className="px-3 py-3 md:p-4 solid-form-content">
               {pathname.includes("app-settings") && (
                 <>
                   <div className="formgrid grid">

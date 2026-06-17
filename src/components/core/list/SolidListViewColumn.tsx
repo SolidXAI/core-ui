@@ -32,7 +32,6 @@ export const isFieldSortable = (fieldMetadata: any): boolean => {
     if (!fieldMetadata) return false;
     const type = fieldMetadata.type;
     if (type === 'mediaSingle' || type === 'mediaMultiple') return false;
-    if (type === 'computed') return false;
     if (type === 'relation') return fieldMetadata.relationType === 'many-to-one';
     return true;
 };
