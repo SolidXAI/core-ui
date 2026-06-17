@@ -30,18 +30,32 @@ interface KanbanCardProps {
   group?: any;
   cardNode?: any;
   DynamicCardWidget?: any;
+  onDelete?: (record: Data) => void;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget, onDelete }) => {
   const router = useRouter()
-  const openRecord = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("fromView", "kanban");
+
+  const persistReturnView = () => {
+    if (typeof window === "undefined") {
+      return;
     }
+
+    try {
+      sessionStorage.setItem("fromView", "kanban");
+      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+    } catch (error) {
+      // Ignore storage errors and continue navigation.
+    }
+  };
+
+  const openRecord = () => {
+    persistReturnView();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 
   const openEdit = () => {
+    persistReturnView();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 
@@ -61,11 +75,20 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
             <SolidDropdownMenuItem
               className="solid-header-dropdown-item"
-              onSelect={() => router.push(`${editButtonUrl}/${data?.id}`)}
+              onSelect={openEdit}
             >
               <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
               <span className="solid-header-action-button-label">Edit</span>
             </SolidDropdownMenuItem>
+            {onDelete ? (
+              <SolidDropdownMenuItem
+                className="solid-header-dropdown-item solid-header-dropdown-item-danger"
+                onSelect={() => onDelete(data)}
+              >
+                <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
+                <span className="solid-header-action-button-label">Delete</span>
+              </SolidDropdownMenuItem>
+            ) : null}
           </SolidDropdownMenuContent>
         </SolidDropdownMenu>
       </div>

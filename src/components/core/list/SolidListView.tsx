@@ -1197,6 +1197,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     hasAppliedFilters(filterPredicates?.predefined_search_predicate);
 
   const hasAppliedFilterValues = hasAppliedFilters(filters);
+  const hasAnyActiveFilters = hasAppliedFilterValues || hasFilterPredicatesApplied;
+
+  useEffect(() => {
+    if (params.embeded === false && hasAnyActiveFilters) {
+      setShowGlobalSearchElement(true);
+    }
+  }, [hasAnyActiveFilters, params.embeded]);
 
   const isListViewEmptyWithoutFilters =
     !loading &&

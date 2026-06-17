@@ -23,6 +23,8 @@
   --accent-foreground: #3730a3;
   --primary: #722ED1;
   --primary-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
   --ring: rgba(114, 46, 209, 0.35);
   --sidebar-background: #f8fafc;
   --sidebar-foreground: #0f172a;
@@ -39,7 +41,7 @@
   --z-app: 1;
   --z-overlay: 1000;
   --z-studio: 9999;
-  --solid-danger: #ef4444;
+  --solid-danger: var(--destructive);
 }
 
 html.dark,
@@ -68,6 +70,8 @@ html.dark,
   --accent-foreground: #dbeafe;
   --primary: #b37feb;
   --primary-foreground: #0b1220;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
   --ring: rgba(179, 127, 235, 0.35);
   --sidebar-background: #020817;
   --sidebar-foreground: #e2e8f0;
@@ -803,12 +807,12 @@ body {
 }
 
 .solid-user-menu-item.is-danger {
-  color: #ef4444;
+  color: var(--destructive);
 }
 
 .solid-user-menu-item.is-danger:hover {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--destructive) 12%, transparent);
+  color: var(--destructive);
 }
 
 .solid-inline-toast {
@@ -825,7 +829,7 @@ body {
 }
 
 .solid-inline-toast.is-error {
-  border-color: color-mix(in srgb, #ef4444 45%, var(--border));
+  border-color: color-mix(in srgb, var(--destructive) 45%, var(--border));
 }
 
 .solid-inline-toast.is-success {
@@ -1105,7 +1109,7 @@ body {
   display: grid;
   grid-template-columns: 28px 1fr;
   align-items: start;
-  column-gap: 12px;
+  /* column-gap: 12px; */
   font-size: 13px;
   line-height: 1.55;
   color: var(--foreground);
@@ -1117,7 +1121,8 @@ body {
   font-weight: 600;
   color: var(--foreground);
   display: inline-block;
-  text-align: left;
+  /* text-align: left; */
+  text-align: center;
 }
 
 .solid-field-delete-flow-dialog .solid-field-delete-flow-step {
@@ -1311,8 +1316,8 @@ body {
 }
 
 .solid-btn--destructive {
-  --solid-btn-bg: #ef4444;
-  --solid-btn-fg: #fff;
+  --solid-btn-bg: var(--destructive);
+  --solid-btn-fg: var(--destructive-foreground);
   --solid-btn-border: transparent;
 }
 
@@ -2097,12 +2102,12 @@ body {
 }
 
 .solid-auth-image-title {
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(2rem, 2.8vw, 3.5rem);
   line-height: 1.05;
 }
 
 .solid-auth-image-subtitle {
-  font-size: clamp(1.25rem, 2.4vw, 2rem);
+  font-size: clamp(1.25rem, 2.4vw, 1.7rem);
   line-height: 1.1;
 }
 
@@ -2323,6 +2328,41 @@ body {
   gap: 12px;
 }
 
+.solid-auth-center-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.solid-auth-center-subtitle {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--solid-text-muted);
+}
+
+.solid-auth-center-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--solid-text-primary);
+}
+
+.solid-auth-center-description {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--solid-text-secondary);
+}
+
 .solid-auth-brand {
   display: inline-flex;
   align-items: center;
@@ -2335,6 +2375,10 @@ body {
 
 .solid-auth-brand.is-center {
   align-self: center;
+}
+
+.solid-auth-brand.is-logo-only {
+  gap: 0;
 }
 
 .solid-auth-brand-logo img {
@@ -3506,6 +3550,9 @@ html.dark .solid-header-cog-trigger:hover,
 
 .solid-data-table-head {
   background: color-mix(in srgb, var(--card) 88%, var(--background) 12%);
+  position: sticky;
+  top: 0;
+  z-index: 6;
 }
 
 .solid-data-table-th {
@@ -4201,6 +4248,10 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   gap: 0.55rem;
 }
 
+.solid-tree-row-menu {
+  min-width: 152px;
+}
+
 .solid-tree-row-menu .solid-dropdown-menu-item.is-danger {
   color: var(--destructive);
 }
@@ -4325,6 +4376,10 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   background: var(--card);
   box-shadow: 0 10px 24px color-mix(in srgb, hsl(222 47% 11%) 18%, transparent);
   transform: none;
+}
+
+.solid-popover-content[data-portal="true"] {
+  max-width: calc(100vw - 16px);
 }
 
 .solid-popover-content[data-side="bottom"] {
@@ -4463,12 +4518,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-row-action-button.solid-row-action-button-danger {
-  color: hsl(0 72% 45%);
+  color: var(--destructive);
 }
 
 .solid-row-action-button.solid-row-action-button-danger:hover {
-  background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
-  border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
+  background: color-mix(in srgb, var(--destructive) 11%, transparent);
+  border-color: color-mix(in srgb, var(--destructive) 40%, transparent);
 }
 
 .solid-form-actions-popover {
@@ -4593,13 +4648,13 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-header-dropdown-item-danger {
-  color: hsl(0 72% 45%);
+  color: var(--destructive);
 }
 
 .solid-header-dropdown-item-danger:hover,
 .solid-header-dropdown-item-danger[data-highlighted] {
-  background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
-  border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
+  background: color-mix(in srgb, var(--destructive) 11%, transparent);
+  border-color: color-mix(in srgb, var(--destructive) 40%, transparent);
 }
 
 .solid-header-actions-group {
@@ -4654,12 +4709,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-header-action-button-danger {
-  color: hsl(0 72% 45%);
+  color: var(--destructive);
 }
 
 .solid-header-action-button-danger:hover {
-  background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
-  border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
+  background: color-mix(in srgb, var(--destructive) 11%, transparent);
+  border-color: color-mix(in srgb, var(--destructive) 40%, transparent);
 }
 
 .solid-accordion-item {
@@ -5876,7 +5931,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding: 0 22px 22px;
+  padding: 16px 22px 22px;
 }
 
 .solid-field-confirm-dialog .solid-radix-dialog-footer {

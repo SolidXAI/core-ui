@@ -2914,6 +2914,37 @@ li.header-li-px {
   color: inherit;
 }
 
+.solid-chip-open-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.solid-chip-open-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, currentColor 26%, transparent);
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.solid-chip-open-label {
+  min-width: 0;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .solid-chip-tone-saved {
   background: color-mix(in srgb, hsl(262 83% 58%) 12%, transparent);
   border-color: color-mix(in srgb, hsl(262 83% 58%) 26%, transparent);
@@ -3078,7 +3109,7 @@ li.header-li-px {
 .solid-global-search-element li {}
 
 .solid-global-search-input-item {
-  flex: 1 1 140px;
+  /* flex: 1 1 140px; */
   min-width: 140px;
 }
 
