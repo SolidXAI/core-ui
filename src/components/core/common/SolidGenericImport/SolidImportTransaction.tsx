@@ -106,7 +106,6 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
         setVisibleHeaders(headers);
     }, [mappingInfo?.data]);
 
-
     const importableFields = mappingInfo?.data?.importableFields ?? [];
     const dropdownOptions = importableFields.map((field: any) => ({
         label: field.displayName,
@@ -129,10 +128,25 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
         });
     };
 
-    const handleImportTransaction = async () => {
-        const visibleMappingEntries = Object.entries(fieldMapping).filter(([header]) => visibleHeaders.includes(header));
-        const mappedEntries = visibleMappingEntries.filter(([, fieldName]) => typeof fieldName === "string" && fieldName.trim() !== "");
+    const visibleMappingEntries = Object.entries(fieldMapping).filter(([header]) => visibleHeaders.includes(header));
+    const mappedEntries = visibleMappingEntries.filter(([, fieldName]) => typeof fieldName === "string" && fieldName.trim() !== "");
+    const mappedFieldCounts = mappedEntries.reduce<Record<string, number>>((acc, [, fieldName]) => {
+        const normalizedFieldName = fieldName.trim();
+        acc[normalizedFieldName] = (acc[normalizedFieldName] ?? 0) + 1;
+        return acc;
+    }, {});
+    const duplicateMappedFieldNames = Object.entries(mappedFieldCounts)
+        .filter(([, count]) => count > 1)
+        .map(([fieldName]) => fieldName);
+    const requiredImportableFields = importableFields.filter((field: any) => field.required);
+    const missingRequiredFields = requiredImportableFields.filter(
+        (field: any) => !mappedFieldCounts[field.name]
+    );
+    const totalImportableFieldCount = importableFields.length;
+    const mappedImportableFieldCount = Object.keys(mappedFieldCounts).length;
+    const unmappedImportableFieldCount = Math.max(totalImportableFieldCount - mappedImportableFieldCount, 0);
 
+    const handleImportTransaction = async () => {
         if (mappedEntries.length === 0) {
             dispatch(showToast({
                 severity: "error",
@@ -142,11 +156,20 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
             return;
         }
 
-        if (mappedEntries.length !== visibleMappingEntries.length) {
+        if (duplicateMappedFieldNames.length > 0) {
             dispatch(showToast({
                 severity: "error",
                 summary: ERROR_MESSAGES.IMPORT_ERROR,
-                detail: ERROR_MESSAGES.IMPORT_UNMAPPED_COLUMNS,
+                detail: ERROR_MESSAGES.IMPORT_DUPLICATE_FIELD_MAPPING,
+            }));
+            return;
+        }
+
+        if (missingRequiredFields.length > 0) {
+            dispatch(showToast({
+                severity: "error",
+                summary: ERROR_MESSAGES.IMPORT_ERROR,
+                detail: ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_MESSAGE(missingRequiredFields.length),
             }));
             return;
         }
@@ -193,33 +216,28 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
 
     const sampleRecords = mappingInfo?.data?.sampleImportedRecordInfo ?? [];
     const visibleSampleRecords = sampleRecords?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader));
-
-    const mappedVisibleCount = visibleSampleRecords.filter((sample: any) => {
-        const mappedField = fieldMapping[sample.cellHeader];
-        return typeof mappedField === "string" && mappedField.trim() !== "";
-    }).length;
-
-    const unmappedVisibleCount = visibleSampleRecords.length - mappedVisibleCount;
     const autoMappedCount = sampleRecords.filter((sample: any) =>
         typeof sample?.defaultMappedFieldName === "string" && sample.defaultMappedFieldName.trim() !== ""
     ).length;
-    
-    const mappingWarningMessage =
-        visibleSampleRecords.length === 0
-            ? null
-            : autoMappedCount === 0 && mappedVisibleCount === 0
-                ? ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_MESSAGE
-                : unmappedVisibleCount > 0
-                    ? ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_MESSAGE(unmappedVisibleCount)
-                    : null;
-    const mappingWarningTitle =
-        visibleSampleRecords.length === 0
-            ? null
-            : autoMappedCount === 0 && mappedVisibleCount === 0
-                ? ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_TITLE
-                : unmappedVisibleCount > 0
-                    ? ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_TITLE
-                    : null;
+
+    let mappingWarningMessage: string | null = null;
+    let mappingWarningTitle: string | null = null;
+
+    if (visibleSampleRecords.length > 0) {
+        if (duplicateMappedFieldNames.length > 0) {
+            mappingWarningTitle = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_TITLE;
+            mappingWarningMessage = ERROR_MESSAGES.IMPORT_DUPLICATE_FIELD_MAPPING;
+        } else if (missingRequiredFields.length > 0) {
+            mappingWarningTitle = ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_TITLE;
+            mappingWarningMessage = ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_MESSAGE(missingRequiredFields.length);
+        } else if (autoMappedCount === 0 && mappedImportableFieldCount === 0) {
+            mappingWarningTitle = ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_TITLE;
+            mappingWarningMessage = ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_MESSAGE;
+        } else if (unmappedImportableFieldCount > 0) {
+            mappingWarningTitle = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_TITLE;
+            mappingWarningMessage = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_MESSAGE(unmappedImportableFieldCount);
+        }
+    }
 
     const mappingErrorMessage = getImportMessage(
         (mappingInfoError as any)?.data?.error ?? (mappingInfoError as any)?.data?.message,
@@ -245,7 +263,7 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                                 <p className='solid-import-section-copy m-0'>Match each incoming column to the correct SolidX field before the import runs.</p>
                             </div>
                             <div className="solid-import-mapping-count">
-                                {visibleSampleRecords.length} column{visibleSampleRecords.length > 1 ? 's' : ''}
+                                {totalImportableFieldCount} importable field{totalImportableFieldCount > 1 ? 's' : ''}
                             </div>
                         </div>
                         {mappingWarningMessage ? (
