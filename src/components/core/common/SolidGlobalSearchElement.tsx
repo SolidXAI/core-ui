@@ -428,7 +428,10 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
                     variant="ghost"
                     size="sm"
                     className={`solid-saved-filter-main w-full ${isActive ? "is-active" : ""} ${isFocused ? "solid-search-overlay-option-active" : ""}`}
-                    onClick={() => applySavedFilter(savedfilter)}
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        applySavedFilter(savedfilter);
+                    }}
                     title={savedfilter?.description}
                 >
                     {savedfilter.name}
@@ -441,7 +444,10 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
                             variant="outline"
                             size="sm"
                             className="solid-saved-filter-icon-btn"
-                            onClick={() => openSavedCustomFilter(savedfilter)}
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                openSavedCustomFilter(savedfilter);
+                            }}
                         >
                             <Pencil size={14} />
                         </SolidButton>
@@ -449,7 +455,8 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
                             variant="outline"
                             size="sm"
                             className="solid-saved-filter-icon-btn is-danger"
-                            onClick={() => {
+                            onMouseDown={(e) => {
+                                e.preventDefault();
                                 setSavedFilterTobeDeleted(savedfilter.id),
                                     setIsDeleteSQDialogVisible(true);
                             }}
@@ -720,6 +727,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const [savedFilterFetchDataRefreshKey, setSavedFilterFetchDataRefreshKey] = useState(0);
 
+    const buildSavedFilterUrl = (savedQueryId?: string | number | null) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (savedQueryId === null || savedQueryId === undefined || savedQueryId === "") {
+            params.delete("savedQuery");
+        } else {
+            params.set("savedQuery", String(savedQueryId));
+        }
+
+        const queryString = params.toString();
+        return queryString ? `${pathname}?${queryString}` : pathname;
+    };
 
 
     useEffect(() => {
@@ -1254,9 +1273,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         let parsedSearchParams = searchParams;
         const savedQuery = parsedSearchParams?.get("savedQuery");
         if (savedFilterTobeDeleted == savedQuery) {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.delete("savedQuery");
-            router.push(`?${urlParams.toString()}`);
+            router.push(buildSavedFilterUrl(null));
         }
         setIsDeleteSQDialogVisible(false);
         setTimeout(() => {
@@ -1289,7 +1306,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
                 setPredefinedSearchBaseFilter(null);
                 setTimeout(() => {
-                    router.push(`?savedQuery=${formValues.id}`);
+                    router.push(buildSavedFilterUrl(formValues.id));
                 }, 500)
             } else {
 
@@ -1314,7 +1331,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
 
                 setTimeout(() => {
-                    router.push(`?savedQuery=${result.data.id}`);
+                    router.push(buildSavedFilterUrl(result.data.id));
                 }, 500)
 
             }
@@ -1404,7 +1421,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
         // push the savedQuery=1 in url 
         if (savedfilter?.id) {
-            router.push(`?savedQuery=${savedfilter.id}`);
+            router.push(buildSavedFilterUrl(savedfilter.id));
             setShowOverlay(false);
         } else {
             console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
@@ -1412,15 +1429,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     }
 
     const removeSavedFilter = () => {
-        const params = new URLSearchParams(searchParams.toString());
         setCurrentSavedFilterData(null);
         setCurrentSavedFilterQuery(null)
-        if (params.has("savedQuery")) {
-            params.delete("savedQuery");
-            const newUrl = params.toString()
-                ? `${pathname}?${params.toString()}`
-                : pathname;
-            router.push(newUrl);
+        if (searchParams.has("savedQuery")) {
+            router.push(buildSavedFilterUrl(null));
         }
     }
 

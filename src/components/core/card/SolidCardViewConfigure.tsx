@@ -251,7 +251,11 @@ export const SolidCardViewConfigure = ({
         </SolidDialogHeader>
         <SolidDialogSeparator />
         <SolidDialogBody className="solid-kanban-export-dialog-body">
-          <SolidExport listViewMetaData={solidCardViewMetaData} filters={filters} />
+          <SolidExport
+            listViewMetaData={solidCardViewMetaData}
+            filters={filters}
+            onExportComplete={() => setExportView(false)}
+          />
         </SolidDialogBody>
       </SolidDialog>
 
