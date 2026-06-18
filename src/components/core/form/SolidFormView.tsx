@@ -1,7 +1,7 @@
 import { useSession } from '../../../hooks/useSession'
 import { permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
+import { useGetSolidViewLayoutQuery, useLazyGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
@@ -713,6 +713,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
+    const [triggerGetSolidViewLayout] = useLazyGetSolidViewLayoutQuery();
     const entityDisplayName =
         solidFormViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
     const [refreshChatterMessage, setRefreshChatterMessage] = useState<boolean>(true);
@@ -1638,20 +1639,47 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
         //en 4 null
-        const handleLocaleChangeRedirect = (
+        const handleLocaleChangeRedirect = async (
             locale: string,
             defaultEntityLocaleId: string,
             viewMode: string,
         ) => {
             let newViewMode = viewMode;
             const defaultApplicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
-            //fr 4
-            const matchingLocale = defaultApplicableLocales.find(
+            let matchingLocale = defaultApplicableLocales.find(
                 (loc: any) =>
                     loc.defaultEntityLocaleId &&
                     loc.entityId &&
                     loc.locale === locale
             );
+
+            if (!matchingLocale) {
+                const resolvedDefaultEntityLocaleId =
+                    defaultEntityLocaleId || params.id;
+
+                const freshQuery = qs.stringify(
+                    {
+                        ...params,
+                        viewType: 'form',
+                        defaultEntityLocaleId: resolvedDefaultEntityLocaleId,
+                    },
+                    { encodeValuesOnly: true },
+                );
+
+                try {
+                    const freshResponse: any = await triggerGetSolidViewLayout(freshQuery).unwrap();
+                    const freshApplicableLocales = freshResponse?.data?.applicableLocales || [];
+                    matchingLocale = freshApplicableLocales.find(
+                        (loc: any) =>
+                            loc.defaultEntityLocaleId &&
+                            loc.entityId &&
+                            loc.locale === locale
+                    );
+                } catch {
+                    // Fall back to the existing locale metadata if the refresh fails.
+                }
+            }
+
             // Extract the base path from the current pathname, removing query params if any
             const basePath = pathname.split('?')[0];
 
