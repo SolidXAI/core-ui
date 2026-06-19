@@ -107,7 +107,7 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                             className="w-full"
                             disabled={createMode}
                         />
-                        {(viewMode === 'view' || createMode) && (
+                        {createMode && (
                             <p className="text-sm mt-0 ml-0 solid-locale-helper-copy"> By default record will be created in <b>{defautlLocale}</b></p>
                         )}
                     </>
