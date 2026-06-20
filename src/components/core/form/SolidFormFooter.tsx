@@ -109,23 +109,32 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
 
                 const queryObject = getFilterObjectFromLocalStorageByUrl(listPath);
                 const defaultQueryObject = queryObject || {};
+                const locale = searchParams.get("locale");
+                const defaultEntityLocaleId = searchParams.get("defaultEntityLocaleId");
 
-                const queryData = {
+                const queryData: Record<string, any> = {
                     offset: defaultQueryObject.offset || 0,
                     limit: defaultQueryObject.limit || 25,
                     filters: defaultQueryObject.finalFullFilter || null,
                     // fields: ["id"],
                     modelName: params.modelName,
                     recordId: params.id,
-                    sort: defaultQueryObject.sort
+                    sort: defaultQueryObject.sort,
                 };
+
+                if (locale) {
+                    queryData.locale = locale;
+                }
+
+                if (defaultEntityLocaleId && defaultEntityLocaleId !== "new") {
+                    queryData.defaultEntityLocaleId = defaultEntityLocaleId;
+                }
 
                 const queryString = qs.stringify(queryData, {
                     encodeValuesOnly: true,
                 });
 
                 const response: any = await triggerGetNavigation(queryString).unwrap();
-                console.log("response nav", response);
                 if (response.statusCode == 200) {
                     setPrevNav(response?.data?.prev ?? null);
                     setNextNav(response?.data?.next ?? null);
@@ -134,7 +143,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             };
             fetchNavigation();
         }
-    }, [params.id, params.embeded]);
+    }, [params.id, params.embeded, params.modelName, searchParams, triggerGetNavigation]);
 
     // -----------------------------
     // UI
