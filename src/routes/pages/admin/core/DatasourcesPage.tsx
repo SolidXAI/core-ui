@@ -1,4 +1,4 @@
-import { Database, HardDriveDownload, Plus, RefreshCw, Server } from "lucide-react";
+import { Database, Plus, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../../redux/features/toastSlice";
@@ -86,10 +86,6 @@ function providerGlyph(type: string) {
   return "MS";
 }
 
-function countByType(datasources: DatasourceManagementRecord[], type: string) {
-  return datasources.filter((datasource) => datasource.type === type).length;
-}
-
 function readMutationError(error: any) {
   return (
     error?.data?.message
@@ -152,14 +148,6 @@ export function DatasourcesPage() {
     }
   }, [dialogOpen]);
 
-  const stats = [
-    { label: "Configured", value: datasources.length, icon: <Database size={18} /> },
-    { label: "Default", value: datasources.filter((item) => item.isDefault).length, icon: <Server size={18} /> },
-    { label: "PostgreSQL", value: countByType(datasources, "postgres"), icon: <HardDriveDownload size={18} /> },
-    { label: "MySQL", value: countByType(datasources, "mysql"), icon: <HardDriveDownload size={18} /> },
-    { label: "MS SQL", value: countByType(datasources, "mssql"), icon: <HardDriveDownload size={18} /> },
-  ];
-
   const handleFieldChange = <K extends keyof CreateDatasourceManagementPayload>(
     key: K,
     value: CreateDatasourceManagementPayload[K],
@@ -213,54 +201,37 @@ export function DatasourcesPage() {
 
   return (
     <div className="sdm-page">
-      <section className="sdm-hero">
-        <div className="sdm-hero__copy">
-          <span className="sdm-eyebrow">App Builder</span>
-          <h1>Datasource Management</h1>
-          <p>
-            Review every configured datasource in one place and add new TypeORM connections without leaving the SolidX admin surface.
-          </p>
-          <div className="sdm-hero__actions">
-            <SolidButton size="small" onClick={() => setDialogOpen(true)} leftIcon={<Plus size={14} />}>
-              Add datasource
-            </SolidButton>
-            <SolidButton size="small" variant="outline" onClick={() => void refetch()} leftIcon={<RefreshCw size={14} />}>
-              Refresh
-            </SolidButton>
-          </div>
+      <div className="sdm-header">
+        <div className="sdm-title-block">
+          <h1 className="sdm-title">Datasource Management</h1>
+          <p className="sdm-subtitle">Review and manage the datasources configured for this SolidX application.</p>
         </div>
-        <div className="sdm-hero__panel">
-          <div className="sdm-hero__panel-title">How this works</div>
-          <ul>
-            <li>`default` stays reserved for the bootstrap datasource.</li>
-            <li>New datasources are written directly into `app-*-database.module.ts` and `.env`.</li>
-            <li>Advanced options stay close to the generated datasource module instead of drifting into a sidecar JSON file.</li>
-          </ul>
-        </div>
-      </section>
 
-      <section className="sdm-stats">
-        {stats.map((stat) => (
-          <article key={stat.label} className="sdm-stat">
-            <div className="sdm-stat__icon">{stat.icon}</div>
-            <div className="sdm-stat__value">{stat.value}</div>
-            <div className="sdm-stat__label">{stat.label}</div>
-          </article>
-        ))}
-      </section>
+        <div className="sdm-header-actions">
+          {isFetching && !isLoading ? (
+            <div className="sdm-inline-status">
+              <SolidSpinner size={16} />
+              <span>Refreshing</span>
+            </div>
+          ) : null}
 
-      <section className="sdm-section-head">
-        <div>
-          <h2>Configured datasources</h2>
-          <p>Large cards surface the provider, host, logical name, and environment prefix at a glance.</p>
+          <SolidButton
+            className="sdm-icon-button"
+            leftIcon={<Plus size={16} />}
+            onClick={() => setDialogOpen(true)}
+            tooltip="Add datasource"
+            aria-label="Add datasource"
+          />
+
+          <SolidButton
+            className="sdm-icon-button"
+            leftIcon={<RefreshCw size={16} />}
+            onClick={() => void refetch()}
+            tooltip="Refresh"
+            aria-label="Refresh"
+          />
         </div>
-        {isFetching && !isLoading ? (
-          <div className="sdm-inline-status">
-            <SolidSpinner size={16} />
-            <span>Refreshing</span>
-          </div>
-        ) : null}
-      </section>
+      </div>
 
       {isLoading ? (
         <div className="sdm-loading">

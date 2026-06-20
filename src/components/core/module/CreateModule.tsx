@@ -449,22 +449,23 @@ const CreateModule = ({ params, data }: any) => {
                   )}
 
                   {fileDetails && (
-                    <div className="solid-file-upload-wrapper mt-4">
-                      <div className="flex align-items-center gap-2">
+                    <div className="solid-file-upload-wrapper solid-module-upload-card mt-4">
+                      <div className="solid-module-upload-row">
                         <FileReaderExt fileDetails={fileDetails} />
-                        <div className="w-full flex flex-column gap-1">
-                          <div className="flex align-items-center justify-content-between">
-                            <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
+                        <div className="solid-module-upload-copy">
+                          <div className="solid-module-upload-header">
+                            <div className="font-bold solid-module-mobile-text-wrapper solid-module-upload-name">{fileDetails.name}</div>
                             <button
                               type="button"
-                              className="solid-file-icon-btn is-danger"
+                              className="solid-file-icon-btn is-danger solid-module-upload-remove"
+                              aria-label="Remove uploaded menu icon"
                               onClick={handleCancelUpload}
                             >
                               <SolidIcon name="si-times" aria-hidden />
                             </button>
                           </div>
                           {uploadCompleted ? (
-                            <div className="flex align-items-center gap-2 text-sm">
+                            <div className="solid-module-upload-status">
                               {totalSize} of {totalSize}
                               <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
                                 <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
@@ -480,7 +481,7 @@ const CreateModule = ({ params, data }: any) => {
                               Completed
                             </div>
                           ) : (
-                            <div className="flex align-items-center gap-2 text-sm">
+                            <div className="solid-module-upload-status">
                               {uploadedSize} of {totalSize}
                               <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
                                 <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
@@ -546,6 +547,17 @@ const CreateModule = ({ params, data }: any) => {
               className="solid-module-form-tabs"
               listClassName="solid-module-form-tablist"
               panelClassName="solid-module-form-tabpanel"
+              extra={(
+                <div className="solid-module-form-tab-extra">
+                  <SolidButton
+                    type="button"
+                    size="sm"
+                    onClick={() => router.push(`/admin/core/solid-core/modules/${data?.id}/datasource-introspection`)}
+                  >
+                    Auto Map Tables
+                  </SolidButton>
+                </div>
+              )}
               tabs={[
                 {
                   value: "general",

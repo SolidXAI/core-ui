@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useSession } from "../../hooks/useSession";
+import { SolidLoadingState } from "../../components/common/SolidLoadingState";
 
 type AuthGuardProps = {
   getLoginRoute?: (pathname: string) => string;
@@ -29,7 +30,12 @@ export function AuthGuard({ getLoginRoute }: AuthGuardProps) {
   const resolveLoginRoute = getLoginRoute || defaultGetLoginRoute;
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return (
+      <SolidLoadingState
+        title="Checking your session"
+        description="We are confirming your sign-in status before opening this page."
+      />
+    );
   }
 
   if (status === "unauthenticated") {

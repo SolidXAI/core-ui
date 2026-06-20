@@ -2427,10 +2427,11 @@ body {
   min-width: 0 !important;
   width: min(100%, 388px) !important;
   max-width: 388px !important;
-  padding: 18px !important;
-  border-radius: 12px !important;
+  padding: 24px !important;
+  border-radius: 16px !important;
   backdrop-filter: none !important;
-  box-shadow: none !important;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08) !important;
+  font-family: var(--font-family, "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif) !important;
 }
 
 .solid-auth-theme-wrapper.left .auth-container,
@@ -2460,22 +2461,35 @@ body {
 
 .solid-auth-theme-wrapper .solid-auth-title {
   margin-top: 0 !important;
-  font-size: 1rem !important;
-  line-height: 1.25 !important;
-  letter-spacing: -0.01em !important;
+  font-size: clamp(1.45rem, 1.2rem + 0.7vw, 1.75rem) !important;
+  font-weight: 650 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.03em !important;
 }
 
 .solid-auth-theme-wrapper .solid-auth-helper {
-  margin-top: 0.5rem !important;
-  margin-bottom: 0.5rem !important;
-  font-size: 11px !important;
-  line-height: 1.35 !important;
+  margin-top: 0.65rem !important;
+  margin-bottom: 1rem !important;
+  font-size: 0.92rem !important;
+  line-height: 1.55 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.solid-auth-theme-wrapper .solid-auth-input-label {
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.solid-auth-theme-wrapper .solid-auth-inline-link {
+  font-size: 0.84rem !important;
+  font-weight: 500 !important;
 }
 
 .solid-auth-theme-wrapper .auth-container .solid-input {
-  height: 36px !important;
-  border-radius: 8px !important;
-  padding: 0 10px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+  padding: 0 12px !important;
   border: 1px solid #2f2f37 !important;
   border-color: #2f2f37 !important;
   border-top-color: #2f2f37 !important;
@@ -2542,9 +2556,17 @@ body {
 .solid-auth-theme-wrapper .auth-submit-button.solid-btn,
 .solid-auth-theme-wrapper .auth-back-button.solid-btn,
 .solid-auth-theme-wrapper .solid-auth-social-btn.solid-btn {
-  min-height: 36px !important;
-  height: 36px !important;
-  border-radius: 8px !important;
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 10px !important;
+}
+
+.solid-auth-theme-wrapper .auth-submit-button.solid-btn .solid-btn-label,
+.solid-auth-theme-wrapper .auth-back-button.solid-btn .solid-btn-label,
+.solid-auth-theme-wrapper .solid-auth-social-btn.solid-btn .solid-btn-label {
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
 }
 
 .solid-auth-theme-wrapper .auth-container .solid-message {
@@ -2575,6 +2597,38 @@ body {
 
 .solid-auth-theme-wrapper .auth-container .solid-message.text-red-500 {
   color: #ef4444 !important;
+}
+
+.solid-auth-theme-wrapper .solid-auth-empty-state {
+  margin-top: 1rem;
+  border: 1px solid var(--solid-border-default) !important;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--solid-surface-input) 55%, transparent);
+  padding: 14px 15px;
+}
+
+.solid-auth-theme-wrapper .solid-auth-empty-state.is-loading {
+  background: color-mix(in srgb, var(--solid-surface-input) 42%, transparent);
+}
+
+.solid-auth-theme-wrapper .solid-auth-empty-title,
+.solid-auth-theme-wrapper .solid-auth-empty-copy {
+  margin: 0;
+}
+
+.solid-auth-theme-wrapper .solid-auth-empty-title {
+  color: var(--solid-text-primary) !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.solid-auth-theme-wrapper .solid-auth-empty-copy {
+  margin-top: 0.35rem;
+  color: var(--solid-text-secondary) !important;
+  font-size: 0.84rem !important;
+  line-height: 1.55 !important;
 }
 
 /* Side auth layout shell (left/right) */
