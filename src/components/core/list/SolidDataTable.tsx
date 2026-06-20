@@ -191,7 +191,7 @@ export function SolidDataTable({
     >
       <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
         <table className={cx("w-full text-sm border-collapse", tableClassName)}>
-          <thead className="solid-data-table-head" style={{ position: "sticky", top: 0, zIndex: 11 }}>
+          <thead className="solid-data-table-head">
             <tr>
               {columns.map((column, index) => {
                 const props = column.props;

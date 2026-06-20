@@ -57,6 +57,11 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
 
     const customInstructions = importInstructionsData?.data?.custom ?? [];
     const standardInstructions = importInstructionsData?.data?.standard ?? {};
+    const {
+        dateFieldFormat,
+        dateTimeFieldFormat,
+        ...instructionGroups
+    } = standardInstructions as Record<string, any>;
 
     return (
         <div>
@@ -88,13 +93,21 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                     </li>
                                     {(() => {
                                         return (
-                                            Object.entries(standardInstructions as Record<string, string[]>)
+                                            Object.entries(instructionGroups)
                                                 .map(([key, values]) => {
                                                     if (!values?.length) return null;
 
-                                                    const titleCaseKey = key
+                                                    let titleCaseKey = key
                                                         .replace(/([A-Z])/g, ' $1')
                                                         .replace(/^./, str => str.toUpperCase());
+
+                                                    if (key === 'dateFields' && dateFieldFormat) {
+                                                        titleCaseKey = `${titleCaseKey} (Format: ${dateFieldFormat})`;
+                                                    }
+
+                                                    if (key === 'dateTimeFields' && dateTimeFieldFormat) {
+                                                        titleCaseKey = `${titleCaseKey} (Format: ${dateTimeFieldFormat})`;
+                                                    }
 
                                                     const rendered = (
                                                         <li key={key} className='solid-import-instruction-item'>
@@ -102,7 +115,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                                                 {titleCaseKey}
                                                             </p>
                                                             <div className='solid-import-instruction-copy solid-import-inline-token-list'>
-                                                                {values.map((item: any, i) => (
+                                                                {values.map((item: any, i: number) => (
                                                                     <span key={i} className='solid-import-inline-token'>
                                                                         {typeof item === 'string'
                                                                             ? item

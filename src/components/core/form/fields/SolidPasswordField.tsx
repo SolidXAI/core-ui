@@ -79,7 +79,7 @@ export class SolidPasswordField implements ISolidField {
         }
         //check password and confirm password match if password have value
         schema = schema.test('passwords-match', ERROR_MESSAGES.FIELD_MUST_MATCH(fieldLabel), function (value) {
-            const { path, parent } = this;
+            const { parent, createError } = this;
             const confirmValue = parent[confirmFieldName];
 
             //  Edit mode / untouched → SKIP
@@ -88,7 +88,14 @@ export class SolidPasswordField implements ISolidField {
             }
             //  Only one filled → ERROR
             if (value || confirmValue) {
-                return value === confirmValue;
+                if (value !== confirmValue) {
+                    return createError({
+                        path: confirmFieldName,
+                        message: ERROR_MESSAGES.FIELD_MUST_MATCH(fieldLabel),
+                    });
+                }
+
+                return true;
             }
             return true; // If password is empty, don't validate match
         });
@@ -263,7 +270,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     autoComplete="new-password"
                     className="w-full"
                 />
-                {isFormFieldValid(formik, `${fieldLayoutInfo.attrs.name}Confirm`) && (
+                {((formik.touched[`${fieldLayoutInfo.attrs.name}Confirm`] || formik.submitCount > 0) && formik.errors[`${fieldLayoutInfo.attrs.name}Confirm`]) && (
                     <p className={styles.fieldError}>{formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()}</p>
                 )}
             </div>
