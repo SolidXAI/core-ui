@@ -116,7 +116,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 />
                             )}
                         </div>
-                        <div className="flex flex-col gap-1 mt-6" style={{}}>
+                        <div className="flex flex-col gap-1 mt-4" style={{}}>
                             <div className="flex items-center justify-between">
                                 <label htmlFor="password" className="solid-auth-input-label">Password</label>
                                 <Link href={"/auth/initiate-forgot-password"} className="solid-auth-inline-link" tabIndex={-1}>Forgot your password?</Link>
