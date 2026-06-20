@@ -67,7 +67,7 @@ export class SolidLongTextField implements ISolidField {
 
     render(formik: FormikObject) {
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
@@ -243,18 +243,18 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
                 </label>
             )}
 
-            <div className="p-4 border-round surface-card shadow-1">
+            <div className="rounded bg-[var(--surface-card)] p-4 shadow-sm">
 
-                <div className="flex flex-column gap-2">
+                <div className="flex flex-col gap-2">
                     {
                         // @ts-ignore
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} rounded border p-3 gap-2`}
                             >
                                 {Object.keys(fieldJsonSchema).map((key) => (
-                                    <div key={key} className="flex flex-column gap-1">
+                                    <div key={key} className="flex flex-col gap-1">
                                         <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                         {
                                             // @ts-ignore
@@ -411,8 +411,8 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                 </label>
             )}
 
-            <div className="p-4 border-round surface-card shadow-1">
-                <div className="flex justify-content-between align-items-center mb-3">
+            <div className="rounded bg-[var(--surface-card)] p-4 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
                     {!disabled && !readOnly ? (
                         <SolidButton
                             type="button"
@@ -424,17 +424,17 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     ) : null}
                 </div>
 
-                <div className="flex flex-column gap-2">
+                <div className="flex flex-col gap-2">
                     {
                         // @ts-ignore
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} rounded border p-3 gap-2`}
                             >
-                                <div className="flex gap-3 align-items-center">
+                                <div className="flex gap-4 items-center">
                                     {Object.keys(fieldJsonSchema).map((key) => (
-                                        <div key={key} className="flex flex-column gap-1">
+                                        <div key={key} className="flex flex-col gap-1">
                                             <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                             {
                                                 // @ts-ignore
@@ -458,7 +458,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
                 {
                     fieldLayoutInfo.attrs?.jsonSchemaShowPreview &&
-                    <pre className="mt-4 bg-gray-100 p-3 border-round overflow-auto">
+                    <pre className="mt-4 overflow-auto rounded bg-gray-100 p-3">
                         {JSON.stringify(data, null, 2)}
                     </pre>
                 }

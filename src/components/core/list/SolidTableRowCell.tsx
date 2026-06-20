@@ -12,7 +12,7 @@ const SolidTableRowCell = ({ value, truncateAfter }: { value: string; truncateAf
     const displayValue = isHTML(safeValue) ? stripHTML(safeValue) : safeValue;
 
     return (
-        <div className="flex align-items-center">
+        <div className="flex items-center">
             <div
                 className="solid-table-row"
                 style={truncateAfter ? { maxWidth: `${truncateAfter}ch` } : {}}

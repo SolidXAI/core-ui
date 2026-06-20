@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    SolidAiChat — uses the application's CSS custom-property theme so it
    automatically adapts when the root class switches between light and dark.
-   Variables sourced from shadcn-base.css and PrimeReact theme files.
+   Variables sourced from solid-custom.css and PrimeReact theme files.
 ───────────────────────────────────────────────────────────────────────────── */
 
 /* ── Container ── */

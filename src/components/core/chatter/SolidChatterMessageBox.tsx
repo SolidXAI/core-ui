@@ -266,7 +266,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                     </div>
                     <div className={styles.solidChatterMessageContent}>
                         <div className={styles.solidChatterMessageHeader}>
-                            <div className='flex align-items-center gap-2 flex-wrap'>
+                            <div className='flex items-center gap-2 flex-wrap'>
                                 <p className={styles.solidChatterUser}>{user}</p>
                                 <SolidTooltip>
                                     <SolidTooltipTrigger asChild>
@@ -282,7 +282,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                                     </SolidTooltipContent>
                                 </SolidTooltip>
                             </div>
-                            <div className='flex align-items-center gap-2'>
+                            <div className='flex items-center gap-2'>
                                 {canEditNote && !isEditing && (
                                     <SolidButton
                                         type="button"
@@ -312,14 +312,14 @@ export const SolidChatterMessageBox = (props: Props) => {
                             </div>
                         )}
                         {isEditing && (
-                            <div className='flex flex-column gap-2'>
+                            <div className='flex flex-col gap-2'>
                                 <SolidTextarea
                                     value={editedMessage}
                                     onChange={(e) => setEditedMessage(e.target.value)}
                                     rows={4}
                                     className="w-full py-2"
                                 />
-                                <div className='flex flex-column gap-2'>
+                                <div className='flex flex-col gap-2'>
                                     <input
                                         ref={fileInputRef}
                                         id={`note-edit-file-${messageId}`}
@@ -329,9 +329,9 @@ export const SolidChatterMessageBox = (props: Props) => {
                                         style={{ display: 'none' }}
                                     />
                                     {selectedFiles.length > 0 && (
-                                        <div className='flex flex-column gap-1'>
+                                        <div className='flex flex-col gap-1'>
                                             {selectedFiles.map((file, index) => (
-                                                <div key={`${file.name}-${index}`} className='flex align-items-center justify-content-between text-xs'>
+                                                <div key={`${file.name}-${index}`} className='flex items-center justify-between text-xs'>
                                                     <span>{file.name} ({formatFileSize(file.size)})</span>
                                                     <SolidButton
                                                         type="button"
@@ -347,8 +347,8 @@ export const SolidChatterMessageBox = (props: Props) => {
                                         </div>
                                     )}
                                 </div>
-                                <div className='flex align-items-center justify-content-between gap-2 flex-wrap'>
-                                    <div className='flex align-items-center gap-2'>
+                                <div className='flex items-center justify-between gap-2 flex-wrap'>
+                                    <div className='flex items-center gap-2'>
                                         <SolidButton
                                             type="button"
                                             size="sm"
@@ -361,7 +361,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                                         />
                                         <span className='text-xs text-color-secondary'>Attach file</span>
                                     </div>
-                                    <div className='flex align-items-center justify-content-end gap-2'>
+                                    <div className='flex items-center justify-end gap-2'>
                                     <SolidButton
                                         type="button"
                                         size="sm"
@@ -431,7 +431,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                                                     href={encodeURI(attachment._full_url)}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                className='flex align-items-center gap-2 text-decoration-none text-sm'
+                                                className='flex items-center gap-2 text-decoration-none text-sm'
                                             >
                                                 <SolidIcon name={getFileIcon(attachment.mimeType)} aria-hidden />
                                                 <span>{attachment.originalFileName}</span>
@@ -443,9 +443,9 @@ export const SolidChatterMessageBox = (props: Props) => {
                             </div>
                         )}
                         {isTaskMessage && (
-                            <div className='flex align-items-center justify-content-end'>
+                            <div className='flex items-center justify-end'>
                                 {isTaskCompleted ? (
-                                    <SolidTag tone="success" className="inline-flex align-items-center gap-1 text-xs px-2 py-1">
+                                    <SolidTag tone="success" className="inline-flex items-center gap-1 text-xs px-2 py-1">
                                         <Check size={12} aria-hidden />
                                         <span className="font-medium">Done</span>
                                     </SolidTag>

@@ -63,7 +63,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
         <div>
             {isUnsaved && (
                 <div className="mb-2">
-                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-start" />
                 </div>
             )}
             {Object.keys(groupedEntities).map((controllerName) => (
@@ -71,7 +71,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                     key={controllerName}
                     toggleable
                     header={
-                        <div className="flex align-items-center gap-3 justify-content-between w-full">
+                        <div className="flex w-full items-center justify-between gap-3">
                             <span className="form-field-label text-base lg:text-lg font-bold solid-permisson-text-wrapper">
                                 {controllerName}
                             </span>
@@ -97,11 +97,11 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                     }
                     className="mt-3 lg:mt-4"
                 >
-                    <div className="formgrid grid gap-3 lg:gap-0">
+                    <div className="flex flex-wrap -mx-2 -mt-2 gap-y-4 lg:gap-y-0">
                         {groupedEntities[controllerName].map((entity: any, i: number) => (
                             <div
                                 key={entity.value}
-                                className={`field col-12 lg:col-6 flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}
+                                className={`field flex w-full gap-2 px-2 pt-2 lg:w-1/2 ${i >= 2 ? 'lg:mt-4' : ''}`}
                             >
                                 <SolidCheckbox
                                     readOnly={readOnlyPermission || isUnsaved}

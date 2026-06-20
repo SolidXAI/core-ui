@@ -767,7 +767,7 @@ export function ModuleMetadataExplorer({
             <SolidMessage
               severity="error"
               text={`Unable to load metadata explorer: ${extractApiErrorMessage(loadError)}`}
-              className="justify-content-start"
+              className="justify-start"
             />
           </div>
         )}

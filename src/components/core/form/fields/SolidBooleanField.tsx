@@ -101,7 +101,7 @@ export class SolidBooleanField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
         //useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
@@ -276,7 +276,7 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             )}
-            <div className="flex align-items-center">
+            <div className="flex items-center">
                 <SolidCheckbox
                     id={fieldLayoutInfo.attrs.name}
                     checked={formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true"}
@@ -373,7 +373,7 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             )}
-            <div className="flex align-items-center">
+            <div className="flex items-center">
                 <SolidSwitch
                     checked={formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true"}
                     onChange={(checked) => {

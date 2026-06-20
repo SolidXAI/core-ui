@@ -156,8 +156,8 @@ const SolidRegister = () => {
                         {showNameFieldsForRegistration ? (
                             <>
                                 {/* first + last name inline */}
-                                <div className="flex gap-2 mt-3">
-                                    <div className="flex flex-column w-full gap-2">
+                                <div className="flex gap-2 mt-4">
+                                    <div className="flex flex-col w-full gap-2">
                                         <label className="solid-auth-input-label">First Name</label>
                                         <SolidInput
                                             id="firstName"
@@ -173,7 +173,7 @@ const SolidRegister = () => {
                                         )}
                                     </div>
 
-                                    <div className="flex flex-column w-full gap-2">
+                                    <div className="flex flex-col w-full gap-2">
                                         <label className="solid-auth-input-label">Last Name</label>
                                         <SolidInput
                                             id="lastName"
@@ -194,7 +194,7 @@ const SolidRegister = () => {
                             <>
                                 {/* username (only if name fields not shown) */}
                                 <div>
-                                    <div className="flex flex-column gap-2 mt-3">
+                                    <div className="flex flex-col gap-2 mt-4">
                                         <label className="solid-auth-input-label">Username</label>
                                         <SolidInput
                                             id="username"
@@ -214,7 +214,7 @@ const SolidRegister = () => {
 
                         {/* Email */}
                         <div>
-                            <div className="flex flex-column gap-2 mt-3">
+                            <div className="flex flex-col gap-2 mt-4">
                                 <label className="solid-auth-input-label">Email</label>
                                 <SolidInput
                                     id="email"
@@ -232,7 +232,7 @@ const SolidRegister = () => {
 
                         {/* Password */}
                         <div>
-                            <div className="flex flex-column gap-2 mt-3">
+                            <div className="flex flex-col gap-2 mt-4">
                                 <label className="solid-auth-input-label">Password</label>
                                 <SolidPasswordInput
                                     id="password"
@@ -249,7 +249,7 @@ const SolidRegister = () => {
                                 <SolidMessage severity="error" text={formik.errors.password?.toString()} />}
                         </div>
                         {/* <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} /> */}
-                        <div className="mt-4">
+                        <div className="mt-6">
                             <SolidButton className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} type="submit" />
                         </div>
                     </Form>
@@ -340,7 +340,7 @@ const SolidRegister = () => {
             >
                 {(formik) => (
                     <Form>
-                        <div className="flex flex-column gap-2 mt-3">
+                        <div className="flex flex-col gap-2 mt-4">
                             <label htmlFor="username" className="solid-auth-input-label">Username</label>
                             <SolidInput
                                 id="username"
@@ -358,7 +358,7 @@ const SolidRegister = () => {
                             />}
                         </div>
                         {isMobile ? (
-                            <div className="flex flex-column gap-2 mt-3">
+                            <div className="flex flex-col gap-2 mt-4">
                                 <label htmlFor="mobile" className="solid-auth-input-label">Mobile</label>
                                 <SolidInput
                                     id="mobile"
@@ -376,7 +376,7 @@ const SolidRegister = () => {
                                 />}
                             </div>
                         ) : (
-                            <div className="flex flex-column gap-2 mt-3">
+                            <div className="flex flex-col gap-2 mt-4">
                                 <label htmlFor="email" className="solid-auth-input-label">Email</label>
                                 <SolidInput
                                     id="email"
@@ -394,7 +394,7 @@ const SolidRegister = () => {
                                 />}
                             </div>
                         )}
-                        <div className="mt-4">
+                        <div className="mt-6">
                             <SolidButton className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} type="submit" />
                         </div>
                     </Form>
@@ -438,7 +438,7 @@ const SolidRegister = () => {
             {/* Overlay UI */}
             <div className={`auth-container position-relative ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {showOverlay && (
-                    <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
+                    <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center register-success-popup">
                         <div className="register-success-card">
                             <div className="register-success-badge">Account created</div>
                             <SolidSpinner className="auth-success-spinner" size={32} />
@@ -460,7 +460,7 @@ const SolidRegister = () => {
                 <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
                 {isAnyOAuthEnabled && (
                     <>
-                        <div className="solid-auth-divider flex align-items-center gap-2 my-4">
+                        <div className="solid-auth-divider flex items-center gap-2 my-6">
                             <SolidDivider className="flex-1" />
                             <span className="text-sm text-500">Or continue with</span>
                             <SolidDivider className="flex-1" />
@@ -474,7 +474,7 @@ const SolidRegister = () => {
                     </>
                 )}
             </div>
-            <div className="text-center mt-3 md:mt-4">
+            <div className="text-center mt-4 md:mt-6">
                 <div className="text-sm text-400 secondary-dark-color">
                     Already have an account? <Link className="font-bold" href="/auth/login" tabIndex={-1}>Sign In</Link>
                 </div>

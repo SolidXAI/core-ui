@@ -942,16 +942,17 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className="solid-list-content  flex flex-column flex-grow-1">
-        <div className="solid-list-surface solid-kanban-surface flex flex-column flex-1 min-h-0">
-          <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-column lg:flex-row">
-            <div className="flex justify-content-between w-full">
-              <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
+      <div className="solid-list-content  flex flex-col flex-grow-1">
+        <div className="solid-list-surface solid-kanban-surface flex flex-col flex-1 min-h-0">
+          <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-col lg:flex-row">
+            <div className="flex justify-between w-full">
+              <div className="solid-list-toolbar-left flex w-full items-center gap-3">
                 {/* {params.embeded !== true &&
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
                   </div>
-                } */}
+                } 
+                */}
 
                 <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
                 <div className="hidden lg:flex">
@@ -960,7 +961,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 </div>
               </div>
 
-              <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                 <div className="flex lg:hidden">
                   <SolidButton

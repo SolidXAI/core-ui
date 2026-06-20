@@ -57,8 +57,8 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
 
 
     return (
-        <div className="flex flex-column p-0 m-0 solid-locale-stack">
-            <div className="flex justify-content-end gap-3">
+        <div className="flex flex-col p-0 m-0 solid-locale-stack">
+            <div className="flex justify-end gap-4">
             </div>
             {solidFormViewData && (viewMode === 'edit') &&
                 (<div className={`w-full solid-locale-status-banner ${published !== null ? 'is-published' : 'is-unpublished'}`}>
@@ -75,21 +75,21 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                 </div>
                 )
             }
-            <div className="flex flex-column gap-2 mt-2 solid-locale-info-card">
+            <div className="flex flex-col gap-2 mt-2 solid-locale-info-card">
                 <h3 className="solid-locale-section-title p-0 m-0">Information</h3>
                 <SolidDivider className="my-2" />
                 <div className="space-y-2">
-                    <div className='flex align-items-center justify-content-between gap-2 p-2 solid-locale-info-row'>
+                    <div className='flex items-center justify-between gap-2 p-2 solid-locale-info-row'>
                         <p className="text-sm font-bold m-0 solid-locale-info-label">Created At</p>
                         <p className="text-sm m-0 solid-locale-info-value">{formatToDDMMYYWithTime(solidFormViewData?.data?.createdAt)}</p>
                     </div>
-                    <div className='flex align-items-center justify-content-between gap-2 p-2 solid-locale-info-row'>
+                    <div className='flex items-center justify-between gap-2 p-2 solid-locale-info-row'>
                         <p className="text-sm font-bold m-0 solid-locale-info-label">Updated At</p>
                         <p className="text-sm m-0 solid-locale-info-value">
                             {formatToDDMMYYWithTime(solidFormViewData?.data?.updatedAt)}
                         </p>
                     </div>
-                    <div className='flex align-items-center justify-content-between gap-2 p-2 solid-locale-info-row'>
+                    <div className='flex items-center justify-between gap-2 p-2 solid-locale-info-row'>
                         <p className="text-sm font-bold m-0 solid-locale-info-label">Published At</p>
                         <p className="text-sm m-0 solid-locale-info-value">{formatToDDMMYYWithTime(published ?? '')}</p>
                     </div>

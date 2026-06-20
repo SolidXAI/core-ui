@@ -433,7 +433,7 @@ export const GeneralSettings = () => {
           <form onSubmit={formik.handleSubmit}>
             <div className="page-header secondary-border-bottom">
               <div className="form-wrapper-title ">Settings</div>
-              <div className="gap-3 flex">
+              <div className="flex gap-4">
                 {formik.dirty && (
                   <SolidButton
                     size="sm"
@@ -450,10 +450,10 @@ export const GeneralSettings = () => {
             <div className="px-3 py-3 md:p-4 solid-form-content">
               {pathname.includes("app-settings") && (
                 <>
-                  <div className="formgrid grid">
-                    <div className="col-12 lg:col-10 xl:col-8">
-                      <div className="formgrid grid">
-                        <div className="col-12 md:col-6">
+                  <div className="flex flex-wrap -mx-2 -mt-2">
+                    <div className="w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2">
+                      <div className="flex flex-wrap -mx-2 -mt-2">
+                        <div className="w-full md:w-1/2 px-2 pt-2">
                           <p className="solid-settings-subheading">App Logo</p>
                           <div>
                             <div
@@ -499,7 +499,7 @@ export const GeneralSettings = () => {
                             )}
                           </div>
                         </div>
-                        <div className="col-12 md:col-6">
+                        <div className="w-full md:w-1/2 px-2 pt-2">
                           <p className="solid-settings-subheading">
                             Company Logo
                           </p>
@@ -552,8 +552,8 @@ export const GeneralSettings = () => {
                     </div>
                   </div>
                   <p className="solid-settings-heading">App Logo Position</p>
-                  <div className="formgrid grid">
-                    <div className="col-12 lg:col-10 xl:col-8">
+                  <div className="flex flex-wrap -mx-2 -mt-2">
+                    <div className="w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2">
                       <div className="flex">
                         <SolidSegmentedControl
                           className="solid-settings-segmented"
@@ -567,17 +567,17 @@ export const GeneralSettings = () => {
                       </div>
                     </div>
                   </div>
-                  <SolidDivider className="my-4" />
+                  <SolidDivider className="my-6" />
                   <p className="solid-settings-heading">Title & Description Details</p>
-                                    <div className='formgrid grid'>
-                                        <div className='col-12 lg:col-10 xl:col-8'>
-                      <div className="formgrid grid">
-                        <div className="col-12 md:col-6">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5 pb-2 md:pb-0">
+                                    <div className='flex flex-wrap -mx-2 -mt-2'>
+                                        <div className='w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2'>
+                      <div className="flex flex-wrap -mx-2 -mt-2">
+                        <div className="w-full md:w-1/2 px-2 pt-2">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                                                             <label className="form-field-label">Show Details on Authentication Screen</label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="showAuthContent"
                                 checked={formik.values.showAuthContent}
@@ -591,14 +591,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 md:col-6">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-12 md:col-5 pb-2 md:pb-0">
+                        <div className="w-full md:w-1/2 px-2 pt-2">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                               <label className="form-field-label">
                                 App Title
                               </label>
                             </div>
-                            <div className="col-12 md:col-7">
+                            <div className="w-full md:w-[58.333333%] px-2 pt-2">
                               <SolidInput
                                 type="text"
                                 id="appTitle"
@@ -610,14 +610,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 md:col-6 mt-4">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-12 md:col-5 pb-2 md:pb-0">
+                        <div className="w-full md:w-1/2 px-2 pt-2 mt-6">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                               <label className="form-field-label">
                                 App Subtitle
                               </label>
                             </div>
-                            <div className="col-12 md:col-7">
+                            <div className="w-full md:w-[58.333333%] px-2 pt-2">
                               <SolidInput
                                 type="text"
                                 id="appSubtitle"
@@ -629,14 +629,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 md:col-6 mt-4">
-                          <div className="formgrid grid align-items-start">
-                            <div className="col-12 md:col-5 pb-2 md:pb-0">
+                        <div className="w-full md:w-1/2 px-2 pt-2 mt-6">
+                          <div className="flex flex-wrap items-start -mx-2 -mt-2">
+                            <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                               <label className="form-field-label">
                                 Description
                               </label>
                             </div>
-                            <div className="col-12 md:col-7">
+                            <div className="w-full md:w-[58.333333%] px-2 pt-2">
                               <SolidTextarea
                                 rows={3}
                                 id="appDescription"
@@ -648,12 +648,12 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 md:col-6 mt-4">
-                          <div className="formgrid grid align-items-start">
-                            <div className="col-12 md:col-5 pb-2 md:pb-0">
+                        <div className="w-full md:w-1/2 px-2 pt-2 mt-6">
+                          <div className="flex flex-wrap items-start -mx-2 -mt-2">
+                            <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                               <label className="form-field-label">Copyright</label>
                             </div>
-                            <div className="col-12 md:col-7">
+                            <div className="w-full md:w-[58.333333%] px-2 pt-2">
                               <SolidTextarea
                                 rows={3}
                                 id="copyright"
@@ -668,18 +668,18 @@ export const GeneralSettings = () => {
                       </div>
                     </div>
                   </div>
-                  <SolidDivider className="my-4" />
+                  <SolidDivider className="my-6" />
 
                   <p className="solid-settings-heading">Legal Links</p>
-                  <div className='formgrid grid'>
-                    <div className='col-12 lg:col-10 xl:col-8'>
-                      <div className="formgrid grid">
-                        <div className="col-12 md:col-6">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                  <div className='flex flex-wrap -mx-2 -mt-2'>
+                    <div className='w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2'>
+                      <div className="flex flex-wrap -mx-2 -mt-2">
+                        <div className="w-full md:w-1/2 px-2 pt-2">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">Show Legal Links</label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="showLegalLinks"
                                 checked={formik.values.showLegalLinks}
@@ -688,14 +688,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 md:col-6">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-12 md:col-5 py-2 md:py-0">
+                        <div className="w-full md:w-1/2 px-2 pt-2">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-full md:w-[41.666667%] px-2 pt-2 py-2 md:py-0">
                               <label className="form-field-label">
                                 Terms and Conditions Link
                               </label>
                             </div>
-                            <div className="col-12 md:col-7">
+                            <div className="w-full md:w-[58.333333%] px-2 pt-2">
                               <SolidInput
                                 type="text"
                                 id="appTnc"
@@ -707,14 +707,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 md:col-6 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-12 md:col-5 pb-2 md:pb-0">
+                        <div className="w-full md:w-1/2 px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                               <label className="form-field-label">
                                 Privacy Policy Link
                               </label>
                             </div>
-                            <div className="col-12 md:col-7">
+                            <div className="w-full md:w-[58.333333%] px-2 pt-2">
                               <SolidInput
                                 type="text"
                                 id="appPrivacyPolicy"
@@ -729,19 +729,19 @@ export const GeneralSettings = () => {
                       </div>
                     </div>
                   </div>
-                  <SolidDivider className="my-4" />
+                  <SolidDivider className="my-6" />
                   <p className="solid-settings-heading">Theme</p>
-                  <div className="formgrid grid">
-                    <div className="col-12 lg:col-10 xl:col-8">
-                      <div className="formgrid grid">
-                        <div className="col-12 md:col-6">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-10 lg:col-5">
+                  <div className="flex flex-wrap -mx-2 -mt-2">
+                    <div className="w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2">
+                      <div className="flex flex-wrap -mx-2 -mt-2">
+                        <div className="w-full md:w-1/2 px-2 pt-2">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[83.333333%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Enable Dark Mode
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="enableDarkMode"
                                 checked={formik.values.enableDarkMode}
@@ -758,17 +758,17 @@ export const GeneralSettings = () => {
               {pathname.includes("authentication-settings") && (
                 <>
                   <p className="solid-settings-heading">User Authentication</p>
-                  <div className="formgrid grid">
-                    <div className="col-12 lg:col-10 xl:col-8">
-                      <div className="formgrid grid">
-                        <div className="col-12">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                  <div className="flex flex-wrap -mx-2 -mt-2">
+                    <div className="w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2">
+                      <div className="flex flex-wrap -mx-2 -mt-2">
+                        <div className="w-full px-2 pt-2">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Public Registration
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="allowPublicRegistration"
                                 checked={formik.values.allowPublicRegistration}
@@ -782,14 +782,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Password Based Authentication
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="passwordBasedAuth"
                                 checked={formik.values.passwordBasedAuth}
@@ -803,14 +803,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Password Less Authentication
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="passwordLessAuth"
                                 checked={formik.values.passwordLessAuth}
@@ -824,14 +824,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Auto Activate User on Registration{" "}
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="activateUserOnRegistration"
                                 checked={
@@ -847,14 +847,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Allow Login/ Signup with Google{" "}
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="iamGoogleOAuthEnabled"
                                 checked={formik.values.iamGoogleOAuthEnabled}
@@ -868,14 +868,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Allow Login/ Signup with Microsoft{" "}
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="iamMicrosoftOAuthEnabled"
                                 checked={formik.values.iamMicrosoftOAuthEnabled}
@@ -889,14 +889,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Allow Login/ Signup with Facebook{" "}
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="iamFacebookOAuthEnabled"
                                 checked={formik.values.iamFacebookOAuthEnabled}
@@ -910,14 +910,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Allow Login/ Signup with Apple{" "}
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="iamAppleOAuthEnabled"
                                 checked={formik.values.iamAppleOAuthEnabled}
@@ -931,14 +931,14 @@ export const GeneralSettings = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="col-12 mt-3">
-                          <div className="formgrid grid align-items-center">
-                            <div className="col-10 sm:col-9 lg:col-5">
+                        <div className="w-full px-2 pt-2 mt-4">
+                          <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                            <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
                                 Force Password change on first Login{" "}
                               </label>
                             </div>
-                            <div className="col-2 sm:col-3 lg:col-7">
+                            <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                               <SolidSwitch
                                 name="forceChangePasswordOnFirstLogin"
                                 checked={
@@ -955,16 +955,16 @@ export const GeneralSettings = () => {
                           </div>
                         </div>
                         {formik.values.passwordLessAuth === true && (
-                          <div className="col-12 mt-3">
-                            <div className="formgrid grid align-items-center">
-                              <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
+                          <div className="w-full px-2 pt-2 mt-4">
+                            <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                              <div className="w-full sm:w-full lg:w-[41.666667%] xl:w-[41.666667%] px-2 pt-2">
                                 <label className="form-field-label">
                                   Password Less Registration Method
                                 </label>
                               </div>
-                              <div className="col-12 sm:col-12 lg:col-6 xl:col-6">
+                              <div className="w-full sm:w-full lg:w-1/2 xl:w-1/2 px-2 pt-2">
                                 <SolidSegmentedControl
-                                  className="solid-settings-segmented mt-3 lg:mt-0"
+                                  className="solid-settings-segmented mt-4 lg:mt-0"
                                   value={
                                     formik.values
                                       .passwordlessRegistrationValidateWhat
@@ -985,16 +985,16 @@ export const GeneralSettings = () => {
                           </div>
                         )}
                         {formik.values.passwordLessAuth === true && (
-                          <div className="col-12 mt-3">
-                            <div className="formgrid grid align-items-center">
-                              <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
+                          <div className="w-full px-2 pt-2 mt-4">
+                            <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                              <div className="w-full sm:w-full lg:w-[41.666667%] xl:w-[41.666667%] px-2 pt-2">
                                 <label className="form-field-label">
                                   Password Less Login Method
                                 </label>
                               </div>
-                              <div className="col-12 sm:col-12 lg:col-6 xl:col-6">
+                              <div className="w-full sm:w-full lg:w-1/2 xl:w-1/2 px-2 pt-2">
                                 <SolidSegmentedControl
-                                  className="solid-settings-segmented mt-3 lg:mt-0"
+                                  className="solid-settings-segmented mt-4 lg:mt-0"
                                   value={
                                     formik.values.passwordlessLoginValidateWhat
                                   }
@@ -1020,12 +1020,12 @@ export const GeneralSettings = () => {
                       </div>
                     </div>
                   </div>
-                  <SolidDivider className="my-4" />
+                  <SolidDivider className="my-6" />
                   <p className="solid-settings-heading">
                     Authentication Screen Layout
                   </p>
-                  <div className="formgrid grid">
-                    <div className="col-12 lg:col-10 xl:col-8">
+                  <div className="flex flex-wrap -mx-2 -mt-2">
+                    <div className="w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2">
                       <SolidSegmentedControl
                         className="solid-settings-segmented"
                         value={formik.values.authPagesLayout}
@@ -1038,7 +1038,7 @@ export const GeneralSettings = () => {
                           formik.setFieldValue("authPagesLayout", value)
                         }
                       />
-                      <p className="mt-3 text-sm font-bold">
+                      <p className="mt-4 text-sm font-bold">
                         Note :{" "}
                         {
                           positionMap[
@@ -1052,10 +1052,10 @@ export const GeneralSettings = () => {
                     </div>
                   </div>
                   {formik.values.authPagesLayout === "center" && <></>}
-                  <div className="formgrid grid">
-                    <div className="col-12 lg:col-10 xl:col-8">
-                      <div className="formgrid grid">
-                        <div className="col-12 md:col-8 lg:col-6">
+                  <div className="flex flex-wrap -mx-2 -mt-2">
+                    <div className="w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2">
+                      <div className="flex flex-wrap -mx-2 -mt-2">
+                        <div className="w-full md:w-[66.666667%] lg:w-1/2 px-2 pt-2">
                           <p className="solid-settings-subheading">
                             {formik.values.authPagesLayout === "center"
                               ? "Background"
@@ -1233,7 +1233,7 @@ export const GeneralSettings = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <SolidDivider className="my-4" />
+                                    <SolidDivider className="my-6" />
                                 </>
                             )}
 
@@ -1241,15 +1241,15 @@ export const GeneralSettings = () => {
                 <>
                   {/* 
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Misc Details</p>
-                                    <div className='formgrid grid'>
-                                        <div className='col-12 lg:col-10 xl:col-8'>
-                                            <div className="formgrid grid">
-                                                <div className="col-12 md:col-6 pb-3 md:pb-0">
-                                                    <div className="formgrid grid align-items-center">
-                                                        <div className="col-10 sm:col-9 lg:col-5 ">
+                                    <div className='flex flex-wrap -mx-2 -mt-2'>
+                                        <div className='w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2'>
+                                            <div className="flex flex-wrap -mx-2 -mt-2">
+                                                <div className="w-full md:w-1/2 px-2 pt-2 pb-4 md:pb-0">
+                                                    <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                                                        <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                                                             <label className="form-field-label">Use queue for sending emails</label>
                                                         </div>
-                                                        <div className="col-2 sm:col-3 lg:col-7">
+                                                        <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                                                             <InputSwitch
                                                                 name="shouldQueueEmails"
                                                                 checked={formik.values.shouldQueueEmails}
@@ -1258,12 +1258,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-5 pb-2">
-                                                    <div className="formgrid grid align-items-center">
-                                                        <div className="col-10 sm:col-9 lg:col-5">
+                                                <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2">
+                                                    <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                                                        <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                                                             <label className="form-field-label">Use queue for sending SMS</label>
                                                         </div>
-                                                        <div className="col-2 sm:col-3 lg:col-7">
+                                                        <div className="w-[16.666667%] sm:w-1/4 lg:w-[58.333333%] px-2 pt-2">
                                                             <InputSwitch
                                                                 name="shouldQueueSms"
                                                                 checked={formik.values.shouldQueueSms}
@@ -1278,15 +1278,15 @@ export const GeneralSettings = () => {
                                     <Divider />
                                  */}
                                     <p className="solid-settings-heading">Contact Support</p>
-                                    <div className='formgrid grid'>
-                                        <div className="col-12 lg:col-10 xl:col-8">
-                                            <div className='formgrid grid'>
-                                                <div className="col-12 md:col-6 pb-3 md:pb-0">
-                                                    <div className="formgrid grid align-items-center">
-                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
+                                    <div className='flex flex-wrap -mx-2 -mt-2'>
+                                        <div className="w-full lg:w-[83.333333%] xl:w-[66.666667%] px-2 pt-2">
+                                            <div className='flex flex-wrap -mx-2 -mt-2'>
+                                                <div className="w-full md:w-1/2 px-2 pt-2 pb-4 md:pb-0">
+                                                    <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                                                        <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                                                             <label className="form-field-label">Contact Support Email</label>
                                                         </div>
-                                                        <div className="col-12 md:col-7">
+                                                        <div className="w-full md:w-[58.333333%] px-2 pt-2">
                                                             <SolidInput
                                                                 type="text"
                                                                 id="contactSupportEmail"
@@ -1298,12 +1298,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-6">
-                                                    <div className="formgrid grid align-items-center">
-                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
+                                                <div className="w-full md:w-1/2 px-2 pt-2">
+                                                    <div className="flex flex-wrap items-center -mx-2 -mt-2">
+                                                        <div className="w-full md:w-[41.666667%] px-2 pt-2 pb-2 md:pb-0">
                                                             <label className="form-field-label">Display Name</label>
                                                         </div>
-                                                        <div className="col-12 md:col-7">
+                                                        <div className="w-full md:w-[58.333333%] px-2 pt-2">
                                                             <SolidInput
                                                                 type="text"
                                                                 id="contactSupportDisplayName"
