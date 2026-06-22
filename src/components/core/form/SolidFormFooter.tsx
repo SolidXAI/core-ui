@@ -12,6 +12,7 @@ import { SolidButton, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } f
 
 export type SolidFormFooterProps = {
     params: SolidFormViewProps;
+    internationalisationEnabled?: boolean;
 };
 
 type NavItem = {
@@ -20,7 +21,7 @@ type NavItem = {
     limit: number;
 };
 
-export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
+export const SolidFormFooter = ({ params, internationalisationEnabled = false }: SolidFormFooterProps) => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -31,6 +32,42 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
 
     const [triggerGetNavigation, { isLoading }] =
         useLazyNavigationQuery();
+
+    const rewriteLocaleFilter = (filterNode: any, locale: string): any => {
+        if (!filterNode || typeof filterNode !== "object") return filterNode;
+
+        if (Array.isArray(filterNode)) {
+            return filterNode.map((item) => rewriteLocaleFilter(item, locale));
+        }
+
+        const nextNode = { ...filterNode };
+
+        if (Object.prototype.hasOwnProperty.call(nextNode, "localeName")) {
+            const localeFilter = nextNode.localeName;
+
+            if (localeFilter && typeof localeFilter === "object" && !Array.isArray(localeFilter)) {
+                const updatedLocaleFilter: Record<string, any> = { ...localeFilter };
+                Object.keys(updatedLocaleFilter).forEach((operator) => {
+                    const operatorValue = updatedLocaleFilter[operator];
+                    if (Array.isArray(operatorValue)) {
+                        updatedLocaleFilter[operator] = [locale];
+                    } else {
+                        updatedLocaleFilter[operator] = locale;
+                    }
+                });
+                nextNode.localeName = updatedLocaleFilter;
+            } else {
+                nextNode.localeName = locale;
+            }
+        }
+
+        Object.keys(nextNode).forEach((key) => {
+            if (key === "localeName") return;
+            nextNode[key] = rewriteLocaleFilter(nextNode[key], locale);
+        });
+
+        return nextNode;
+    };
 
     // -----------------------------
     // Helper: update local storage
@@ -111,11 +148,14 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
                 const defaultQueryObject = queryObject || {};
                 const locale = searchParams.get("locale");
                 const defaultEntityLocaleId = searchParams.get("defaultEntityLocaleId");
+                const resolvedFilters = internationalisationEnabled && locale
+                    ? rewriteLocaleFilter(defaultQueryObject.finalFullFilter || null, locale)
+                    : (defaultQueryObject.finalFullFilter || null);
 
                 const queryData: Record<string, any> = {
                     offset: defaultQueryObject.offset || 0,
                     limit: defaultQueryObject.limit || 25,
-                    filters: defaultQueryObject.finalFullFilter || null,
+                    filters: resolvedFilters,
                     // fields: ["id"],
                     modelName: params.modelName,
                     recordId: params.id,

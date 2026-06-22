@@ -209,6 +209,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
   const [solidListViewLayout, setSolidListViewLayout] = useState<any>(null);
   const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
+  const internationalisationEnabled = Boolean(solidListViewMetaData?.data?.solidView?.model?.internationalisation);
 
   // Filter query realted states
   const [filters, setFilters] = useState<any>(null);
@@ -264,6 +265,67 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
+
+  const resolveLocaleFromFilter = (filterNode: any): string | null => {
+    if (!filterNode || typeof filterNode !== "object") return null;
+
+    if (Array.isArray(filterNode)) {
+      for (const item of filterNode) {
+        const resolved = resolveLocaleFromFilter(item);
+        if (resolved) return resolved;
+      }
+      return null;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(filterNode, "localeName")) {
+      const localeFilter = filterNode.localeName;
+
+      if (typeof localeFilter === "string") {
+        return localeFilter;
+      }
+
+      if (localeFilter && typeof localeFilter === "object") {
+        for (const key of ["$eqi", "$eq", "$in", "$containsi", "$contains"]) {
+          const localeValue = localeFilter[key];
+          if (typeof localeValue === "string" && localeValue.trim()) {
+            return localeValue;
+          }
+          if (Array.isArray(localeValue) && localeValue.length > 0) {
+            const firstValue = localeValue[0];
+            if (typeof firstValue === "string" && firstValue.trim()) {
+              return firstValue;
+            }
+          }
+        }
+      }
+    }
+
+    for (const value of Object.values(filterNode)) {
+      const resolved = resolveLocaleFromFilter(value);
+      if (resolved) return resolved;
+    }
+
+    return null;
+  };
+
+  const getResolvedListLocale = () => resolveLocaleFromFilter(latestFiltersRef.current) || localeName || null;
+
+  const buildEditNavigationQueryString = (rowData: any) => {
+    const queryParams = new URLSearchParams(editActionQueryParams);
+    if (internationalisationEnabled) {
+      const resolvedLocale = rowData?.localeName || getResolvedListLocale();
+      if (resolvedLocale) {
+        queryParams.set("locale", resolvedLocale);
+      }
+
+      const defaultEntityLocaleId = rowData?.defaultEntityLocaleId ?? rowData?.id;
+      if (defaultEntityLocaleId !== undefined && defaultEntityLocaleId !== null && defaultEntityLocaleId !== "") {
+        queryParams.set("defaultEntityLocaleId", String(defaultEntityLocaleId));
+      }
+    }
+
+    return queryParams.toString();
+  };
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -446,12 +508,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       const listLayoutAttrs = solidListViewLayout.attrs;
       const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
       const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
+      const resolvedListLocale = getResolvedListLocale();
 
       if (listLayoutAttrs?.createAction) {
         setCreateActionQueryParams({
           actionName: listLayoutAttrs.createAction.name,
           actionType: listLayoutAttrs.createAction.type,
           actionContext: listLayoutAttrs.createAction.context,
+          ...(internationalisationEnabled && resolvedListLocale ? { locale: resolvedListLocale } : {}),
         });
       }
       if (listLayoutAttrs?.editAction) {
@@ -459,6 +523,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           actionName: listLayoutAttrs.editAction.name,
           actionType: listLayoutAttrs.editAction.type,
           actionContext: listLayoutAttrs.editAction.context,
+          ...(internationalisationEnabled && resolvedListLocale ? { locale: resolvedListLocale } : {}),
         });
       }
 
@@ -767,6 +832,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const setQueryString = async () => {
     const solidFieldsMetadata =
       solidListViewMetaData?.data?.solidFieldsMetadata;
+    const explicitLocale = resolveLocaleFromFilter(latestFiltersRef.current);
 
     let queryData: any = {
       offset: first,
@@ -774,8 +840,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       filters: latestFiltersRef.current ?? latestFiltersRef.current,
       populate: toPopulate,
       populateMedia: toPopulateMedia,
-      locale: localeName ? localeName : "en",
     };
+
+    const resolvedLocale = explicitLocale || localeName;
+    if (resolvedLocale) {
+      queryData.locale = resolvedLocale;
+    }
 
 
 
@@ -1584,7 +1654,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             // ignore storage errors
                           }
                         }
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${buildEditNavigationQueryString(rowData)}`);
                       }
                     }
                     }
@@ -1687,7 +1757,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                           } catch (e) { }
                                         }
                                         router.push(
-                                          `${editBaseUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                                          `${editBaseUrl}/${rowData?.id}?viewMode=edit&${buildEditNavigationQueryString(rowData)}`
                                         );
                                       }
                                     }}
@@ -1781,7 +1851,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                             sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
                                           } catch (e) { }
                                           router.push(
-                                            `${editBaseUrl}/${selectedRow?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                                            `${editBaseUrl}/${selectedRow?.id}?viewMode=edit&${buildEditNavigationQueryString(selectedRow)}`
                                           );
                                         }
                                       }}
