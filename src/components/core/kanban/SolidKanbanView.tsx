@@ -17,7 +17,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
-import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage } from "../list/SolidListView";
+import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage, hasStoredFilterPredicates } from "../list/SolidListView";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
@@ -930,6 +930,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const entityDisplayName = solidKanbanViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
   const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : loading || !queryDataLoaded ? "Loading..." : null;
 
+  const handleRefreshView = () => {
+    if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
+      // @ts-ignore
+      solidGlobalSearchElementRef.current?.clearAppliedFilters?.({ preserveGrouping: true });
+      return;
+    }
+
+    window.location.reload();
+  };
+
   const toggleBothSidebars = () => {
     if (visibleNavbar) {
       dispatch(toggleNavbar());   // close both
@@ -991,9 +1001,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                   variant="outline"
                   size="sm"
                   className="solid-icon-button"
-                  onClick={() => {
-                    window.location.reload()
-                  }}
+                  onClick={handleRefreshView}
                   aria-label="Refresh board"
                   leftIcon={<SolidIcon name="si-refresh" aria-hidden />}
                 />
@@ -1005,7 +1013,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
                   filters={filters}
-                  handleRefreshView={() => window.location.reload()}
+                  handleRefreshView={handleRefreshView}
                 />
               </div>
             </div>

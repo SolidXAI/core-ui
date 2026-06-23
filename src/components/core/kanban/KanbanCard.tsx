@@ -3,6 +3,7 @@ import React from "react";
 import { useRouter } from "../../../hooks/useRouter";
 import { DraggableProvided } from "@hello-pangea/dnd";
 import { CompatibleDraggable } from "../common/dndCompat";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import {
   SolidDropdownMenu,
   SolidDropdownMenuContent,
@@ -37,16 +38,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   const router = useRouter()
 
   const persistReturnView = () => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    try {
-      sessionStorage.setItem("fromView", "kanban");
-      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-    } catch (error) {
-      // Ignore storage errors and continue navigation.
-    }
+    storeCurrentModelViewContext();
   };
 
   const openRecord = () => {

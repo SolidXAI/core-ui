@@ -15,7 +15,7 @@ import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus"
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { SolidEmptyListViewPlaceholder } from "../list/SolidEmptyListViewPlaceholder";
-import { getFilterObjectFromLocalStorage, setFilterObjectToLocalStorage } from "../list/SolidListView";
+import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, setFilterObjectToLocalStorage } from "../list/SolidListView";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { SolidCardViewConfigure } from "./SolidCardViewConfigure";
 import { CardGrid } from "./CardGrid";
@@ -330,6 +330,11 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   };
 
   const handleFetchUpdatedRecords = () => {
+    if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
+      solidGlobalSearchElementRef.current?.clearAppliedFilters?.();
+      return;
+    }
+
     setQueryDataLoaded((current) => !current);
   };
 

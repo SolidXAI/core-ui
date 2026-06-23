@@ -34,6 +34,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
@@ -55,6 +56,39 @@ import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
+
+const hasMeaningfulPersistedFilterValue = (value: any): boolean => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number" || typeof value === "boolean") return true;
+  if (Array.isArray(value)) return value.some((item) => hasMeaningfulPersistedFilterValue(item));
+  if (typeof value === "object") return hasMeaningfulPersistedFilter(value);
+  return false;
+};
+
+export const hasMeaningfulPersistedFilter = (filterObject: any): boolean => {
+  if (!filterObject || typeof filterObject !== "object") return false;
+
+  if (Array.isArray(filterObject)) {
+    return filterObject.some((item) => hasMeaningfulPersistedFilter(item) || hasMeaningfulPersistedFilterValue(item));
+  }
+
+  return Object.entries(filterObject).some(([key, val]) => {
+    if (key === "matchMode" || key === "operator") return false;
+    if (key === "value") return hasMeaningfulPersistedFilterValue(val);
+    if ((key === "$and" || key === "$or") && Array.isArray(val)) {
+      return val.some((item) => hasMeaningfulPersistedFilter(item) || hasMeaningfulPersistedFilterValue(item));
+    }
+    if (typeof val === "object") return hasMeaningfulPersistedFilter(val);
+    return hasMeaningfulPersistedFilterValue(val);
+  });
+};
+
+export const hasStoredFilterPredicates = (queryObject: any): boolean =>
+  hasMeaningfulPersistedFilter(queryObject?.custom_filter_predicate) ||
+  hasMeaningfulPersistedFilter(queryObject?.search_predicate) ||
+  hasMeaningfulPersistedFilter(queryObject?.saved_filter_predicate) ||
+  hasMeaningfulPersistedFilter(queryObject?.predefined_search_predicate);
 
 export const getFilterObjectFromLocalStorage = () => {
   const currentPageUrl = window.location.pathname; // Get the current page URL
@@ -598,6 +632,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         }
         setSortField(restoredSortField);
         setSortOrder(restoredSortOrder);
+        setShowArchived(queryObject.showArchived === true || queryObject.showArchived === "true" || queryObject.showSoftDeleted === "inclusive");
         const { populate, populateMedia } = initialFilterMethod();
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
@@ -609,6 +644,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
         setFirst(0);
+        setShowArchived(false);
       }
       //below line was added to handle state stale issue when we converted boilerplate to vite 
       //since now we dont need it becuase our component is remounted on every router change
@@ -954,6 +990,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       setToPopulate(populate);
       setToPopulateMedia(populateMedia);
     }
+    setFirst(0);
     latestFiltersRef.current = {
       $and: []
     };
@@ -1263,6 +1300,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // }
 
   const handleFetchUpdatedRecords = () => {
+    if (hasAnyActiveFilters) {
+      clearFilter();
+      return;
+    }
+
     setQueryString();
   };
 
@@ -1438,7 +1480,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       leftIcon={<RefreshCw size={14} />}
                     />
                   )}
-                  {showArchived && (
+                  {showArchived && selectedRecoverRecords.length > 0 && (
                     <SolidButton
                       type="button"
                       size="small"
@@ -1476,7 +1518,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 </div>
               </div>
               {/* </div> */}
-              {showGlobalSearchElement && params.embeded === false && (
+              {showGlobalSearchElement && params.embeded === false && window.innerWidth < 991 && (
                 <div className="flex lg:hidden">
                   <SolidGlobalSearchElement
                     viewType="list"
@@ -1560,6 +1602,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       const rowData = e.data;
 
                       if (solidListViewLayout?.attrs?.disableRowClick === true) return;
+                      if (rowData?.deletedAt) return;
 
                       const hasFindPermission = actionsAllowed.includes(
                         permissionExpression(params.modelName, 'findOne')
@@ -1573,17 +1616,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       if (params.embeded === true) {
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
-                        if (typeof window !== "undefined") {
-                          // store a simple marker for the caller
-
-                          // also store the full current URL so Back can restore exact state (including action params)
-                          try {
-                            sessionStorage.setItem("fromView", "list");
-                            sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                          } catch (e) {
-                            // ignore storage errors
-                          }
-                        }
+                        storeCurrentModelViewContext();
                         router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                       }
                     }
@@ -1625,29 +1658,29 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     const presentation = resolveButtonPresentation(button?.attrs);
                                     if (!presentation.showIcon && !presentation.showLabel) return null;
                                     return (
-                                  <SolidButton
-                                    type="button"
-                                    icon={presentation.icon}
-                                    iconPos={presentation.iconPos}
-                                    label={presentation.label}
-                                    tooltip={presentation.tooltip}
-                                    aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
-                                    className={`solid-inline-row-button w-full text-left gap-2 ${presentation.buttonClassName
-                                      ? presentation.buttonClassName
-                                      : ""
-                                      }`}
-                                    size="small"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      const event = {
-                                        params,
-                                        rowData: rowData,
-                                        solidListViewMetaData:
-                                          solidListViewMetaData?.data,
-                                      };
-                                      handleCustomButtonClick(button.attrs, event);
-                                    }}
-                                  />
+                                      <SolidButton
+                                        type="button"
+                                        icon={presentation.icon}
+                                        iconPos={presentation.iconPos}
+                                        label={presentation.label}
+                                        tooltip={presentation.tooltip}
+                                        aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
+                                        className={`solid-inline-row-button w-full text-left gap-2 ${presentation.buttonClassName
+                                          ? presentation.buttonClassName
+                                          : ""
+                                          }`}
+                                        size="small"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          const event = {
+                                            params,
+                                            rowData: rowData,
+                                            solidListViewMetaData:
+                                              solidListViewMetaData?.data,
+                                          };
+                                          handleCustomButtonClick(button.attrs, event);
+                                        }}
+                                      />
                                     );
                                   })()
                                 );
@@ -1679,12 +1712,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       if (params.embeded == true) {
                                         params.handleEditClickForEmbeddedView(rowData?.id);
                                       } else {
-                                        if (typeof window !== "undefined") {
-                                          try {
-                                            sessionStorage.setItem("fromView", "list");
-                                            sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                          } catch (e) { }
-                                        }
+                                        storeCurrentModelViewContext();
                                         router.push(
                                           `${editBaseUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                         );
@@ -1743,20 +1771,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         alignFrozen="right"
                         body={(rowData) =>
                           rowData?.deletedAt ? (
-                            <a
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                recoverById(rowData.id);
-                              }}
-                              className="retrieve-button solid-row-menu-trigger"
-                            >
-                              <RotateCcw size={14} className={styles.retrieveIcon} />
-                            </a>
+                            <div className="flex justify-content-center align-items-center" data-no-row-click="true">
+                              <a
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  recoverById(rowData.id);
+                                }}
+                                className="retrieve-button solid-row-menu-trigger"
+                              >
+                                <RotateCcw size={14} className={styles.retrieveIcon} />
+                              </a>
+                            </div>
                           ) : (
                             <>
                               {solidListViewLayout?.attrs?.showRowContextMenu !==
                                 false && (
-                                  <div className="flex justify-content-end" data-no-row-click="true">
+                                  <div className="flex justify-content-center align-items-center" data-no-row-click="true">
                                     <SolidListViewRowActionsMenu
                                       rowData={rowData}
                                       hasEditInContextMenu={hasEditInContextMenu}
@@ -1775,10 +1805,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         if (params.embeded == true) {
                                           params.handleEditClickForEmbeddedView(selectedRow?.id);
                                         } else {
-                                          try {
-                                            sessionStorage.setItem("fromView", "list");
-                                            sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                          } catch (e) { }
+                                          storeCurrentModelViewContext();
                                           router.push(
                                             `${editBaseUrl}/${selectedRow?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                           );
@@ -1861,9 +1888,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             </SolidDialogHeader>
             <SolidDialogSeparator />
             <SolidDialogBody>
-            <ListViewRowActionPopup
-              context={listViewRowActionData}
-            ></ListViewRowActionPopup>
+              <ListViewRowActionPopup
+                context={listViewRowActionData}
+              ></ListViewRowActionPopup>
             </SolidDialogBody>
           </SolidDialog>
         )

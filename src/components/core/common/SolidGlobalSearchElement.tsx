@@ -774,9 +774,44 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         user?.id
     ])
 
+    const resetAppliedFilters = ({ preserveGrouping = false }: { preserveGrouping?: boolean } = {}) => {
+        setSearchChips([]);
+        setSearchFilter(null);
+        setFilterRules(initialState);
+        setCustomFilter(null);
+        setPredefinedSearchChip(null);
+        setPredefinedSearchBaseFilter(null);
+        setCurrentSavedFilterData(null);
+        setCurrentSavedFilterQuery(null);
+        setCurrentSavedFilterRules(null);
+        if (!preserveGrouping) {
+            setGroupingRules(defaultGroupingRules);
+            setAggregationRules(defaultAggregationRules);
+        }
+        setShowOverlay(false);
+        setShowChipManager(false);
+        setInputValue("");
+
+        const currentPageUrl = window.location.pathname;
+        localStorage.removeItem(currentPageUrl);
+
+        if (activeSavedFilter) {
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete("savedQuery");
+            const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+            router.replace(nextUrl);
+        }
+
+        setHasSearched(true);
+        setRefreshKey((prev) => prev + 1);
+    };
+
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
-            setFilterRules(initialState);
+            resetAppliedFilters();
+        },
+        clearAppliedFilters: (options?: { preserveGrouping?: boolean }) => {
+            resetAppliedFilters(options);
         },
         openGroupingDialog: () => {
             setShowOverlay(false);
@@ -1603,22 +1638,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const clearAllAppliedChips = () => {
         if (managedChipItems.length === 0) return;
-
-        if (activeSavedFilter || currentSavedFilterData) {
-            removeSavedFilter();
-        }
-
-        setSearchChips([]);
-        setSearchFilter(null);
-        setPredefinedSearchChip(null);
-        setPredefinedSearchBaseFilter(null);
-        setCustomFilter(null);
-        setFilterRules(initialState);
-        setGroupingRules(defaultGroupingRules);
-        setAggregationRules(defaultAggregationRules);
-        setShowChipManager(false);
-        setHasSearched(true);
-        setRefreshKey((prev) => prev + 1);
+        resetAppliedFilters();
     };
 
     useEffect(() => {

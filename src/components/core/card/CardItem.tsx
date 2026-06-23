@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { useRouter } from "../../../hooks/useRouter";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import {
   SolidDropdownMenu,
   SolidDropdownMenuContent,
@@ -31,14 +32,12 @@ const CardItem: React.FC<CardItemProps> = ({
   const router = useRouter();
 
   const openRecord = () => {
-    if (typeof window !== "undefined") {
-      sessionStorage.setItem("fromView", "card");
-      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-    }
+    storeCurrentModelViewContext();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 
   const openEdit = () => {
+    storeCurrentModelViewContext();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 

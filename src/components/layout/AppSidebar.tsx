@@ -10,6 +10,7 @@ import SolidLink from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { env } from "../../adapters/env";
+import { resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
 
 type SolidMenuItem = {
     key?: string;
@@ -63,10 +64,11 @@ function doesSearchParamsMatchSubset(requiredParams: URLSearchParams, currentPar
 }
 
 function isMenuPathActive(itemPath: string | undefined, currentPathname: string, currentSearchParams: URLSearchParams): boolean {
-    if (!itemPath) return false;
+  if (!itemPath) return false;
 
-    const { pathname: itemPathname, searchParams: itemSearchParams } = getPathAndParams(itemPath);
-    if (itemPathname !== normalizePath(currentPathname)) return false;
+  const resolvedItemPath = resolveRetainedModelViewRoute(itemPath);
+  const { pathname: itemPathname, searchParams: itemSearchParams } = getPathAndParams(resolvedItemPath);
+  if (itemPathname !== normalizePath(currentPathname)) return false;
 
     return doesSearchParamsMatchSubset(itemSearchParams, currentSearchParams);
 }
@@ -142,6 +144,7 @@ const SidebarMenuTree = ({
         const hasChildren = !!(node.children && node.children.length > 0);
         const isExpanded = expandedKeys[nodeId] === true;
         const isActive = isMenuPathActive(node.path, pathname, searchParams);
+        const resolvedPath = node.path ? resolveRetainedModelViewRoute(node.path) : undefined;
         const paddingLeft = 12 + depth * 14;
 
         return (
@@ -161,7 +164,7 @@ const SidebarMenuTree = ({
                             <span className="solid-sidebar-tree-label">{node.title}</span>
                         </button>
                     ) : node.path ? (
-                        <SolidLink href={node.path} className="solid-sidebar-tree-link">
+                        <SolidLink href={resolvedPath} className="solid-sidebar-tree-link">
                             <span className="solid-sidebar-tree-label">{node.title}</span>
                         </SolidLink>
                     ) : (

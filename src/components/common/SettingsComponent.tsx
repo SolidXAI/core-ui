@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { Search } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { env } from "../../adapters/env";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
+import { normalizeAssetUrl } from "../../helpers/assetUrl";
 import { getExtensionComponent } from "../../helpers/registry";
 import {
   extractSettingsList,
@@ -37,13 +37,6 @@ import styles from "./SettingsComponent.module.css";
 
 type SettingsFormValue = string | number | boolean | null | File;
 type SettingsFilterMode = "all" | "read-only" | "editable";
-
-function normalizeAssetUrl(src?: string | null) {
-  if (!src) return "";
-  const isBlobOrAbsolute = src.startsWith("blob:") || src.startsWith("http");
-  if (isBlobOrAbsolute || src.startsWith("/")) return src;
-  return `${env("API_URL")}/${src}`;
-}
 
 function toModuleInitials(moduleName: string) {
   return moduleName

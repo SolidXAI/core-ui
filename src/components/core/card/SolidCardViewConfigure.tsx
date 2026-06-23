@@ -2,6 +2,7 @@ import { permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { useEffect, useState } from "react";
 import { SolidExport } from "../../../components/common/SolidExport";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
@@ -112,7 +113,9 @@ export const SolidCardViewConfigure = ({
 
     const newPath = "/" + pathSegments.join("/");
     const nextQueryString = nextSearchParams.toString();
-    router.push(nextQueryString ? `${newPath}?${nextQueryString}` : newPath);
+    const nextUrl = nextQueryString ? `${newPath}?${nextQueryString}` : newPath;
+    storeCurrentModelViewContext(nextUrl);
+    router.push(nextUrl);
   };
 
   const clearLocalstorageCache = () => {

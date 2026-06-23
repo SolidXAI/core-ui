@@ -110,6 +110,9 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
                 const queryObject = getFilterObjectFromLocalStorageByUrl(listPath);
                 const defaultQueryObject = queryObject || {};
 
+                const requiresPopulate =
+                    Array.isArray(defaultQueryObject.sort) &&
+                    defaultQueryObject.sort[0].split(":")[0].includes(".");
                 const queryData = {
                     offset: defaultQueryObject.offset || 0,
                     limit: defaultQueryObject.limit || 25,
@@ -117,7 +120,10 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
                     // fields: ["id"],
                     modelName: params.modelName,
                     recordId: params.id,
-                    sort: defaultQueryObject.sort
+                    sort: defaultQueryObject.sort,
+                    ...(requiresPopulate && {
+                        populate: defaultQueryObject.populate,
+                    }),
                 };
 
                 const queryString = qs.stringify(queryData, {

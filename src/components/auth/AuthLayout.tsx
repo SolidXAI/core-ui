@@ -5,11 +5,11 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
-import { env } from "../../adapters/env";
 import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { solidGet } from "../../http/solidHttp";
 import { AuthSettingsContext } from "./AuthSettingsContext";
+import { normalizeAssetUrl, toCssBackgroundImage } from "../../helpers/assetUrl";
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 import { SolidToastProvider } from "../common/SolidToastProvider";
 
@@ -67,7 +67,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     }
 
     const solidSideBanner = () => {
-        const layout = solidSettingsData?.data?.authPagesLayout;
+        const layout = solidSettingsData?.data?.authPagesLayout || "center";
 
         let src = '';
 
@@ -79,23 +79,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             src = solidSettingsData?.data?.authScreenCenterBackgroundImage || (AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage;
         }
 
-        // Normalize image path if coming from API
-        const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
-        if (!isBlobOrAbsolute && !src?.startsWith("/")) {
-            src = `${env("API_URL")}/${src}`;
-        }
-
-        return src;
-    };
-
-    const normalizeAssetUrl = (src?: string) => {
-        if (!src) return "";
-        const isBlobOrAbsolute = src.startsWith("blob:") || src.startsWith("http");
-        if (isBlobOrAbsolute || src.startsWith("/")) return src;
-        return `${env("API_URL")}/${src}`;
+        return normalizeAssetUrl(src);
     };
 
     const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
+    const authBackgroundSrc = solidSideBanner();
     const appTitle = solidSettingsData?.data?.appTitle || "";
     const appSubtitle = solidSettingsData?.data?.appSubtitle || "";
     const appDescription = solidSettingsData?.data?.appDescription || "";
@@ -144,13 +132,13 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const imagePane = (
         <div
             className={`solid-auth-image-pane position-relative ${isLeft ? "solid-left-layout pane-on-right" : "solid-right-layout pane-on-left"}`.trim()}
-            style={{ backgroundImage: `url(${solidSideBanner()})` }}
+            style={{ backgroundImage: toCssBackgroundImage(authBackgroundSrc) }}
         >
             {solidSettingsData?.data?.appLogoPosition === "in_image_view" &&
                 <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
                     <Image
                         alt="solid logo"
-                        src={solidSettingsData?.data?.appLogo || SolidLogo}
+                        src={normalizeAssetUrl(solidSettingsData?.data?.appLogo) || SolidLogo}
                         className="relative"
                         fill
                     />
@@ -172,7 +160,25 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <AuthSettingsContext.Provider value={authSettingsContextValue}>
-            <div className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`} data-auth-theme={authTheme}>
+            <div
+                className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`}
+                data-auth-theme={authTheme}
+                style={isCenter ? { position: "relative" } : undefined}
+            >
+                {isCenter && authBackgroundSrc ? (
+                    <div
+                        aria-hidden="true"
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            zIndex: 0,
+                            backgroundImage: toCssBackgroundImage(authBackgroundSrc),
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "cover",
+                        }}
+                    />
+                ) : null}
                 <SolidToastProvider />
                 {!isCenter && (
                     <div className="solid-auth-split">
@@ -181,7 +187,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         {isRight && formPane}
                     </div>
                 )}
-                {isCenter && <div className="solid-center-layout">
+                {isCenter && <div className="solid-center-layout" style={{ position: "relative", zIndex: 1 }}>
                     <div className="solid-auth-center-stack">
                     {renderBrand("center")}
                         {showAuthContent &&
@@ -195,7 +201,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     </div>
                 </div>}
                 {/* {solidSettingsData?.data?.showLegalLinks === true && */}
-                <div className={`absolute hidden md:flex ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'solid-auth-footer flex flex-column sm:flex-row align-items-center justify-content-between' : 'solid-auth-footer-2 grid'}`}>
+                <div
+                    className={`absolute hidden md:flex ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'solid-auth-footer flex flex-column sm:flex-row align-items-center justify-content-between' : 'solid-auth-footer-2 grid'}`}
+                    style={isCenter ? { zIndex: 1 } : undefined}
+                >
                     {solidSettingsData?.data?.authPagesLayout !== 'left' &&
                         <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-6 lg:col-5  xl:col-6 flex justify-content-center' : ''}>
                             {solidSettingsData?.data?.showLegalLinks === true &&
