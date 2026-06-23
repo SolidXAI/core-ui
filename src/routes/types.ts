@@ -25,7 +25,6 @@ export type SolidRouteKey =
   | "initiateGoogleOauth"
   | "initiateFacebookOauth"
   | "initiateMicrosoftOauth"
-  | "initiateMicrosoftActiveDirectoryOauth"
   | "sso"
   | "admin"
   | "moduleHome"
