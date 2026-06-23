@@ -4,6 +4,119 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.9] - 2026-06-23
+
+### Added
+
+- implement ClearModulePackageRuntimeHeaderAction component and associated functionality
+- add ExportModulePackageRowAction component for module export functionality
+- enhance SolidGlobalSearchElement to support unique searchable entries for layout columns
+- update CreateModel and FieldMetaData components to manage field deletion state and improve form handling
+- enhance module import functionality with resumable transactions and environment-based button visibility
+- add ModulePackageDialog for importing module packages with validation, build, and seed steps
+- enhance ModuleMetadataExplorer with validation feedback and save conditions
+- implement ModuleMetadataExplorer with read-only support and enhance CreateModel styling
+- enhance JSON editor styling in ModuleMetadataExplorer
+- add jsoneditor dependency to package.json
+- add ModuleMetadataExplorer component and related API queries
+- enhance SolidGlobalSearchElement with custom and grouping options; update styles for search overlay
+- add echarts and echarts-for-react dependencies
+- add responsive chart resizing and unauthorized state handling to dashboard widgets
+- add Queue SLA heatmap widget and integrate into dashboard
+- enhance dashboard filters with dialog and apply/clear functionality
+- remove DynamicSelectionStaticEditWidget component from SolidLongTextField
+- add dashboard functionality with various widget components
+- add field quality checklists for form and list components; enhance dialog descriptions in relation fields
+- implement note editing functionality in SolidChatter and SolidMessageComposer
+- add embeded and disabled props to relation columns to support read-only display states
+- add updateFieldValue prop to form fields for consistent value updates
+
+### Fixed
+
+- update ModulePackageImportContent to conditionally render dropzone and file card
+- suppress TypeScript error for dynamic import of jsoneditor module
+- restrict editable message subtype to 'note'
+- enhance breadcrumb label generation for better handling of  model name
+- normalize rule.value to ensure it is always an array of primitive values
+- improve condition for rendering disabled state in DefaultRelationManyToOneListWidget
+- handle embedded parameter in SolidFormFooter to reset navigation state
+- mark formik field as touched on change event in DefaultJsonFormEditWidget
+- ensure formik fields are marked as touched on change events
+
+### Changed
+
+- update dialog styling for field deletion flow
+- remove disabled prop from SolidListView and related components
+- comment out fields property in SolidFormFooter query parameters
+- clean up unused variable assignments in SolidFormView
+- replace updateFieldValue with onChange for consistent field updates
+- simplify condition for showing save button in edit mode
+
+### Maintenance
+
+- update package-lock.json to add new dependencies and versions
+
+### Other
+
+- Revert "active-directory"
+- active-directory
+- adding package lock changes
+- ui changes
+- Update SolidLocale to display helper text only in create mode
+- Enhance SolidFormFooter and SolidFormView for locale handling and improve CSS styles
+- conflicts resolved
+- Add Date field in Instructions
+- fix import
+- fixes
+- roles grouped by module changes
+- ui changes
+- ui ifxes
+- ui fix around list , form , row buttons , icon related
+- Computed field sortable
+- ui fixes
+- changes for module metadata explorer
+- fixes for solid boolean / Added roles grouped by widget
+- solid responsive bugs
+- Refactor ModulePackageDialog to streamline import process and add backend availability check
+- solid primary header theme toggle visibility controlled using enableDarkMode settings key
+- ui fixes part 2
+- ui refactoring
+- Global toast changes
+- add file icon color based on the type
+- bug fixs
+- bug fixs
+- icon related changes
+- fixes for legacy table flags cleanup
+- changes
+- Before pre-populating the parent field in the embdedded form, check if the parent field matches. Also cleant up the code to avoid using 0th index from parentData to fetch the value for pre-population for readability purpose and used the parentDataForKey vaue instead
+- Remove DashboardPage component and its associated routes from the admin core section
+- exported kanban view prop
+- Setting ui changes
+- ui fixes
+- changed the type of fieldsMetadata in form events
+- Bug fixs dipak tickets
+- bug fix
+- pagination changes
+- unblock USer CTA added and list view widgdt
+- removed un-necessary file
+- social media buttons are now center aligned
+- Auth layout now supports toast provider
+- changes to copy of forgot password pages
+- admin and auth layouts now support title management
+- removed extra " from field validation label
+- disabled toast messages
+- app title bug fix
+- changes to handle onFieldBlur events
+- removed extra loading indicator in tree view
+- Fix popover alignment by setting left property to auto
+- Fix showSwitchType condition to handle cases with no visible view modes
+- Enhance form action header save logic and improve autocomplete styles
+- Refactor visibleViewModes to ensure unique types and handle current action/menu item correctly
+- logout dialog ui broken while small screen
+- custom filter z index issue
+- reducer - middleware - entity api slice lazy loading + caching optimisation
+- we are caching entity apis
+
 ## [0.1.7] - 2026-04-22
 
 ### Breaking / Major
