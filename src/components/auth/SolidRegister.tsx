@@ -431,8 +431,7 @@ const SolidRegister = () => {
         solidSettingsData?.data?.iamGoogleOAuthEnabled ||
         solidSettingsData?.data?.iamFacebookOAuthEnabled ||
         solidSettingsData?.data?.iamAppleOAuthEnabled ||
-        solidSettingsData?.data?.iamMicrosoftOAuthEnabled ||
-        solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled
+        solidSettingsData?.data?.iamMicrosoftOAuthEnabled
     );
     return (
         <div className="">
@@ -471,7 +470,6 @@ const SolidRegister = () => {
                             facebookEnabled={solidSettingsData?.data?.iamFacebookOAuthEnabled}
                             appleEnabled={solidSettingsData?.data?.iamAppleOAuthEnabled}
                             microsoftEnabled={solidSettingsData?.data?.iamMicrosoftOAuthEnabled}
-                            microsoftActiveDirectoryEnabled={solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled}
                         />
                     </>
                 )}

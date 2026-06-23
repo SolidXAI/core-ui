@@ -7,7 +7,6 @@ type SocialMediaLoginProps = {
   facebookEnabled?: boolean;
   appleEnabled?: boolean;
   microsoftEnabled?: boolean;
-  microsoftActiveDirectoryEnabled?: boolean;
 };
 
 export const SocialMediaLogin = ({
@@ -15,15 +14,13 @@ export const SocialMediaLogin = ({
   facebookEnabled = false,
   appleEnabled = false,
   microsoftEnabled = false,
-  microsoftActiveDirectoryEnabled = false,
 }: SocialMediaLoginProps) => {
   const router = useRouter();
 
-  const backendApiUrl = (
-    env("NEXT_PUBLIC_BACKEND_API_URL") || env("API_URL")
-  ).replace(/\/+$/, "");
-  const getOAuthConnectUrl = (provider: string) =>
-    `${backendApiUrl}/api/iam/${provider}/connect`;
+  const googleApiConnectRedirectUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/google/connect`;
+  const facebookApiConnectRedirectUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/facebook/connect`;
+  const appleApiConnectRedirectUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/apple/connect`;
+  const microsoftApiConnectRedirectUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/microsoft/connect`;
 
   return (
     <div className="mt-4">
@@ -34,9 +31,8 @@ export const SocialMediaLogin = ({
           variant="outline"
           className="solid-auth-social-btn"
           tabIndex={-1}
-          onClick={() => router.push(getOAuthConnectUrl("apple"))}
+          onClick={() => router.push(appleApiConnectRedirectUrl)}
           aria-label="Login with Apple"
-          title="Login with Apple"
         >
           <svg
             viewBox="0 0 24 24"
@@ -56,9 +52,8 @@ export const SocialMediaLogin = ({
           variant="outline"
           className="solid-auth-social-btn"
           tabIndex={-1}
-          onClick={() => router.push(getOAuthConnectUrl("google"))}
+          onClick={() => router.push(googleApiConnectRedirectUrl)}
           aria-label="Login with Google"
-          title="Login with Google"
         >
           <svg
             viewBox="0 0 24 24"
@@ -93,9 +88,8 @@ export const SocialMediaLogin = ({
           variant="outline"
           className="solid-auth-social-btn"
           tabIndex={-1}
-          onClick={() => router.push(getOAuthConnectUrl("facebook"))}
+          onClick={() => router.push(facebookApiConnectRedirectUrl)}
           aria-label="Login with Meta"
-          title="Login with Meta"
         >
           <svg
             viewBox="0 0 24 24"
@@ -121,30 +115,8 @@ export const SocialMediaLogin = ({
           variant="outline"
           className="solid-auth-social-btn"
           tabIndex={-1}
-          onClick={() => router.push(getOAuthConnectUrl("microsoft"))}
+          onClick={() => router.push(microsoftApiConnectRedirectUrl)}
           aria-label="Login with Microsoft"
-          title="Login with Microsoft"
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <g transform="translate(2, 2)">
-              <rect width="9" height="9" x="0" y="0" fill="#f25022" />
-              <rect width="9" height="9" x="11" y="0" fill="#7fba00" />
-              <rect width="9" height="9" x="0" y="11" fill="#00a4ef" />
-              <rect width="9" height="9" x="11" y="11" fill="#ffb900" />
-            </g>
-          </svg>
-        </SolidButton>
-        )}
-
-        {microsoftActiveDirectoryEnabled && (
-        <SolidButton
-          type="button"
-          variant="outline"
-          className="solid-auth-social-btn"
-          tabIndex={-1}
-          onClick={() => router.push(getOAuthConnectUrl("microsoft-active-directory"))}
-          aria-label="Login with Microsoft Active Directory"
-          title="Login with Microsoft Active Directory"
         >
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
             <g transform="translate(2, 2)">
