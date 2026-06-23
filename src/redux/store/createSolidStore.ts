@@ -1,7 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import type { Middleware, ReducersMapObject } from "@reduxjs/toolkit";
 import { solidApiSlices, solidReducers } from "./defaultStoreConfig";
-import { createSolidEntityApi } from "../api/solidEntityApi";
+import { createDynamicReducerManager } from "./dynamicReducerManager";
+import { createDynamicEntityApiMiddlewareManager } from "./dynamicEntityApiMiddleware";
+import { setSolidEntityApiStore } from "./solidEntityApiPool";
 
 export type CreateSolidStoreOptions = {
   entities?: string[];
@@ -24,7 +26,7 @@ export type CreateSolidStoreOptions = {
  *   });
  */
 export function createSolidStore(options: CreateSolidStoreOptions = {}) {
-  const { entities = [], reducers = {}, middlewares = [] } = options;
+  const { reducers = {}, middlewares = [] } = options;
 
   const rootReducers: ReducersMapObject = {
     ...solidReducers,
@@ -37,17 +39,24 @@ export function createSolidStore(options: CreateSolidStoreOptions = {}) {
     ...middlewares,
   ];
 
-  for (let i = 0; i < entities.length; i += 1) {
-    const entity = entities[i];
-    const apiSlice = createSolidEntityApi(entity);
-    rootReducers[apiSlice.reducerPath] = apiSlice.reducer;
-    rootMiddlewares.push(apiSlice.middleware as Middleware);
-  }
+  const reducerManager = createDynamicReducerManager(rootReducers);
+  const entityApiMiddlewareManager = createDynamicEntityApiMiddlewareManager();
 
-  return configureStore({
-    reducer: rootReducers,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(rootMiddlewares),
+  const store = configureStore({
+    reducer: reducerManager.reduce,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(...rootMiddlewares, entityApiMiddlewareManager.middleware),
   });
+
+  setSolidEntityApiStore({
+    dispatch: store.dispatch,
+    getState: store.getState,
+    replaceReducer: store.replaceReducer,
+    reducerManager,
+    middlewareManager: entityApiMiddlewareManager,
+  });
+
+  return store;
 }
 
 export type SolidStore = ReturnType<typeof createSolidStore>;

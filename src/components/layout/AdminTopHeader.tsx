@@ -1,14 +1,17 @@
 import { useContext, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { usePathname } from "../../hooks/usePathname";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { useRouter } from "../../hooks/useRouter";
-import { useSession } from "../../hooks/useSession";
 import { useGetSolidActionByIdQuery } from "../../redux/api/solidActionApi";
+import { useGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { LayoutContext } from "./context/layoutcontext";
 import { enterStudioMode } from "../../redux/features/solidStudioSlice";
 import { hasAnyRole } from "../../helpers/rolesHelper";
+import { getSettingsMap } from "../../helpers/settingsPayload";
 import { env } from "../../adapters/env";
+import { AdminHeaderActions, StudioSparkleIcon } from "./AdminHeaderActions";
+import { useDispatch, useSelector } from "react-redux";
+import { useSession } from "@/hooks/useSession";
 
 const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
 
@@ -17,13 +20,6 @@ const toLabel = (value: string) =>
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (m) => m.toUpperCase());
 
-const StudioSparkleIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.93 2.93l1.41 1.41M9.66 9.66l1.41 1.41M2.93 11.07l1.41-1.41M9.66 4.34l1.41-1.41" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.4" />
-  </svg>
-);
-
 export const AdminTopHeader = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -31,10 +27,13 @@ export const AdminTopHeader = () => {
   const dispatch = useDispatch();
   const { toggleThemeMode } = useContext(LayoutContext);
   const { data: session } = useSession();
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
   const user = session?.user;
   const isAdmin = hasAnyRole(user?.roles, ["Admin"]);
   const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
   const isDev = env("VITE_SOLIDX_ENV") === "dev";
+  const settingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
+  const isDarkModeEnabled = settingsMap?.enableDarkMode === true || settingsMap?.enableDarkMode === "true";
 
   // We treat actionId as the source of truth for breadcrumb labels.
   // If present, we resolve module/model/action via action-metadata API
@@ -70,7 +69,11 @@ export const AdminTopHeader = () => {
       const moduleName = segments[2];
       const modelName = segments[3];
       const viewName = segments[4];
-      const next = [moduleName, modelName, viewName].filter(Boolean).map((item) => toLabel(item!));
+      const next = [
+        moduleName ? toLabel(moduleName) : null,
+        modelFromApi ? decodeURIComponent(modelFromApi) : modelName ? toLabel(modelName) : null,
+        viewName ? toLabel(viewName) : null,
+      ].filter(Boolean) as string[];
       return next.length ? next : ["Admin"];
     }
 
@@ -149,7 +152,7 @@ export const AdminTopHeader = () => {
                   {crumb}
                 </button>
               ) : (
-                <span>{crumb}</span>
+                <span className="solid-bread-crum-text-wrapper">{crumb}</span>
               )}
             </span>
           ))}
@@ -162,28 +165,31 @@ export const AdminTopHeader = () => {
               className="solid-studio-trigger-btn"
               onClick={() => { dispatch(enterStudioMode()); router.push("/studio"); }}
               title="Enter SolidX Studio"
+              aria-label="Enter SolidX Studio"
             >
               <StudioSparkleIcon />
-              Studio
+              <span className="solid-studio-trigger-label">Studio</span>
             </button>
           )}
 
-          <button
-            type="button"
-            className="solid-admin-theme-toggle"
-            onClick={toggleThemeMode}
-            aria-label="Toggle theme"
-            title="Toggle theme"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 3l0 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 9l4.65 -4.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 14.3l7.37 -7.37" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 19.6l8.85 -8.85" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span className="solid-sr-only">Toggle theme</span>
-          </button>
+          {isDarkModeEnabled && (
+            <button
+              type="button"
+              className="solid-admin-theme-toggle"
+              onClick={toggleThemeMode}
+              aria-label="Toggle theme"
+              title="Toggle theme"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 3l0 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 9l4.65 -4.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 14.3l7.37 -7.37" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 19.6l8.85 -8.85" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="solid-sr-only">Toggle theme</span>
+            </button>
+          )}
 
           {showBack && (
             <button
@@ -196,6 +202,7 @@ export const AdminTopHeader = () => {
             </button>
           )}
         </div>
+        <AdminHeaderActions variant="header" />
       </div>
     </header>
   );

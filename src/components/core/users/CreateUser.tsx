@@ -9,12 +9,11 @@ import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useRouter } from "../../../hooks/useRouter";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "../../../redux/api/authApi";
-import { useGetrolesQuery } from "../../../redux/api/roleApi";
 import { useDeleteUserMutation } from "../../../redux/api/userApi";
+import { RolesGroupedByModuleWidget } from "../../core/form/fields/relations/RolesGroupedByModuleWidget";
 import { showToast } from "../../../redux/features/toastSlice";
 import {
   SolidButton,
-  SolidCheckbox,
   SolidInput,
   SolidMessage,
   SolidPanel,
@@ -39,6 +38,7 @@ const CreateUser = ({ data, params }: any) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [failedAttempts, setFailedAttempts] = useState<number>(data?.failedLoginAttempts ?? 0);
   const [activeTab, setActiveTab] = useState("userDetails");
   const [newUserIdForApiKey, setNewUserIdForApiKey] = useState<number | null>(null);
   const [revealKey, setRevealKey] = useState<{ apiKey: string; keyName: string } | null>(null);
@@ -54,12 +54,12 @@ const CreateUser = ({ data, params }: any) => {
   ] = useUpdateUserMutation();
 
   const [deleteUser, { isLoading: isUserDeleting, isSuccess: isDeleteUserSuccess }] = useDeleteUserMutation();
-  const { data: rolesData } = useGetrolesQuery("");
 
   useEffect(() => {
     if (data?.roles) {
       setSelectedRoles(data.roles.map((role: any) => role.name));
     }
+    setFailedAttempts(data?.failedLoginAttempts ?? 0);
   }, [data]);
 
   const initialValues = {
@@ -69,7 +69,7 @@ const CreateUser = ({ data, params }: any) => {
     mobile: data?.mobile ?? "",
     password: "",
     confirmPassword: "",
-    failedLoginAttempts: data?.failedLoginAttempts ?? 0,
+    active: data?.active ?? true,
     isAllowedToGenerateApiKeys: data?.isAllowedToGenerateApiKeys ?? false,
   };
 
@@ -85,11 +85,7 @@ const CreateUser = ({ data, params }: any) => {
       then: (schema) => schema.oneOf([Yup.ref("password")], ERROR_MESSAGES.FIELD_MUST_MATCH("Password")).nullable(),
       otherwise: (schema) => schema.notRequired().nullable(),
     }),
-    mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED("Mobile")),
-    failedLoginAttempts: Yup.number()
-      .typeError("Failed Login Attempts must be a number")
-      .nullable()
-      .transform((value, originalValue) => (originalValue === "" ? null : value)),
+    mobile: Yup.string().nullable(),
   });
 
   function isFetchBaseQueryErrorWithErrorResponse(
@@ -110,7 +106,7 @@ const CreateUser = ({ data, params }: any) => {
           email: values.email,
           mobile: values.mobile,
           roles: selectedRoles,
-          failedLoginAttempts: values.failedLoginAttempts,
+          active: values.active,
           isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
         };
 
@@ -130,7 +126,6 @@ const CreateUser = ({ data, params }: any) => {
           mobile: values.mobile,
           password: values.password,
           roles: selectedRoles,
-          failedLoginAttempts: values.failedLoginAttempts,
           isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
         }).unwrap();
 
@@ -188,13 +183,33 @@ const CreateUser = ({ data, params }: any) => {
   const isEditMode = params.id !== "new";
   const isSaving = isLoading || isUserUpdating;
 
+  const handleUnblockUser = async () => {
+    if (!data?.id) return;
+
+    try {
+      await updateUser({
+        id: data.id,
+        data: { failedLoginAttempts: 0 },
+      }).unwrap();
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Success",
+          detail: "User is unblocked.",
+        })
+      );
+      setFailedAttempts(0);
+    } catch {
+      // error shown via userUpdateError effect
+    }
+  };
 
   return (
     <div className="solid-form-wrapper">
       <div className="solid-form-section">
         <form onSubmit={formik.handleSubmit}>
-          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
-            <div className="solid-user-form-titleblock flex align-items-center gap-3">
+          <div className="solid-form-header flex items-center justify-between gap-4 flex-wrap">
+            <div className="solid-user-form-titleblock flex items-center gap-4">
               <BackButton />
               <div>
                 <div className="form-wrapper-title">{isEditMode ? "Update User" : "Create User"}</div>
@@ -205,7 +220,12 @@ const CreateUser = ({ data, params }: any) => {
                 </p>
               </div>
             </div>
-            <div className="gap-3 flex flex-wrap">
+            <div className="flex gap-4 flex-wrap">
+              {isEditMode && failedAttempts > 0 ? (
+                <SolidButton size="small" type="button" variant="outline" loading={isUserUpdating} onClick={handleUnblockUser}>
+                  Unblock User
+                </SolidButton>
+              ) : null}
               {formik.dirty ? (
                 <SolidButton size="small" type="submit" loading={isSaving}>
                   Save
@@ -228,7 +248,7 @@ const CreateUser = ({ data, params }: any) => {
 
           <SolidFormHeader />
 
-          <div className="px-4 py-3 md:p-4 solid-form-content">
+          <div className="px-3 py-3 md:p-4 solid-form-content">
             {isEditMode ? (
               <SolidTabGroup
                 value={activeTab}
@@ -241,7 +261,6 @@ const CreateUser = ({ data, params }: any) => {
                       <UserDetailsContent
                         formik={formik}
                         fieldError={fieldError}
-                        rolesData={rolesData}
                         selectedRoles={selectedRoles}
                         handleCheckboxChange={handleCheckboxChange}
                         isEditMode={isEditMode}
@@ -263,7 +282,6 @@ const CreateUser = ({ data, params }: any) => {
               <UserDetailsContent
                 formik={formik}
                 fieldError={fieldError}
-                rolesData={rolesData}
                 selectedRoles={selectedRoles}
                 handleCheckboxChange={handleCheckboxChange}
                 isEditMode={isEditMode}
@@ -307,14 +325,12 @@ const CreateUser = ({ data, params }: any) => {
 function UserDetailsContent({
   formik,
   fieldError,
-  rolesData,
   selectedRoles,
   handleCheckboxChange,
   isEditMode,
 }: {
   formik: any;
   fieldError: (field: any) => string;
-  rolesData: any;
   selectedRoles: string[];
   handleCheckboxChange: (roleName: string) => void;
   isEditMode: boolean;
@@ -323,8 +339,8 @@ function UserDetailsContent({
     <div className="solid-user-details-layout">
       <div className="solid-user-details-stack">
         <SolidPanel header="Basic Info" className="solid-column-panel">
-          <div className="grid formgrid">
-            <div className="field col-12 md:col-6 flex flex-column gap-2">
+          <div className="flex flex-wrap -mx-2 -mt-2">
+            <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="fullName" className="form-field-label">
                 Full Name
               </label>
@@ -341,7 +357,7 @@ function UserDetailsContent({
               {fieldError("fullName") ? <SolidMessage severity="error" text={fieldError("fullName")} /> : null}
             </div>
 
-            <div className="field col-12 md:col-6 flex flex-column gap-2">
+            <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="username" className="form-field-label">
                 Username
               </label>
@@ -359,7 +375,7 @@ function UserDetailsContent({
               {fieldError("username") ? <SolidMessage severity="error" text={fieldError("username")} /> : null}
             </div>
 
-            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="email" className="form-field-label">
                 Email
               </label>
@@ -377,7 +393,7 @@ function UserDetailsContent({
               {fieldError("email") ? <SolidMessage severity="error" text={fieldError("email")} /> : null}
             </div>
 
-            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
               <label htmlFor="mobile" className="form-field-label">
                 Mobile
               </label>
@@ -396,7 +412,7 @@ function UserDetailsContent({
 
             {!isEditMode ? (
               <>
-                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                   <label htmlFor="password" className="form-field-label">
                     Password
                   </label>
@@ -412,7 +428,7 @@ function UserDetailsContent({
                   {fieldError("password") ? <SolidMessage severity="error" text={fieldError("password")} /> : null}
                 </div>
 
-                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                   <label htmlFor="confirmPassword" className="form-field-label">
                     Confirm Password
                   </label>
@@ -430,36 +446,27 @@ function UserDetailsContent({
                   ) : null}
                 </div>
               </>
-            ) : (
-              <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
-                <label htmlFor="failedLoginAttempts" className="form-field-label">
-                  Failed Login Attempts
-                </label>
-                <SolidInput
-                  type="number"
-                  id="failedLoginAttempts"
-                  name="failedLoginAttempts"
-                  autoComplete="off"
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  value={formik.values.failedLoginAttempts}
-                  className={cx(fieldError("failedLoginAttempts") && "solid-user-form-input-invalid")}
-                />
-                {fieldError("failedLoginAttempts") ? (
-                  <SolidMessage severity="error" text={fieldError("failedLoginAttempts")} />
-                ) : null}
-                <p className="solid-user-section-helper">
-                  Your account has been locked due to repeated unsuccessful login attempts. Please contact your
-                  system admin.
-                </p>
-              </div>
-            )}
+            ) : null}
           </div>
         </SolidPanel>
 
         <SolidPanel toggleable header="Access" className="solid-column-panel">
-          <div className="formgrid grid">
-            <div className="field col-12 solid-user-access-row">
+          <div className="flex flex-wrap -mx-2 -mt-2 solid-user-access-grid">
+            {isEditMode ? (
+              <div className="field w-full px-2 pt-2 solid-user-access-row">
+                <div className="solid-user-access-copy">
+                  <p className="form-field-label m-0">Active User</p>
+                  <p className="solid-user-section-helper m-0 mt-1">
+                    Control whether this user account is active and allowed to sign in.
+                  </p>
+                </div>
+                <SolidSwitch
+                  checked={formik.values.active}
+                  onChange={(checked) => formik.setFieldValue("active", checked)}
+                />
+              </div>
+            ) : null}
+            <div className="field w-full px-2 pt-2 solid-user-access-row">
               <div className="solid-user-access-copy">
                 <p className="form-field-label m-0">Allow API Key Generation</p>
                 <p className="solid-user-section-helper m-0 mt-1">
@@ -476,22 +483,10 @@ function UserDetailsContent({
 
         <SolidPanel toggleable header="Roles" className="solid-column-panel">
           <p className="solid-user-section-copy">Select the roles that should be assigned to this user.</p>
-          <div className="solid-user-role-grid">
-            {rolesData?.data?.records?.map((role: any) => (
-              <div
-                key={role.name}
-                className={cx("solid-user-role-card", selectedRoles.includes(role.name) && "is-selected")}
-              >
-                <SolidCheckbox
-                  id={role.name}
-                  checked={selectedRoles.includes(role.name)}
-                  onChange={() => handleCheckboxChange(role.name)}
-                  label={role.name}
-                  className="solid-user-role-control"
-                />
-              </div>
-            ))}
-          </div>
+          <RolesGroupedByModuleWidget
+            selectedRoles={selectedRoles}
+            onToggle={handleCheckboxChange}
+          />
         </SolidPanel>
       </div>
     </div>

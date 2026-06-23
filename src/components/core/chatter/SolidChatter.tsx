@@ -92,17 +92,27 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 queryData.filters = queryData.filters || {};
                 queryData.filters['user'] = { fullName: { $containsi: filters.name }};
             }
+            const startOfDay = (d: Date) => {
+                const x = new Date(d);
+                x.setHours(0, 0, 0, 0);
+                return x;
+            };
+            const endOfDay = (d: Date) => {
+                const x = new Date(d);
+                x.setHours(23, 59, 59, 999);
+                return x;
+            };
             if (filters.startDate && filters.endDate) {
                 queryData.filters = queryData.filters || {};
                 queryData.filters.createdAt = {
-                    $between: [filters.startDate.toISOString(), filters.endDate.toISOString()]
+                    $between: [startOfDay(filters.startDate).toISOString(), endOfDay(filters.endDate).toISOString()]
                 };
             } else if (filters.startDate) {
                 queryData.filters = queryData.filters || {};
-                queryData.filters.createdAt = { $gte: filters.startDate.toISOString() };
+                queryData.filters.createdAt = { $gte: startOfDay(filters.startDate).toISOString() };
             } else if (filters.endDate) {
                 queryData.filters = queryData.filters || {};
-                queryData.filters.createdAt = { $lte: filters.endDate.toISOString() };
+                queryData.filters.createdAt = { $lte: endOfDay(filters.endDate).toISOString() };
             }
 
             const queryString = qs.stringify(queryData, {
@@ -115,15 +125,17 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
             }).unwrap();
             const processedMessages = response.data.records.map((msg: any) => {
                 if (msg.messageType === 'custom') {
+                    const displayTimeSource = msg.updatedAt || msg.createdAt;
                     // Custom message
                     return {
                         id: msg.id,
                         user: msg.user?.fullName || "System",
+                        userId: msg.user?.id,
                         messageType: "custom",
                         message: msg.messageBody,
-                        time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        createdAt: msg.createdAt,
-                        date: formatDate(msg.createdAt),
+                        time: new Date(displayTimeSource).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        createdAt: displayTimeSource,
+                        date: formatDate(displayTimeSource),
                         media: msg._media,
                         messageSubType: msg.messageSubType,
                         status: msg.status,
@@ -154,6 +166,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     return {
                         id: msg.id,
                         user: msg.user?.fullName || "System",
+                        userId: msg.user?.id,
                         messageType: "audit",
                         time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         auditRecord: auditRecord,
@@ -189,8 +202,8 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     const canViewMessages = actionsAllowed.includes(`${permissionExpression('chatterMessage', 'findMany')}`);
 
     const renderLoadingState = () => (
-        <div className='flex flex-column align-items-center justify-content-center gap-2 h-full text-center text-color-secondary'>
-            <Loader2 size={20} className='text-primary animate-spin' />
+        <div className='flex h-full flex-col items-center justify-center gap-2 text-center text-color-secondary'>
+            <Loader2 size={20} className='animate-spin text-[var(--primary-color)]' />
             <span className='text-sm'>Loading recent activity…</span>
         </div>
     );
@@ -198,9 +211,9 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     const renderEmptyState = () => {
         const isLogComposerOpen = visibleBox === 'log';
         return (
-        <div className='flex align-items-center justify-content-center h-full'>
-            <div className='flex flex-column align-items-center gap-2 text-center text-color-secondary px-3'>
-                <div className='p-2 border-round bg-primary-reverse text-primary'>
+        <div className='flex h-full items-center justify-center'>
+            <div className='flex flex-col items-center gap-2 px-3 text-center text-color-secondary'>
+                <div className='rounded bg-[var(--primary-color-text)] p-2 text-[var(--primary-color)]'>
                     <Inbox size={20} />
                 </div>
                 <p className='m-0 text-base font-medium text-color'>No activity yet</p>
@@ -215,12 +228,12 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
 
     const permissionError = () => (
         <div className='p-3'>
-            <SolidMessage severity='warn' text="You do not have permission to view these messages." className='justify-content-start' />
+            <SolidMessage severity='warn' text="You do not have permission to view these messages." className='justify-start' />
         </div>
     );
 
     const renderMessages = () => (
-        <div className='flex flex-column gap-3'>
+        <div className='flex flex-col gap-4'>
             {messages.map((message, index) => {
                 const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
                 return (
@@ -229,6 +242,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         <SolidChatterMessageBox
                             messageId={message.id}
                             user={message.user}
+                            userId={message.userId}
                             messageType={message.messageType}
                             message={message.message}
                             time={message.time}
@@ -244,7 +258,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 );
             })}
             {totalRecords > messages.length && (
-                <div className='flex justify-content-center'>
+                <div className='flex justify-center'>
                     <SolidButton
                         type='button'
                         size='sm'

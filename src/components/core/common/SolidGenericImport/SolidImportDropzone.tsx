@@ -51,6 +51,8 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
             'text/csv': ['.csv']
         },
         multiple: false,
+        noClick: true,
+        noKeyboard: true,
     });
 
     const rootProps = getRootProps({ className: 'solid-import-dropzone-shell' });
@@ -72,7 +74,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                 <div {...rootProps}>
                     <input {...getInputProps()} />
                     <div className="solid-import-dropzone-copy">
-                        <div className='flex justify-content-center'>
+                        <div className='flex justify-center'>
                             <DocumentSvg />
                         </div>
                         <div className="solid-import-dropzone-kicker">Accepted formats</div>
@@ -88,7 +90,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                                 CSV
                             </span>
                         </div>
-                        <div className='flex justify-content-center mt-3'>
+                        <div className='mt-4 flex justify-center'>
                             <SolidButton type="button" variant="outline" size="small" leftIcon={<Upload size={14} />} onClick={(event) => {
                                 event.stopPropagation();
                                 open();

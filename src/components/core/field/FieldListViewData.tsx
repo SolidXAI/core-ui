@@ -173,7 +173,7 @@ export const FieldListViewData = () => {
 
   return (
     <div className="solid-field-list w-full">
-      <div className="flex gap-3 mb-4">
+      <div className="flex gap-4 mb-6">
         {selectedMenus.length > 0 && (
           <SolidButton
             type="button"
@@ -186,7 +186,7 @@ export const FieldListViewData = () => {
         )}
       </div>
 
-      <div className="flex flex-column md:flex-row align-items-start gap-3 mb-3">
+      <div className="flex flex-col md:flex-row items-start gap-4 mb-4">
         <SolidInput
             value={pendingFilters.displayName.value ?? ""}
             onChange={(event) => handleFilterInputChange("displayName", event.currentTarget.value)}
@@ -199,14 +199,14 @@ export const FieldListViewData = () => {
             placeholder="Search by model name"
             className="w-full md:w-20rem"
         />
-        <div className="flex align-items-center gap-2">
+        <div className="flex items-center gap-2">
             <SolidButton size="small" onClick={applyFilters} label="Apply" />
             <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
         </div>
       </div>
 
       {(loading || isLoading) && (
-        <div className="flex justify-content-center my-3">
+        <div className="flex justify-center my-4">
           <SolidSpinner />
         </div>
       )}
@@ -255,7 +255,7 @@ export const FieldListViewData = () => {
         onHide={() => setDialogVisible(false)}
       >
         <p>Are you sure you want to delete the selected Fields?</p>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={deleteBulk} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={onDeleteClose} />
         </div>

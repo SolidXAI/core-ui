@@ -170,14 +170,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
 
         notify("success", ERROR_MESSAGES.PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
         resetForm();
-        handleLogout({
-          toast: {
-            current: {
-              show: ({ severity, summary, detail, sticky, life }: any) =>
-                notify(severity || "info", summary || "", detail || "", { sticky, life }),
-            },
-          },
-        });
+        handleLogout();
       } catch (err: any) {
         notify("error", err?.data?.message || ERROR_MESSAGES.ERROR, err?.data?.data?.message || err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
       }

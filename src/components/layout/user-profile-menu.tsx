@@ -1,28 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { SolidAccountSettings } from "../core/common/SolidAccountSettings/SolidAccountSettings";
 import { useGetUserQuery } from "../../redux/api/userApi";
 import { handleLogout } from "../../adapters/auth/handleLogout";
 import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { useSession } from "../../hooks/useSession";
+import { showToast } from "../../redux/features/toastSlice";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { SolidButton } from "../shad-cn-ui/SolidButton";
+import { SolidDialog } from "../shad-cn-ui/SolidDialog";
 import { SolidIcon, parseSolidIconMeta } from "../shad-cn-ui/SolidIcon";
 import { getSettingsMap } from "../../helpers/settingsPayload";
 
-type InlineToast = {
-  id: number;
-  severity: "success" | "error" | "info" | "warn";
-  summary?: string;
-  detail?: string;
-  sticky?: boolean;
-  life?: number;
-};
-
 const UserProfileMenu = () => {
+  const dispatch = useDispatch();
   const menuRef = useRef<HTMLDivElement>(null);
   const [showProfileSettingsDialog, setShowProfileSettingsDialog] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
-  const [toast, setToast] = useState<InlineToast | null>(null);
 
   useEffect(() => {
     trigger("") // Fetch settings on mount
@@ -49,30 +44,12 @@ const UserProfileMenu = () => {
     return () => document.removeEventListener("mousedown", onPointerDown);
   }, [menuOpen]);
 
-  useEffect(() => {
-    if (!toast || toast.sticky) return;
-    const timer = window.setTimeout(() => setToast((current) => (current?.id === toast.id ? null : current)), toast.life ?? 3000);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
-
-  const toastRef = useMemo(
-    () => ({
-      current: {
-        show: (message: Partial<InlineToast>) => {
-          const nextToast: InlineToast = {
-            id: Date.now(),
-            severity: (message.severity as InlineToast["severity"]) || "info",
-            summary: message.summary,
-            detail: message.detail,
-            sticky: Boolean(message.sticky),
-            life: typeof message.life === "number" ? message.life : 3000,
-          };
-          setToast(nextToast);
-        },
-      },
-    }),
-    []
-  );
+  const onLogout = async () => {
+    const success = await handleLogout();
+    if (!success) {
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGOUT_FAILED }));
+    }
+  };
 
   const getInitials = (value: string) => {
     if (!value) return "";
@@ -102,14 +79,6 @@ const UserProfileMenu = () => {
     ? userData?.data?.username
     : userData?.data?.email;
   const primaryRole = roleLabel?.split("|")?.[0]?.trim() || "User";
-  const toastSeverityClass =
-    toast?.severity === "error"
-      ? "is-error"
-      : toast?.severity === "success"
-        ? "is-success"
-        : toast?.severity === "warn"
-          ? "is-warn"
-          : "is-info";
 
   const UserProfileAvatar = ({ compact = false }: { compact?: boolean }) => {
     const imageUrl = userData?.data?._media?.profilePicture?.[0]?._full_url;
@@ -131,22 +100,6 @@ const UserProfileMenu = () => {
 
   return (
     <div className="userProfile">
-      {toast && (
-        <div className={`solid-inline-toast ${toastSeverityClass}`} role="status" aria-live="polite">
-          <div className="solid-inline-toast-body">
-            {toast.summary && <div className="solid-inline-toast-title">{toast.summary}</div>}
-            {toast.detail && <div className="solid-inline-toast-detail">{toast.detail}</div>}
-          </div>
-          <button
-            type="button"
-            className="solid-inline-toast-close"
-            onClick={() => setToast(null)}
-            aria-label="Close notification"
-          >
-            ×
-          </button>
-        </div>
-      )}
       <div className="solid-user-menu" ref={menuRef}>
         <button
           type="button"
@@ -234,35 +187,29 @@ const UserProfileMenu = () => {
         )}
       </div>
       {confirmLogout && (
-        <div
-          className="solid-dialog-backdrop"
-          role="presentation"
-          onClick={() => setConfirmLogout(false)}
+        <SolidDialog
+          open={confirmLogout}
+          onOpenChange={setConfirmLogout}
+          showHeader={false}
+          className="solid-confirm-dialog solid-shadcn-confirm-dialog"
+          style={{ width: "min(320px, calc(100vw - 40px))" }}
         >
-          <div
-            className="solid-confirm-dialog solid-shadcn-confirm-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="solid-logout-dialog-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="solid-shadcn-dialog-head">
-              <h3 id="solid-logout-dialog-title">Logout</h3>
-            </div>
-            <div className="solid-shadcn-dialog-sep" />
-            <div className="solid-shadcn-dialog-body">
-              <p className="solid-shadcn-dialog-text">Are you sure you want to log out?</p>
-            </div>
-            <div className="solid-shadcn-dialog-actions">
-              <SolidButton size="sm" variant="destructive" onClick={() => handleLogout({ toast: toastRef })}>
-                Logout
-              </SolidButton>
-              <SolidButton size="sm" variant="outline" onClick={() => setConfirmLogout(false)}>
-                Cancel
-              </SolidButton>
-            </div>
+          <div className="solid-shadcn-dialog-head">
+            <h3 id="solid-logout-dialog-title">Logout</h3>
           </div>
-        </div>
+          <div className="solid-shadcn-dialog-sep" />
+          <div className="solid-shadcn-dialog-body">
+            <p className="solid-shadcn-dialog-text">Are you sure you want to log out?</p>
+          </div>
+          <div className="solid-shadcn-dialog-actions">
+            <SolidButton size="sm" variant="destructive" onClick={onLogout}>
+              Logout
+            </SolidButton>
+            <SolidButton size="sm" variant="outline" onClick={() => setConfirmLogout(false)}>
+              Cancel
+            </SolidButton>
+          </div>
+        </SolidDialog>
       )}
       {showProfileSettingsDialog &&
         <SolidAccountSettings

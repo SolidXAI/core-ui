@@ -107,7 +107,7 @@ export class SolidTimeField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
@@ -157,7 +157,7 @@ export class SolidTimeField implements ISolidField {
 export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const calendarRef = useRef<any>(null); // Reference for the Calendar component
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;

@@ -80,7 +80,7 @@ function exportFormatMeta(code?: string) {
   };
 }
 
-export const SolidExport = ({ listViewMetaData, filters }: any) => {
+export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any) => {
   const dispatch = useDispatch();
 
   if (!listViewMetaData?.data) return null;
@@ -241,6 +241,11 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
   };
 
   const handleDownload = async () => {
+    setProgress(0);
+    setStatus("In Progress");
+    setMessage("");
+    setMessageDescription("");
+
     const exportData = {
       id: selectedTemplate?.code ?? null,
       templateName: selectedTemplate?.name ?? null,
@@ -251,13 +256,16 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
     };
 
     try {
-      await downloadFileWithProgress(
+      const result = await downloadFileWithProgress(
         `/export-template/startExport/sync`,
         downloadHandlers,
         filters,
         checkApplyFilter,
         exportData
       );
+      window.setTimeout(() => {
+        onExportComplete?.(result);
+      }, 1600);
     } catch (error) {
       console.error(ERROR_MESSAGES.DOWNLOAD_FAILED, error);
     }
@@ -283,6 +291,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                   if (next) setSelectedFormat(next);
                 }}
                 placeholder="Select format"
+                native={false}
               />
             </label>
 
@@ -293,6 +302,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                 options={resolvedTemplateOptions.map((option) => ({ label: option.name, value: option.code }))}
                 onChange={(event) => handleTemplateSelect(event.value)}
                 placeholder={resolvedTemplateOptions.length ? "Choose template" : "No saved templates"}
+                native={false}
               />
             </label>
           </div>

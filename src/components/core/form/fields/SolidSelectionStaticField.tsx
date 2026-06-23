@@ -142,7 +142,7 @@ export class SolidSelectionStaticField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
         const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;

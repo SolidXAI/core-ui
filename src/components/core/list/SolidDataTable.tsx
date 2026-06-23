@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowDownWideNarrow, ArrowUpDown, ArrowUpWideNarrow } from "lucide-react";
+import { SolidSelect } from "../../shad-cn-ui/SolidSelect";
 
 export type DataTableStateEvent = {
   sortField?: string;
@@ -190,7 +191,7 @@ export function SolidDataTable({
     >
       <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
         <table className={cx("w-full text-sm border-collapse", tableClassName)}>
-          <thead className="solid-data-table-head" style={{ position: "sticky", top: 0, zIndex: 11 }}>
+          <thead className="solid-data-table-head">
             <tr>
               {columns.map((column, index) => {
                 const props = column.props;
@@ -306,19 +307,17 @@ export function SolidDataTable({
 
       {typeof onPage === "function" ? (
         <div
-          className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background", paginatorClassName)}
+          className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background", paginatorClassName)}
         >
-          <div className="solid-paginator-meta flex items-center gap-2 ml-auto">
+          <div className="solid-paginator-meta flex items-center gap-2 sm:ml-auto">
             <span className="solid-paginator-label">Rows</span>
-            <select
+            <SolidSelect
               value={rows}
-              onChange={(e) => onPage({ first: 0, rows: Number(e.target.value) })}
+              onChange={(event) => onPage({ first: 0, rows: Number(event.value) })}
               className="solid-paginator-select"
-            >
-              {rowsPerPageOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
+              options={rowsPerPageOptions.map((option) => ({ label: String(option), value: option }))}
+              native={false}
+            />
             <span className="solid-paginator-report">{report}</span>
           </div>
           <div className="solid-paginator-actions flex items-center gap-2">

@@ -46,7 +46,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
         try {
             const formData = new FormData();
             formData.append('messageType', "custom");
-            formData.append('messageSubType', "custom");
+            formData.append('messageSubType', "note");
             formData.append('messageBody', message);
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);
@@ -60,6 +60,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
             await createChatterMessage(formData).unwrap();
             setMessage('');
             setSelectedFiles([]);
+            onCancel?.();
         } catch (error) {
             console.error(ERROR_MESSAGES.FETCHING_MESSAGE, error);
         }
@@ -81,7 +82,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
     return (
         <form className={styles.chatterMessageComposer} onSubmit={handleSubmit}>
             {/* {type === 'email' &&
-                <div className='flex align-items-center gap-1 text-sm mb-2'>
+                <div className='mb-2 flex items-center gap-1 text-sm'>
                     <span className='font-bold'>To:</span>
                     <div className={styles.chatterEmails}>
                         {tempEmails.map((mail, index) => (
@@ -90,7 +91,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                             </span>
                         ))}
                     </div>
-                    <div className={`si si-sort-down-fill text-primary ${styles.emailTooltipIcon}`} style={{ fontSize: 8 }}>
+                    <div className={`si si-sort-down-fill text-[var(--primary-color)] ${styles.emailTooltipIcon}`} style={{ fontSize: 8 }}>
                         <div className={styles.emailsTooltip}>
                             {tempEmails.map((mail, index) => (
                                 <span key={index} className='text-color text-sm'>
@@ -101,8 +102,8 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                     </div>
                 </div>
             } */}
-            <div className={`${styles.solidMessageWrapper} flex flex-column gap-2 w-full`}>
-                <div className='flex align-items-center justify-content-between'>
+            <div className={`${styles.solidMessageWrapper} flex flex-col gap-2 w-full`}>
+                <div className='flex items-center justify-between'>
                     <p className='form-field-label m-0'>
                         {type === 'email' ? 'Email Message' : 'Internal Note'}
                     </p>
@@ -111,11 +112,11 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={type === 'email' ? 'Send a message to followers' : 'Log an internal note.'}
-                    className="w-full p-1"
+                    className="w-full p-2"
                     rows={4}
                 />
-                <div className='flex align-items-center justify-content-between flex-wrap gap-2'>
-                    <div className='flex align-items-center gap-2'>
+                <div className='flex items-center justify-between flex-wrap gap-2'>
+                    <div className='flex items-center gap-2'>
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -135,13 +136,14 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                         />
                         <span className='text-xs text-color-secondary'>Attach file</span>
                     </div>
-                    <div className='flex align-items-center gap-2'>
+                    <div className='flex items-center gap-2'>
                         <SolidButton
                             type='submit'
                             size='sm'
                             className='gap-2 solid-purple-button'
                             variant='primary'
                             loading={isLoading}
+                            disabled={!message.trim() && selectedFiles.length === 0}
                         >
                             {type === 'email' ? 'Send' : 'Log'}
                         </SolidButton>

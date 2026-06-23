@@ -39,15 +39,39 @@
   padding: 14px 16px 16px;
 }
 
+.solid-user-access-grid {
+  row-gap: 0;
+}
+
 .solid-user-access-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  gap: 22px;
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 96%, white 4%);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+}
+
+.solid-user-access-row + .solid-user-access-row {
+  margin-top: 12px;
 }
 
 .solid-user-access-copy {
-  max-width: 720px;
+  flex: 1;
+  max-width: 640px;
+}
+
+.solid-user-access-copy .form-field-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.solid-user-access-row .solid-switch {
+  flex-shrink: 0;
 }
 
 .solid-user-role-grid {
@@ -106,6 +130,7 @@
   .solid-user-access-row {
     flex-direction: column;
     align-items: stretch;
+    padding: 14px;
   }
 
   .solid-user-access-row .solid-switch {

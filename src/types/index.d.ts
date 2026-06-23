@@ -5,6 +5,7 @@ declare module "nodemailer";
 declare module "mapbox-gl/dist/mapbox-gl.js";
 declare module "react-datepicker";
 declare module "moment";
+declare module "jsoneditor";
 
 import React, { ReactNode } from 'react';
 import {
@@ -31,6 +32,7 @@ import {
     SolidUiEventResponse,
     SolidLoadList,
     SolidListUiEventResponse,
+    SolidKanbanCardWidgetProps,
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
     SolidSettingsWidgetProps,
@@ -74,6 +76,7 @@ export type {
     SolidListUiEvent,
     SolidLoadForm,
     SolidFormWidgetProps,
+    SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidFormFieldWidgetProps,
     SolidSettingsWidgetProps,

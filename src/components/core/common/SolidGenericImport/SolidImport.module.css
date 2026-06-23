@@ -321,7 +321,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    cursor: pointer;
+    cursor: default;
     transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
 }
 
@@ -470,6 +470,10 @@
     color: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
 
+:global(.solid-import-empty-state.solid-import-empty-state-danger h4) {
+    color: #b91c1c;
+}
+
 :global(.solid-import-mapping-shell) {
     padding: 12px;
 }
@@ -494,6 +498,52 @@
     font-weight: 600;
     white-space: nowrap;
     color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
+:global(.solid-import-mapping-alert) {
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, #f59e0b 34%, var(--border));
+    border-radius: 12px;
+    background:
+        linear-gradient(180deg,
+            color-mix(in srgb, #f59e0b 12%, var(--card)),
+            color-mix(in srgb, var(--card) 96%, white 4%));
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: flex-start;
+}
+
+:global(.solid-import-mapping-alert-icon) {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, #f59e0b 16%, transparent);
+    color: #b45309;
+    flex-shrink: 0;
+}
+
+:global(.solid-import-mapping-alert-copy) {
+    min-width: 0;
+}
+
+:global(.solid-import-mapping-alert-title) {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.35;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--foreground) 96%, transparent);
+}
+
+:global(.solid-import-mapping-alert-text) {
+    margin: 3px 0 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--foreground) 74%, transparent);
 }
 
 :global(.solid-import-mapping-table) {
@@ -696,6 +746,16 @@
 
     :global(.solid-import-mapping-intro) {
         flex-direction: column;
+    }
+
+    :global(.solid-import-mapping-alert) {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    :global(.solid-import-mapping-alert-icon) {
+        width: 28px;
+        height: 28px;
     }
 
     :global(.solid-import-panel-grid.is-single-column .solid-import-instruction-list > li) {

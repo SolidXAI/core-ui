@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useSolidLayoutRegistry } from "../../SolidLayoutRegistry";
 import type { SolidLayoutEntry } from "../../SolidLayoutRegistry";
 import { ChatIcon } from "../../../components/layout/SolidAiStudioLayout";
 import { env } from "../../../adapters/env";
+import { showToast } from "../../../redux/features/toastSlice";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -152,7 +154,7 @@ function CardFooter({ children, className = "" }: { children: React.ReactNode; c
 
 // ── Empty state ───────────────────────────────────────────────────────────────
 
-function EmptyState() {
+function EmptyState({ onOpenChat }: { onOpenChat: () => void }) {
   return (
     <div className="solid-studio-landing-empty-container">
       <Card className="solid-studio-landing-empty-card">
@@ -170,10 +172,7 @@ function EmptyState() {
             <button
               type="button"
               className="solid-studio-empty-cta-button"
-              onClick={() => {
-                const aiUrl = env("VITE_SOLIDX_AI_URL");
-                if (aiUrl) window.open(aiUrl, "_blank");
-              }}
+              onClick={onOpenChat}
             >
               <ChatIcon />
               <span>Open AI Chat</span>
@@ -255,8 +254,45 @@ function LayoutCard({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export function StudioLandingPage() {
+  const dispatch = useDispatch();
   const layouts = useSolidLayoutRegistry();
   const [listView, setListView] = useState(false);
+  
+  const handleOpenAiChat = () => {
+    const aiUrl = env("VITE_SOLIDX_AI_URL");
+
+    if (!aiUrl) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "AI Chat unavailable",
+          detail: "VITE_SOLIDX_AI_URL is not configured.",
+        }),
+      );
+      return;
+    }
+
+    try {
+      const chatWindow = window.open(aiUrl, "_blank", "noopener,noreferrer");
+      if (!chatWindow) {
+        dispatch(
+          showToast({
+            severity: "error",
+            summary: "AI Chat unavailable",
+            detail: "Unable to open chat window. Please allow pop-ups and try again.",
+          }),
+        );
+      }
+    } catch {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "AI Chat unavailable",
+          detail: "Failed to open chat. Please check the configured URL.",
+        }),
+      );
+    }
+  };
 
   return (
     <div className={`solid-studio-home ${layouts.length > 0 ? "solid-studio-home--top" : ""}`}>
@@ -300,7 +336,7 @@ export function StudioLandingPage() {
         </div>
 
         {layouts.length === 0 ? (
-          <EmptyState />
+          <EmptyState onOpenChat={handleOpenAiChat} />
         ) : listView ? (
           <div className="solid-studio-home-cards--list">
             {layouts.map((entry, i) => (

@@ -102,7 +102,7 @@ const SolidInitiateRegisterOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
+                // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
@@ -192,7 +192,7 @@ const SolidInitiateRegisterOtp = () => {
                                                 .padStart(2, "0")}:${(timeLeft % 60).toString().padStart(2, "0")}`}
                                     </p>
                                 </div>
-                                <div className="mt-4">
+                                <div className="mt-6">
                                     <SolidButton
                                         type="submit"
                                         className="w-full font-light auth-submit-button"
@@ -213,7 +213,7 @@ const SolidInitiateRegisterOtp = () => {
                     </Formik>
                 </>
             </div>
-            {/* <div className="text-center mt-5">
+            {/* <div className="text-center mt-8">
             <div className="text-sm text-400 secondary-dark-color">
                 {'<'} Back to <Link className="font-bold" href="/auth/login">Sign In</Link>
             </div>

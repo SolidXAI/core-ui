@@ -603,6 +603,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     setSelectedRecords([]);
   }
 
+  const openDeleteDialogForRecord = (record: any) => {
+    setSelectedRecords(record ? [record] : []);
+    setDialogVisible(true);
+  };
+
 
   // Individual Swimlane Load More
   const handleLoadMore = async (groupByField: string) => {
@@ -937,16 +942,17 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className="solid-list-content h-full flex flex-column flex-grow-1">
-        <div className="solid-list-surface solid-kanban-surface flex flex-column flex-1 min-h-0">
-          <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-column lg:flex-row">
-            <div className="flex justify-content-between w-full">
-              <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
-                {params.embeded !== true &&
+      <div className="solid-list-content  flex flex-col flex-grow-1">
+        <div className="solid-list-surface solid-kanban-surface flex flex-col flex-1 min-h-0">
+          <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-col lg:flex-row">
+            <div className="flex justify-between w-full">
+              <div className="solid-list-toolbar-left flex w-full items-center gap-3">
+                {/* {params.embeded !== true &&
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
                   </div>
-                }
+                } 
+                */}
 
                 <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
                 <div className="hidden lg:flex">
@@ -955,7 +961,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 </div>
               </div>
 
-              <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                 <div className="flex lg:hidden">
                   <SolidButton
@@ -1013,7 +1019,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
           }
         </div>
       </div>
@@ -1029,7 +1035,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         separatorClassName="solid-shadcn-dialog-sep"
         showSeparator
         title={`Delete ${entityDisplayName}`}
-        message={<p className="solid-shadcn-dialog-text">{`Are you sure you want to delete the selected ${entityDisplayName} records?`}</p>}
+        message={
+          <p className="solid-shadcn-dialog-text">
+            {selectedRecords.length === 1
+              ? `Are you sure you want to delete this ${entityDisplayName} record?`
+              : `Are you sure you want to delete the selected ${entityDisplayName} records?`}
+          </p>
+        }
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />

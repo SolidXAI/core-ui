@@ -300,6 +300,7 @@ export type SolidListFieldWidgetProps = {
     solidListViewMetaData: any
     fieldMetadata: FieldMetadata;
     column: any;
+    embeded?: boolean;
 }
 
 export type SolidMediaListFieldWidgetProps = SolidListFieldWidgetProps & {

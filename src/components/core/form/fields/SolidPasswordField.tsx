@@ -79,7 +79,7 @@ export class SolidPasswordField implements ISolidField {
         }
         //check password and confirm password match if password have value
         schema = schema.test('passwords-match', ERROR_MESSAGES.FIELD_MUST_MATCH(fieldLabel), function (value) {
-            const { path, parent } = this;
+            const { parent, createError } = this;
             const confirmValue = parent[confirmFieldName];
 
             //  Edit mode / untouched → SKIP
@@ -88,7 +88,14 @@ export class SolidPasswordField implements ISolidField {
             }
             //  Only one filled → ERROR
             if (value || confirmValue) {
-                return value === confirmValue;
+                if (value !== confirmValue) {
+                    return createError({
+                        path: confirmFieldName,
+                        message: ERROR_MESSAGES.FIELD_MUST_MATCH(fieldLabel),
+                    });
+                }
+
+                return true;
             }
             return true; // If password is empty, don't validate match
         });
@@ -99,7 +106,7 @@ export class SolidPasswordField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
         let createWidget = fieldLayoutInfo?.attrs?.createWidget;
@@ -170,7 +177,7 @@ export const DefaultPasswordFormViewWidget = ({ formik, fieldContext }: SolidFor
             {showFieldLabel !== false && (
                 <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
-            <div className="flex align-items-center gap-3">
+            <div className="flex items-center gap-4">
                 <p className={styles.fieldViewValue}>
                     {isText ? formik.values[fieldLayoutInfo.attrs.name] : "••••••••"}
                 </p>
@@ -240,7 +247,19 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     name={`${fieldLayoutInfo.attrs.name}Confirm`}
                     value={formik.values[`${fieldLayoutInfo.attrs.name}Confirm`] || ''}
                     onChange={(e) => {
-                        formik.setFieldValue(`${fieldLayoutInfo.attrs.name}Confirm`, e.target.value);
+                        const confirmFieldName = `${fieldLayoutInfo.attrs.name}Confirm`;
+                        fieldContext.onChange(
+                            {
+                                ...e,
+                                target: {
+                                    ...e.target,
+                                    name: confirmFieldName,
+                                    value: e.target.value,
+                                    type: "text",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
                     }}
                     onBlur={(e) => {
                         formik.setFieldTouched(`${fieldLayoutInfo.attrs.name}Confirm`, true);
@@ -251,7 +270,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     autoComplete="new-password"
                     className="w-full"
                 />
-                {isFormFieldValid(formik, `${fieldLayoutInfo.attrs.name}Confirm`) && (
+                {((formik.touched[`${fieldLayoutInfo.attrs.name}Confirm`] || formik.submitCount > 0) && formik.errors[`${fieldLayoutInfo.attrs.name}Confirm`]) && (
                     <p className={styles.fieldError}>{formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()}</p>
                 )}
             </div>
@@ -350,7 +369,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     <SolidDialogClose />
                 </SolidDialogHeader>
                 <SolidDialogBody>
-                    <form onSubmit={modalFormik.handleSubmit} className="p-fluid">
+                    <form onSubmit={modalFormik.handleSubmit} className="solid-fluid">
                         <div className={styles.fieldWrapper}>
                             <label htmlFor={fieldName} className={`${styles.fieldLabel} form-field-label`}>New {fieldLabel}</label>
                             <SolidPasswordInput

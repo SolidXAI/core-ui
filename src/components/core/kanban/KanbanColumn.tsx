@@ -35,18 +35,19 @@ interface KanbanColumnProps {
   DynamicCardWidget?: any;
   toggleFold: (groupByField: string) => void;
   handleLoadMore: (groupByField: string) => void;
+  onDelete?: (record: GroupData) => void;
   setLightboxUrls: any,
   setOpenLightbox: any
 }
 
 // @ts-ignore
-const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, setLightboxUrls, setOpenLightbox, editButtonUrl }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, onDelete, setLightboxUrls, setOpenLightbox, editButtonUrl }: KanbanColumnProps) => {
   return (
     <div className={group.folded ? "kanban-column kanban-column-folded" : "kanban-column"}>
       <div className="kaban-heading-area">
         {group.folded &&
           <a onClick={e => toggleFold(groupByField)}>
-            <div className="flex align-items-center">
+            <div className="flex items-center">
               <div className="kanban-arrow-icon-container">
                 <SolidIcon name="si-sort-up-fill" aria-hidden />
                 <SolidIcon name="si-sort-down-fill" aria-hidden />
@@ -57,7 +58,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
         }
 
         {!group.folded &&
-          <div className="flex align-items-center">
+          <div className="flex items-center">
             <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
           </div>
         }
@@ -94,7 +95,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
             >
               {groupData.map((data, index) => (
                 // @ts-ignore
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} />
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} onDelete={onDelete} />
               ))}
               {asCompatibleReactNode(provided.placeholder)}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&

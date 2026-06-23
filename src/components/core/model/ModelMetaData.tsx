@@ -60,20 +60,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
     isLegacyTable: modelMetaData ? modelMetaData?.isLegacyTable : false,
-    isLegacyTableWithId: modelMetaData ? modelMetaData?.isLegacyTableWithId : false,
-  //   isLegacyTable: modelMetaData 
-  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId && params.id !== 'new') 
-  //     ? true  
-  //     : modelMetaData.isLegacyTableWithId 
-  //       ? true  
-  //       : false 
-  //   : false,
-    
-  // isLegacyTableWithId: modelMetaData 
-  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId &&  params.id !== 'new') 
-  //     ? true  
-  //     : false  
-  //   : false,
+    hasExistingId: modelMetaData ? modelMetaData?.hasExistingId : false,
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
@@ -135,7 +122,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       }
     }),
     isLegacyTable: Yup.boolean(),
-    isLegacyTableWithId: Yup.boolean(),
+    hasExistingId: Yup.boolean(),
   });
 
 
@@ -208,8 +195,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
           }),
-          isLegacyTable:values.isLegacyTable === true ? true : false,
-          isLegacyTableWithId:values.isLegacyTableWithId === true ? true :false
+          isLegacyTable: values.isLegacyTable === true ? true : false,
+          hasExistingId: values.hasExistingId === true ? true : false,
            
         };
         setModelMetaData(modelData);
@@ -409,8 +396,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     <>
       <form onSubmit={formik.handleSubmit}>
         <div className="">
-          <div className="grid formgrid">
-            <div className="field col-12 lg:col-6 lg:pr-3">
+          <div className="flex flex-wrap -mx-2 -mt-2">
+            <div className="field w-full px-2 pt-2 lg:w-1/2 lg:pr-4">
               <SolidPanel header={"Basic Info"} className="solid-column-panel">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="moduleId" className={styles.fieldLabel}>
@@ -532,6 +519,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="enableAuditTracking"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.enableAuditTracking}
                     onChange={(event) => {
                       formik.setFieldValue("enableAuditTracking", event.currentTarget.checked);
@@ -544,6 +532,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="internationalisation"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.internationalisation}
                     onChange={(event) => {
                       formik.setFieldValue("internationalisation", event.currentTarget.checked);
@@ -555,6 +544,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="draftPublishWorkflow"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.draftPublishWorkflow}
                     onChange={(event) => {
                       formik.setFieldValue("draftPublishWorkflow", event.currentTarget.checked);
@@ -566,12 +556,13 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 <div className="mt-3">
                   <SolidCheckbox
                     name="isLegacyTable"
+                    disabled={params.id !== "new"}
                     checked={!!formik.values.isLegacyTable}
                     onChange={(event) => {
                       const isChecked = event.currentTarget.checked;
                       formik.setFieldValue("isLegacyTable", isChecked);
                       if (!isChecked) {
-                        formik.setFieldValue("isLegacyTableWithId", false);
+                        formik.setFieldValue("hasExistingId", false);
                       }
                     }}
                     label="Is Legacy Table"
@@ -582,10 +573,11 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   <>
                     <div className="ml-4 mt-2">
                       <SolidCheckbox
-                        name="isLegacyTableWithId"
-                        checked={!!formik.values.isLegacyTableWithId}
+                        name="hasExistingId"
+                        disabled={params.id !== "new"}
+                        checked={!!formik.values.hasExistingId}
                         onChange={(event) => {
-                          formik.setFieldValue("isLegacyTableWithId", event.currentTarget.checked);
+                          formik.setFieldValue("hasExistingId", event.currentTarget.checked);
                         }}
                         label="Has existing Id"
                       />
@@ -597,7 +589,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 )}
               </SolidPanel>
             </div>
-            <div className="field col-12 lg:col-6 lg:pl-3">
+            <div className="field w-full px-2 pt-2 lg:w-1/2 lg:pl-4">
               <SolidPanel header={"Basic Settings"} className="solid-column-panel">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="displayName" className={styles.fieldLabel}>
@@ -609,6 +601,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     name="displayName"
                     className={styles.fieldInput}
                     value={formik.values.displayName}
+                    disabled={params.id !== "new"}
                     onChange={(e) => {
                       formik.handleChange(e);
                       const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
@@ -680,67 +673,13 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     className={styles.fieldTextarea}
                     value={formik.values.description}
                     rows={5}
+                    disabled={params.id !== "new"}
                     onChange={formik.handleChange}
                   />
                   {renderFieldError("description")}
                 </div>
               </SolidPanel>
             </div>
-
-            {/* <div className="md:col-6 sm:col-12">
-                  <div className="field">
-                    <label htmlFor="pluralName" className="form-label form-field-label">
-                      Plural Name
-                    </label>
-                    <InputText
-                      type="text"
-                      id="pluralName"
-                      name="pluralName"
-                      onChange={formik.handleChange}
-                      value={formik.values.pluralName}
-                      className={cx("p-inputtext-sm w-full small-input", {
-                        "p-invalid": isFormFieldValid(formik, "pluralName"),
-                      })}
-                    />
-                    {isFormFieldValid(formik, "pluralName") && (
-                      <Message severity="error" text={formik?.errors?.pluralName?.toString()} />
-                    )}
-                  </div>
-                </div> */}
-
-
-            {/* <div className="md:col-6 sm:col-12">
-                  <div className="field form-dropdown-select">
-                    <label htmlFor="dataSourceType" className="form-labe form-field-label">
-                      Data Source
-                    </label>
-                    <Dropdown
-                      id="dataSourceType"
-                      name="dataSourceType"
-                      value={formik.values.dataSourceType}
-                      options={dataSourceTypes}
-                      onChange={(e) => {
-                        formik.setFieldValue("dataSourceType", e.value);
-                        // if (e.value == "mariadb") {
-                        //   formik.setFieldValue("dataSourceType", "mongodb");
-                        // }
-                        // else {
-                        //   formik.setFieldValue("dataSourceType", "rdbms");
-                        // }
-                      }
-                      }
-                      placeholder="Select a Data Source"
-                      className={cx("p-inputtext-sm w-full", {
-                        "p-invalid": isFormFieldValid(formik, "dataSource"),
-                      })}
-                    />
-                    {isFormFieldValid(formik, "dataSource") && (
-                      <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
-                    )}
-                  </div>
-                </div> */}
-
-
           </div>
         </div>
       </form>

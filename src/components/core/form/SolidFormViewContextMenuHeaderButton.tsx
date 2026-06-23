@@ -1,4 +1,5 @@
 import { hasAnyRole } from "../../../helpers/rolesHelper";
+import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useSession } from "../../../hooks/useSession";
 import { SolidButton, SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui";
 
@@ -28,10 +29,17 @@ export function SolidFormViewContextMenuHeaderButton({
     const user = session?.user;
 
     const hasRole = !button.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
+    const presentation = resolveButtonPresentation(button?.attrs);
 
     if (!hasRole) return null;
     if (button.attrs?.visible == false) return null
-    const iconMeta = parseSolidIconMeta(button?.attrs?.icon ?? "si si-pencil");
+    if (!presentation.showIcon && !presentation.showLabel) return null;
+    const iconMeta = presentation.icon ? parseSolidIconMeta(presentation.icon) : undefined;
+    const iconNode = presentation.showIcon
+        ? (iconMeta
+            ? <SolidIcon name={iconMeta.name} spin={iconMeta.spin} className="solid-row-action-button-icon" aria-hidden />
+            : <i className={`${presentation.icon} solid-row-action-button-icon`} aria-hidden />)
+        : null;
     const handleClick = () => {
         const event = {
             action: button.attrs.action,
@@ -48,18 +56,14 @@ export function SolidFormViewContextMenuHeaderButton({
         return (
             <button
                 type="button"
-                className={`solid-row-action-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                className={`solid-row-action-button ${presentation.buttonClassName ? presentation.buttonClassName : ''}`}
                 onClick={handleClick}
+                title={presentation.tooltip}
+                aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
             >
-                {iconMeta ? (
-                    <SolidIcon
-                        name={iconMeta.name}
-                        spin={iconMeta.spin}
-                        className="solid-row-action-button-icon"
-                        aria-hidden
-                    />
-                ) : null}
-                <span className="solid-row-action-button-label">{button.attrs.label}</span>
+                {presentation.iconPos === "left" ? iconNode : null}
+                {presentation.showLabel ? <span className="solid-row-action-button-label">{presentation.label}</span> : null}
+                {presentation.iconPos === "right" ? iconNode : null}
             </button>
         );
     }
@@ -69,12 +73,17 @@ export function SolidFormViewContextMenuHeaderButton({
             <SolidButton
                 text
                 type="button"
-                className={`w-full text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
-                label={button.attrs.label}
+                className={[
+                    "w-full text-left gap-2",
+                    presentation.isIconOnly ? "solid-icon-button" : "",
+                    presentation.buttonClassName ? presentation.buttonClassName : ""
+                ].filter(Boolean).join(" ")}
+                label={presentation.label}
                 size="sm"
-                leftIcon={
-                    iconMeta ? <SolidIcon name={iconMeta.name} spin={iconMeta.spin} aria-hidden /> : undefined
-                }
+                icon={presentation.icon}
+                iconPos={presentation.iconPos}
+                tooltip={presentation.tooltip}
+                aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
                 onClick={handleClick}
             />
         </div>

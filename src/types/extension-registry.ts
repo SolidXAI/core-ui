@@ -1,4 +1,5 @@
 export const ExtensionComponentTypes = {
+    dashboardWidget: "dashboardWidget",
     listFieldWidget: "listFieldWidget",
     listRowAction: "listRowAction",
     listHeaderAction: "listHeaderAction",

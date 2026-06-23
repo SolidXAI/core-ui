@@ -1,7 +1,7 @@
 import { useSession } from '../../../hooks/useSession'
 import { permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
+import { useGetSolidViewLayoutQuery, useLazyGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
@@ -79,6 +79,107 @@ interface ErrorResponseData {
     statusCode: number;
     error: string;
 }
+
+const LAYOUT_CLASSNAME_MAPPER: Record<string, string> = {
+    grid: "flex flex-wrap",
+    formgrid: "flex-wrap",
+    "col-12": "w-full",
+    "col-11": "w-[91.666667%]",
+    "col-10": "w-[83.333333%]",
+    "col-9": "w-3/4",
+    "col-8": "w-[66.666667%]",
+    "col-7": "w-[58.333333%]",
+    "col-6": "w-1/2",
+    "col-5": "w-[41.666667%]",
+    "col-4": "w-1/3",
+    "col-3": "w-1/4",
+    "col-2": "w-[16.666667%]",
+    "col-1": "w-[8.333333%]",
+    "flex-column": "flex-col",
+    "flex-row": "flex-row",
+    "flex-wrap": "flex-wrap",
+    "align-items-start": "items-start",
+    "align-items-center": "items-center",
+    "align-items-end": "items-end",
+    "justify-content-start": "justify-start",
+    "justify-content-center": "justify-center",
+    "justify-content-end": "justify-end",
+    "justify-content-between": "justify-between",
+    "m-0": "m-0",
+    "mt-0": "mt-0",
+    "mt-1": "mt-1",
+    "mt-2": "mt-2",
+    "mt-3": "mt-3",
+    "mt-4": "mt-4",
+    "mb-0": "mb-0",
+    "mb-2": "mb-2",
+    "mb-3": "mb-3",
+    "my-4": "my-4",
+    "mx-auto": "mx-auto",
+    "px-0": "px-0",
+    "px-2": "px-2",
+    "px-3": "px-3",
+    "px-4": "px-4",
+    "py-2": "py-2",
+    "py-3": "py-3",
+    "pt-0": "pt-0",
+    "pt-2": "pt-2",
+    "pb-0": "pb-0",
+    "pb-2": "pb-2",
+    "pb-3": "pb-3",
+    "w-full": "w-full",
+    "h-full": "h-full",
+};
+
+const PRIMEFLEX_BREAKPOINT_TO_TAILWIND: Record<string, string> = {
+    sm: "sm",
+    md: "md",
+    lg: "lg",
+    xl: "xl",
+};
+
+const mapLayoutToken = (token: string) => {
+    const directMatch = LAYOUT_CLASSNAME_MAPPER[token];
+    if (directMatch) return directMatch;
+
+    const responsiveColumnMatch = token.match(/^col-(sm|md|lg|xl)-(\d{1,2})$/);
+    if (responsiveColumnMatch) {
+        const [, breakpoint, columnSize] = responsiveColumnMatch;
+        const widthClass = LAYOUT_CLASSNAME_MAPPER[`col-${columnSize}`];
+
+        if (widthClass) {
+            return `${PRIMEFLEX_BREAKPOINT_TO_TAILWIND[breakpoint]}:${widthClass}`;
+        }
+    }
+
+    return token;
+};
+
+const normalizeLayoutClassName = (className?: string) => {
+    if (!className) return className;
+
+    return className
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((token) => {
+            const parts = token.split(":");
+            const baseToken = parts[parts.length - 1];
+            const responsivePrefix = parts.length > 1 ? `${parts.slice(0, -1).join(":")}:` : "";
+            const mappedToken = mapLayoutToken(baseToken);
+
+            return mappedToken ? `${responsivePrefix}${mappedToken}` : token;
+        })
+        .join(" ");
+};
+
+const normalizeLayoutAttrs = (attrs: any = {}) => {
+    if (!attrs?.className) return attrs;
+
+    return {
+        ...attrs,
+        className: normalizeLayoutClassName(attrs.className),
+    };
+};
 
 const getLayoutFields = (node: any): any => {
     let fields = [];
@@ -211,32 +312,42 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
 };
 
 const SolidGroup = ({ children, attrs }: any) => {
-    const className = ["solid-form-layout-group", attrs.label ? "solid-form-layout-group--labeled" : "", attrs.className]
+    const className = [
+        "solid-form-layout-group",
+        "px-2",
+        "pt-2",
+        attrs.label ? "solid-form-layout-group--labeled" : "",
+        attrs.className,
+    ]
         .filter(Boolean)
         .join(" ");
 
     return (
         <div className={className}>
             {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
-            <div className="grid">{children}</div>
+            <div className="flex flex-wrap -mx-2 -mt-2">{children}</div>
         </div>
         // <div className={className}>
         //     <div className="s_group">
         //         <fieldset>
         //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-        //             <div className="grid">{children}</div>
+        //             <div className="flex flex-wrap -mx-2 -mt-2">{children}</div>
         //         </fieldset>
         //     </div>
 
-        // </div>
-        // <div className="formgrid grid">
-        //     {children}
         // </div>
     );
 };
 
 const SolidRow = ({ children, attrs }: any) => {
-    const className = ["row", "solid-form-layout-row", attrs.label ? "solid-form-layout-row--labeled" : "", attrs.className]
+    const className = [
+        "row",
+        "solid-form-layout-row",
+        "px-2",
+        "pt-2",
+        attrs.label ? "solid-form-layout-row--labeled" : "",
+        attrs.className,
+    ]
         .filter(Boolean)
         .join(" ");
 
@@ -246,34 +357,41 @@ const SolidRow = ({ children, attrs }: any) => {
         //     <div className="s_group">
         //         <fieldset>
         //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-        //             <div className="grid">{children}</div>
+        //             <div className="flex flex-wrap -mx-2 -mt-2">{children}</div>
         //         </fieldset>
         //     </div>
 
         // </div>
         <div className={className}>
             {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
-            <div className="grid">{children}</div>
+            <div className="flex flex-wrap -mx-2 -mt-2">{children}</div>
         </div>
         // <div>{children}</div>
     );
 };
 
 const SolidColumn = ({ children, attrs }: any) => {
-    const className = ["solid-form-layout-column", attrs.label ? "solid-form-layout-column--labeled" : "", attrs.className]
+    const className = [
+        "solid-form-layout-column",
+        "px-2",
+        "pt-2",
+        "min-w-0",
+        attrs.label ? "solid-form-layout-column--labeled" : "",
+        attrs.className,
+    ]
         .filter(Boolean)
         .join(" ");
 
     return (
         <div className={className}>
             {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
-            <div className="grid">{children}</div>
+            <div className="flex flex-wrap -mx-2 -mt-2">{children}</div>
         </div>
     );
 };
 
 const SolidSheet = ({ children }: any) => (
-    <div className="p-fluid p-grid">
+    <div className="solid-fluid flex flex-wrap -mx-2 mt-1">
         {children}
     </div>
 );
@@ -398,7 +516,7 @@ const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
 
     return (
         <SolidPageTab key={key} label={label} tabKey={key} hasError={errorCount > 0}>
-            <div className="p-fluid">{children}</div>
+            <div className="solid-fluid">{children}</div>
         </SolidPageTab>
     );
 };
@@ -411,7 +529,6 @@ const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
 //             element.attrs = {
 //                 ...element.attrs,
 //                 level: level,  // Add level information to the attrs
-//                 // className: level === 1 ? 'col-12' : 'col-6',  // Assign className based on level
 //             };
 //         } else {
 //             element.children = addLevelToGroups(element.children, level);
@@ -713,6 +830,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
+    const [triggerGetSolidViewLayout] = useLazyGetSolidViewLayoutQuery();
     const entityDisplayName =
         solidFormViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
     const [refreshChatterMessage, setRefreshChatterMessage] = useState<boolean>(true);
@@ -884,7 +1002,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         const baseFormPath = normalizeSolidFormActionPath(pathname, "form");
                         const queryParams = new URLSearchParams(searchParams.toString());
                         queryParams.set("viewMode", "view");
-                        router.push(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
+                        router.replace(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
                         setViewMode("view")
                     }
                     return result;
@@ -1160,9 +1278,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
              * ----------------------------- */
             let workingLayout = params.customLayout ?? solidFormViewMetaData?.data?.solidView?.layout;
             let workingFormData = solidFormViewData?.data;
+            let solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
+
             const baseEvent = {
                 parentData: params?.parentData,
-                fieldsMetadata: solidFormViewMetaData,
+                fieldsMetadata: solidFieldsMetadata,
                 viewMetadata: solidFormViewMetaData?.data?.solidView,
                 queryParams: {
                     actionName,
@@ -1287,14 +1407,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
         });
 
         return (
-            <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
+            <div className={`solid-form-wrapper ${viewMode=="edit"?"solid-form-edit":"solid-form-view"}`} ref={solidFormWrapperRef}>
                 <div className="solid-form-section">
-                    <div className="page-header solid-list-toolbar flex-column lg:flex-row">
-                        <div className="flex justify-content-between w-full solid-form-toolbar-row">
-                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                    <div className="page-header solid-list-toolbar flex-col lg:flex-row">
+                        <div className="flex justify-between w-full solid-form-toolbar-row">
+                            <div className="flex gap-4 items-center solid-form-toolbar-left">
                                 <p className="m-0 view-title solid-text-wrapper">Loading form</p>
                             </div>
-                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                            <div className="flex items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
                                 <SolidHeaderRequestStatus label="Loading..." />
                             </div>
                         </div>
@@ -1327,6 +1447,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (params.parentData) {
                 fieldContext.parentData = params.parentData;
             }
+            if (params.parentFieldName) {
+                fieldContext.parentFieldName = params.parentFieldName;
+            }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
                 const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label : formLayoutField.attrs.name;
@@ -1353,13 +1476,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const formFieldOnXXX = async (event: ChangeEvent<HTMLInputElement>, eventType: string) => {
             // console.log("formFieldOnXXX", eventType, event);
 
-            // Invoke the formik change 
+            // Invoke the formik change
             if (eventType === 'onFieldChange') {
                 formik.handleChange(event);
+                formik.setFieldTouched(event.target.name, true, false);
+            } else if (eventType === 'onFieldBlur') {
+                formik.handleBlur(event);
             }
 
             // get details from the form event
-            const { name: fieldName, value, type, checked } = event.target;
+            const { name: fieldName, value } = event.target;
 
             // TODO: check if there is a change handler registered with this form view, load it and fire it.
             let changeHandler = solidView.layout.attrs[eventType];
@@ -1442,16 +1568,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
         // Now render the form dynamically...
         const renderFormElementDynamically: any = (element: any, recursiveFVMD: any, path = "root") => {
             let { type, attrs, body, children } = element;
+            const normalizedAttrs = normalizeLayoutAttrs(attrs);
+            const normalizedElement = normalizedAttrs === attrs ? element : { ...element, attrs: normalizedAttrs };
 
             // const key = attrs?.name ?? generateRandomKey();
-            const key = attrs?.key ?? attrs?.name ?? attrs?.label ?? `${type}-${path}`;
-            let visible = attrs?.visible;
+            const key = normalizedAttrs?.key ?? normalizedAttrs?.name ?? normalizedAttrs?.label ?? `${type}-${path}`;
+            let visible = normalizedAttrs?.visible;
             if (visible === undefined || visible === null) {
                 visible = true;
             }
             // console.log(`Resolved visibility of form element ${ key } to ${ visible } `);
             // console.log(`Form element ${ key }: `, attrs);
-            const visibleToRole = attrs?.roles || [];
+            const visibleToRole = normalizedAttrs?.roles || [];
 
             if (visibleToRole.length > 0) {
                 if (!hasAnyRole(user?.roles, visibleToRole)) {
@@ -1467,48 +1595,48 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "div":
                     if (!children)
                         children = [];
-                    return <div key={key} {...attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>
+                    return <div key={key} {...normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>
                 case "span":
-                    return <span key={key} {...attrs}>{body}</span>
+                    return <span key={key} {...normalizedAttrs}>{body}</span>
                 case "p":
-                    return <p key={key} className={attrs?.className} {...attrs}>{body}</p>
+                    return <p key={key} className={normalizedAttrs?.className} {...normalizedAttrs}>{body}</p>
                 case "h1":
-                    return <h1 key={key} {...attrs}>{body}</h1>
+                    return <h1 key={key} {...normalizedAttrs}>{body}</h1>
                 case "h2":
-                    return <h2 key={key} {...attrs}>{body}</h2>
+                    return <h2 key={key} {...normalizedAttrs}>{body}</h2>
                 case "ul":
                     if (!children)
                         children = [];
-                    return <ul key={key} {...attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</ul>
+                    return <ul key={key} {...normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</ul>
                 case "li":
-                    return <li key={key} {...attrs}>{body}</li>
+                    return <li key={key} {...normalizedAttrs}>{body}</li>
                 case "sheet":
                     return <SolidSheet key={key}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidSheet>;
                 case "group":
                     if (visible === true) {
-                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidGroup>;
+                        return <SolidGroup key={key} attrs={normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidGroup>;
                     }
                     break;
                 case "row":
                     if (visible === true) {
-                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidRow>;
+                        return <SolidRow key={key} attrs={normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidRow>;
                     }
                     break;
                 case "column":
                     if (visible === true) {
-                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidColumn>;
+                        return <SolidColumn key={key} attrs={normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidColumn>;
                     }
                     break;
                 case "field":
                     if (visible === true) {
 
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
-                        const fieldMetadata = recursiveFVMD.data.solidFieldsMetadata[attrs.name];
+                        const fieldMetadata = recursiveFVMD.data.solidFieldsMetadata[normalizedAttrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
                         const readOnlyPermission = !actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) && params.id !== "new";
                         return <SolidField
-                            key={attrs.name}
-                            field={element}
+                            key={normalizedAttrs.name}
+                            field={normalizedElement}
                             formik={formik}
                             fieldMetadata={fieldMetadata}
                             initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
@@ -1630,20 +1758,47 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
         //en 4 null
-        const handleLocaleChangeRedirect = (
+        const handleLocaleChangeRedirect = async (
             locale: string,
             defaultEntityLocaleId: string,
             viewMode: string,
         ) => {
             let newViewMode = viewMode;
             const defaultApplicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
-            //fr 4
-            const matchingLocale = defaultApplicableLocales.find(
+            let matchingLocale = defaultApplicableLocales.find(
                 (loc: any) =>
                     loc.defaultEntityLocaleId &&
                     loc.entityId &&
                     loc.locale === locale
             );
+
+            if (!matchingLocale) {
+                const resolvedDefaultEntityLocaleId =
+                    defaultEntityLocaleId || params.id;
+
+                const freshQuery = qs.stringify(
+                    {
+                        ...params,
+                        viewType: 'form',
+                        defaultEntityLocaleId: resolvedDefaultEntityLocaleId,
+                    },
+                    { encodeValuesOnly: true },
+                );
+
+                try {
+                    const freshResponse: any = await triggerGetSolidViewLayout(freshQuery).unwrap();
+                    const freshApplicableLocales = freshResponse?.data?.applicableLocales || [];
+                    matchingLocale = freshApplicableLocales.find(
+                        (loc: any) =>
+                            loc.defaultEntityLocaleId &&
+                            loc.entityId &&
+                            loc.locale === locale
+                    );
+                } catch {
+                    // Fall back to the existing locale metadata if the refresh fails.
+                }
+            }
+
             // Extract the base path from the current pathname, removing query params if any
             const basePath = pathname.split('?')[0];
 
@@ -1757,11 +1912,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
-                            headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
+                            // headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
                             showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
                             onMobileOpenChatter={() => setShowChatter(true)}
                         />
-                        <div className={`px-4 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-3 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : 'solid-edit-mode-form-content'} ${params.embeded === true ? 'h-auto' : ''}`}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1802,7 +1957,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             />
                         }
                         {isShowChatter === false ?
-                            <div className="flex flex-column gap-2 justify-content-center p-1">
+                            <div className="flex flex-col gap-2 justify-center p-1">
                                 {/*if solidview Internationalisation is enabled then show the locale tab */}
                                 {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
@@ -1866,7 +2021,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         <SolidDialogClose />
                     </SolidDialogHeader>
                     <SolidDialogSeparator />
-                    <SolidDialogBody className="p-3 pt-0 lg:p-4">
+                    <SolidDialogBody className="p-4 pt-0 lg:p-6">
                         <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
                     </SolidDialogBody>
                 </SolidDialog>

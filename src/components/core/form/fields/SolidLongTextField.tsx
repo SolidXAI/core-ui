@@ -67,7 +67,7 @@ export class SolidLongTextField implements ISolidField {
 
     render(formik: FormikObject) {
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
@@ -243,18 +243,18 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
                 </label>
             )}
 
-            <div className="p-4 border-round surface-card shadow-1">
+            <div className="rounded bg-[var(--surface-card)] p-4 shadow-sm">
 
-                <div className="flex flex-column gap-2">
+                <div className="flex flex-col gap-2">
                     {
                         // @ts-ignore
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} rounded border p-3 gap-2`}
                             >
                                 {Object.keys(fieldJsonSchema).map((key) => (
-                                    <div key={key} className="flex flex-column gap-1">
+                                    <div key={key} className="flex flex-col gap-1">
                                         <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                         {
                                             // @ts-ignore
@@ -311,7 +311,16 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
     const handleAllChange = (updated: any) => {
         setData(updated);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: JSON.stringify(updated),
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     }
 
     const handleChange = (index: number, key: string, value: any) => {
@@ -402,8 +411,8 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                 </label>
             )}
 
-            <div className="p-4 border-round surface-card shadow-1">
-                <div className="flex justify-content-between align-items-center mb-3">
+            <div className="rounded bg-[var(--surface-card)] p-4 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
                     {!disabled && !readOnly ? (
                         <SolidButton
                             type="button"
@@ -415,17 +424,17 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     ) : null}
                 </div>
 
-                <div className="flex flex-column gap-2">
+                <div className="flex flex-col gap-2">
                     {
                         // @ts-ignore
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} rounded border p-3 gap-2`}
                             >
-                                <div className="flex gap-3 align-items-center">
+                                <div className="flex gap-4 items-center">
                                     {Object.keys(fieldJsonSchema).map((key) => (
-                                        <div key={key} className="flex flex-column gap-1">
+                                        <div key={key} className="flex flex-col gap-1">
                                             <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                             {
                                                 // @ts-ignore
@@ -449,7 +458,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
                 {
                     fieldLayoutInfo.attrs?.jsonSchemaShowPreview &&
-                    <pre className="mt-4 bg-gray-100 p-3 border-round overflow-auto">
+                    <pre className="mt-4 overflow-auto rounded bg-gray-100 p-3">
                         {JSON.stringify(data, null, 2)}
                     </pre>
                 }
@@ -485,7 +494,18 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
             <div className="border border-gray-300 rounded overflow-hidden">
                 <SolidCodeEditor
                     value={value}
-                    onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
+                    onChange={(val) => {
+                        fieldContext.onChange(
+                            {
+                                target: {
+                                    name: fieldLayoutInfo.attrs.name,
+                                    value: val,
+                                    type: "text",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
+                    }}
                     height={fieldLayoutInfo.attrs?.height ?? "200px"}
                     fontSize={fieldLayoutInfo.attrs?.fontSize ?? "14px"}
                     readOnly={readOnly || disabled}
@@ -498,92 +518,6 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
                     <SolidMessage text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
-        </div>
-    );
-};
-
-export const DynamicSelectionStaticEditWidget = ({
-    formik,
-    fieldContext,
-}: SolidFormFieldWidgetProps) => {
-    const fieldLayoutInfo = fieldContext.field;
-    const fieldJsonSchema = fieldLayoutInfo.attrs.jsonSchema;
-    const name = fieldLayoutInfo.attrs.name;
-    const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
-    const disabled = fieldLayoutInfo.attrs?.disabled;
-
-    const value = formik.values[name] || "{}";
-    const [data, setData] = useState(JSON.parse(value || "{}"));
-
-    const handleChange = (key: string, value: any) => {
-        const updated = { ...data, [key]: value };
-        setData(updated);
-        formik.setFieldValue(name, JSON.stringify(updated));
-    };
-
-    const renderInput = (key: string) => {
-        const meta: any = fieldJsonSchema[key];
-        const val = data[key];
-
-        if (meta?.type === "selectionStatic") {
-            return (
-                <SolidSelect
-                    value={val}
-                    options={meta.allowedValues.map((v: any) => ({
-                        label: v,
-                        value: v,
-                    }))}
-                    onChange={(e) => handleChange(key, e.value)}
-                    placeholder={meta.placeHolder || "Select."}
-                    disabled={!!disabled}
-                    className="w-full"
-                />
-            );
-        }
-
-        return null;
-    };
-    const shouldShowField = (key: string) => {
-        const meta = fieldJsonSchema[key];
-
-        if (!meta?.visibility) return true; // default show
-
-        if (meta.visibility === "parent") {
-            const parentKey = Object.keys(fieldJsonSchema)[0]; // assume first field is parent
-            return !!data[parentKey]; // show only if parent has value
-        }
-
-        return true;
-    };
-
-    return (
-        <div className="flex gap-3 align-items-center">
-            {Object.keys(fieldJsonSchema).map((key) => {
-                const meta: any = fieldJsonSchema[key];
-                if (!shouldShowField(key)) return null;
-                return (
-                    <div key={key} className={"flex flex-column gap-2 " + (meta.className || '')}>
-                        {/*load prime header icon and headerText */}
-                        {(meta.headerText || meta.headerIcon) && (
-                            <div className="flex align-items-center gap-2">
-                                {meta.headerIcon && (() => { const m = parseSolidIconMeta(meta.headerIcon); return m ? <SolidIcon name={m.name} spin={m.spin} /> : <i className={meta.headerIcon}></i>; })()}
-                                <span className="font-semibold form-field-label font-medium">
-                                    {meta.headerText ?? key}
-                                </span>
-                            </div>
-                        )}
-                        {/* Notes below input */}
-                        {meta.noteText && (
-                            <small className="text-secondary mt-2">{meta.noteText}</small>
-                        )}
-                        {/*load note here */}
-                        <label className="form-field-label font-medium">{key.charAt(0).toUpperCase() + key.slice(1)} {meta.required && <span className="text-red-500">*</span>}</label>
-                        <div className="w-full mt-1 flex flex-row gap-2">
-                            {renderInput(key)}
-                        </div>
-                    </div>
-                );
-            })}
         </div>
     );
 };

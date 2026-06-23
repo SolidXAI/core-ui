@@ -113,11 +113,11 @@ export const SolidChatterHeader = (props: Props) => {
 
     return (
         <div className={`${styles.chatterTitle} ${title ? styles.chatterTitleWithLabel : ''} solid-list-toolbar`}>
-            <div className='flex justify-content-between align-items-center solid-list-toolbar-row'>
+            <div className='flex justify-between items-center solid-list-toolbar-row'>
                 <p className="m-0 view-title solid-text-wrapper form-wrapper-title">
                     {title || ''}
                 </p>
-                <div className='flex align-items-center solid-header-buttons-wrapper'>
+                <div className='flex items-center solid-header-buttons-wrapper'>
                     {/* <Button
                         label="Send Message"
                         size="small"
@@ -185,6 +185,7 @@ export const SolidChatterHeader = (props: Props) => {
                 className='solid-filter-dialog-shell solid-chatter-filter-main'
                 style={{ width: 500 }}
                 showHeader={false}
+                dismissible={false}
             >
                 <SolidDialogHeader className="solid-filter-dialog-head">
                     <div>
@@ -194,8 +195,8 @@ export const SolidChatterHeader = (props: Props) => {
                 </SolidDialogHeader>
                 <SolidDialogSeparator className="solid-filter-dialog-sep" />
                 <SolidDialogBody className="solid-filter-dialog-body">
-                    <div className="flex flex-column gap-3">
-                        <div className="flex flex-column gap-2">
+                    <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-2">
                             <label htmlFor="fullName" className="form-field-label">User</label>
                             <SolidAutocomplete
                                 id="fullName"
@@ -207,11 +208,12 @@ export const SolidChatterHeader = (props: Props) => {
                                 placeholder="Filter by user"
                                 className="w-full"
                                 inputClassName="w-full"
+                                portal
                             />
                         </div>
-                        <div className="flex flex-column gap-2">
+                        <div className="flex flex-col gap-2">
                             <label htmlFor="dateRange" className="form-field-label">Date Range</label>
-                            <div className="flex gap-2 flex-column md:flex-row">
+                            <div className="flex gap-2 flex-col md:flex-row">
                                 <div className="flex-1">
                                     <SolidDatePicker
                                         selected={filters.startDate ?? undefined}
@@ -220,6 +222,7 @@ export const SolidChatterHeader = (props: Props) => {
                                         className="w-full"
                                         wrapperClassName="w-full"
                                         inputClassName="w-full"
+                                        portalId="solid-datepicker-portal"
                                     />
                                 </div>
                                 <div className="flex-1">
@@ -230,6 +233,7 @@ export const SolidChatterHeader = (props: Props) => {
                                         className="w-full"
                                         wrapperClassName="w-full"
                                         inputClassName="w-full"
+                                        portalId="solid-datepicker-portal"
                                     />
                                 </div>
                             </div>

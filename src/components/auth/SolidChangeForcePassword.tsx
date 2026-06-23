@@ -109,8 +109,8 @@ const SolidChangeForcePassword = () => {
 
     return (
         <>
-            <form onSubmit={formik.handleSubmit} className='d-flex flex-column gap-3 auth-form'>
-                <div className="flex flex-column gap-2 mt-2" style={{}}>
+            <form onSubmit={formik.handleSubmit} className='flex flex-col gap-4 auth-form'>
+                <div className="flex flex-col gap-2 mt-2" style={{}}>
                     <label htmlFor="currentPassword" className="solid-auth-input-label">Current Password</label>
                     <SolidPasswordInput
                         id="currentPassword"
@@ -130,7 +130,7 @@ const SolidChangeForcePassword = () => {
                         />
                     )}
                 </div>
-                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
+                <div className="flex flex-col gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
                     <label htmlFor="password" className="solid-auth-input-label">New Password</label>
                     <SolidPasswordInput
                         id="newPassword"
@@ -150,7 +150,7 @@ const SolidChangeForcePassword = () => {
                         />
                     )}
                 </div>
-                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
+                <div className="flex flex-col gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
                     <label htmlFor="password" className="solid-auth-input-label">Confirm Password</label>
                     <SolidPasswordInput
                         id="confirmPassword"
@@ -170,13 +170,13 @@ const SolidChangeForcePassword = () => {
                         />
                     )}
                 </div>
-                {/* <div className='mt-4'>
-                    <div className='grid'>
+                {/* <div className='mt-6'>
+                    <div className='flex flex-wrap -mx-2 gap-y-2'>
                         {passwordPolicies.map((policy, index) => {
                             return (
-                                <div key={index} className='col-6'>
-                                    <p className="solid-auth-input-label flex align-items-center gap-2">
-                                        <div className='flex align-items-center justify-content-center' style={{ height: 14, width: 14, borderRadius: '50%', backgroundColor: '#A4A4A4' }}>
+                                <div key={index} className='w-1/2 px-2'>
+                                    <p className="solid-auth-input-label flex items-center gap-2">
+                                        <div className='flex items-center justify-center' style={{ height: 14, width: 14, borderRadius: '50%', backgroundColor: '#A4A4A4' }}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
                                                 <path d="M4.86813 8.72999L2.28979 6.15166L2.91396 5.52749L4.86813 7.48166L9.08563 3.26416L9.7098 3.88833L4.86813 8.72999Z" fill="#E8EAED" />
                                             </svg>
@@ -189,19 +189,19 @@ const SolidChangeForcePassword = () => {
                     </div>
                 </div> */}
                 {envPasswordHelperText && (
-                    <div className="mt-4">
-                        <div className="grid">
+                    <div className="mt-6">
+                        <div className="flex flex-wrap -mx-2 gap-y-2">
                             {envPasswordHelperText
                                 .split('\\n')
                                 .map((text, idx) => (
-                                    <div key={idx} className="col-6 pt-0">
+                                    <div key={idx} className="w-1/2 px-2 pt-0">
                                         <div className='flex gap-2'><span>•</span><span>{text}</span></div>
                                     </div>
                                 ))}
                         </div>
                     </div>
                 )}
-                <div className="mt-4">
+                <div className="mt-6">
                     <SolidButton
                         type="submit"
                         className="w-full font-light auth-submit-button"

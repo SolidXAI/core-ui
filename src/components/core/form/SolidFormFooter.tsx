@@ -40,7 +40,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             /\/form\/[^/]+/,
             "/list",
         );
-        const queryObject = getFilterObjectFromLocalStorageByUrl(listPath);
+        const queryObject = getFilterObjectFromLocalStorageByUrl(listPath) || {};
 
         const updatedQueryObj = {
             ...queryObject,
@@ -92,6 +92,13 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     // Fetch navigation data
     // -----------------------------
     useEffect(() => {
+        if (params.embeded === true) {
+            setPrevNav(null);
+            setNextNav(null);
+            setMeta(null);
+            return;
+        }
+
         if (params.id !== "new") {
 
             const fetchNavigation = async () => {
@@ -101,23 +108,33 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
                 );
 
                 const queryObject = getFilterObjectFromLocalStorageByUrl(listPath);
+                const defaultQueryObject = queryObject || {};
+                const locale = searchParams.get("locale");
+                const defaultEntityLocaleId = searchParams.get("defaultEntityLocaleId");
 
-                const queryData = {
-                    offset: queryObject.offset || 0,
-                    limit: queryObject.limit || 25,
-                    filters: queryObject.filters,
-                    fields: ["id"],
+                const queryData: Record<string, any> = {
+                    offset: defaultQueryObject.offset || 0,
+                    limit: defaultQueryObject.limit || 25,
+                    filters: defaultQueryObject.finalFullFilter || null,
+                    // fields: ["id"],
                     modelName: params.modelName,
                     recordId: params.id,
-                    sort: queryObject.sort
+                    sort: defaultQueryObject.sort,
                 };
+
+                if (locale) {
+                    queryData.locale = locale;
+                }
+
+                if (defaultEntityLocaleId && defaultEntityLocaleId !== "new") {
+                    queryData.defaultEntityLocaleId = defaultEntityLocaleId;
+                }
 
                 const queryString = qs.stringify(queryData, {
                     encodeValuesOnly: true,
                 });
 
                 const response: any = await triggerGetNavigation(queryString).unwrap();
-                console.log("response nav", response);
                 if (response.statusCode == 200) {
                     setPrevNav(response?.data?.prev ?? null);
                     setNextNav(response?.data?.next ?? null);
@@ -126,16 +143,16 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             };
             fetchNavigation();
         }
-    }, [params.id]);
+    }, [params.id, params.embeded, params.modelName, searchParams, triggerGetNavigation]);
 
     // -----------------------------
     // UI
     // -----------------------------
     return (
         <div
-            className="flex justify-content-end align-items-center gap-2 p-1"
+            className="flex justify-end items-center gap-2 p-1"
         >{meta &&
-            <span className="solid-form-footer-pagination-meta">{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
+            <span className="solid-form-footer-pagination-meta p-2">{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
             }
             {prevNav && (
                 <SolidTooltip>

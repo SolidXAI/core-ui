@@ -23,10 +23,11 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
-        <div className='flex flex-column md:flex-row align-items-start gap-6 md:gap-1'>
-            <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
+        <div className='flex flex-col items-start gap-2 md:flex-row md:gap-1'>
+            <div className="w-full p-0 px-0 md:w-1/2 md:pl-0 md:pr-0">
                 <SolidSelect
                     value={rule.matchMode}
+                    native={false}
                     onChange={(e: any) => {
                         onChange(rule.id, 'matchMode', e.value)
                     }}
@@ -38,7 +39,7 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
                 />
             </div>
 
-            <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-0 md:pr-0 p-0'>
+            <div className='flex flex-col gap-2 w-full md:w-1/2 px-0 md:pl-0 md:pr-0 p-0'>
                 <SolidVarInputsFilterElement
                     values={rule.value}
                     onChange={(e: any) => {

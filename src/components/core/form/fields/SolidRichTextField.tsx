@@ -62,7 +62,7 @@ export class SolidRichTextField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
@@ -113,7 +113,7 @@ export class SolidRichTextField implements ISolidField {
 export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -142,7 +142,18 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                 id={fieldLayoutInfo.attrs.name}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ""}
-                onChange={(value) => formik.setFieldValue(fieldLayoutInfo.attrs.name, value ?? "")}
+                onChange={(value) => {
+                    fieldContext.onChange(
+                        {
+                            target: {
+                                name: fieldLayoutInfo.attrs.name,
+                                value: value ?? "",
+                                type: "text",
+                            },
+                        } as any,
+                        "onFieldChange"
+                    );
+                }}
                 className="solid-custom-editor"
                 style={{ minHeight: 180 }}
             />

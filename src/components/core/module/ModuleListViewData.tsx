@@ -1,5 +1,6 @@
 import { CreateButton } from "../../../components/common/CreateButton";
 import {
+  useExportModulePackageMutation,
   useDeleteMultiplemodulesMutation,
   useGenerateCodeFormoduleMutation,
   useLazyGetmodulesQuery,
@@ -13,6 +14,7 @@ import { showToast } from "../../../redux/features/toastSlice";
 import { FilterMatchMode } from "../filter/filterMatchMode";
 import { SolidButton, SolidDialog, SolidIcon, SolidInput, SolidSpinner } from "../../shad-cn-ui";
 import { Column, DataTableStateEvent, SolidDataTable } from "../list/SolidDataTable";
+import { ModulePackageDialog } from "./ModulePackageDialog";
 
 export interface ModelMetaData {
   id: string;
@@ -40,13 +42,16 @@ export const ModuleListViewData = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isGenerateCodeVisible, setGenerateCodeVisible] = useState(false);
+  const [isModulePackageDialogOpen, setModulePackageDialogOpen] = useState(false);
   const [generateCodeForModule, setGenerateCodeForModule] = useState<string | null>(null);
+  const [exportingModuleId, setExportingModuleId] = useState<string | null>(null);
 
   const [triggerGetModule, { data: module, isLoading }] = useLazyGetmodulesQuery();
   const [generateCode, { isError: isGenerateCodeError, isSuccess: isGenerateCodeSuceess, error: generateCodeError }] =
     useGenerateCodeFormoduleMutation();
   const [refreshPermission] = useRefreshPermissionsMutation();
   const [deleteManyModules] = useDeleteMultiplemodulesMutation();
+  const [exportModulePackage] = useExportModulePackageMutation();
 
   useEffect(() => {
     if (module) {
@@ -194,6 +199,27 @@ export const ModuleListViewData = () => {
     refreshPermission("");
   };
 
+  const handleExportModule = async (moduleId: string) => {
+    try {
+      setExportingModuleId(moduleId);
+      const response = await exportModulePackage({ moduleName: moduleId }).unwrap();
+      const fileUrl = window.URL.createObjectURL(response.blob);
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = response.fileName || `${moduleId}.sldx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(fileUrl);
+      dispatch(showToast({ severity: "success", summary: "Export started", detail: `${moduleId} was packaged as a .sldx archive.` }));
+    } catch (error: any) {
+      const detail = error?.data?.message || error?.message || "Unable to export the selected module.";
+      dispatch(showToast({ severity: "error", summary: "Export failed", detail: String(detail) }));
+    } finally {
+      setExportingModuleId(null);
+    }
+  };
+
   const detailsBodyTemplate = (record: ModelMetaData) => (
     <Link
       href={`${record.id}`}
@@ -214,7 +240,7 @@ export const ModuleListViewData = () => {
     return (
       <button
         type="button"
-        className="text-primary border-0 bg-transparent cursor-pointer"
+        className="border-0 bg-transparent text-[var(--primary-color)] cursor-pointer"
         onClick={() => {
           setGenerateCodeForModule(record.id);
           setGenerateCodeVisible(true);
@@ -225,10 +251,33 @@ export const ModuleListViewData = () => {
     );
   };
 
+  const exportBodyTemplate = (record: ModelMetaData) => (
+    <button
+      type="button"
+      className="border-0 bg-transparent text-[var(--primary-color)] cursor-pointer disabled:opacity-50"
+      onClick={() => handleExportModule(record.id)}
+      disabled={exportingModuleId === record.id}
+      title="Export module package"
+    >
+      {exportingModuleId === record.id ? (
+        <SolidSpinner size={16} />
+      ) : (
+        <SolidIcon name="si-download" style={{ fontSize: "1rem" }} aria-hidden />
+      )}
+    </button>
+  );
+
   return (
     <div className="solid-module-list w-full">
-      <div className="flex gap-3 mb-4 align-items-center flex-wrap">
+      <div className="flex gap-4 mb-6 items-center flex-wrap">
         <CreateButton />
+        <SolidButton
+          className="small-button"
+          onClick={() => setModulePackageDialogOpen(true)}
+          label="Import Module"
+          icon="si-upload"
+          iconPos="left"
+        />
         <SolidButton className="small-button" onClick={handleRefreshPermission} label="Refresh Permissions" />
         {selectedMenus.length > 0 && (
           <SolidButton
@@ -242,21 +291,21 @@ export const ModuleListViewData = () => {
         )}
       </div>
 
-      <div className="flex flex-column md:flex-row align-items-start gap-3 mb-3">
+      <div className="flex flex-col md:flex-row items-start gap-4 mb-4">
         <SolidInput
           value={pendingFilters.displayName.value ?? ""}
           onChange={(event) => handleFilterInputChange("displayName", event.currentTarget.value)}
           placeholder="Search module by name"
           className="w-full md:w-20rem"
         />
-        <div className="flex align-items-center gap-2">
+        <div className="flex items-center gap-2">
           <SolidButton size="small" onClick={applyFilters} label="Apply" />
           <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
         </div>
       </div>
 
       {(loading || isLoading) && (
-        <div className="flex justify-content-center my-3">
+        <div className="flex justify-center my-4">
           <SolidSpinner />
         </div>
       )}
@@ -290,6 +339,7 @@ export const ModuleListViewData = () => {
         />
         <Column header="Edit" body={detailsBodyTemplate} />
         <Column header="Code" body={generateCodeBodyTemplate} />
+        <Column header="Export" body={exportBodyTemplate} />
       </SolidDataTable>
 
       <SolidDialog
@@ -300,7 +350,7 @@ export const ModuleListViewData = () => {
         onHide={() => setDialogVisible(false)}
       >
         <p>Are you sure you want to delete the selected Modules?</p>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={deleteBulk} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setDialogVisible(false)} />
         </div>
@@ -317,11 +367,19 @@ export const ModuleListViewData = () => {
         }}
       >
         <p className="text-center">Proceed with module code generation? Existing files will be overwritten.</p>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={handleGenerateCode} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setGenerateCodeVisible(false)} />
         </div>
       </SolidDialog>
+
+      <ModulePackageDialog
+        open={isModulePackageDialogOpen}
+        onOpenChange={setModulePackageDialogOpen}
+        onImported={() => {
+          setQueryString(first, rows, sortField, sortOrder, filters);
+        }}
+      />
     </div>
   );
 };

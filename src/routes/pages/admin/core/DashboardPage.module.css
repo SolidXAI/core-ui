@@ -1,0 +1,219 @@
+.page {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.iconButton {
+  min-width: 36px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filterButtonWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.filterCountBadge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  background: #dc2626;
+  color: #fff;
+  border: 1px solid #fff;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.filterDialogContent {
+  width: min(540px, calc(100vw - 32px));
+}
+
+.filterModalColumn {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.filterModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.dateRange {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.dateRange :global(.react-datepicker-wrapper),
+.dateRange :global(.react-datepicker__input-container) {
+  width: 100%;
+}
+
+.multiSelect {
+  width: 100%;
+  min-height: 84px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px;
+  font-size: 0.9rem;
+}
+
+.gridStack {
+  width: 100%;
+}
+
+.gridStackCompact {
+  min-height: 0;
+}
+
+.widgetCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.widgetTitle {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.widgetBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.widgetUnauthorizedState {
+  flex: 1;
+  width: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.widgetUnauthorizedIcon {
+  color: #f59e0b;
+}
+
+.widgetUnauthorizedText {
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.muted {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .title {
+    font-size: 1.08rem;
+  }
+
+  .subtitle {
+    font-size: 0.82rem;
+  }
+
+  .dateRange {
+    grid-template-columns: 1fr;
+  }
+
+  .widgetCard {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .widgetTitle {
+    margin-bottom: 8px;
+    font-size: 0.94rem;
+  }
+}

@@ -8,8 +8,6 @@ import userReducer from "../features/userSlice";
 import solidStudioReducer from "../features/solidStudioSlice";
 import { authApi } from "../api/authApi";
 import { aiInteractionApi } from "../api/aiInteractionApi";
-import { dashboardApi } from "../api/dashboardApi";
-import { dashboardQuestionApi } from "../api/dashboardQuestionApi";
 import { exportTemplateApi } from "../api/exportTemplateApi";
 import { fieldsApi } from "../api/fieldApi";
 import { importTransactionApi } from "../api/importTransactionApi";
@@ -25,8 +23,8 @@ import { solidServiceApi } from "../api/solidServiceApi";
 import { solidSettingsApi } from "../api/solidSettingsApi";
 import { solidViewsApi } from "../api/solidViewApi";
 import { userApi } from "../api/userApi";
-import { dashboardLayoutApi } from "../api/dashboardLayoutApi";
 import { apiKeyApi } from "../api/apiKeyApi";
+import { dashboardRuntimeApi } from "../api/dashboardRuntimeApi";
 
 // 1. Export all APIs in one array
 export const solidApiSlices = [
@@ -46,11 +44,9 @@ export const solidApiSlices = [
     exportTemplateApi,
     solidServiceApi,
     importTransactionApi,
-    dashboardApi,
-    dashboardQuestionApi,
     aiInteractionApi,
-    dashboardLayoutApi,
     apiKeyApi,
+    dashboardRuntimeApi,
 ];
 
 // 2. Export default reducers

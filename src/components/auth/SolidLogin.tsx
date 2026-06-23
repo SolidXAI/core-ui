@@ -95,7 +95,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             >
                 {(formik) => (
                     <Form>
-                        <div className="flex flex-column gap-2 mt-3">
+                        <div className="flex flex-col gap-2 mt-4">
                             <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
                             <SolidInput
                                 id="identifier"
@@ -116,10 +116,10 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 />
                             )}
                         </div>
-                        <div className="flex flex-column gap-1 mt-4" style={{}}>
-                            <div className="flex align-items-center justify-content-between">
+                        <div className="flex flex-col gap-1 mt-4" style={{}}>
+                            <div className="flex items-center justify-between">
                                 <label htmlFor="password" className="solid-auth-input-label">Password</label>
-                                <Link href={"/auth/initiate-forgot-password"} className="solid-auth-inline-link">Forgot your password?</Link>
+                                <Link href={"/auth/initiate-forgot-password"} className="solid-auth-inline-link" tabIndex={-1}>Forgot your password?</Link>
                             </div>
                             <SolidPasswordInput
                                 id="password"
@@ -139,11 +139,11 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 />
                             )}
                         </div>
-                        {/* <div className="flex align-items-center mt-4">
+                        {/* <div className="flex items-center mt-6">
                                     <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
                                     <label htmlFor="remember" className="ml-2">Remember me</label>
                                 </div> */}
-                        <div className="mt-4">
+                        <div className="mt-6">
                             <SolidButton
                                 type="submit"
                                 className="w-full font-light auth-submit-button"
@@ -259,7 +259,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
+                            // dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
                             const identifier = values.identifier;
                             localStorage.setItem(`resendOtpLogin_${identifier}`, Date.now().toString());
                             router.push(`/auth/initiate-login?identifier=${encodeURIComponent(identifier)}&type=${authType}`);
@@ -280,7 +280,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     <Form>
                         {/* Radio buttons for selectable type */}
                         {validationType === "selectable" && (
-                            <div className="flex flex-column gap-3 mt-3">
+                            <div className="flex flex-col gap-4 mt-4">
                                 <label className="solid-auth-input-label">Select Authentication Method</label>
                                 <SolidRadioGroup
                                     name="authMethod"
@@ -293,11 +293,11 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                         setSelectedAuthMethod(value);
                                         formik.setFieldValue("identifier", "");
                                     }}
-                                    className="solid-auth-radio-options flex gap-4 flex-wrap"
+                                    className="solid-auth-radio-options flex gap-6 flex-wrap"
                                 />
                             </div>
                         )}
-                        <div className="flex flex-column gap-2 mt-3">
+                        <div className="flex flex-col gap-2 mt-4">
                             <label htmlFor="identifier" className="solid-auth-input-label">{fieldConfig.label}</label>
                             <SolidInput
                                 id="identifier"
@@ -318,7 +318,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 />
                             )}
                         </div>
-                        <div className="mt-4">
+                        <div className="mt-6">
                             <SolidButton
                                 type="submit"
                                 className="w-full font-light auth-submit-button"
@@ -370,7 +370,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
                 {isAnyOAuthEnabled && (
                     <>
-                        <div className="solid-auth-divider flex align-items-center gap-2 my-4">
+                        <div className="solid-auth-divider flex items-center gap-2 my-6">
                             <SolidDivider className="flex-1" />
                             <span className="text-sm text-500">Or continue with</span>
                             <SolidDivider className="flex-1" />
@@ -384,9 +384,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     </>
                 )}
             </div>
-            {solidSettingsData?.data?.allowPublicRegistration && <div className="mt-3 md:mt-5">
+            {solidSettingsData?.data?.allowPublicRegistration && <div className="mt-4 md:mt-8">
                 <div className="text-sm text-center text-400 secondary-dark-color">
-                    Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
+                    Don’t have an account ? <Link className="font-bold" href="/auth/register" tabIndex={-1}>Sign Up</Link>
                 </div>
             </div>}
         </div>

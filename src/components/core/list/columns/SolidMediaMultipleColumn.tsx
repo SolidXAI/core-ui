@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Download, File, Volume2 } from "lucide-react";
+import { Download, Volume2 } from "lucide-react";
 import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 import { FileReaderExt } from '../../../../components/common/FileReaderExt';
 import { SolidButton, SolidDialog } from "../../../shad-cn-ui";
+import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
 
 const getCleanUrl = (url: string) => url.split("?")[0];
 
@@ -55,7 +56,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
                 <img
                     src={src}
                     alt="media"
-                    className="shadow-2 border-round"
+                    className="rounded shadow-md"
                     width={40}
                     height={40}
                     style={{ objectFit: "cover" }}
@@ -71,7 +72,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
                     src={src}
                     width={40}
                     height={40}
-                    className="shadow-2 border-round"
+                    className="rounded shadow-md"
                     style={{ objectFit: "cover" }}
                     onError={() => setIsBroken(true)}
                     onClick={handleClick}
@@ -83,7 +84,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
         if (isAudioFile(src)) {
             return (
                 <div
-                    className="shadow-2 border-round flex align-items-center justify-content-center bg-gray-100"
+                    className="flex items-center justify-center rounded bg-gray-100 shadow-md"
                     style={{ width: 40, height: 40 }}
                     onClick={handleClick}
                 >
@@ -98,7 +99,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={handleClick}
         >
-            <File size={24} className="text-gray-400" />
+            <SolidFileTypeIcon fileUrl={src} size={24} />
         </div>
     );
 };
@@ -179,7 +180,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
 
     return fullrecord.length > 0 ? (
-        <div className='flex gap-2 align-items-end'>
+        <div className='flex items-end gap-2'>
 
             {/* THUMBNAIL - FIXED BEHAVIOR */}
             <MediaPreview
@@ -248,15 +249,15 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                     const fileId = `${file.name}-${file.size}`;
                     return (
                         <div key={fileId} className="solid-file-upload-wrapper mb-3">
-                            <div className="flex align-items-center gap-2">
+                            <div className="flex items-center gap-2">
 
                                 <FileReaderExt fileDetails={file} />
 
-                                <div className="w-full flex flex-column gap-1">
-                                    <div className="flex align-items-center justify-content-between">
+                                <div className="flex w-full flex-col gap-1">
+                                    <div className="flex items-center justify-between">
 
                                         <p
-                                            className="font-normal w-11 text-primary m-0"
+                                            className="m-0 w-11 font-normal text-[var(--primary-color)] solid-media-column-text-wrapper"
                                             style={{ cursor: "pointer" }}
                                             onClick={() => handleFileView(file)}
                                         >

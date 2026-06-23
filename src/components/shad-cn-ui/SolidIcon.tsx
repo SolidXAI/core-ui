@@ -89,6 +89,7 @@ const ICON_MAP = {
   "si-calendar-minus": CalendarMinus,
   "si-calendar-plus": CalendarPlus,
   "si-chart-bar": BarChart3,
+  "si-chart-line": BarChart3,
   "si-check": Check,
   "si-check-circle": CheckCircle2,
   "si-chevron-down": ChevronDown,

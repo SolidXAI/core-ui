@@ -7,6 +7,7 @@ import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSe
 import { SolidExport } from "../../../components/common/SolidExport";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
@@ -140,8 +141,40 @@ export const SolidListViewConfigure = (
         window.location.reload();
     };
 
-    const visibleViewModes = Array.isArray(viewModes) ? viewModes : [];
-    const showSwitchType = visibleViewModes.length > 1;
+    const visibleViewModes = (() => {
+        if (!Array.isArray(viewModes)) return [];
+
+        const uniqueByType = new Map<string, ViewMode>();
+        const currentActionId = String(params?.actionId ?? "");
+        const currentMenuItemId = String(params?.menuItemId ?? "");
+
+        for (const mode of viewModes) {
+            if (!mode || typeof mode.type !== "string") continue;
+
+            const existing = uniqueByType.get(mode.type);
+            if (!existing) {
+                uniqueByType.set(mode.type, mode);
+                continue;
+            }
+
+            const modeActionId = String(mode.actionId ?? "");
+            const modeMenuItemId = String(mode.menuItemId ?? "");
+            const existingActionId = String(existing.actionId ?? "");
+            const existingMenuItemId = String(existing.menuItemId ?? "");
+
+            const modeIsCurrent = (currentActionId && modeActionId === currentActionId) ||
+                (currentMenuItemId && modeMenuItemId === currentMenuItemId);
+            const existingIsCurrent = (currentActionId && existingActionId === currentActionId) ||
+                (currentMenuItemId && existingMenuItemId === currentMenuItemId);
+
+            if (modeIsCurrent && !existingIsCurrent) {
+                uniqueByType.set(mode.type, mode);
+            }
+        }
+
+        return Array.from(uniqueByType.values());
+    })();
+    const showSwitchType = visibleViewModes.length > 0;
     const handleViewTypeChange = (nextType: string) => {
         const nextView = visibleViewModes.find((option: ViewMode) => option.type === nextType);
         if (nextView) {
@@ -171,7 +204,7 @@ export const SolidListViewConfigure = (
                         isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
                         isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
                         (solidListViewLayout?.attrs?.headerButtons
-                            ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
+                            ?.some((rb: any) => rb.attrs.actionInContextMenu === true && isButtonVisibleInCurrentEnv(rb?.attrs))) ||
                         viewData?.data?.solidView?.model?.enableSoftDelete
                     ) && (
                         <>
@@ -212,6 +245,7 @@ export const SolidListViewConfigure = (
                                 </SolidDropdownMenuItem>
                             )}
                             {solidListViewLayout?.attrs?.headerButtons
+                                ?.filter((rb: any) => isButtonVisibleInCurrentEnv(rb?.attrs))
                                 ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
                                 ?.map((button: any, index: number) => (
                                     <SolidListViewHeaderContextMenuButton
@@ -311,7 +345,7 @@ export const SolidListViewConfigure = (
                                 }}
                             >
                                 <Trash2 size={14} className="solid-header-action-button-icon" />
-                                <span className="solid-header-action-button-label">Clear cache</span>
+                                <span className="solid-header-action-button-label">Reset View</span>
                             </SolidDropdownMenuItem>
                         </>
                     )}
@@ -334,7 +368,11 @@ export const SolidListViewConfigure = (
                 </SolidDialogHeader>
                 <SolidDialogSeparator />
                 <SolidDialogBody className="solid-kanban-export-dialog-body">
-                    <SolidExport listViewMetaData={listViewMetaData} filters={filters} />
+                    <SolidExport
+                        listViewMetaData={listViewMetaData}
+                        filters={filters}
+                        onExportComplete={() => setExportView(false)}
+                    />
                 </SolidDialogBody>
             </SolidDialog>
             <SolidDialog

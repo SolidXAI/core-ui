@@ -1,6 +1,6 @@
 import { useSession } from "../../../hooks/useSession";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
-import { SquarePen } from "lucide-react";
+import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
 export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
@@ -9,13 +9,25 @@ export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidL
     const user = session?.user;
 
     const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
+    const presentation = resolveButtonPresentation(button?.attrs);
+    const iconNode = presentation.showIcon
+        ? (() => {
+            const m = parseSolidIconMeta(presentation.icon);
+            return m
+                ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" />
+                : <i className={`${presentation.icon} solid-row-action-button-icon`} />;
+        })()
+        : null;
 
     if (!hasRole) return null;
+    if (!presentation.showIcon && !presentation.showLabel) return null;
 
     return (
         <button
             type="button"
-            className={`solid-row-action-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+            className={`solid-row-action-button ${presentation.buttonClassName ? presentation.buttonClassName : ''}`}
+            title={presentation.tooltip}
+            aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
             onClick={() => {
                 const event = {
                     params,
@@ -34,10 +46,9 @@ export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidL
                 onActionComplete?.();
             }}
         >
-            {button?.attrs?.icon
-                ? (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" /> : <i className={`${button.attrs.icon} solid-row-action-button-icon`} />; })()
-                : <SquarePen size={14} className="solid-row-action-button-icon" />}
-            <span className="solid-row-action-button-label">{button.attrs.label}</span>
+            {presentation.iconPos === "left" ? iconNode : null}
+            {presentation.showLabel ? <span className="solid-row-action-button-label">{presentation.label}</span> : null}
+            {presentation.iconPos === "right" ? iconNode : null}
         </button>
     );
 };

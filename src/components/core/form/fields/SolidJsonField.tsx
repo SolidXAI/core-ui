@@ -47,7 +47,7 @@ export class SolidJsonField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -98,7 +98,7 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -127,7 +127,18 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                         if (typeof val === "string") return val;
                         return JSON.stringify(val, null, 2);
                     })()}
-                    onChange={(next) => formik.setFieldValue(fieldLayoutInfo.attrs.name, next)}
+                    onChange={(next) => {
+                        fieldContext.onChange(
+                            {
+                                target: {
+                                    name: fieldLayoutInfo.attrs.name,
+                                    value: next,
+                                    type: "text",
+                                },
+                            } as any,
+                            "onFieldChange"
+                        );
+                    }}
                     height={fieldLayoutInfo.attrs?.height}
                     fontSize={fieldLayoutInfo.attrs?.fontSize}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
@@ -149,7 +160,7 @@ export const DefaultJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFie
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;

@@ -80,7 +80,6 @@ export { SolidSelectionDynamicFilterElement } from './components/core/list/Solid
 export { SolidSelectionStaticFilterElement } from './components/core/list/SolidSelectionStaticFilterElement';
 export { SolidVarInputsFilterElement } from './components/core/filter/SolidVarInputsFilterElement';
 
-export { default as SolidDashboard } from './components/core/dashboard/SolidDashboard';
 
 export { dateFilterMatchModeOptions } from './components/core/filter/fields/SolidDateField';
 
@@ -100,16 +99,19 @@ export { AppTitle } from './helpers/AppTitle';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from './helpers/helpers';
 export { fetchS3Url } from './helpers/fetchS3Url';
 export type { FetchS3UrlOptions } from './helpers/fetchS3Url';
+export { getFileTypeIconTone, SolidFileTypeIcon } from './helpers/fileTypeIcon';
 export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export { QueueSlaHeatmapWidget } from './components/core/dashboard/widgets/QueueSlaHeatmapWidget';
 export {
     ExtensionComponentTypes,
     ExtensionFunctionTypes,
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "./types/extension-registry";
+export type { DashboardWidgetComponentProps } from "./types/dashboard";
 export {
     createSolidUiModuleRuntime,
     getSolidUiModules,
@@ -123,6 +125,8 @@ export {
 } from './modules/solidUiModule';
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
+export { SolidRouteMetadataBoundary } from './routes/SolidRouteMetadataBoundary';
+export type { SolidPageMeta } from './routes/types';
 
 export {
     authApi,
@@ -136,13 +140,6 @@ export {
     useInitateRegisterMutation,
     useConfirmOtpRegisterMutation
 } from './redux/api/authApi';
-
-export {
-    useGetDashboardLayoutQuery,
-    useLazyGetDashboardLayoutQuery,
-    useUpsertUserDashboardLayoutMutation,
-    useLazyGetUserDashboardLayoutByDashboardIdQuery
-} from './redux/api/dashboardLayoutApi';
 
 export { baseQueryWithAuth } from './redux/api/fetchBaseQuery';
 
@@ -202,17 +199,34 @@ export {
 
 export {
     modulesApi,
+    useClearModulePackageRuntimeMutation,
+    useConfirmModulePackageImportMutation,
     useCreatemoduleMutation,
     useDeleteMultiplemodulesMutation,
     useDeletemoduleMutation,
+    useExportModulePackageMutation,
     useGenerateCodeFormoduleMutation,
     useGetDefaultDataSourceQuery,
+    useGetModuleMetadataExplorerDocumentQuery,
+    useGetModuleMetadataExplorerManifestQuery,
+    useGetModuleMetadataExplorerSectionQuery,
+    useLazyGetModulePackageImportStatusQuery,
     useGetmoduleByIdQuery,
     useGetmodulesQuery,
     useLazyGetDefaultDataSourceQuery,
+    useLazyGetModuleMetadataExplorerDocumentQuery,
+    useLazyGetModuleMetadataExplorerManifestQuery,
+    useLazyGetModuleMetadataExplorerReferencesQuery,
+    useLazyGetModuleMetadataExplorerSectionQuery,
+    useLazySearchModuleMetadataExplorerQuery,
     useLazyGetmoduleByIdQuery,
     useLazyGetmodulesQuery,
     useRefreshPermissionsMutation,
+    useRunModulePackageBuildMutation,
+    useRunModulePackageSeedMutation,
+    useUpdateModuleMetadataExplorerSectionMutation,
+    useValidateModulePackageImportMutation,
+    useValidateModuleMetadataExplorerSectionMutation,
     useUpdatemoduleMutation
 } from './redux/api/moduleApi';
 
@@ -280,6 +294,15 @@ export {
 } from './redux/api/solidMenuApi';
 
 export {
+    dashboardRuntimeApi,
+    useGetDashboardDefinitionQuery,
+    useGetDashboardLayoutQuery,
+    useSaveDashboardLayoutMutation,
+    useGetDashboardDataMutation,
+    useLazyGetDashboardVariableOptionsQuery,
+} from './redux/api/dashboardRuntimeApi';
+
+export {
     solidViewsApi,
     useCreateSolidViewMutation,
     useDeleteMultipleSolidViewsMutation,
@@ -292,9 +315,6 @@ export {
     useUpdateSolidViewMutation
 } from './redux/api/solidViewApi';
 
-export { dashboardApi } from './redux/api/dashboardApi';
-export { dashboardQuestionApi } from './redux/api/dashboardQuestionApi';
-export { dashboardLayoutApi } from './redux/api/dashboardLayoutApi';
 export { aiInteractionApi } from './redux/api/aiInteractionApi';
 
 export {
@@ -389,7 +409,6 @@ export { default as CreateUserRole } from './components/core/users/CreateUserRol
 
 export { default as AdminSidebar } from './components/layout/AdminSidebar';
 export { default as ButtonLoader } from './components/layout/ButtonLoader';
-export { default as DashboardHeader } from './components/layout/DashboardHeader';
 export { default as FilterMenu } from './components/layout/FilterMenu';
 export { default as Footer } from './components/layout/Footer';
 export { default as Header } from './components/layout/Header';
@@ -520,6 +539,7 @@ export type {
     SolidLoadForm,
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
+    SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidBeforeListDataLoad,
     SolidBeforeTreeNodeLoad,
@@ -543,6 +563,7 @@ export { SolidNotFoundPage } from './components/common/SolidNotFoundPage';
 
 export { SolidThemeLink } from './components/common/SolidThemeLink';
 export { SolidThemeProvider } from './components/common/SolidThemeProvider';
+export { SolidFaviconProvider, SOLID_SETTINGS_UPDATED_EVENT } from './components/common/SolidFaviconProvider';
 export { eventBus, AppEvents } from './helpers/eventBus';
 export { useSession } from './hooks/useSession';
 export { useRouter } from './hooks/useRouter';
@@ -553,6 +574,7 @@ export type { Session } from './adapters/auth';
 export { createSolidStore } from './redux/store/createSolidStore';
 export type { SolidStore, SolidRootState, SolidDispatch, CreateSolidStoreOptions } from './redux/store/createSolidStore';
 export { StoreProvider } from './redux/store/StoreProvider';
+export { getSolidEntityApiPoolSnapshot, SOLID_ENTITY_API_POOL_LIMIT } from './redux/store/solidEntityApiPool';
 export { solidAxios, solidGet, solidPost, solidPut, solidPatch, solidDelete } from './http/solidHttp';
 export { AuthGuard } from './routes/guards/AuthGuard';
 export { GuestGuard } from './routes/guards/GuestGuard';
@@ -565,9 +587,9 @@ export { SolidLayoutRegistryProvider, useSolidLayoutRegistry } from './routes/So
 export type { SolidLayoutEntry, SolidLayoutHandle } from './routes/SolidLayoutRegistry';
 export { AdminPage } from './routes/pages/admin/AdminPage';
 export { ModuleHomePage } from './routes/pages/admin/core/ModuleHomePage';
-export { DashboardPage as AdminDashboardPage } from './routes/pages/admin/core/DashboardPage';
 export { ListPage as AdminListPage } from './routes/pages/admin/core/ListPage';
 export { KanbanPage as AdminKanbanPage } from './routes/pages/admin/core/KanbanPage';
+export { DashboardPage as AdminDashboardPage } from './routes/pages/admin/core/DashboardPage';
 export { FormPage as AdminFormPage } from './routes/pages/admin/core/FormPage';
 export { SettingsPage as AdminSettingsPage } from './routes/pages/admin/core/SettingsPage';
 export { LoginPage as AuthLoginPage } from './routes/pages/auth/LoginPage';

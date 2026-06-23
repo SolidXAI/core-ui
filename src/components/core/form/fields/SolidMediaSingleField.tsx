@@ -95,7 +95,7 @@ export class SolidMediaSingleField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
@@ -151,7 +151,7 @@ export class SolidMediaSingleField implements ISolidField {
 export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -193,7 +193,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         }
         e.stopPropagation();
         setFileDetails(null);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: null,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
         setDeleteImageDialogVisible(false);
     };
 
@@ -221,7 +230,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
         const reader = new FileReader();
         reader.readAsDataURL(file);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, file);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: file,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
     };
 
     const handleReplaceFile = () => {
@@ -230,7 +248,16 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             deleteMedia(imageToBeDeletedData);
         }
         setFileDetails(null);
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
+        fieldContext.onChange(
+            {
+                target: {
+                    name: fieldLayoutInfo.attrs.name,
+                    value: null,
+                    type: "text",
+                },
+            } as any,
+            "onFieldChange"
+        );
 
         // Proceed with uploading new file
         if (newFileToUpload) {
@@ -366,10 +393,10 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 }
                 {fileDetails && (
                     <div className={`${styles.mediaAttachmentCard} mt-4`}>
-                        <div className={`${styles.mediaAttachmentRow} flex align-items-center md:gap-2`}>
+                        <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
                             <FileReaderExt fileDetails={fileDetails} />
                             <div className={`${styles.mediaAttachmentMeta} w-full`}>
-                                <div className="flex align-items-start justify-content-between gap-3">
+                                <div className="flex items-start justify-between gap-4">
                                     <button
                                         type="button"
                                         className={styles.mediaAttachmentName}
@@ -378,7 +405,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                     >
                                         {fileDetails.name}
                                     </button>
-                                    <div className={`${styles.mediaAttachmentActions} flex align-items-center gap-2`}>
+                                    <div className={`${styles.mediaAttachmentActions} flex items-center gap-2`}>
                                         <button
                                             type="button"
                                             className="solid-file-icon-btn"
@@ -459,7 +486,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
     const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
@@ -540,10 +567,10 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
 
             {fileDetails && (
                 <div className={`${styles.mediaAttachmentCard} ${styles.mediaAttachmentCardView} mt-4`}>
-                    <div className={`${styles.mediaAttachmentRow} flex align-items-center md:gap-2`}>
+                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
                         <FileReaderExt fileDetails={fileDetails} />
                         <div className={`${styles.mediaAttachmentMeta} w-full`}>
-                            <div className="flex align-items-start justify-content-between gap-3">
+                            <div className="flex items-start justify-between gap-4">
                                 <button
                                     type="button"
                                     className={styles.mediaAttachmentName}
@@ -552,7 +579,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                 >
                                     {fileDetails.name}
                                 </button>
-                                <div className={`${styles.mediaAttachmentActions} flex align-items-center md:gap-2`}>
+                                <div className={`${styles.mediaAttachmentActions} flex items-center md:gap-2`}>
                                     <button
                                         type="button"
                                         className="solid-file-icon-btn"

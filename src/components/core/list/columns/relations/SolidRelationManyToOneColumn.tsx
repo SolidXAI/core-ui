@@ -6,7 +6,7 @@ import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { kebabCase } from 'lodash';
 import { ExternalLink } from "lucide-react";
 
-const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
+const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded }: SolidListViewColumnParams) => {
 
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
@@ -27,7 +27,8 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
                     rowData,
                     solidListViewMetaData,
                     fieldMetadata,
-                    column
+                    column,
+                    embeded
                 }
                 return (
                     <>
@@ -47,15 +48,24 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
 export default SolidRelationManyToOneColumn;
 
 
-export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, embeded }: SolidListFieldWidgetProps) => {
     const manyToOneFieldData = rowData[column.attrs.name];
-
     // This is the userkey that will be present within the rowData.
     if (manyToOneFieldData) {
         // Since this is a many-to-one field, we fetch the user key field of the associated model.
         const userKeyField = column?.attrs?.coModelFieldToDisplay ? column?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
 
         const manyToOneColVal = manyToOneFieldData[userKeyField];
+
+        const isDisabled = column?.attrs?.disabled === true;
+
+        if (embeded === true || isDisabled) {
+            return (
+                <span className="solid-list-external-link-text">
+                    {manyToOneColVal}
+                </span>
+            );
+        }
 
         return (
             <button

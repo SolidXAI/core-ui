@@ -35,7 +35,7 @@ export const SolidShortTextFieldAvatarWidget = ({ formik, fieldContext }: SolidF
 
 
     return (
-        <div className="mt-2 flex-column gap-2">
+        <div className="mt-2 flex flex-col gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             <div>
                 {value &&

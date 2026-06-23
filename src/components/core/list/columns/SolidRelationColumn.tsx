@@ -4,9 +4,9 @@ import SolidRelationManyToManyColumn from './relations/SolidRelationManyToManyCo
 import SolidRelationManyToOneColumn from './relations/SolidRelationManyToOneColumn';
 import SolidRelationOneToManyColumn from './relations/SolidRelationOneToManyColumn';
 
-const SolidRelationColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
+const SolidRelationColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded }: SolidListViewColumnParams) => {
     if (fieldMetadata.relationType === 'many-to-one') {
-        return SolidRelationManyToOneColumn({ solidListViewMetaData, fieldMetadata, column });
+        return SolidRelationManyToOneColumn({ solidListViewMetaData, fieldMetadata, column, embeded });
     }
     if (fieldMetadata.relationType === 'one-to-many') {
         return SolidRelationOneToManyColumn({ solidListViewMetaData, fieldMetadata, column });

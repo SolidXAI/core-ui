@@ -2,7 +2,7 @@
 import { createSolidEntityApi } from "../../../../../redux/api/solidEntityApi";
 import { SolidAutocomplete } from "../../../../shad-cn-ui/SolidAutocomplete";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
-import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidDialog, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import qs from "qs";
 import React, { useEffect, useState } from "react";
@@ -51,13 +51,11 @@ export class SolidRelationManyToOneField implements ISolidField {
         if (manyToOneColVal) {
             return { solidManyToOneLabel: manyToOneColVal || '', solidManyToOneValue: manyToOneFieldData?.id || '', ...manyToOneFieldData };
         }
-        if (this.fieldContext.parentData) {
+        const fieldName = this.fieldContext?.field?.attrs?.name;
+        if (this.fieldContext.parentData && this.fieldContext.parentFieldName === fieldName) {
             const parentDataForKey = this.fieldContext.parentData[userKeyField];
             if (parentDataForKey && typeof parentDataForKey === 'object') {
-                const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
-                if (key && value !== undefined) {
-                    return { solidManyToOneLabel: value.solidManyToOneLabel, solidManyToOneValue: value.solidManyToOneValue };
-                }
+                return { solidManyToOneLabel: parentDataForKey.solidManyToOneLabel, solidManyToOneValue: parentDataForKey.solidManyToOneValue };
             }
         }
         return {}
@@ -133,7 +131,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
         let isVisible = fieldLayoutInfo.attrs?.visible || true;
         if (this.fieldContext.parentData && this.fieldContext.parentFieldName === fieldLayoutInfo.attrs.name) {
@@ -184,7 +182,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
@@ -421,7 +419,10 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             },
         ];
 
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
+        fieldContext.onChange(
+            buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, updatedRelationData, "text"),
+            'onFieldChange'
+        );
 
     }
     return (
@@ -434,7 +435,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
                 }
-                <div className="flex align-items-center gap-3">
+                <div className="flex items-center gap-4">
                     <SolidAutocomplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission}
@@ -456,7 +457,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                                 'onFieldChange'
                             )
                         }
-                        className="w-full solid-standard-autocomplete"
+                        className="w-full min-w-0 solid-standard-autocomplete"
                         // virtualScrollerOptions={{
                         //     itemSize: 38,
                         //     lazy: true,
@@ -484,12 +485,14 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams }: any) => {
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-6';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-1/2 px-2 pt-2';
     const parentModelName = fieldLayoutInfo?.attrs?.parentModelName;
     const childModelName = fieldLayoutInfo?.attrs?.childModelName;
     const parentFieldName = fieldLayoutInfo?.attrs?.parentFieldName;
     const childFieldName = fieldLayoutInfo?.attrs?.childFieldName;
     const parentModuleName = fieldLayoutInfo?.attrs?.parentModuleName;
+    const dialogTitle = `${formViewParams?.id && formViewParams.id !== "new" ? "Edit" : "Create"} ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"}`;
+    const dialogDescription = `Manage the ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"} form in this dialog.`;
 
 
     const params = {
@@ -529,10 +532,14 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
                 }}
                 showHeader={false}
-                className="solid-dialog"
+                className="solid-dialog solid-inline-relation-dialog"
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >
+                <SolidDialogHeader className="solid-sr-only">
+                    <SolidDialogTitle>{dialogTitle}</SolidDialogTitle>
+                    <SolidDialogDescription>{dialogDescription}</SolidDialogDescription>
+                </SolidDialogHeader>
                 <SolidFormView {...params} />
 
             </SolidDialog>
@@ -569,7 +576,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
@@ -957,7 +964,10 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             },
         ];
 
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
+        fieldContext.onChange(
+            buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, updatedRelationData, "text"),
+            'onFieldChange'
+        );
 
     }
     return (
@@ -970,7 +980,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
                 }
-                <div className="flex align-items-center gap-3" >
+                <div className="flex items-center gap-4" >
                     <SolidAutocomplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission || viewMode === "view"}
@@ -992,7 +1002,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                                 'onFieldChange'
                             )
                         }
-                        className="w-full solid-standard-autocomplete"
+                        className="w-full min-w-0 solid-standard-autocomplete"
                         // virtualScrollerOptions={{
                         //     itemSize: 38,
                         //     lazy: true,

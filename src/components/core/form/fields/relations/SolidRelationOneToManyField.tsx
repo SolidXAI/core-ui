@@ -11,7 +11,7 @@ import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "../../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
-import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import styles from "../solidFields.module.css";
@@ -80,7 +80,7 @@ export class SolidRelationOneToManyField implements ISolidField {
 
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
         const userKeyFieldName = fieldMetadata.relationModel?.userKeyField?.name;
 
@@ -188,7 +188,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
     const router = useRouter();
 
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -320,21 +320,21 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
     return (
         <div>
-            {/* <div className="justify-content-center align-items-center"> */}
-            {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
-                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                    <SolidFieldTooltip fieldContext={fieldContext} />
-                </label>
-            }
+            <div className={styles.fieldWrapper}>
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext} />
+                    </label>
+                }
 
-            {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
-            {listViewParams &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
-            }
-            {readOnlyPermission !== true && formViewParams &&
-                <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
-            }
+                {listViewParams &&
+                    <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
+                }
+                {readOnlyPermission !== true && formViewParams &&
+                    <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
+                }
+            </div>
 
             <SolidDialog
                 open={showSaveParentEntityConfirmationPopup}
@@ -375,7 +375,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
     const fieldMetadata = fieldContext.fieldMetadata;
 
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -471,24 +471,20 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
 
     return (
-        <div>
-            {/* <div className="justify-content-center align-items-center"> */}
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
 
-            {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
             {listViewParams &&
                 <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
             {readOnlyPermission !== true && formViewParams &&
                 <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
-
-
         </div>
     );
 }
@@ -496,6 +492,8 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
 export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose }: any) => {
     const router = useRouter();
+    const dialogTitle = `${formViewParams?.id && formViewParams.id !== "new" ? "Edit" : "Create"} ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"}`;
+    const dialogDescription = `Manage the ${fieldLayoutInfo?.attrs?.label ?? formViewParams?.modelName ?? "related record"} form in this dialog.`;
 
     const params: FormViewParams = {
         moduleName: formViewParams.moduleName,
@@ -527,7 +525,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
             <SolidDialog
                 open={visibleCreateRelationEntity}
                 onOpenChange={setvisibleCreateRelationEntity}
-                className="solid-dialog"
+                className="solid-dialog solid-inline-relation-dialog"
                 style={{
                     width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
@@ -536,6 +534,10 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >
+                <SolidDialogHeader className="solid-sr-only">
+                    <SolidDialogTitle>{dialogTitle}</SolidDialogTitle>
+                    <SolidDialogDescription>{dialogDescription}</SolidDialogDescription>
+                </SolidDialogHeader>
                 {params &&
                     <SolidFormView {...params} />
                 }
@@ -548,7 +550,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
 export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetadata, viewMetadata, formViewData }: SolidFormWidgetProps) => {
 
     const fieldLayoutInfo = field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
     const fieldLabel = fieldLayoutInfo.attrs.label;
     const fieldDescription = fieldLayoutInfo.attrs.description;
     const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
@@ -681,7 +683,6 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
 
     return (
         <div>
-            {/* <div className="justify-content-center align-items-center"> */}
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                     {/* {fieldMetadata.required && <span className="text-red-500"> *</span>} */}

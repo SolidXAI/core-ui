@@ -204,7 +204,7 @@ export const ModelListViewData = () => {
     return (
       <button
         type="button"
-        className="text-primary border-0 bg-transparent cursor-pointer"
+        className="border-0 bg-transparent text-[var(--primary-color)] cursor-pointer"
         onClick={() => {
           setGenerateCodeForModel(record.id);
           setGenerateCodeVisible(true);
@@ -217,7 +217,7 @@ export const ModelListViewData = () => {
 
   return (
     <div className="solid-model-list w-full">
-      <div className="flex gap-3 mb-4 align-items-center flex-wrap">
+      <div className="flex gap-4 mb-6 items-center flex-wrap">
         <CreateButton />
         {selectedMenus.length > 0 && (
           <SolidButton
@@ -231,7 +231,7 @@ export const ModelListViewData = () => {
         )}
       </div>
 
-      <div className="flex flex-column md:flex-row align-items-start gap-3 mb-3">
+      <div className="flex flex-col md:flex-row items-start gap-4 mb-4">
         <SolidInput
           value={pendingFilters.displayName.value ?? ""}
           onChange={(event) => handleFilterInputChange("displayName", event.currentTarget.value)}
@@ -244,14 +244,14 @@ export const ModelListViewData = () => {
           placeholder="Search by module"
           className="w-full md:w-20rem"
         />
-        <div className="flex align-items-center gap-2">
+        <div className="flex items-center gap-2">
           <SolidButton size="small" onClick={applyFilters} label="Apply" />
           <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
         </div>
       </div>
 
       {(loading || isLoading) && (
-        <div className="flex justify-content-center my-3">
+        <div className="flex justify-center my-4">
           <SolidSpinner />
         </div>
       )}
@@ -302,7 +302,7 @@ export const ModelListViewData = () => {
         onHide={() => setDialogVisible(false)}
       >
         <p>Are you sure you want to delete the selected Models?</p>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={deleteBulk} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={onDeleteClose} />
         </div>
@@ -326,7 +326,7 @@ export const ModelListViewData = () => {
           <li>Model Service File</li>
           <li>Model Create and Update DTO files</li>
         </ul>
-        <div className="flex justify-content-center gap-3 mt-3">
+        <div className="flex justify-center gap-4 mt-4">
           <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={handleGenerateCode} />
           <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setGenerateCodeVisible(false)} />
         </div>
