@@ -2,8 +2,8 @@ import { SolidInput, SolidPasswordInput } from "../../../shad-cn-ui";
 
 export const OpenAiProviderComponent = ({ profile, onUpdate }: any) => {
   return (
-    <div className="flex flex-column gap-4 mt-3">
-      <div className="flex flex-column gap-2">
+    <div className="flex flex-col gap-6 mt-4">
+      <div className="flex flex-col gap-2">
         <label className="form-field-label">Base URL</label>
         <SolidInput
           placeholder="https://api.provider.com"
@@ -12,7 +12,7 @@ export const OpenAiProviderComponent = ({ profile, onUpdate }: any) => {
           className="w-full"
         />
       </div>
-      <div className="flex flex-column gap-2">
+      <div className="flex flex-col gap-2">
         <label className="form-field-label">API Key</label>
         <SolidPasswordInput
           className="w-full"
@@ -21,7 +21,7 @@ export const OpenAiProviderComponent = ({ profile, onUpdate }: any) => {
           toggle
         />
       </div>
-      <div className="flex flex-column gap-2">
+      <div className="flex flex-col gap-2">
         <label className="form-field-label">Model Name</label>
         <SolidInput
           placeholder="e.g. gpt-4o-mini"

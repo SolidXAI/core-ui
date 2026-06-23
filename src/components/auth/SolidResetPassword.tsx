@@ -86,7 +86,7 @@ const SolidResetPassword = () => {
                 <p className="solid-auth-helper">Use a strong password for your account security</p>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
-                    <div className="flex flex-column gap-2">
+                    <div className="flex flex-col gap-2">
                         <label htmlFor="password" className="solid-auth-input-label">New Password</label>
                         <SolidPasswordInput
                             id="password"
@@ -105,7 +105,7 @@ const SolidResetPassword = () => {
                             text={formik?.errors?.password?.toString()}
                         />}
                     </div>
-                    <div className="flex flex-column gap-1 mt-4" style={{}}>
+                    <div className="flex flex-col gap-1 mt-6" style={{}}>
                         <label htmlFor="password" className="solid-auth-input-label">Confirm Password</label>
                         <SolidPasswordInput
                             id="confirmPassword"
@@ -125,29 +125,29 @@ const SolidResetPassword = () => {
                         />}
                     </div>
                     {envPasswordHelperText && (
-                        <div className="mt-4 text-sm">
-                            <div className="grid">
+                        <div className="mt-6 text-sm">
+                            <div className="flex flex-wrap -mx-2 gap-y-2">
                                 {envPasswordHelperText
                                     .split('\\n')
                                     .map((text, idx) => (
-                                        <div key={idx} className="col-6 pt-0">
+                                        <div key={idx} className="w-1/2 px-2 pt-0">
                                             <div className='flex gap-2'><span>•</span><span>{text}</span></div>
                                         </div>
                                     ))}
                             </div>
                         </div>
                     )}
-                    {/* <div className="flex align-items-center mt-4">
+                    {/* <div className="flex items-center mt-6">
                                         <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
                                         <label htmlFor="remember" className="ml-2">Remember me</label>
                                     </div> */}
-                    <div className="mt-4">
+                    <div className="mt-6">
                         <SolidButton className="w-full font-light auth-submit-button" label="Reset Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} type="submit" />
                         <SolidButton type="button" label="Back" className="w-full auth-back-button text-center mt-1" text onClick={() => (window.location.href = '/auth/login')} />
                     </div>
                 </form>
             </div>
-            {/* <div className="text-center mt-5">
+            {/* <div className="text-center mt-8">
                 <div className="text-sm text-400 secondary-dark-color">
                     {'<'} Back to <Link className="font-bold" href="/auth/login">Sign In</Link>
                 </div>

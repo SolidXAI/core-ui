@@ -9,7 +9,7 @@ export const SolidSearchBox = ({ viewData }: any) => {
         // setItems([...Array(10).keys()].map(item => event.query + '-' + item));
     }
     return (
-        <div className="card flex justify-content-center">
+        <div className="card flex justify-center">
             <SolidAutocomplete value={value} suggestions={items} completeMethod={search} onChange={(e) => setValue(e.value)} />
         </div>
     )

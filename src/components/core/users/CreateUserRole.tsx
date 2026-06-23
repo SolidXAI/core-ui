@@ -112,24 +112,24 @@ const CreateUserRole = ({ data }: any) => {
   }, [isSuccess])
 
   return (
-    <div className="grid">
-      <div className="col-12 xl:col-10 mx-auto">
+    <div className="flex flex-wrap -mx-2 -mt-2">
+      <div className="mx-auto w-full px-2 pt-2 xl:w-[83.333333%]">
         <div>
           {/* <Toast ref={toast} /> */}
 
           <form onSubmit={formik.handleSubmit}>
-            {pathname.includes('create') ? <div className="flex gap-3 justify-content-between mb-5">
+            {pathname.includes('create') ? <div className="mb-6 flex justify-between gap-4">
               <div className="form-wrapper-title"> Create User Role</div>
-              <div className="gap-3 flex">
+              <div className="flex gap-4">
                 <div>
                   <SolidButton label="Save" size="sm" onClick={() => showError()} type="submit" className='small-button' />
                 </div>
                 <CancelButton />
               </div>
             </div> :
-              <div className="flex gap-3 justify-content-between mb-5">
+              <div className="mb-6 flex justify-between gap-4">
                 <h1 className="m-0"> Edit User</h1>
-                <div className="gap-3 flex">
+                <div className="flex gap-4">
                   <div>
                     <SolidButton label="Save" onClick={() => showError()} type="submit" size="sm" className='small-button' />
                   </div>
@@ -141,8 +141,8 @@ const CreateUserRole = ({ data }: any) => {
               </div>
             }
             <div className="form-wrapper">
-              <div className="grid formgrid">
-                <div className="md:col-6 sm:col-12">
+              <div className="flex flex-wrap -mx-2 -mt-2">
+                <div className="w-full px-2 pt-2 md:w-1/2">
                   <div className="field">
                     <label htmlFor="username" className="form-label form-field-label">
                       User Name
@@ -161,7 +161,7 @@ const CreateUserRole = ({ data }: any) => {
                     )}
                   </div>
                 </div>
-                <div className="md:col-6 sm:col-12">
+                <div className="w-full px-2 pt-2 md:w-1/2">
                   <div className="field">
                     <label htmlFor="type" className="form-label form-field-label">
                       Role Name

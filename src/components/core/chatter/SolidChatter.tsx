@@ -202,8 +202,8 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     const canViewMessages = actionsAllowed.includes(`${permissionExpression('chatterMessage', 'findMany')}`);
 
     const renderLoadingState = () => (
-        <div className='flex flex-column align-items-center justify-content-center gap-2 h-full text-center text-color-secondary'>
-            <Loader2 size={20} className='text-primary animate-spin' />
+        <div className='flex h-full flex-col items-center justify-center gap-2 text-center text-color-secondary'>
+            <Loader2 size={20} className='animate-spin text-[var(--primary-color)]' />
             <span className='text-sm'>Loading recent activity…</span>
         </div>
     );
@@ -211,9 +211,9 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     const renderEmptyState = () => {
         const isLogComposerOpen = visibleBox === 'log';
         return (
-        <div className='flex align-items-center justify-content-center h-full'>
-            <div className='flex flex-column align-items-center gap-2 text-center text-color-secondary px-3'>
-                <div className='p-2 border-round bg-primary-reverse text-primary'>
+        <div className='flex h-full items-center justify-center'>
+            <div className='flex flex-col items-center gap-2 px-3 text-center text-color-secondary'>
+                <div className='rounded bg-[var(--primary-color-text)] p-2 text-[var(--primary-color)]'>
                     <Inbox size={20} />
                 </div>
                 <p className='m-0 text-base font-medium text-color'>No activity yet</p>
@@ -228,12 +228,12 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
 
     const permissionError = () => (
         <div className='p-3'>
-            <SolidMessage severity='warn' text="You do not have permission to view these messages." className='justify-content-start' />
+            <SolidMessage severity='warn' text="You do not have permission to view these messages." className='justify-start' />
         </div>
     );
 
     const renderMessages = () => (
-        <div className='flex flex-column gap-3'>
+        <div className='flex flex-col gap-4'>
             {messages.map((message, index) => {
                 const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
                 return (
@@ -258,7 +258,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 );
             })}
             {totalRecords > messages.length && (
-                <div className='flex justify-content-center'>
+                <div className='flex justify-center'>
                     <SolidButton
                         type='button'
                         size='sm'

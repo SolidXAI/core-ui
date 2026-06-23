@@ -18,7 +18,11 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
     return (
         <SolidButton
             type="button"
-            className={`text-left ${presentation.buttonClassName ?? "gap-2"}`}
+            className={[
+                "text-left gap-2",
+                presentation.isIconOnly ? "solid-icon-button" : "",
+                presentation.buttonClassName ?? ""
+            ].filter(Boolean).join(" ")}
             size="small"
             icon={presentation.icon}
             iconPos={presentation.iconPos}

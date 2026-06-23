@@ -39,7 +39,7 @@ export class SolidComputedField implements ISolidField {
 
     render(formik: FormikObject) {
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
 
         // Computed fields are only relevant for existing records.
         // Check by whether the underlying data has an `id` (record exists).

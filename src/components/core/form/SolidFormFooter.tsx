@@ -109,6 +109,8 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
 
                 const queryObject = getFilterObjectFromLocalStorageByUrl(listPath);
                 const defaultQueryObject = queryObject || {};
+                const locale = searchParams.get("locale");
+                const defaultEntityLocaleId = searchParams.get("defaultEntityLocaleId");
 
                 const requiresPopulate =
                     Array.isArray(defaultQueryObject.sort) &&
@@ -126,12 +128,19 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
                     }),
                 };
 
+                if (locale) {
+                    queryData.locale = locale;
+                }
+
+                if (defaultEntityLocaleId && defaultEntityLocaleId !== "new") {
+                    queryData.defaultEntityLocaleId = defaultEntityLocaleId;
+                }
+
                 const queryString = qs.stringify(queryData, {
                     encodeValuesOnly: true,
                 });
 
                 const response: any = await triggerGetNavigation(queryString).unwrap();
-                console.log("response nav", response);
                 if (response.statusCode == 200) {
                     setPrevNav(response?.data?.prev ?? null);
                     setNextNav(response?.data?.next ?? null);
@@ -140,14 +149,14 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             };
             fetchNavigation();
         }
-    }, [params.id, params.embeded]);
+    }, [params.id, params.embeded, params.modelName, searchParams, triggerGetNavigation]);
 
     // -----------------------------
     // UI
     // -----------------------------
     return (
         <div
-            className="flex justify-content-end align-items-center gap-2 p-1"
+            className="flex justify-end items-center gap-2 p-1"
         >{meta &&
             <span className="solid-form-footer-pagination-meta p-2">{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
             }

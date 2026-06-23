@@ -123,7 +123,7 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
     ];
 
     return (
-        <div className="mt-2 flex-column">
+        <div className="mt-2 flex flex-col">
             <SolidTabGroup tabs={tabs} value={activeTab} onValueChange={setActiveTab} />
         </div>
     );

@@ -18,9 +18,9 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
         const isSelected = activeId !== null && item.id !== null && item.id === activeId;
         const isParentActive = activeId !== null && item.items?.length > 0 && hasActiveChild(item.items);
         return (
-            <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${isSelected || isParentActive ? "p-highlight" : ""}`} onClick={options.onClick} >
-                <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-content-between font-normal">
-                    <div className="flex align-items-center" style={{ gap: 10 }}>
+            <div key={item?.key} className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "p-highlight" : ""}`} onClick={options.onClick} >
+                <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-between font-normal">
+                    <div className="flex items-center" style={{ gap: 10 }}>
                         {item.icon && (
                             // material-symbols-${item.iconVariant ?? 'outlined'}
                             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
@@ -88,9 +88,9 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
 
                     return (
                         <li key={item.key}>
-                            <div className={`flex align-items-center cursor-pointer menuHead px-3 ${isSelected || isParentActive ? "p-highlight" : ""}`}>
-                                <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-content-between font-normal">
-                                    <div className="flex align-items-center" style={{ gap: 10 }}>
+                            <div className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "p-highlight" : ""}`}>
+                                <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-between font-normal">
+                                    <div className="flex items-center" style={{ gap: 10 }}>
                                         {item.icon && (
                                             <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
                                                 {item.icon}
@@ -111,7 +111,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
                                 )}
                             </div>
                             {hasChildren && isExpanded && (
-                                <div className="solid-panel-menu-children pl-3">
+                                <div className="solid-panel-menu-children pl-6">
                                     {renderMenuItems(item.items)}
                                 </div>
                             )}

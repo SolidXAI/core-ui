@@ -176,7 +176,7 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
   };
 
   return (
-    <div className="flex align-items-center gap-2 mt-2">
+    <div className="mt-2 flex items-center gap-2">
 
       {/* Input field for Value */}
       <SolidInput
@@ -332,7 +332,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
   });
 
   return (
-    <div className="flex align-items-center gap-3 mt-2 flex-wrap md:flex-nowrap">
+    <div className="mt-2 flex flex-wrap items-center gap-4 md:flex-nowrap">
 
       <div className="">
         <label
@@ -1776,8 +1776,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
             ></FieldSelector>
             :
             <div className="p-3" style={{ maxHeight: '80vh', overflowY: 'auto', overflowX: 'hidden' }}>
-              <div className="p-d-flex p-jc-center creat-field-for form-dem">
-                <div className="p-fluid" style={{ position: 'relative' }}>
+              <div className="flex justify-center creat-field-for form-dem">
+                <div className="solid-fluid" style={{ position: 'relative' }}>
                   {/* <div className="mb-3">
                     <div className="form-wrapper-title">{fieldMetaData ? `Edit ${capitalize(selectedType.label)} Field` : `Add a new ${capitalize(selectedType.label)} Field`}</div>
                   </div> */}
@@ -1787,9 +1787,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                       className={(formik.touched.hasOwnProperty("name") && formik.errors.hasOwnProperty("name")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("displayName")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("ormType")) ? "tab-error-heading" : ""}
                     // rightIcon="si si-info-circle ml-2"
                     >
-                      <div className="formgrid grid">
+                      <div className="flex flex-wrap -mx-2 -mt-2">
                         {currentFields.includes("displayName") && (
-                          <div className="field col-12 md:col-6 mt-2">
+                          <div className="field mt-2 w-full px-2 pt-2 md:w-1/2">
                             <label htmlFor="displayName" className={classNames("form-field-label", styles.fieldLabel)}>
                               Display Name
                             </label>
@@ -1818,7 +1818,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         )}
 
                         {currentFields.includes("name") && (
-                          <div className="field col-12 md:col-6 mt-1 md:mt-0">
+                          <div className="field mt-1 w-full px-2 pt-2 md:mt-0 md:w-1/2">
                             <label htmlFor="name" className={classNames("form-field-label", styles.fieldLabel)}>
                               Name
                             </label>
@@ -1839,7 +1839,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("description") && (
-                          <div className="field col-12 md:col-6 mt-1 md:mt-2">
+                          <div className="field mt-1 w-full px-2 pt-2 md:mt-2 md:w-1/2">
                             <label htmlFor="description" className={classNames("form-field-label", styles.fieldLabel)}>
                               Description
                             </label>
@@ -1862,8 +1862,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         )}
 
                         {currentFields.includes("columnName") && (
-                          <div className="field col-12 md:col-6 mt-2">
-                            <div className="flex align-items-center gap-2">
+                          <div className="field mt-2 w-full px-2 pt-2 md:w-1/2">
+                            <div className="flex items-center gap-2">
                               <SolidCheckbox
                                 onChange={(event) => {
                                   const checked = event.currentTarget.checked;
@@ -1885,7 +1885,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               </label>
                             </div>
                             {showColumnName && (
-                              <div className="field col-12 gap-2 mt-4">
+                              <div className="field mt-4 w-full gap-2">
                                 <label htmlFor="columnName" className={classNames("form-field-label", styles.fieldLabel)}>
                                   Column Name
                                 </label>
@@ -1909,51 +1909,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         )}
 
 
-                        {/* {currentFields.includes("type") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field col-6 flex-flex-column gap-2">
-                              <label htmlFor="type" className="form-field-label">
-                                Type
-                              </label>
-                              <SolidAutocomplete
-                                value={selectedType}
-                                suggestions={filteredTypes}
-                                invalid={isFormFieldValid(formik, "type")}
-                                completeMethod={searchTypes}
-                                virtualScrollerOptions={{ itemSize: 38 }}
-                                field="label"
-                                className="small-input"
-                                dropdown
-                                onChange={(e) => {
-                                  formik.setFieldTouched('type', true); // Manually mark as touched
-                                  setSelectedType(e.value);
-                                  formik.setFieldValue("type", e.value.value);
-                                  if (e.value.value == "email") {
-                                    formik.setFieldValue("regexPattern", "/^[a-zA-Z0-9. _%+-]+@[a-zA-Z0-9. -]+\\. [a-zA-Z]{2,}$/");
-                                  } else {
-                                    formik.setFieldValue("regexPattern", "");
-                                  }
-                                  const _filteredOrmType: any = fieldDefaultMetaData.data.ormType.filter((t: any) => t.solidType == e.value.value);
-                                  setSelectedOrmType(_filteredOrmType[0].value)
-                                  formik.setFieldValue("ormType", _filteredOrmType[0].value);
-
-                                  setCurrentFields(
-                                    fetchCurrentFields(e.value.value, fieldDefaultMetaData)
-                                  );
-                                }}
-
-
-                              />
-
-                              {isFormFieldValid(formik, "type") && (
-                                <SolidMessage
-                                  severity="error"
-                                  text={formik?.errors?.type?.toString()}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        )} */}
 
                       </div>
 
@@ -1964,9 +1919,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                     //  rightIcon="si si-cog ml-2"
                     >
                       {formik?.values?.type?.length > 0 && (
-                        <div className="formgrid grid">
+                        <div className="flex flex-wrap -mx-2 -mt-2">
                           {currentFields.includes("length") && (
-                            <div className="field col-6 flex-flex-column gap-2">
+                            <div className="field flex w-1/2 flex-col gap-2 px-2 pt-2">
                               <label htmlFor="length" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Length
                               </label>
@@ -1991,7 +1946,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("defaultValue") && selectedTypeValue === "boolean" &&
-                            <div className="field col-12  md:col-6 flex flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
 
                               <label
                                 style={{ marginBottom: "0px" }}
@@ -2012,7 +1967,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           }
 
                           {currentFields.includes("defaultValue") && selectedTypeValue !== "boolean" && (
-                            <div className="field col-12  md:col-6 flex flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
 
                               <label
                                 style={{ marginBottom: "0px" }}
@@ -2098,7 +2053,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("mediaTypes") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2">
+                            <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="mediaTypes"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2141,7 +2096,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("mediaMaxSizeKb") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2 md:mt-0">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:mt-0 md:w-1/2">
                               <label
                                 htmlFor="mediaMaxSizeKb"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2169,7 +2124,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("mediaStorageProviderId") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="mediaStorageProviderId"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2201,7 +2156,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("mediaEmbedded") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="mediaEmbedded"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2240,7 +2195,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("relationType") && (
-                            <div className="field col-12 flex gap-2 mt-1 align-items-center">
+                            <div className="field mt-1 flex w-full items-center gap-2 px-2 pt-2">
                               {/* <label
                                   htmlFor="relationType"
                                   className="form-field-label"
@@ -2284,22 +2239,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   "p-invalid": isFormFieldValid(formik, "relationType"),
                                 })}
                               />
-                              {/* <div className="align-items-center">
-                                  <div className="flex mt-1">
-                                    {fieldDefaultMetaData?.data?.relationTypes.map((i: any) => (
-                                      <div key={i.value} className="mr-3">
-                                        <SolidRadioGroup
-                                          inputId="ingredient1"
-                                          name="pizza"
-                                          value={i.value}
-                                          onChange={(e) => formik.setFieldValue("relationType", e.value)}
-                                          checked={formik.values.relationType === i.value}
-                                        />
-                                        <label htmlFor="ingredient1" className="form-field-label ml-2">{i.value}</label>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div> */}
 
                               {isFormFieldValid(formik, "relationType") && (
                                 <p className={styles.fieldError}>{formik?.errors?.relationType?.toString()}</p>
@@ -2307,7 +2246,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("relationType") && (formik.values.relationType === "many-to-one" || formik.values.relationType === "one-to-many") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationCascade"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2340,7 +2279,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("relationModelModuleName") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2  mt-1">
+                            <div className="field mt-1 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationModelModuleName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2398,7 +2337,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           {currentFields.includes(
                             "relationCoModelSingularName"
                           ) && (
-                              <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                                 <label
                                   htmlFor="relationCoModelSingularName"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2438,7 +2377,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               </div>
                             )}
                           {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationCoModelColumnName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2467,7 +2406,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {askForUserKeyField && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="userKey"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2504,7 +2443,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           {currentFields.includes(
                             "relationFieldFixedFilter"
                           ) && (
-                              <div className="field col-12 flex-flex-column gap-2 mt-2">
+                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2">
                                 <label
                                   htmlFor="relationFieldFixedFilter"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2551,11 +2490,11 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
 
                           {currentFields.includes("relationCreateInverse") && (
-                            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label htmlFor="relationCreateInverse" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Relation Create Inverse
                               </label>
-                              <div className="flex align-items-center">
+                              <div className="flex items-center">
                                 <SolidCheckbox
                                   id="relationCreateInverse"
                                   name="relationCreateInverse"
@@ -2572,12 +2511,12 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && !formik.values.relationCoModelSingularName && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <SolidMessage text="Please select Co-model" />
                             </div>
                           )}
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && formik.values.relationCoModelSingularName && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationCoModelFieldName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2614,7 +2553,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {/* {currentFields.includes("joinColumnName") && formik.values.relationType === "many-to-many" && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
                               <label
                                 htmlFor="joinColumnName"
                                 className="form-field-label"
@@ -2647,7 +2586,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
 
                           {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationJoinTableName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2676,7 +2615,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("selectionDynamicProvider") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="selectionDynamicProvider"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2732,7 +2671,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("selectionValueType") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="selectionValueType"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2768,7 +2707,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("selectionStaticValues") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="selectionStaticValues"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2812,7 +2751,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("computedFieldValueType") && (
-                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="computedFieldValueType"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2859,7 +2798,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           {currentFields.includes(
                             "computedFieldValueProvider"
                           ) && (
-                              <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                                 <label
                                   htmlFor="computedFieldValueProvider"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2893,14 +2832,14 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           {currentFields.includes(
                             "computedFieldTriggerConfig"
                           ) && (
-                              <div className="field col-12 flex-flex-column gap-2 mt-2">
+                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2">
                                 {fieldMetaData?.computedFieldTriggerConfig === null
                                   &&
                                   <div className="mb-3">
                                     <SolidMessage severity="error" text={`You seem to be using an old configuration of ComputedFieldProvider. Please change your current computed field provider i.e ${fieldMetaData?.computedFieldValueProvider} to implement IEntityComputedFieldProvider before continuing.`} />
                                   </div>
                                 }
-                                <div className="flex align-items-center gap-2">
+                                <div className="flex items-center gap-2">
                                   <label
                                     htmlFor="computedFieldTriggerConfig"
                                     className={classNames("form-field-label", styles.fieldLabel)}
@@ -2940,37 +2879,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 )}
                               </div>
                             )}
-                          {/* {currentFields.includes("externalIdProvider") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field col-6 flex-flex-column gap-2">
-                                <label
-                                  htmlFor="externalIdProvider"
-                                  className="form-field-label"
-                                >
-                                  External Id Provider
-                                </label>
-                                <SolidAutocomplete
-                                  key="externalIdProvider"
-                                  value={formik.values.externalIdProvider}
-                                  suggestions={[]}
-                                />
-                               
-
-                                    {isFormFieldValid(
-                                      formik,
-                                      "externalIdProvider"
-                                    ) && (
-                                        <SolidMessage
-                                          severity="error"
-                                          text={formik?.errors?.externalIdProvider?.toString()}
-                                        />
-                                      )}
-                              </div>
-                            </div>
-                          )} */}
 
                           {currentFields.includes("selectionDynamicProviderCtxt") && (
-                            <div className="field col-12 flex-flex-column gap-2 mt-4">
+                            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2">
                               <label htmlFor="selectionDynamicProviderCtxt" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Selection Dynamic Provider Context
                               </label>
@@ -2994,7 +2905,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("computedFieldValueProviderCtxt") && (
-                            <div className="field col-12 flex-flex-column gap-2 mt-4">
+                            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2">
                               <label htmlFor="computedFieldValueProviderCtxt" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Computed Field Value Provider Context
                               </label>
@@ -3017,58 +2928,16 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
 
-                          {/* {currentFields.includes("externalIdProviderCtxt") && (
-                            <div className="md:col-12 sm:col-12">
-
-                              <div className="formgrid grid">
-                                {markdownText &&
-                                  <div className="md:col-12 sm:col-12">
-                                    <div className="field col-6 flex-flex-column gap-2">
-                                      <label htmlFor="name" className="form-field-label">
-                                        Markdown
-                                      </label>
-                                      <MarkdownViewer data={markdownText}></MarkdownViewer>
-                                    </div>
-                                  </div>
-                                }
-                                <div className="md:col-12 sm:col-12">
-                                  <div className="field col-6 flex-flex-column gap-2">
-                                    <label htmlFor="name" className="form-field-label">
-                                      External Id Provider Context
-                                    </label>
-                                    <SolidCodeEditor
-                                      value={formik.values.externalIdProviderCtxt ?? ""}
-                                      onChange={(value) => {
-                                        formik.setFieldValue("externalIdProviderCtxt", value ?? "");
-                                      }}
-                                      language="json"
-                                      height="300px"
-                                    />
-                                    {isFormFieldValid(
-                                      formik,
-                                      "externalIdProviderCtxt"
-                                    ) && (
-                                        <SolidMessage
-                                          severity="error"
-                                          text={formik?.errors?.externalIdProviderCtxt?.toString()}
-                                        />
-                                      )}
-                                  </div>
-                                </div>
-
-                              </div>
-                            </div>
-                          )} */}
 
                         </div>
                       )}
                       {showValidationSection && (
                         <>
                           <p className="form-wrapper-heading">Validations</p>
-                          <div className="formgrid grid">
+                          <div className="flex flex-wrap -mx-2 -mt-2">
                             {(showRegexFields && selectedTypeValue === "password") &&
                               <>
-                                <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                                <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                                   <label
                                     htmlFor="regexPattern"
                                     className={classNames("form-field-label", styles.fieldLabel)}
@@ -3095,7 +2964,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             }
                             {showRegexFields && (
                               <>
-                                <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                                <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                                   <label
                                     htmlFor="regexPattern"
                                     className={classNames("form-field-label", styles.fieldLabel)}
@@ -3120,7 +2989,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   )}
                                 </div>
                                 {showRegexFields && (
-                                  <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2 mb-3 md:mb-3">
+                                  <div className="field mt-2 mb-3 flex w-full flex-col gap-2 px-2 pt-2 md:mb-3 md:w-1/2">
                                     <label
                                       htmlFor="regexPatternNotMatchingErrorMsg"
                                       className={classNames("form-field-label", styles.fieldLabel)}
@@ -3151,7 +3020,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             {(showMinFields || showMaxFields) &&
                               <>
                                 {showMinFields && (
-                                  <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                                  <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                                     <label htmlFor="min" className={classNames("form-field-label", styles.fieldLabel)}>
                                       Min {(selectedTypeValue !== "int" && selectedTypeValue !== "decimal") && `(Characters Allowed)`}
 
@@ -3190,7 +3059,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   </div>
                                 )}
                                 {showMaxFields && (
-                                  <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                                  <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                                     <label htmlFor="max" className={classNames("form-field-label", styles.fieldLabel)}>
                                       Max {(selectedTypeValue !== "int" &&
                                         selectedTypeValue !== "decimal") && `(Characters allowed)`}
@@ -3232,7 +3101,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               </>
                             }
                             {showOrmOptions && (
-                              <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
+                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                                 <label htmlFor="ormType" className={classNames("form-field-label", styles.fieldLabel)}>
                                   Type
                                 </label>
@@ -3255,7 +3124,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                     ),
                                   }))}
                                   className="ormTypeflex"
-                                  itemClassName="mr-3 align-items-center"
+                                  itemClassName="mr-4 items-center"
                                 />
 
                                 {isFormFieldValid(formik, "ormType") && (
@@ -3268,10 +3137,10 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                       )}
 
                       {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading">Settings</p>}
-                      <div className="formgrid grid mt-1 md:mt-0">
+                      <div className="mt-1 flex flex-wrap -mx-2 -mt-2 md:mt-0">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center">
                               <SolidCheckbox
                                 id="required"
                                 name="required"
@@ -3296,8 +3165,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("unique") && selectedTypeValue !== 'relation' && (
-                          <div className="field col-6 flex-flex-column gap-2">
-                            <div className="flex align-items-center">
+                          <div className="field flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center">
                               <SolidCheckbox
                                 id="unique"
                                 name="unique"
@@ -3330,8 +3199,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("index") && selectedTypeValue !== 'relation' && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center">
                               <SolidCheckbox
                                 id="index"
                                 name="index"
@@ -3350,8 +3219,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("private") && selectedTypeValue !== 'relation' && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center">
                               <SolidCheckbox
                                 id="private"
                                 name="private"
@@ -3373,8 +3242,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("encrypt") && selectedTypeValue !== 'relation' && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center gap-2">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center gap-2">
                               <SolidCheckbox
                                 id="encrypt"
                                 name="encrypt"
@@ -3394,8 +3263,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("isMultiSelect") && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center">
                               <SolidCheckbox
                                 id="isMultiSelect"
                                 name="isMultiSelect"
@@ -3413,33 +3282,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
                           </div>
                         )}
-                        {/* {currentFields.includes("isSystem") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <div className="flex align-items-center">
-                                <SolidCheckbox
-                                  name="isSystem"
-                                  onChange={(event) => {
-                                    formik.setFieldValue("isSystem", event.currentTarget.checked);
-                                  }}
-                                  checked={formik.values.isSystem}
-                                />
-                                <label htmlFor="ingredient1" className="form-field-label">
-                                  isSystem
-                                </label>
-                              </div>
-                              {isFormFieldValid(formik, "isSystem") && (
-                                <SolidMessage
-                                  severity="error"
-                                  text={formik?.errors?.isSystem?.toString()}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        )} */}
                         {currentFields.includes("enableAuditTracking") && formik.values.relationType !== "one-to-many" && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center gap-2">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center gap-2">
                               <SolidCheckbox
                                 id="enableAuditTracking"
                                 name="enableAuditTracking"
@@ -3460,8 +3305,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("isUserKey") && formik.values.unique && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center gap-2">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center gap-2">
                               <SolidCheckbox
                                 id="isUserKey"
                                 name="isUserKey"
@@ -3482,8 +3327,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("isPrimaryKey") && modelMetaData?.isLegacyTable && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
-                            <div className="flex align-items-center gap-2">
+                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                            <div className="flex items-center gap-2">
                               <SolidCheckbox
                                 id="isPrimaryKey"
                                 name="isPrimaryKey"
@@ -3513,9 +3358,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
 
                       {formik.values.encrypt === true && (
-                        <div className="formgrid grid mt-2">
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field col-6 flex-flex-column gap-2">
+                        <div className="mt-2 flex flex-wrap -mx-2 -mt-2">
+                          <div className="w-full px-2 pt-2 md:w-1/2">
+                            <div className="field flex w-full flex-col gap-2">
                               <label
                                 htmlFor="encryptionType"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -3558,8 +3403,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               )}
                             </div>
                           </div>
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field col-6 flex-flex-column gap-2">
+                          <div className="w-full px-2 pt-2 md:w-1/2">
+                            <div className="field flex w-full flex-col gap-2">
                               <label htmlFor="decryptWhen" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Decrypt When
                               </label>
@@ -3600,7 +3445,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                       )}
                     </TabPanel>
                   </TabView>
-                  <div className="flex gap-3 mt-3">
+                  <div className="mt-4 flex gap-4">
                     <div>
                       <SolidButton label="Finish" size="small" onClick={() => showError()} type="submit" />
                     </div>

@@ -110,11 +110,11 @@ export const RolesGroupedByModuleWidget = ({
                     <SolidAccordionItem key={key} value={key}>
                         <SolidAccordionTrigger>{title}</SolidAccordionTrigger>
                         <SolidAccordionContent>
-                            <div className="formgrid grid pt-1">
+                            <div className="flex flex-wrap -mx-2 -mt-2 pt-1">
                                 {group.roles.map((item, i) => (
                                     <div
                                         key={item.value}
-                                        className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}
+                                        className={`field flex w-1/2 gap-2 ${i >= 2 ? 'mt-3' : ''}`}
                                     >
                                         <SolidCheckbox
                                             disabled={readOnly}

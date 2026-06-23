@@ -126,7 +126,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             type="button"
                             icon={'si si-cog'}
                             size="sm"
-                            className="surface-card solid-icon-button hidden md:flex"
+                            className="solid-icon-button hidden bg-[var(--surface-card)] md:flex"
                         />
                     </SolidPopoverTrigger>
                     <SolidPopoverTrigger asChild>
@@ -135,7 +135,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             type="button"
                             icon={'si si-cog'}
                             size="sm"
-                            className="surface-card solid-icon-button md:hidden"
+                            className="solid-icon-button bg-[var(--surface-card)] md:hidden"
                         />
                     </SolidPopoverTrigger>
                 </div>
@@ -211,7 +211,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 />
                             )
                         })}
-                        <div className="lg:hidden flex flex-column gap-1">
+                        <div className="lg:hidden flex flex-col gap-1">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
                                     <SolidFormViewNormalHeaderButton
@@ -243,11 +243,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     }
     return (
         <>
-            <div className="page-header solid-list-toolbar flex-column lg:flex-row">
-                <div className="flex justify-content-between w-full solid-form-toolbar-row">
+            <div className="page-header solid-list-toolbar flex-col lg:flex-row">
+                <div className="flex justify-between w-full solid-form-toolbar-row">
                     {params.id === "new" ? (
                         <>
-                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                            <div className="flex gap-4 items-center solid-form-toolbar-left">
                                 {/* {params.embeded !== true && <BackButton />}*/}
                                 {params.embeded == true &&
                                     <p className="m-0 view-title solid-text-wrapper">{createHeaderTitle}</p>
@@ -264,7 +264,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     ></SolidFormStepper>
                                 }
                             </div>
-                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                            <div className="flex items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
                                 <SolidHeaderRequestStatus label={activeHeaderRequestStatusLabel} />
                                 <div className="hidden lg:flex solid-header-buttons-wrapper">
                                     {normalHeaderButtons.map((button: any, index: number) => {
@@ -352,11 +352,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     <>
                                         <div className="hidden lg:flex">
                                             <div>
-                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-[var(--primary-color-text)]' style={{ minWidth: 66 }} />
                                             </div>
                                         </div>
                                         <div className="lg:hidden">
-                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
+                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='solid-icon-button bg-[var(--primary-color-text)]' />
                                         </div>
                                     </>
                                 }
@@ -386,7 +386,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         </>
                     ) : (
                         <>
-                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                            <div className="flex gap-4 items-center solid-form-toolbar-left">
                                 {params.embeded !== true &&
                                     <SolidFormStepper
                                         solidFormViewMetaData={solidFormViewMetaData}
@@ -404,7 +404,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 }
                             </div>
 
-                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                            <div className="flex items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
                                 <SolidHeaderRequestStatus label={activeHeaderRequestStatusLabel} />
                                 <div className="hidden lg:flex solid-header-buttons-wrapper">
                                     {normalHeaderButtons.map((button: any, index: number) => {
@@ -525,11 +525,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     <>
                                         <div className="hidden lg:flex">
                                             <div>
-                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                                <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-[var(--primary-color-text)]' style={{ minWidth: 66 }} />
                                             </div>
                                         </div>
                                         <div className="lg:hidden">
-                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
+                                            <SolidButton variant="outline" size="sm" type="button" icon="si si-times" onClick={() => params.handlePopupClose()} className='solid-icon-button bg-[var(--primary-color-text)]' />
                                         </div>
                                     </>
                                 }

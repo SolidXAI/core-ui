@@ -37,7 +37,7 @@ export function SsoPage() {
   }, [router, searchParams]);
 
   return (
-    <div className="card flex justify-content-center align-items-center" style={{ height: "80vh" }}>
+    <div className="card flex justify-center items-center" style={{ height: "80vh" }}>
       <div
         className="custom-card md:w-25rem solid-sso-card"
         style={{
