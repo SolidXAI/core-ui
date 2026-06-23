@@ -158,7 +158,7 @@ export const AdminTopHeader = () => {
           ))}
         </nav>
 
-        <div className="solid-admin-header-actions">
+        {/* <div className="solid-admin-header-actions">
           {isAdmin && isDev && !isStudioMode && (
             <button
               type="button"
@@ -201,7 +201,7 @@ export const AdminTopHeader = () => {
               Back
             </button>
           )}
-        </div>
+        </div> */}
         <AdminHeaderActions variant="header" />
       </div>
     </header>
