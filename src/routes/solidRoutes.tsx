@@ -27,6 +27,7 @@ import { InitiateRegisterPage } from "./pages/auth/InitiateRegisterPage";
 import { InitiateGoogleOauthPage } from "./pages/auth/InitiateGoogleOauthPage";
 import { InitiateFacebookOauthPage } from "./pages/auth/InitiateFacebookOauthPage";
 import { InitiateMicrosoftOauthPage } from "./pages/auth/InitiateMicrosoftOauthPage";
+import { InitiateMicrosoftActiveDirectoryOauthPage } from "./pages/auth/InitiateMicrosoftActiveDirectoryOauthPage";
 import { SsoPage } from "./pages/auth/SsoPage";
 import type { SolidRoutesOptions, SolidRouteKey } from "./types";
 import { TreePage } from "./pages/admin/core/TreePage";
@@ -72,6 +73,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/auth/initiate-google-oauth", element: pick("initiateGoogleOauth", <InitiateGoogleOauthPage />), handle: { title: "Google Sign In", manageDocumentMeta: true } },
     { path: "/auth/initiate-facebook-oauth", element: pick("initiateFacebookOauth", <InitiateFacebookOauthPage />), handle: { title: "Facebook Sign In", manageDocumentMeta: true } },
     { path: "/auth/initiate-microsoft-oauth", element: pick("initiateMicrosoftOauth", <InitiateMicrosoftOauthPage />), handle: { title: "Microsoft Sign In", manageDocumentMeta: true } },
+    { path: "/auth/initiate-microsoft-active-directory-oauth", element: pick("initiateMicrosoftActiveDirectoryOauth", <InitiateMicrosoftActiveDirectoryOauthPage />), handle: { title: "Microsoft Active Directory Sign In", manageDocumentMeta: true } },
     { path: "/auth/sso", element: pick("sso", <SsoPage />), handle: { title: "Single Sign-On", manageDocumentMeta: true } },
     ...extraAuthRoutes,
   ];
