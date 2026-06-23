@@ -124,6 +124,24 @@
   min-height: 0;
 }
 
+.dashboardLoadingState {
+  min-height: calc(100vh - 240px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.dashboardLoadingCopy {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .widgetCard {
   border: 1px solid #e5e7eb;
   border-radius: 10px;

@@ -1,0 +1,56 @@
+.solidLoadingState {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.5rem;
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--primary-color) 10%, transparent), transparent 38%),
+    var(--background);
+}
+
+.card {
+  width: min(100%, 28rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, white 16%);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--card) 94%, white 6%);
+  box-shadow: 0 18px 40px -28px rgba(15, 23, 42, 0.35);
+}
+
+.spinner {
+  color: var(--primary-color);
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--foreground);
+}
+
+.description {
+  margin: 0;
+  max-width: 24rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 640px) {
+  .solidLoadingState {
+    padding: 1.25rem;
+  }
+
+  .card {
+    padding: 1.5rem 1.25rem;
+    border-radius: 0.875rem;
+  }
+}
