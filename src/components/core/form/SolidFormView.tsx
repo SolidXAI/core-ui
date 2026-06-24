@@ -155,6 +155,8 @@ const mapLayoutToken = (token: string) => {
     return token;
 };
 
+const isValidIntegerId = (value?: string | null) => Boolean(value && /^\d+$/.test(value));
+
 const normalizeLayoutClassName = (className?: string) => {
     if (!className) return className;
 
@@ -729,7 +731,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
 
         if (defaultEntityLocaleIdn) {
-            setDefaultEntityLocaleId(defaultEntityLocaleIdn);
+            setDefaultEntityLocaleId(isValidIntegerId(defaultEntityLocaleIdn) ? defaultEntityLocaleIdn : null);
         }
 
         // Set the viewMode based on the URL
@@ -821,9 +823,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
-    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form', defaultEntityLocaleId: defaultEntityLocaleId }, {
-        encodeValuesOnly: true,
-    });
+    const formViewMetaDataQs = qs.stringify(
+        {
+            ...params,
+            viewType: 'form',
+            ...(isValidIntegerId(defaultEntityLocaleId) ? { defaultEntityLocaleId } : {}),
+        },
+        {
+            encodeValuesOnly: true,
+        },
+    );
     const [formViewMetaData, setFormViewMetaData] = useState({});
     const [formViewLayout, setFormViewLayout] = useState<any>(null);
     const {
@@ -970,11 +979,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
             if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
+                const resolvedDefaultEntityLocaleId = defaultEntityLocaleId ?? '';
                 if (selectedLocale && !formData.has('localeName')) {
                     formData.append('localeName', selectedLocale);
                 }
-                if (defaultEntityLocaleId) {
-                    formData.append('defaultEntityLocaleId', defaultEntityLocaleId.toString());
+                if (params.id === 'new' && isValidIntegerId(resolvedDefaultEntityLocaleId)) {
+                    formData.append('defaultEntityLocaleId', resolvedDefaultEntityLocaleId);
                 }
             }
             if (solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow) {
@@ -1758,6 +1768,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 setDefaultTabViewOptionIndex(2);
             }
         };
+        const showChatterInfo = Boolean(
+            solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow
+            || solidFormViewMetaData?.data?.solidView?.model?.internationalisation
+        );
 
         //en 4 null
         const handleLocaleChangeRedirect = async (
@@ -1961,8 +1975,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         }
                         {isShowChatter === false ?
                             <div className="flex flex-col gap-2 justify-center p-1">
-                                {/*if solidview Internationalisation is enabled then show the locale tab */}
-                                {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
+                                {/*Show the info tab when workflow info or internationalisation is enabled. */}
+                                {showChatterInfo &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
                                         Info
                                     </div>}
