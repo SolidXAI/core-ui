@@ -48,7 +48,10 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   actionsAllowed,
   mcpUrl,
 }) => {
-  const showWorkflowInfo = Boolean(solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow);
+  const showWorkflowInfo = Boolean(
+    solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow
+    || solidFormViewMetaData?.data?.solidView?.model?.internationalisation
+  );
 
   const tabOrder = useMemo(() => {
     const order: string[] = [];
