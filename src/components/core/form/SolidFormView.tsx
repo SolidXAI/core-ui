@@ -821,16 +821,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
-    const formViewMetaDataQs = qs.stringify(
-        {
-            ...params,
-            viewType: 'form',
-            defaultEntityLocaleId: defaultEntityLocaleId,
-        },
-        {
-            encodeValuesOnly: true,
-        },
-    );
+    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form', defaultEntityLocaleId: defaultEntityLocaleId }, {
+        encodeValuesOnly: true,
+    });
     const [formViewMetaData, setFormViewMetaData] = useState({});
     const [formViewLayout, setFormViewLayout] = useState<any>(null);
     const {
