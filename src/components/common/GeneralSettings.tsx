@@ -47,6 +47,7 @@ export const GeneralSettings = () => {
         activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
         iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
         iamMicrosoftOAuthEnabled: solidSettingsData?.data?.iamMicrosoftOAuthEnabled ?? false,
+        iamMicrosoftActiveDirectoryOAuthEnabled: solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled ?? false,
         iamFacebookOAuthEnabled: solidSettingsData?.data?.iamFacebookOAuthEnabled ?? false,
         iamAppleOAuthEnabled: solidSettingsData?.data?.iamAppleOAuthEnabled ?? false,
         // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
@@ -877,6 +878,27 @@ export const GeneralSettings = () => {
                         <div className="w-full px-2 pt-2 mt-4">
                           <div className="flex flex-wrap items-center -mx-2 -mt-2">
                             <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
+                              <label className="form-field-label">
+                                Allow Login/ Signup with Microsoft Active Directory{" "}
+                              </label>
+                            </div>
+                            <div className="col-2 sm:col-3 lg:col-7">
+                              <SolidSwitch
+                                name="iamMicrosoftActiveDirectoryOAuthEnabled"
+                                checked={formik.values.iamMicrosoftActiveDirectoryOAuthEnabled}
+                                onChange={(checked) =>
+                                  formik.setFieldValue(
+                                    "iamMicrosoftActiveDirectoryOAuthEnabled",
+                                    checked,
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-12 mt-3">
+                          <div className="formgrid grid align-items-center">
+                            <div className="col-10 sm:col-9 lg:col-5">
                               <label className="form-field-label">
                                 Allow Login/ Signup with Facebook{" "}
                               </label>

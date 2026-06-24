@@ -11,7 +11,7 @@ import { getSettingsMap } from "../../helpers/settingsPayload";
 import { env } from "../../adapters/env";
 import { AdminHeaderActions, StudioSparkleIcon } from "./AdminHeaderActions";
 import { useDispatch, useSelector } from "react-redux";
-import { useSession } from "@/hooks/useSession";
+import { useSession } from "../../hooks/useSession";
 
 const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
 
@@ -158,7 +158,7 @@ export const AdminTopHeader = () => {
           ))}
         </nav>
 
-        <div className="solid-admin-header-actions">
+        {/* <div className="solid-admin-header-actions">
           {isAdmin && isDev && !isStudioMode && (
             <button
               type="button"
@@ -201,7 +201,7 @@ export const AdminTopHeader = () => {
               Back
             </button>
           )}
-        </div>
+        </div> */}
         <AdminHeaderActions variant="header" />
       </div>
     </header>

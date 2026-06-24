@@ -23,9 +23,8 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
         }
 
         if (viewMode === 'edit' || viewMode === 'view') {
-            //This is to check record entity matched defaultEntityLocaleId from query params & isDefault for default locale
             const matchedLocale = applicableLocales.find(
-                (x: any) => x.isDefault === 'yes' && x.defaultEntityLocaleId == id
+                (x: any) => String(x.entityId) === String(id)
             );
             if (matchedLocale) {
                 setSelectedLocale(matchedLocale.locale);

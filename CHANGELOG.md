@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.11] - 2026-06-23
+
+### Other
+
+- import bug fix
+
 ## [0.1.7] - 2026-04-22
 
 ### Breaking / Major

@@ -20,7 +20,7 @@ interface AuthModesProps {
     passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-    const { solidSettingsData } = useAuthSettings();
+    const { solidSettingsData, isLoadingAuthSettings } = useAuthSettings();
 
     const [initiateLogin] = useInitateLoginMutation();
     const [activeIndex, setActiveIndex] = useState(0);
@@ -334,6 +334,15 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     }
 
     const RenderAuthModes: React.FC<AuthModesProps> = ({ passwordBasedAuth, passwordLessAuth }) => {
+        if (isLoadingAuthSettings) {
+            return (
+                <div className="solid-auth-empty-state is-loading" aria-live="polite">
+                    <p className="solid-auth-empty-title">Loading sign-in options...</p>
+                    <p className="solid-auth-empty-copy">We&apos;re fetching the authentication settings for this workspace.</p>
+                </div>
+            );
+        }
+
         if (passwordBasedAuth && passwordLessAuth) {
             return (
                 <AuthTabs
@@ -350,7 +359,12 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         } else if (passwordLessAuth) {
             return <PasswordLessLogin />;
         } else {
-            return <p>No authentication method available</p>;
+            return (
+                <div className="solid-auth-empty-state" role="status">
+                    <p className="solid-auth-empty-title">No authentication method available</p>
+                    <p className="solid-auth-empty-copy">Ask your administrator to enable a password or passwordless sign-in option.</p>
+                </div>
+            );
         }
     };
 
@@ -358,7 +372,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         solidSettingsData?.data?.iamGoogleOAuthEnabled ||
         solidSettingsData?.data?.iamFacebookOAuthEnabled ||
         solidSettingsData?.data?.iamAppleOAuthEnabled ||
-        solidSettingsData?.data?.iamMicrosoftOAuthEnabled
+        solidSettingsData?.data?.iamMicrosoftOAuthEnabled ||
+        solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled
     );
 
     return (
@@ -380,6 +395,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             facebookEnabled={solidSettingsData?.data?.iamFacebookOAuthEnabled}
                             appleEnabled={solidSettingsData?.data?.iamAppleOAuthEnabled}
                             microsoftEnabled={solidSettingsData?.data?.iamMicrosoftOAuthEnabled}
+                            microsoftActiveDirectoryEnabled={solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled}
                         />
                     </>
                 )}

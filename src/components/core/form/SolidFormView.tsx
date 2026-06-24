@@ -868,10 +868,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
             setDefaultTabViewOptionIndex(0)
-            const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes');
-            //this is to attach default locale when adding data in popup view where relations exists
-            if (!selectedLocale && matchedLocale && !searchParams.get('locale')) {
-                setSelectedLocale(matchedLocale.locale);
+            const applicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
+            const currentRecordLocale = applicableLocales.find((x: any) => String(x.entityId) === String(params.id));
+            const defaultLocale = applicableLocales.find((x: any) => x.isDefault === 'yes');
+            //this is to attach the current record locale when available, otherwise fall back to the default locale for create/new flows
+            if (!selectedLocale && !searchParams.get('locale')) {
+                setSelectedLocale(currentRecordLocale?.locale || defaultLocale?.locale || null);
             }
         }
 
@@ -1767,7 +1769,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const defaultApplicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
             let matchingLocale = defaultApplicableLocales.find(
                 (loc: any) =>
-                    loc.defaultEntityLocaleId &&
                     loc.entityId &&
                     loc.locale === locale
             );
@@ -1790,7 +1791,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const freshApplicableLocales = freshResponse?.data?.applicableLocales || [];
                     matchingLocale = freshApplicableLocales.find(
                         (loc: any) =>
-                            loc.defaultEntityLocaleId &&
                             loc.entityId &&
                             loc.locale === locale
                     );
@@ -1928,7 +1928,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         </div>
 
                     </form>
-                    <SolidFormFooter params={params}></SolidFormFooter>
+                    <SolidFormFooter
+                        params={params}
+                        internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
+                    ></SolidFormFooter>
                 </div>
                 {params.embeded !== true &&
                     <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : 'open'}`} style={{ width: chatterLocaleWidth }}>

@@ -443,7 +443,8 @@ const CreateModule = ({ params, data }: any) => {
                             <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
                             <button
                               type="button"
-                              className="solid-file-icon-btn is-danger"
+                              className="solid-file-icon-btn is-danger solid-module-upload-remove"
+                              aria-label="Remove uploaded menu icon"
                               onClick={handleCancelUpload}
                             >
                               <SolidIcon name="si-times" aria-hidden />
@@ -532,6 +533,17 @@ const CreateModule = ({ params, data }: any) => {
               className="solid-module-form-tabs"
               listClassName="solid-module-form-tablist"
               panelClassName="solid-module-form-tabpanel"
+              extra={(
+                <div className="solid-module-form-tab-extra">
+                  <SolidButton
+                    type="button"
+                    size="sm"
+                    onClick={() => router.push(`/admin/core/solid-core/modules/${data?.id}/datasource-introspection`)}
+                  >
+                    Auto Map Tables
+                  </SolidButton>
+                </div>
+              )}
               tabs={[
                 {
                   value: "general",

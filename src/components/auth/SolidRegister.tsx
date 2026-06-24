@@ -24,7 +24,7 @@ interface AuthModesProps {
 const SolidRegister = () => {
     const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     const [activeIndex, setActiveIndex] = useState(0);
-    const { solidSettingsData } = useAuthSettings();
+    const { solidSettingsData, isLoadingAuthSettings } = useAuthSettings();
 
     const [showOverlay, setShowOverlay] = useState(false);
 
@@ -404,6 +404,15 @@ const SolidRegister = () => {
     }
 
     const RenderAuthModes: React.FC<AuthModesProps> = ({ passwordBasedAuth, passwordLessAuth, showNameFieldsForRegistration }) => {
+        if (isLoadingAuthSettings) {
+            return (
+                <div className="solid-auth-empty-state is-loading" aria-live="polite">
+                    <p className="solid-auth-empty-title">Loading registration options...</p>
+                    <p className="solid-auth-empty-copy">We&apos;re fetching the authentication settings for this workspace.</p>
+                </div>
+            );
+        }
+
         if (passwordBasedAuth && passwordLessAuth) {
             return (
                 <AuthTabs
@@ -424,14 +433,20 @@ const SolidRegister = () => {
         } else if (passwordLessAuth) {
             return <PasswordLessSignup />;
         } else {
-            return <p>No authentication method available</p>;
+            return (
+                <div className="solid-auth-empty-state" role="status">
+                    <p className="solid-auth-empty-title">No authentication method available</p>
+                    <p className="solid-auth-empty-copy">Ask your administrator to enable a password or passwordless authentication option.</p>
+                </div>
+            );
         }
     };
     const isAnyOAuthEnabled = !!(
         solidSettingsData?.data?.iamGoogleOAuthEnabled ||
         solidSettingsData?.data?.iamFacebookOAuthEnabled ||
         solidSettingsData?.data?.iamAppleOAuthEnabled ||
-        solidSettingsData?.data?.iamMicrosoftOAuthEnabled
+        solidSettingsData?.data?.iamMicrosoftOAuthEnabled ||
+        solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled
     );
     return (
         <div className="">
@@ -470,6 +485,7 @@ const SolidRegister = () => {
                             facebookEnabled={solidSettingsData?.data?.iamFacebookOAuthEnabled}
                             appleEnabled={solidSettingsData?.data?.iamAppleOAuthEnabled}
                             microsoftEnabled={solidSettingsData?.data?.iamMicrosoftOAuthEnabled}
+                            microsoftActiveDirectoryEnabled={solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled}
                         />
                     </>
                 )}
