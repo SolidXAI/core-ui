@@ -70,7 +70,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
 
       if (isAlive) {
         setStatusMessage("Refreshing seeded metadata...");
-        await triggerSeeder("ModuleMetadataSeederService");
+        await triggerSeeder({ seeder: "ModuleMetadataSeederService", modulesToSeed: [event?.rowData?.name].filter(Boolean) });
         return;
       }
 

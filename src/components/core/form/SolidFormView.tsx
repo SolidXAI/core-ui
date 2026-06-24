@@ -1758,6 +1758,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 setDefaultTabViewOptionIndex(2);
             }
         };
+        const showChatterInfo = Boolean(
+            solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow
+            || solidFormViewMetaData?.data?.solidView?.model?.internationalisation
+        );
 
         //en 4 null
         const handleLocaleChangeRedirect = async (
@@ -1961,8 +1965,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         }
                         {isShowChatter === false ?
                             <div className="flex flex-col gap-2 justify-center p-1">
-                                {/*if solidview Internationalisation is enabled then show the locale tab */}
-                                {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
+                                {/*Show the info tab when workflow info or internationalisation is enabled. */}
+                                {showChatterInfo &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
                                         Info
                                     </div>}
