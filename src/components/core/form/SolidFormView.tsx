@@ -155,8 +155,6 @@ const mapLayoutToken = (token: string) => {
     return token;
 };
 
-const isValidIntegerId = (value?: string | null) => Boolean(value && /^\d+$/.test(value));
-
 const normalizeLayoutClassName = (className?: string) => {
     if (!className) return className;
 
@@ -731,7 +729,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
 
         if (defaultEntityLocaleIdn) {
-            setDefaultEntityLocaleId(isValidIntegerId(defaultEntityLocaleIdn) ? defaultEntityLocaleIdn : null);
+            setDefaultEntityLocaleId(defaultEntityLocaleIdn);
         }
 
         // Set the viewMode based on the URL
@@ -827,7 +825,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         {
             ...params,
             viewType: 'form',
-            ...(isValidIntegerId(defaultEntityLocaleId) ? { defaultEntityLocaleId } : {}),
+            defaultEntityLocaleId: defaultEntityLocaleId,
         },
         {
             encodeValuesOnly: true,
@@ -979,12 +977,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
             if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
-                const resolvedDefaultEntityLocaleId = defaultEntityLocaleId ?? '';
                 if (selectedLocale && !formData.has('localeName')) {
                     formData.append('localeName', selectedLocale);
                 }
-                if (params.id === 'new' && isValidIntegerId(resolvedDefaultEntityLocaleId)) {
-                    formData.append('defaultEntityLocaleId', resolvedDefaultEntityLocaleId);
+                if (defaultEntityLocaleId) {
+                    formData.append('defaultEntityLocaleId', defaultEntityLocaleId.toString());
                 }
             }
             if (solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow) {
