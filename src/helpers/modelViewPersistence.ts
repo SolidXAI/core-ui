@@ -146,10 +146,11 @@ export const getPersistedLastModelViewRoute = (target: string): string | null =>
   if (!route) return null;
 
   const stored = readStoredModelViews();
+  const hasMenuScope = Boolean(route.menuItemId || route.actionId);
   const candidateKeys = [
-    Boolean(route.menuItemId || route.actionId) ? getScopedStorageKey(route) : null,
+    hasMenuScope ? getScopedStorageKey(route) : null,
     route.menuItemId ? getMenuStorageKey(route) : null,
-    getModelStorageKey(route),
+    hasMenuScope ? null : getModelStorageKey(route),
   ].filter(Boolean) as string[];
 
   let bestMatch: { entry: StoredModelViewEntry; priority: number } | null = null;
