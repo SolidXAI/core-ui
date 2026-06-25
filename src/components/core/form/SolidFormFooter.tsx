@@ -152,7 +152,10 @@ export const SolidFormFooter = ({ params, internationalisationEnabled = false }:
                     ? rewriteLocaleFilter(defaultQueryObject.finalFullFilter || null, locale)
                     : (defaultQueryObject.finalFullFilter || null);
 
-                const queryData: Record<string, any> = {
+                const requiresPopulate =
+                    Array.isArray(defaultQueryObject.sort) &&
+                    defaultQueryObject.sort[0].split(":")[0].includes(".");
+                const queryData = {
                     offset: defaultQueryObject.offset || 0,
                     limit: defaultQueryObject.limit || 25,
                     filters: resolvedFilters,
@@ -160,6 +163,9 @@ export const SolidFormFooter = ({ params, internationalisationEnabled = false }:
                     modelName: params.modelName,
                     recordId: params.id,
                     sort: defaultQueryObject.sort,
+                    ...(requiresPopulate && {
+                        populate: defaultQueryObject.populate,
+                    }),
                 };
 
                 if (locale) {

@@ -16,8 +16,8 @@ import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveBu
 import { ModelConfigTab, ProvidersTab, ModelBehavior, ModelEntry, SolidAiConfig, ensureBuiltInProviders } from './SolidSettings/LlmSettings/AiModelConfigTab';
 import { useDispatch, useSelector } from 'react-redux';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
+import { normalizeAssetUrl } from '../../helpers/assetUrl';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
-import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 
 export const GeneralSettings = () => {
@@ -478,16 +478,9 @@ export const GeneralSettings = () => {
                                     ? formik.values.appLogo
                                     : logoSrc;
 
-                                const isBlobOrAbsolute =
-                                  src?.startsWith("blob:") ||
-                                  src?.startsWith("http");
-
-                                if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                  src = `${env("API_URL")}/${src}`;
-                                }
                                 return (
                                   <SolidUploadedImage
-                                    src={src}
+                                    src={normalizeAssetUrl(src)}
                                     className="solid-app-logo"
                                   />
                                 );
@@ -526,17 +519,9 @@ export const GeneralSettings = () => {
                                     ? formik.values.companylogo
                                     : logoSrc;
 
-                                const isBlobOrAbsolute =
-                                  src?.startsWith("blob:") ||
-                                  src?.startsWith("http");
-
-                                if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                  src = `${env("API_URL")}/${src}`;
-                                }
-
                                 return (
                                   <SolidUploadedImage
-                                    src={src}
+                                    src={normalizeAssetUrl(src)}
                                     className="solid-compony-logo"
                                   />
                                 );
@@ -1116,19 +1101,9 @@ export const GeneralSettings = () => {
                                           .authScreenLeftBackgroundImage
                                       : logoSrc;
 
-                                  const isBlobOrAbsolute =
-                                    src?.startsWith("blob:") ||
-                                    src?.startsWith("http");
-
-                                  if (
-                                    !isBlobOrAbsolute &&
-                                    !src.startsWith("/")
-                                  ) {
-                                    src = `${env("API_URL")}/${src}`;
-                                  }
                                   return (
                                     <SolidUploadedImage
-                                      src={src}
+                                      src={normalizeAssetUrl(src)}
                                       height={400}
                                       width={400}
                                       maxHeight={400}
@@ -1176,19 +1151,9 @@ export const GeneralSettings = () => {
                                             .authScreenRightBackgroundImage
                                         : logoSrc;
 
-                                  const isBlobOrAbsolute =
-                                    src?.startsWith("blob:") ||
-                                    src?.startsWith("http");
-
-                                  if (
-                                    !isBlobOrAbsolute &&
-                                    !src.startsWith("/")
-                                  ) {
-                                    src = `${env("API_URL")}/${src}`;
-                                  }
                                   return (
                                     <SolidUploadedImage
-                                      src={src}
+                                      src={normalizeAssetUrl(src)}
                                       height={400}
                                       width={400}
                                       maxHeight={400}
@@ -1234,23 +1199,21 @@ export const GeneralSettings = () => {
                                             .authScreenCenterBackgroundImage
                                         : logoSrc;
 
-                                  const isBlobOrAbsolute =
-                                    src?.startsWith("blob:") ||
-                                    src?.startsWith("http");
-
-                                                                    if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${env("API_URL")}/${src}`;
-                                                                    }
-                                                                    return (
-                                                                        <SolidUploadedImage src={src} height={300} width={600} maxHeight={300} />
-                                                                    );
-                                                                })()}
-                                                            </div>
-                                                            {formik.values.authScreenCenterBackgroundImage && (
-                                                                <SettingsImageRemoveButton onClick={removeAuthScreenCenterBackgroundImage} />
-                                                            )}
-                                                        </div>
-                                                    )}
+                                  return (
+                                    <SolidUploadedImage
+                                      src={normalizeAssetUrl(src)}
+                                      height={300}
+                                      width={600}
+                                      maxHeight={300}
+                                    />
+                                  );
+                                })()}
+                              </div>
+                              {formik.values.authScreenCenterBackgroundImage && (
+                                <SettingsImageRemoveButton onClick={removeAuthScreenCenterBackgroundImage} />
+                              )}
+                            </div>
+                          )}
                                                 </div>
                                             </div>
                                         </div>

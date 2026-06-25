@@ -172,6 +172,7 @@ export const ERROR_MESSAGES = {
   PARSED_FIELD: 'Failed to parse fields:',
   CODE_GENERTAE_SUCCESSFULLY: 'Code Generated Successfully',
   RESPONSE_GENERATE_CODE_HANDLER: "response generate code handler",
+  CODE_GENERATE_FAILED: "Failed to generate code",
   KANBAN_UPDATED: "Kanban View Updated!",
   TRY_AGAIN: 'Please try again later',
   REMOVE_ROOT_NODE: "Cannot remove the root node",

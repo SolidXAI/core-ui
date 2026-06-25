@@ -47,7 +47,7 @@ export const BackButton = () => {
 
             const storedView = sessionStorage.getItem("fromView");
             let fromView = "list"
-            if (storedView === "list" || storedView === "kanban" || storedView === "card") {
+            if (storedView === "list" || storedView === "kanban" || storedView === "card" || storedView === "tree") {
                 fromView = storedView;
             }
             const targetView = fromView || "list";

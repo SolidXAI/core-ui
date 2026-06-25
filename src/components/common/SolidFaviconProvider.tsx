@@ -1,16 +1,10 @@
 import { useCallback, useEffect } from "react";
 import { solidGet } from "../../http/solidHttp";
+import { normalizeAssetUrl } from "../../helpers/assetUrl";
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
-import { env } from "../../adapters/env";
 
 const FAVICON_LINK_ID = "solid-dynamic-favicon";
 export const SOLID_SETTINGS_UPDATED_EVENT = "solid:settings-updated";
-
-const normalizeAssetUrl = (src?: string | null) => {
-    if (!src) return "";
-    if (src.startsWith("blob:") || src.startsWith("http") || src.startsWith("/")) return src;
-    return `${env("API_URL")}/${src}`;
-};
 
 const applyFavicon = (href: string) => {
     if (typeof document === "undefined" || !href) return;

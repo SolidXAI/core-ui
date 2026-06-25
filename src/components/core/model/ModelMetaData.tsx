@@ -30,7 +30,7 @@ const cx = (...parts: Array<string | false | null | undefined | Record<string, b
   return classes.join(" ");
 };
 
-const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params, formErrors, setIsDirty }: any, ref) => {
+const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, formikModelMetadataRef, params, formErrors, setIsDirty }: any, ref) => {
 
   // const ModelMetaData = ({ modelMetaData, setModelMetaData, deleteModelFunction, nextTab, formikModelMetadataRef }: any) => {   
 
@@ -200,8 +200,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
            
         };
         setModelMetaData(modelData);
-        nextTab()
-
       } catch (err) {
         console.error(ERROR_MESSAGES.CREATE_MODEL, err);
       }

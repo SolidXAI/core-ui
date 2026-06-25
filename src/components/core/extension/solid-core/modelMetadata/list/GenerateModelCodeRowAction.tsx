@@ -53,13 +53,13 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
       setStatusMessage("Submitting model generation request...");
       await generateCode({ id: event?.rowData?.id }).unwrap();
       setStatusMessage("Waiting for backend to come back online...");
-    } catch (error) {
+    } catch (error: any) {
       setIsGenerating(false);
       dispatch(closePopup());
-      dispatch(showToast({ severity: "error", summary: "Something went wrong", detail: ERROR_MESSAGES.API_ERROR }));
+      const errorMessage = error?.data?.message || error?.data?.error || ERROR_MESSAGES.CODE_GENERATE_FAILED;
+      dispatch(showToast({ severity: "error", summary: "Failed to generate code", detail: errorMessage }));
     }
   };
-
   useEffect(() => {
     if (!isGenerateCodeSuceess) return undefined;
 

@@ -1,6 +1,7 @@
 import Link from "../../common/Link";
 import { usePathname } from "../../../hooks/usePathname";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { SolidButton } from "../../shad-cn-ui";
 import { Plus } from "lucide-react";
 
@@ -19,21 +20,7 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
 
     const createPath = resolveCreatePath();
     const storeCurrentViewContext = () => {
-        if (typeof window === "undefined") return;
-
-        const currentUrl = `${window.location.pathname}${window.location.search}`;
-        const currentSegments = window.location.pathname.split("/").filter(Boolean);
-        const currentView = currentSegments[currentSegments.length - 1];
-        const normalizedView =
-            currentView === "list" ||
-                currentView === "kanban" ||
-                currentView === "card" ||
-                currentView === "tree"
-                ? currentView
-                : "list";
-
-        sessionStorage.setItem("fromView", normalizedView);
-        sessionStorage.setItem("fromViewUrl", currentUrl);
+        storeCurrentModelViewContext();
     };
 
     const icon = solidListViewLayout?.attrs?.addButtonIcon;

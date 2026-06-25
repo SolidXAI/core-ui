@@ -27,7 +27,7 @@ import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { getFilterObjectFromLocalStorage, setFilterObjectToLocalStorage } from "../list/SolidListView";
+import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, setFilterObjectToLocalStorage } from "../list/SolidListView";
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
@@ -37,6 +37,7 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon } from "../../shad-cn-ui";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -555,19 +556,58 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     return null;
   }
 
-  const buildNestedEqCondition = (fieldPath: string, value: any, dateGranularity: any) => {
+  const isEmptyGroupValue = (value: any) =>
+    value === null || value === undefined || value === "";
+
+  const buildNestedCondition = (fieldPath: string,condition: Record<string, any>,dateGranularity?: string | null) => {
     const parts = fieldPath.split(".").filter(Boolean);
     if (parts.length === 0) return {};
+
     if (dateGranularity) {
-      return { [`${parts[0]}:${dateGranularity}`]: { $eq: value } };
+      return { [`${parts[0]}:${dateGranularity}`]: condition };
     }
-    return parts.reduceRight((acc: any, part: string) => ({ [part]: acc }), { $eq: value });
+
+    return parts.reduceRight((acc: any, part: string) => ({ [part]: acc }), condition);
+  };
+
+  const buildEqCondition = (fieldPath: string,value: any,dateGranularity?: string | null) => buildNestedCondition(fieldPath, { $eq: value }, dateGranularity);
+
+  const buildNullCondition = (fieldPath: string,dateGranularity?: string | null) => buildNestedCondition(fieldPath, { $null: true }, dateGranularity);
+
+  const buildImplicitFilterCondition = (item: GroupPathItem) => {
+    const fieldMetadata = getFieldMetadata(item.fieldName);
+    const isManyToOneRelation =
+      fieldMetadata?.type === "relation" &&
+      fieldMetadata?.relationType === "many-to-one";
+      
+    const emptyRelationFilter = { [item.fieldName]: { $null: true } };
+    const emptyValueFilter = isManyToOneRelation
+      ? emptyRelationFilter
+      : buildNullCondition(item.filterField, item.dateGranularity);
+
+    if (item.value === null || item.value === undefined) {
+      return emptyValueFilter;
+    }
+
+    if (item.value === "") {
+      if (item.dateGranularity) {
+        return emptyValueFilter;
+      }
+
+      return {
+        $or: [
+          buildEqCondition(item.filterField, "", item.dateGranularity),
+          emptyValueFilter,
+        ],
+      };
+    }
+
+    return buildEqCondition(item.filterField, item.value, item.dateGranularity);
   };
 
   const buildImplicitFiltersFromPath = (groupPath: GroupPathItem[]) =>
     groupPath
-      // .filter((item) => !item.skipImplicitFilter)
-      .map((item) => buildNestedEqCondition(item.filterField, item.value, item.dateGranularity));
+      .map((item) => buildImplicitFilterCondition(item));
 
   const mergeFiltersWithImplicit = (implicitFilters: any[]) => {
     const baseFilters = latestFiltersRef.current;
@@ -801,7 +841,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     // const dateGranularity = dateTimeImplicitFilter(rule);
     const dateGranularity = getDateGranularity(rule);
     return (groupMetaRows || []).map((groupMeta, index) => {
-      const groupLabel = groupMeta?.groupName ?? "(empty)";
+      const groupLabel = isEmptyGroupValue(groupMeta?.groupName)? "(empty)": groupMeta?.groupName;
       const groupValue = groupMeta?.groupValue ?? "(empty)";
       const idCount = extractGroupCount(groupMeta);
 
@@ -1193,7 +1233,12 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
   const handleFetchUpdatedRecords = () => {
-    // setQueryString();
+    if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
+      solidGlobalSearchElementRef.current?.clearAppliedFilters?.({ preserveGrouping: true });
+      return;
+    }
+
+    void loadRootGroups(getPagination("root").offset);
   };
 
   // ─── Column rendering ─────────────────────────────────────────────────────
@@ -1415,10 +1460,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
   const openRowForEdit = (rowData: any, viewMode: "edit" | "view") => {
-    try {
-      sessionStorage.setItem("fromView", "tree");
-      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-    } catch (e) { }
+    storeCurrentModelViewContext();
 
     router.push(
       `${editBaseUrl}/${rowData?.id}?viewMode=${viewMode}&${new URLSearchParams(editActionQueryParams).toString()}`
@@ -1821,17 +1863,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   // if (params.embeded === true) {
                   // params.handleEditClickForEmbeddedView(rowData?.id);
                   // } else {
-                  if (typeof window !== "undefined") {
-                    // store a simple marker for the caller
-
-                    // also store the full current URL so Back can restore exact state (including action params)
-                    try {
-                      sessionStorage.setItem("fromView", "tree");
-                      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                    } catch (e) {
-                      // ignore storage errors
-                    }
-                  }
+                  storeCurrentModelViewContext();
                   router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                   // }
                 }

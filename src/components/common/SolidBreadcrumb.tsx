@@ -58,12 +58,12 @@ export const SolidBreadcrumb = (props: Props) => {
     }
   }, [pathname, userKeyFieldValue, queryUserKeyField, isNewForm, router]);
 
-  const [fromView, setFromView] = useState<"list" | "kanban" | "card" | null>(null);
+  const [fromView, setFromView] = useState<"list" | "kanban" | "card" | "tree" | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedView = sessionStorage.getItem("fromView");
-      if (storedView === "list" || storedView === "kanban" || storedView === "card") {
+      if (storedView === "list" || storedView === "kanban" || storedView === "card" || storedView === "tree") {
         setFromView(storedView);
       }
     }

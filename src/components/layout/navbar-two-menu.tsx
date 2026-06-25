@@ -1,6 +1,7 @@
 import Link from "../common/Link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "../../hooks/useSearchParams";
+import { resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
 
 const NavbarTwoMenu = ({ menuItems }: any) => {
     const searchParams = useSearchParams();
@@ -40,7 +41,8 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
 
     const createMenuItems = (menuItems: any[]): any[] =>
         menuItems.map((mi) => {
-            const menuItemId = new URLSearchParams(mi.path?.split("?")[1]).get("menuItemId");
+            const resolvedPath = mi.path ? resolveRetainedModelViewRoute(mi.path) : null;
+            const menuItemId = new URLSearchParams(resolvedPath?.split("?")[1]).get("menuItemId");
             return {
                 key: mi.key,
                 id: menuItemId,   // ← extracted from path
@@ -48,7 +50,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
                 icon: mi.icon ?? "",
                 // iconVariant: mi.iconVariant,
                 template: itemRenderer,
-                url: mi.path ?? null,
+                url: resolvedPath,
                 items: mi.children ? createMenuItems(mi.children) : null,
             };
         })

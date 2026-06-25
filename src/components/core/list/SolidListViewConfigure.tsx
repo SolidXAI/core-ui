@@ -14,6 +14,7 @@ import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { capitalize } from "lodash";
 import { Cog, Download, RefreshCw, Save, SlidersHorizontal, Table, Trash2, Upload } from "lucide-react";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import {
     SolidDialog,
     SolidDialogBody,
@@ -80,6 +81,7 @@ export const SolidListViewConfigure = (
         const pathSegments = pathname.split('/').filter(Boolean);
         pathSegments[pathSegments.length - 1] = newView.type; // Replace the last part with new view
         const newPath = '/' + pathSegments.join('/') + `?menuItemId=${newView.menuItemId}&menuItemName=${newView.menuItemName}&actionId=${newView.actionId}&actionName=${newView.actionName}`;
+        storeCurrentModelViewContext(newPath);
         router.push(newPath);
     };
 

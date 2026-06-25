@@ -4549,6 +4549,9 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   line-height: 1.1;
   cursor: pointer;
 }
+.p-button-danger{
+  color: var(--destructive) !important;
+}
 
 .solid-row-action-button-label {
   flex: 1;

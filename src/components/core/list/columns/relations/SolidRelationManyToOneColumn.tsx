@@ -2,8 +2,8 @@
 import { Column } from "../../SolidDataTable";
 import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
 import { getExtensionComponent } from '../../../../../helpers/registry';
+import { buildAdminRecordFormPath } from '../../../../../helpers/routePaths';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
-import { kebabCase } from 'lodash';
 import { ExternalLink } from "lucide-react";
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded }: SolidListViewColumnParams) => {
@@ -54,12 +54,24 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
     if (manyToOneFieldData) {
         // Since this is a many-to-one field, we fetch the user key field of the associated model.
         const userKeyField = column?.attrs?.coModelFieldToDisplay ? column?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
-
         const manyToOneColVal = manyToOneFieldData[userKeyField];
+        const relatedModuleName =
+            fieldMetadata?.relationModelModuleName ||
+            fieldMetadata?.relationModel?.module?.name ||
+            solidListViewMetaData?.data?.solidView?.module?.name;
+        const relatedModelName =
+            fieldMetadata?.relationModel?.singularName ||
+            fieldMetadata?.relationCoModelSingularName;
+        const relationRecordPath = buildAdminRecordFormPath({
+            moduleName: relatedModuleName,
+            modelName: relatedModelName,
+            recordId: manyToOneFieldData?.id,
+            viewMode: "view",
+        });
 
         const isDisabled = column?.attrs?.disabled === true;
 
-        if (embeded === true || isDisabled) {
+        if (embeded === true || isDisabled || !relationRecordPath) {
             return (
                 <span className="solid-list-external-link-text">
                     {manyToOneColVal}
@@ -72,25 +84,7 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
                 type="button"
                 className="solid-list-external-link"
                 onClick={() => {
-                    const pathSegments = window.location.pathname.split('/').filter(Boolean);
-
-                    const listIndex = pathSegments.lastIndexOf('list');
-
-                    if (listIndex > 0) {
-                        pathSegments[listIndex - 1] = kebabCase(fieldMetadata?.relationModel?.singularName);
-                        pathSegments[listIndex] = `form/${manyToOneFieldData?.id}`;
-                    }
-                    else if (pathSegments[pathSegments.length - 2] === "form") {
-                        pathSegments[pathSegments.length - 3] = kebabCase(fieldMetadata?.relationModel?.singularName);
-                        pathSegments[pathSegments.length - 2] = "form";
-                        pathSegments[pathSegments.length - 1] = manyToOneFieldData?.id;
-                    }
-
-                    const newPath = `/${pathSegments.join('/')}?viewMode=view`;
-
-                    // open in new tab
-                    window.open(newPath, "_blank");
-
+                    window.open(relationRecordPath, "_blank");
                 }}
             >
                 <span className="solid-list-external-link-text">{manyToOneColVal}</span>
