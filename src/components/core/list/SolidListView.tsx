@@ -1449,16 +1449,17 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
               {/* <div> */}
               <div className="flex justify-between w-full">
                 <div className="solid-list-toolbar-left flex w-full items-center gap-3">
-                  <div className='flex items-center gap-2'>
-                    {/* {params.embeded !== true &&
+                  {/* Here only hide the Solid list view title, LayoutGrid already commented */}
+                  {/* <div className='flex items-center gap-2'>
+                    {params.embeded !== true &&
                       <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                         <LayoutGrid size={18} />
                       </div>
-                    } */}
+                    }
                     <p className="m-0 view-title solid-list-view-text-wrapper">
                       {solidListViewMetaData?.data?.solidView?.action?.displayName || solidListViewMetaData?.data?.solidView?.displayName}
                     </p>
-                  </div>
+                  </div> */}
                   {params.embeded === false && (
                     <div className="hidden lg:flex">
                       {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}

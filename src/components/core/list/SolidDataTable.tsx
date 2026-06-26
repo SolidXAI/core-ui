@@ -284,7 +284,7 @@ export function SolidDataTable({
                         <td
                           key={`cell-${key}-${index}`}
                           className={cx(
-                            "solid-data-table-td align-top text-foreground",
+                            "solid-data-table-td align-middle text-foreground",
                             props.frozen ? "solid-tree-sticky-cell" : undefined,
                             props.frozen && props.alignFrozen === "right" ? "solid-tree-sticky-cell-right" : undefined,
                             props.frozen && props.alignFrozen !== "right" ? "solid-tree-sticky-cell-left" : undefined,

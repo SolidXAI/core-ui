@@ -145,9 +145,9 @@ export const AdminTopHeader = () => {
               {index === 1 && showBack ? (
                 <button
                   type="button"
-                  className="solid-admin-crumb-link"
+                  className="px-0 solid-admin-crumb-link"
                   onClick={() => handleBreadcrumbClick(index)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", textDecoration: "underline" }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", textDecoration: "underline", fontFamily: 'inherit' }}
                 >
                   {crumb}
                 </button>

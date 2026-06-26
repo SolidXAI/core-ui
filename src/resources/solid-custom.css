@@ -534,6 +534,7 @@ body {
   height: 100%;
   padding: 0;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .solid-sidebar-tree-label {
@@ -4373,6 +4374,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   font-weight: 500;
   padding: 0;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .solid-list-external-link:hover {
@@ -6617,6 +6619,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-list-toolbar-row {
   padding: 5px 15px 0 10px;
-  padding-left: 2.4rem;
+  padding-left: 1rem;
 
 }

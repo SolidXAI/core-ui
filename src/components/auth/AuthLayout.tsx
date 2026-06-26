@@ -12,6 +12,7 @@ import { AuthSettingsContext } from "./AuthSettingsContext";
 import { normalizeAssetUrl, toCssBackgroundImage } from "../../helpers/assetUrl";
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 import { SolidToastProvider } from "../common/SolidToastProvider";
+import { SolidSpinner } from "../shad-cn-ui";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
@@ -57,8 +58,14 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         }
     }, [solidSettingsData, pathname]);
 
-    const authChildren =
-        pathname !== "/auth/register" || allowRegistration !== false || isLoadingAuthSettings
+    const authLoadingContent = (
+        <div className="flex items-center justify-center min-h-[240px]" aria-busy="true" aria-live="polite">
+            <SolidSpinner size={32} />
+        </div>
+    );
+    const authChildren = isLoadingAuthSettings
+        ? authLoadingContent
+        : pathname !== "/auth/register" || allowRegistration !== false
             ? children
             : null;
     const handleRegistration = () => {

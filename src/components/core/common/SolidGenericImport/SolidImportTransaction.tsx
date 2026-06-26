@@ -166,10 +166,21 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
         }
 
         if (missingRequiredFields.length > 0) {
+            const errorDetail = ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_MESSAGE(missingRequiredFields.length);
             dispatch(showToast({
                 severity: "error",
                 summary: ERROR_MESSAGES.IMPORT_ERROR,
-                detail: ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_MESSAGE(missingRequiredFields.length),
+                detail: errorDetail,
+            }));
+            return;
+        }
+
+        if (unmappedImportableFieldCount > 0) {
+            const errorDetail = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_MESSAGE(unmappedImportableFieldCount);
+            dispatch(showToast({
+                severity: "error",
+                summary: ERROR_MESSAGES.IMPORT_ERROR,
+                detail: errorDetail,
             }));
             return;
         }
