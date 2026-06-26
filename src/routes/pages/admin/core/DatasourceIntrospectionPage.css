@@ -787,6 +787,13 @@
   justify-content: flex-end;
 }
 
+.sdix-column-action-stack {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
 .sdix-column-include {
   display: flex;
   align-items: center;
@@ -815,6 +822,11 @@
 .sdix-column-action-chip--required {
   background: #f4edff !important;
   color: #7152d8 !important;
+}
+
+.sdix-column-action-icon {
+  min-width: 2rem;
+  padding-inline: 0.45rem !important;
 }
 
 .sdix-column-placeholder {

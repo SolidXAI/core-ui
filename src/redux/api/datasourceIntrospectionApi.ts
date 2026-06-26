@@ -121,6 +121,7 @@ export type DatasourceIntrospectionMappingColumn = {
   include: boolean;
   matched: boolean;
   isPrimaryKey: boolean;
+  fieldConfig?: Record<string, any> | null;
 };
 
 export type DatasourceIntrospectionMappingRequest = {

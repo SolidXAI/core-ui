@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   AlignLeft,
@@ -22,11 +22,17 @@ import {
   Timer,
   ToggleLeft,
   Type,
+  ArrowRight,
 } from "lucide-react";
+import { SolidButton } from "../../shad-cn-ui";
 
 type FieldSelectorProps = {
   handleTypeSelect: (value: string, label: string) => void;
   modelMetaData?: any;
+  availableFieldTypes?: string[];
+  initialSelectedValue?: string | null;
+  requireExplicitContinue?: boolean;
+  continueLabel?: string;
 };
 
 type FieldOption = {
@@ -83,12 +89,39 @@ const solidFieldOptions: FieldOption[] = [
   { label: "UUID", description: "Unique identifier", Icon: Fingerprint, value: "uuid", tone: fieldToneMap.uuid },
 ];
 
-const FieldSelector = ({ handleTypeSelect }: FieldSelectorProps) => {
-  const [selectedField, setSelectedField] = useState<string | null>(null);
+const FieldSelector = ({
+  handleTypeSelect,
+  availableFieldTypes,
+  initialSelectedValue = null,
+  requireExplicitContinue = false,
+  continueLabel = "Next",
+}: FieldSelectorProps) => {
+  const [selectedField, setSelectedField] = useState<string | null>(initialSelectedValue);
+
+  useEffect(() => {
+    setSelectedField(initialSelectedValue);
+  }, [initialSelectedValue]);
+
+  const visibleFieldOptions = useMemo(() => {
+    if (!availableFieldTypes?.length) {
+      return solidFieldOptions;
+    }
+
+    const allowedTypes = new Set(availableFieldTypes);
+    return solidFieldOptions.filter((option) => allowedTypes.has(option.value));
+  }, [availableFieldTypes]);
 
   const handleSelect = (option: FieldOption) => {
     setSelectedField(option.value);
-    handleTypeSelect(option.value, option.label);
+    if (!requireExplicitContinue) {
+      handleTypeSelect(option.value, option.label);
+    }
+  };
+
+  const handleContinue = () => {
+    const selectedOption = visibleFieldOptions.find((option) => option.value === selectedField);
+    if (!selectedOption) return;
+    handleTypeSelect(selectedOption.value, selectedOption.label);
   };
 
   return (
@@ -98,7 +131,7 @@ const FieldSelector = ({ handleTypeSelect }: FieldSelectorProps) => {
         <p className="solid-field-selector-subheading">Choose the data type you want to add to the model.</p>
       </div>
       <div className="solid-field-selector-grid">
-        {solidFieldOptions.map((option) => (
+        {visibleFieldOptions.map((option) => (
           <button
             key={option.value}
             type="button"
@@ -117,6 +150,18 @@ const FieldSelector = ({ handleTypeSelect }: FieldSelectorProps) => {
           </button>
         ))}
       </div>
+      {requireExplicitContinue ? (
+        <div className="mt-4 flex justify-end">
+          <SolidButton
+            size="small"
+            leftIcon={<ArrowRight size={14} />}
+            onClick={handleContinue}
+            disabled={!selectedField}
+          >
+            {continueLabel}
+          </SolidButton>
+        </div>
+      ) : null}
     </div>
   );
 };
