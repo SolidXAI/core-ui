@@ -161,6 +161,13 @@
   min-height: 28rem;
 }
 
+.solid-json-editor.sdix-json-editor div.jsoneditor-tree,
+.solid-json-editor.sdix-json-editor textarea.jsoneditor-text,
+.solid-json-editor.sdix-json-editor .ace-jsoneditor {
+  min-height: 0;
+  height: 100% !important;
+}
+
 .solid-json-editor textarea.jsoneditor-text,
 .solid-json-editor .ace-jsoneditor,
 .solid-json-editor .ace-jsoneditor .ace_text-layer,

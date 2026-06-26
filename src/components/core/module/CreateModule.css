@@ -22,12 +22,6 @@
   border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
 }
 
-.solid-module-form-tab-extra {
-  display: inline-flex;
-  align-items: center;
-  padding-right: 0.35rem;
-}
-
 .solid-module-form-workspace .solid-module-form-tabpanel {
   padding-top: 0.65rem;
 }
@@ -109,4 +103,64 @@
   color: color-mix(in srgb, var(--foreground, #111827) 78%, var(--muted-foreground, #6b7280));
   font-size: 0.875rem;
   line-height: 1.4;
+}
+
+.solid-module-automap-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--primary-color, var(--primary)) 16%, var(--border, #d6dae5) 84%);
+  border-radius: 1rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 5%, #ffffff 95%),
+      color-mix(in srgb, var(--primary-color, var(--primary)) 9%, #f8fafc 91%)
+    );
+}
+
+.solid-module-automap-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.solid-module-automap-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--primary-color, var(--primary)) 70%, #4b5563 30%);
+}
+
+.solid-module-automap-copy h4 {
+  margin: 0;
+  color: var(--foreground, #111827);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.solid-module-automap-copy p {
+  margin: 0;
+  color: color-mix(in srgb, var(--foreground, #111827) 76%, var(--muted-foreground, #6b7280));
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.solid-module-automap-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: color-mix(in srgb, var(--foreground, #111827) 76%, var(--muted-foreground, #6b7280));
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.solid-module-automap-list li + li {
+  margin-top: 0.22rem;
+}
+
+.solid-module-automap-actions {
+  display: flex;
+  justify-content: center;
 }
