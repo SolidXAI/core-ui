@@ -1431,13 +1431,14 @@ export function DatasourceIntrospectionPage() {
       setRunMigrationCompleted(true);
       dispatch(showToast({
         severity: "success",
-        summary: "Migration complete",
-        detail: response.message || `Migrations ran successfully for datasource "${selectedDatasource}".`,
+        summary: "Migration workflow complete",
+        detail: response.message || `Migration, build, and seed ran successfully for datasource "${selectedDatasource}".`,
       }));
 
       await refetchTables();
       await refetchBootstrap();
     } catch (error: any) {
+      setRunMigrationOutput(readQueryError(error));
       dispatch(showToast({
         severity: "error",
         summary: "Run migration failed",
@@ -1887,19 +1888,21 @@ export function DatasourceIntrospectionPage() {
     <div className="sdix-stage-panel">
       <div className="sdix-stage-panel__header">
         <span className="sdix-stage-panel__eyebrow">Step 5</span>
-        <h3>Run datasource migration</h3>
-        <p>With the datasource file updated and module code generated, SolidX can now run the TypeORM migration for the selected datasource and apply the missing system fields to the legacy table.</p>
+        <h3>Run migration, build, and seed</h3>
+        <p>With the datasource file updated and module code generated, SolidX can now run the TypeORM migration for the selected datasource, rebuild the project, and reseed the mapped module metadata.</p>
       </div>
       <div className="sdix-stage-panel__body">
         <div className="sdix-stage-panel__card">
-          <div className="sdix-stage-panel__card-title">Command</div>
-          <pre className="sdix-stage-panel__command"><code>{`npx @solidxai/solidctl@latest migration -d ${selectedDatasource} run`}</code></pre>
+          <div className="sdix-stage-panel__card-title">Commands</div>
+          <pre className="sdix-stage-panel__command"><code>{`npx @solidxai/solidctl@latest migration -d ${selectedDatasource} run
+npx @solidxai/solidctl@latest build
+npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name || ""}`}</code></pre>
         </div>
         {runMigrationCompleted ? (
           <div className="sdix-empty-state is-inline sdix-stage-progress">
             <Check size={24} />
-            <h3>Migration finished</h3>
-            <p>Review the output below. When you are satisfied, click Finish to return to the model list.</p>
+            <h3>Migration workflow finished</h3>
+            <p>Review the command output below. When you are satisfied, click Finish to return to the model list.</p>
           </div>
         ) : null}
         {runMigrationOutput ? (
@@ -1969,18 +1972,18 @@ export function DatasourceIntrospectionPage() {
       case "run-migration":
         return runMigrationCompleted ? (
           <span>
-            The datasource migration has completed for
+            The migration, build, and seed workflow has completed for
             {" "}
             <strong>{selectedDatasource}</strong>
             . Review the output below and click Finish when you are ready to return to the model list.
           </span>
         ) : (
           <span>
-            Run the datasource migration for
+            Run the migration, build, and seed workflow for
             {" "}
             <strong>{selectedDatasource}</strong>
             {" "}
-            to apply the SolidX system columns on the legacy table.
+            to apply the SolidX system columns on the legacy table and refresh the module metadata state.
           </span>
         );
       case "configure":
