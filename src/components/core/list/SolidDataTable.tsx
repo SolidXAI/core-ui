@@ -317,6 +317,7 @@ export function SolidDataTable({
               className="solid-paginator-select"
               options={rowsPerPageOptions.map((option) => ({ label: String(option), value: option }))}
               native={false}
+              menuPlacement="top"
             />
             <span className="solid-paginator-report">{report}</span>
           </div>
