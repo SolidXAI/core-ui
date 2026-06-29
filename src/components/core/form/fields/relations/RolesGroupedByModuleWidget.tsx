@@ -17,6 +17,10 @@ interface RolesGroupedByModuleWidgetProps {
     readOnly?: boolean;
 }
 
+function cx(...parts: Array<string | false | undefined>) {
+    return parts.filter(Boolean).join(' ');
+}
+
 export const RolesGroupedByModuleWidget = ({
     selectedRoles,
     onToggle,
@@ -110,26 +114,29 @@ export const RolesGroupedByModuleWidget = ({
                     <SolidAccordionItem key={key} value={key}>
                         <SolidAccordionTrigger>{title}</SolidAccordionTrigger>
                         <SolidAccordionContent>
-                            <div className="flex flex-wrap -mx-2 -mt-2 pt-1">
-                                {group.roles.map((item, i) => (
-                                    <div
-                                        key={item.value}
-                                        className={`field flex w-1/2 gap-2 ${i >= 2 ? 'mt-3' : ''}`}
-                                    >
-                                        <SolidCheckbox
-                                            disabled={readOnly}
-                                            id={`role-${item.value}`}
-                                            checked={selectedRoles.includes(item.label)}
-                                            onChange={() => onToggle(item.label)}
-                                        />
-                                        <label
-                                            htmlFor={`role-${item.value}`}
-                                            className="form-field-label m-0"
+                            <div className="solid-user-role-grid pt-1">
+                                {group.roles.map((item) => {
+                                    const isSelected = selectedRoles.includes(item.label);
+
+                                    return (
+                                        <div
+                                            key={item.value}
+                                            className={cx(
+                                                'solid-user-role-card',
+                                                isSelected && 'is-selected'
+                                            )}
                                         >
-                                            {item.label}
-                                        </label>
-                                    </div>
-                                ))}
+                                            <SolidCheckbox
+                                                className="solid-user-role-control"
+                                                disabled={readOnly}
+                                                id={`role-${item.value}`}
+                                                checked={isSelected}
+                                                onChange={() => onToggle(item.label)}
+                                                label={item.label}
+                                            />
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </SolidAccordionContent>
                     </SolidAccordionItem>

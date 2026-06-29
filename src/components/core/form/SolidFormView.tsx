@@ -341,7 +341,7 @@ const SolidGroup = ({ children, attrs }: any) => {
 
 const SolidRow = ({ children, attrs }: any) => {
     const className = [
-        "row",
+        "flex-row w-full",
         "solid-form-layout-row",
         "px-2",
         "pt-2",
