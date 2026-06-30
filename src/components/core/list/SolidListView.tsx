@@ -242,7 +242,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const localeName = searchParams.get("locale");
   const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
   const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
-  const rowClickFormMode = solidSettingsMap?.formModeOnRowClick === "view" ? "view" : "edit";
+  const rowClickFormMode = solidSettingsMap?.rowClickAction === "view" ? "view" : "edit";
 
 
   const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
