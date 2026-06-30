@@ -73,6 +73,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         setIsRestricted(false);
     }
 
+    const authTheme = layoutContext?.themeMode === "dark" ? "dark" : "light";
+
     const solidSideBanner = () => {
         const layout = solidSettingsData?.data?.authPagesLayout || "center";
 
@@ -83,7 +85,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         } else if (layout === 'right') {
             src = solidSettingsData?.data?.authScreenRightBackgroundImage || SHADCN_PLACEHOLDER_IMAGE;
         } else if (layout === 'center') {
-            src = solidSettingsData?.data?.authScreenCenterBackgroundImage || (AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage;
+            src = solidSettingsData?.data?.authScreenCenterBackgroundImage
+                || (authTheme === "light"
+                    ? ((AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage)
+                    : "");
         }
 
         return normalizeAssetUrl(src);
@@ -114,7 +119,6 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLayout = solidSettingsData?.data?.authPagesLayout || "center";
-    const authTheme = layoutContext?.themeMode === "dark" ? "dark" : "light";
     const isCenter = authLayout === "center";
     const isLeft = authLayout === "left";
     const isRight = authLayout === "right";
