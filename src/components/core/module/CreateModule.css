@@ -49,6 +49,10 @@
   padding: 0 0.9rem 1rem;
 }
 
+.solid-module-general-info-content form {
+  background: transparent;
+}
+
 .solid-module-general-info-actions {
   display: flex;
   align-items: center;
@@ -115,8 +119,8 @@
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--primary-color, var(--primary)) 5%, #ffffff 95%),
-      color-mix(in srgb, var(--primary-color, var(--primary)) 9%, #f8fafc 91%)
+      color-mix(in srgb, var(--primary-color, var(--primary)) 5%, var(--card, #ffffff) 95%),
+      color-mix(in srgb, var(--primary-color, var(--primary)) 9%, var(--background, #f8fafc) 91%)
     );
 }
 
@@ -163,4 +167,31 @@
 .solid-module-automap-actions {
   display: flex;
   justify-content: center;
+}
+
+[data-theme="dark"] .solid-module-form-workspace,
+[data-theme="dark"] .solid-module-form-tabpanel,
+[data-theme="dark"] .solid-module-general-info-content,
+[data-theme="dark"] .solid-module-general-info-content form {
+  background: transparent;
+}
+
+[data-theme="dark"] .solid-module-automap-panel {
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 24%, var(--border) 76%);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 10%, var(--card) 90%),
+      color-mix(in srgb, var(--primary-color, var(--primary)) 14%, var(--background) 86%)
+    );
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+[data-theme="dark"] .solid-module-automap-eyebrow {
+  color: color-mix(in srgb, var(--primary-color, var(--primary)) 72%, var(--muted-foreground) 28%);
+}
+
+[data-theme="dark"] .solid-module-automap-copy p,
+[data-theme="dark"] .solid-module-automap-list {
+  color: color-mix(in srgb, var(--foreground) 80%, var(--muted-foreground));
 }
