@@ -303,6 +303,8 @@ const AppSidebar = () => {
         .filter(Boolean)
         .join(" ");
 
+    const showExpanded = !isDesktop || !isCollapsed;
+
     const selectWorkspace = (workspace: SolidMenuItem) => {
         setSelectedWorkspaceKey(workspace.key || "");
         setSearchTerm("");
@@ -325,7 +327,7 @@ const AppSidebar = () => {
                             <span className="solid-workspace-avatar">
                                 {(selectedWorkspace?.title || "W").slice(0, 1).toUpperCase()}
                             </span>
-                            {!isCollapsed && (
+                            {showExpanded && (
                                 <>
                                     <span className="solid-workspace-label-wrap">
                                         <span className="solid-workspace-label-top">Workspace</span>
@@ -341,7 +343,7 @@ const AppSidebar = () => {
                             )}
                         </button>
 
-                        {workspaceOpen && !isCollapsed && (
+                        {workspaceOpen && showExpanded && (
                             <div className="solid-workspace-menu">
                                 {workspaces.map((workspace) => (
                                     <button
@@ -360,7 +362,7 @@ const AppSidebar = () => {
 
                 </div>
 
-                {!isCollapsed ? (
+                {showExpanded ? (
                     <>
                         <div className="solid-sidebar-search-wrap">
                             <input
