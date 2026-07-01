@@ -3873,6 +3873,25 @@ html.dark .solid-data-table-root input[type="checkbox"],
     transform 120ms ease;
 }
 
+html.dark .solid-data-table-th.solid-data-table-selection-col,
+html.dark .solid-data-table-td.solid-data-table-selection-col,
+[data-theme="dark"] .solid-data-table-th.solid-data-table-selection-col,
+[data-theme="dark"] .solid-data-table-td.solid-data-table-selection-col {
+  text-align: center;
+  vertical-align: middle;
+}
+
+html.dark .solid-data-table-selection-col input[type="checkbox"],
+[data-theme="dark"] .solid-data-table-selection-col input[type="checkbox"] {
+  display: grid;
+  place-content: center;
+  width: 15px;
+  height: 15px;
+  margin: 0 auto;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 html.dark .solid-data-table-root input[type="checkbox"]::before,
 [data-theme="dark"] .solid-data-table-root input[type="checkbox"]::before {
   content: "";
