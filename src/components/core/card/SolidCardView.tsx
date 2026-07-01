@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import qs from "qs";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
 import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
@@ -29,7 +29,9 @@ import {
   SolidDialogSeparator,
   SolidDialogTitle,
   SolidIcon,
+  SolidSelect,
 } from "../../shad-cn-ui";
+import { showToast } from "../../../redux/features/toastSlice";
 
 type SolidCardViewParams = {
   moduleName: string;
@@ -126,6 +128,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [solidCardViewMetaData, setSolidCardViewMetaData] = useState<any>();
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
+  const [showArchived, setShowArchived] = useState(false);
 
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
@@ -145,8 +148,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     : [];
 
   const entityApi = createSolidEntityApi(params.modelName);
-  const { useLazyGetSolidEntitiesQuery } = entityApi;
+  const { useLazyGetSolidEntitiesQuery, useLazyRecoverSolidEntityByIdQuery } = entityApi;
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
+  const [triggerRecoverSolidEntityById, { isLoading: recoverByIdIsLoading }] = useLazyRecoverSolidEntityByIdQuery();
 
   const menuItemId = searchParams.get("menuItemId");
   const menuItemName = searchParams.get("menuItemName");
@@ -180,8 +184,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const canGoPrev = currentPage > 1;
   const canGoNext = currentPage < totalPages;
 
-  const handleRowsChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const nextRows = Number(event.target.value);
+  const handleRowsChange = (value: number) => {
+    const nextRows = Number(value);
     setRows(nextRows);
     setFirst(0);
   };
@@ -247,6 +251,11 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     setRows(Number(persistedFilterObject?.limit) || rows);
     setRowsPerPageOptions(pageSizeOptions);
     setFirst(Number(persistedFilterObject?.offset) || 0);
+    setShowArchived(
+      persistedFilterObject?.showArchived === true ||
+      persistedFilterObject?.showArchived === "true" ||
+      persistedFilterObject?.showSoftDeleted === "inclusive"
+    );
     setToPopulate(toPopulate);
     setToPopulateMedia(toPopulateMedia);
     setFilters(restoredFilter.$and.length > 0 ? restoredFilter : { $and: [] });
@@ -272,34 +281,57 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     setEditButtonUrl(editActionUrl);
   }, [solidCardViewMetaDataResponse]);
 
+  const loadCards = async (nextFilters = filters) => {
+    if (!queryDataLoaded || !solidCardViewMetaDataResponse) return;
+
+    setLoading(true);
+
+    const queryData: any = {
+      offset: first,
+      limit: rows,
+      populate: toPopulate,
+      populateMedia: toPopulateMedia,
+      filters: nextFilters,
+    };
+    if (showArchived) {
+      queryData.showSoftDeleted = "inclusive";
+    }
+
+    try {
+      const data: any = await triggerGetSolidEntities(
+        qs.stringify(queryData, { encodeValuesOnly: true })
+      ).unwrap();
+
+      setCards(data?.records || []);
+      setTotalRecords(data?.meta?.totalRecords || 0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchCards = async () => {
-      if (!queryDataLoaded || !solidCardViewMetaDataResponse) return;
+    void loadCards(filters);
+  }, [filters, first, queryDataLoaded, rows, showArchived, solidCardViewMetaDataResponse, toPopulate, toPopulateMedia]);
 
-      setLoading(true);
+  useEffect(() => {
+    if (!queryDataLoaded) return;
 
-      const queryData = {
-        offset: first,
-        limit: rows,
-        populate: toPopulate,
-        populateMedia: toPopulateMedia,
-        filters,
-      };
-
-      try {
-        const data: any = await triggerGetSolidEntities(
-          qs.stringify(queryData, { encodeValuesOnly: true })
-        ).unwrap();
-
-        setCards(data?.records || []);
-        setTotalRecords(data?.meta?.totalRecords || 0);
-      } finally {
-        setLoading(false);
-      }
+    const persistedFilterObject = typeof window !== "undefined" ? (getFilterObjectFromLocalStorage() || {}) : {};
+    const nextPersistedFilterObject: Record<string, any> = {
+      ...persistedFilterObject,
+      offset: first,
+      limit: rows,
+      showArchived,
     };
 
-    fetchCards();
-  }, [queryDataLoaded, first, rows, toPopulate, toPopulateMedia, filters, solidCardViewMetaDataResponse]);
+    if (showArchived) {
+      nextPersistedFilterObject.showSoftDeleted = "inclusive";
+    } else {
+      delete nextPersistedFilterObject.showSoftDeleted;
+    }
+
+    setFilterObjectToLocalStorage(nextPersistedFilterObject);
+  }, [first, queryDataLoaded, rows, showArchived]);
 
   const handleApplyCustomFilter = async (filterPredicates: any) => {
     const updatedFilter = { $and: [] as any[] };
@@ -322,6 +354,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     setFilterObjectToLocalStorage({
       offset: 0,
       limit: rows,
+      showArchived,
+      ...(showArchived ? { showSoftDeleted: "inclusive" } : {}),
       custom_filter_predicate: filterPredicates.custom_filter_predicate || {},
       search_predicate: filterPredicates.search_predicate || {},
       saved_filter_predicate: filterPredicates.saved_filter_predicate || {},
@@ -335,7 +369,29 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       return;
     }
 
-    setQueryDataLoaded((current) => !current);
+    void loadCards(filters);
+  };
+
+  const handleRecoverRecord = async (record: any) => {
+    if (!record?.id) return;
+
+    try {
+      const response: any = await triggerRecoverSolidEntityById(record.id).unwrap();
+      dispatch(showToast({
+        severity: "success",
+        summary: "Success",
+        detail: response?.data?.message || "Record recovered successfully.",
+        life: 3000,
+      }));
+      await loadCards(filters);
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Recover Failed",
+        detail: error?.data?.message || error?.message || "Unable to recover the selected record.",
+        life: 4000,
+      }));
+    }
   };
 
   const toggleBothSidebars = () => {
@@ -348,7 +404,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
   const cardViewTitle = solidCardViewMetaDataResponse?.data?.solidView?.displayName;
   const showEmptyState = !loading && cards.length === 0;
-  const headerRequestStatusLabel = loading || !queryDataLoaded ? "Loading..." : null;
+  const headerRequestStatusLabel = recoverByIdIsLoading ? "Recovering..." : loading || !queryDataLoaded ? "Loading..." : null;
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
@@ -413,6 +469,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   modelName={params.modelName}
                   actionsAllowed={actionsAllowed}
                   viewModes={viewModes}
+                  setShowArchived={setShowArchived}
+                  showArchived={showArchived}
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
                   filters={filters}
@@ -451,8 +509,10 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   records={cards}
                   solidCardViewMetaData={solidCardViewMetaDataResponse?.data}
                   editButtonUrl={editBaseUrl}
+                  onRecover={handleRecoverRecord}
                   setLightboxUrls={setLightboxUrls}
                   setOpenLightbox={setOpenLightbox}
+                  showArchived={showArchived}
                 />
               )}
             </div>
@@ -462,17 +522,13 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                 <div className="solid-card-view-pagination-bar solid-table-paginator flex items-center justify-center gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background">
                   <div className="solid-paginator-meta flex items-center gap-2">
                     <span className="solid-paginator-label">Records</span>
-                    <select
+                    <SolidSelect
                       value={rows}
-                      onChange={handleRowsChange}
                       className="solid-paginator-select"
-                    >
-                      {rowsOptions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
+                      options={rowsOptions.map((option) => ({ label: String(option), value: option }))}
+                      native={false}
+                      onChange={(event) => handleRowsChange(Number(event.value))}
+                    />
                     <span className="solid-paginator-report">{paginationReport}</span>
                   </div>
                   <div className="solid-paginator-actions flex items-center gap-2">

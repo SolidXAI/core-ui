@@ -2402,6 +2402,16 @@ body {
 
 .solid-auth-theme-wrapper.center .solid-center-layout {
   width: min(388px, calc(100vw - 24px)) !important;
+  min-height: calc(100dvh - 48px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.solid-auth-theme-wrapper.center .solid-auth-center-stack {
+  width: 100%;
+  align-items: center;
 }
 
 .solid-auth-theme-wrapper.center .solid-auth-footer {
@@ -4270,6 +4280,17 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-datatable-wrapper .greyed-out-row {
   opacity: 0.55;
+}
+
+.solid-card-view-card.greyed-out-row,
+.solid-kanban-card.greyed-out-row {
+  opacity: 0.55;
+}
+
+.solid-card-view-card.greyed-out-row:hover,
+.solid-kanban-card.greyed-out-row:hover {
+  transform: none !important;
+  filter: none !important;
 }
 
 .solid-datatable-wrapper a {

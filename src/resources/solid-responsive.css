@@ -651,9 +651,9 @@
         text-overflow: ellipsis;
     }
 
-    .solid-popover-content.solid-custom-overlay.solid-form-stepper-overlay {
+    /* .solid-popover-content.solid-custom-overlay.solid-form-stepper-overlay {
         left: -86px !important;
-    }
+    } */
 
     .solid-list-page-wrapper {
         padding: 8px;
@@ -926,9 +926,9 @@
         max-width: min(300px, calc(100vw - 40px));
     }
 
-    .solid-popover-content.solid-custom-overlay.solid-form-stepper-overlay {
+    /* .solid-popover-content.solid-custom-overlay.solid-form-stepper-overlay {
         left: -86px !important;
-    }
+    } */
 
 
     .solid-list-view-text-wrapper {
