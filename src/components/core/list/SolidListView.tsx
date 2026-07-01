@@ -31,6 +31,8 @@ import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { getSettingsMap } from "../../../helpers/settingsPayload";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
@@ -238,6 +240,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
+  const rowClickFormMode = solidSettingsMap?.rowClickAction === "view" ? "view" : "edit";
 
 
   const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
@@ -1688,7 +1693,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
                         storeCurrentModelViewContext();
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${buildEditNavigationQueryString(rowData)}`);
+                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
                       }
                     }
                     }
