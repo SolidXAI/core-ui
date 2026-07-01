@@ -242,9 +242,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const localeName = searchParams.get("locale");
   const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
   const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
-  const rowClickFormMode = solidSettingsMap?.rowClickAction === "view" ? "view" : "edit";
-
-
   const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
   const [solidListViewLayout, setSolidListViewLayout] = useState<any>(null);
   const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
@@ -304,6 +301,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
+  const rowClickFormMode = useMemo(() => {
+    const isSystemModule = solidListViewMetaData?.data?.solidView?.module?.isSystem === true;
+
+    if (isSystemModule) {
+      return "view";
+    }
+
+    return solidSettingsMap?.rowClickAction === "view" ? "view" : "edit";
+  }, [solidListViewMetaData, solidSettingsMap]);
 
   const resolveLocaleFromFilter = (filterNode: any): string | null => {
     if (!filterNode || typeof filterNode !== "object") return null;
