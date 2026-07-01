@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ChevronLeft, ChevronRight, EllipsisVertical, Pencil, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, EllipsisVertical, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -35,7 +35,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { usePathname } from "../../../hooks/usePathname";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
-import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon } from "../../shad-cn-ui";
+import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon, SolidSelect } from "../../shad-cn-ui";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
@@ -414,6 +414,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       setToPopulateMedia(queryObject.populateMedia || []);
       setSortField(queryObject.sortField || "");
       setSortOrder(queryObject.sortOrder || 0);
+      setShowArchived(
+        queryObject.showArchived === true ||
+        queryObject.showArchived === "true" ||
+        queryObject.showSoftDeleted === "inclusive"
+      );
 
       const savedLimit = queryObject.limit;
       if (savedLimit && currentOptions.includes(savedLimit)) {
@@ -448,6 +453,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       setToPopulate(nextPopulate);
       setToPopulateMedia(nextPopulateMedia);
       setGlobalLimit(resolveDefaultPageSize(currentOptions));
+      setShowArchived(false);
     }
   }, [solidTreeViewLayout, solidTreeViewMetaData]);
 
@@ -629,6 +635,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     return derivedAggregates.length > 0 ? derivedAggregates : ["id:count"];
   };
 
+  const applyArchivedQueryState = (queryData: Record<string, any>) => {
+    if (showArchived) {
+      queryData.showSoftDeleted = "inclusive";
+    }
+    return queryData;
+  };
+
   const extractGroupCount = (groupMeta: any) => {
     if (groupMeta?.id_count !== undefined) return groupMeta.id_count;
     const countKey = Object.keys(groupMeta || {}).find((key) => key.endsWith("_count"));
@@ -717,6 +730,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const implicitFilters = buildImplicitFiltersFromPath(groupPath);
     const mergedFilters = mergeFiltersWithImplicit(implicitFilters);
     if (mergedFilters) queryData.filters = mergedFilters;
+    applyArchivedQueryState(queryData);
 
     // event invocation is not tested
     const dynamicHeader = solidTreeViewMetaData?.data?.solidView?.layout?.onBeforeTreeDataLoad;
@@ -776,6 +790,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const implicitFilters = buildImplicitFiltersFromPath(groupPath);
     const mergedFilters = mergeFiltersWithImplicit(implicitFilters);
     if (mergedFilters) queryData.filters = mergedFilters;
+    applyArchivedQueryState(queryData);
 
 
     // event invocation is not tested
@@ -943,6 +958,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           populateMedia: toPopulateMedia,
           sortField: sortField,
           sortOrder: sortOrder,
+          showArchived,
           custom_filter_predicate: latestFilterPredicatesRef.current.custom_filter_predicate || null,
           search_predicate: latestFilterPredicatesRef.current.search_predicate || null,
           saved_filter_predicate: latestFilterPredicatesRef.current.saved_filter_predicate || null,
@@ -950,6 +966,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           grouping_rules: latestFilterPredicatesRef.current.grouping_rules || null,
           aggregation_rules: latestFilterPredicatesRef.current.aggregation_rules || null,
         };
+        applyArchivedQueryState(queryData);
 
         setFilterObjectToLocalStorage(queryData);
       }
@@ -969,7 +986,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       loadRootGroups(0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [solidTreeViewMetaData, params.modelName, activeGroupingRules, aggregationRules, filters, sortField, sortOrder, globalLimit]);
+  }, [solidTreeViewMetaData, params.modelName, activeGroupingRules, aggregationRules, filters, sortField, sortOrder, globalLimit, showArchived]);
 
   // ─── Expand handler ───────────────────────────────────────────────────────
 
@@ -1164,8 +1181,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     };
 
     walk(treeNodes);
-    setSelectedRecords(checkedRecords);
-    setSelectedRecoverRecords(checkedRecords);
+    const activeRecords = checkedRecords.filter((record: any) => record.deletedAt === null);
+    const deletedRecords = checkedRecords.filter((record: any) => record.deletedAt !== null);
+    setSelectedRecords(activeRecords);
+    setSelectedRecoverRecords(deletedRecords);
   }, [treeNodes, selectedNodeKeys]);
 
   // ─── Filter handler ───────────────────────────────────────────────────────
@@ -1373,23 +1392,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const rootHasNext = hasNext("root");
     const start = total === 0 ? 0 : offset + 1;
     const end = total === 0 ? 0 : Math.min(offset + limit, total);
+    const report = `${start} - ${end} of ${total}`;
 
     return (
       <div className="w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background">
         <div className="solid-paginator-meta flex items-center gap-2 sm:ml-auto">
           <span className="solid-paginator-label">Rows</span>
-          <select
+          <SolidSelect
             value={limit}
-            onChange={(event) => {
-              setGlobalLimit(Number(event.target.value));
-            }}
             className="solid-paginator-select"
-          >
-            {pageSizeOptions.map((option) => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-          <span className="solid-paginator-report">{start} - {end} of {total}</span>
+            options={pageSizeOptions.map((option) => ({ label: String(option), value: option }))}
+            native={false}
+            onChange={(event) => {
+              setGlobalLimit(Number(event.value));
+            }}
+          />
+          <span className="solid-paginator-report">{report}</span>
         </div>
         <div className="solid-paginator-actions flex items-center gap-2">
           <button
@@ -1439,20 +1457,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       setSortField(nextSortField);
       setSortOrder(nextSortOrder);
     },
-    setShowArchived: () => { /* archived toggle for grouped tree will be wired later */ },
+    setShowArchived: (value) => {
+      setShowArchived(value);
+    },
     getState: () => ({
       first: getPagination("root").offset,
       rows: getPagination("root").limit,
       sortField,
       sortOrder: sortOrder as any,
-      showArchived: false,
+      showArchived,
       filters,
       filterPredicates,
       listData: treeNodes,
       totalRecords: getPagination("root").total,
       loading: treeLoading,
     }),
-  }), [filters, filterPredicates, params.customFilter, treeLoading, treeNodes, paginationMap]);
+  }), [filters, filterPredicates, paginationMap, showArchived, sortField, sortOrder, treeLoading, treeNodes]);
 
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
@@ -1468,6 +1488,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   };
 
   const canEditRow = (rowData: any, inContextMenu = false) =>
+    !rowData?.deletedAt &&
     actionsAllowed.includes(permissionExpression(params.modelName, "update")) &&
     solidTreeViewLayout?.attrs?.edit !== false &&
     (!inContextMenu || solidTreeViewLayout?.attrs?.showDefaultEditButton !== false) &&
@@ -1475,6 +1496,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     !(isDraftPublishWorkflowEnabled && rowData?.publishedAt);
 
   const canDeleteRow = (rowData: any, inContextMenu = false) =>
+    !rowData?.deletedAt &&
     actionsAllowed.includes(permissionExpression(params.modelName, "delete")) &&
     solidTreeViewLayout?.attrs?.delete !== false &&
     (!inContextMenu
@@ -1741,16 +1763,17 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   className="solid-icon-button"
                   onClick={() => { void loadRootGroups(getPagination("root").offset); }}
                 />
-                {showArchived && (
+                {showArchived && selectedRecoverRecords.length > 0 && (
                   <SolidButton
                     type="button"
-                    label="Recover"
                     size="sm"
-                    variant="outline"
-                    leftIcon={<RefreshCw size={14} />}
-                    className="hidden lg:flex solid-icon-button "
+                    variant="secondary"
+                    className="hidden lg:flex"
                     onClick={() => setRecoverDialogVisible(true)}
-                  />
+                    leftIcon={<RotateCcw size={14} />}
+                  >
+                    Recover
+                  </SolidButton>
                 )}
 
                 {params.embeded === false &&
@@ -1836,6 +1859,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 onExpand={handleNodeExpand}
                 tableStyle={{ minWidth: "max-content" }}
                 tableClassName="solid-data-table"
+                rowClassName={(node) => node?.data?.deletedAt ? "greyed-out-row" : ""}
                 selectionMode="checkbox"
                 selectionKeys={selectedNodeKeys}
                 sortField={sortField}
@@ -1850,6 +1874,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   const rowData = e.node.data;
 
                   if (solidTreeViewLayout?.attrs?.disableRowClick === true) return;
+                  if (rowData?.deletedAt) return;
 
                   const hasFindPermission = actionsAllowed.includes(
                     permissionExpression(params.modelName, 'findOne')

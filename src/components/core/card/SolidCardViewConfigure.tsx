@@ -15,6 +15,7 @@ import {
   SolidDialogSeparator,
   SolidDialogTitle,
   SolidDropdownMenu,
+  SolidDropdownMenuCheckboxItem,
   SolidDropdownMenuContent,
   SolidDropdownMenuItem,
   SolidDropdownMenuLabel,
@@ -57,6 +58,8 @@ export const SolidCardViewConfigure = ({
   modelName,
   actionsAllowed,
   viewModes,
+  setShowArchived,
+  showArchived,
   setLayoutDialogVisible,
   setShowSaveFilterPopup,
   filters,
@@ -136,6 +139,7 @@ export const SolidCardViewConfigure = ({
 
   const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
   const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
+  const canShowArchivedRecords = Boolean(solidCardViewMetaData?.data?.solidView?.model?.enableSoftDelete);
 
   return (
     <div className="position-relative">
@@ -176,7 +180,16 @@ export const SolidCardViewConfigure = ({
             </SolidDropdownMenuItem>
           )}
 
-          {(canCustomizeLayout || canSaveCustomFilter) && <SolidDropdownMenuSeparator />}
+          {canShowArchivedRecords && (
+            <SolidDropdownMenuCheckboxItem
+              checked={showArchived}
+              onCheckedChange={() => setShowArchived(!showArchived)}
+            >
+              Show Archived Records
+            </SolidDropdownMenuCheckboxItem>
+          )}
+
+          {(canCustomizeLayout || canSaveCustomFilter || canShowArchivedRecords) && <SolidDropdownMenuSeparator />}
 
           {canCustomizeLayout && (
             <SolidDropdownMenuSub>

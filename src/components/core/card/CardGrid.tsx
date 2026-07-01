@@ -19,8 +19,10 @@ export const CardGrid = ({
   records,
   solidCardViewMetaData,
   editButtonUrl,
+  onRecover,
   setLightboxUrls,
   setOpenLightbox,
+  showArchived,
 }: any) => {
   const cardNode = findCardNode(solidCardViewMetaData?.solidView?.layout?.children || []);
   const cardWidget = cardNode?.attrs?.cardWidget || cardNode?.cardWidget;
@@ -72,8 +74,10 @@ export const CardGrid = ({
           editButtonUrl={editButtonUrl}
           cardNode={cardNode}
           DynamicCardWidget={DynamicCardWidget}
+          onRecover={onRecover}
           setLightboxUrls={setLightboxUrls}
           setOpenLightbox={setOpenLightbox}
+          showArchived={showArchived}
         />
       ))}
     </div>

@@ -2096,7 +2096,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                     >
                                                         <div className="flex items-center gap-1">
                                                             <strong>{predefinedSearch.name}:</strong>
-                                                            <span className="font-bold text-color">{inputValue}</span>
+                                                            <span className="font-bold text-color pr-1">{inputValue} </span>
                                                         </div>
                                                         <div className="text-xs">{predefinedSearch.description}</div>
                                                     </SolidButton>
