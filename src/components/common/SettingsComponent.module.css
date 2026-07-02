@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 0.6rem;
   height: calc(100dvh - 46px);
+  color: var(--foreground);
 }
 
 .pageHeader {
@@ -15,6 +16,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(17rem, 28rem) auto;
   align-items: end;
   gap: 0.9rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
 }
 
 .headerIntro {
@@ -52,7 +54,7 @@
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-  background: color-mix(in srgb, var(--surface-ground, #f8fafc) 78%, #ffffff 22%);
+  background: color-mix(in srgb, var(--surface-ground, var(--card)) 78%, var(--card) 22%);
   color: var(--muted-foreground);
   font-size: 0.74rem;
   font-weight: 600;
@@ -64,7 +66,7 @@
 
 .summaryChipActive {
   border-color: color-mix(in srgb, var(--primary-color, #7c3aed) 45%, transparent);
-  background: color-mix(in srgb, var(--primary-color, #7c3aed) 12%, #ffffff 88%);
+  background: color-mix(in srgb, var(--primary-color, #7c3aed) 14%, var(--card) 86%);
   color: var(--primary-color, #7c3aed);
 }
 
@@ -74,7 +76,7 @@
   min-height: 1.75rem;
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--primary-color, #7c3aed) 10%, white);
+  background: color-mix(in srgb, var(--primary-color, #7c3aed) 12%, var(--card) 88%);
   color: var(--primary-color, #7c3aed);
   font-size: 0.76rem;
   font-weight: 600;
@@ -126,7 +128,7 @@
   height: 1.1rem;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
-  background: color-mix(in srgb, var(--surface-card) 92%, #ffffff 8%);
+  background: color-mix(in srgb, var(--surface-card, var(--card)) 92%, var(--card) 8%);
   color: var(--muted-foreground);
   font-size: 0.72rem;
   cursor: help;
@@ -159,7 +161,7 @@
 }
 
 .workspace {
-  background: color-mix(in srgb, var(--surface-card) 94%, #ffffff 6%);
+  background: color-mix(in srgb, var(--surface-card, var(--card)) 94%, var(--card) 6%);
   border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
   border-radius: 1.25rem;
   overflow: hidden;
@@ -184,7 +186,7 @@
   padding: 0.85rem 0.75rem;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--primary-color, #4f46e5) 10%, transparent), transparent 42%),
-    color-mix(in srgb, var(--surface-ground, #f8fafc) 90%, #ffffff 10%);
+    color-mix(in srgb, var(--surface-ground, var(--card)) 90%, var(--card) 10%);
   border-right: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   overflow-y: auto;
   min-height: 0;
@@ -216,7 +218,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--primary-color, #4f46e5);
-  background: color-mix(in srgb, var(--primary-color, #4f46e5) 12%, white);
+  background: color-mix(in srgb, var(--primary-color, #4f46e5) 14%, var(--card) 86%);
   border: 1px solid color-mix(in srgb, var(--primary-color, #4f46e5) 28%, transparent);
 }
 
@@ -246,7 +248,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
   border-radius: 1rem;
   overflow: hidden;
-  background: color-mix(in srgb, var(--surface-card) 96%, #ffffff 4%);
+  background: color-mix(in srgb, var(--surface-card, var(--card)) 96%, var(--card) 4%);
 }
 
 .groupHeader {
@@ -255,7 +257,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.7rem 0.9rem;
-  background: color-mix(in srgb, var(--surface-ground, #f8fafc) 85%, #ffffff 15%);
+  background: color-mix(in srgb, var(--surface-ground, var(--background)) 85%, var(--card) 15%);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
 }
 
@@ -324,7 +326,7 @@
   padding: 0.55rem 0.7rem;
   border-radius: 0.9rem;
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  background: color-mix(in srgb, var(--surface-ground, #f8fafc) 78%, #ffffff 22%);
+  background: color-mix(in srgb, var(--surface-ground, var(--card)) 78%, var(--card) 22%);
 }
 
 .emptyValue {
@@ -380,7 +382,7 @@
   border-radius: 0.9rem;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   padding: 0.75rem;
-  background: color-mix(in srgb, var(--surface-ground, #f8fafc) 80%, #ffffff 20%);
+  background: color-mix(in srgb, var(--surface-ground, var(--card)) 80%, var(--card) 20%);
 }
 
 .mediaEmptyState {
@@ -392,7 +394,7 @@
   padding: 1rem;
   border-radius: 0.9rem;
   border: 1px dashed color-mix(in srgb, var(--border) 78%, transparent);
-  background: color-mix(in srgb, var(--surface-ground, #f8fafc) 72%, #ffffff 28%);
+  background: color-mix(in srgb, var(--surface-ground, var(--card)) 72%, var(--card) 28%);
   color: var(--muted-foreground);
   font-size: 0.8rem;
 }
@@ -413,6 +415,104 @@
   padding: 2.25rem 1.5rem;
   text-align: center;
   color: var(--muted-foreground);
+}
+
+.pageHeader :global(.form-wrapper-title) {
+  color: var(--foreground) !important;
+}
+
+.workspace :global(.solid-notebook-tab-trigger) {
+  color: color-mix(in srgb, var(--muted-foreground) 88%, transparent);
+  border-bottom-color: transparent;
+}
+
+.workspace :global(.solid-notebook-tab-trigger:hover) {
+  color: var(--foreground);
+}
+
+.workspace :global(.solid-notebook-tab-trigger.active) {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--primary) 10%, var(--card) 90%);
+  border-bottom-color: transparent;
+}
+
+.workspace :global(.solid-tabs--vertical .solid-notebook-tab-trigger) {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.95rem;
+  margin-bottom: 0;
+  text-align: left;
+}
+
+.workspace :global(.solid-tabs--vertical .solid-notebook-tab-trigger.active) {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+:global(html.dark) .pageHeader,
+:global([data-theme="dark"]) .pageHeader {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--background) 96%, #020617 4%), color-mix(in srgb, var(--background) 92%, #020617 8%));
+  border-bottom-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+}
+
+:global(html.dark) .workspace,
+:global([data-theme="dark"]) .workspace {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, #172554 4%), color-mix(in srgb, var(--card) 90%, #0b1220 10%));
+  border-color: color-mix(in srgb, var(--border) 74%, #334155 26%);
+  box-shadow:
+    0 24px 48px rgba(2, 6, 23, 0.34),
+    inset 0 1px 0 rgba(148, 163, 184, 0.04);
+}
+
+:global(html.dark) .tabList,
+:global([data-theme="dark"]) .tabList {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--primary) 10%, transparent), transparent 34%),
+    color-mix(in srgb, var(--background) 78%, var(--card) 22%);
+  border-right-color: color-mix(in srgb, var(--border) 74%, #334155 26%);
+}
+
+:global(html.dark) .groupCard,
+:global([data-theme="dark"]) .groupCard {
+  border-color: color-mix(in srgb, var(--border) 76%, #334155 24%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 95%, #172554 5%), color-mix(in srgb, var(--card) 90%, #0b1220 10%));
+}
+
+:global(html.dark) .groupHeader,
+:global([data-theme="dark"]) .groupHeader {
+  background: color-mix(in srgb, var(--background) 72%, var(--card) 28%);
+  border-bottom-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+}
+
+:global(html.dark) .groupTitle,
+:global(html.dark) .settingLabel,
+:global([data-theme="dark"]) .groupTitle,
+:global([data-theme="dark"]) .settingLabel {
+  color: var(--foreground);
+}
+
+:global(html.dark) .readonlyValue,
+:global(html.dark) .mediaPreview,
+:global(html.dark) .mediaEmptyState,
+:global([data-theme="dark"]) .readonlyValue,
+:global([data-theme="dark"]) .mediaPreview,
+:global([data-theme="dark"]) .mediaEmptyState {
+  border-color: color-mix(in srgb, var(--border) 74%, #334155 26%);
+  background: color-mix(in srgb, var(--background) 70%, var(--card) 30%);
+}
+
+:global(html.dark) .workspace :global(.solid-notebook-tab-trigger),
+:global([data-theme="dark"]) .workspace :global(.solid-notebook-tab-trigger) {
+  color: color-mix(in srgb, var(--foreground) 74%, transparent);
+}
+
+:global(html.dark) .workspace :global(.solid-notebook-tab-trigger.active),
+:global([data-theme="dark"]) .workspace :global(.solid-notebook-tab-trigger.active) {
+  color: color-mix(in srgb, var(--foreground) 96%, white 4%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 18%, #172554 82%), color-mix(in srgb, var(--primary) 10%, #0b1220 90%));
 }
 
 @media (max-width: 960px) {
