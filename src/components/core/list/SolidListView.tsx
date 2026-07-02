@@ -1437,6 +1437,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
+  const isEmbeddedList = params.embeded === true;
 
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
@@ -1446,9 +1447,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   //   }
   // };
   return (
-    <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className={`solid-list-content  flex flex-col flex-grow-1 ${styles.ListContentWrapper}`}>
-        <div className="solid-list-surface flex flex-col flex-1 min-h-0">
+    <div className={`page-parent-wrapper ${isEmbeddedList ? "solid-list-page-wrapper-embedded" : "solid-list-page-wrapper"} flex ${isEmbeddedList ? "min-h-0 overflow-visible" : "h-full min-h-0 overflow-hidden"}`}>
+      <div className={`solid-list-content flex flex-col ${isEmbeddedList ? "min-h-0" : "flex-grow-1"} ${styles.ListContentWrapper}`}>
+        <div className={`solid-list-surface flex flex-col min-h-0 ${isEmbeddedList ? "" : "flex-1"}`}>
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-col lg:flex-row">
               {/* <div> */}
@@ -1629,11 +1630,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
               ) : (
                 <div
-                  className={`solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden ${styles.listTableArea}`}
+                  className={`solid-datatable-wrapper solid-list-table-area min-h-0 ${isEmbeddedList ? "overflow-visible" : "flex-1 overflow-hidden"} ${styles.listTableArea}`}
                 >
                   <DataTable
                     value={listViewData}
-                    // viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 128px)"}
+                    viewportHeight={isEmbeddedList ? "auto" : undefined}
                     rowClassName={(rowData) => {
                       return rowData.deletedAt ? "greyed-out-row" : "";
                     }}

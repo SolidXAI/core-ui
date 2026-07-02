@@ -224,10 +224,10 @@
     }
 
     /* =============================== Search ================================ */
-    .page-header {
+    /* .page-header {
         padding: 10px 16px 16px 20px !important;
         gap: 16px;
-    }
+    } */
 
     .solid-custom-filter-wrapper .p-inputtext {
         width: 100% !important;
@@ -278,6 +278,12 @@
 
     }
 
+    .solid-list-page-wrapper-embedded .solid-datatable-wrapper,
+    .solid-list-page-wrapper-embedded .solid-datatable-wrapper .p-datatable-wrapper {
+        height: auto !important;
+        min-height: 0;
+    }
+
     .h-full.flex-grow-1 {
         display: flex;
         flex-direction: column;
@@ -286,8 +292,8 @@
 
     .page-header {
         flex-shrink: 0;
-        padding: 10px 16px 12px 20px !important;
-
+        padding: 10px 16px 16px 20px !important;
+        gap: 16px;
     }
 
 
@@ -316,11 +322,11 @@
     } */
 
     .solid-form-wrapper .solid-form-content.solid-form-view {
-        height: calc(100vh - 167px) !important;
+        height: auto !important;
     }
 
     .solid-form-wrapper .solid-form-content.solid-form-edit {
-        height: calc(100vh - 135px) !important;
+        height: auto !important;
     }
 
     /* .solid-form-wrapper .solid-form-content {
@@ -357,9 +363,9 @@
     }
 
 
-    .solid-list-surface {
-        height: calc(100vh - 70px) !important;
-    }
+    /* .solid-list-surface {
+            height: calc(100vh - 70px) !important;
+        } */
 
     .solid-export-summary-chip {
         max-height: 16px;
@@ -371,7 +377,7 @@
 
     .solid-file-upload-wrapper {
         padding: 6px 6px 6px 0px;
-      margin: 6px;
+        margin: 6px;
 
     }
 
@@ -386,6 +392,9 @@
     }
 
     /* ===================== Layout  ============================= */
+    .page-header {
+        gap: 12px;
+    }
 
     .apps-icon i {
         font-size: 1.12rem !important;
@@ -578,11 +587,11 @@
     }
 
     .solid-form-wrapper .solid-form-content.solid-form-view {
-        height: calc(100vh - 167px) !important;
+        height: auto !important;
     }
 
     .solid-form-wrapper .solid-form-content.solid-form-edit {
-        height: calc(100vh - 135px) !important;
+        height: auto !important;
     }
 
     /* .solid-form-wrapper .solid-form-content {
@@ -663,8 +672,10 @@
         padding: 0px !important;
     }
 
-    .solid-global-search-element ul {
-        /* padding: 3px !important; */
+
+
+    .search-filter-chip-type {
+        margin: 4px 0px 0px 4px !important;
     }
 
     .solid-autocomplete-chip {
@@ -839,11 +850,11 @@
     }
 
     .solid-file-icon-btn {
-        width: 28px !important ;
+        width: 28px !important;
         height: 28px !important;
     }
 
-    ._modal_zjixp_12{
+    ._modal_zjixp_12 {
         max-width: 92vw !important;
     }
 }

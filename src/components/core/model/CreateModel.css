@@ -1,13 +1,17 @@
 .solid-model-form-workspace {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 0.25rem;
+  min-height: 0;
 }
 
 .solid-model-form-tabs {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 0;
+  min-height: 0;
 }
 
 .solid-model-form-tablist {
@@ -17,6 +21,10 @@
 }
 
 .solid-model-form-tabpanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
   padding-top: 0.65rem;
 }
 
@@ -33,7 +41,18 @@
 }
 
 .solid-model-form-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
   padding: 0.75rem 1rem 1rem;
+}
+
+.solid-model-form-content > form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .solid-model-form-content.is-tabbed {
