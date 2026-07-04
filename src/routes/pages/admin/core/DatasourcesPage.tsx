@@ -405,7 +405,7 @@ export function DatasourcesPage() {
                 <strong>Synchronize</strong>
                 <span>Write `*_DATABASE_SYNCHRONIZE` for this datasource.</span>
               </div>
-              <SolidSwitch checked={!!formState.synchronize} onChange={(checked) => handleFieldChange("synchronize", checked)} />
+              <SolidSwitch className="sdm-switch" checked={!!formState.synchronize} onChange={(checked) => handleFieldChange("synchronize", checked)} />
             </label>
 
             <label className="sdm-switch-field">
@@ -413,7 +413,7 @@ export function DatasourcesPage() {
                 <strong>Logging</strong>
                 <span>Enable TypeORM logging through the generated datasource module.</span>
               </div>
-              <SolidSwitch checked={!!formState.logging} onChange={(checked) => handleFieldChange("logging", checked)} />
+              <SolidSwitch className="sdm-switch" checked={!!formState.logging} onChange={(checked) => handleFieldChange("logging", checked)} />
             </label>
           </div>
 
@@ -426,7 +426,7 @@ export function DatasourcesPage() {
                       <strong>Encrypt</strong>
                       <span>MSSQL connection option.</span>
                     </div>
-                    <SolidSwitch checked={!!formState.encrypt} onChange={(checked) => handleFieldChange("encrypt", checked)} />
+                    <SolidSwitch className="sdm-switch" checked={!!formState.encrypt} onChange={(checked) => handleFieldChange("encrypt", checked)} />
                   </label>
 
                   <label className="sdm-switch-field sdm-switch-field--inline">
@@ -434,7 +434,7 @@ export function DatasourcesPage() {
                       <strong>Trust certificate</strong>
                       <span>Allow self-signed development certificates.</span>
                     </div>
-                    <SolidSwitch checked={!!formState.trustServerCertificate} onChange={(checked) => handleFieldChange("trustServerCertificate", checked)} />
+                    <SolidSwitch className="sdm-switch" checked={!!formState.trustServerCertificate} onChange={(checked) => handleFieldChange("trustServerCertificate", checked)} />
                   </label>
                 </>
               ) : (
@@ -444,7 +444,7 @@ export function DatasourcesPage() {
                       <strong>SSL</strong>
                       <span>Enable SSL for PostgreSQL or MySQL.</span>
                     </div>
-                    <SolidSwitch checked={!!formState.ssl} onChange={(checked) => handleFieldChange("ssl", checked)} />
+                    <SolidSwitch className="sdm-switch" checked={!!formState.ssl} onChange={(checked) => handleFieldChange("ssl", checked)} />
                   </label>
 
                   <label className="sdm-switch-field sdm-switch-field--inline">
@@ -452,7 +452,7 @@ export function DatasourcesPage() {
                       <strong>Reject unauthorized</strong>
                       <span>Keep certificate validation strict when SSL is enabled.</span>
                     </div>
-                    <SolidSwitch checked={!!formState.sslRejectUnauthorized} onChange={(checked) => handleFieldChange("sslRejectUnauthorized", checked)} />
+                    <SolidSwitch className="sdm-switch" checked={!!formState.sslRejectUnauthorized} onChange={(checked) => handleFieldChange("sslRejectUnauthorized", checked)} />
                   </label>
                 </>
               )}

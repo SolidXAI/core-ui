@@ -306,7 +306,7 @@ const CreateModule = ({ params, data }: any) => {
       )}
       <form
         id="module-general-info-form"
-        style={{ width: '100%', background: "#fff" }}
+        style={{ width: '100%' }}
         onSubmit={formik.handleSubmit}
       >
         <div className="solid-form-content">
@@ -478,6 +478,7 @@ const CreateModule = ({ params, data }: any) => {
                       completeMethod={defaultDataSourceField.searchItems}
                       onChange={defaultDataSourceField.handleChange}
                       dropdown
+                      portal
                       field="label"
                       className="w-full"
                     />
