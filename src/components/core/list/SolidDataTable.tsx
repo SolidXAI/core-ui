@@ -180,16 +180,17 @@ export function SolidDataTable({
       : size === "large"
         ? "solid-table-density-comfortable"
         : "solid-table-density-cozy";
+  const isAutoHeight = viewportHeight === "auto";
 
   return (
     <div
-      className={cx("solid-data-table-root w-full min-h-0", densityClass)}
+      className={cx("solid-data-table-root w-full min-h-0", densityClass, isAutoHeight && "solid-data-table-root-auto")}
       style={{
         height: viewportHeight || "100%",
         maxHeight: viewportHeight || "100%",
       }}
     >
-      <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
+      <div className={cx("solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background", isAutoHeight && "solid-data-table-viewport-auto")}>
         <table className={cx("w-full text-sm border-collapse", tableClassName)}>
           <thead className="solid-data-table-head">
             <tr>

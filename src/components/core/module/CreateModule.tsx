@@ -291,7 +291,7 @@ const CreateModule = ({ params, data }: any) => {
   };
 
   const generalInfoContent = (
-    <div className={`solid-module-general-info-content ${!isCreateMode ? "is-tabbed" : ""}`}>
+    <div className={`solid-module-general-info-content px-3 pt-3 md:px-4 ${!isCreateMode ? "is-tabbed" : ""}`}>
       {!isCreateMode && shouldShowGeneralSave && formik.dirty && (
         <div className="solid-module-general-info-actions">
           <SolidButton
