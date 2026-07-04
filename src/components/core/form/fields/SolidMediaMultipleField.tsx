@@ -27,6 +27,7 @@ import { SolidFieldTooltip } from "../../../../components/common/SolidFieldToolt
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
+import { buildMediaFieldKey, getPersistedMediaId } from "./mediaFieldUtils";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -158,6 +159,7 @@ export class SolidMediaMultipleField implements ISolidField {
 
 
 export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaFormFieldWidgetProps) => {
+    type MediaFileDetail = { name: string; type: string; size: number; mediaId: number | string | null; fileKey: string; fileUrl: string };
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -176,8 +178,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     const isFieldReadonly = formReadonly || fieldReadonly || readOnlyPermission;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
-    const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
-    const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number, fileUrl: string }[]>([]);
+    const [fileDetails, setFileDetails] = useState<MediaFileDetail[]>([]);
     const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
     const [fileSizeError, setFileSizeError] = useState<string | null>(null);
 
@@ -186,63 +187,63 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             ? `${(size / (1024 * 1024)).toFixed(1)} MB`
             : `${(size / 1024).toFixed(1)} KB`;
     };
-    const [
-        deleteMedia,
-        { isLoading: isMediaDeleted, isSuccess: isDeleteMediaSuceess, isError: isMediaDeleteError, error: mediaDeleteError, data: DeletedMedia },
-    ] = useDeleteMediaMutation();
+    const [deleteMedia] = useDeleteMediaMutation();
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
+        const objectUrls: string[] = [];
 
         if (Array.isArray(fieldValue) && fieldValue.length > 0) {
-            const urls: string[] = [];
-            const details: { name: string; type: string; size: number, id: any, fileUrl: string }[] = [];
-            const objectUrls: string[] = [];
+            const details: MediaFileDetail[] = [];
             fieldValue.forEach((file: File | any) => {
                 if (file instanceof File) {
-                    // New file (from local upload)
                     const fileUrl = URL.createObjectURL(file);
-                    objectUrls.push(fileUrl); // Store URL for cleanup
-                    urls.push(fileUrl);
+                    objectUrls.push(fileUrl);
 
                     details.push({
                         name: file.name,
                         type: file.type,
                         size: file.size,
-                        id: `${file.name}-${file.size}`,
-                        fileUrl: fileUrl // ✅ Store the generated object URL
+                        mediaId: null,
+                        fileKey: buildMediaFieldKey(file),
+                        fileUrl: fileUrl
                     });
                 } else if (typeof file === "object" && file._full_url) {
-                    urls.push(file._full_url);
                     details.push({
                         name: file.originalFileName,
                         type: file.mimeType,
                         size: file.fileSize,
-                        id: file.id,
+                        mediaId: getPersistedMediaId(file),
+                        fileKey: buildMediaFieldKey(file),
                         fileUrl: file._full_url
                     });
                 }
             });
             setFileDetails(details);
+        } else {
+            setFileDetails([]);
         }
+
+        return () => {
+            objectUrls.forEach((url) => URL.revokeObjectURL(url));
+        };
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleDropImages = (acceptedFiles: any[]) => {
         if (!acceptedFiles.length) return;
         setFileSizeError(null);
-        const newFileDetails = [...fileDetails];
+        const existingFiles = Array.isArray(formik?.values[fieldLayoutInfo.attrs.name])
+            ? formik.values[fieldLayoutInfo.attrs.name]
+            : [];
         acceptedFiles.forEach((file) => {
-            newFileDetails.push({ name: file.name, type: file.type, size: file.size, id: file.id, fileUrl: file._full_url });
             const reader = new FileReader();
             reader.readAsDataURL(file);
         });
-
-        setFileDetails(newFileDetails);
 
         fieldContext.onChange(
             {
                 target: {
                     name: fieldLayoutInfo.attrs.name,
-                    value: acceptedFiles,
+                    value: [...existingFiles, ...acceptedFiles],
                     type: "text",
                 },
             } as any,
@@ -250,41 +251,53 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
         );
     };
 
-    const confirmDeleteFile = (fileId: any, deleteId: number) => {
+    const confirmDeleteFile = (fileId: string) => {
         setSelectedFileId(fileId);
         setDeleteImageDialogVisible(true);
-        setImageToBeDeletedData(deleteId)
     };
 
-    const deleteFile = () => {
-        if (selectedFileId && imageToBeDeletedData) {
-            // Remove file from UI before making API call
-            setFileDetails((prev) => prev.filter((file) => `${file.name}-${file.size}` !== selectedFileId));
+    const deleteFile = async () => {
+        if (!selectedFileId) {
+            return;
+        }
 
-            deleteMedia(imageToBeDeletedData)
-                .unwrap()
-                .then(() => {
-                    // Update form state
-                    const nextValue = fileDetails.filter((file) => `${file.name}-${file.size}` !== selectedFileId);
-                    fieldContext.onChange(
-                        {
-                            target: {
-                                name: fieldLayoutInfo.attrs.name,
-                                value: nextValue,
-                                type: "text",
-                            },
-                        } as any,
-                        "onFieldChange"
-                    );
-                })
-                .catch((error) => {
-                    console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
-                });
+        const currentFiles = Array.isArray(formik?.values[fieldLayoutInfo.attrs.name])
+            ? formik.values[fieldLayoutInfo.attrs.name]
+            : [];
+        const fileToDelete = currentFiles.find((file: File | any) => buildMediaFieldKey(file) === selectedFileId);
 
+        if (!fileToDelete) {
             setDeleteImageDialogVisible(false);
             setShowAllFiles(false);
             setSelectedFileId(null);
+            return;
         }
+
+        try {
+            const persistedMediaId = getPersistedMediaId(fileToDelete);
+            if (persistedMediaId !== null) {
+                await deleteMedia(persistedMediaId).unwrap();
+            }
+
+            const nextValue = currentFiles.filter((file: File | any) => buildMediaFieldKey(file) !== selectedFileId);
+            fieldContext.onChange(
+                {
+                    target: {
+                        name: fieldLayoutInfo.attrs.name,
+                        value: nextValue,
+                        type: "text",
+                    },
+                } as any,
+                "onFieldChange"
+            );
+            setFileDetails((prev) => prev.filter((file) => file.fileKey !== selectedFileId));
+        } catch (error) {
+            console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
+        }
+
+        setDeleteImageDialogVisible(false);
+        setShowAllFiles(false);
+        setSelectedFileId(null);
     };
 
     const {
@@ -402,7 +415,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                             className="solid-file-icon-btn is-danger"
                                             disabled={isFieldDisabled || isFieldReadonly}
                                             aria-label="Remove file"
-                                            onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
+                                            onClick={() => confirmDeleteFile(fileDetails[0].fileKey)}
                                         >
                                             <SolidIcon name="si-times" aria-hidden />
                                         </button>
@@ -441,7 +454,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 <SolidDialogBody>
                 {fileDetails.length > 1 &&
                     fileDetails.map((file, index) => {
-                        const fileId = `${file.name}-${file.size}`;
+                        const fileId = file.fileKey;
                         return (
                             <div key={fileId} className="solid-file-upload-wrapper">
                                 <div className="flex items-center md:gap-2">
@@ -464,7 +477,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                     className="solid-file-icon-btn is-danger"
                                                     disabled={isFieldDisabled || isFieldReadonly}
                                                     aria-label="Remove file"
-                                                    onClick={() => confirmDeleteFile(fileId, file?.id)}
+                                                    onClick={() => confirmDeleteFile(fileId)}
                                                 >
                                                     <SolidIcon name="si-times" aria-hidden />
                                                 </button>

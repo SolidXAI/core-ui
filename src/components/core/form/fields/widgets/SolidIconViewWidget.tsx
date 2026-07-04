@@ -1,4 +1,6 @@
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
+import { SolidIcon } from "../../../../shad-cn-ui/SolidIcon";
+import { SolidMaterialSymbol } from "../../../../common/SolidMaterialSymbol";
 
 export const SolidIconViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
@@ -14,14 +16,18 @@ export const SolidIconViewWidget = ({ formik, fieldContext }: SolidFormFieldWidg
             .join(' ')
         : '';
 
+
     return (
         <div>
             <label className="form-field-label">{fieldLabel}</label>
             {selectedIcon ? (
-                <div className="mt-2" style={{display:'inline-block'}}>
-                    <span className="material-symbols-outlined" style={{ fontSize: 48 , cursor:'pointer'}}>
-                        {selectedIcon}
-                    </span>
+                <div className="mt-2" style={{ display: 'inline-block' }}>
+                    <SolidMaterialSymbol
+                        fallback={<SolidIcon name="si-th-large" size={48} />}
+                        name={selectedIcon}
+                        size={48}
+                        style={{ cursor: "pointer" }}
+                    />
                     <p className="mb-0 text-center">{formattedIconName}</p>
                 </div>
             ) : (

@@ -307,6 +307,38 @@
   color: var(--solid-form-title, #0f172a);
 }
 
+.settingHelpButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: help;
+  transition: color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.settingHelpButton:hover {
+  color: var(--primary-color, #7c3aed);
+  background: color-mix(in srgb, var(--primary-color, #7c3aed) 10%, transparent);
+  transform: translateY(-1px);
+}
+
+.settingHelpButton:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-color, #7c3aed) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.settingHelpTooltip {
+  max-width: 24rem;
+  white-space: normal;
+  line-height: 1.45;
+}
+
 .settingDescription {
   margin: 0;
   color: var(--muted-foreground);
