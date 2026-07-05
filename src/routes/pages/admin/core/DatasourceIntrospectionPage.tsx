@@ -139,7 +139,9 @@ const scalarFieldTypeOptions = [
   { value: "password", label: "Password" },
 ];
 
-const scalarFieldTypeValueSet = new Set(scalarFieldTypeOptions.map((option) => option.value));
+function getFieldTypeLabel(type: string) {
+  return scalarFieldTypeOptions.find((option) => option.value === type)?.label ?? startCase(type);
+}
 const mappingStrategyOptions = [
   { value: "generated_id", label: "Legacy generated id" },
   { value: "existing_id", label: "Legacy existing id" },
@@ -407,8 +409,8 @@ function getDrawerValidationErrors(draft: DrawerDraft) {
       continue;
     }
 
-    if (!scalarFieldTypeValueSet.has(column.solidFieldType)) {
-      errors.push(`SolidX type "${column.solidFieldType}" is not allowed in step 1 for column "${column.columnName}".`);
+    if (!column.solidFieldType.trim()) {
+      errors.push(`SolidX type is required for column "${column.columnName}".`);
       continue;
     }
 
@@ -1182,29 +1184,6 @@ export function DatasourceIntrospectionPage() {
     }));
   };
 
-  const updateColumnSolidFieldType = (columnName: string, nextSolidFieldType: string) => {
-    updateDrawerDraft((current) => ({
-      ...current,
-      columns: current.columns.map((column) => {
-        if (column.columnName !== columnName) return column;
-        if (column.handledBySuperclass) return column;
-
-        return {
-          ...column,
-          solidFieldType: nextSolidFieldType,
-          ormType: getDefaultOrmTypeForSolidFieldType(current.dataSourceType, nextSolidFieldType),
-          fieldConfig: column.fieldConfig
-            ? {
-              ...column.fieldConfig,
-              type: nextSolidFieldType,
-              ormType: getDefaultOrmTypeForSolidFieldType(current.dataSourceType, nextSolidFieldType),
-            }
-            : column.fieldConfig,
-        };
-      }),
-    }));
-  };
-
   const openFieldConfigEditor = (columnName: string) => {
     setFieldConfigColumnName(columnName);
   };
@@ -1650,6 +1629,7 @@ export function DatasourceIntrospectionPage() {
     "run-migration",
   ];
   const currentStepIndex = stepSequence.indexOf(workspaceStep);
+  const hasMigrationGenerationWork = Boolean(mappingPreview?.migration.willGenerate);
   const stepperItems = [
     {
       key: "configure" as const,
@@ -1691,7 +1671,7 @@ export function DatasourceIntrospectionPage() {
     },
     {
       key: "run-migration" as const,
-      label: "Run Migration",
+      label: hasMigrationGenerationWork ? "Run Migration" : "Finish",
       complete: false,
       active: workspaceStep === "run-migration",
       disabled: !migrationArtifactsResult,
@@ -1911,33 +1891,27 @@ export function DatasourceIntrospectionPage() {
                   <span className="sdix-column-meta">
                     <strong>{column.dataType}</strong>
                   </span>
-                  <span>
-                    {column.handledBySuperclass ? (
-                      <span>{column.solidFieldType}</span>
-                    ) : (
-                      <SolidSelect
-                        value={column.solidFieldType}
-                        options={scalarFieldTypeOptions}
-                        onChange={(event) => updateColumnSolidFieldType(column.columnName, event.value)}
-                      />
-                    )}
+                  <span className="sdix-column-type-cell">
+                    {!column.handledBySuperclass && (column.include || column.matched) ? (
+                      <SolidButton
+                        size="small"
+                        variant="outline"
+                        className="sdix-column-action-icon"
+                        onClick={() => openFieldConfigEditor(column.columnName)}
+                        aria-label={`Configure ${column.fieldName || column.columnName} field`}
+                      >
+                        <Cog size={14} />
+                      </SolidButton>
+                    ) : null}
+                    <span className={`sdix-status-badge ${column.handledBySuperclass ? "is-superclass" : "is-muted"}`}>
+                      {getFieldTypeLabel(column.solidFieldType)}
+                    </span>
                   </span>
                   <span>
                     <span className={`sdix-status-badge ${statusClassName}`}>{statusText}</span>
                   </span>
                   <span className="sdix-column-action">
                     <div className="sdix-column-action-stack">
-                      {!column.handledBySuperclass && (column.include || column.matched) ? (
-                        <SolidButton
-                          size="small"
-                          variant="outline"
-                          className="sdix-column-action-icon"
-                          onClick={() => openFieldConfigEditor(column.columnName)}
-                          aria-label={`Configure ${column.fieldName || column.columnName} field`}
-                        >
-                          <Cog size={14} />
-                        </SolidButton>
-                      ) : null}
                       {column.handledBySuperclass ? (
                         <SolidButton size="small" variant="outline" disabled className="sdix-column-action-chip sdix-column-action-chip--managed">
                           Managed
@@ -2085,8 +2059,12 @@ export function DatasourceIntrospectionPage() {
       {!runMigrationCompleted ? (
         <div className="sdix-stage-panel__header">
           <span className="sdix-stage-panel__eyebrow">Step 5</span>
-          <h3>Run migration, build, and seed</h3>
-          <p>With the datasource file updated and module code generated, SolidX can now run the TypeORM migration for the selected datasource, rebuild the project, and reseed the mapped module metadata.</p>
+          <h3>{hasMigrationGenerationWork ? "Run migration, build, and seed" : "Finish mapping workflow"}</h3>
+          <p>
+            {hasMigrationGenerationWork
+              ? "With the datasource file updated and module code generated, SolidX can now run the TypeORM migration for the selected datasource, rebuild the project, and reseed the mapped module metadata."
+              : "SolidX will now run the final wrap-up workflow for this mapping: execute the datasource migration command, rebuild the project, and reseed the mapped module metadata."}
+          </p>
         </div>
       ) : null}
       <div className="sdix-stage-panel__body">
@@ -2179,11 +2157,13 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
           </span>
         ) : (
           <span>
-            Run the migration, build, and seed workflow for
+            {hasMigrationGenerationWork ? "Run the migration, build, and seed workflow for" : "Finish the mapping workflow for"}
             {" "}
             <strong>{selectedDatasource}</strong>
             {" "}
-            to apply the SolidX system columns on the legacy table and refresh the module metadata state.
+            {hasMigrationGenerationWork
+              ? "to apply the SolidX system columns on the legacy table and refresh the module metadata state."
+              : "to execute the final rebuild and reseed flow after the mapping changes are already in place."}
           </span>
         );
       case "configure":
@@ -2554,45 +2534,51 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                 setFieldConfigColumnName(null);
               }
             }}
-            style={{ width: "min(1080px, calc(100vw - 48px))" }}
+            style={{ width: "min(760px, calc(100vw - 64px))" }}
           >
             <SolidDialogHeader>
               <div>
                 <SolidDialogTitle>Field configuration</SolidDialogTitle>
                 <SolidDialogDescription>
-                  Reuse the standard field form here to fine-tune the mapped SolidX field before saving the introspection draft.
+                  Configure how this mapped field should work in SolidX before saving it to the mapping draft.
                 </SolidDialogDescription>
               </div>
               <SolidDialogClose />
             </SolidDialogHeader>
             <SolidDialogSeparator />
             <SolidDialogBody>
-              {activeFieldConfigColumn && activeFieldConfigMetaData && drawerDraft ? (
-                <FieldMetaDataForm
-                  modelMetaData={{
-                    singularName: drawerDraft.singularName,
-                    pluralName: drawerDraft.pluralName,
-                  }}
-                  fieldMetaData={activeFieldConfigMetaData}
-                  setFieldMetaData={() => undefined}
-                  setVisiblePopup={() => undefined}
-                  setIsDirty={() => undefined}
-                  allFields={fieldDraftAllFields}
-                  deleteModelFunction={() => undefined}
-                  params={params}
-                  setIsRequiredPopUp={() => undefined}
-                  showToaster={showFieldDraftToaster}
-                  onDraftSubmit={(nextFieldConfig: Record<string, any>) => applyFieldConfigDraft(activeFieldConfigColumn.columnName, nextFieldConfig)}
-                  onClose={() => setFieldConfigColumnName(null)}
-                  availableFieldTypes={scalarFieldTypeOptions.map((option) => option.value)}
-                  forceShowTypeSelector
-                  selectorRequireContinue
-                  selectorContinueLabel="Next"
-                  selectorInitialFieldType={activeFieldConfigColumn.solidFieldType}
-                  disableIdentityEditingForExisting={false}
-                  submitLabel="Save field config"
-                />
-              ) : null}
+              <div className="sdix-field-config-dialog">
+                {activeFieldConfigColumn && activeFieldConfigMetaData && drawerDraft ? (
+                  <FieldMetaDataForm
+                    modelMetaData={{
+                      singularName: drawerDraft.singularName,
+                      pluralName: drawerDraft.pluralName,
+                      dataSourceType: drawerDraft.dataSourceType,
+                      module: {
+                        name: bootstrap?.module?.name,
+                        displayName: bootstrap?.module?.displayName,
+                      },
+                    }}
+                    fieldMetaData={activeFieldConfigMetaData}
+                    setFieldMetaData={() => undefined}
+                    setVisiblePopup={() => undefined}
+                    setIsDirty={() => undefined}
+                    allFields={fieldDraftAllFields}
+                    deleteModelFunction={() => undefined}
+                    params={params}
+                    setIsRequiredPopUp={() => undefined}
+                    showToaster={showFieldDraftToaster}
+                    onDraftSubmit={(nextFieldConfig: Record<string, any>) => applyFieldConfigDraft(activeFieldConfigColumn.columnName, nextFieldConfig)}
+                    onClose={() => setFieldConfigColumnName(null)}
+                    forceShowTypeSelector
+                    selectorRequireContinue
+                    selectorContinueLabel="Next"
+                    selectorInitialFieldType={activeFieldConfigColumn.solidFieldType}
+                    disableIdentityEditingForExisting={false}
+                    submitLabel="Save field config"
+                  />
+                ) : null}
+              </div>
             </SolidDialogBody>
           </SolidDialog>
 

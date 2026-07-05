@@ -794,6 +794,13 @@
   gap: 0.4rem;
 }
 
+.sdix-column-type-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.45rem;
+}
+
 .sdix-column-include {
   display: flex;
   align-items: center;
@@ -827,6 +834,30 @@
 .sdix-column-action-icon {
   min-width: 2rem;
   padding-inline: 0.45rem !important;
+}
+
+.sdix-field-config-dialog {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.sdix-field-config-dialog .solid-fluid {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.sdix-field-config-dialog [class~="md:w-1/2"] {
+  width: 100%;
+}
+
+.sdix-field-config-dialog [class~="md:w-1/4"] {
+  width: 100%;
+}
+
+.sdix-field-config-dialog .p-tabview-panels,
+.sdix-field-config-dialog .p-tabview-panel {
+  padding-inline: 0;
 }
 
 .sdix-column-placeholder {

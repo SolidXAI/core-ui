@@ -185,7 +185,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           tableName: values?.tableName || tableName,
           moduleId: values.moduleId,
           module: values.module,
-          isSystem: values.isSystem ? values.isSystem === true : '',
+          isSystem: values.isSystem === true,
           enableSoftDelete: values.enableSoftDelete === true ? true : '',
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
           internationalisation: values.internationalisation === true ? true : '',

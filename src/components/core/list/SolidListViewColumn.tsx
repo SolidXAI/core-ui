@@ -152,6 +152,7 @@ export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, colu
     if (fieldMetadata.type === 'uuid') {
         return SolidUuidColumn({ solidListViewMetaData, fieldMetadata, column });
     }
+    return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
     // // Load everything else based on type and dynamically.
     // else {
     //     const ComponentFound = await loadComponentByType(fieldMetadata.type);

@@ -490,11 +490,14 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
 }
 
 function fetchCurrentFields(solidFieldType: any, fieldDefaultMetaData: any) {
+  const fieldTypes = Array.isArray(fieldDefaultMetaData?.data?.fieldTypes)
+    ? fieldDefaultMetaData.data.fieldTypes
+    : [];
 
   if (solidFieldType) {
-    const allowedFields = fieldDefaultMetaData?.data?.fieldTypes.filter((e: any) => e.fieldType === solidFieldType);
+    const allowedFields = fieldTypes.filter((e: any) => e.fieldType === solidFieldType);
     if (allowedFields.length > 0) {
-      return allowedFields[0].fields
+      return allowedFields[0].fields ?? [];
     }
 
   }
@@ -1431,7 +1434,7 @@ const FieldMetaDataForm = ({
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const newFieldData = { ...values, isSystem: values.isSystem == true ? true : '' }
+        const newFieldData = { ...values, isSystem: values.isSystem === true }
         const formtatedFieldPayload = fieldBasedPayloadFormating(newFieldData, currentFields, fieldMetaData);
 
         if (typeof onDraftSubmit === "function") {
@@ -1559,16 +1562,18 @@ const FieldMetaDataForm = ({
     } else {
       formik.setFieldValue("regexPattern", "");
     }
-    const ormType = fieldDefaultMetaData.data.ormType[modelMetaData?.dataSourceType];
-    const availableOrmTypes = ormType[e];
+    const ormTypeByDataSource = fieldDefaultMetaData?.data?.ormType?.[modelMetaData?.dataSourceType];
+    const availableOrmTypes = ormTypeByDataSource?.[e];
     // setFilteredOrmTypes(availableOrmTypes.ormTypes.map((e: any) => ({
     //   label: e,
     //   value: e,
     // })));
     // setSelectedOrmType({ label: availableOrmTypes.ormTypes[0], value: availableOrmTypes.ormTypes[0] });
-    setOrmTypeOptions(availableOrmTypes.ormTypes)
-    formik.setFieldValue("ormType", availableOrmTypes.ormTypes[0].label);
-    setSelectedOrmType(availableOrmTypes.ormTypes[0].label)
+    const nextOrmTypes = availableOrmTypes?.ormTypes ?? [];
+    const nextOrmTypeLabel = nextOrmTypes[0]?.label ?? null;
+    setOrmTypeOptions(nextOrmTypes);
+    formik.setFieldValue("ormType", nextOrmTypeLabel);
+    setSelectedOrmType(nextOrmTypeLabel);
     setCurrentFields(
       fetchCurrentFields(e, fieldDefaultMetaData)
     );
