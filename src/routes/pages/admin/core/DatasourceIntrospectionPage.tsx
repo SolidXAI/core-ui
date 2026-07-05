@@ -11,7 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { camelCase, startCase } from "lodash";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { showToast } from "../../../../redux/features/toastSlice";
@@ -44,21 +44,28 @@ import {
   type DatasourceIntrospectionTableRecord,
   type DatasourceIntrospectionApplyResponse,
   type DatasourceIntrospectionCreateMigrationResponse,
+  datasourceIntrospectionApi,
   useApplyDatasourceIntrospectionMappingMutation,
   useCreateDatasourceIntrospectionMigrationArtifactsMutation,
   useGenerateDatasourceIntrospectionCodeMutation,
   useGetDatasourceIntrospectionBootstrapQuery,
-  useGetDatasourceIntrospectionTableDetailQuery,
   useGetDatasourceIntrospectionTablesQuery,
   usePreviewDatasourceIntrospectionMappingMutation,
   useRunDatasourceIntrospectionMigrationMutation,
 } from "../../../../redux/api/datasourceIntrospectionApi";
-import { useGetmodelByIdQuery } from "../../../../redux/api/modelApi";
+import { modelsApi } from "../../../../redux/api/modelApi";
 import "./DatasourceIntrospectionPage.css";
 
 type SessionSettings = {
   relationInferenceEnabled: boolean;
   prioritizeUnmappedTables: boolean;
+};
+
+type BatchWorkspaceItemState = "idle" | "loading" | "ready" | "success" | "error";
+
+type BatchWorkspaceItemStatus = {
+  state: BatchWorkspaceItemState;
+  message: string;
 };
 
 type WorkspaceStep =
@@ -113,6 +120,26 @@ type DrawerDraft = {
   internationalisation: boolean;
   columns: DrawerColumnDraft[];
   preservedFields: any[];
+};
+
+type WorkspaceBatchItem = {
+  key: string;
+  record: DatasourceIntrospectionTableRecord;
+  detail: DatasourceIntrospectionTableDetail | null;
+  mappedModelData: any | null;
+  draft: DrawerDraft | null;
+  loadStatus: BatchWorkspaceItemStatus;
+  reviewStatus: BatchWorkspaceItemStatus;
+  saveStatus: BatchWorkspaceItemStatus;
+  migrationStatus: BatchWorkspaceItemStatus;
+  mappingPreview: DatasourceIntrospectionMappingPreview | null;
+  persistedMappingResult: DatasourceIntrospectionApplyResponse | null;
+  migrationArtifactsResult: DatasourceIntrospectionCreateMigrationResponse | null;
+  reviewedMetadataJsonValue: any | null;
+  metadataJsonText: string;
+  metadataJsonValidationError: string | null;
+  metadataJsonResetToken: string;
+  error: string | null;
 };
 
 function providerLabel(type: string) {
@@ -634,7 +661,7 @@ function parseAndValidateReviewedModelJson(
 export function DatasourceIntrospectionPage() {
   const params = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<any>();
   const moduleId = Number(params.moduleId ?? 0);
   const isValidModuleId = Number.isFinite(moduleId) && moduleId > 0;
 
@@ -650,16 +677,14 @@ export function DatasourceIntrospectionPage() {
 
   const [selectedDatasource, setSelectedDatasource] = useState("");
   const [selectedRows, setSelectedRows] = useState<DatasourceIntrospectionTableRecord[]>([]);
-  const [workspaceTableKey, setWorkspaceTableKey] = useState("");
+  const [workspaceTableKeys, setWorkspaceTableKeys] = useState<string[]>([]);
+  const [activeWorkspaceTableKey, setActiveWorkspaceTableKey] = useState("");
+  const [workspaceItems, setWorkspaceItems] = useState<Record<string, WorkspaceBatchItem>>({});
   const [tableSearch, setTableSearch] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("datasource-info");
-  const [drawerDraft, setDrawerDraft] = useState<DrawerDraft | null>(null);
   const [drawerTab, setDrawerTab] = useState("general-info");
   const [workspaceStep, setWorkspaceStep] = useState<WorkspaceStep>("configure");
-  const [mappingPreview, setMappingPreview] = useState<DatasourceIntrospectionMappingPreview | null>(null);
-  const [persistedMappingResult, setPersistedMappingResult] = useState<DatasourceIntrospectionApplyResponse | null>(null);
-  const [migrationArtifactsResult, setMigrationArtifactsResult] = useState<DatasourceIntrospectionCreateMigrationResponse | null>(null);
   const [generateCodeOutput, setGenerateCodeOutput] = useState("");
   const [isGeneratingCodeWorkflow, setIsGeneratingCodeWorkflow] = useState(false);
   const [generateCodeStatusMessage, setGenerateCodeStatusMessage] = useState("");
@@ -668,18 +693,12 @@ export function DatasourceIntrospectionPage() {
   const [hasAttemptedGenerateCode, setHasAttemptedGenerateCode] = useState(false);
   const [runMigrationOutput, setRunMigrationOutput] = useState("");
   const [runMigrationCompleted, setRunMigrationCompleted] = useState(false);
-  const [reviewedMetadataJsonValue, setReviewedMetadataJsonValue] = useState<any>(null);
-  const [metadataJsonText, setMetadataJsonText] = useState("");
-  const [metadataJsonValidationError, setMetadataJsonValidationError] = useState<string | null>(null);
-  const [metadataJsonResetToken, setMetadataJsonResetToken] = useState("initial");
-  const [drawerBootstrapping, setDrawerBootstrapping] = useState(false);
   const [fieldConfigColumnName, setFieldConfigColumnName] = useState<string | null>(null);
   const [sessionSettings, setSessionSettings] = useState<SessionSettings>({
     relationInferenceEnabled: false,
     prioritizeUnmappedTables: true,
   });
   const [draftSessionSettings, setDraftSessionSettings] = useState<SessionSettings>(sessionSettings);
-  const drawerBootstrapTimerRef = useRef<number | null>(null);
 
   const [
     previewMapping,
@@ -727,14 +746,12 @@ export function DatasourceIntrospectionPage() {
 
   useEffect(() => {
     setSelectedRows([]);
-    setWorkspaceTableKey("");
-    setDrawerDraft(null);
+    setWorkspaceTableKeys([]);
+    setActiveWorkspaceTableKey("");
+    setWorkspaceItems({});
     setFieldConfigColumnName(null);
     setTableSearch("");
     setWorkspaceStep("configure");
-    setMappingPreview(null);
-    setPersistedMappingResult(null);
-    setMigrationArtifactsResult(null);
     setGenerateCodeOutput("");
     setIsGeneratingCodeWorkflow(false);
     setGenerateCodeStatusMessage("");
@@ -743,17 +760,7 @@ export function DatasourceIntrospectionPage() {
     setHasAttemptedGenerateCode(false);
     setRunMigrationOutput("");
     setRunMigrationCompleted(false);
-    setReviewedMetadataJsonValue(null);
-    setMetadataJsonText("");
-    setMetadataJsonValidationError(null);
-    setMetadataJsonResetToken(`datasource-${Date.now()}`);
   }, [selectedDatasource]);
-
-  useEffect(() => () => {
-    if (drawerBootstrapTimerRef.current) {
-      window.clearTimeout(drawerBootstrapTimerRef.current);
-    }
-  }, []);
 
   const datasourceOptions = useMemo(
     () => (bootstrap?.datasources ?? []).map((datasource) => ({
@@ -775,45 +782,26 @@ export function DatasourceIntrospectionPage() {
       skip: !isValidModuleId || !selectedDatasource,
     },
   );
-
-  const selectedListRow = selectedRows[0] ?? null;
-  const selectedListRowKey = selectedListRow ? `${selectedListRow.schema ?? ""}::${selectedListRow.tableName}` : "";
-  const isWorkspaceMode = Boolean(workspaceTableKey);
-
-  const selectedTable = useMemo(
-    () => tablesResponse?.records?.find((record) => `${record.schema ?? ""}::${record.tableName}` === workspaceTableKey) ?? null,
-    [tablesResponse, workspaceTableKey],
-  );
-
-  const {
-    data: tableDetail,
-    isLoading: isTableDetailLoading,
-    isFetching: isTableDetailFetching,
-    error: tableDetailError,
-    refetch: refetchTableDetail,
-  } = useGetDatasourceIntrospectionTableDetailQuery(
-    {
-      moduleId,
-      datasource: selectedDatasource,
-      table: selectedTable?.tableName ?? "",
-      schema: selectedTable?.schema ?? undefined,
-    },
-    {
-      skip: !isWorkspaceMode || !isValidModuleId || !selectedDatasource || !selectedTable || !!tablesResponse?.synchronizeBlocked,
-    },
-  );
-
-  const {
-    data: mappedModelResponse,
-    isLoading: isMappedModelLoading,
-    isFetching: isMappedModelFetching,
-    error: mappedModelError,
-  } = useGetmodelByIdQuery(selectedTable?.mappedModelId ?? 0, {
-    skip: !isWorkspaceMode || !selectedTable?.mapped || !selectedTable?.mappedModelId,
-  });
-
-  const mappedModelData = mappedModelResponse?.data;
   const selectedDatasourceRecord = bootstrap?.datasources?.find((datasource) => datasource.name === selectedDatasource) ?? null;
+  const makeTableKey = (schema: string | null | undefined, tableName: string) => `${schema ?? ""}::${tableName}`;
+  const selectedListRowKeySet = useMemo(
+    () => new Set(selectedRows.map((row) => makeTableKey(row.schema, row.tableName))),
+    [selectedRows],
+  );
+  const isWorkspaceMode = workspaceTableKeys.length > 0 && Boolean(activeWorkspaceTableKey);
+  const selectedTable = useMemo(
+    () => workspaceItems[activeWorkspaceTableKey]?.record ?? null,
+    [activeWorkspaceTableKey, workspaceItems],
+  );
+  const activeWorkspaceItem = activeWorkspaceTableKey ? workspaceItems[activeWorkspaceTableKey] ?? null : null;
+  const drawerDraft = activeWorkspaceItem?.draft ?? null;
+  const mappingPreview = activeWorkspaceItem?.mappingPreview ?? null;
+  const persistedMappingResult = activeWorkspaceItem?.persistedMappingResult ?? null;
+  const migrationArtifactsResult = activeWorkspaceItem?.migrationArtifactsResult ?? null;
+  const reviewedMetadataJsonValue = activeWorkspaceItem?.reviewedMetadataJsonValue ?? null;
+  const metadataJsonText = activeWorkspaceItem?.metadataJsonText ?? "";
+  const metadataJsonValidationError = activeWorkspaceItem?.metadataJsonValidationError ?? null;
+  const metadataJsonResetToken = activeWorkspaceItem?.metadataJsonResetToken ?? "initial";
   const activeFieldConfigColumn = drawerDraft?.columns.find((column) => column.columnName === fieldConfigColumnName) ?? null;
   const activeFieldConfigMetaData = useMemo(() => {
     if (!drawerDraft || !activeFieldConfigColumn) {
@@ -866,76 +854,12 @@ export function DatasourceIntrospectionPage() {
         columnName: column.columnName,
       }));
   }, [activeFieldConfigColumn, drawerDraft]);
-  const drawerLoadingError = selectedTable?.mapped ? (tableDetailError || mappedModelError) : tableDetailError;
-  const isDrawerBlockingLoading = Boolean(
-    selectedTable
-    && (
-      drawerBootstrapping
-      || !drawerDraft
-      || isTableDetailLoading
-      || isTableDetailFetching
-      || (selectedTable.mapped && (isMappedModelLoading || isMappedModelFetching))
-    ),
-  );
-
-  useEffect(() => {
-    if (!isWorkspaceMode) {
-      setDrawerDraft(null);
-      setFieldConfigColumnName(null);
-      return;
-    }
-
-    if (drawerBootstrapTimerRef.current) {
-      window.clearTimeout(drawerBootstrapTimerRef.current);
-    }
-
-    setDrawerDraft(null);
-    setFieldConfigColumnName(null);
-    setDrawerTab("general-info");
-    setWorkspaceStep("configure");
-    setMappingPreview(null);
-    setPersistedMappingResult(null);
-    setMigrationArtifactsResult(null);
-    setGenerateCodeOutput("");
-    setIsGeneratingCodeWorkflow(false);
-    setGenerateCodeStatusMessage("");
-    setGenerateCodeTimeoutMessage(null);
-    setGenerateCodeReady(false);
-    setHasAttemptedGenerateCode(false);
-    setRunMigrationOutput("");
-    setRunMigrationCompleted(false);
-    setReviewedMetadataJsonValue(null);
-    setMetadataJsonText("");
-    setMetadataJsonValidationError(null);
-    setMetadataJsonResetToken(`table-${workspaceTableKey}-${Date.now()}`);
-    setDrawerBootstrapping(true);
-  }, [isWorkspaceMode, workspaceTableKey]);
-
-  useEffect(() => {
-    if (!isWorkspaceMode || !selectedTable) return;
-    setSelectedRows([selectedTable]);
-  }, [isWorkspaceMode, selectedTable]);
-
-  useEffect(() => {
-    if (!isWorkspaceMode || !selectedTable || !tableDetail) return;
-    if (selectedTable.mapped && (!mappedModelData || mappedModelData.id !== selectedTable.mappedModelId)) return;
-
-    if (drawerBootstrapTimerRef.current) {
-      window.clearTimeout(drawerBootstrapTimerRef.current);
-    }
-
-    setDrawerDraft(buildDrawerDraft(
-      tableDetail,
-      selectedTable,
-      selectedTable.mapped ? mappedModelResponse : undefined,
-    ));
-    drawerBootstrapTimerRef.current = window.setTimeout(() => {
-      setDrawerBootstrapping(false);
-    }, 150);
-  }, [isWorkspaceMode, selectedTable, tableDetail, mappedModelData, mappedModelResponse]);
+  const drawerLoadingError = activeWorkspaceItem?.error ?? null;
+  const isDrawerBlockingLoading = activeWorkspaceItem?.loadStatus.state === "loading" || !drawerDraft;
 
   const filteredRecords = useMemo(() => {
-    const records = [...(tablesResponse?.records ?? [])];
+    const records = [...(tablesResponse?.records ?? [])]
+      .filter((record) => !record.tableName.toLowerCase().startsWith("ss_"));
     const searchNeedle = tableSearch.trim().toLowerCase();
 
     const filtered = searchNeedle
@@ -960,10 +884,179 @@ export function DatasourceIntrospectionPage() {
     return filtered;
   }, [sessionSettings.prioritizeUnmappedTables, tableSearch, tablesResponse?.records]);
 
+  const workspaceRecords = useMemo(
+    () => workspaceTableKeys
+      .map((key) => workspaceItems[key]?.record)
+      .filter(Boolean) as DatasourceIntrospectionTableRecord[],
+    [workspaceItems, workspaceTableKeys],
+  );
+  const selectedRowCount = selectedRows.length;
+  const visibleRowKeySet = useMemo(
+    () => new Set(filteredRecords.map((row) => makeTableKey(row.schema, row.tableName))),
+    [filteredRecords],
+  );
+  const visibleSelectedRowCount = useMemo(
+    () => selectedRows.filter((row) => visibleRowKeySet.has(makeTableKey(row.schema, row.tableName))).length,
+    [selectedRows, visibleRowKeySet],
+  );
+  const hasVisibleRows = filteredRecords.length > 0;
+  const allVisibleRowsSelected = hasVisibleRows && visibleSelectedRowCount === filteredRecords.length;
+  const totalWorkspaceCount = workspaceTableKeys.length;
+  const activeWorkspacePosition = activeWorkspaceTableKey
+    ? Math.max(0, workspaceTableKeys.indexOf(activeWorkspaceTableKey)) + 1
+    : 0;
+
+  const allWorkspaceItemsReady = useMemo(
+    () => workspaceTableKeys.length > 0 && workspaceTableKeys.every((key) => workspaceItems[key]?.draft),
+    [workspaceItems, workspaceTableKeys],
+  );
+  const allWorkspaceItemsPreviewed = useMemo(
+    () => workspaceTableKeys.length > 0 && workspaceTableKeys.every((key) => workspaceItems[key]?.mappingPreview),
+    [workspaceItems, workspaceTableKeys],
+  );
+  const allWorkspaceItemsPersisted = useMemo(
+    () => workspaceTableKeys.length > 0 && workspaceTableKeys.every((key) => workspaceItems[key]?.persistedMappingResult),
+    [workspaceItems, workspaceTableKeys],
+  );
+  const allWorkspaceItemsMigrated = useMemo(
+    () => workspaceTableKeys.length > 0 && workspaceTableKeys.every((key) => workspaceItems[key]?.migrationArtifactsResult),
+    [workspaceItems, workspaceTableKeys],
+    );
+  const hasMigrationGenerationWork = useMemo(
+    () => workspaceTableKeys.some((key) => Boolean(workspaceItems[key]?.mappingPreview?.migration.willGenerate)),
+    [workspaceItems, workspaceTableKeys],
+  );
+  const reviewedWorkspaceCount = useMemo(
+    () => workspaceTableKeys.filter((key) => workspaceItems[key]?.mappingPreview).length,
+    [workspaceItems, workspaceTableKeys],
+  );
+  const savedWorkspaceCount = useMemo(
+    () => workspaceTableKeys.filter((key) => workspaceItems[key]?.persistedMappingResult).length,
+    [workspaceItems, workspaceTableKeys],
+  );
+  const migrationReadyWorkspaceCount = useMemo(
+    () => workspaceTableKeys.filter((key) => workspaceItems[key]?.migrationArtifactsResult).length,
+    [workspaceItems, workspaceTableKeys],
+  );
+  const reviewErrorWorkspaceCount = useMemo(
+    () => workspaceTableKeys.filter((key) => workspaceItems[key]?.reviewStatus.state === "error").length,
+    [workspaceItems, workspaceTableKeys],
+  );
+  const saveErrorWorkspaceCount = useMemo(
+    () => workspaceTableKeys.filter((key) => workspaceItems[key]?.saveStatus.state === "error").length,
+    [workspaceItems, workspaceTableKeys],
+  );
+  const migrationErrorWorkspaceCount = useMemo(
+    () => workspaceTableKeys.filter((key) => workspaceItems[key]?.migrationStatus.state === "error").length,
+    [workspaceItems, workspaceTableKeys],
+  );
+  const totalIncludedMappedColumns = useMemo(
+    () => workspaceTableKeys.reduce((count, key) => {
+      const preview = workspaceItems[key]?.mappingPreview;
+      return count + (preview?.summary.includedColumnNames.length ?? 0);
+    }, 0),
+    [workspaceItems, workspaceTableKeys],
+  );
+  const totalGeneratedSystemColumns = useMemo(
+    () => workspaceTableKeys.reduce((count, key) => {
+      const preview = workspaceItems[key]?.mappingPreview;
+      return count + (preview?.summary.generatedSystemColumnCount ?? 0);
+    }, 0),
+    [workspaceItems, workspaceTableKeys],
+  );
+  const totalGeneratedMigrations = useMemo(
+    () => workspaceTableKeys.reduce((count, key) => {
+      return count + (workspaceItems[key]?.mappingPreview?.migration.willGenerate ? 1 : 0);
+    }, 0),
+    [workspaceItems, workspaceTableKeys],
+  );
+
+  const updateWorkspaceItem = (key: string, updater: (current: WorkspaceBatchItem) => WorkspaceBatchItem) => {
+    setWorkspaceItems((current) => {
+      const item = current[key];
+      if (!item) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [key]: updater(item),
+      };
+    });
+  };
+
+  const buildWorkspacePlaceholder = (record: DatasourceIntrospectionTableRecord): WorkspaceBatchItem => ({
+    key: makeTableKey(record.schema, record.tableName),
+    record,
+    detail: null,
+    mappedModelData: null,
+    draft: null,
+    loadStatus: { state: "loading", message: "Loading mapping workspace..." },
+    reviewStatus: { state: "idle", message: "Not reviewed yet." },
+    saveStatus: { state: "idle", message: "Not saved yet." },
+    migrationStatus: { state: "idle", message: "Migration artifacts not created yet." },
+    mappingPreview: null,
+    persistedMappingResult: null,
+    migrationArtifactsResult: null,
+    reviewedMetadataJsonValue: null,
+    metadataJsonText: "",
+    metadataJsonValidationError: null,
+    metadataJsonResetToken: `workspace-${record.tableName}-${Date.now()}`,
+    error: null,
+  });
+
+  const loadWorkspaceItem = async (record: DatasourceIntrospectionTableRecord) => {
+    const key = makeTableKey(record.schema, record.tableName);
+
+    try {
+      const tableDetailRequest = dispatch(
+        datasourceIntrospectionApi.endpoints.getDatasourceIntrospectionTableDetail.initiate({
+          moduleId,
+          datasource: selectedDatasource,
+          table: record.tableName,
+          schema: record.schema ?? undefined,
+        }),
+      ) as any;
+      const tableDetailData = await tableDetailRequest.unwrap();
+      tableDetailRequest.unsubscribe?.();
+
+      let mappedModelData: any = null;
+      if (record.mapped && record.mappedModelId) {
+        const modelRequest = dispatch(
+          modelsApi.endpoints.getmodelById.initiate(record.mappedModelId),
+        ) as any;
+        const modelResponse = await modelRequest.unwrap();
+        modelRequest.unsubscribe?.();
+        mappedModelData = modelResponse?.data ?? modelResponse ?? null;
+      }
+
+      const draft = buildDrawerDraft(
+        tableDetailData,
+        record,
+        mappedModelData ? { data: mappedModelData } : undefined,
+      );
+
+      updateWorkspaceItem(key, (current) => ({
+        ...current,
+        detail: tableDetailData,
+        mappedModelData,
+        draft,
+        loadStatus: { state: "ready", message: "Ready to configure." },
+        error: null,
+      }));
+    } catch (error: any) {
+      updateWorkspaceItem(key, (current) => ({
+        ...current,
+        loadStatus: { state: "error", message: readQueryError(error) },
+        error: readQueryError(error),
+      }));
+    }
+  };
+
   const drawerUserKeyOptions = useMemo(() => {
     const options = new Map<string, { label: string; value: string }>();
 
-    tableDetail?.userKeyCandidates?.forEach((candidate) => {
+    activeWorkspaceItem?.detail?.userKeyCandidates?.forEach((candidate) => {
       options.set(candidate.name, {
         label: `${candidate.label} · ${candidate.reason}`,
         value: candidate.name,
@@ -982,7 +1075,7 @@ export function DatasourceIntrospectionPage() {
       });
 
     return Array.from(options.values());
-  }, [drawerDraft?.columns, tableDetail?.userKeyCandidates]);
+  }, [activeWorkspaceItem?.detail?.userKeyCandidates, drawerDraft?.columns]);
 
   const settingsTabs = [
     {
@@ -1065,33 +1158,43 @@ export function DatasourceIntrospectionPage() {
     if (selectedDatasource) {
       await refetchTables();
     }
-    if (isWorkspaceMode && selectedTable) {
-      await refetchTableDetail();
+    if (isWorkspaceMode) {
+      workspaceRecords.forEach((record) => {
+        void loadWorkspaceItem(record);
+      });
     }
   };
 
-  const startMappingForRecord = (record: DatasourceIntrospectionTableRecord) => {
-    if (drawerBootstrapTimerRef.current) {
-      window.clearTimeout(drawerBootstrapTimerRef.current);
-    }
+  const toggleSelectedRow = (row: DatasourceIntrospectionTableRecord, checked?: boolean) => {
+    const rowKey = makeTableKey(row.schema, row.tableName);
+    setSelectedRows((current) => {
+      const exists = current.some((item) => makeTableKey(item.schema, item.tableName) === rowKey);
+      const shouldInclude = checked ?? !exists;
 
-    setSelectedRows([record]);
-    setWorkspaceTableKey(`${record.schema ?? ""}::${record.tableName}`);
+      if (shouldInclude) {
+        if (exists) return current;
+        return [...current, row];
+      }
+
+      return current.filter((item) => makeTableKey(item.schema, item.tableName) !== rowKey);
+    });
   };
 
-  const leaveWorkspace = () => {
-    if (drawerBootstrapTimerRef.current) {
-      window.clearTimeout(drawerBootstrapTimerRef.current);
-    }
+  const startMappingForRows = (records: DatasourceIntrospectionTableRecord[]) => {
+    if (!records.length) return;
 
-    setWorkspaceTableKey("");
-    setDrawerDraft(null);
+    const keys = records.map((record) => makeTableKey(record.schema, record.tableName));
+    const nextWorkspaceItems = Object.fromEntries(
+      records.map((record) => [makeTableKey(record.schema, record.tableName), buildWorkspacePlaceholder(record)]),
+    );
+
+    setSelectedRows(records);
+    setWorkspaceTableKeys(keys);
+    setActiveWorkspaceTableKey(keys[0]);
+    setWorkspaceItems(nextWorkspaceItems);
     setFieldConfigColumnName(null);
-    setWorkspaceStep("configure");
     setDrawerTab("general-info");
-    setMappingPreview(null);
-    setPersistedMappingResult(null);
-    setMigrationArtifactsResult(null);
+    setWorkspaceStep("configure");
     setGenerateCodeOutput("");
     setIsGeneratingCodeWorkflow(false);
     setGenerateCodeStatusMessage("");
@@ -1100,22 +1203,19 @@ export function DatasourceIntrospectionPage() {
     setHasAttemptedGenerateCode(false);
     setRunMigrationOutput("");
     setRunMigrationCompleted(false);
-    setReviewedMetadataJsonValue(null);
-    setMetadataJsonText("");
-    setMetadataJsonValidationError(null);
-    setMetadataJsonResetToken(`workspace-closed-${Date.now()}`);
-    setDrawerBootstrapping(false);
+
+    records.forEach((record) => {
+      void loadWorkspaceItem(record);
+    });
   };
 
-  const applyDraftSettings = () => {
-    setSessionSettings(draftSessionSettings);
-    setSettingsOpen(false);
-  };
-
-  const updateDrawerDraft = (updater: (current: DrawerDraft) => DrawerDraft) => {
-    setMappingPreview(null);
-    setPersistedMappingResult(null);
-    setMigrationArtifactsResult(null);
+  const leaveWorkspace = () => {
+    setWorkspaceTableKeys([]);
+    setActiveWorkspaceTableKey("");
+    setWorkspaceItems({});
+    setFieldConfigColumnName(null);
+    setWorkspaceStep("configure");
+    setDrawerTab("general-info");
     setGenerateCodeOutput("");
     setIsGeneratingCodeWorkflow(false);
     setGenerateCodeStatusMessage("");
@@ -1123,7 +1223,37 @@ export function DatasourceIntrospectionPage() {
     setGenerateCodeReady(false);
     setHasAttemptedGenerateCode(false);
     setRunMigrationOutput("");
-    setDrawerDraft((current) => (current ? updater(current) : current));
+    setRunMigrationCompleted(false);
+  };
+
+  const applyDraftSettings = () => {
+    setSessionSettings(draftSessionSettings);
+    setSettingsOpen(false);
+  };
+
+  const updateActiveWorkspaceItem = (updater: (current: WorkspaceBatchItem) => WorkspaceBatchItem) => {
+    if (!activeWorkspaceTableKey) return;
+    updateWorkspaceItem(activeWorkspaceTableKey, updater);
+  };
+
+  const updateDrawerDraft = (updater: (current: DrawerDraft) => DrawerDraft) => {
+    setGenerateCodeOutput("");
+    setIsGeneratingCodeWorkflow(false);
+    setGenerateCodeStatusMessage("");
+    setGenerateCodeTimeoutMessage(null);
+    setGenerateCodeReady(false);
+    setHasAttemptedGenerateCode(false);
+    setRunMigrationOutput("");
+    updateActiveWorkspaceItem((current) => ({
+      ...current,
+      mappingPreview: null,
+      persistedMappingResult: null,
+      migrationArtifactsResult: null,
+      reviewStatus: { state: "idle", message: "Not reviewed yet." },
+      saveStatus: { state: "idle", message: "Not saved yet." },
+      migrationStatus: { state: "idle", message: "Migration artifacts not created yet." },
+      draft: current.draft ? updater(current.draft) : current.draft,
+    }));
   };
 
   const updateGeneralField = (field: keyof DrawerDraft, value: any) => {
@@ -1358,86 +1488,167 @@ export function DatasourceIntrospectionPage() {
   };
 
   const reviewMappingJson = async () => {
-    if (!drawerDraft || !bootstrap?.module?.id) return;
+    if (!bootstrap?.module?.id || !workspaceTableKeys.length) return;
 
-    const validationErrors = getDrawerValidationErrors(drawerDraft);
-    if (validationErrors.length) {
-      validationErrors.forEach((detail) => {
-        dispatch(showToast({ severity: "error", summary: "Validation", detail }));
+    const tablesWithErrors = workspaceTableKeys
+      .map((key) => ({ key, item: workspaceItems[key] }))
+      .filter((entry) => entry.item?.draft)
+      .flatMap(({ item }) => getDrawerValidationErrors(item.draft as DrawerDraft).map((detail) => ({
+        tableName: item?.record.tableName,
+        detail,
+      })));
+
+    if (tablesWithErrors.length) {
+      tablesWithErrors.forEach(({ tableName, detail }) => {
+        dispatch(showToast({ severity: "error", summary: tableName || "Validation", detail }));
       });
       return;
     }
 
-    try {
-      const preview = await previewMapping({
-        moduleId: bootstrap.module.id,
-        payload: buildMappingRequest(drawerDraft),
-      }).unwrap();
+    let firstSuccessKey = "";
 
-      setMappingPreview(preview);
-      setReviewedMetadataJsonValue(preview.metadataJson.model);
-      setMetadataJsonText(JSON.stringify(preview.metadataJson.model, null, 2));
-      setMetadataJsonValidationError(null);
-      setMetadataJsonResetToken(`preview-${preview.metadataJson.filePath}-${Date.now()}`);
-      setPersistedMappingResult(null);
-      setMigrationArtifactsResult(null);
+    for (const key of workspaceTableKeys) {
+      const item = workspaceItems[key];
+      if (!item?.draft) continue;
+
+      updateWorkspaceItem(key, (current) => ({
+        ...current,
+        reviewStatus: { state: "loading", message: "Generating mapping preview..." },
+      }));
+
+      try {
+        const preview = await previewMapping({
+          moduleId: bootstrap.module.id,
+          payload: buildMappingRequest(item.draft),
+        }).unwrap();
+
+        if (!firstSuccessKey) {
+          firstSuccessKey = key;
+        }
+
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          mappingPreview: preview,
+          reviewedMetadataJsonValue: preview.metadataJson.model,
+          metadataJsonText: JSON.stringify(preview.metadataJson.model, null, 2),
+          metadataJsonValidationError: null,
+          metadataJsonResetToken: `preview-${preview.metadataJson.filePath}-${Date.now()}`,
+          persistedMappingResult: null,
+          migrationArtifactsResult: null,
+          reviewStatus: { state: "success", message: "Preview ready." },
+          saveStatus: { state: "idle", message: "Not saved yet." },
+          migrationStatus: { state: "idle", message: "Migration artifacts not created yet." },
+        }));
+      } catch (error: any) {
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          reviewStatus: { state: "error", message: readQueryError(error) },
+        }));
+        dispatch(showToast({
+          severity: "error",
+          summary: `Preview failed for ${item.record.tableName}`,
+          detail: readQueryError(error),
+        }));
+      }
+    }
+
+    if (firstSuccessKey) {
+      setActiveWorkspaceTableKey(firstSuccessKey);
+      setWorkspaceStep("review-json");
       setGenerateCodeOutput("");
       setRunMigrationOutput("");
-      setWorkspaceStep("review-json");
-    } catch (error: any) {
-      dispatch(showToast({
-        severity: "error",
-        summary: "Preview failed",
-        detail: readQueryError(error),
-      }));
     }
   };
 
   const persistMappingArtifacts = async () => {
-    if (!drawerDraft || !bootstrap?.module?.id) return;
+    if (!bootstrap?.module?.id || !workspaceTableKeys.length) return;
 
-    const validationErrors = getDrawerValidationErrors(drawerDraft);
-    if (validationErrors.length) {
-      validationErrors.forEach((detail) => {
-        dispatch(showToast({ severity: "error", summary: "Validation", detail }));
-      });
-      setWorkspaceStep("configure");
-      return;
+    let firstSavedKey = "";
+
+    for (const key of workspaceTableKeys) {
+      const item = workspaceItems[key];
+      if (!item?.draft || !item.mappingPreview) continue;
+
+      const validationErrors = getDrawerValidationErrors(item.draft);
+      if (validationErrors.length) {
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          saveStatus: { state: "error", message: validationErrors[0] },
+        }));
+        validationErrors.forEach((detail) => {
+          dispatch(showToast({ severity: "error", summary: item.record.tableName, detail }));
+        });
+        continue;
+      }
+
+      const reviewedModelValidation = parseAndValidateReviewedModelJson(item.metadataJsonText, item.draft);
+      if (reviewedModelValidation.error || !reviewedModelValidation.parsed) {
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          metadataJsonValidationError: reviewedModelValidation.error ?? "Metadata JSON is invalid.",
+          saveStatus: { state: "error", message: reviewedModelValidation.error ?? "Metadata JSON is invalid." },
+        }));
+        dispatch(showToast({
+          severity: "error",
+          summary: item.record.tableName,
+          detail: reviewedModelValidation.error ?? "Metadata JSON is invalid.",
+        }));
+        continue;
+      }
+
+      updateWorkspaceItem(key, (current) => ({
+        ...current,
+        metadataJsonValidationError: null,
+        saveStatus: { state: "loading", message: "Saving mapping..." },
+      }));
+
+      try {
+        const response = await applyMapping({
+          moduleId: bootstrap.module.id,
+          payload: {
+            ...buildMappingRequest(item.draft, item.mappingPreview.migration.timestamp ?? null),
+            reviewedModel: reviewedModelValidation.parsed,
+          },
+        }).unwrap();
+
+        if (!firstSavedKey) {
+          firstSavedKey = key;
+        }
+
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          persistedMappingResult: response,
+          migrationArtifactsResult: null,
+          saveStatus: { state: "success", message: "Mapping saved." },
+          migrationStatus: { state: "idle", message: "Migration artifacts not created yet." },
+          draft: current.draft
+            ? {
+              ...current.draft,
+              mapped: true,
+              modelId: response.modelId,
+            }
+            : current.draft,
+          record: {
+            ...current.record,
+            mapped: true,
+            mappedModelId: response.modelId,
+          },
+        }));
+      } catch (error: any) {
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          saveStatus: { state: "error", message: readQueryError(error) },
+        }));
+        dispatch(showToast({
+          severity: "error",
+          summary: `Save failed for ${item.record.tableName}`,
+          detail: readQueryError(error),
+        }));
+      }
     }
 
-    const reviewedModelValidation = parseAndValidateReviewedModelJson(metadataJsonText, drawerDraft);
-    if (reviewedModelValidation.error || !reviewedModelValidation.parsed) {
-      setMetadataJsonValidationError(reviewedModelValidation.error ?? "Metadata JSON is invalid.");
-      setWorkspaceStep("review-json");
-      dispatch(showToast({
-        severity: "error",
-        summary: "Validation",
-        detail: reviewedModelValidation.error ?? "Metadata JSON is invalid.",
-      }));
-      return;
-    }
-
-    setMetadataJsonValidationError(null);
-
-    try {
-      const response = await applyMapping({
-        moduleId: bootstrap.module.id,
-        payload: {
-          ...buildMappingRequest(drawerDraft, mappingPreview?.migration.timestamp ?? null),
-          reviewedModel: reviewedModelValidation.parsed,
-        },
-      }).unwrap();
-
-      dispatch(showToast({
-        severity: "success",
-        summary: "Mapping saved",
-        detail: drawerDraft.mapped
-          ? "The model mapping metadata was updated successfully."
-          : "The model mapping metadata was created successfully.",
-      }));
-
-      setPersistedMappingResult(response);
-      setMigrationArtifactsResult(null);
+    if (firstSavedKey) {
+      setActiveWorkspaceTableKey(firstSavedKey);
       setGenerateCodeOutput("");
       setIsGeneratingCodeWorkflow(false);
       setGenerateCodeStatusMessage("");
@@ -1446,21 +1657,11 @@ export function DatasourceIntrospectionPage() {
       setHasAttemptedGenerateCode(false);
       setRunMigrationOutput("");
       setRunMigrationCompleted(false);
-      setDrawerDraft((current) => (
-        current
-          ? {
-            ...current,
-            mapped: true,
-            modelId: response.modelId,
-          }
-          : current
-      ));
       setWorkspaceStep("generate-code");
-    } catch (error: any) {
       dispatch(showToast({
-        severity: "error",
-        summary: "Save failed",
-        detail: readQueryError(error),
+        severity: "success",
+        summary: "Mappings saved",
+        detail: "The selected table mappings were saved successfully.",
       }));
     }
   };
@@ -1522,7 +1723,6 @@ export function DatasourceIntrospectionPage() {
 
     setGenerateCodeStatusMessage("Backend is back online. You can continue.");
     setGenerateCodeReady(true);
-    setMigrationArtifactsResult(null);
     setRunMigrationOutput("");
     dispatch(showToast({
       severity: "success",
@@ -1532,50 +1732,83 @@ export function DatasourceIntrospectionPage() {
   };
 
   const handleCreateMigrationArtifacts = async () => {
-    if (!drawerDraft || !bootstrap?.module?.id || !persistedMappingResult?.modelId) return;
+    if (!bootstrap?.module?.id || !workspaceTableKeys.length) return;
 
-    const reviewedModelValidation = parseAndValidateReviewedModelJson(metadataJsonText, drawerDraft);
-    if (reviewedModelValidation.error || !reviewedModelValidation.parsed) {
-      setMetadataJsonValidationError(reviewedModelValidation.error ?? "Metadata JSON is invalid.");
-      setWorkspaceStep("review-json");
-      dispatch(showToast({
-        severity: "error",
-        summary: "Validation",
-        detail: reviewedModelValidation.error ?? "Metadata JSON is invalid.",
+    let firstMigrationKey = "";
+
+    for (const key of workspaceTableKeys) {
+      const item = workspaceItems[key];
+      if (!item?.draft || !item.persistedMappingResult?.modelId || !item.mappingPreview) continue;
+
+      const reviewedModelValidation = parseAndValidateReviewedModelJson(item.metadataJsonText, item.draft);
+      if (reviewedModelValidation.error || !reviewedModelValidation.parsed) {
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          metadataJsonValidationError: reviewedModelValidation.error ?? "Metadata JSON is invalid.",
+          migrationStatus: { state: "error", message: reviewedModelValidation.error ?? "Metadata JSON is invalid." },
+        }));
+        dispatch(showToast({
+          severity: "error",
+          summary: item.record.tableName,
+          detail: reviewedModelValidation.error ?? "Metadata JSON is invalid.",
+        }));
+        continue;
+      }
+
+      updateWorkspaceItem(key, (current) => ({
+        ...current,
+        metadataJsonValidationError: null,
+        migrationStatus: { state: "loading", message: "Creating migration artifacts..." },
       }));
-      return;
+
+      try {
+        const response = await createMigrationArtifacts({
+          moduleId: bootstrap.module.id,
+          payload: {
+            ...buildMappingRequest(
+              {
+                ...item.draft,
+                mapped: true,
+                modelId: item.persistedMappingResult.modelId,
+              },
+              item.mappingPreview.migration.timestamp ?? null,
+            ),
+            reviewedModel: reviewedModelValidation.parsed,
+          },
+        }).unwrap();
+
+        if (!firstMigrationKey) {
+          firstMigrationKey = key;
+        }
+
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          migrationArtifactsResult: response,
+          migrationStatus: {
+            state: "success",
+            message: response.migration.written ? "Migration artifacts created." : "No migration file required.",
+          },
+        }));
+      } catch (error: any) {
+        updateWorkspaceItem(key, (current) => ({
+          ...current,
+          migrationStatus: { state: "error", message: readQueryError(error) },
+        }));
+        dispatch(showToast({
+          severity: "error",
+          summary: `Create migration artifacts failed for ${item.record.tableName}`,
+          detail: readQueryError(error),
+        }));
+      }
     }
 
-    try {
-      const response = await createMigrationArtifacts({
-        moduleId: bootstrap.module.id,
-        payload: {
-          ...buildMappingRequest(
-            {
-              ...drawerDraft,
-              mapped: true,
-              modelId: persistedMappingResult.modelId,
-            },
-            mappingPreview?.migration.timestamp ?? null,
-          ),
-          reviewedModel: reviewedModelValidation.parsed,
-        },
-      }).unwrap();
-
-      setMigrationArtifactsResult(response);
+    if (firstMigrationKey) {
+      setActiveWorkspaceTableKey(firstMigrationKey);
       setWorkspaceStep("run-migration");
       dispatch(showToast({
         severity: "success",
-        summary: "Migration artifacts created",
-        detail: response.migration.written
-          ? "The migration file and datasource registration were written successfully."
-          : "No migration file was required, but the datasource registration was updated successfully.",
-      }));
-    } catch (error: any) {
-      dispatch(showToast({
-        severity: "error",
-        summary: "Create migration artifacts failed",
-        detail: readQueryError(error),
+        summary: "Migration artifacts ready",
+        detail: "Datasource registration and migration artifacts were prepared for the selected tables.",
       }));
     }
   };
@@ -1629,7 +1862,6 @@ export function DatasourceIntrospectionPage() {
     "run-migration",
   ];
   const currentStepIndex = stepSequence.indexOf(workspaceStep);
-  const hasMigrationGenerationWork = Boolean(mappingPreview?.migration.willGenerate);
   const stepperItems = [
     {
       key: "configure" as const,
@@ -1644,9 +1876,9 @@ export function DatasourceIntrospectionPage() {
       label: "Review Mapping JSON",
       complete: currentStepIndex > 1,
       active: workspaceStep === "review-json",
-      disabled: !mappingPreview,
+      disabled: !allWorkspaceItemsPreviewed,
       onClick: () => {
-        if (mappingPreview) setWorkspaceStep("review-json");
+        if (allWorkspaceItemsPreviewed) setWorkspaceStep("review-json");
       },
     },
     {
@@ -1654,9 +1886,9 @@ export function DatasourceIntrospectionPage() {
       label: "Generate Code",
       complete: currentStepIndex > 2,
       active: workspaceStep === "generate-code",
-      disabled: !persistedMappingResult,
+      disabled: !allWorkspaceItemsPersisted,
       onClick: () => {
-        if (persistedMappingResult) setWorkspaceStep("generate-code");
+        if (allWorkspaceItemsPersisted) setWorkspaceStep("generate-code");
       },
     },
     {
@@ -1674,9 +1906,9 @@ export function DatasourceIntrospectionPage() {
       label: hasMigrationGenerationWork ? "Run Migration" : "Finish",
       complete: false,
       active: workspaceStep === "run-migration",
-      disabled: !migrationArtifactsResult,
+      disabled: !allWorkspaceItemsMigrated,
       onClick: () => {
-        if (migrationArtifactsResult) setWorkspaceStep("run-migration");
+        if (allWorkspaceItemsMigrated) setWorkspaceStep("run-migration");
       },
     },
   ];
@@ -1686,7 +1918,7 @@ export function DatasourceIntrospectionPage() {
   ) ?? [];
   const allSelectableUnmappedIncluded = selectableUnmappedColumns.length > 0
     && selectableUnmappedColumns.every((column) => column.include);
-  const drawerRawDdl = tableDetail?.rawDdl ?? null;
+  const drawerRawDdl = activeWorkspaceItem?.detail?.rawDdl ?? null;
   const drawerTabs = drawerDraft ? [
     {
       value: "general-info",
@@ -1825,7 +2057,7 @@ export function DatasourceIntrospectionPage() {
               <span>Database</span>
               <span>SolidX</span>
               <span>Status</span>
-              <span>Action</span>
+              <span>Mapping</span>
             </div>
             {drawerDraft.columns.map((column) => {
               const isUserKey = drawerDraft.userKeyField === column.fieldName;
@@ -1956,6 +2188,24 @@ export function DatasourceIntrospectionPage() {
 
   const reviewJsonPanel = mappingPreview ? (
     <div className="sdix-review-panel sdix-review-panel--metadata">
+      <div className="sdix-workspace-summary">
+        <div className="sdix-workspace-summary__item">
+          <span>Selected tables</span>
+          <strong>{totalWorkspaceCount}</strong>
+        </div>
+        <div className="sdix-workspace-summary__item">
+          <span>Previews ready</span>
+          <strong>{reviewedWorkspaceCount}/{totalWorkspaceCount}</strong>
+        </div>
+        <div className="sdix-workspace-summary__item">
+          <span>Current table</span>
+          <strong>{activeWorkspacePosition}/{totalWorkspaceCount}</strong>
+        </div>
+        <div className="sdix-workspace-summary__item">
+          <span>Review errors</span>
+          <strong>{reviewErrorWorkspaceCount}</strong>
+        </div>
+      </div>
       <div className="sdix-review-meta sdix-review-meta--compact">
         <span>Target file</span>
         <strong>{mappingPreview.metadataJson.filePath}</strong>
@@ -1965,15 +2215,24 @@ export function DatasourceIntrospectionPage() {
         value={reviewedMetadataJsonValue ?? mappingPreview.metadataJson.model}
         resetToken={metadataJsonResetToken}
         onValueChange={(nextValue) => {
-          setReviewedMetadataJsonValue(nextValue);
-          if (metadataJsonValidationError) {
-            setMetadataJsonValidationError(null);
-          }
+          updateActiveWorkspaceItem((current) => ({
+            ...current,
+            reviewedMetadataJsonValue: nextValue,
+            metadataJsonValidationError: null,
+          }));
         }}
         onTextChange={(nextText) => {
-          setMetadataJsonText(nextText);
+          updateActiveWorkspaceItem((current) => ({
+            ...current,
+            metadataJsonText: nextText,
+          }));
         }}
-        onErrorChange={setMetadataJsonValidationError}
+        onErrorChange={(nextError) => {
+          updateActiveWorkspaceItem((current) => ({
+            ...current,
+            metadataJsonValidationError: nextError,
+          }));
+        }}
       />
       {metadataJsonValidationError ? (
         <div className="sdix-json-validation-error">
@@ -1985,6 +2244,24 @@ export function DatasourceIntrospectionPage() {
 
   const createMigrationsPanel = mappingPreview ? (
     <div className="sdix-review-panel sdix-review-panel--migration">
+      <div className="sdix-workspace-summary">
+        <div className="sdix-workspace-summary__item">
+          <span>Selected tables</span>
+          <strong>{totalWorkspaceCount}</strong>
+        </div>
+        <div className="sdix-workspace-summary__item">
+          <span>Migration previews ready</span>
+          <strong>{migrationReadyWorkspaceCount}/{totalWorkspaceCount}</strong>
+        </div>
+        <div className="sdix-workspace-summary__item">
+          <span>Migration files to write</span>
+          <strong>{totalGeneratedMigrations}</strong>
+        </div>
+        <div className="sdix-workspace-summary__item">
+          <span>System columns to add</span>
+          <strong>{totalGeneratedSystemColumns}</strong>
+        </div>
+      </div>
       {mappingPreview.migration.willGenerate && mappingPreview.migration.filePath ? (
         <>
           <div className="sdix-review-meta sdix-review-meta--compact">
@@ -2012,15 +2289,33 @@ export function DatasourceIntrospectionPage() {
       <div className="sdix-stage-panel__header">
         <span className="sdix-stage-panel__eyebrow">Step 3</span>
         <h3>Generate module code</h3>
-        <p>The reviewed metadata JSON is now persisted. Run the normal SolidX module generation flow next so the entity, DTOs, repository, service, controller, and UI code are refreshed before we register the entity on the datasource and write the migration.</p>
+        <p>The reviewed metadata JSON is now persisted for the selected batch. Run the normal SolidX module generation flow next so every mapped entity, DTO, repository, service, controller, and UI asset is refreshed before datasource registration and migration files are written.</p>
       </div>
       <div className="sdix-stage-panel__body">
+        <div className="sdix-workspace-summary">
+          <div className="sdix-workspace-summary__item">
+            <span>Selected tables</span>
+            <strong>{totalWorkspaceCount}</strong>
+          </div>
+          <div className="sdix-workspace-summary__item">
+            <span>Saved mappings</span>
+            <strong>{savedWorkspaceCount}/{totalWorkspaceCount}</strong>
+          </div>
+          <div className="sdix-workspace-summary__item">
+            <span>Columns queued</span>
+            <strong>{totalIncludedMappedColumns}</strong>
+          </div>
+          <div className="sdix-workspace-summary__item">
+            <span>System columns pending</span>
+            <strong>{totalGeneratedSystemColumns}</strong>
+          </div>
+        </div>
         <div className="sdix-stage-panel__card">
           <div className="sdix-stage-panel__card-title">What happens here</div>
           <ul className="sdix-stage-panel__list">
-            <li>The module generate-code pipeline runs for <strong>{bootstrap?.module?.displayName}</strong>.</li>
-            <li>The newly mapped model entity is generated inside the module source folder.</li>
-            <li>Any existing generated assets for this module may be refreshed.</li>
+            <li>The module generate-code pipeline runs once for <strong>{bootstrap?.module?.displayName}</strong>.</li>
+            <li>All saved mappings in this batch contribute to the generated entities inside the module source folder.</li>
+            <li>Any existing generated assets for this module may be refreshed in the same pass.</li>
           </ul>
         </div>
         <div className="sdix-stage-panel__actions">
@@ -2062,12 +2357,30 @@ export function DatasourceIntrospectionPage() {
           <h3>{hasMigrationGenerationWork ? "Run migration, build, and seed" : "Finish mapping workflow"}</h3>
           <p>
             {hasMigrationGenerationWork
-              ? "With the datasource file updated and module code generated, SolidX can now run the TypeORM migration for the selected datasource, rebuild the project, and reseed the mapped module metadata."
-              : "SolidX will now run the final wrap-up workflow for this mapping: execute the datasource migration command, rebuild the project, and reseed the mapped module metadata."}
+              ? "With datasource registration updated and module code generated, SolidX can now run the TypeORM migration, rebuild the project, and reseed metadata for the full selected batch."
+              : "SolidX will now run the final wrap-up workflow for the full selected batch: execute the datasource migration command, rebuild the project, and reseed the mapped module metadata."}
           </p>
         </div>
       ) : null}
       <div className="sdix-stage-panel__body">
+        <div className="sdix-workspace-summary">
+          <div className="sdix-workspace-summary__item">
+            <span>Selected tables</span>
+            <strong>{totalWorkspaceCount}</strong>
+          </div>
+          <div className="sdix-workspace-summary__item">
+            <span>Generated code ready</span>
+            <strong>{hasAttemptedGenerateCode ? "Yes" : "No"}</strong>
+          </div>
+          <div className="sdix-workspace-summary__item">
+            <span>Migration artifacts ready</span>
+            <strong>{migrationReadyWorkspaceCount}/{totalWorkspaceCount}</strong>
+          </div>
+          <div className="sdix-workspace-summary__item">
+            <span>Datasource</span>
+            <strong>{selectedDatasource}</strong>
+          </div>
+        </div>
         {!runMigrationCompleted ? (
           <div className="sdix-stage-panel__card">
             <div className="sdix-stage-panel__card-title">Commands</div>
@@ -2119,7 +2432,16 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
       case "review-json":
         return (
           <span>
-            Review the generated metadata JSON before it is written to the module metadata file.
+            Reviewing
+            {" "}
+            <strong>{activeWorkspacePosition} of {totalWorkspaceCount}</strong>
+            {" "}
+            selected tables. Preview generation is ready for
+            {" "}
+            <strong>{reviewedWorkspaceCount}</strong>
+            {" "}
+            table(s)
+            {reviewErrorWorkspaceCount ? `, with ${reviewErrorWorkspaceCount} table(s) still needing review fixes.` : "."}
           </span>
         );
       case "generate-code":
@@ -2127,24 +2449,37 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
           <span>
             Metadata JSON has been saved for
             {" "}
-            <strong>{drawerDraft.displayName || drawerDraft.singularName}</strong>
-            . Generate the module code next so the entity file exists before datasource registration is updated. Continue stays disabled until you attempt code generation at least once.
+            <strong>{savedWorkspaceCount}</strong>
+            {" "}
+            of
+            {" "}
+            <strong>{totalWorkspaceCount}</strong>
+            {" "}
+            selected tables. Generate the module code next so every entity file exists before datasource registration is updated. Continue stays disabled until you attempt code generation at least once.
           </span>
         ) : (
-          <span>Save the metadata JSON before generating code.</span>
+          <span>Save the reviewed metadata JSON for the selected tables before generating code.</span>
         );
       case "create-migrations":
         return mappingPreview ? (
           <span>
-            Create the migration artifacts for
+            Create migration artifacts for
             {" "}
-            <strong>{mappingPreview.summary.includedColumnNames.length}</strong>
+            <strong>{migrationReadyWorkspaceCount}</strong>
             {" "}
-            mapped columns
-            {mappingPreview.summary.generatedSystemColumnCount
-              ? ` and ${mappingPreview.summary.generatedSystemColumnCount} SolidX system column migration changes`
-              : ""}
-            .
+            of
+            {" "}
+            <strong>{totalWorkspaceCount}</strong>
+            {" "}
+            selected tables. This batch currently includes
+            {" "}
+            <strong>{totalIncludedMappedColumns}</strong>
+            {" "}
+            mapped columns and
+            {" "}
+            <strong>{totalGeneratedSystemColumns}</strong>
+            {" "}
+            SolidX system column changes.
           </span>
         ) : null;
       case "run-migration":
@@ -2153,13 +2488,24 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
             The migration, build, and seed workflow has completed for
             {" "}
             <strong>{selectedDatasource}</strong>
-            . Review the output below and click Finish when you are ready to return to the model list.
+            {" "}
+            across
+            {" "}
+            <strong>{totalWorkspaceCount}</strong>
+            {" "}
+            selected table mappings. Review the output below and click Finish when you are ready to return to the model list.
           </span>
         ) : (
           <span>
             {hasMigrationGenerationWork ? "Run the migration, build, and seed workflow for" : "Finish the mapping workflow for"}
             {" "}
             <strong>{selectedDatasource}</strong>
+            {" "}
+            across
+            {" "}
+            <strong>{totalWorkspaceCount}</strong>
+            {" "}
+            selected table mappings.
             {" "}
             {hasMigrationGenerationWork
               ? "to apply the SolidX system columns on the legacy table and refresh the module metadata state."
@@ -2170,13 +2516,26 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
       default:
         return drawerDraft.mapped ? (
           <span>
-            Editing mapped model
+            Editing
+            {" "}
+            <strong>{activeWorkspacePosition} of {totalWorkspaceCount}</strong>
+            {" "}
+            selected tables.
+            {" "}
+            Current mapped model:
             {" "}
             <strong>{selectedTable?.mappedModelDisplayName || selectedTable?.mappedModelSingularName}</strong>
             {drawerDraft.mappedModuleLabel ? ` in ${drawerDraft.mappedModuleLabel}` : ""}
           </span>
         ) : (
-          <span>Configure the field mapping draft before generating the metadata JSON preview.</span>
+          <span>
+            Configure
+            {" "}
+            <strong>{activeWorkspacePosition} of {totalWorkspaceCount}</strong>
+            {" "}
+            selected tables before generating the batch metadata JSON previews.
+            {allWorkspaceItemsReady ? " All selected mapping drafts are loaded." : ""}
+          </span>
         );
     }
   })() : null;
@@ -2221,12 +2580,8 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                 <SolidButton
                   size="small"
                   leftIcon={<Sparkles size={14} />}
-                  onClick={() => {
-                    if (selectedListRow) {
-                      startMappingForRecord(selectedListRow);
-                    }
-                  }}
-                  disabled={!selectedListRow}
+                  onClick={() => startMappingForRows(selectedRows)}
+                  disabled={!selectedRowCount}
                 >
                   Start Mapping
                 </SolidButton>
@@ -2303,8 +2658,8 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                       dataKey="tableName"
                       viewportHeight="calc(100vh - 162px)"
                       size="small"
-                      onRowClick={({ data }) => setSelectedRows([data])}
-                      rowClassName={(rowData) => `${rowData.schema ?? ""}::${rowData.tableName}` === selectedListRowKey ? "sdix-table-row-selected" : ""}
+                      onRowClick={({ data }) => toggleSelectedRow(data)}
+                      rowClassName={(rowData) => selectedListRowKeySet.has(makeTableKey(rowData.schema, rowData.tableName)) ? "sdix-table-row-selected" : ""}
                       emptyMessage="No datasource tables found"
                     >
                       <Column
@@ -2314,8 +2669,8 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                           return (
                             <div className="sdix-selection-cell" data-no-row-click="true">
                               <SolidCheckbox
-                                checked={rowKey === selectedListRowKey}
-                                onChange={(event) => setSelectedRows(event.target.checked ? [rowData] : [])}
+                                checked={selectedListRowKeySet.has(rowKey)}
+                                onChange={(event) => toggleSelectedRow(rowData, event.target.checked)}
                               />
                             </div>
                           );
@@ -2407,7 +2762,7 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
               ) : drawerLoadingError ? (
                 <div className="sdix-error">
                   <span>{readQueryError(drawerLoadingError)}</span>
-                  <SolidButton size="small" variant="outline" onClick={() => void refetchTableDetail()}>
+                  <SolidButton size="small" variant="outline" onClick={() => selectedTable && void loadWorkspaceItem(selectedTable)}>
                     Retry
                   </SolidButton>
                 </div>
@@ -2418,6 +2773,56 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                 </div>
               ) : (
                 <div className="sdix-wizard-shell">
+                  <div className="sdix-workspace-body">
+                    <aside className="sdix-workspace-rail">
+                      <div className="sdix-workspace-rail__header">
+                        <strong>Selected tables</strong>
+                        <span>{workspaceRecords.length}</span>
+                      </div>
+                      <div className="sdix-workspace-rail__list">
+                        {workspaceTableKeys.map((key) => {
+                          const item = workspaceItems[key];
+                          if (!item) return null;
+                          const isActive = key === activeWorkspaceTableKey;
+                          const status =
+                            item.migrationStatus.state !== "idle" ? item.migrationStatus
+                              : item.saveStatus.state !== "idle" ? item.saveStatus
+                                : item.reviewStatus.state !== "idle" ? item.reviewStatus
+                                  : item.loadStatus;
+
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              className={`sdix-workspace-rail__item${isActive ? " is-active" : ""}`}
+                              onClick={() => {
+                                setActiveWorkspaceTableKey(key);
+                                if (workspaceStep === "configure") {
+                                  setDrawerTab("general-info");
+                                }
+                              }}
+                            >
+                              <div className="sdix-workspace-rail__item-main">
+                                <strong>{item.record.tableName}</strong>
+                                <span>{item.record.schema || "dbo"}</span>
+                              </div>
+                              <div className="sdix-workspace-rail__item-status">
+                                {status.state === "loading" ? <SolidSpinner size={12} /> : null}
+                                <span className={`sdix-workspace-rail__status sdix-workspace-rail__status--${status.state}`}>
+                                  {status.state === "success"
+                                    ? "Ready"
+                                    : status.state === "error"
+                                      ? "Needs attention"
+                                      : status.message}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </aside>
+
+                    <div className="sdix-workspace-main">
                   <div className="sdix-wizard-stepper">
                     {stepperItems.map((step, index) => (
                       <button
@@ -2443,6 +2848,8 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                   <div className="sdix-wizard-panel">
                     <div className="sdix-wizard-panel__body">
                       {workspaceContent}
+                    </div>
+                  </div>
                     </div>
                   </div>
 

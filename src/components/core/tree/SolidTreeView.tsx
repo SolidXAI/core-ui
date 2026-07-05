@@ -38,6 +38,7 @@ import { useHandleListCustomButtonClick } from "../../../components/common/useHa
 import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon, SolidSelect } from "../../shad-cn-ui";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
+import { getRelationDisplayText } from "../../../helpers/relationDisplay";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -856,7 +857,12 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     // const dateGranularity = dateTimeImplicitFilter(rule);
     const dateGranularity = getDateGranularity(rule);
     return (groupMetaRows || []).map((groupMeta, index) => {
-      const groupLabel = isEmptyGroupValue(groupMeta?.groupName)? "(empty)": groupMeta?.groupName;
+      const rawGroupLabel = groupMeta?.groupName;
+      const normalizedGroupLabel =
+        rawGroupLabel === "[object Object]"
+          ? getRelationDisplayText(groupMeta?.groupValue)
+          : getRelationDisplayText(rawGroupLabel);
+      const groupLabel = isEmptyGroupValue(normalizedGroupLabel) ? "(empty)" : normalizedGroupLabel;
       const groupValue = groupMeta?.groupValue ?? "(empty)";
       const idCount = extractGroupCount(groupMeta);
 
