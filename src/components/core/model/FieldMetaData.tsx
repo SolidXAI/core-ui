@@ -140,7 +140,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
         :
         <>
 
-          <div className="absolute" style={{ top: -3, right: 0 }}>
+          <div className="flex justify-end" style={{ marginBottom: '0.5rem' }}>
             {modelMetaData.isSystem !== true &&
               <SolidButton
                 size="sm"
@@ -186,7 +186,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
               }
             }}
             className="solid-dialog solid-field-dialog"
-            style={{ width: "30vw" }}
+            style={{ width: "min(720px, calc(100vw - 2rem))" }}
             showHeader={false}
           >
             <SolidDialogBody className="solid-dialog-body-flush">

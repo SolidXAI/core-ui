@@ -1898,7 +1898,6 @@ const FieldMetaDataForm = ({
                               onChange={formik.handleChange}
                               value={formik.values.description}
                               rows={5}
-                              cols={30}
                               className={classNames(styles.fieldTextarea, {
                                 "p-invalid": isFormFieldValid(formik, "description"),
                               })}
@@ -2506,7 +2505,6 @@ const FieldMetaDataForm = ({
                                   onChange={formik.handleChange}
                                   value={formik.values.relationFieldFixedFilter}
                                   rows={5}
-                                  cols={30}
                                   className={classNames(styles.fieldTextarea, {
                                     "p-invalid": isFormFieldValid(
                                       formik,
