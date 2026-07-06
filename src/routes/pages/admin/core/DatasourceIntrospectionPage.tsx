@@ -11,7 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { camelCase, startCase } from "lodash";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { showToast } from "../../../../redux/features/toastSlice";
@@ -118,6 +118,10 @@ type DrawerDraft = {
   enableSoftDelete: boolean;
   draftPublishWorkflow: boolean;
   internationalisation: boolean;
+  hasPrimaryKey: boolean;
+  primaryKeyColumnCount: number;
+  primaryKeyColumnNames: string[];
+  mappingBlockedReason: string | null;
   columns: DrawerColumnDraft[];
   preservedFields: any[];
 };
@@ -271,6 +275,10 @@ function getDefaultOrmTypeForSolidFieldType(dataSourceType: string, solidFieldTy
 }
 
 function statusLabel(record: DatasourceIntrospectionTableRecord) {
+  if (!record.hasPrimaryKey) {
+    return "Blocked";
+  }
+
   return record.mapped ? "Mapped" : "Ready to map";
 }
 
@@ -380,7 +388,13 @@ function buildDrawerDraft(
     };
   });
 
-  const draftUserKeyField = modelUserKeyField || tableDetail.suggestedMetadata.userKeyField;
+  const requestedUserKeyField = modelUserKeyField || tableDetail.suggestedMetadata.userKeyField;
+  const resolvedUserKeyField = (
+    columns.find((column) => column.fieldName === requestedUserKeyField)
+    || columns.find((column) => column.columnName === requestedUserKeyField)
+    || columns.find((column) => !column.handledBySuperclass && column.isPrimaryKey)
+    || columns.find((column) => !column.handledBySuperclass && column.include)
+  )?.fieldName ?? requestedUserKeyField;
 
   return {
     mapped: selectedTable.mapped,
@@ -396,11 +410,15 @@ function buildDrawerDraft(
     dataSourceType: modelData?.dataSourceType ?? tableDetail.suggestedMetadata.dataSourceType,
     legacyTableType: modelData?.legacyTableType ?? tableDetail.suggestedMetadata.legacyTableType,
     baseClassName: tableDetail.suggestedMetadata.baseClassName,
-    userKeyField: draftUserKeyField,
+    userKeyField: resolvedUserKeyField,
     enableAuditTracking: modelData?.enableAuditTracking ?? true,
     enableSoftDelete: modelData?.enableSoftDelete ?? false,
     draftPublishWorkflow: modelData?.draftPublishWorkflow ?? false,
     internationalisation: modelData?.internationalisation ?? false,
+    hasPrimaryKey: selectedTable.hasPrimaryKey,
+    primaryKeyColumnCount: selectedTable.primaryKeyColumnCount,
+    primaryKeyColumnNames: selectedTable.primaryKeyColumnNames,
+    mappingBlockedReason: selectedTable.mappingBlockedReason,
     columns,
     preservedFields,
   };
@@ -422,6 +440,13 @@ function getDrawerValidationErrors(draft: DrawerDraft) {
   }
   if (!includedColumns.length) {
     errors.push("Select at least one physical column to include in the mapping.");
+  }
+
+  if (!draft.hasPrimaryKey) {
+    errors.push(
+      draft.mappingBlockedReason
+      || `Table "${draft.tableName}" cannot be mapped because the datasource table does not define any primary key.`,
+    );
   }
 
   for (const column of includedColumns) {
@@ -452,17 +477,26 @@ function getDrawerValidationErrors(draft: DrawerDraft) {
   if (!draft.userKeyField.trim()) {
     errors.push("Choose a user key field before saving the mapping.");
   } else {
-    const userKeyExists = includedColumns.some((column) => column.fieldName === draft.userKeyField);
+    const userKeyExists = draft.columns.some((column) => (
+      column.fieldName === draft.userKeyField
+      && (column.handledBySuperclass || column.include)
+    ));
     if (!userKeyExists) {
       errors.push("The chosen user key field must remain part of the mapped columns.");
     }
   }
 
-  if (draft.legacyTableType === "existing_id") {
-    const hasPrimaryKey = includedColumns.some((column) => column.isPrimaryKey);
-    if (!hasPrimaryKey) {
-      errors.push("Legacy existing-id mappings must keep the generated id column mapped to field name \"id\".");
-    }
+  const includedPrimaryKeyColumns = includedColumns.filter((column) => column.isPrimaryKey);
+  if (draft.hasPrimaryKey && !includedPrimaryKeyColumns.length) {
+    errors.push("Keep the datasource primary key columns included in the mapping.");
+  }
+
+  const missingDetectedPrimaryKeyColumns = draft.columns
+    .filter((column) => column.isDetectedPrimaryKey && !column.handledBySuperclass)
+    .filter((column) => !column.include || !column.isPrimaryKey)
+    .map((column) => column.columnName);
+  if (missingDetectedPrimaryKeyColumns.length) {
+    errors.push(`Keep all datasource primary key columns mapped and marked as primary key: ${missingDetectedPrimaryKeyColumns.join(", ")}.`);
   }
 
   return errors;
@@ -645,17 +679,84 @@ function parseAndValidateReviewedModelJson(
     seenFieldNames.add(normalizedFieldName);
   }
 
-  if (!parsed.fields.some((field: any) => field?.name === parsed.userKeyFieldUserKey && !field?.isMarkedForRemoval)) {
+  const expectedUserKeyFieldName = `${parsed.userKeyFieldUserKey ?? draft.userKeyField ?? ""}`.trim();
+  const resolvedUserKeyFieldName = resolveReviewedUserKeyFieldName(
+    parsed.fields,
+    expectedUserKeyFieldName,
+    draft.userKeyField,
+  );
+  const inheritedGeneratedIdUserKey =
+    draft.legacyTableType === "generated_id" && expectedUserKeyFieldName.toLowerCase() === "id";
+
+  if (!resolvedUserKeyFieldName && !inheritedGeneratedIdUserKey) {
     return {
       error: "Metadata JSON must keep userKeyFieldUserKey present in the fields array.",
       parsed: null,
     };
   }
 
+  if (draft.hasPrimaryKey) {
+    const activeFields = parsed.fields.filter((field: any) => !field?.isMarkedForRemoval);
+    const missingPrimaryKeyColumns = draft.columns
+      .filter((column) => column.isDetectedPrimaryKey && !column.handledBySuperclass)
+      .filter((column) => {
+        const matchingField = activeFields.find((field: any) =>
+          `${field?.columnName ?? ""}`.trim().toLowerCase() === column.columnName.trim().toLowerCase(),
+        );
+
+        return !matchingField || matchingField.isPrimaryKey !== true;
+      })
+      .map((column) => column.columnName);
+
+    if (missingPrimaryKeyColumns.length) {
+      return {
+        error: `Metadata JSON must keep all datasource primary key columns marked with isPrimaryKey: true: ${missingPrimaryKeyColumns.join(", ")}.`,
+        parsed: null,
+      };
+    }
+  }
+
+  parsed.userKeyFieldUserKey = resolvedUserKeyFieldName ?? expectedUserKeyFieldName;
+
   return {
     error: null,
     parsed,
   };
+}
+
+function resolveReviewedUserKeyFieldName(
+  reviewedFields: Array<Record<string, any>>,
+  requestedUserKeyFieldName: string,
+  fallbackUserKeyFieldName?: string,
+) {
+  const activeFields = reviewedFields.filter((field) => !field?.isMarkedForRemoval);
+  const normalizedRequested = `${requestedUserKeyFieldName ?? ""}`.trim().toLowerCase();
+  const normalizedFallback = `${fallbackUserKeyFieldName ?? ""}`.trim().toLowerCase();
+
+  const byExactRequested = activeFields.find((field) => field?.name?.toLowerCase?.() === normalizedRequested);
+  if (byExactRequested?.name) {
+    return byExactRequested.name;
+  }
+
+  const byExistingUserKeyFlag = activeFields.find((field) => field?.isUserKey);
+  if (byExistingUserKeyFlag?.name) {
+    return byExistingUserKeyFlag.name;
+  }
+
+  const byPrimaryKeyFallback = activeFields.find((field) => {
+    if (!field?.isPrimaryKey) {
+      return false;
+    }
+
+    const normalizedName = `${field?.name ?? ""}`.trim().toLowerCase();
+    return normalizedName === normalizedFallback || normalizedName === "id" || normalizedName === "legacyid";
+  });
+  if (byPrimaryKeyFallback?.name) {
+    return byPrimaryKeyFallback.name;
+  }
+
+  const byFallbackFieldName = activeFields.find((field) => field?.name?.toLowerCase?.() === normalizedFallback);
+  return byFallbackFieldName?.name ?? null;
 }
 
 export function DatasourceIntrospectionPage() {
@@ -680,6 +781,7 @@ export function DatasourceIntrospectionPage() {
   const [workspaceTableKeys, setWorkspaceTableKeys] = useState<string[]>([]);
   const [activeWorkspaceTableKey, setActiveWorkspaceTableKey] = useState("");
   const [workspaceItems, setWorkspaceItems] = useState<Record<string, WorkspaceBatchItem>>({});
+  const workspaceRailItemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [tableSearch, setTableSearch] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState("datasource-info");
@@ -761,6 +863,34 @@ export function DatasourceIntrospectionPage() {
     setRunMigrationOutput("");
     setRunMigrationCompleted(false);
   }, [selectedDatasource]);
+
+  const activeWorkspaceProcessingKey = useMemo(
+    () =>
+      workspaceTableKeys.find((key) => {
+        const item = workspaceItems[key];
+        if (!item) return false;
+
+        return [
+          item.loadStatus.state,
+          item.reviewStatus.state,
+          item.saveStatus.state,
+          item.migrationStatus.state,
+        ].includes("loading");
+      }) ?? null,
+    [workspaceItems, workspaceTableKeys],
+  );
+
+  useEffect(() => {
+    const targetKey = activeWorkspaceProcessingKey ?? activeWorkspaceTableKey;
+    if (!targetKey) return;
+
+    const targetNode = workspaceRailItemRefs.current[targetKey];
+    targetNode?.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+      behavior: "smooth",
+    });
+  }, [activeWorkspaceProcessingKey, activeWorkspaceTableKey]);
 
   const datasourceOptions = useMemo(
     () => (bootstrap?.datasources ?? []).map((datasource) => ({
@@ -896,11 +1026,15 @@ export function DatasourceIntrospectionPage() {
     [filteredRecords],
   );
   const visibleSelectedRowCount = useMemo(
-    () => selectedRows.filter((row) => visibleRowKeySet.has(makeTableKey(row.schema, row.tableName))).length,
+    () => selectedRows.filter((row) => row.hasPrimaryKey && visibleRowKeySet.has(makeTableKey(row.schema, row.tableName))).length,
     [selectedRows, visibleRowKeySet],
   );
+  const visibleSelectableRowCount = useMemo(
+    () => filteredRecords.filter((row) => row.hasPrimaryKey).length,
+    [filteredRecords],
+  );
   const hasVisibleRows = filteredRecords.length > 0;
-  const allVisibleRowsSelected = hasVisibleRows && visibleSelectedRowCount === filteredRecords.length;
+  const allVisibleRowsSelected = visibleSelectableRowCount > 0 && visibleSelectedRowCount === visibleSelectableRowCount;
   const totalWorkspaceCount = workspaceTableKeys.length;
   const activeWorkspacePosition = activeWorkspaceTableKey
     ? Math.max(0, workspaceTableKeys.indexOf(activeWorkspaceTableKey)) + 1
@@ -1166,6 +1300,10 @@ export function DatasourceIntrospectionPage() {
   };
 
   const toggleSelectedRow = (row: DatasourceIntrospectionTableRecord, checked?: boolean) => {
+    if (!row.hasPrimaryKey) {
+      return;
+    }
+
     const rowKey = makeTableKey(row.schema, row.tableName);
     setSelectedRows((current) => {
       const exists = current.some((item) => makeTableKey(item.schema, item.tableName) === rowKey);
@@ -1180,15 +1318,56 @@ export function DatasourceIntrospectionPage() {
     });
   };
 
+  const toggleAllVisibleRows = (checked: boolean) => {
+    setSelectedRows((current) => {
+      if (checked) {
+        const merged = [...current];
+        const currentKeySet = new Set(current.map((row) => makeTableKey(row.schema, row.tableName)));
+
+        filteredRecords.forEach((row) => {
+          if (!row.hasPrimaryKey) {
+            return;
+          }
+
+          const rowKey = makeTableKey(row.schema, row.tableName);
+          if (!currentKeySet.has(rowKey)) {
+            merged.push(row);
+          }
+        });
+
+        return merged;
+      }
+
+      return current.filter((row) => !visibleRowKeySet.has(makeTableKey(row.schema, row.tableName)));
+    });
+  };
+
   const startMappingForRows = (records: DatasourceIntrospectionTableRecord[]) => {
     if (!records.length) return;
 
-    const keys = records.map((record) => makeTableKey(record.schema, record.tableName));
+    const eligibleRecords = records.filter((record) => record.hasPrimaryKey);
+    const skippedRecords = records.filter((record) => !record.hasPrimaryKey);
+
+    if (skippedRecords.length) {
+      dispatch(showToast({
+        severity: "warn",
+        summary: "Skipped blocked tables",
+        detail: skippedRecords.length === 1
+          ? skippedRecords[0].mappingBlockedReason || `Table "${skippedRecords[0].tableName}" was skipped because it has no primary key.`
+          : `${skippedRecords.length} tables were skipped because they do not define a datasource primary key.`,
+      }));
+    }
+
+    if (!eligibleRecords.length) {
+      return;
+    }
+
+    const keys = eligibleRecords.map((record) => makeTableKey(record.schema, record.tableName));
     const nextWorkspaceItems = Object.fromEntries(
-      records.map((record) => [makeTableKey(record.schema, record.tableName), buildWorkspacePlaceholder(record)]),
+      eligibleRecords.map((record) => [makeTableKey(record.schema, record.tableName), buildWorkspacePlaceholder(record)]),
     );
 
-    setSelectedRows(records);
+    setSelectedRows(eligibleRecords);
     setWorkspaceTableKeys(keys);
     setActiveWorkspaceTableKey(keys[0]);
     setWorkspaceItems(nextWorkspaceItems);
@@ -1204,7 +1383,7 @@ export function DatasourceIntrospectionPage() {
     setRunMigrationOutput("");
     setRunMigrationCompleted(false);
 
-    records.forEach((record) => {
+    eligibleRecords.forEach((record) => {
       void loadWorkspaceItem(record);
     });
   };
@@ -2662,14 +2841,28 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                       rowClassName={(rowData) => selectedListRowKeySet.has(makeTableKey(rowData.schema, rowData.tableName)) ? "sdix-table-row-selected" : ""}
                       emptyMessage="No datasource tables found"
                     >
-                      <Column
-                        header=""
-                        body={(rowData: DatasourceIntrospectionTableRecord) => {
-                          const rowKey = `${rowData.schema ?? ""}::${rowData.tableName}`;
-                          return (
+                    <Column
+                      header={
+                        <div className="sdix-selection-cell" data-no-row-click="true">
+                          <SolidCheckbox
+                            checked={allVisibleRowsSelected}
+                            disabled={!hasVisibleRows || !filteredRecords.some((row) => row.hasPrimaryKey)}
+                            onChange={(event) => toggleAllVisibleRows(event.target.checked)}
+                            aria-label={
+                              allVisibleRowsSelected
+                                ? "Deselect all visible tables"
+                                : "Select all visible tables"
+                            }
+                          />
+                        </div>
+                      }
+                      body={(rowData: DatasourceIntrospectionTableRecord) => {
+                        const rowKey = `${rowData.schema ?? ""}::${rowData.tableName}`;
+                        return (
                             <div className="sdix-selection-cell" data-no-row-click="true">
                               <SolidCheckbox
                                 checked={selectedListRowKeySet.has(rowKey)}
+                                disabled={!rowData.hasPrimaryKey}
                                 onChange={(event) => toggleSelectedRow(rowData, event.target.checked)}
                               />
                             </div>
@@ -2692,12 +2885,23 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                         header="Status"
                         body={(rowData: DatasourceIntrospectionTableRecord) => (
                           <span
-                            className={`sdix-status-badge ${rowData.mapped ? "is-mapped" : "is-unmapped"}`}
+                            className={`sdix-status-badge ${!rowData.hasPrimaryKey ? "is-blocked" : rowData.mapped ? "is-mapped" : "is-unmapped"}`}
                           >
                             {statusLabel(rowData)}
                           </span>
                         )}
                         style={{ minWidth: 150 }}
+                      />
+                      <Column
+                        header="Primary Key"
+                        body={(rowData: DatasourceIntrospectionTableRecord) => (
+                          rowData.hasPrimaryKey
+                            ? rowData.primaryKeyColumnCount > 1
+                              ? `${rowData.primaryKeyColumnCount} columns`
+                              : rowData.primaryKeyColumnNames[0] ?? "1 column"
+                            : <span className="sdix-muted-cell">Missing</span>
+                        )}
+                        style={{ minWidth: 160 }}
                       />
                       <Column
                         header="Superclass"
@@ -2793,6 +2997,9 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                           return (
                             <button
                               key={key}
+                              ref={(node) => {
+                                workspaceRailItemRefs.current[key] = node;
+                              }}
                               type="button"
                               className={`sdix-workspace-rail__item${isActive ? " is-active" : ""}`}
                               onClick={() => {

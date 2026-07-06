@@ -13,6 +13,7 @@ import { normalizeAssetUrl, toCssBackgroundImage } from "../../helpers/assetUrl"
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 import { SolidToastProvider } from "../common/SolidToastProvider";
 import { SolidSpinner } from "../shad-cn-ui";
+import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
@@ -245,6 +246,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     />
                 ) : null}
                 <SolidToastProvider />
+                <BackendReconnectIndicator variant="floating" />
                 {!isCenter && (
                     <div className="solid-auth-split">
                         {isLeft && formPane}

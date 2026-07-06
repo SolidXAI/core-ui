@@ -502,6 +502,11 @@
   color: #7a8398;
 }
 
+.sdix-status-badge.is-blocked {
+  background: #fff1f0;
+  color: #b9382f;
+}
+
 .sdix-provider-mark {
   width: 2.35rem;
   height: 2.35rem;

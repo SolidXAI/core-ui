@@ -118,6 +118,64 @@ body {
   gap: 8px;
 }
 
+.solid-backend-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  color: var(--muted-foreground);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.solid-backend-indicator[data-status="offline"] {
+  border-color: color-mix(in srgb, #d9485f 24%, var(--border));
+  background: color-mix(in srgb, #fff1f2 88%, var(--card));
+  color: #9f1239;
+}
+
+.solid-backend-indicator-spinner {
+  display: inline-flex;
+  align-items: center;
+}
+
+.solid-backend-indicator-spinner .solid-spinner-icon {
+  color: currentColor;
+}
+
+.solid-backend-indicator-spinner .solid-spinner-label {
+  display: none;
+}
+
+.solid-backend-indicator-text {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.solid-backend-indicator--floating {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 70;
+}
+
+[data-theme="dark"] .solid-backend-indicator,
+html.dark .solid-backend-indicator {
+  background: color-mix(in srgb, var(--card) 84%, transparent);
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.24);
+}
+
+[data-theme="dark"] .solid-backend-indicator[data-status="offline"],
+html.dark .solid-backend-indicator[data-status="offline"] {
+  background: color-mix(in srgb, #4c1d2a 74%, var(--card));
+  color: #fecdd3;
+}
+
 .solid-admin-theme-toggle {
   width: 32px;
   height: 32px;
@@ -1165,6 +1223,11 @@ textarea {
 
   .solid-admin-header-inner {
     padding-inline: 10px;
+  }
+
+  .solid-backend-indicator--floating {
+    top: 10px;
+    right: 10px;
   }
 
   .solid-sidebar {
