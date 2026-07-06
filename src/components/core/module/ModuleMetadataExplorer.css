@@ -181,6 +181,33 @@
   text-overflow: ellipsis;
 }
 
+[data-theme="dark"] .solid-module-explorer-tree-row:hover {
+  background: color-mix(in srgb, var(--card) 92%, var(--background) 8%);
+}
+
+[data-theme="dark"] .solid-module-explorer-tree-row.is-active {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary-color, var(--primary)) 22%, var(--card) 78%),
+    color-mix(in srgb, var(--primary-color, var(--primary)) 16%, var(--background) 84%)
+  );
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--primary-color, var(--primary)) 34%, transparent),
+    0 8px 18px rgba(2, 6, 23, 0.22);
+}
+
+[data-theme="dark"] .solid-module-explorer-tree-row.is-active .solid-module-explorer-tree-label {
+  color: color-mix(in srgb, var(--foreground) 96%, var(--card) 4%);
+}
+
+[data-theme="dark"] .solid-module-explorer-tree-row.is-active .solid-module-explorer-tree-toggle {
+  color: color-mix(in srgb, var(--foreground) 82%, var(--primary-color, var(--primary)) 18%);
+}
+
+[data-theme="dark"] .solid-module-explorer-tree-row.is-active .solid-module-explorer-tree-dot {
+  background: color-mix(in srgb, var(--foreground) 82%, var(--primary-color, var(--primary)) 18%);
+}
+
 .solid-module-explorer-resizer {
   position: relative;
   cursor: col-resize;

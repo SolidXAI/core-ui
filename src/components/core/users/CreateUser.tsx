@@ -48,7 +48,6 @@ const CreateUser = ({ data, params }: any) => {
     updateUser,
     {
       isLoading: isUserUpdating,
-      isSuccess: isUpdateUserSuccess,
       error: userUpdateError,
     },
   ] = useUpdateUserMutation();
@@ -114,7 +113,19 @@ const CreateUser = ({ data, params }: any) => {
           userData.password = values.password;
         }
 
-        updateUser({ id: data.id, data: userData });
+        try {
+          await updateUser({ id: data.id, data: userData }).unwrap();
+          dispatch(
+            showToast({
+              severity: "success",
+              summary: ERROR_MESSAGES.FORM_UPDATE,
+              detail: ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY,
+            })
+          );
+          router.back();
+        } catch {
+          // error shown via userUpdateError effect
+        }
         return;
       }
 
@@ -175,10 +186,10 @@ const CreateUser = ({ data, params }: any) => {
   }, [dispatch, userCreateError, userUpdateError]);
 
   useEffect(() => {
-    if (isDeleteUserSuccess || isUpdateUserSuccess) {
+    if (isDeleteUserSuccess) {
       router.back();
     }
-  }, [isDeleteUserSuccess, isUpdateUserSuccess, router]);
+  }, [isDeleteUserSuccess, router]);
 
   const isEditMode = params.id !== "new";
   const isSaving = isLoading || isUserUpdating;

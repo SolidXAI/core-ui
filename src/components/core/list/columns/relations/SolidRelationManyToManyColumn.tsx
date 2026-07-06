@@ -2,6 +2,7 @@
 import { Column } from "../../SolidDataTable";
 import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
 import { getExtensionComponent } from '../../../../../helpers/registry';
+import { getRelatedRecordDisplayText } from '../../../../../helpers/relationDisplay';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 
 
@@ -51,7 +52,9 @@ export const DefaultRelationManyToManyListWidget = ({ rowData, solidListViewMeta
     if (manyToManyFieldData) {
         // Since this is a many-to-one field, we fetch the user key field of the associated model.
         const userKeyField = column?.attrs?.coModelFieldToDisplay ? column?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
-        const manyToManyColVal = manyToManyFieldData.map((f: any) => f[userKeyField]);
+        const manyToManyColVal = manyToManyFieldData
+            .map((f: any) => getRelatedRecordDisplayText(f, userKeyField))
+            .filter(Boolean);
 
         // TODO: change this to use an anchor tag so that on click we open that entity form view. 
         return (

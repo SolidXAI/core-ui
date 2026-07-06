@@ -1,4 +1,5 @@
 import { permissionExpression } from "../../../helpers/permissions";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
@@ -7,6 +8,7 @@ import { SolidExport } from "../../../components/common/SolidExport";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 import {
     SolidDropdownMenu,
+    SolidDropdownMenuCheckboxItem,
     SolidDropdownMenuContent,
     SolidDropdownMenuItem,
     SolidDropdownMenuLabel,
@@ -57,6 +59,8 @@ export const SolidKanbanViewConfigure = ({
     actionsAllowed,
     setLayoutDialogVisible,
     viewModes,
+    setShowArchived,
+    showArchived,
     setShowSaveFilterPopup,
     filters,
     handleRefreshView,
@@ -71,7 +75,6 @@ export const SolidKanbanViewConfigure = ({
 
     const visibleViewModes = normalizeViewModes(Array.isArray(viewModes) ? viewModes : []);
     const showSwitchType = visibleViewModes.length > 1;
-    const layoutAttrs = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs ?? {};
 
     useEffect(() => {
         if (typeof pathname === "string") {
@@ -113,7 +116,9 @@ export const SolidKanbanViewConfigure = ({
 
         const newPath = "/" + pathSegments.join("/");
         const nextQueryString = nextSearchParams.toString();
-        router.push(nextQueryString ? `${newPath}?${nextQueryString}` : newPath);
+        const nextUrl = nextQueryString ? `${newPath}?${nextQueryString}` : newPath;
+        storeCurrentModelViewContext(nextUrl);
+        router.push(nextUrl);
     };
 
     const clearLocalstorageCache = () => {
@@ -134,6 +139,7 @@ export const SolidKanbanViewConfigure = ({
 
     const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
     const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
+    const canShowArchivedRecords = Boolean(solidKanbanViewMetaData?.data?.solidView?.model?.enableSoftDelete);
 
     return (
         <div className="position-relative">
@@ -174,7 +180,16 @@ export const SolidKanbanViewConfigure = ({
                         </SolidDropdownMenuItem>
                     )}
 
-                    {(canCustomizeLayout || canSaveCustomFilter) && <SolidDropdownMenuSeparator />}
+                    {canShowArchivedRecords && (
+                        <SolidDropdownMenuCheckboxItem
+                            checked={showArchived}
+                            onCheckedChange={() => setShowArchived(!showArchived)}
+                        >
+                            Show Archived Records
+                        </SolidDropdownMenuCheckboxItem>
+                    )}
+
+                    {(canCustomizeLayout || canSaveCustomFilter || canShowArchivedRecords) && <SolidDropdownMenuSeparator />}
 
                     {canCustomizeLayout && (
                         <SolidDropdownMenuSub>

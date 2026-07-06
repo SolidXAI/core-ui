@@ -10,6 +10,15 @@ type QueueToast = ToastMessage & {
 
 let toastId = 0;
 
+function isSameToastMessage(current: ToastMessage, next: ToastMessage) {
+  return (
+    current.severity === next.severity &&
+    current.summary === next.summary &&
+    current.detail === next.detail &&
+    current.sticky === next.sticky
+  );
+}
+
 export const SolidToastProvider = () => {
   const dispatch = useDispatch();
   const message = useSelector((state: RootState) => state.toast.message);
@@ -19,7 +28,16 @@ export const SolidToastProvider = () => {
     if (!message) return;
 
     toastId += 1;
-    setQueue((current) => [...current, { id: toastId, ...message }]);
+    setQueue((current) => {
+      const lastToast = current[current.length - 1];
+      const nextToast = { id: toastId, ...message };
+
+      if (lastToast && isSameToastMessage(lastToast, message)) {
+        return [...current.slice(0, -1), nextToast];
+      }
+
+      return [...current, nextToast];
+    });
     dispatch(clearToast());
   }, [dispatch, message]);
 

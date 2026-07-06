@@ -196,6 +196,18 @@
   font-size: 0.9rem;
 }
 
+:global(html.dark) .widgetCard,
+:global([data-theme="dark"]) .widgetCard {
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+  background: var(--card);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 2%, transparent);
+}
+
+:global(html.dark) .widgetTitle,
+:global([data-theme="dark"]) .widgetTitle {
+  color: var(--foreground);
+}
+
 @media (max-width: 768px) {
   .page {
     padding: 12px;

@@ -26,6 +26,7 @@ import { SolidFieldTooltip } from "../../../../components/common/SolidFieldToolt
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
+import { getPersistedMediaId } from "./mediaFieldUtils";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -169,7 +170,6 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     const isFieldReadonly = formReadonly || fieldReadonly || readOnlyPermission;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
-    const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
     const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
     const [isReplaceImageDialogVisible, setReplaceImageDialogVisible] = useState(false);
     const [newFileToUpload, setNewFileToUpload] = useState<any>(null);
@@ -181,17 +181,9 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             : `${(size / 1024).toFixed(1)} KB`;
     };
 
-    const [
-        deleteMedia,
-        { isLoading: isMediaDeleted, isSuccess: isDeleteMediaSuceess, isError: isMediaDeleteError, error: mediaDeleteError, data: DeletedMedia },
-    ] = useDeleteMediaMutation();
+    const [deleteMedia] = useDeleteMediaMutation();
 
-    const handleCancelUpload = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (imageToBeDeletedData) {
-            deleteMedia(imageToBeDeletedData);
-        }
-        e.stopPropagation();
+    const clearSelectedFile = () => {
         setFileDetails(null);
         fieldContext.onChange(
             {
@@ -203,6 +195,26 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             } as any,
             "onFieldChange"
         );
+    };
+
+    const deletePersistedMediaIfNeeded = async (value: unknown) => {
+        console.log("DeletePersistedMedia Called");
+        
+        const mediaId = getPersistedMediaId(value);
+        if (mediaId !== null) {
+            await deleteMedia(mediaId).unwrap();
+        }
+    };
+
+    const handleCancelUpload = async (e: React.MouseEvent) => {
+        console.log("handleCancelUpload called");
+        e.stopPropagation();
+        try {
+            await deletePersistedMediaIfNeeded(formik?.values[fieldLayoutInfo.attrs.name]);
+            clearSelectedFile();
+        } catch (error) {
+            console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
+        }
         setDeleteImageDialogVisible(false);
     };
 
@@ -242,29 +254,19 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         );
     };
 
-    const handleReplaceFile = () => {
-        // Delete the existing file first
-        if (imageToBeDeletedData) {
-            deleteMedia(imageToBeDeletedData);
-        }
-        setFileDetails(null);
-        fieldContext.onChange(
-            {
-                target: {
-                    name: fieldLayoutInfo.attrs.name,
-                    value: null,
-                    type: "text",
-                },
-            } as any,
-            "onFieldChange"
-        );
+    const handleReplaceFile = async () => {
+        try {
+            await deletePersistedMediaIfNeeded(formik?.values[fieldLayoutInfo.attrs.name]);
+            clearSelectedFile();
 
-        // Proceed with uploading new file
-        if (newFileToUpload) {
-            uploadFile(newFileToUpload);
-            setNewFileToUpload(null);
+            // Proceed with uploading new file
+            if (newFileToUpload) {
+                uploadFile(newFileToUpload);
+                setNewFileToUpload(null);
+            }
+        } catch (error) {
+            console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
         }
-
         setReplaceImageDialogVisible(false);
     };
 
@@ -293,11 +295,10 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 fileSize
             });
 
-            // Set file ID for delete operation
-            setImageToBeDeletedData(fieldValue.id);
-
             // Ensure formik has the correct value
             formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+        } else {
+            setFileDetails(null);
         }
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 

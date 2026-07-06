@@ -64,7 +64,7 @@ const SolidFormLayouts = ({ params }: any) => {
     }, [refetchuser]);
 
     return (
-        <div className="page-parent-wrapper">
+        <div className="page-parent-wrapper solid-form-page-wrapper">
             {params.modelName === "model-metadata" &&
                 // <SolidFormView {...params} embeded={false} modelName={camelCase(params.modelName)} />
                 (params.id === "new" ?

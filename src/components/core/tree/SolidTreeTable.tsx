@@ -59,6 +59,7 @@ type SolidTreeTableProps = {
   removableSort?: boolean;
   onSort?: (event: { sortField?: string; sortOrder?: 1 | -1 | 0 }) => void;
   onRowClick?: (event: { node: SolidTreeNode; originalEvent: React.MouseEvent<HTMLTableRowElement> }) => void;
+  rowClassName?: (node: SolidTreeNode) => string | undefined;
 };
 
 type FlattenedTreeRow = {
@@ -210,6 +211,7 @@ export function SolidTreeTable({
   removableSort = true,
   onSort,
   onRowClick,
+  rowClassName,
 }: SolidTreeTableProps) {
   const columns = useMemo(() => normalizeColumns(children), [children]);
   const visibleRows = useMemo(() => flattenVisibleNodes(value, expandedKeys), [value, expandedKeys]);
@@ -384,7 +386,7 @@ export function SolidTreeTable({
                   return (
                     <tr
                       key={key}
-                      className={cx("solid-data-table-row solid-tree-table-row", isSelected && "is-selected")}
+                      className={cx("solid-data-table-row solid-tree-table-row", isSelected && "is-selected", rowClassName?.(node))}
                       onClick={(event) => {
                         const target = event.target as HTMLElement;
                         if (target.closest("button,a,input,label,[data-no-row-click='true']")) return;

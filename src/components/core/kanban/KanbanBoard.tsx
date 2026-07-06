@@ -29,7 +29,7 @@ const findKanbanCardNode = (nodes: any[] = []): any => {
     return null;
 };
 
-export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCount, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, onDelete, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
+export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCount, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, showArchived }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -148,11 +148,13 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
                                 toggleFold={toggleFold}
                                 handleLoadMore={handleLoadMore}
                                 onDelete={onDelete}
+                                onRecover={onRecover}
                                 setLightboxUrls={setLightboxUrls}
                                 setOpenLightbox={setOpenLightbox}
                                 editButtonUrl={editButtonUrl}
                                 cardNode={cardNode}
                                 DynamicCardWidget={DynamicCardWidget}
+                                showArchived={showArchived}
                             />
                         );
                     })}

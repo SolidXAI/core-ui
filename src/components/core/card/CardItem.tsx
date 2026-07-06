@@ -16,8 +16,10 @@ interface CardItemProps {
   editButtonUrl?: string;
   cardNode?: any;
   DynamicCardWidget?: any;
+  onRecover?: (record: any) => void;
   setLightboxUrls?: any;
   setOpenLightbox?: any;
+  showArchived?: boolean;
 }
 
 const CardItem: React.FC<CardItemProps> = ({
@@ -26,24 +28,33 @@ const CardItem: React.FC<CardItemProps> = ({
   editButtonUrl,
   cardNode,
   DynamicCardWidget,
+  onRecover,
   setLightboxUrls,
   setOpenLightbox,
+  showArchived,
 }) => {
   const router = useRouter();
+  const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
 
   const openRecord = () => {
+    if (isArchivedRecord) return;
     storeCurrentModelViewContext();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 
   const openEdit = () => {
+    if (isArchivedRecord) return;
     storeCurrentModelViewContext();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 
   return (
     <div className="solid-card-view-item">
-      <div className="solid-card-view-card solid-kanban-card" onClick={openRecord}>
+      <div
+        className={`solid-card-view-card solid-kanban-card${isArchivedRecord ? " greyed-out-row" : ""}`}
+        onClick={openRecord}
+        style={{ cursor: isArchivedRecord ? "default" : "pointer" }}
+      >
         <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
           <SolidDropdownMenu>
             <SolidDropdownMenuTrigger asChild>
@@ -56,13 +67,24 @@ const CardItem: React.FC<CardItemProps> = ({
               </button>
             </SolidDropdownMenuTrigger>
             <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
-              <SolidDropdownMenuItem
-                className="solid-header-dropdown-item"
-                onSelect={openEdit}
-              >
-                <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
-                <span className="solid-header-action-button-label">Edit</span>
-              </SolidDropdownMenuItem>
+              {!isArchivedRecord ? (
+                <SolidDropdownMenuItem
+                  className="solid-header-dropdown-item"
+                  onSelect={openEdit}
+                >
+                  <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
+                  <span className="solid-header-action-button-label">Edit</span>
+                </SolidDropdownMenuItem>
+              ) : null}
+              {showArchived && data?.deletedAt !== null && data?.deletedAt !== undefined && onRecover ? (
+                <SolidDropdownMenuItem
+                  className="solid-header-dropdown-item"
+                  onSelect={() => onRecover(data)}
+                >
+                  <SolidIcon name="si-refresh" className="solid-header-action-button-icon" aria-hidden />
+                  <span className="solid-header-action-button-label">Recover</span>
+                </SolidDropdownMenuItem>
+              ) : null}
             </SolidDropdownMenuContent>
           </SolidDropdownMenu>
         </div>

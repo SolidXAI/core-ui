@@ -1829,3 +1829,12 @@ export const solidIcons = [
         ]
     }
 ]
+
+export const solidMaterialIconNames = new Set(
+    solidIcons.flatMap(({ icons }) => icons)
+);
+
+export function hasSolidMaterialIconName(value?: string | null): boolean {
+    const normalizedValue = typeof value === "string" ? value.trim() : "";
+    return normalizedValue.length > 0 && solidMaterialIconNames.has(normalizedValue);
+}

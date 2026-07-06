@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
-import { Search } from "lucide-react";
+import { CircleHelp, Search } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { normalizeAssetUrl } from "../../helpers/assetUrl";
@@ -142,6 +142,7 @@ export function SettingsComponent() {
         setting.key,
         setting.label,
         setting.description,
+        setting.helpText,
         setting.options?.map((option) => `${option.label} ${option.value}`).join(" "),
       ]
         .filter(Boolean)
@@ -328,6 +329,8 @@ export function SettingsComponent() {
                 <div className={styles.groupBody}>
                   {group.settings.map((setting) => {
                     const value = formValues[setting.key];
+                    const settingName = setting.label || humanizeSettingToken(setting.key);
+                    const settingHelpText = setting.helpText?.trim() || "";
                     const settingsWidgetName = getSettingsWidgetName(setting);
                     const SettingsWidget = settingsWidgetName ? getExtensionComponent(settingsWidgetName) : null;
                     const customWidgetErrorText = getCustomWidgetErrorText(setting, settingsWidgetName, SettingsWidget);
@@ -344,7 +347,23 @@ export function SettingsComponent() {
                       <div key={setting.key} className={styles.settingRow}>
                         <div className={styles.settingLabelWrap}>
                           <div className={styles.settingLabelLine}>
-                            <p className={styles.settingLabel}>{setting.label || humanizeSettingToken(setting.key)}</p>
+                            <p className={styles.settingLabel}>{settingName}</p>
+                            {settingHelpText ? (
+                              <SolidTooltip>
+                                <SolidTooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    className={styles.settingHelpButton}
+                                    aria-label={`Show help for ${settingName}`}
+                                  >
+                                    <CircleHelp size={14} aria-hidden />
+                                  </button>
+                                </SolidTooltipTrigger>
+                                <SolidTooltipContent align="start" className={styles.settingHelpTooltip}>
+                                  {settingHelpText}
+                                </SolidTooltipContent>
+                              </SolidTooltip>
+                            ) : null}
                             {!setting.editable ? (
                               <SolidTooltip>
                                 <SolidTooltipTrigger asChild>
@@ -494,7 +513,7 @@ export function SettingsComponent() {
 
   return (
     <div className={styles.page}>
-      <div className={`page-header secondary-border-bottom ${styles.pageHeader}`}>
+      <div className={`page-header ${styles.pageHeader}`}>
         <div className={styles.headerIntro}>
           <div className="form-wrapper-title">Settings</div>
           <div className={styles.subtitle}>Manage platform configuration across modules from a single workspace.</div>

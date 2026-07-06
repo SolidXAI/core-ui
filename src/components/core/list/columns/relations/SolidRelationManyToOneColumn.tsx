@@ -2,6 +2,7 @@
 import { Column } from "../../SolidDataTable";
 import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
 import { getExtensionComponent } from '../../../../../helpers/registry';
+import { getRelatedRecordDisplayText } from '../../../../../helpers/relationDisplay';
 import { buildAdminRecordFormPath } from '../../../../../helpers/routePaths';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { ExternalLink } from "lucide-react";
@@ -54,7 +55,7 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
     if (manyToOneFieldData) {
         // Since this is a many-to-one field, we fetch the user key field of the associated model.
         const userKeyField = column?.attrs?.coModelFieldToDisplay ? column?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
-        const manyToOneColVal = manyToOneFieldData[userKeyField];
+        const manyToOneColVal = getRelatedRecordDisplayText(manyToOneFieldData, userKeyField);
         const relatedModuleName =
             fieldMetadata?.relationModelModuleName ||
             fieldMetadata?.relationModel?.module?.name ||

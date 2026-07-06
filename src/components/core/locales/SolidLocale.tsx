@@ -104,6 +104,7 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                             options={localeOptions}
                             placeholder="Select locale"
                             className="w-full"
+                            native={false}
                             disabled={createMode}
                         />
                         {createMode && (

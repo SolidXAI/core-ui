@@ -3,6 +3,7 @@ import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import SolidTableRowCell from '../SolidTableRowCell';
 import { getExtensionComponent } from '../../../../helpers/registry';
+import { getRelationDisplayText } from '../../../../helpers/relationDisplay';
 import { SolidListFieldWidgetProps, SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 
 const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
@@ -53,9 +54,10 @@ export default SolidShortTextColumn;
 
 export const DefaultTextListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
-    let displayValue = rowData[fieldMetadata.name];
+    const rawValue = rowData[fieldMetadata.name];
+    let displayValue = rawValue;
 
-    if (fieldMetadata?.selectionStaticValues && displayValue) {
+    if (fieldMetadata?.selectionStaticValues && typeof displayValue === "string" && displayValue) {
         const mapping: Record<string, string> = {};
 
         fieldMetadata.selectionStaticValues.forEach((entry: string) => {
@@ -66,6 +68,9 @@ export const DefaultTextListWidget = ({ rowData, solidListViewMetaData, fieldMet
         const values = displayValue.split(",").map((v: string) => v.trim());
 
         displayValue = values.map((v: string) => mapping[v] || v).join(", ");
+    }
+    else {
+        displayValue = getRelationDisplayText(rawValue);
     }
 
     return (

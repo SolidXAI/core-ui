@@ -7,6 +7,7 @@ import { env } from "../../adapters/env";
 import { hasAnyRole } from "../../helpers/rolesHelper";
 import { enterStudioMode } from "../../redux/features/solidStudioSlice";
 import { LayoutContext } from "./context/layoutcontext";
+import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
 
 type AdminHeaderActionsProps = {
   variant: "header" | "sidebar";
@@ -105,6 +106,7 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
 
   return (
     <div className={`solid-admin-header-actions hidden md:flex ${className}`.trim()}>
+      <BackendReconnectIndicator />
       {actions.map((action) => {
         if (action.key === "studio") {
           return (

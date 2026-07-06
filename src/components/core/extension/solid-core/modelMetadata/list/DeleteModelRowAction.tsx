@@ -7,16 +7,25 @@ import { kebabCase } from "lodash";
 import { createSolidEntityApi } from "../../../../../../redux/api/solidEntityApi";
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
 import { SolidButton, SolidCheckbox } from "../../../../../shad-cn-ui";
+import { pingBackendAvailability } from "../../../../../../helpers/waitForBackendAvailability";
+import { backendHealthMonitor } from "../../../../../../helpers/backendHealthMonitor";
 
+const DELETE_MODEL_DIALOG_DISMISS_DELAY_MS = 3_000;
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [isApplying, setIsApplying] = useState(false);
     const dispatch = useDispatch();
     const entityApi = createSolidEntityApi(event.params.modelName);
     const {useDeleteSolidEntityMutation} = entityApi;
     const [deleteSolidSingleEntiry] = useDeleteSolidEntityMutation()
 
     const deleteModelHandler = async () => {
+        if (isApplying) {
+            return;
+        }
+
+        setIsApplying(true);
         try {
             const res: any = await deleteSolidSingleEntiry(event.rowData.id);
             
@@ -30,11 +39,24 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                 dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.DELETE_FAIELD, detail: message }));
             } else {
                 dispatch(showToast({ severity: 'success', summary: ERROR_MESSAGES.MODEL_DELETE, detail: ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName) }));
+                await new Promise((resolve) => window.setTimeout(resolve, DELETE_MODEL_DIALOG_DISMISS_DELAY_MS));
                 dispatch(closePopup());
+
+                const isBackendAvailable = await pingBackendAvailability();
+                if (isBackendAvailable) {
+                    backendHealthMonitor.reportSuccess();
+                } else {
+                    backendHealthMonitor.reportFailure({
+                        status: "FETCH_ERROR",
+                        message: "Unable to reach the server. Reconnecting...",
+                    });
+                }
             }
         } catch (err: any) {
             console.error("catch error", err);
             dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail: ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR }));
+        } finally {
+            setIsApplying(false);
         }
     }
 
@@ -102,10 +124,10 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                 </div>
 
                 <div className="solid-delete-model-popup__actions">
-                    <SolidButton size="small" disabled={!isConfirmed} autoFocus onClick={deleteModelHandler}>
+                    <SolidButton size="small" disabled={!isConfirmed || isApplying} loading={isApplying} autoFocus onClick={deleteModelHandler}>
                         Apply
                     </SolidButton>
-                    <SolidButton size="small" variant="outline" onClick={() => dispatch(closePopup())}>
+                    <SolidButton size="small" variant="outline" disabled={isApplying} onClick={() => dispatch(closePopup())}>
                         Cancel
                     </SolidButton>
                 </div>

@@ -203,6 +203,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const {
     useDeleteMultipleSolidEntitiesMutation,
     useLazyGetSolidEntitiesQuery,
+    useLazyRecoverSolidEntityByIdQuery,
     usePatchUpdateSolidEntityMutation
   } = entityApi;
 
@@ -349,7 +350,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
-  const [triggerGetSolidEntities, { data: solidEntityKanbanViewData }] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
+  const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useLazyRecoverSolidEntityByIdQuery();
 
   // Delete mutation 
   const [
@@ -366,14 +368,15 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     },
   ] = usePatchUpdateSolidEntityMutation();
 
-  // After data is fetched populate the kanban view state so as to be able to render the data. 
-  useEffect(() => {
-    if (solidEntityKanbanViewData) {
-      setServerSwimLaneCount(solidEntityKanbanViewData?.meta?.totalRecords || 0);
-      setRawKanbanGroupRecords(solidEntityKanbanViewData?.groupRecords || []);
-      setLoading(false);
+  const applyArchivedQueryState = (queryData: Record<string, any>) => {
+    if (showArchived) {
+      queryData.showSoftDeleted = "inclusive";
+      if (queryData.groupFilter) {
+        queryData.groupFilter.showSoftDeleted = "inclusive";
+      }
     }
-  }, [solidEntityKanbanViewData]);
+    return queryData;
+  };
 
   useEffect(() => {
     const mergedKanbanGroupData = mergeKanbanGroupsWithDefinitions(
@@ -499,6 +502,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         const queryObject = getFilterObjectFromLocalStorage();
         let queryString = "";
         if (queryObject) {
+          setShowArchived(
+            queryObject.showArchived === true ||
+            queryObject.showArchived === "true" ||
+            queryObject.showSoftDeleted === "inclusive"
+          );
           const filters = {
             $and: []
           }
@@ -542,7 +550,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           setToPopulate(toPopulate);
           setToPopulateMedia(toPopulateMedia);
           setRecordsInSwimlane(recordsInSwimlane);
-          // setFilters(filters);
+          setFilters(filters);
           setQueryDataLoaded(true);
 
           queryString = qs.stringify(queryData, {
@@ -550,6 +558,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           });
 
         } else {
+          setShowArchived(false);
+          const defaultFilters = { $and: [] };
           const { recordsInSwimlane, toPopulate, toPopulateMedia } = initialFilterMethod();
           const queryData = {
             offset: 0,
@@ -561,7 +571,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             groupFilter: {
               limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane || 10,
               offset: 0,
-              filters: filters,
+              filters: defaultFilters,
               populate: toPopulate,
               populateMedia: toPopulateMedia
             }
@@ -570,6 +580,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           setRecordsInSwimlane(recordsInSwimlane);
           setToPopulate(toPopulate);
           setToPopulateMedia(toPopulateMedia);
+          setFilters(defaultFilters);
 
           // fields=status&groupBy=status&fields=count(status)&populateGroup=true
           queryString = qs.stringify(queryData, {
@@ -584,6 +595,76 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       }
     }
   }, [groupByFieldName, isDeleteSolidEntitiesSucess, solidKanbanViewMetaData, swimlaneDefinitions]);
+
+  const loadKanbanBoard = async (nextFilters = filters) => {
+    if (!solidKanbanViewMetaData || !groupByFieldName || !queryDataLoaded) return;
+
+    setLoading(true);
+
+    try {
+      const swimlanesCount = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.swimlanesCount || 5;
+      const resolvedSwimlanesCount = swimlaneDefinitions.length > 0 ? swimlaneDefinitions.length : swimlanesCount;
+      const queryData = applyArchivedQueryState({
+        offset: 0,
+        limit: resolvedSwimlanesCount,
+        groupBy: groupByFieldName,
+        populate: toPopulate,
+        populateMedia: toPopulateMedia,
+        populateGroup: true,
+        groupFilter: {
+          limit: recordsInSwimlane,
+          offset: 0,
+          filters: nextFilters,
+          populate: toPopulate,
+          populateMedia: toPopulateMedia,
+        },
+      });
+
+      const response: any = await triggerGetSolidEntities(
+        qs.stringify(queryData, {
+          encodeValuesOnly: true
+        })
+      ).unwrap();
+
+      setServerSwimLaneCount(response?.meta?.totalRecords || 0);
+      setRawKanbanGroupRecords(response?.groupRecords || []);
+      setSelectedRecords([]);
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Failed to load board",
+        detail: error?.data?.message || error?.message || "Unable to load kanban data.",
+        life: 4000,
+      }));
+      setServerSwimLaneCount(0);
+      setRawKanbanGroupRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!queryDataLoaded || !solidKanbanViewMetaData || !groupByFieldName) return;
+    void loadKanbanBoard(filters);
+  }, [groupByFieldName, queryDataLoaded, recordsInSwimlane, showArchived, solidKanbanViewMetaData, swimlaneDefinitions, toPopulate, toPopulateMedia]);
+
+  useEffect(() => {
+    if (!queryDataLoaded) return;
+
+    const persistedFilterObject = getFilterObjectFromLocalStorage() || {};
+    const nextPersistedFilterObject: Record<string, any> = {
+      ...persistedFilterObject,
+      showArchived,
+    };
+
+    if (showArchived) {
+      nextPersistedFilterObject.showSoftDeleted = "inclusive";
+    } else {
+      delete nextPersistedFilterObject.showSoftDeleted;
+    }
+
+    setFilterObjectToLocalStorage(nextPersistedFilterObject);
+  }, [queryDataLoaded, showArchived]);
 
   // clickable link allowing one to open the detail / form view.
 
@@ -608,13 +689,35 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     setDialogVisible(true);
   };
 
+  const handleRecoverRecord = async (record: any) => {
+    if (!record?.id) return;
+
+    try {
+      const response: any = await triggerRecoverSolidEntityById(record.id).unwrap();
+      dispatch(showToast({
+        severity: "success",
+        summary: "Success",
+        detail: response?.data?.message || "Record recovered successfully.",
+        life: 3000,
+      }));
+      await loadKanbanBoard(filters);
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Recover Failed",
+        detail: error?.data?.message || error?.message || "Unable to recover the selected record.",
+        life: 4000,
+      }));
+    }
+  };
+
 
   // Individual Swimlane Load More
   const handleLoadMore = async (groupByField: string) => {
     const { offset, limit } = kanbanLoadMoreData[groupByField];
     kanbanLoadMoreData[groupByField].offset = offset + limit;
     try {
-      const queryData = {
+      const queryData = applyArchivedQueryState({
         offset: offset + limit,
         limit: limit,
         populate: toPopulate,
@@ -626,7 +729,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           },
           ...filters
         }
-      }
+      });
 
 
       const queryString = qs.stringify(queryData, {
@@ -804,6 +907,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         }
         // sort: [`id:desc`],
       };
+      applyArchivedQueryState(queryData);
       // fields=status&groupBy=status&fields=count(status)&populateGroup=true
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
@@ -875,7 +979,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           populate: toPopulate,
           populateMedia: toPopulateMedia
         }
-      }
+      };
+      applyArchivedQueryState(queryData);
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
       });
@@ -892,6 +997,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         urlData.custom_filter_predicate = customFilter.custom_filter_predicate || {};
         // @ts-ignore
         urlData.search_predicate = customFilter.search_predicate || {};
+        // @ts-ignore
+        urlData.showArchived = showArchived;
+        if (showArchived) {
+          // @ts-ignore
+          urlData.showSoftDeleted = "inclusive";
+        }
         // @ts-ignore
         setFilterObjectToLocalStorage(urlData);
       }
@@ -928,7 +1039,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
   const entityDisplayName = solidKanbanViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
-  const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : loading || !queryDataLoaded ? "Loading..." : null;
+  const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : isRecoveringRecord ? "Recovering..." : loading || !queryDataLoaded ? "Loading..." : null;
 
   const handleRefreshView = () => {
     if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
@@ -937,7 +1048,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       return;
     }
 
-    window.location.reload();
+     loadKanbanBoard(filters);
   };
 
   const toggleBothSidebars = () => {
@@ -1011,6 +1122,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                   modelName={params.modelName}
                   actionsAllowed={actionsAllowed}
                   viewModes={viewModes}
+                  setShowArchived={setShowArchived}
+                  showArchived={showArchived}
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
                   filters={filters}
@@ -1027,7 +1140,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} showArchived={showArchived}></KanbanBoard>
           }
         </div>
       </div>

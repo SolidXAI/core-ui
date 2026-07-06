@@ -112,7 +112,9 @@ export const RolesGroupedByModuleWidget = ({
                         : `${group.moduleDisplayName} Roles`;
                 return (
                     <SolidAccordionItem key={key} value={key}>
-                        <SolidAccordionTrigger>{title}</SolidAccordionTrigger>
+                        <div className="pt-2">
+                            <SolidAccordionTrigger>{title}</SolidAccordionTrigger>
+                        </div>
                         <SolidAccordionContent>
                             <div className="solid-user-role-grid pt-1">
                                 {group.roles.map((item) => {
