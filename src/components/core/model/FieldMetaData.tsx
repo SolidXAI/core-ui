@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
 import FieldMetaDataForm from "./FieldMetaDataForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { AlertTriangle, Info, Trash2 } from "lucide-react";
+import { AlertTriangle, Info, Pencil, Plus, Trash2 } from "lucide-react";
 import {
   SolidButton,
   SolidDialog,
@@ -52,6 +52,27 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
     )
   };
 
+
+  // Template for the pencil icon column
+  const editTemplate = (rowData: any) => {
+    return (
+      <>
+        {rowData.isSystem !== true && rowData.isMarkedForRemoval !== true &&
+          <SolidButton
+            variant="ghost"
+            size="sm"
+            className="solid-icon-button"
+            aria-label="Edit field"
+            leftIcon={<Pencil size={14} />}
+            onClick={() => {
+              setSelectedFieldMetaData(rowData);
+              setVisiblePopup(true);
+            }}
+          />
+        }
+      </>
+    )
+  };
 
   // Function to delete a row
   const deleteRow = (rowData: any) => {
@@ -119,6 +140,24 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
         :
         <>
 
+          <div className="absolute" style={{ top: -3, right: 0 }}>
+            {modelMetaData.isSystem !== true &&
+              <SolidButton
+                size="sm"
+                leftIcon={<Plus size={14} />}
+                onClick={() => {
+                  if (!modelMetaData?.dataSourceType) {
+                    dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail: ERROR_MESSAGES.ORM_TYPE_REQUIRED }));
+                  } else {
+                    setSelectedFieldMetaData(null);
+                    setVisiblePopup(true)
+                  }
+                }}
+              >
+                Add
+              </SolidButton>
+            }
+          </div>
           <div className="solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden">
             <DataTable
               value={fieldMetaData}
@@ -131,7 +170,9 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
               <Column field="name" header="Name"></Column>
               <Column field="type" header="Type"></Column>
 
-
+              {modelMetaData.isSystem !== true &&
+                <Column body={editTemplate} header="Edit" style={{ width: '80px' }} />
+              }
               {modelMetaData.isSystem !== true &&
                 <Column body={deleteTemplate} header="Delete" style={{ width: '90px' }} />
               }
