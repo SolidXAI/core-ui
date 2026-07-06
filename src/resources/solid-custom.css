@@ -6119,7 +6119,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
  max-width: 94vw;
  max-height: 94vh;
  width: 718px;
- height: 770px;
+ /* height: 770px; */
  overflow-y: auto ;
  padding: 0px 10px;
 }

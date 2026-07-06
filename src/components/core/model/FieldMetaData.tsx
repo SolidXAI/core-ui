@@ -24,7 +24,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [isRequiredPopUp, setIsRequiredPopUp] = useState(false);
   const [currentPopup, setCurrentPopup] = useState();
-  const [selectedFieldMetaData, setSelectedFieldMetaData] = useState(null);
+  const [selectedFieldMetaData, setSelectedFieldMetaData] = useState<any>(null);
   const [deleteAlertPopup, setDeleteAlertPopup] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<any>(null);
   const onRowSelect = (event: any) => {
@@ -186,7 +186,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
               }
             }}
             className="solid-dialog solid-field-dialog"
-            style={{ width: "min(720px, calc(100vw - 2rem))" }}
+            style={{ width: "min(720px, calc(100vw - 2rem))", minWidth:"20rem", maxWidth:"95vw" }}
             showHeader={false}
           >
             <SolidDialogBody className="solid-dialog-body-flush">
