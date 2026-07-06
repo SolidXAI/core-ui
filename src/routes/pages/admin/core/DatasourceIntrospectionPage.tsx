@@ -2063,7 +2063,7 @@ export function DatasourceIntrospectionPage() {
     {
       key: "generate-code" as const,
       label: "Generate Code",
-      complete: currentStepIndex > 2,
+      complete: currentStepIndex > 2 || generateCodeReady,
       active: workspaceStep === "generate-code",
       disabled: !allWorkspaceItemsPersisted,
       onClick: () => {
@@ -2507,6 +2507,13 @@ export function DatasourceIntrospectionPage() {
             Generate Code
           </SolidButton>
         </div>
+        {generateCodeReady && !isGeneratingCodeWorkflow ? (
+          <div className="sdix-empty-state is-inline sdix-stage-progress sdix-stage-progress--success">
+            <Check size={24} />
+            <h3>Code generation finished</h3>
+            <p>The module generation workflow completed and the backend is back online. You can continue to migrations, or run generate code again if you want to retry.</p>
+          </div>
+        ) : null}
         {isGeneratingCodeWorkflow ? (
           <div className="sdix-empty-state is-inline sdix-stage-progress">
             <SolidSpinner size={30} />

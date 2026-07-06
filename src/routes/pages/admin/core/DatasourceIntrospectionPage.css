@@ -1216,6 +1216,18 @@
   justify-content: center;
 }
 
+.sdix-stage-progress--success {
+  min-height: 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid #cfe9d6;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, #f6fdf7 0%, #f1faf4 100%);
+}
+
+.sdix-stage-progress--success svg {
+  color: #2f9e5b;
+}
+
 .sdix-review-meta {
   display: flex;
   flex-direction: column;
