@@ -1,5 +1,6 @@
 
 import React, { useEffect } from "react";
+import DOMPurify from "dompurify";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import { SolidRichTextEditor } from "../../../shad-cn-ui/SolidRichTextEditor";
 import * as Yup from 'yup';
@@ -259,7 +260,7 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
             <div
                 className="solid-custom-editor solid-custom-editor-view"
                 id={fieldLabel}
-                dangerouslySetInnerHTML={{ __html: formik.values[fieldLayoutInfo.attrs.name] || "" }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formik.values[fieldLayoutInfo.attrs.name] || "") }}
             />
         </div>
     );
