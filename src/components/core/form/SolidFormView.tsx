@@ -71,6 +71,7 @@ export type SolidFormViewProps = {
     parentData?: any,
     redirectToPath?: string,
     onEmbeddedFormSave?: () => void,
+    hideVersionHistory?: boolean,
 };
 
 
@@ -462,6 +463,228 @@ const SolidNotebook = ({ children, activeTab, embeded, requestedTab, requestedTa
             </div>
         </div>
     );
+};
+
+const getVersionStatusLabel = (record: any) => {
+    if (record?.isPublished) return 'Published';
+    return 'Draft';
+};
+
+const getVersionStatusClassName = (record: any) => {
+    if (record?.isPublished) return 'bg-green-50 text-green-700 border-green-200';
+    return 'bg-amber-50 text-amber-700 border-amber-200';
+};
+
+const formatVersionDate = (value?: string | null) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString([], {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+const getUserDisplay = (value: any) => {
+    if (!value) return '-';
+    if (typeof value === 'object') return value.fullName || value.name || value.id || '-';
+    return value;
+};
+
+const SolidVersionHistory = ({ params, currentRecord, onRefresh }: any) => {
+    const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
+    const entityApi = useMemo(() => createSolidEntityApi(params.modelName), [params.modelName]);
+    const { useLazyGetSolidEntitiesQuery } = entityApi;
+    const [getVersions, { data, isLoading }] = useLazyGetSolidEntitiesQuery();
+    const chainId = currentRecord?.initialEntityVersionId || currentRecord?.id;
+
+    const fetchVersions = async () => {
+        if (!chainId) return;
+        const queryString = qs.stringify({
+            initialEntityVersionId: chainId,
+            sort: ['createdAt:desc'],
+            populate: ['createdBy', 'updatedBy'],
+        }, { encodeValuesOnly: true });
+        await getVersions(queryString);
+    };
+
+    useEffect(() => {
+        fetchVersions();
+    }, [chainId]);
+
+    const records = data?.records || [];
+
+    if (!chainId) {
+        return (
+            <div className="p-3 text-sm text-color-secondary">
+                Version history will be available after this record is saved.
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-full p-2">
+            <div className="flex items-center justify-between gap-2 pb-2">
+                <h3 className="m-0 text-base font-semibold">Version History</h3>
+                <SolidButton
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    icon="si si-refresh"
+                    onClick={fetchVersions}
+                    loading={isLoading}
+                />
+            </div>
+            <div className="overflow-x-auto rounded border border-[var(--surface-border)]">
+                <table className="w-full border-collapse text-sm">
+                    <thead className="bg-[var(--surface-ground)] text-left">
+                        <tr>
+                            <th className="p-2 font-semibold">Version</th>
+                            <th className="p-2 font-semibold">Status</th>
+                            <th className="p-2 font-semibold">Created</th>
+                            <th className="p-2 font-semibold">Updated By</th>
+                            <th className="p-2 font-semibold">Published</th>
+                            <th className="p-2 font-semibold text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {records.length === 0 && (
+                            <tr>
+                                <td className="p-3 text-center text-color-secondary" colSpan={6}>
+                                    {isLoading ? 'Loading versions...' : 'No versions found'}
+                                </td>
+                            </tr>
+                        )}
+                        {records.map((record: any) => (
+                            <tr key={record.id} className="border-t border-[var(--surface-border)]">
+                                <td className="p-2">#{record.id}{record.isLatest ? ' · Latest' : ''}</td>
+                                <td className="p-2">
+                                    <span className={`inline-flex rounded border px-2 py-1 text-xs font-medium ${getVersionStatusClassName(record)}`}>
+                                        {getVersionStatusLabel(record)}
+                                    </span>
+                                </td>
+                                <td className="p-2">
+                                    <div>{formatVersionDate(record.createdAt)}</div>
+                                    <div className="text-xs text-color-secondary">{getUserDisplay(record.createdBy)}</div>
+                                </td>
+                                <td className="p-2">{getUserDisplay(record.updatedBy)}</td>
+                                <td className="p-2">{record.isPublished ? formatVersionDate(record.publishedAt) : '-'}</td>
+                                <td className="p-2 text-right">
+                                    <SolidButton
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        icon="si si-eye"
+                                        className="solid-icon-button"
+                                        tooltip="Open version"
+                                        aria-label="Open version"
+                                        onClick={() => setSelectedVersionId(String(record.id))}
+                                    />
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <SolidDialog
+                open={Boolean(selectedVersionId)}
+                onOpenChange={(open) => {
+                    if (!open) setSelectedVersionId(null);
+                }}
+                showHeader={false}
+                contentClassName="solid-version-history-dialog"
+                style={{ width: 'min(1100px, 94vw)', maxHeight: '90vh', overflow: 'auto' }}
+            >
+                {selectedVersionId && (
+                    <SolidFormView
+                        {...params}
+                        id={selectedVersionId}
+                        embeded={true}
+                        hideVersionHistory={true}
+                        handlePopupClose={() => setSelectedVersionId(null)}
+                        onEmbeddedFormSave={() => {
+                            fetchVersions();
+                            onRefresh?.();
+                        }}
+                    />
+                )}
+            </SolidDialog>
+        </div>
+    );
+};
+
+const VERSION_HISTORY_PAGE = {
+    type: 'page',
+    attrs: {
+        name: 'versionHistory',
+        label: 'Version History',
+        key: 'versionHistory',
+    },
+    children: [
+        {
+            type: 'versionHistory',
+            attrs: {
+                key: 'versionHistoryList',
+            },
+        },
+    ],
+};
+
+const appendVersionHistoryPage = (layout: any): any => {
+    if (!layout) return layout;
+    let appended = false;
+
+    const visit = (node: any): any => {
+        if (!node || typeof node !== 'object') return node;
+        const children = Array.isArray(node.children) ? node.children : [];
+
+        if (node.type === 'notebook') {
+            const hasVersionHistory = children.some((child: any) => child?.attrs?.name === 'versionHistory' || child?.attrs?.key === 'versionHistory');
+            appended = true;
+            return {
+                ...node,
+                children: hasVersionHistory ? children.map(visit) : [...children.map(visit), VERSION_HISTORY_PAGE],
+            };
+        }
+
+        return children.length > 0
+            ? { ...node, children: children.map(visit) }
+            : { ...node };
+    };
+
+    const nextLayout = visit(layout);
+
+    if (appended || nextLayout?.type !== 'form') {
+        return nextLayout;
+    }
+
+    return {
+        ...nextLayout,
+        children: [
+            {
+                type: 'notebook',
+                attrs: {
+                    name: 'workflowNotebook',
+                    key: 'workflowNotebook',
+                },
+                children: [
+                    {
+                        type: 'page',
+                        attrs: {
+                            name: 'details',
+                            label: 'Details',
+                            key: 'details',
+                        },
+                        children: nextLayout.children || [],
+                    },
+                    VERSION_HISTORY_PAGE,
+                ],
+            },
+        ],
+    };
 };
 
 const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, solidFormViewData }: any) => {
@@ -977,11 +1200,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData.append('defaultEntityLocaleId', defaultEntityLocaleId.toString());
                 }
             }
-            if (solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow) {
-                if (published) {
-                    formData.append('publishedAt', published);
-                }
-            }
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
             } else {
@@ -1016,7 +1234,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (!params.embeded) {
                         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORM_UPDATE, detail: ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY }));
                         if (result?.statusCode === 200) {
-                            updateViewMode("view")
+                            const nextId = result?.data?.id;
+                            if (nextId && String(nextId) !== String(params.id)) {
+                                const queryParams = new URLSearchParams(searchParams.toString());
+                                queryParams.set("viewMode", "view");
+                                const updatedPath = pathname.replace(/\/form\/[^/]+/, `/form/${nextId}`);
+                                router.replace(`${updatedPath}?${queryParams.toString()}`);
+                                setViewMode("view");
+                            } else {
+                                updateViewMode("view")
+                            }
                         }
                     }
                     return result;
@@ -1103,10 +1330,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
             } else {
                 setFormViewLayout(solidFormViewMetaData?.data?.solidView?.layout);
             }
-            setPublished(solidFormViewData?.data?.publishedAt);
+            setPublished(solidFormViewData?.data?.isPublished ? solidFormViewData?.data?.publishedAt : null);
             setFormViewMetaData(solidFormViewMetaData);
         }
-    }, [solidFormViewMetaData]);
+    }, [solidFormViewMetaData, solidFormViewData]);
 
     // useEffect(() => {
     //     const handleOnFormLayoutLoadEvent = async () => {
@@ -1690,6 +1917,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         }
                     }
                     break;
+                case "versionHistory":
+                    if (visible === true) {
+                        return (
+                            <SolidVersionHistory
+                                key={key}
+                                params={params}
+                                currentRecord={solidFormViewData?.data}
+                                onRefresh={() => {
+                                    refetchSolidFormViewData();
+                                    setRefreshChatterMessage(true);
+                                }}
+                            />
+                        );
+                    }
+                    break;
 
                 default:
                     return null;
@@ -1708,7 +1950,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (!solidView || !solidFieldsMetadata) {
                 return;
             }
-            const updatedLayout = [formViewLayout];
+            const shouldShowVersionHistory = Boolean(
+                recursiveFVMD.data.solidView?.model?.draftPublishWorkflow
+                && params.id !== 'new'
+                && params.embeded !== true
+                && !params.hideVersionHistory
+            );
+            const layoutToRender = shouldShowVersionHistory ? appendVersionHistoryPage(formViewLayout) : formViewLayout;
+            const updatedLayout = [layoutToRender];
             const dynamicForm = updatedLayout.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `root-${index}`));
 
             return dynamicForm;
@@ -1861,7 +2110,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
             console.log("publish/unpublish result", result);
 
             // Set updated publish value from API response
-            setPublished(result?.data?.publishedAt);
+            setPublished(result?.data?.isPublished ? result?.data?.publishedAt : null);
+            refetchSolidFormViewData();
+            if (params.onEmbeddedFormSave) {
+                params.onEmbeddedFormSave();
+            }
         };
 
 

@@ -29,7 +29,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const { data: session, status } = useSession();
     const user = session?.user;
 
-    const isPublished = publish && publish !== 'null';   // record is published if publish has value
+    const isPublished = formData?.isPublished ?? (publish && publish !== 'null');   // fallback keeps older API responses working
+    const showDraftPublishActions = Boolean(
+        draftEnabled &&
+        params.id !== 'new'
+    );
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
     // const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
     const hasUserInteraction = Object.keys(formik?.touched || {}).length > 0;
@@ -170,7 +174,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 closeMenu();
                             }}
                         />
-                        {draftEnabled && params.id !== 'new' && (
+                        {showDraftPublishActions && (
                             <>
                                 {!isPublished && canPublish && (
                                     <FormActionMenuButton
@@ -187,6 +191,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     <FormActionMenuButton
                                         label="Unpublish"
                                         icon="si si-cloud-download"
+                                        danger
                                         onClick={() => {
                                             handleDraftPublishWorkFlow('unpublish');
                                             closeMenu();
@@ -469,7 +474,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     formViewLayout.attrs?.showEditFormButton !== false &&
                                     params.embeded !== true &&
                                     viewMode === "view" &&
-                                    !isPublished &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     <>
                                         <div className="hidden lg:flex">
@@ -492,6 +496,28 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     <div>
                                         <SolidButton label="Save" size="sm" type="submit" className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting} />
                                         <SolidButton size="sm" type="submit" className="lg:hidden solid-icon-button" icon="si si-check" loading={isSubmitting} disabled={isSubmitting} />
+                                    </div>
+                                }
+
+                                {
+                                    params.embeded !== true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    !isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'publish')) &&
+                                    <div>
+                                        <SolidButton label="Publish" size="sm" type="button" onClick={() => handleDraftPublishWorkFlow('publish')} />
+                                    </div>
+                                }
+
+                                {
+                                    params.embeded !== true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish')) &&
+                                    <div>
+                                        <SolidButton label="Unpublish" size="sm" type="button" variant="destructive" onClick={() => handleDraftPublishWorkFlow('unpublish')} />
                                     </div>
                                 }
 
@@ -518,6 +544,26 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     !isPublished &&
                                     <div>
                                         <SolidButton size="sm" type="button" label="Delete" variant="destructive" onClick={() => setDeleteDialogVisible(true)} />
+                                    </div>
+                                }
+                                {
+                                    params.embeded == true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    !isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'publish')) &&
+                                    <div>
+                                        <SolidButton label="Publish" size="sm" type="button" onClick={() => handleDraftPublishWorkFlow('publish')} />
+                                    </div>
+                                }
+                                {
+                                    params.embeded == true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish')) &&
+                                    <div>
+                                        <SolidButton label="Unpublish" size="sm" type="button" variant="destructive" onClick={() => handleDraftPublishWorkFlow('unpublish')} />
                                     </div>
                                 }
                                 {

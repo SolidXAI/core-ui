@@ -15,6 +15,10 @@ export type CommonEntity = {
     updatedAt: string;
     deletedAt: string | null;
     deletedTracker: string;
+    publishedAt?: string | null;
+    isPublished?: boolean;
+    isLatest?: boolean;
+    initialEntityVersionId?: number | null;
 };
 
 // Model
