@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Check,
   Cog,
+  Copy,
   Database,
   ExternalLink,
   RefreshCw,
@@ -793,6 +794,7 @@ export function DatasourceIntrospectionPage() {
   const [generateCodeTimeoutMessage, setGenerateCodeTimeoutMessage] = useState<string | null>(null);
   const [generateCodeReady, setGenerateCodeReady] = useState(false);
   const [hasAttemptedGenerateCode, setHasAttemptedGenerateCode] = useState(false);
+  const [migrationPreviewCopied, setMigrationPreviewCopied] = useState(false);
   const [runMigrationOutput, setRunMigrationOutput] = useState("");
   const [runMigrationCompleted, setRunMigrationCompleted] = useState(false);
   const [fieldConfigColumnName, setFieldConfigColumnName] = useState<string | null>(null);
@@ -913,6 +915,7 @@ export function DatasourceIntrospectionPage() {
     },
   );
   const selectedDatasourceRecord = bootstrap?.datasources?.find((datasource) => datasource.name === selectedDatasource) ?? null;
+  const isSynchronizeBlocked = Boolean(selectedDatasource && tablesResponse?.synchronizeBlocked);
   const makeTableKey = (schema: string | null | undefined, tableName: string) => `${schema ?? ""}::${tableName}`;
   const selectedListRowKeySet = useMemo(
     () => new Set(selectedRows.map((row) => makeTableKey(row.schema, row.tableName))),
@@ -1422,6 +1425,7 @@ export function DatasourceIntrospectionPage() {
     setGenerateCodeTimeoutMessage(null);
     setGenerateCodeReady(false);
     setHasAttemptedGenerateCode(false);
+    setMigrationPreviewCopied(false);
     setRunMigrationOutput("");
     updateActiveWorkspaceItem((current) => ({
       ...current,
@@ -1433,6 +1437,30 @@ export function DatasourceIntrospectionPage() {
       migrationStatus: { state: "idle", message: "Migration artifacts not created yet." },
       draft: current.draft ? updater(current.draft) : current.draft,
     }));
+  };
+
+  const handleCopyMigrationPreview = async () => {
+    const migrationContent = mappingPreview?.migration.content;
+    if (!migrationContent) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(migrationContent);
+      setMigrationPreviewCopied(true);
+      window.setTimeout(() => setMigrationPreviewCopied(false), 2000);
+      dispatch(showToast({
+        severity: "success",
+        summary: "Migration copied",
+        detail: "The migration preview was copied to the clipboard.",
+      }));
+    } catch (error) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Copy failed",
+        detail: "Unable to copy the migration preview to the clipboard.",
+      }));
+    }
   };
 
   const updateGeneralField = (field: keyof DrawerDraft, value: any) => {
@@ -2443,9 +2471,22 @@ export function DatasourceIntrospectionPage() {
       </div>
       {mappingPreview.migration.willGenerate && mappingPreview.migration.filePath ? (
         <>
-          <div className="sdix-review-meta sdix-review-meta--compact">
-            <span>Target file</span>
-            <strong>{mappingPreview.migration.filePath}</strong>
+          <div className="sdix-review-code-header">
+            <div className="sdix-review-meta sdix-review-meta--compact">
+              <span>Target file</span>
+              <strong>{mappingPreview.migration.filePath}</strong>
+            </div>
+            {mappingPreview.migration.content ? (
+              <SolidButton
+                size="small"
+                variant="outline"
+                className="sdix-review-copy-button"
+                leftIcon={migrationPreviewCopied ? <Check size={14} /> : <Copy size={14} />}
+                onClick={() => void handleCopyMigrationPreview()}
+              >
+                {migrationPreviewCopied ? "Copied" : "Copy"}
+              </SolidButton>
+            ) : null}
           </div>
           <p className="sdix-review-note">
             This migration preview is generated from the current mapping and stays read-only here. Moving ahead writes the migration file to disk and updates the datasource registration now that the entity code already exists.
@@ -2802,12 +2843,18 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
             </div>
           ) : null}
 
-          {selectedDatasource && tablesResponse?.synchronizeBlocked ? (
+          {isSynchronizeBlocked ? (
             <div className="sdix-blocker">
-              <ShieldAlert size={20} />
-              <div>
-                <h3>Synchronize must be disabled before introspection</h3>
-                <p>{tablesResponse.synchronizeMessage}</p>
+              <div className="sdix-blocker__icon">
+                <ShieldAlert size={22} />
+              </div>
+              <div className="sdix-blocker__content">
+                <span className="sdix-blocker__eyebrow">Configuration blocker</span>
+                <h3>Disable TypeORM synchronize before running datasource introspection</h3>
+                <p>{tablesResponse?.synchronizeMessage}</p>
+                <div className="sdix-blocker__note">
+                  Introspection is paused here to avoid schema-sync side effects while reviewing legacy datasource tables.
+                </div>
               </div>
             </div>
           ) : null}
@@ -2832,7 +2879,7 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                       Retry
                     </SolidButton>
                   </div>
-                ) : !filteredRecords.length ? (
+                ) : isSynchronizeBlocked ? null : !filteredRecords.length ? (
                   <div className="sdix-empty-state is-inline">
                     <Database size={22} />
                     <p>{tableSearch ? "No tables match the current quick filter." : "No database tables were discovered for this datasource."}</p>

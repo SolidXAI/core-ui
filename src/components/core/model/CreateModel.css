@@ -59,6 +59,13 @@
   padding: 0 0.9rem 1rem;
 }
 
+.solid-model-fields-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0 0.75rem;
+  flex: 0 0 auto;
+}
+
 .solid-model-form-actions {
   display: flex;
   align-items: center;

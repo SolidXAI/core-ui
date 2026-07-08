@@ -1,0 +1,82 @@
+.solid-field-dialog {
+  width: min(720px, calc(100vw - 2rem)) !important;
+  max-width: calc(100vw - 2rem) !important;
+}
+
+.solid-field-dialog .solid-radix-dialog-body.solid-dialog-body-flush {
+  width: auto;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+.solid-field-dialog .solid-radix-dialog-header {
+  padding-bottom: 0.9rem;
+}
+
+.solid-field-form-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.solid-field-form-scroll {
+  max-height: min(85vh, 820px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem;
+}
+
+.solid-field-form-frame {
+  position: relative;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.solid-field-form-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.solid-field-form-subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.solid-field-form-tabs .solid-notebook-tablist {
+  width: 100% !important;
+}
+
+.solid-field-form-tabs .solid-notebook-content {
+  padding-top: 0.85rem;
+}
+
+.solid-field-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+@media (max-width: 640px) {
+  .solid-field-form-scroll {
+    padding: 0.75rem;
+  }
+
+  .solid-field-form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .solid-field-form-actions .solid-btn {
+    width: 100%;
+  }
+}

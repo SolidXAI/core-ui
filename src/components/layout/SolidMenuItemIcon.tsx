@@ -12,9 +12,9 @@ type SolidMenuItemIconProps = {
 };
 
 export const SolidMenuItemIcon = ({ item, className, size = 18, }: SolidMenuItemIconProps) => {
-  if (item?.isSystem) {
-    return null;
-  }
+  // if (item?.isSystem) {
+  //   return null;
+  // }
   const icon = resolveMenuItemIcon(item);
   if (!icon) {
     return null;

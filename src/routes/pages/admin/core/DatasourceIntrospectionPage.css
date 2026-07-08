@@ -543,9 +543,12 @@
 
 .sdix-blocker {
   flex-direction: row;
-  align-items: flex-start;
-  background: #fff8ed;
-  border: 1px solid #f6d9aa;
+  align-items: stretch;
+  gap: 1rem;
+  padding: 1.15rem 1.2rem;
+  background: linear-gradient(135deg, #fff8ef 0%, #fffdf8 100%);
+  border: 1px solid #f1d3a2;
+  box-shadow: 0 10px 30px rgba(182, 128, 37, 0.08);
   color: #8c5c14;
 }
 
@@ -554,6 +557,80 @@
 .sdix-detail-callout h3,
 .sdix-detail-callout p {
   margin: 0;
+}
+
+.sdix-blocker__icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  flex: 0 0 2.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.9rem;
+  background: rgba(176, 109, 11, 0.1);
+  color: #a15e0d;
+}
+
+.sdix-blocker__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.sdix-blocker__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b06c0b;
+}
+
+.sdix-blocker__content h3 {
+  color: #2a3145;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.sdix-blocker__content p {
+  color: #8c5c14;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.sdix-blocker__note {
+  margin-top: 0.25rem;
+  color: #6a7288;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.sdix-blocker-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  padding: 1.5rem;
+  border: 1px dashed #e5cfab;
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at top, rgba(244, 187, 95, 0.12), transparent 45%),
+    linear-gradient(180deg, #fffdfa 0%, #fffaf3 100%);
+}
+
+.sdix-blocker-panel__body {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #eedfc3;
+  color: #7c6130;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 .sdix-loading,
@@ -1236,6 +1313,17 @@
   border: 1px solid #e7ebf3;
   border-radius: 0.8rem;
   background: #fbfcff;
+}
+
+.sdix-review-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.sdix-review-copy-button {
+  flex-shrink: 0;
 }
 
 .sdix-review-meta--compact {

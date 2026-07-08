@@ -6116,6 +6116,17 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-radix-dialog-body.solid-dialog-body-flush {
   padding: 0;
+ max-width: 94vw;
+ max-height: 94vh;
+ width: 718px;
+ /* height: 770px; */
+ overflow-y: auto ;
+ padding: 0px 10px;
+}
+@media(max-width: 767px){
+  .solid-radix-dialog-body.solid-dialog-body-flush {
+   padding: 0px 4px;
+  }
 }
 
 .solid-field-confirm-dialog .solid-radix-dialog-body {
@@ -6524,7 +6535,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-field-selector-container {
   padding: 10px;
-  max-height: min(520px, calc(100vh - 220px));
+  /* max-height: min(520px, calc(100vh - 220px)); */
   overflow-y: auto;
   max-width: 900px;
   margin: 0 auto;

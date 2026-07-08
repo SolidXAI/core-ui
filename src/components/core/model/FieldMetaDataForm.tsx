@@ -31,6 +31,7 @@ import {
   SolidCodeEditor,
 } from "../../shad-cn-ui";
 import styles from "../form/fields/solidFields.module.css";
+import "./FieldMetaDataForm.css";
 
 
 
@@ -967,6 +968,7 @@ const FieldMetaDataForm = ({
   const showValidationSection =
     selectedTypeValue !== "relation" && (showRegexFields || showMinFields || showMaxFields || showOrmOptions);
   const isExistingFieldReadOnly = disableIdentityEditingForExisting && Boolean(fieldMetaData?.id);
+  const fieldTypeLabel = capitalize(String(selectedType?.label ?? selectedTypeValue ?? "field"));
 
   const closeForm = useCallback(() => {
     if (typeof onClose === "function") {
@@ -1476,6 +1478,10 @@ const FieldMetaDataForm = ({
 
   });
 
+  const fieldEditorTitle = fieldMetaData
+    ? `Edit ${formik?.values?.displayName || fieldTypeLabel} Field`
+    : `Add ${fieldTypeLabel} Field`;
+
   const mediaTypeSelectedItems = useMemo(() => {
     if (!Array.isArray(formik.values.mediaTypes)) return [];
     return formik.values.mediaTypes.map((entry: any) => {
@@ -1804,7 +1810,7 @@ const FieldMetaDataForm = ({
 
 
   return (
-    <div>
+    <div className="solid-field-form-shell">
       <div>
         <form
           onSubmit={formik.handleSubmit}
@@ -1814,22 +1820,28 @@ const FieldMetaDataForm = ({
           }}
         >
           {showTypeFilter === true ?
-            <FieldSelector
-              handleTypeSelect={handleTypeSelect}
-              modelMetaData={modelMetaData}
-              availableFieldTypes={availableFieldTypes}
-              initialSelectedValue={selectedType?.value ?? selectorInitialFieldType}
-              requireExplicitContinue={selectorRequireContinue}
-              continueLabel={selectorContinueLabel}
-            ></FieldSelector>
+            <div className="solid-field-form-scroll">
+              <FieldSelector
+                handleTypeSelect={handleTypeSelect}
+                modelMetaData={modelMetaData}
+                availableFieldTypes={availableFieldTypes}
+                initialSelectedValue={selectedType?.value ?? selectorInitialFieldType}
+                requireExplicitContinue={selectorRequireContinue}
+                continueLabel={selectorContinueLabel}
+              ></FieldSelector>
+            </div>
             :
-            <div className="p-3" style={{ maxHeight: '80vh', overflowY: 'auto', overflowX: 'hidden' }}>
-              <div className="flex justify-center creat-field-for form-dem">
-                <div className="solid-fluid" style={{ position: 'relative' }}>
-                  {/* <div className="mb-3">
-                    <div className="form-wrapper-title">{fieldMetaData ? `Edit ${capitalize(selectedType.label)} Field` : `Add a new ${capitalize(selectedType.label)} Field`}</div>
-                  </div> */}
-                  <TabView panelContainerClassName="px-0">
+            <div className="solid-field-form-scroll">
+              <div className="flex justify-center creat-field-form form-demo">
+                <div className="solid-fluid solid-field-form-frame">
+                  <div className="solid-field-form-header">
+                    <p className="form-wrapper-title m-0">{fieldEditorTitle}</p>
+                    <p className="solid-field-form-subtitle">
+                      Review the basic info and advanced configuration for this field.
+                    </p>
+                  </div>
+                  <div className="solid-field-form-tabs">
+                    <TabView panelContainerClassName="px-0">
                     <TabPanel
                       header="Basic Info"
                       className={(formik.touched.hasOwnProperty("name") && formik.errors.hasOwnProperty("name")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("displayName")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("ormType")) ? "tab-error-heading" : ""}
@@ -1898,7 +1910,6 @@ const FieldMetaDataForm = ({
                               onChange={formik.handleChange}
                               value={formik.values.description}
                               rows={5}
-                              cols={30}
                               className={classNames(styles.fieldTextarea, {
                                 "p-invalid": isFormFieldValid(formik, "description"),
                               })}
@@ -2506,7 +2517,6 @@ const FieldMetaDataForm = ({
                                   onChange={formik.handleChange}
                                   value={formik.values.relationFieldFixedFilter}
                                   rows={5}
-                                  cols={30}
                                   className={classNames(styles.fieldTextarea, {
                                     "p-invalid": isFormFieldValid(
                                       formik,
@@ -3492,14 +3502,11 @@ const FieldMetaDataForm = ({
                         </div>
                       )}
                     </TabPanel>
-                  </TabView>
-                  <div className="mt-4 flex gap-4">
-                    <div>
-                      <SolidButton label={submitLabel} size="small" onClick={() => showError()} type="submit" />
-                    </div>
-                    <div>
-                      <SolidButton label="Cancel" size="small" severity="secondary" type="reset" onClick={closeForm} outlined />
-                    </div>
+                    </TabView>
+                  </div>
+                  <div className="solid-field-form-actions">
+                    <SolidButton label={submitLabel} size="small" onClick={() => showError()} type="submit" />
+                    <SolidButton label="Cancel" size="small" severity="secondary" type="reset" onClick={closeForm} outlined />
                   </div>
                 </div>
                 {/* <div className="ml-4">
