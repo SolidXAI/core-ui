@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import DOMPurify from "dompurify";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import { SolidRichTextEditor } from "../../../shad-cn-ui/SolidRichTextEditor";
@@ -66,6 +66,7 @@ const normalizeQuillRichTextHtml = (html: string): string => {
             currentList.appendChild(node);
         });
 
+        appendCurrentList();
         orderedList.replaceWith(replacementFragment);
     });
 
@@ -83,7 +84,7 @@ export class SolidRichTextField implements ISolidField {
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
         if (value !== undefined && value !== null) {
-            formData.append(fieldLayoutInfo.attrs.name, value);
+            formData.append(fieldLayoutInfo.attrs.name, normalizeQuillRichTextHtml(value));
         }
     }
 
@@ -190,25 +191,6 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const fieldName = fieldLayoutInfo.attrs.name;
-    const fieldValue = formik.values[fieldName] || "";
-    const normalizedFieldValue = normalizeQuillRichTextHtml(fieldValue);
-
-    useEffect(() => {
-        if (fieldValue === normalizedFieldValue) {
-            return;
-        }
-
-        fieldContext.onChange(
-            {
-                target: {
-                    name: fieldName,
-                    value: normalizedFieldValue,
-                    type: "text",
-                },
-            } as any,
-            "onFieldChange"
-        );
-    }, [fieldContext, fieldName, fieldValue, normalizedFieldValue]);
 
 
     return (
@@ -223,14 +205,13 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
             <SolidRichTextEditor
                 readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                 id={fieldName}
-                value={normalizedFieldValue}
+                value={formik.values[fieldName] || ""}
                 onChange={(value) => {
-                    const normalizedValue = normalizeQuillRichTextHtml(value ?? "");
                     fieldContext.onChange(
                         {
                             target: {
                                 name: fieldName,
-                                value: normalizedValue,
+                                value: value ?? "",
                                 type: "text",
                             },
                         } as any,
@@ -260,7 +241,7 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
             <div
                 className="solid-custom-editor solid-custom-editor-view"
                 id={fieldLabel}
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formik.values[fieldLayoutInfo.attrs.name] || "") }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(normalizeQuillRichTextHtml(formik.values[fieldLayoutInfo.attrs.name] || "")) }}
             />
         </div>
     );
