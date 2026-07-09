@@ -2,13 +2,13 @@ import { Column } from "./SolidDataTable";
 import { getExtensionComponent } from "../../../helpers/registry";
 import type { SolidListFieldWidgetProps } from "../../../types/solid-core";
 
-type SolidCustomListColumnProps = {
+type SolidCustomListViewColumnProps = {
     solidListViewMetaData: any;
     column: any;
     embeded?: boolean;
 };
 
-export const SolidCustomListColumn = ({ solidListViewMetaData, column, embeded }: SolidCustomListColumnProps) => {
+export const SolidCustomListViewColumn = ({ solidListViewMetaData, column, embeded }: SolidCustomListViewColumnProps) => {
     const widgetName = column?.attrs?.widget;
     const fieldName = column?.attrs?.name ?? widgetName ?? "custom";
     const header = column?.attrs?.label ?? fieldName;

@@ -4,7 +4,7 @@ import qs from "qs";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn, isFieldSortable } from "./SolidListViewColumn";
-import { SolidCustomListColumn } from "./SolidCustomListColumn";
+import { SolidCustomListViewColumn } from "./SolidCustomListViewColumn";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -1237,14 +1237,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
     return currentLayout.children?.map((column: any) => {
       if (column?.type === "custom") {
-        return (
-          <SolidCustomListColumn
-            key={column?.attrs?.name ?? column?.attrs?.widget ?? column?.attrs?.label}
-            solidListViewMetaData={solidListViewMetaData}
-            column={column}
-            embeded={params.embeded}
-          />
-        );
+        return SolidCustomListViewColumn({
+          solidListViewMetaData,
+          column,
+          embeded: params.embeded
+        });
       }
 
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
