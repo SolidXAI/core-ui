@@ -4,6 +4,70 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.12] - 2026-07-09
+
+### Added
+
+- enhance SolidRichTextField to normalize rich text HTML and update form data on change
+- enhance FieldMetaDataForm and FieldSelector with additional props and functionality
+
+### Fixed
+
+- show correct validation error when clearing required many-to-one relation field
+
+### Changed
+
+- enhance migration workflow messaging and commands in DatasourceIntrospectionPage
+- improve candidate key selection in getPersistedLastModelViewRoute
+
+### Other
+
+- Refactor SolidRichTextField to normalize Quill rich text HTML on form data update and rendering
+- changes to handle quill vulnerability: https://fluidattacks.com/advisories/diomedes
+- Enhance Datasource Introspection Page with migration preview copy functionality and improve blocker UI
+- Enhance Datasource Introspection Page with migration preview copy functionality and improve blocker UI
+- fix ui
+- fix feild model ui..........
+- css changes for add button
+- display icon for core models also
+- changes to restore add/edit functionality
+- Enhance Datasource Introspection Page with success state indication and clean up Datasources Page by removing unused code
+- Add backend health monitoring and reconnect indicator components
+- Implement structural updates and optimizations across multiple modules
+- Refactor relation display handling and improve field configuration UI
+- handle  menus icons and add helper text for setting....
+- layout fix across view
+- profile avatar remove button not visible propperly
+- dark theme issues resolved
+- row click action allow only of which is not isSystem marked
+- solid dark theme issues
+- handle recover and refresh properly across view
+- font issues
+- key changed
+- taking impact of formModeOnRowClick on row click
+- auth dark theme issue
+- solid form view column layout fix
+- update solid-tailwind-generated.css for improved styling consistency
+- data source introspection related - Refactor code structure for improved readability and maintainability
+- solidx-theme customization variables files added
+- come changes pushed
+- changes to make explorer editable by default, configurable through an attr i.e readonly in the widget attrs
+- added jsoneditor types packages to fix build breaking
+- moduleToSeed fix cleanup
+- fix test cases
+- reverting  stale line
+- changes to seed modules only while seeding
+- Refactor SolidFormView to simplify defaultEntityLocaleId handling and remove unused isValidIntegerId function
+- Enhance SolidFormView and SolidChatterLocaleTabView to validate defaultEntityLocaleId and show workflow info conditionally
+- some fixes
+- back and studio button duplicate issue
+- ui fixes
+- Restore Microsoft Active Directory OAuth (revert revert of #97)
+- Enhance internationalisation support in form components
+- Refactor DatasourcesPage layout and styles; update routes to include Datasource Introspection page
+- Add loading state to DashboardPage with spinner and message
+- Add Datasource Management functionality with API integration and UI components
+
 ## [0.1.11] - 2026-06-23
 
 ### Other
