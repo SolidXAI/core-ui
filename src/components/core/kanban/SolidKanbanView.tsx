@@ -17,7 +17,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
-import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage, hasStoredFilterPredicates } from "../list/SolidListView";
+import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage, hasStoredFilterPredicates } from "../common/globalSearchPersistence";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
@@ -140,6 +140,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
+
   const [swimlaneDefinitions, setSwimlaneDefinitions] = useState<KanbanSwimlaneDefinition[]>([]);
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
@@ -1075,7 +1076,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 } 
                 */}
 
-                <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
+                {/* <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p> */}
                 <div className="hidden lg:flex">
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
                   <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
