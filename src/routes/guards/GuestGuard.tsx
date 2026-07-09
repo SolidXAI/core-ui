@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useSession } from "../../hooks/useSession";
+import { SolidLoadingState } from "../../components/common/SolidLoadingState";
 
 export function GuestGuard() {
   const { status } = useSession();
@@ -13,7 +14,12 @@ export function GuestGuard() {
   }, [status, navigate]);
 
   if (status === "loading" || status === "authenticated") {
-    return <div>Loading...</div>;
+    return (
+      <SolidLoadingState
+        title="Loading"
+        description="Please wait while we route you to the right place."
+      />
+    );
   }
 
   return <Outlet />;

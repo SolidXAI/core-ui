@@ -10,8 +10,11 @@ import SolidLink from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { env } from "../../adapters/env";
+import { resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
+import type { MenuItemIconSource } from "../../helpers/menuItemIcons";
+import { SolidMenuItemIcon } from "./SolidMenuItemIcon";
 
-type SolidMenuItem = {
+type SolidMenuItem = MenuItemIconSource & {
     key?: string;
     title: string;
     path?: string;
@@ -63,10 +66,11 @@ function doesSearchParamsMatchSubset(requiredParams: URLSearchParams, currentPar
 }
 
 function isMenuPathActive(itemPath: string | undefined, currentPathname: string, currentSearchParams: URLSearchParams): boolean {
-    if (!itemPath) return false;
+  if (!itemPath) return false;
 
-    const { pathname: itemPathname, searchParams: itemSearchParams } = getPathAndParams(itemPath);
-    if (itemPathname !== normalizePath(currentPathname)) return false;
+  const resolvedItemPath = resolveRetainedModelViewRoute(itemPath);
+  const { pathname: itemPathname, searchParams: itemSearchParams } = getPathAndParams(resolvedItemPath);
+  if (itemPathname !== normalizePath(currentPathname)) return false;
 
     return doesSearchParamsMatchSubset(itemSearchParams, currentSearchParams);
 }
@@ -142,6 +146,7 @@ const SidebarMenuTree = ({
         const hasChildren = !!(node.children && node.children.length > 0);
         const isExpanded = expandedKeys[nodeId] === true;
         const isActive = isMenuPathActive(node.path, pathname, searchParams);
+        const resolvedPath = node.path ? resolveRetainedModelViewRoute(node.path) : undefined;
         const paddingLeft = 12 + depth * 14;
 
         return (
@@ -153,19 +158,24 @@ const SidebarMenuTree = ({
                     {hasChildren ? (
                         <button
                             type="button"
-                            className="solid-sidebar-tree-parent"
+                            className="solid-sidebar-tree-parent flex items-center gap-2"
                             onClick={() => toggleExpanded(nodeId)}
                             aria-expanded={isExpanded}
                             aria-label={`Toggle ${node.title}`}
                         >
+                            <SolidMenuItemIcon item={node} />
                             <span className="solid-sidebar-tree-label">{node.title}</span>
                         </button>
                     ) : node.path ? (
-                        <SolidLink href={node.path} className="solid-sidebar-tree-link">
+                        <SolidLink href={resolvedPath} className="solid-sidebar-tree-link flex items-center gap-2">
+                            <SolidMenuItemIcon item={node} />
                             <span className="solid-sidebar-tree-label">{node.title}</span>
                         </SolidLink>
                     ) : (
-                        <span className="solid-sidebar-tree-label">{node.title}</span>
+                        <span className="solid-sidebar-tree-link flex items-center gap-2">
+                            <SolidMenuItemIcon item={node} />
+                            <span className="solid-sidebar-tree-label">{node.title}</span>
+                        </span>
                     )}
                     {hasChildren && (
                         <button
@@ -180,7 +190,7 @@ const SidebarMenuTree = ({
                 </div>
                 {hasChildren && isExpanded && (
                     <ul className="solid-sidebar-tree-list solid-sidebar-tree-children">
-                        {node.children!.map((child, childIndex) => renderNode(child, depth + 1, nodeId, childIndex))}
+                        {node.children!.map((child, childIndex) => renderNode(child as SolidMenuItem, depth + 1, nodeId, childIndex))}
                     </ul>
                 )}
             </li>

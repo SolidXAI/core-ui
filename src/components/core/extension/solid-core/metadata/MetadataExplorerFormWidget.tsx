@@ -14,9 +14,17 @@ import { SolidFormWidgetProps } from '../../../../../types/solid-core';
  *   arrayPath     - root-level key in the JSON (e.g. 'views', 'actions', 'menus')
  *   itemNameField - field on each array item to match against (e.g. 'name',
  *                   'scheduleName', 'sequenceName'). Defaults to 'name'.
+ *   readOnly      - whether the explorer is read-only. Defaults to false.
+ *   allowSeed     - whether the seed button is shown. Defaults to false.
  */
 export const MetadataExplorerFormWidget = ({ field, formData }: SolidFormWidgetProps) => {
-    const { moduleName: staticModuleName, arrayPath, itemNameField = 'name' } = field?.attrs ?? {};
+    const {
+        moduleName: staticModuleName,
+        arrayPath,
+        itemNameField = 'name',
+        readOnly = false,
+        allowSeed = false,
+    } = field?.attrs ?? {};
 
     // Resolve moduleName dynamically from the record's module relation when available.
     // formData.module can be a relation object ({ name: "solid-core", ... }) or a string.
@@ -36,8 +44,8 @@ export const MetadataExplorerFormWidget = ({ field, formData }: SolidFormWidgetP
             scopedArrayPath={arrayPath}
             scopedItemValue={scopedItemValue}
             scopedItemField={itemNameField}
-            readOnly
-            allowSeed={false}
+            readOnly={readOnly}
+            allowSeed={allowSeed}
         />
     );
 };

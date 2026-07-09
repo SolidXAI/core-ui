@@ -440,7 +440,15 @@ export function DashboardPage() {
     { skip: !moduleName || !dashboardName }
   );
 
-  const [getDashboardData, { data: dashboardData, isLoading: dataLoading, error: dataError }] = useGetDashboardDataMutation();
+  const [
+    getDashboardData,
+    {
+      data: dashboardData,
+      isLoading: dataLoading,
+      isUninitialized: dataUninitialized,
+      error: dataError,
+    },
+  ] = useGetDashboardDataMutation();
   const [saveDashboardLayout, { isLoading: saveLayoutLoading }] = useSaveDashboardLayoutMutation();
   const [getVariableOptions] = useLazyGetDashboardVariableOptionsQuery();
 
@@ -530,6 +538,9 @@ export function DashboardPage() {
     return map;
   }, [definitionWidgets]);
 
+  const hasDashboardPayload = dashboardData !== undefined;
+  const showDashboardLoadingState = !dataError && (dataLoading || dataUninitialized || !hasDashboardPayload);
+
   const widgetDataMap = useMemo(() => {
     const map = new Map<string, any>();
     const rows = Array.isArray(dashboardData?.widgets) ? dashboardData.widgets : [];
@@ -608,7 +619,7 @@ export function DashboardPage() {
   }, [appliedVariableValues, defaultFilterValues, variables]);
 
   useEffect(() => {
-    if (!gridRef.current || orderedWidgets.length === 0) return;
+    if (showDashboardLoadingState || !gridRef.current || orderedWidgets.length === 0) return;
 
     if (gridInstanceRef.current) {
       gridInstanceRef.current.destroy(false);
@@ -667,7 +678,7 @@ export function DashboardPage() {
       instance.destroy(false);
       if (gridInstanceRef.current === instance) gridInstanceRef.current = null;
     };
-  }, [activeGridColumns, baseLayoutItems, isCompactLayout, orderedWidgets, renderedLayoutItems]);
+  }, [activeGridColumns, baseLayoutItems, isCompactLayout, orderedWidgets, renderedLayoutItems, showDashboardLoadingState]);
 
   const handleDraftVariableChange = (variableName: string, value: DashboardVariableValue) => {
     setFilterDraftValues((prev) => ({ ...prev, [variableName]: value }));
@@ -996,37 +1007,44 @@ export function DashboardPage() {
 
       {dataError ? <p className={styles.error}>Failed to load dashboard data.</p> : null}
 
-      <div
-        ref={gridRef}
-        className={`grid-stack ${styles.gridStack} ${isCompactLayout ? styles.gridStackCompact : ""}`}
-      >
-        {orderedWidgets.map((widget: any) => {
-          const widgetName = widget?.id ?? widget?.name;
-          const runtime = widgetDataMap.get(widgetName);
-          const slot = renderedWidgetLayoutMap.get(widgetName) ?? widgetLayoutMap.get(widgetName);
+      {showDashboardLoadingState ? (
+        <div className={styles.dashboardLoadingState}>
+          <SolidSpinner size={30} label="Loading records" />
+          <p className={styles.dashboardLoadingCopy}>Please wait while dashboard data is loading...</p>
+        </div>
+      ) : (
+        <div
+          ref={gridRef}
+          className={`grid-stack ${styles.gridStack} ${isCompactLayout ? styles.gridStackCompact : ""}`}
+        >
+          {orderedWidgets.map((widget: any) => {
+            const widgetName = widget?.id ?? widget?.name;
+            const runtime = widgetDataMap.get(widgetName);
+            const slot = renderedWidgetLayoutMap.get(widgetName) ?? widgetLayoutMap.get(widgetName);
 
-          return (
-            <div
-              key={widgetName}
-              className="grid-stack-item"
-              gs-id={widgetName}
-              gs-x={slot?.x ?? 0}
-              gs-y={slot?.y ?? 0}
-              gs-w={slot?.w ?? 4}
-              gs-h={slot?.h ?? 3}
-              gs-min-w={slot?.minW ?? 2}
-              gs-min-h={slot?.minH ?? 2}
-            >
-              <div className={`grid-stack-item-content ${styles.widgetCard}`}>
-                <h3 className={styles.widgetTitle}>{getWidgetTitle(widget, widgetName)}</h3>
-                <div className={styles.widgetBody}>
-                  {runtime ? renderWidgetBody(widget, runtime) : <p className={styles.muted}>No data</p>}
+            return (
+              <div
+                key={widgetName}
+                className="grid-stack-item"
+                gs-id={widgetName}
+                gs-x={slot?.x ?? 0}
+                gs-y={slot?.y ?? 0}
+                gs-w={slot?.w ?? 4}
+                gs-h={slot?.h ?? 3}
+                gs-min-w={slot?.minW ?? 2}
+                gs-min-h={slot?.minH ?? 2}
+              >
+                <div className={`grid-stack-item-content ${styles.widgetCard}`}>
+                  <h3 className={styles.widgetTitle}>{getWidgetTitle(widget, widgetName)}</h3>
+                  <div className={styles.widgetBody}>
+                    {runtime ? renderWidgetBody(widget, runtime) : <p className={styles.muted}>No data</p>}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

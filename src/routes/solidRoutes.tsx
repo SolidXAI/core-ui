@@ -15,6 +15,8 @@ import { CardPage } from "./pages/admin/core/CardPage";
 import { FormPage } from "./pages/admin/core/FormPage";
 import { SettingsPage } from "./pages/admin/core/SettingsPage";
 import { DashboardPage } from "./pages/admin/core/DashboardPage";
+import { DatasourcesPage } from "./pages/admin/core/DatasourcesPage";
+import { DatasourceIntrospectionPage } from "./pages/admin/core/DatasourceIntrospectionPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
@@ -27,6 +29,7 @@ import { InitiateRegisterPage } from "./pages/auth/InitiateRegisterPage";
 import { InitiateGoogleOauthPage } from "./pages/auth/InitiateGoogleOauthPage";
 import { InitiateFacebookOauthPage } from "./pages/auth/InitiateFacebookOauthPage";
 import { InitiateMicrosoftOauthPage } from "./pages/auth/InitiateMicrosoftOauthPage";
+import { InitiateMicrosoftActiveDirectoryOauthPage } from "./pages/auth/InitiateMicrosoftActiveDirectoryOauthPage";
 import { SsoPage } from "./pages/auth/SsoPage";
 import type { SolidRoutesOptions, SolidRouteKey } from "./types";
 import { TreePage } from "./pages/admin/core/TreePage";
@@ -72,6 +75,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/auth/initiate-google-oauth", element: pick("initiateGoogleOauth", <InitiateGoogleOauthPage />), handle: { title: "Google Sign In", manageDocumentMeta: true } },
     { path: "/auth/initiate-facebook-oauth", element: pick("initiateFacebookOauth", <InitiateFacebookOauthPage />), handle: { title: "Facebook Sign In", manageDocumentMeta: true } },
     { path: "/auth/initiate-microsoft-oauth", element: pick("initiateMicrosoftOauth", <InitiateMicrosoftOauthPage />), handle: { title: "Microsoft Sign In", manageDocumentMeta: true } },
+    { path: "/auth/initiate-microsoft-active-directory-oauth", element: pick("initiateMicrosoftActiveDirectoryOauth", <InitiateMicrosoftActiveDirectoryOauthPage />), handle: { title: "Microsoft Active Directory Sign In", manageDocumentMeta: true } },
     { path: "/auth/sso", element: pick("sso", <SsoPage />), handle: { title: "Single Sign-On", manageDocumentMeta: true } },
     ...extraAuthRoutes,
   ];
@@ -86,6 +90,8 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/dashboard/:dashboardName", element: pick("dashboard", <DashboardPage />), handle: { title: "Dashboard", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />), handle: { title: "Form", manageDocumentMeta: true } },
     { path: "/admin/core/settings", element: pick("settings", <SettingsPage />), handle: { title: "Settings", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/datasources", element: <DatasourcesPage />, handle: { title: "Datasources", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/modules/:moduleId/datasource-introspection", element: <DatasourceIntrospectionPage />, handle: { title: "Datasource Introspection", manageDocumentMeta: true } },
     ...extraAdminRoutes,
   ];
 

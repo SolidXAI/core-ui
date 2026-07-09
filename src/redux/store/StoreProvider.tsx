@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { createSolidStore, type SolidStore } from "./createSolidStore";
-import { eventBus, AppEvents } from "../../helpers/eventBus";
+import { backendHealthMonitor } from "../../helpers/backendHealthMonitor";
 import { solidGet } from "../../http/solidHttp";
+import { SolidLoadingState } from "../../components/common/SolidLoadingState";
 
 async function fetchEntities(): Promise<string[]> {
   const response = await solidGet("/model-metadata/public");
@@ -28,12 +29,13 @@ export function StoreProvider({
     fetchEntities()
       .then((entities) => {
         if (!mounted) return;
+        backendHealthMonitor.reportSuccess();
         setStore(createSolidStore({ entities, reducers, middlewares }));
       })
       .catch(() => {
         if (!mounted) return;
-        eventBus.emit(AppEvents.GlobalError, {
-          message: "Unable to reach the server. Please try again later.",
+        backendHealthMonitor.reportFailure({
+          message: "Unable to reach the server. Reconnecting...",
         });
         setStore(createSolidStore({ entities: [], reducers, middlewares }));
       });
@@ -44,7 +46,14 @@ export function StoreProvider({
   }, [reducers, middlewares]);
 
   const content = useMemo(() => {
-    if (!store) return <div>Loading...</div>;
+    if (!store) {
+      return (
+        <SolidLoadingState
+          title="Preparing workspace"
+          description="We are loading the application shell and getting your workspace ready."
+        />
+      );
+    }
     return <Provider store={store}>{children}</Provider>;
   }, [store, children]);
 

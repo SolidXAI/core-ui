@@ -31,6 +31,7 @@ import {
   SolidCodeEditor,
 } from "../../shad-cn-ui";
 import styles from "../form/fields/solidFields.module.css";
+import "./FieldMetaDataForm.css";
 
 
 
@@ -490,11 +491,14 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
 }
 
 function fetchCurrentFields(solidFieldType: any, fieldDefaultMetaData: any) {
+  const fieldTypes = Array.isArray(fieldDefaultMetaData?.data?.fieldTypes)
+    ? fieldDefaultMetaData.data.fieldTypes
+    : [];
 
   if (solidFieldType) {
-    const allowedFields = fieldDefaultMetaData?.data?.fieldTypes.filter((e: any) => e.fieldType === solidFieldType);
+    const allowedFields = fieldTypes.filter((e: any) => e.fieldType === solidFieldType);
     if (allowedFields.length > 0) {
-      return allowedFields[0].fields
+      return allowedFields[0].fields ?? [];
     }
 
   }
@@ -868,7 +872,27 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
   return Yup.object(schema);
 };
 
-const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup, params, setIsRequiredPopUp, showToaster }: any) => {
+const FieldMetaDataForm = ({
+  setIsDirty,
+  modelMetaData,
+  fieldMetaData,
+  setFieldMetaData,
+  allFields,
+  deleteModelFunction,
+  setVisiblePopup,
+  params,
+  setIsRequiredPopUp,
+  showToaster,
+  onDraftSubmit,
+  onClose,
+  availableFieldTypes,
+  forceShowTypeSelector = false,
+  selectorRequireContinue = false,
+  selectorContinueLabel = "Next",
+  selectorInitialFieldType = null,
+  disableIdentityEditingForExisting = true,
+  submitLabel = "Finish",
+}: any) => {
   const booleanOptions = ["false", "true"];
   const booleanSegmentedOptions = booleanOptions.map((value) => ({
     label: capitalize(value),
@@ -898,9 +922,13 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   const [markdownText, setMarkdownText] = useState<string>();
   const [encryptState, setEncryptState] = useState<boolean>(Boolean(fieldMetaData?.encrypt));
 
-  const [showTypeFilter, setShowTypeFilter] = useState(fieldMetaData ? false : true);
+  const [showTypeFilter, setShowTypeFilter] = useState(forceShowTypeSelector || !fieldMetaData);
   const [selectedType, setSelectedType] = useState<{ label: string; value: string } | null>(
-    fieldMetaData?.type ? { label: fieldMetaData.type, value: fieldMetaData.type } : null
+    fieldMetaData?.type
+      ? { label: fieldMetaData.type, value: fieldMetaData.type }
+      : selectorInitialFieldType
+        ? { label: selectorInitialFieldType, value: selectorInitialFieldType }
+        : null
   );
   const selectedTypeValue = selectedType?.value || "";
   const [selectedComputedFieldValueType, setSelectedComputedFieldValueType] = useState(fieldMetaData?.computedFieldValueType && { label: fieldMetaData.computedFieldValueType, value: fieldMetaData.computedFieldValueType });
@@ -939,6 +967,19 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   const showOrmOptions = currentFields.includes("ormType") && Boolean(ormTypeOptions && ormTypeOptions.length);
   const showValidationSection =
     selectedTypeValue !== "relation" && (showRegexFields || showMinFields || showMaxFields || showOrmOptions);
+  const isExistingFieldReadOnly = disableIdentityEditingForExisting && Boolean(fieldMetaData?.id);
+  const fieldTypeLabel = capitalize(String(selectedType?.label ?? selectedTypeValue ?? "field"));
+
+  const closeForm = useCallback(() => {
+    if (typeof onClose === "function") {
+      onClose();
+      return;
+    }
+
+    if (typeof setVisiblePopup === "function") {
+      setVisiblePopup(false);
+    }
+  }, [onClose, setVisiblePopup]);
 
   const searchMediaStorageProvIderId = async (event: any) => {
     try {
@@ -1395,34 +1436,37 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        setFieldMetaData((prevItems: any) => {
-          const newFieldData = { ...values, isSystem: values.isSystem == true ? true : '' }
-          const formtatedFieldPayload = fieldBasedPayloadFormating(newFieldData, currentFields, fieldMetaData);
-          const existingIndex = prevItems.findIndex((item: any) => item.identifier === formtatedFieldPayload.identifier);
-          let updatedItems;
-          if (existingIndex !== -1) {
-            updatedItems = [...prevItems];
-            updatedItems[existingIndex] = formtatedFieldPayload;
-            return updatedItems
-          }
-          else {
-            updatedItems = [...prevItems, formtatedFieldPayload];
-            if (params?.id !== 'new' && formtatedFieldPayload?.required && !formtatedFieldPayload?.defaultValue) {
-              setIsRequiredPopUp(true);
+        const newFieldData = { ...values, isSystem: values.isSystem === true }
+        const formtatedFieldPayload = fieldBasedPayloadFormating(newFieldData, currentFields, fieldMetaData);
+
+        if (typeof onDraftSubmit === "function") {
+          onDraftSubmit(formtatedFieldPayload);
+        } else {
+          setFieldMetaData((prevItems: any) => {
+            const existingIndex = prevItems.findIndex((item: any) => item.identifier === formtatedFieldPayload.identifier);
+            let updatedItems;
+            if (existingIndex !== -1) {
+              updatedItems = [...prevItems];
+              updatedItems[existingIndex] = formtatedFieldPayload;
+              return updatedItems
             }
-            // return [...prevItems, formtatedFieldPayload]
+            else {
+              updatedItems = [...prevItems, formtatedFieldPayload];
+              if (params?.id !== 'new' && formtatedFieldPayload?.required && !formtatedFieldPayload?.defaultValue) {
+                setIsRequiredPopUp(true);
+              }
+            }
+            return updatedItems;
+          });
+          if (values.userKey) {
+            const data = {
+              modelName: values.relationCoModelSingularName,
+              fieldName: values.userKey
+            }
+            updateUserKey(data);
           }
-          return updatedItems;
-        });
-        if (values.userKey) {
-          const data = {
-            modelName: values.relationCoModelSingularName,
-            fieldName: values.userKey
-          }
-          updateUserKey(data);
         }
-        // nextTab()
-        setVisiblePopup(false);
+        closeForm();
 
       } catch (err) {
         console.error(ERROR_MESSAGES.CREATE_MODEL, err);
@@ -1433,6 +1477,10 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
 
   });
+
+  const fieldEditorTitle = fieldMetaData
+    ? `Edit ${formik?.values?.displayName || fieldTypeLabel} Field`
+    : `Add ${fieldTypeLabel} Field`;
 
   const mediaTypeSelectedItems = useMemo(() => {
     if (!Array.isArray(formik.values.mediaTypes)) return [];
@@ -1520,16 +1568,18 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     } else {
       formik.setFieldValue("regexPattern", "");
     }
-    const ormType = fieldDefaultMetaData.data.ormType[modelMetaData?.dataSourceType];
-    const availableOrmTypes = ormType[e];
+    const ormTypeByDataSource = fieldDefaultMetaData?.data?.ormType?.[modelMetaData?.dataSourceType];
+    const availableOrmTypes = ormTypeByDataSource?.[e];
     // setFilteredOrmTypes(availableOrmTypes.ormTypes.map((e: any) => ({
     //   label: e,
     //   value: e,
     // })));
     // setSelectedOrmType({ label: availableOrmTypes.ormTypes[0], value: availableOrmTypes.ormTypes[0] });
-    setOrmTypeOptions(availableOrmTypes.ormTypes)
-    formik.setFieldValue("ormType", availableOrmTypes.ormTypes[0].label);
-    setSelectedOrmType(availableOrmTypes.ormTypes[0].label)
+    const nextOrmTypes = availableOrmTypes?.ormTypes ?? [];
+    const nextOrmTypeLabel = nextOrmTypes[0]?.label ?? null;
+    setOrmTypeOptions(nextOrmTypes);
+    formik.setFieldValue("ormType", nextOrmTypeLabel);
+    setSelectedOrmType(nextOrmTypeLabel);
     setCurrentFields(
       fetchCurrentFields(e, fieldDefaultMetaData)
     );
@@ -1760,7 +1810,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
 
   return (
-    <div>
+    <div className="solid-field-form-shell">
       <div>
         <form
           onSubmit={formik.handleSubmit}
@@ -1770,18 +1820,28 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
           }}
         >
           {showTypeFilter === true ?
-            <FieldSelector
-              handleTypeSelect={handleTypeSelect}
-              modelMetaData={modelMetaData}
-            ></FieldSelector>
+            <div className="solid-field-form-scroll">
+              <FieldSelector
+                handleTypeSelect={handleTypeSelect}
+                modelMetaData={modelMetaData}
+                availableFieldTypes={availableFieldTypes}
+                initialSelectedValue={selectedType?.value ?? selectorInitialFieldType}
+                requireExplicitContinue={selectorRequireContinue}
+                continueLabel={selectorContinueLabel}
+              ></FieldSelector>
+            </div>
             :
-            <div className="p-3" style={{ maxHeight: '80vh', overflowY: 'auto', overflowX: 'hidden' }}>
-              <div className="flex justify-center creat-field-for form-dem">
-                <div className="solid-fluid" style={{ position: 'relative' }}>
-                  {/* <div className="mb-3">
-                    <div className="form-wrapper-title">{fieldMetaData ? `Edit ${capitalize(selectedType.label)} Field` : `Add a new ${capitalize(selectedType.label)} Field`}</div>
-                  </div> */}
-                  <TabView panelContainerClassName="px-0">
+            <div className="solid-field-form-scroll">
+              <div className="flex justify-center creat-field-form form-demo">
+                <div className="solid-fluid solid-field-form-frame">
+                  <div className="solid-field-form-header">
+                    <p className="form-wrapper-title m-0">{fieldEditorTitle}</p>
+                    <p className="solid-field-form-subtitle">
+                      Review the basic info and advanced configuration for this field.
+                    </p>
+                  </div>
+                  <div className="solid-field-form-tabs">
+                    <TabView panelContainerClassName="px-0">
                     <TabPanel
                       header="Basic Info"
                       className={(formik.touched.hasOwnProperty("name") && formik.errors.hasOwnProperty("name")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("displayName")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("ormType")) ? "tab-error-heading" : ""}
@@ -1795,7 +1855,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </label>
                             <SolidInput
                               type="text"
-                              disabled={fieldMetaData?.id}
+                              disabled={isExistingFieldReadOnly}
                               id="displayName"
                               name="displayName"
                               onChange={(e) => {
@@ -1823,7 +1883,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               Name
                             </label>
                             <SolidInput
-                              disabled={fieldMetaData?.id}
+                              disabled={isExistingFieldReadOnly}
                               type="text"
                               id="name"
                               name="name"
@@ -1850,7 +1910,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               onChange={formik.handleChange}
                               value={formik.values.description}
                               rows={5}
-                              cols={30}
                               className={classNames(styles.fieldTextarea, {
                                 "p-invalid": isFormFieldValid(formik, "description"),
                               })}
@@ -1878,7 +1937,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   }
                                 }}
                                 checked={showColumnName}
-                                disabled={fieldMetaData?.id}
+                                disabled={isExistingFieldReadOnly}
                               />
                               <label htmlFor="ingredient1" className="form-field-label">
                                 Set Column Name
@@ -1890,7 +1949,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   Column Name
                                 </label>
                                 <SolidInput
-                                  disabled={fieldMetaData?.id}
+                                  disabled={isExistingFieldReadOnly}
                                   type="text"
                                   id="columnName"
                                   name="columnName"
@@ -2389,7 +2448,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 id="relationCoModelColumnName"
                                 name="relationCoModelColumnName"
                                 onChange={formik.handleChange}
-                                disabled={fieldMetaData?.id}
+                                disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationCoModelColumnName}
                                 className={classNames(styles.fieldInput, {
                                   "p-invalid": isFormFieldValid(
@@ -2458,7 +2517,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   onChange={formik.handleChange}
                                   value={formik.values.relationFieldFixedFilter}
                                   rows={5}
-                                  cols={30}
                                   className={classNames(styles.fieldTextarea, {
                                     "p-invalid": isFormFieldValid(
                                       formik,
@@ -2528,7 +2586,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 id="relationCoModelFieldName"
                                 name="relationCoModelFieldName"
                                 onChange={formik.handleChange}
-                                disabled={fieldMetaData?.id}
+                                disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationCoModelFieldName}
                                 className={classNames(styles.fieldInput, {
                                   "p-invalid": isFormFieldValid(
@@ -2598,7 +2656,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 id="relationJoinTableName"
                                 name="relationJoinTableName"
                                 onChange={formik.handleChange}
-                                disabled={fieldMetaData?.id}
+                                disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationJoinTableName}
                                 className={classNames(styles.fieldInput, {
                                   "p-invalid": isFormFieldValid(
@@ -3050,7 +3108,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                             "min"
                                           ),
                                         })}
-                                        disabled={fieldMetaData?.id}
+                                        disabled={isExistingFieldReadOnly}
                                       />
                                     </div>
                                     {isFormFieldValid(formik, "min") && (
@@ -3088,7 +3146,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                             "max"
                                           ),
                                         })}
-                                        disabled={fieldMetaData?.id}
+                                        disabled={isExistingFieldReadOnly}
                                       />
                                     </div>
 
@@ -3444,14 +3502,11 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         </div>
                       )}
                     </TabPanel>
-                  </TabView>
-                  <div className="mt-4 flex gap-4">
-                    <div>
-                      <SolidButton label="Finish" size="small" onClick={() => showError()} type="submit" />
-                    </div>
-                    <div>
-                      <SolidButton label="Cancel" size="small" severity="secondary" type="reset" onClick={() => setVisiblePopup(false)} outlined />
-                    </div>
+                    </TabView>
+                  </div>
+                  <div className="solid-field-form-actions">
+                    <SolidButton label={submitLabel} size="small" onClick={() => showError()} type="submit" />
+                    <SolidButton label="Cancel" size="small" severity="secondary" type="reset" onClick={closeForm} outlined />
                   </div>
                 </div>
                 {/* <div className="ml-4">

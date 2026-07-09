@@ -5,13 +5,15 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
-import { env } from "../../adapters/env";
 import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { solidGet } from "../../http/solidHttp";
 import { AuthSettingsContext } from "./AuthSettingsContext";
+import { normalizeAssetUrl, toCssBackgroundImage } from "../../helpers/assetUrl";
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 import { SolidToastProvider } from "../common/SolidToastProvider";
+import { SolidSpinner } from "../shad-cn-ui";
+import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
@@ -57,8 +59,14 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         }
     }, [solidSettingsData, pathname]);
 
-    const authChildren =
-        pathname !== "/auth/register" || allowRegistration !== false || isLoadingAuthSettings
+    const authLoadingContent = (
+        <div className="flex items-center justify-center min-h-[240px]" aria-busy="true" aria-live="polite">
+            <SolidSpinner size={32} />
+        </div>
+    );
+    const authChildren = isLoadingAuthSettings
+        ? authLoadingContent
+        : pathname !== "/auth/register" || allowRegistration !== false
             ? children
             : null;
     const handleRegistration = () => {
@@ -66,8 +74,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         setIsRestricted(false);
     }
 
+    const authTheme = layoutContext?.themeMode === "dark" ? "dark" : "light";
+
     const solidSideBanner = () => {
-        const layout = solidSettingsData?.data?.authPagesLayout;
+        const layout = solidSettingsData?.data?.authPagesLayout || "center";
 
         let src = '';
 
@@ -76,30 +86,25 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         } else if (layout === 'right') {
             src = solidSettingsData?.data?.authScreenRightBackgroundImage || SHADCN_PLACEHOLDER_IMAGE;
         } else if (layout === 'center') {
-            src = solidSettingsData?.data?.authScreenCenterBackgroundImage || (AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage;
+            src = solidSettingsData?.data?.authScreenCenterBackgroundImage
+                || (authTheme === "light"
+                    ? ((AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage)
+                    : "");
         }
 
-        // Normalize image path if coming from API
-        const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
-        if (!isBlobOrAbsolute && !src?.startsWith("/")) {
-            src = `${env("API_URL")}/${src}`;
-        }
-
-        return src;
-    };
-
-    const normalizeAssetUrl = (src?: string) => {
-        if (!src) return "";
-        const isBlobOrAbsolute = src.startsWith("blob:") || src.startsWith("http");
-        if (isBlobOrAbsolute || src.startsWith("/")) return src;
-        return `${env("API_URL")}/${src}`;
+        return normalizeAssetUrl(src);
     };
 
     const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
+    const authBackgroundSrc = solidSideBanner();
     const appTitle = solidSettingsData?.data?.appTitle || "";
     const appSubtitle = solidSettingsData?.data?.appSubtitle || "";
     const appDescription = solidSettingsData?.data?.appDescription || "";
     const showAuthContent = solidSettingsData?.data?.showAuthContent === true;
+    const showLegalLinks = solidSettingsData?.data?.showLegalLinks === true;
+    const appTnc = solidSettingsData?.data?.appTnc || "";
+    const appPrivacyPolicy = solidSettingsData?.data?.appPrivacyPolicy || "";
+    const copyright = solidSettingsData?.data?.copyright || "";
 
     const renderBrand = (align: "center" | "start" = "start") => {
       if (!authLogoSrc && !appTitle) return null;
@@ -119,10 +124,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLayout = solidSettingsData?.data?.authPagesLayout || "center";
-    const authTheme = layoutContext?.themeMode === "dark" ? "dark" : "light";
     const isCenter = authLayout === "center";
     const isLeft = authLayout === "left";
     const isRight = authLayout === "right";
+    const shouldRenderFooter = showLegalLinks || Boolean(copyright);
     const authSettingsContextValue = useMemo(
         () => ({
             solidSettingsData,
@@ -132,11 +137,60 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         [solidSettingsData, isLoadingAuthSettings, loadAuthSettings]
     );
 
+    const legalFooter = shouldRenderFooter ? (
+        <div className="solid-auth-legal-footer hidden md:flex">
+            <div className="solid-auth-legal-footer-row">
+                {showLegalLinks ? (
+                    <p className="solid-auth-legal-copy">
+                        <span>Made with</span>
+                        <svg
+                            aria-hidden="true"
+                            className="solid-auth-legal-heart"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z"
+                                fill="#ff0000"
+                            />
+                        </svg>
+                        <span>in Mumbai</span>
+                    </p>
+                ) : null}
+                {(appTnc || appPrivacyPolicy) && (
+                    <div className="solid-auth-legal-links">
+                        {appTnc ? (
+                            <Link className="solid-auth-legal-link" href={appTnc}>
+                                Terms of Service
+                            </Link>
+                        ) : null}
+                        {appPrivacyPolicy ? (
+                            <Link className="solid-auth-legal-link" href={appPrivacyPolicy}>
+                                Privacy Policy
+                            </Link>
+                        ) : null}
+                    </div>
+                )}
+                {copyright ? (
+                    <p className="solid-auth-legal-copy solid-auth-legal-copy--muted">{copyright}</p>
+                ) : null}
+            </div>
+        </div>
+    ) : null;
+
     const formPane = (
         <div className="solid-auth-form-pane solid-login-dark-bg">
             <div className="solid-auth-form-pane-inner">
-                {renderBrand("start")}
-                {authChildren}
+                <div className="solid-auth-form-pane-brand">
+                    {renderBrand("start")}
+                </div>
+                <div className="solid-auth-form-pane-content">
+                    {authChildren}
+                </div>
+                {legalFooter}
             </div>
         </div>
     );
@@ -144,13 +198,13 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const imagePane = (
         <div
             className={`solid-auth-image-pane position-relative ${isLeft ? "solid-left-layout pane-on-right" : "solid-right-layout pane-on-left"}`.trim()}
-            style={{ backgroundImage: `url(${solidSideBanner()})` }}
+            style={{ backgroundImage: toCssBackgroundImage(authBackgroundSrc) }}
         >
             {solidSettingsData?.data?.appLogoPosition === "in_image_view" &&
                 <div className={`solid-logo flex items-center gap-4 ${solidSettingsData?.data?.appLogoPosition}`}>
                     <Image
                         alt="solid logo"
-                        src={solidSettingsData?.data?.appLogo || SolidLogo}
+                        src={normalizeAssetUrl(solidSettingsData?.data?.appLogo) || SolidLogo}
                         className="relative"
                         fill
                     />
@@ -172,8 +226,27 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <AuthSettingsContext.Provider value={authSettingsContextValue}>
-            <div className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`} data-auth-theme={authTheme}>
+            <div
+                className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`}
+                data-auth-theme={authTheme}
+                style={isCenter ? { position: "relative" } : undefined}
+            >
+                {isCenter && authBackgroundSrc ? (
+                    <div
+                        aria-hidden="true"
+                        style={{
+                            position: "absolute",
+                            inset: 0,
+                            zIndex: 0,
+                            backgroundImage: toCssBackgroundImage(authBackgroundSrc),
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "cover",
+                        }}
+                    />
+                ) : null}
                 <SolidToastProvider />
+                <BackendReconnectIndicator variant="floating" />
                 {!isCenter && (
                     <div className="solid-auth-split">
                         {isLeft && formPane}
@@ -181,7 +254,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         {isRight && formPane}
                     </div>
                 )}
-                {isCenter && <div className="solid-center-layout">
+                {isCenter && <div className="solid-center-layout" style={{ position: "relative", zIndex: 1 }}>
                     <div className="solid-auth-center-stack">
                     {renderBrand("center")}
                         {showAuthContent &&
@@ -193,39 +266,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         }
                         {authChildren}
                     </div>
+                    {legalFooter}
                 </div>}
-                {/* {solidSettingsData?.data?.showLegalLinks === true && */}
-                <div className={`absolute hidden md:flex ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'solid-auth-footer flex flex-col sm:flex-row items-center justify-between' : 'solid-auth-footer-2 grid'}`}>
-                    {solidSettingsData?.data?.authPagesLayout !== 'left' &&
-                        <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'w-1/2 px-2 pt-2 flex justify-center' : ''}>
-                            {solidSettingsData?.data?.showLegalLinks === true &&
-                                <p className={`solid-auth-input-label text-sm m-0 ${solidSettingsData?.data?.authPagesLayout}`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
-                            }
-                        </div>
-                    }
-                    <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-6 flex justify-center' : ''}>
-                        {solidSettingsData?.data?.showLegalLinks === true && <div className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-5 solid-auth-subtitle mr-3 ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'left' : ''}`}>
-                            {solidSettingsData?.data?.appTnc !== "" && <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData?.data?.appTnc}>Terms of Service</Link></p>}
-                            {solidSettingsData?.data?.appPrivacyPolicy !== "" && <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData?.data?.appPrivacyPolicy}>Privacy Policy.</Link></p>}
-                        </div>
-                        }
-                        {solidSettingsData?.data?.copyright !== "" &&
-                            <div className="mt-1">
-                                <p className="m-0 text-sm font-normal">{solidSettingsData?.data?.copyright}</p>
-                            </div>
-                        }
-                    </div>
-                    {
-                        solidSettingsData?.data?.authPagesLayout === 'left' &&
-                    <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'w-1/2 lg:w-[41.666667%] xl:w-1/2 px-2 pt-2 flex justify-center' : ''}>
-                            {solidSettingsData?.data?.showLegalLinks === true &&
-                                <p className={`solid-auth-input-label text-sm m-0 right`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
-                            }
-                        </div>
-                    }
-                </div >
-
-            {/* } */}
             <SolidDialog
                 visible={isRestricted}
                 onHide={handleRegistration}

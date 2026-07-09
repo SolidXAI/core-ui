@@ -12,6 +12,8 @@ import {
 } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidInput } from "../../../../shad-cn-ui/SolidInput";
 import { useEffect, useState } from "react";
+import { SolidIcon } from "../../../../shad-cn-ui/SolidIcon";
+import { SolidMaterialSymbol } from "../../../../common/SolidMaterialSymbol";
 
 export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
@@ -31,6 +33,10 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
     //     { label: "Rounded", value: "rounded" },
     //     { label: "Sharp", value: "sharp" }
     // ];
+
+    useEffect(() => {
+        setSelectedIcon(formik.values?.[fieldName] ?? "");
+    }, [formik.values?.[fieldName]]);
 
     const allIcons = solidIcons.flatMap(({ category, icons }) =>
         icons.map((icon) => ({ icon, category }))
@@ -100,9 +106,14 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                         //     outlined
                         // />
                         <div>
-                            <span className={`material-symbols-outlined`} style={{ fontSize: 48, cursor: 'pointer' }} onClick={() => setOpenIconDialog(true)}>
-                                {selectedIcon}
-                            </span>
+                            <SolidMaterialSymbol
+                                className="cursor-pointer"
+                                fallback={<SolidIcon name="si-th-large" size={48} />}
+                                name={selectedIcon}
+                                onClick={() => setOpenIconDialog(true)}
+                                size={48}
+                                style={{ cursor: "pointer" }}
+                            />
                             <p className="mb-0 text-center">
                                 {formatIconLabel(selectedIcon)}
                             </p>
@@ -135,9 +146,9 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                 open={openIconDialog}
                 onOpenChange={setOpenIconDialog}
                 className="solid-icon-dialog p-0"
-                style={{ width: '70vw', height: '70vh', borderRadius: 6 }}
+                style={{ minWidth: '70vw', minHeight: '70vh', borderRadius: 6 }}
                 showHeader={false}
-                breakpoints={{ '1024px': '75vw','991px': '90vw','767px':'94w', '250px': '96vw'}}
+                breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }}
             >
                 <SolidDialogHeader>
                     <SolidDialogTitle>Select Icon</SolidDialogTitle>
@@ -192,9 +203,11 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                 {selectedIcon && (
                                     <>
                                         <div className="flex justify-center">
-                                            <span className={`material-symbols-outlined`} style={{ fontSize: 100 }}>
-                                                {selectedIcon}
-                                            </span>
+                                            <SolidMaterialSymbol
+                                                fallback={<SolidIcon name="si-th-large" size={100} />}
+                                                name={selectedIcon}
+                                                size={100}
+                                            />
                                         </div>
                                         <p className='mt-2 text-center'>{formatIconLabel(selectedIcon)}</p>
                                         {/* <code className="mt-2 d-block">
@@ -224,20 +237,19 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                         filteredIcons.map(({ icon, category }) => (
                                             <div className="w-1/4 px-2 pt-2" key={icon}>
                                                 <div className="w-full flex flex-col items-center justify-center gap-4">
-                                                    <span
-                                                        className={`material-symbols-outlined`}
+                                                    <SolidMaterialSymbol
+                                                        fallback={null}
+                                                        name={icon}
+                                                        onClick={() => handleSelectIcon(icon)}
+                                                        size={32}
                                                         style={{
-                                                            fontSize: 32,
                                                             cursor: "pointer",
                                                             padding: "8px",
                                                             border: selectedIcon === icon ? "2px solid var(--primary-color)" : "2px solid transparent",
                                                             borderRadius: "6px",
                                                         }}
-                                                        onClick={() => handleSelectIcon(icon)}
                                                         title={`${icon} (${category})`}
-                                                    >
-                                                        {icon}
-                                                    </span>
+                                                    />
                                                     <p className='mb-0 mt-1 text-center'>
                                                         {formatIconLabel(icon)}
                                                     </p>
@@ -257,9 +269,11 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                 {selectedIcon && (
                                     <>
                                         <div className="flex justify-center">
-                                            <span className={`material-symbols-outlined`} style={{ fontSize: 100 }}>
-                                                {selectedIcon}
-                                            </span>
+                                            <SolidMaterialSymbol
+                                                fallback={<SolidIcon name="si-th-large" size={100} />}
+                                                name={selectedIcon}
+                                                size={100}
+                                            />
                                         </div>
                                         <p className='mt-2 text-center'>{formatIconLabel(selectedIcon)}</p>
                                         {/* <code className="mt-2 d-block">

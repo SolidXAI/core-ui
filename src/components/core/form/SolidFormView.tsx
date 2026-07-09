@@ -341,7 +341,7 @@ const SolidGroup = ({ children, attrs }: any) => {
 
 const SolidRow = ({ children, attrs }: any) => {
     const className = [
-        "row",
+        "flex-row w-full",
         "solid-form-layout-row",
         "px-2",
         "pt-2",
@@ -868,10 +868,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
             setDefaultTabViewOptionIndex(0)
-            const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes');
-            //this is to attach default locale when adding data in popup view where relations exists
-            if (!selectedLocale && matchedLocale && !searchParams.get('locale')) {
-                setSelectedLocale(matchedLocale.locale);
+            const applicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
+            const currentRecordLocale = applicableLocales.find((x: any) => String(x.entityId) === String(params.id));
+            const defaultLocale = applicableLocales.find((x: any) => x.isDefault === 'yes');
+            //this is to attach the current record locale when available, otherwise fall back to the default locale for create/new flows
+            if (!selectedLocale && !searchParams.get('locale')) {
+                setSelectedLocale(currentRecordLocale?.locale || defaultLocale?.locale || null);
             }
         }
 
@@ -1756,6 +1758,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 setDefaultTabViewOptionIndex(2);
             }
         };
+        const showChatterInfo = Boolean(
+            solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow
+            || solidFormViewMetaData?.data?.solidView?.model?.internationalisation
+        );
 
         //en 4 null
         const handleLocaleChangeRedirect = async (
@@ -1767,7 +1773,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const defaultApplicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
             let matchingLocale = defaultApplicableLocales.find(
                 (loc: any) =>
-                    loc.defaultEntityLocaleId &&
                     loc.entityId &&
                     loc.locale === locale
             );
@@ -1790,7 +1795,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const freshApplicableLocales = freshResponse?.data?.applicableLocales || [];
                     matchingLocale = freshApplicableLocales.find(
                         (loc: any) =>
-                            loc.defaultEntityLocaleId &&
                             loc.entityId &&
                             loc.locale === locale
                     );
@@ -1928,7 +1932,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         </div>
 
                     </form>
-                    <SolidFormFooter params={params}></SolidFormFooter>
+                    <SolidFormFooter
+                        params={params}
+                        internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
+                    ></SolidFormFooter>
                 </div>
                 {params.embeded !== true &&
                     <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : 'open'}`} style={{ width: chatterLocaleWidth }}>
@@ -1958,8 +1965,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         }
                         {isShowChatter === false ?
                             <div className="flex flex-col gap-2 justify-center p-1">
-                                {/*if solidview Internationalisation is enabled then show the locale tab */}
-                                {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
+                                {/*Show the info tab when workflow info or internationalisation is enabled. */}
+                                {showChatterInfo &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
                                         Info
                                     </div>}

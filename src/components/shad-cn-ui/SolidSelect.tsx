@@ -14,6 +14,7 @@ type SolidSelectProps = {
   onChange?: (event: { value: any }) => void;
   id?: string;
   native?: boolean;
+  menuPlacement?: "auto" | "top" | "bottom";
 };
 
 function cx(...parts: Array<string | false | undefined>) {
@@ -31,6 +32,7 @@ export function SolidSelect({
   onChange,
   id,
   native = true,
+  menuPlacement = "auto",
 }: SolidSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [openUpward, setOpenUpward] = React.useState(false);
@@ -75,6 +77,16 @@ export function SolidSelect({
   React.useLayoutEffect(() => {
     if (!open || native || !rootRef.current || !menuRef.current) return;
 
+    if (menuPlacement === "top") {
+      setOpenUpward(true);
+      return;
+    }
+
+    if (menuPlacement === "bottom") {
+      setOpenUpward(false);
+      return;
+    }
+
     const rootRect = rootRef.current.getBoundingClientRect();
     const menuHeight = menuRef.current.offsetHeight;
     const viewportHeight = window.innerHeight;
@@ -83,7 +95,7 @@ export function SolidSelect({
     const needsOpenUpward = spaceBelow < menuHeight + 8 && spaceAbove > spaceBelow;
 
     setOpenUpward(needsOpenUpward);
-  }, [open, native, options.length]);
+  }, [open, native, options.length, menuPlacement]);
 
   if (!native) {
     return (

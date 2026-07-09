@@ -118,6 +118,7 @@ export function SolidTabGroup({
             aria-labelledby={`solid-tab-${tab.value}`}
             hidden={!isActive}
             className={cx("solid-notebook-content", "solid-tabs-panel", panelClassName)}
+            style={!isActive ? { display: "none" } : undefined}
           >
             {isActive ? tab.content : null}
           </div>

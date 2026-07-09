@@ -271,7 +271,6 @@ const CreateModel = ({ data, params }: any) => {
         setModelMetaData={setModelMetaData}
         allModelsNames={allModelsNames}
         deleteModelFunction={deleteModelFunction}
-        nextTab={nextTab}
         formikModelMetadataRef={formikModelMetadataRef}
         params={params}
         formErrors={formErrors}

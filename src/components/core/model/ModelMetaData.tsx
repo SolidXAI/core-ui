@@ -30,7 +30,7 @@ const cx = (...parts: Array<string | false | null | undefined | Record<string, b
   return classes.join(" ");
 };
 
-const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params, formErrors, setIsDirty }: any, ref) => {
+const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, formikModelMetadataRef, params, formErrors, setIsDirty }: any, ref) => {
 
   // const ModelMetaData = ({ modelMetaData, setModelMetaData, deleteModelFunction, nextTab, formikModelMetadataRef }: any) => {   
 
@@ -185,7 +185,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           tableName: values?.tableName || tableName,
           moduleId: values.moduleId,
           module: values.module,
-          isSystem: values.isSystem ? values.isSystem === true : '',
+          isSystem: values.isSystem === true,
           enableSoftDelete: values.enableSoftDelete === true ? true : '',
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
           internationalisation: values.internationalisation === true ? true : '',
@@ -200,8 +200,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
            
         };
         setModelMetaData(modelData);
-        nextTab()
-
       } catch (err) {
         console.error(ERROR_MESSAGES.CREATE_MODEL, err);
       }

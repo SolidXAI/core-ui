@@ -15,7 +15,7 @@ type SignInResponse = {
 type SignInWithOAuthAccessCodeOptions = {
   accessCode: string;
   userAgent?: string;
-  provider?: "google" | "facebook" | "microsoft";
+  provider?: "google" | "facebook" | "microsoft" | "microsoft-active-directory";
 };
 
 export async function signInWithOAuthAccessCode(options: SignInWithOAuthAccessCodeOptions): Promise<SignInResponse> {

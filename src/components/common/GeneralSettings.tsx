@@ -16,8 +16,8 @@ import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveBu
 import { ModelConfigTab, ProvidersTab, ModelBehavior, ModelEntry, SolidAiConfig, ensureBuiltInProviders } from './SolidSettings/LlmSettings/AiModelConfigTab';
 import { useDispatch, useSelector } from 'react-redux';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
+import { normalizeAssetUrl } from '../../helpers/assetUrl';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
-import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 
 export const GeneralSettings = () => {
@@ -47,6 +47,7 @@ export const GeneralSettings = () => {
         activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
         iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
         iamMicrosoftOAuthEnabled: solidSettingsData?.data?.iamMicrosoftOAuthEnabled ?? false,
+        iamMicrosoftActiveDirectoryOAuthEnabled: solidSettingsData?.data?.iamMicrosoftActiveDirectoryOAuthEnabled ?? false,
         iamFacebookOAuthEnabled: solidSettingsData?.data?.iamFacebookOAuthEnabled ?? false,
         iamAppleOAuthEnabled: solidSettingsData?.data?.iamAppleOAuthEnabled ?? false,
         // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
@@ -477,16 +478,9 @@ export const GeneralSettings = () => {
                                     ? formik.values.appLogo
                                     : logoSrc;
 
-                                const isBlobOrAbsolute =
-                                  src?.startsWith("blob:") ||
-                                  src?.startsWith("http");
-
-                                if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                  src = `${env("API_URL")}/${src}`;
-                                }
                                 return (
                                   <SolidUploadedImage
-                                    src={src}
+                                    src={normalizeAssetUrl(src)}
                                     className="solid-app-logo"
                                   />
                                 );
@@ -525,17 +519,9 @@ export const GeneralSettings = () => {
                                     ? formik.values.companylogo
                                     : logoSrc;
 
-                                const isBlobOrAbsolute =
-                                  src?.startsWith("blob:") ||
-                                  src?.startsWith("http");
-
-                                if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                  src = `${env("API_URL")}/${src}`;
-                                }
-
                                 return (
                                   <SolidUploadedImage
-                                    src={src}
+                                    src={normalizeAssetUrl(src)}
                                     className="solid-compony-logo"
                                   />
                                 );
@@ -893,6 +879,27 @@ export const GeneralSettings = () => {
                           <div className="flex flex-wrap items-center -mx-2 -mt-2">
                             <div className="w-[83.333333%] sm:w-[75%] lg:w-[41.666667%] px-2 pt-2">
                               <label className="form-field-label">
+                                Allow Login/ Signup with Microsoft Active Directory{" "}
+                              </label>
+                            </div>
+                            <div className="col-2 sm:col-3 lg:col-7">
+                              <SolidSwitch
+                                name="iamMicrosoftActiveDirectoryOAuthEnabled"
+                                checked={formik.values.iamMicrosoftActiveDirectoryOAuthEnabled}
+                                onChange={(checked) =>
+                                  formik.setFieldValue(
+                                    "iamMicrosoftActiveDirectoryOAuthEnabled",
+                                    checked,
+                                  )
+                                }
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-12 mt-3">
+                          <div className="formgrid grid align-items-center">
+                            <div className="col-10 sm:col-9 lg:col-5">
+                              <label className="form-field-label">
                                 Allow Login/ Signup with Facebook{" "}
                               </label>
                             </div>
@@ -1094,19 +1101,9 @@ export const GeneralSettings = () => {
                                           .authScreenLeftBackgroundImage
                                       : logoSrc;
 
-                                  const isBlobOrAbsolute =
-                                    src?.startsWith("blob:") ||
-                                    src?.startsWith("http");
-
-                                  if (
-                                    !isBlobOrAbsolute &&
-                                    !src.startsWith("/")
-                                  ) {
-                                    src = `${env("API_URL")}/${src}`;
-                                  }
                                   return (
                                     <SolidUploadedImage
-                                      src={src}
+                                      src={normalizeAssetUrl(src)}
                                       height={400}
                                       width={400}
                                       maxHeight={400}
@@ -1154,19 +1151,9 @@ export const GeneralSettings = () => {
                                             .authScreenRightBackgroundImage
                                         : logoSrc;
 
-                                  const isBlobOrAbsolute =
-                                    src?.startsWith("blob:") ||
-                                    src?.startsWith("http");
-
-                                  if (
-                                    !isBlobOrAbsolute &&
-                                    !src.startsWith("/")
-                                  ) {
-                                    src = `${env("API_URL")}/${src}`;
-                                  }
                                   return (
                                     <SolidUploadedImage
-                                      src={src}
+                                      src={normalizeAssetUrl(src)}
                                       height={400}
                                       width={400}
                                       maxHeight={400}
@@ -1212,23 +1199,21 @@ export const GeneralSettings = () => {
                                             .authScreenCenterBackgroundImage
                                         : logoSrc;
 
-                                  const isBlobOrAbsolute =
-                                    src?.startsWith("blob:") ||
-                                    src?.startsWith("http");
-
-                                                                    if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${env("API_URL")}/${src}`;
-                                                                    }
-                                                                    return (
-                                                                        <SolidUploadedImage src={src} height={300} width={600} maxHeight={300} />
-                                                                    );
-                                                                })()}
-                                                            </div>
-                                                            {formik.values.authScreenCenterBackgroundImage && (
-                                                                <SettingsImageRemoveButton onClick={removeAuthScreenCenterBackgroundImage} />
-                                                            )}
-                                                        </div>
-                                                    )}
+                                  return (
+                                    <SolidUploadedImage
+                                      src={normalizeAssetUrl(src)}
+                                      height={300}
+                                      width={600}
+                                      maxHeight={300}
+                                    />
+                                  );
+                                })()}
+                              </div>
+                              {formik.values.authScreenCenterBackgroundImage && (
+                                <SettingsImageRemoveButton onClick={removeAuthScreenCenterBackgroundImage} />
+                              )}
+                            </div>
+                          )}
                                                 </div>
                                             </div>
                                         </div>

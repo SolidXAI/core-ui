@@ -1,5 +1,5 @@
 
-
+import { toTitleCase } from "../../helpers/helpers";
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
@@ -15,13 +15,6 @@ interface Props {
   solidFormViewMetaData?: any;
   initialEntityData?: any;
 }
-
-const toTitleCase = (str: string) => {
-  return str
-    .replace(/[-_]/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-};
 
 const truncateText = (text: string, maxLength: number = 15) => {
   if (text.length <= maxLength) return text;
@@ -58,12 +51,12 @@ export const SolidBreadcrumb = (props: Props) => {
     }
   }, [pathname, userKeyFieldValue, queryUserKeyField, isNewForm, router]);
 
-  const [fromView, setFromView] = useState<"list" | "kanban" | "card" | null>(null);
+  const [fromView, setFromView] = useState<"list" | "kanban" | "card" | "tree" | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedView = sessionStorage.getItem("fromView");
-      if (storedView === "list" || storedView === "kanban" || storedView === "card") {
+      if (storedView === "list" || storedView === "kanban" || storedView === "card" || storedView === "tree") {
         setFromView(storedView);
       }
     }

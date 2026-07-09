@@ -19,6 +19,7 @@ import * as Handlebars from "handlebars";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import { getVirtualScrollerOptions } from "../../../../../helpers/autoCompleteVirtualScroll";
+import { getRelatedRecordDisplayText } from "../../../../../helpers/relationDisplay";
 import { buildSyntheticChangeEvent } from "../fieldEventUtils";
 import styles from "../solidFields.module.css";
 
@@ -46,9 +47,11 @@ export class SolidRelationManyToOneField implements ISolidField {
 
         const manyToOneFieldData = this.fieldContext?.data[this.fieldContext?.field?.attrs?.name];
         const fieldMetadata = this.fieldContext?.fieldMetadata;
-        const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
-        const manyToOneColVal = manyToOneFieldData ? manyToOneFieldData[userKeyField] : '';
-        if (manyToOneColVal) {
+        const userKeyField =
+            this.fieldContext?.field?.attrs?.coModelFieldToDisplay ||
+            fieldMetadata?.relationModel?.userKeyField?.name;
+        const manyToOneColVal = getRelatedRecordDisplayText(manyToOneFieldData, userKeyField);
+        if (manyToOneFieldData) {
             return { solidManyToOneLabel: manyToOneColVal || '', solidManyToOneValue: manyToOneFieldData?.id || '', ...manyToOneFieldData };
         }
         const fieldName = this.fieldContext?.field?.attrs?.name;
@@ -65,6 +68,9 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         if (value?.solidManyToOneValue) {
             formData.append(`${fieldLayoutInfo.attrs.name}Id`, value.solidManyToOneValue);
+        } else {
+            // Explicitly tell backend the field is cleared
+            formData.append(`${fieldLayoutInfo.attrs.name}Id`, '');
         }
     }
 
@@ -74,7 +80,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         let schema = Yup.mixed();
-        // Custom validation for relation field
+
         if (fieldMetadata.required) {
             schema = schema.test(
                 ERROR_MESSAGES.REQUIRED_REALTION,
@@ -84,6 +90,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                     if (!value) return false;
 
                     // If it's an object with solidManyToOneValue, check if it's valid
+                    if (typeof value === 'object' && Object.keys(value).length === 0) return false;
                     if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
                         return true;
                     }
@@ -104,7 +111,7 @@ export class SolidRelationManyToOneField implements ISolidField {
             ERROR_MESSAGES.SELECT_VALID_FROM_DROPDOWN(fieldLabel),
             function (value: any) {
                 // If not required and empty, it's valid
-                if (!fieldMetadata.required && (!value || value === '')) {
+                if (!value || value === '' || (typeof value === 'object' && Object.keys(value).length === 0)) {
                     return true;
                 }
 
@@ -119,7 +126,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                 }
 
                 // Empty value for non-required field
-                return !fieldMetadata.required;
+                return true;
             }
         );
 
@@ -207,6 +214,9 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     const [currentQuery, setCurrentQuery] = useState("");
     const LIMIT = 50;
     const [loading, setLoading] = useState(false);
+    const userKeyField =
+        fieldLayoutInfo?.attrs?.coModelFieldToDisplay ||
+        fieldMetadata?.relationModel?.userKeyField?.name;
 
     useEffect(() => {
         const formviewparams: FormViewParams = {
@@ -304,7 +314,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                 if (autocompleteData) {
                     const autoCompleteItems = autocompleteData.records.map((item: any) => {
                         return {
-                            solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
+                            solidManyToOneLabel: getRelatedRecordDisplayText(item, userKeyField),
                             solidManyToOneValue: item['id'],
                             ...item,
                         }
@@ -394,7 +404,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                 const records = response.data?.records || [];
                 if (records.length < LIMIT) setHasMore(false);
                 setAutoCompleteItems(prev => [...prev, ...records.map((item: any) => ({
-                    solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
+                    solidManyToOneLabel: getRelatedRecordDisplayText(item, userKeyField),
                     solidManyToOneValue: item.id,
                     ...item
                 }))]);
@@ -413,7 +423,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         const updatedRelationData = [
             ...currentRelationData,
             {
-                solidManyToOneLabel: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
+                solidManyToOneLabel: getRelatedRecordDisplayText(jsonValues as Record<string, unknown>, userKeyField),
                 solidManyToOneValue: "new",
                 original: jsonValues,
             },
@@ -445,12 +455,14 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
-                        onChange={({ value }: { value: any }) =>
+                        onChange={({ value }: { value: any }) => {
+                            // When user clears the field, set to empty object so validation catches it
+                            const newValue = (value === '' || value === null || value === undefined) ? {} : value;
                             fieldContext.onChange(
-                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),
+                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, newValue, "text"),
                                 'onFieldChange'
                             )
-                        }
+                        }}
                         onSelect={({ value }: { value: any }) =>
                             fieldContext.onChange(
                                 buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),
@@ -556,7 +568,7 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const value = formik.values[fieldLayoutInfo.attrs.name];
     const userKeyField = fieldLayoutInfo?.attrs?.coModelFieldToDisplay ? fieldLayoutInfo?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
-    const displayValue = value?.[userKeyField];
+    const displayValue = getRelatedRecordDisplayText(value, userKeyField);
     return (
         <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
@@ -990,12 +1002,13 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
-                        onChange={({ value }: { value: any }) =>
+                        onChange={({ value }: { value: any }) => {
+                            const newValue = (value === '' || value === null || value === undefined) ? {} : value;
                             fieldContext.onChange(
-                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),
+                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, newValue, "text"),
                                 'onFieldChange'
                             )
-                        }
+                        }}
                         onSelect={({ value }: { value: any }) =>
                             fieldContext.onChange(
                                 buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),

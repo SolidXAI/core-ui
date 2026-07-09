@@ -291,7 +291,7 @@ const CreateModule = ({ params, data }: any) => {
   };
 
   const generalInfoContent = (
-    <div className={`solid-module-general-info-content ${!isCreateMode ? "is-tabbed" : ""}`}>
+    <div className={`solid-module-general-info-content px-3 pt-3 md:px-4 ${!isCreateMode ? "is-tabbed" : ""}`}>
       {!isCreateMode && shouldShowGeneralSave && formik.dirty && (
         <div className="solid-module-general-info-actions">
           <SolidButton
@@ -306,7 +306,7 @@ const CreateModule = ({ params, data }: any) => {
       )}
       <form
         id="module-general-info-form"
-        style={{ width: '100%', background: "#fff" }}
+        style={{ width: '100%' }}
         onSubmit={formik.handleSubmit}
       >
         <div className="solid-form-content">
@@ -396,32 +396,8 @@ const CreateModule = ({ params, data }: any) => {
                 </div>
               </div>
             </div>
-          </SolidPanel>
-          <SolidPanel header={"Configurations"} className="solid-column-panel mt-4">
-            <div className="mt-3 flex flex-wrap -mx-2 -mt-2">
-              <div className="field w-full px-2 pt-2 pb-3 lg:w-1/2 lg:pb-0">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="defaultDataSource" className={`${styles.fieldLabel} form-field-label`}>
-                    Default Data Source
-                  </label>
-                  <div className="solid-standard-autocomplete w-full">
-                    <SolidAutocomplete
-                      disabled={!!data}
-                      value={defaultDataSourceField.selectedItem}
-                      suggestions={defaultDataSourceField.filteredItems}
-                      completeMethod={defaultDataSourceField.searchItems}
-                      onChange={defaultDataSourceField.handleChange}
-                      dropdown
-                      field="label"
-                      className="w-full"
-                    />
-                  </div>
-                  {isFormFieldValid(formik, "defaultDataSource") && (
-                    <p className={styles.fieldError}>{formik?.errors?.defaultDataSource?.toString()}</p>
-                  )}
-                </div>
-              </div>
-              <div className="field w-full px-2 pt-2 lg:w-1/2">
+            <div className="mt-4 flex flex-wrap -mx-2 -mt-2">
+              <div className="field w-full px-2 pt-2">
                 <div className={`${styles.fieldWrapper} relative`}>
                   <label htmlFor="menuIconUrl" className={`${styles.fieldLabel} form-field-label`}>
                     Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
@@ -443,7 +419,8 @@ const CreateModule = ({ params, data }: any) => {
                             <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
                             <button
                               type="button"
-                              className="solid-file-icon-btn is-danger"
+                              className="solid-file-icon-btn is-danger solid-module-upload-remove"
+                              aria-label="Remove uploaded menu icon"
                               onClick={handleCancelUpload}
                             >
                               <SolidIcon name="si-times" aria-hidden />
@@ -484,6 +461,61 @@ const CreateModule = ({ params, data }: any) => {
                   )}
                 </div>
               </div>
+            </div>
+          </SolidPanel>
+          <SolidPanel header={"Datasource Configuration"} className="solid-column-panel mt-4">
+            <div className="mt-3 flex flex-wrap -mx-2 -mt-2">
+              <div className="field w-full px-2 pt-2">
+                <div className={styles.fieldWrapper}>
+                  <label htmlFor="defaultDataSource" className={`${styles.fieldLabel} form-field-label`}>
+                    Default Data Source
+                  </label>
+                  <div className="solid-standard-autocomplete w-full">
+                    <SolidAutocomplete
+                      disabled={!!data}
+                      value={defaultDataSourceField.selectedItem}
+                      suggestions={defaultDataSourceField.filteredItems}
+                      completeMethod={defaultDataSourceField.searchItems}
+                      onChange={defaultDataSourceField.handleChange}
+                      dropdown
+                      portal
+                      field="label"
+                      className="w-full"
+                    />
+                  </div>
+                  {isFormFieldValid(formik, "defaultDataSource") && (
+                    <p className={styles.fieldError}>{formik?.errors?.defaultDataSource?.toString()}</p>
+                  )}
+                </div>
+              </div>
+              {!isCreateMode ? (
+                <div className="field w-full px-2 pt-4">
+                  <div className="solid-module-automap-panel">
+                    <div className="solid-module-automap-copy">
+                      <div className="solid-module-automap-eyebrow">Legacy Table Mapping</div>
+                      <h4>Auto map datasource tables into this module</h4>
+                      <p>
+                        Open the datasource introspection workspace to inspect legacy tables, preview field mappings,
+                        review metadata JSON changes, and generate the supporting migration template for SolidX system fields.
+                      </p>
+                      <ul className="solid-module-automap-list">
+                        <li>Review tables available on the selected datasource.</li>
+                        <li>Control which legacy columns are included in each mapping session.</li>
+                        <li>Preview the metadata JSON and migration output before saving.</li>
+                      </ul>
+                    </div>
+                    <div className="solid-module-automap-actions">
+                      <SolidButton
+                        type="button"
+                        size="sm"
+                        onClick={() => router.push(`/admin/core/solid-core/modules/${data?.id}/datasource-introspection`)}
+                      >
+                        Auto Map Tables
+                      </SolidButton>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </SolidPanel>
         </div>

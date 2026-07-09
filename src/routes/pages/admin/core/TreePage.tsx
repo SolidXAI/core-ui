@@ -1,13 +1,17 @@
 import { camelCase } from "lodash";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import type { SolidTreeViewHandle } from "../../../../components/core/tree/SolidTreeView";
 import { registerTree, unregisterTree } from "../../../../components/core/tree/treeViewRegistry";
 import { SolidTreeView } from "../../../../components/core/tree/SolidTreeView";
+import { storeCurrentModelViewContext } from "../../../../helpers/modelViewPersistence";
+import { usePathname } from "../../../../hooks/usePathname";
 
 export function TreePage() {
   const params = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const pathname = usePathname();
+  const search = searchParams.toString();
 
   const moduleName = params.moduleName || "";
   const modelName = params.modelName ? camelCase(params.modelName) : "";
@@ -25,6 +29,11 @@ export function TreePage() {
     }
     unregisterTree(treeId);
   }, [treeId]);
+
+  useEffect(() => {
+    const currentUrl = search ? `${pathname}?${search}` : pathname;
+    storeCurrentModelViewContext(currentUrl);
+  }, [pathname, search]);
 
   return <SolidTreeView ref={setTreeRef} key={moduleName + modelName + menuItemId + menuItemName + actionId + actionName} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }

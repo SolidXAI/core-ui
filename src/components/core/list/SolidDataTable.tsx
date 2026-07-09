@@ -180,16 +180,17 @@ export function SolidDataTable({
       : size === "large"
         ? "solid-table-density-comfortable"
         : "solid-table-density-cozy";
+  const isAutoHeight = viewportHeight === "auto";
 
   return (
     <div
-      className={cx("solid-data-table-root w-full min-h-0", densityClass)}
+      className={cx("solid-data-table-root w-full min-h-0", densityClass, isAutoHeight && "solid-data-table-root-auto")}
       style={{
         height: viewportHeight || "100%",
         maxHeight: viewportHeight || "100%",
       }}
     >
-      <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
+      <div className={cx("solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background", isAutoHeight && "solid-data-table-viewport-auto")}>
         <table className={cx("w-full text-sm border-collapse", tableClassName)}>
           <thead className="solid-data-table-head">
             <tr>
@@ -284,7 +285,7 @@ export function SolidDataTable({
                         <td
                           key={`cell-${key}-${index}`}
                           className={cx(
-                            "solid-data-table-td align-top text-foreground",
+                            "solid-data-table-td align-middle text-foreground",
                             props.frozen ? "solid-tree-sticky-cell" : undefined,
                             props.frozen && props.alignFrozen === "right" ? "solid-tree-sticky-cell-right" : undefined,
                             props.frozen && props.alignFrozen !== "right" ? "solid-tree-sticky-cell-left" : undefined,
@@ -317,6 +318,7 @@ export function SolidDataTable({
               className="solid-paginator-select"
               options={rowsPerPageOptions.map((option) => ({ label: String(option), value: option }))}
               native={false}
+              menuPlacement="top"
             />
             <span className="solid-paginator-report">{report}</span>
           </div>

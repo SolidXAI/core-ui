@@ -932,6 +932,7 @@ export function ModuleMetadataExplorer({
         header="Context"
         contentClassName="solid-module-explorer-context-dialog"
       >
+        <SolidDialogSeparator />
         <SolidDialogBody>
           <div className="solid-module-explorer-context-dialog-body">
             <div className="solid-module-explorer-context-dialog-header">

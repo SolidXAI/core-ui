@@ -10,7 +10,7 @@ const noopReload = async () => {};
 
 export const AuthSettingsContext = createContext<AuthSettingsContextValue>({
   solidSettingsData: null,
-  isLoadingAuthSettings: false,
+  isLoadingAuthSettings: true,
   reloadAuthSettings: noopReload,
 });
 

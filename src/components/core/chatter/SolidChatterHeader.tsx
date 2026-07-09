@@ -45,6 +45,7 @@ export const SolidChatterHeader = (props: Props) => {
     });
     const [hasActiveFilters, setHasActiveFilters] = useState(false);
     const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [selectedUser, setSelectedUser] = useState<any | null>(null);
     const [getUsers] = useLazyGetusersQuery();
 
     useEffect(() => {
@@ -53,6 +54,7 @@ export const SolidChatterHeader = (props: Props) => {
     }, [filters]);
 
     const handleFilterClick = () => {
+        setSelectedUser(filters.name ? { fullName: filters.name } : null);
         setShowFilterDialog(true);
     };
 
@@ -69,6 +71,8 @@ export const SolidChatterHeader = (props: Props) => {
             startDate: null,
             endDate: null
         };
+        setSelectedUser(null);
+        setSuggestions([]);
         setFilters(clearedFilters);
         if (onFilterChange) {
             onFilterChange(clearedFilters);
@@ -89,9 +93,16 @@ export const SolidChatterHeader = (props: Props) => {
     };
 
     const searchUsers = async (event: { query: string }) => {
-        updateNameFilter(event.query || '');
+        const query = event.query || '';
+        setSelectedUser((prev: any | null) => {
+            if (!prev) {
+                return prev;
+            }
+            return prev.fullName === query ? prev : null;
+        });
+        updateNameFilter(query);
         try {
-            const response = await getUsers(`filters[fullName][$containsi]=${event.query}`).unwrap();
+            const response = await getUsers(`filters[fullName][$containsi]=${query}`).unwrap();
             setSuggestions(response?.data?.records || []);
         } catch (error) {
             console.error(ERROR_MESSAGES.FETCHING_USER, error);
@@ -101,13 +112,16 @@ export const SolidChatterHeader = (props: Props) => {
 
     const handleUserChange = (value: any) => {
         if (!value) {
+            setSelectedUser(null);
             updateNameFilter('');
             return;
         }
         if (typeof value === 'object') {
+            setSelectedUser(value);
             updateNameFilter(value.fullName || '');
             return;
         }
+        setSelectedUser(null);
         updateNameFilter(value);
     };
 
@@ -200,7 +214,7 @@ export const SolidChatterHeader = (props: Props) => {
                             <label htmlFor="fullName" className="form-field-label">User</label>
                             <SolidAutocomplete
                                 id="fullName"
-                                value={filters.name}
+                                value={selectedUser}
                                 suggestions={suggestions}
                                 field="fullName"
                                 completeMethod={searchUsers}

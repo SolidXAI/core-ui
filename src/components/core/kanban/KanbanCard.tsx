@@ -3,6 +3,7 @@ import React from "react";
 import { useRouter } from "../../../hooks/useRouter";
 import { DraggableProvided } from "@hello-pangea/dnd";
 import { CompatibleDraggable } from "../common/dndCompat";
+import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import {
   SolidDropdownMenu,
   SolidDropdownMenuContent,
@@ -31,30 +32,26 @@ interface KanbanCardProps {
   cardNode?: any;
   DynamicCardWidget?: any;
   onDelete?: (record: Data) => void;
+  onRecover?: (record: Data) => void;
+  showArchived?: boolean;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget, onDelete }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived }) => {
   const router = useRouter()
+  const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
 
   const persistReturnView = () => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    try {
-      sessionStorage.setItem("fromView", "kanban");
-      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-    } catch (error) {
-      // Ignore storage errors and continue navigation.
-    }
+    storeCurrentModelViewContext();
   };
 
   const openRecord = () => {
+    if (isArchivedRecord) return;
     persistReturnView();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 
   const openEdit = () => {
+    if (isArchivedRecord) return;
     persistReturnView();
     router.push(`${editButtonUrl}/${data?.id}`);
   };
@@ -73,14 +70,25 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             </button>
           </SolidDropdownMenuTrigger>
           <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
-            <SolidDropdownMenuItem
-              className="solid-header-dropdown-item"
-              onSelect={openEdit}
-            >
-              <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
-              <span className="solid-header-action-button-label">Edit</span>
-            </SolidDropdownMenuItem>
-            {onDelete ? (
+            {!isArchivedRecord ? (
+              <SolidDropdownMenuItem
+                className="solid-header-dropdown-item"
+                onSelect={openEdit}
+              >
+                <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
+                <span className="solid-header-action-button-label">Edit</span>
+              </SolidDropdownMenuItem>
+            ) : null}
+            {showArchived && data?.deletedAt !== null && data?.deletedAt !== undefined && onRecover ? (
+              <SolidDropdownMenuItem
+                className="solid-header-dropdown-item"
+                onSelect={() => onRecover(data)}
+              >
+                <SolidIcon name="si-refresh" className="solid-header-action-button-icon" aria-hidden />
+                <span className="solid-header-action-button-label">Recover</span>
+              </SolidDropdownMenuItem>
+            ) : null}
+            {onDelete && (data?.deletedAt === null || data?.deletedAt === undefined) ? (
               <SolidDropdownMenuItem
                 className="solid-header-dropdown-item solid-header-dropdown-item-danger"
                 onSelect={() => onDelete(data)}
@@ -110,12 +118,12 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           {/* <p className="kanban-card-content">{data.content}</p> */}
           <div
             style={{
-              opacity: snapshot.isDragging ? 0.9 : 1,
+              opacity: snapshot.isDragging ? 0.9 : (isArchivedRecord ? 0.55 : 1),
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
-              cursor: isDragDisabled ? "pointer" : "grab"
+              cursor: isArchivedRecord ? "default" : (isDragDisabled ? "pointer" : "grab")
             }}
             elevation={snapshot.isDragging ? 3 : 1}
-            className="solid-kanban-card"
+            className={`solid-kanban-card${isArchivedRecord ? " greyed-out-row" : ""}`}
             onClick={openRecord}
           >
             {renderKanbanAction(data)}

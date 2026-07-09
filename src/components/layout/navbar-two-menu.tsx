@@ -1,6 +1,8 @@
 import Link from "../common/Link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "../../hooks/useSearchParams";
+import { resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
+import { SolidMenuItemIcon } from "./SolidMenuItemIcon";
 
 const NavbarTwoMenu = ({ menuItems }: any) => {
     const searchParams = useSearchParams();
@@ -20,12 +22,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
             <div key={item?.key} className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "p-highlight" : ""}`} onClick={options.onClick} >
                 <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-between font-normal">
                     <div className="flex items-center" style={{ gap: 10 }}>
-                        {item.icon && (
-                            // material-symbols-${item.iconVariant ?? 'outlined'}
-                            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                                {item.icon}
-                            </span>
-                        )}
+                        <SolidMenuItemIcon item={item.source ?? item} />
                         <span>
                             {item.label}
                         </span>
@@ -40,15 +37,16 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
 
     const createMenuItems = (menuItems: any[]): any[] =>
         menuItems.map((mi) => {
-            const menuItemId = new URLSearchParams(mi.path?.split("?")[1]).get("menuItemId");
+            const resolvedPath = mi.path ? resolveRetainedModelViewRoute(mi.path) : null;
+            const menuItemId = new URLSearchParams(resolvedPath?.split("?")[1]).get("menuItemId");
             return {
                 key: mi.key,
                 id: menuItemId,   // ← extracted from path
                 label: mi.title,
-                icon: mi.icon ?? "",
+                source: mi,
                 // iconVariant: mi.iconVariant,
                 template: itemRenderer,
-                url: mi.path ?? null,
+                url: resolvedPath,
                 items: mi.children ? createMenuItems(mi.children) : null,
             };
         })
@@ -89,11 +87,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
                             <div className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "p-highlight" : ""}`}>
                                 <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-between font-normal">
                                     <div className="flex items-center" style={{ gap: 10 }}>
-                                        {item.icon && (
-                                            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
-                                                {item.icon}
-                                            </span>
-                                        )}
+                                        <SolidMenuItemIcon item={item.source ?? item} />
                                         <span>{item.label}</span>
                                     </div>
                                 </Link>

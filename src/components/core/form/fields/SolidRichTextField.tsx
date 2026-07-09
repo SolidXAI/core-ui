@@ -1,5 +1,6 @@
 
 import React from "react";
+import DOMPurify from "dompurify";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import { SolidRichTextEditor } from "../../../shad-cn-ui/SolidRichTextEditor";
 import * as Yup from 'yup';
@@ -9,6 +10,68 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
+
+const normalizeQuillRichTextHtml = (html: string): string => {
+    if (!html || typeof document === "undefined") {
+        return html ?? "";
+    }
+
+    const template = document.createElement("template");
+    template.innerHTML = html;
+
+    const orderedLists = Array.from(template.content.querySelectorAll("ol")).reverse();
+
+    orderedLists.forEach((orderedList) => {
+        const listItems = Array.from(orderedList.children).filter(
+            (child): child is HTMLLIElement => child instanceof HTMLLIElement,
+        );
+
+        if (listItems.length === 0) {
+            return;
+        }
+
+        const hasBulletItems = listItems.some((item) => item.getAttribute("data-list") === "bullet");
+        if (!hasBulletItems) {
+            listItems.forEach((item) => item.removeAttribute("data-list"));
+            return;
+        }
+
+        const replacementFragment = document.createDocumentFragment();
+        let currentList: HTMLOListElement | HTMLUListElement | null = null;
+        let currentListType: "ordered" | "bullet" | null = null;
+
+        const appendCurrentList = () => {
+            if (currentList) {
+                replacementFragment.appendChild(currentList);
+                currentList = null;
+                currentListType = null;
+            }
+        };
+
+        Array.from(orderedList.childNodes).forEach((node) => {
+            if (!(node instanceof HTMLLIElement)) {
+                appendCurrentList();
+                replacementFragment.appendChild(node);
+                return;
+            }
+
+            const listType = node.getAttribute("data-list") === "bullet" ? "bullet" : "ordered";
+            if (!currentList || currentListType !== listType) {
+                appendCurrentList();
+                currentList = document.createElement(listType === "bullet" ? "ul" : "ol");
+                currentListType = listType;
+            }
+
+            node.removeAttribute("data-list");
+            currentList.appendChild(node);
+        });
+
+        appendCurrentList();
+        orderedList.replaceWith(replacementFragment);
+    });
+
+    return template.innerHTML;
+};
 
 export class SolidRichTextField implements ISolidField {
 
@@ -21,7 +84,7 @@ export class SolidRichTextField implements ISolidField {
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
         if (value !== undefined && value !== null) {
-            formData.append(fieldLayoutInfo.attrs.name, value);
+            formData.append(fieldLayoutInfo.attrs.name, normalizeQuillRichTextHtml(value));
         }
     }
 
@@ -127,6 +190,7 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const fieldName = fieldLayoutInfo.attrs.name;
 
 
     return (
@@ -140,13 +204,13 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
             }
             <SolidRichTextEditor
                 readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
-                id={fieldLayoutInfo.attrs.name}
-                value={formik.values[fieldLayoutInfo.attrs.name] || ""}
+                id={fieldName}
+                value={formik.values[fieldName] || ""}
                 onChange={(value) => {
                     fieldContext.onChange(
                         {
                             target: {
-                                name: fieldLayoutInfo.attrs.name,
+                                name: fieldName,
                                 value: value ?? "",
                                 type: "text",
                             },
@@ -157,8 +221,8 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 className="solid-custom-editor"
                 style={{ minHeight: 180 }}
             />
-            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+            {isFormFieldValid(formik, fieldName) && (
+                <p className={styles.fieldError}>{formik?.errors[fieldName]?.toString()}</p>
             )}
         </div>
     );
@@ -177,7 +241,7 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
             <div
                 className="solid-custom-editor solid-custom-editor-view"
                 id={fieldLabel}
-                dangerouslySetInnerHTML={{ __html: formik.values[fieldLayoutInfo.attrs.name] || "" }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(normalizeQuillRichTextHtml(formik.values[fieldLayoutInfo.attrs.name] || "")) }}
             />
         </div>
     );

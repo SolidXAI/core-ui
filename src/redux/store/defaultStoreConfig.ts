@@ -25,6 +25,8 @@ import { solidViewsApi } from "../api/solidViewApi";
 import { userApi } from "../api/userApi";
 import { apiKeyApi } from "../api/apiKeyApi";
 import { dashboardRuntimeApi } from "../api/dashboardRuntimeApi";
+import { datasourceManagementApi } from "../api/datasourceManagementApi";
+import { datasourceIntrospectionApi } from "../api/datasourceIntrospectionApi";
 
 // 1. Export all APIs in one array
 export const solidApiSlices = [
@@ -47,6 +49,8 @@ export const solidApiSlices = [
     aiInteractionApi,
     apiKeyApi,
     dashboardRuntimeApi,
+    datasourceManagementApi,
+    datasourceIntrospectionApi,
 ];
 
 // 2. Export default reducers
