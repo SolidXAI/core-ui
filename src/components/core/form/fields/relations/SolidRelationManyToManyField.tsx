@@ -150,7 +150,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
             filters: {
                 $and: [
                     {
-                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                        [fieldLayoutInfo?.attrs?.coModelFieldToDisplay || fieldMetadata?.relationModel?.userKeyField?.name]: {
                             [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: event.query,
                         },
                     },
@@ -492,7 +492,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
             filters: {
                 $and: [
                     {
-                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                        [fieldLayoutInfo?.attrs?.coModelFieldToDisplay || fieldMetadata?.relationModel?.userKeyField?.name]: {
                             [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: event.query,
                         },
                     },

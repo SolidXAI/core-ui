@@ -241,7 +241,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             filters: {
                 $and: [
                     {
-                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                        [userKeyField]: {
                             [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: event.query
                         }
                     }
@@ -342,7 +342,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             filters: {
                 $and: [
                     {
-                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                        [userKeyField]: {
                             [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: currentQuery
                         }
                     }
