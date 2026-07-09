@@ -1,8 +1,7 @@
 import styles from './chatter.module.css'
-import { useCreateChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
+import { usePostChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
 import { useEffect, useState, useRef } from 'react'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
-import { useSession } from '../../../hooks/useSession'
 import { SolidButton, SolidTextarea } from '../../shad-cn-ui'
 import { FileText, Paperclip, X } from 'lucide-react'
 
@@ -19,18 +18,10 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-    const { data: session, status } = useSession();
-    const user = session?.user;
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // const { data: viewLayoutData } = useGetSolidViewLayoutQuery(null);
-    const [createChatterMessage, { isLoading, isSuccess, isError }] = useCreateChatterMessageMutation();
-
-    const tempEmails = [
-        "johndoe@gmal.com",
-        "tempmail@gmail.com",
-        "example@mail.com"
-    ]
+    const [postChatterMessage, { isLoading, isSuccess }] = usePostChatterMessageMutation();
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -45,19 +36,17 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
 
         try {
             const formData = new FormData();
-            formData.append('messageType', "custom");
             formData.append('messageSubType', "note");
             formData.append('messageBody', message);
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);
-            formData.append('userId', user?.id || 1);
 
             if (modelUserKey) formData.append('modelUserKey', modelUserKey);
-            selectedFiles.forEach((file, index) => {
+            selectedFiles.forEach((file) => {
                 formData.append(`messageAttachments`, file);
             });
 
-            await createChatterMessage(formData).unwrap();
+            await postChatterMessage(formData).unwrap();
             setMessage('');
             setSelectedFiles([]);
             onCancel?.();
