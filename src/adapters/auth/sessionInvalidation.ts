@@ -15,7 +15,7 @@ export async function handleSessionInvalidation() {
 
   isHandlingSessionInvalidation = true;
   try {
-    await signOut({ callbackUrl: "/auth/login", forceRedirect: true });
+    await signOut({ callbackUrl: "/auth/login" });
   } finally {
     isHandlingSessionInvalidation = false;
   }
