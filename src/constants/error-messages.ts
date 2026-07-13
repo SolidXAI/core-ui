@@ -256,3 +256,5 @@ export const ERROR_MESSAGES = {
 
 
 };
+
+export const SESSION_INVALID_ERROR_CODE = 'solidx-session-invalid';

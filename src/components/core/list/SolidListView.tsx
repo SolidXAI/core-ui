@@ -4,6 +4,7 @@ import qs from "qs";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn, isFieldSortable } from "./SolidListViewColumn";
+import { SolidCustomListViewColumn } from "./SolidCustomListViewColumn";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -369,6 +370,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const currentLayout = params.customLayout ? params.customLayout : solidView?.layout;
     for (let i = 0; i < currentLayout?.children.length; i++) {
       const column = currentLayout?.children[i];
+      if (column?.type === "custom") {
+        continue;
+      }
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
         showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
@@ -1142,6 +1146,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const currentLayout = solidListViewLayout;
 
     return currentLayout.children?.map((column: any) => {
+      if (column?.type === "custom") {
+        return SolidCustomListViewColumn({
+          solidListViewMetaData,
+          column,
+          embeded: params.embeded
+        });
+      }
+
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
       if (!fieldMetadata) {
         return;
