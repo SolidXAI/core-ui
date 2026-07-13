@@ -21,12 +21,24 @@ import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
+import { getAbsoluteMediaUrl, resolveMediaPreviewUrl } from "../../../../helpers/mediaUrl";
 import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { getPersistedMediaId } from "./mediaFieldUtils";
+
+type SingleMediaFileDetail = {
+    name: string;
+    type: string;
+    fileUrl: string;
+    fileSize: number;
+    originalUrl?: string;
+};
+
+const getMediaExtension = (fileUrl: string, fileName?: string) =>
+    (fileName || fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase();
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -170,7 +182,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     const isFieldReadonly = formReadonly || fieldReadonly || readOnlyPermission;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
-    const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
+    const [fileDetails, setFileDetails] = useState<SingleMediaFileDetail | null>(null);
     const [isReplaceImageDialogVisible, setReplaceImageDialogVisible] = useState(false);
     const [newFileToUpload, setNewFileToUpload] = useState<any>(null);
     const [fileSizeError, setFileSizeError] = useState<string | null>(null);
@@ -272,34 +284,71 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
+        let active = true;
+        const revokeFns: Array<() => void> = [];
 
-        if (fieldValue && typeof fieldValue === "object") {
-            let fileUrl = "";
-            let fileName = "Unknown File";
-            let fileSize = 0;
+        const resolveFileDetails = async () => {
+            if (fieldValue && typeof fieldValue === "object") {
+                let fileUrl = "";
+                let fileName = "Unknown File";
+                let fileSize = 0;
+                let originalUrl = "";
 
-            if (fieldValue instanceof File) {
-                fileUrl = URL.createObjectURL(fieldValue);
-                fileName = fieldValue.name;
-                fileSize = fieldValue.size;
-            } else if (fieldValue._full_url) {
-                fileUrl = fieldValue._full_url;
-                fileName = fieldValue.originalFileName;
-                fileSize = fieldValue.fileSize;
+                if (fieldValue instanceof File) {
+                    fileUrl = URL.createObjectURL(fieldValue);
+                    revokeFns.push(() => URL.revokeObjectURL(fileUrl));
+                    originalUrl = fileUrl;
+                    fileName = fieldValue.name;
+                    fileSize = fieldValue.size;
+                } else if (fieldValue._full_url) {
+                    const resolved = await resolveMediaPreviewUrl(fieldValue._full_url);
+                    if (resolved.revoke) {
+                        revokeFns.push(resolved.revoke);
+                    }
+                    fileUrl = resolved.url;
+                    originalUrl = getAbsoluteMediaUrl(fieldValue._full_url);
+                    fileName = fieldValue.originalFileName;
+                    fileSize = fieldValue.fileSize;
+                }
+
+                if (!active) {
+                    revokeFns.forEach((fn) => fn());
+                    return;
+                }
+
+                setFileDetails({
+                    name: fileName,
+                    type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
+                    fileUrl,
+                    fileSize,
+                    originalUrl,
+                });
+
+                formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+                return;
             }
 
-            setFileDetails({
-                name: fileName,
-                type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
-                fileUrl,
-                fileSize
-            });
-
-            // Ensure formik has the correct value
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
-        } else {
             setFileDetails(null);
-        }
+        };
+
+        resolveFileDetails().catch(() => {
+            if (!active) return;
+            if (fieldValue && typeof fieldValue === "object" && fieldValue._full_url) {
+                setFileDetails({
+                    name: fieldValue.originalFileName,
+                    type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
+                    fileUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                    fileSize: fieldValue.fileSize,
+                    originalUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                });
+                return;
+            }
+            setFileDetails(null);
+        });
+        return () => {
+            active = false;
+            revokeFns.forEach((fn) => fn());
+        };
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const {
@@ -340,18 +389,10 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         ];
 
         const fileUrl = url?.fileUrl || "";
-        const cleanUrl = fileUrl.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+        const ext = getMediaExtension(fileUrl, url?.name);
 
         if (ext && downloadOnlyExt.includes(ext)) {
-            const link = document.createElement('a');
-            link.href = url.fileUrl;
-            link.download = ''; // or specify a file name like 'file.pdf'
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
+            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
         } else {
             setLightboxUrls?.([
                 { src: url.fileUrl, downloadUrl: url.fileUrl },
@@ -412,7 +453,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                             className="solid-file-icon-btn"
                                             disabled={isFieldDisabled || isFieldReadonly}
                                             aria-label="Download file"
-                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                            onClick={() => downloadMediaFile(fileDetails?.originalUrl || fileDetails?.fileUrl, fileDetails?.name)}
                                         >
                                             <SolidIcon name="si-download" aria-hidden />
                                         </button>
@@ -484,7 +525,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 }
 
 export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaFormFieldWidgetProps) => {
-    const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
+    const [fileDetails, setFileDetails] = useState<SingleMediaFileDetail | null>(null);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
@@ -502,31 +543,69 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
 
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
+        let active = true;
+        const revokeFns: Array<() => void> = [];
 
-        if (fieldValue && typeof fieldValue === "object") {
-            let fileUrl = "";
-            let fileName = "Unknown File";
-            let fileSize = 0;
+        const resolveFileDetails = async () => {
+            if (fieldValue && typeof fieldValue === "object") {
+                let fileUrl = "";
+                let fileName = "Unknown File";
+                let fileSize = 0;
+                let originalUrl = "";
 
-            if (fieldValue instanceof File) {
-                fileUrl = URL.createObjectURL(fieldValue);
-                fileName = fieldValue.name;
-                fileSize = fieldValue.size;
-            } else if (fieldValue._full_url) {
-                fileUrl = fieldValue._full_url;
-                fileName = fieldValue.originalFileName;
-                fileSize = fieldValue.fileSize;
+                if (fieldValue instanceof File) {
+                    fileUrl = URL.createObjectURL(fieldValue);
+                    revokeFns.push(() => URL.revokeObjectURL(fileUrl));
+                    originalUrl = fileUrl;
+                    fileName = fieldValue.name;
+                    fileSize = fieldValue.size;
+                } else if (fieldValue._full_url) {
+                    const resolved = await resolveMediaPreviewUrl(fieldValue._full_url);
+                    if (resolved.revoke) {
+                        revokeFns.push(resolved.revoke);
+                    }
+                    fileUrl = resolved.url;
+                    originalUrl = getAbsoluteMediaUrl(fieldValue._full_url);
+                    fileName = fieldValue.originalFileName;
+                    fileSize = fieldValue.fileSize;
+                }
+
+                if (!active) {
+                    revokeFns.forEach((fn) => fn());
+                    return;
+                }
+
+                setFileDetails({
+                    name: fileName,
+                    type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
+                    fileUrl,
+                    fileSize,
+                    originalUrl,
+                });
+                return;
             }
 
-            setFileDetails({
-                name: fileName,
-                type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
-                fileUrl,
-                fileSize
-            });
-            // Ensure formik has the correct value
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
-        }
+            setFileDetails(null);
+        };
+
+        resolveFileDetails().catch(() => {
+            if (!active) return;
+            if (fieldValue && typeof fieldValue === "object" && fieldValue._full_url) {
+                setFileDetails({
+                    name: fieldValue.originalFileName,
+                    type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
+                    fileUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                    fileSize: fieldValue.fileSize,
+                    originalUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                });
+                return;
+            }
+            setFileDetails(null);
+        });
+        return () => {
+            active = false;
+            revokeFns.forEach((fn) => fn());
+        };
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleFileView = (url: any) => {
@@ -538,18 +617,10 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
         ];
 
         const fileUrl = url?.fileUrl || "";
-        const cleanUrl = fileUrl.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+        const ext = getMediaExtension(fileUrl, url?.name);
 
         if (ext && downloadOnlyExt.includes(ext)) {
-            const link = document.createElement('a');
-            link.href = url.fileUrl;
-            link.download = ''; // or specify a file name like 'file.pdf'
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
+            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
         } else {
             setLightboxUrls?.([
                 { src: url.fileUrl, downloadUrl: url.fileUrl },
@@ -585,7 +656,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                         type="button"
                                         className="solid-file-icon-btn"
                                         aria-label="Download file"
-                                        onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                        onClick={() => downloadMediaFile(fileDetails?.originalUrl || fileDetails?.fileUrl, fileDetails?.name)}
                                     >
                                         <SolidIcon name="si-download" aria-hidden />
                                     </button>

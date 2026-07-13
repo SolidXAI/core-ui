@@ -22,12 +22,17 @@ import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
+import { getAbsoluteMediaUrl, resolveMediaPreviewUrl } from "../../../../helpers/mediaUrl";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { buildMediaFieldKey, getPersistedMediaId } from "./mediaFieldUtils";
+
+const getMediaExtension = (fileUrl: string, fileName?: string) =>
+    (fileName || fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase();
+
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -159,7 +164,7 @@ export class SolidMediaMultipleField implements ISolidField {
 
 
 export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaFormFieldWidgetProps) => {
-    type MediaFileDetail = { name: string; type: string; size: number; mediaId: number | string | null; fileKey: string; fileUrl: string };
+    type MediaFileDetail = { name: string; type: string; size: number; mediaId: number | string | null; fileKey: string; fileUrl: string; originalUrl?: string };
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -190,41 +195,87 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     const [deleteMedia] = useDeleteMediaMutation();
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
-        const objectUrls: string[] = [];
+        let active = true;
+        const revokeFns: Array<() => void> = [];
 
-        if (Array.isArray(fieldValue) && fieldValue.length > 0) {
-            const details: MediaFileDetail[] = [];
-            fieldValue.forEach((file: File | any) => {
-                if (file instanceof File) {
-                    const fileUrl = URL.createObjectURL(file);
-                    objectUrls.push(fileUrl);
+        const resolveFileDetails = async () => {
+            if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+                const details = await Promise.all(
+                    fieldValue.map(async (file: File | any): Promise<MediaFileDetail | null> => {
+                        if (file instanceof File) {
+                            const fileUrl = URL.createObjectURL(file);
+                            revokeFns.push(() => URL.revokeObjectURL(fileUrl));
+                            return {
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                mediaId: null,
+                                fileKey: buildMediaFieldKey(file),
+                                fileUrl,
+                                originalUrl: fileUrl,
+                            };
+                        }
 
-                    details.push({
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        mediaId: null,
-                        fileKey: buildMediaFieldKey(file),
-                        fileUrl: fileUrl
-                    });
-                } else if (typeof file === "object" && file._full_url) {
-                    details.push({
-                        name: file.originalFileName,
-                        type: file.mimeType,
-                        size: file.fileSize,
-                        mediaId: getPersistedMediaId(file),
-                        fileKey: buildMediaFieldKey(file),
-                        fileUrl: file._full_url
-                    });
+                        if (typeof file === "object" && file._full_url) {
+                            const resolved = await resolveMediaPreviewUrl(file._full_url);
+                            if (resolved.revoke) {
+                                revokeFns.push(resolved.revoke);
+                            }
+                            return {
+                                name: file.originalFileName,
+                                type: file.mimeType,
+                                size: file.fileSize,
+                                mediaId: getPersistedMediaId(file),
+                                fileKey: buildMediaFieldKey(file),
+                                fileUrl: resolved.url,
+                                originalUrl: getAbsoluteMediaUrl(file._full_url),
+                            };
+                        }
+
+                        return null;
+                    })
+                );
+
+                if (!active) {
+                    revokeFns.forEach((fn) => fn());
+                    return;
                 }
-            });
-            setFileDetails(details);
-        } else {
+
+                setFileDetails(details.filter((detail): detail is MediaFileDetail => detail !== null));
+                return;
+            }
+
             setFileDetails([]);
-        }
+        };
+
+        resolveFileDetails().catch(() => {
+            if (!active) return;
+            if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+                const details = fieldValue
+                    .map((file: File | any): MediaFileDetail | null => {
+                        if (typeof file === "object" && file._full_url) {
+                            return {
+                                name: file.originalFileName,
+                                type: file.mimeType,
+                                size: file.fileSize,
+                                mediaId: getPersistedMediaId(file),
+                                fileKey: buildMediaFieldKey(file),
+                                fileUrl: getAbsoluteMediaUrl(file._full_url),
+                                originalUrl: getAbsoluteMediaUrl(file._full_url),
+                            };
+                        }
+                        return null;
+                    })
+                    .filter((detail): detail is MediaFileDetail => detail !== null);
+                setFileDetails(details);
+                return;
+            }
+            setFileDetails([]);
+        });
 
         return () => {
-            objectUrls.forEach((url) => URL.revokeObjectURL(url));
+            active = false;
+            revokeFns.forEach((fn) => fn());
         };
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
@@ -340,18 +391,10 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
         ];
 
         const fileUrl = url?.fileUrl || "";
-        const cleanUrl = fileUrl.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+        const ext = getMediaExtension(fileUrl, url?.name);
 
         if (ext && downloadOnlyExt.includes(ext)) {
-            const link = document.createElement('a');
-            link.href = url.fileUrl;
-            link.download = ''; // or specify a file name like 'file.pdf'
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
+            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
         } else {
             setLightboxUrls?.([
                 { src: url.fileUrl, downloadUrl: url.fileUrl },
@@ -406,7 +449,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                             className="solid-file-icon-btn"
                                             disabled={isFieldDisabled || isFieldReadonly}
                                             aria-label="Download file"
-                                            onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
+                                            onClick={() => downloadMediaFile(fileDetails[0]?.originalUrl || fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
                                         >
                                             <SolidIcon name="si-download" aria-hidden />
                                         </button>
@@ -468,7 +511,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                     className="solid-file-icon-btn"
                                                     disabled={isFieldDisabled || isFieldReadonly}
                                                     aria-label="Download file"
-                                                    onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                                    onClick={() => downloadMediaFile(file?.originalUrl || file?.fileUrl, file?.name)}
                                                 >
                                                     <SolidIcon name="si-download" aria-hidden />
                                                 </button>
@@ -521,7 +564,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
 }
 
 export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaFormFieldWidgetProps) => {
-    const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number, fileUrl: string }[]>([]);
+    const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number; id: number | string; fileUrl: string; originalUrl?: string }[]>([]);
     const [isShowAllFiles, setShowAllFiles] = useState(false);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -539,38 +582,79 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
 
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
+        let active = true;
+        const revokeFns: Array<() => void> = [];
 
-        if (Array.isArray(fieldValue) && fieldValue.length > 0) {
-            const urls: string[] = [];
-            const details: { name: string; type: string; size: number, id: any, fileUrl: string }[] = [];
-            const objectUrls: string[] = [];
-            fieldValue.forEach((file: File | any) => {
-                if (file instanceof File) {
-                    // New file (from local upload)
-                    const fileUrl = URL.createObjectURL(file);
-                    objectUrls.push(fileUrl); // Store URL for cleanup
-                    urls.push(fileUrl);
+        const resolveFileDetails = async () => {
+            if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+                const details = await Promise.all(
+                    fieldValue.map(async (file: File | any) => {
+                        if (file instanceof File) {
+                            const fileUrl = URL.createObjectURL(file);
+                            revokeFns.push(() => URL.revokeObjectURL(fileUrl));
+                            return {
+                                name: file.name,
+                                type: file.type,
+                                size: file.size,
+                                id: `${file.name}-${file.size}`,
+                                fileUrl,
+                                originalUrl: fileUrl,
+                            };
+                        }
 
-                    details.push({
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        id: `${file.name}-${file.size}`,
-                        fileUrl: fileUrl // ✅ Store the generated object URL
-                    });
-                } else if (typeof file === "object" && file._full_url) {
-                    urls.push(file._full_url);
-                    details.push({
+                        if (typeof file === "object" && file._full_url) {
+                            const resolved = await resolveMediaPreviewUrl(file._full_url);
+                            if (resolved.revoke) {
+                                revokeFns.push(resolved.revoke);
+                            }
+                            return {
+                                name: file.originalFileName,
+                                type: file.mimeType,
+                                size: file.fileSize,
+                                id: file.id,
+                                fileUrl: resolved.url,
+                                originalUrl: getAbsoluteMediaUrl(file._full_url),
+                            };
+                        }
+
+                        return null;
+                    })
+                );
+
+                if (!active) {
+                    revokeFns.forEach((fn) => fn());
+                    return;
+                }
+
+                setFileDetails(details.filter(Boolean) as { name: string; type: string; size: number; id: number | string; fileUrl: string; originalUrl?: string }[]);
+                return;
+            }
+
+            setFileDetails([]);
+        };
+
+        resolveFileDetails().catch(() => {
+            if (!active) return;
+            if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+                setFileDetails(fieldValue
+                    .filter((file: File | any) => typeof file === "object" && file._full_url)
+                    .map((file: File | any) => ({
                         name: file.originalFileName,
                         type: file.mimeType,
                         size: file.fileSize,
                         id: file.id,
-                        fileUrl: file._full_url
-                    });
-                }
-            });
-            setFileDetails(details);
-        }
+                        fileUrl: getAbsoluteMediaUrl(file._full_url),
+                        originalUrl: getAbsoluteMediaUrl(file._full_url),
+                    })));
+                return;
+            }
+            setFileDetails([]);
+        });
+
+        return () => {
+            active = false;
+            revokeFns.forEach((fn) => fn());
+        };
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleFileView = (url: any) => {
@@ -582,18 +666,10 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
         ];
 
         const fileUrl = url?.fileUrl || "";
-        const cleanUrl = fileUrl.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+        const ext = getMediaExtension(fileUrl, url?.name);
 
         if (ext && downloadOnlyExt.includes(ext)) {
-            const link = document.createElement('a');
-            link.href = url.fileUrl;
-            link.download = ''; // or specify a file name like 'file.pdf'
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
+            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
         } else {
             setLightboxUrls?.([
                 { src: url.fileUrl, downloadUrl: url.fileUrl },
@@ -602,7 +678,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
         }
     }
 
-    const renderMediaFileCard = (file: { name: string; type: string; size: number; id: number; fileUrl: string }, className = "") => (
+    const renderMediaFileCard = (file: { name: string; type: string; size: number; id: number | string; fileUrl: string; originalUrl?: string }, className = "") => (
         <div className={`${styles.mediaAttachmentCard} ${className}`.trim()}>
             <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
                 <FileReaderExt fileDetails={file} />
@@ -621,7 +697,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                 type="button"
                                 className="solid-file-icon-btn"
                                 aria-label="Download file"
-                                onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                onClick={() => downloadMediaFile(file?.originalUrl || file?.fileUrl, file?.name)}
                             >
                                 <SolidIcon name="si-download" aria-hidden />
                             </button>
