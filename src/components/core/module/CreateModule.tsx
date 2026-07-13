@@ -311,7 +311,7 @@ const CreateModule = ({ params, data }: any) => {
       >
         <div className="solid-form-content">
           <SolidPanel header={"Basic Info"} className="solid-column-panel">
-            <div className="mt-3 flex flex-wrap -mx-2 -mt-2">
+            <div className="mt-3 flex flex-wrap -mx-2 ">
               <div className="field w-full px-2 pt-2 pb-3 lg:w-1/2 lg:pb-0">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="displayName" className={`${styles.fieldLabel} form-field-label`}>

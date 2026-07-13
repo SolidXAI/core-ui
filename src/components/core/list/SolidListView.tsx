@@ -42,6 +42,11 @@ import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
+  getFilterObjectFromLocalStorage,
+  hasStoredFilterPredicates,
+  setFilterObjectToLocalStorage,
+} from "../common/globalSearchPersistence";
+import {
   SolidButton,
   SolidConfirmDialog,
   SolidDialog,
@@ -58,101 +63,6 @@ import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const hasMeaningfulPersistedFilterValue = (value: any): boolean => {
-  if (value === null || value === undefined) return false;
-  if (typeof value === "string") return value.trim().length > 0;
-  if (typeof value === "number" || typeof value === "boolean") return true;
-  if (Array.isArray(value)) return value.some((item) => hasMeaningfulPersistedFilterValue(item));
-  if (typeof value === "object") return hasMeaningfulPersistedFilter(value);
-  return false;
-};
-
-export const hasMeaningfulPersistedFilter = (filterObject: any): boolean => {
-  if (!filterObject || typeof filterObject !== "object") return false;
-
-  if (Array.isArray(filterObject)) {
-    return filterObject.some((item) => hasMeaningfulPersistedFilter(item) || hasMeaningfulPersistedFilterValue(item));
-  }
-
-  return Object.entries(filterObject).some(([key, val]) => {
-    if (key === "matchMode" || key === "operator") return false;
-    if (key === "value") return hasMeaningfulPersistedFilterValue(val);
-    if ((key === "$and" || key === "$or") && Array.isArray(val)) {
-      return val.some((item) => hasMeaningfulPersistedFilter(item) || hasMeaningfulPersistedFilterValue(item));
-    }
-    if (typeof val === "object") return hasMeaningfulPersistedFilter(val);
-    return hasMeaningfulPersistedFilterValue(val);
-  });
-};
-
-export const hasStoredFilterPredicates = (queryObject: any): boolean =>
-  hasMeaningfulPersistedFilter(queryObject?.custom_filter_predicate) ||
-  hasMeaningfulPersistedFilter(queryObject?.search_predicate) ||
-  hasMeaningfulPersistedFilter(queryObject?.saved_filter_predicate) ||
-  hasMeaningfulPersistedFilter(queryObject?.predefined_search_predicate);
-
-export const getFilterObjectFromLocalStorage = () => {
-  const currentPageUrl = window.location.pathname; // Get the current page URL
-  const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
-
-  if (encodedQueryString) {
-    try {
-      const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
-      const parsedParams = JSON.parse(decodedQueryString); // Parse the decoded string into an object
-      return parsedParams;
-    } catch (error) {
-      console.error(
-        ERROR_MESSAGES.ERROR_DECODING,
-        error
-      );
-    }
-  }
-};
-
-
-export const getFilterObjectFromLocalStorageByUrl = (url: string) => {
-  const currentPageUrl = url; // Get the current page URL
-  const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
-
-  if (encodedQueryString) {
-    try {
-      const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
-      const parsedParams = JSON.parse(decodedQueryString); // Parse the decoded string into an object
-      return parsedParams;
-    } catch (error) {
-      console.error(
-        ERROR_MESSAGES.ERROR_DECODING,
-        error
-      );
-    }
-  }
-};
-
-export const setFilterObjectToLocalStorage = (queryObject: any) => {
-  if (queryObject) {
-    const stringifiedObject = JSON.stringify(queryObject);
-    // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
-    const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
-    const currentPageUrl = window.location.pathname; // Get the current page URL
-    localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
-    return encodedQueryString;
-  }
-  return null;
-};
-
-
-export const setFilterObjectToLocalStorageByUrl = (url: string, queryObject: any) => {
-  if (queryObject) {
-    const stringifiedObject = JSON.stringify(queryObject);
-    // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
-    const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
-    const currentPageUrl = url; // Get the current page URL
-    localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
-    return encodedQueryString;
-  }
-  return null;
 };
 
 type SolidListViewParams = {

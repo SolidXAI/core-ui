@@ -27,7 +27,7 @@ import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, setFilterObjectToLocalStorage } from "../list/SolidListView";
+import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, setFilterObjectToLocalStorage } from "../common/globalSearchPersistence";
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
@@ -566,7 +566,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const isEmptyGroupValue = (value: any) =>
     value === null || value === undefined || value === "";
 
-  const buildNestedCondition = (fieldPath: string,condition: Record<string, any>,dateGranularity?: string | null) => {
+  const buildNestedCondition = (fieldPath: string, condition: Record<string, any>, dateGranularity?: string | null) => {
     const parts = fieldPath.split(".").filter(Boolean);
     if (parts.length === 0) return {};
 
@@ -577,16 +577,16 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     return parts.reduceRight((acc: any, part: string) => ({ [part]: acc }), condition);
   };
 
-  const buildEqCondition = (fieldPath: string,value: any,dateGranularity?: string | null) => buildNestedCondition(fieldPath, { $eq: value }, dateGranularity);
+  const buildEqCondition = (fieldPath: string, value: any, dateGranularity?: string | null) => buildNestedCondition(fieldPath, { $eq: value }, dateGranularity);
 
-  const buildNullCondition = (fieldPath: string,dateGranularity?: string | null) => buildNestedCondition(fieldPath, { $null: true }, dateGranularity);
+  const buildNullCondition = (fieldPath: string, dateGranularity?: string | null) => buildNestedCondition(fieldPath, { $null: true }, dateGranularity);
 
   const buildImplicitFilterCondition = (item: GroupPathItem) => {
     const fieldMetadata = getFieldMetadata(item.fieldName);
     const isManyToOneRelation =
       fieldMetadata?.type === "relation" &&
       fieldMetadata?.relationType === "many-to-one";
-      
+
     const emptyRelationFilter = { [item.fieldName]: { $null: true } };
     const emptyValueFilter = isManyToOneRelation
       ? emptyRelationFilter
@@ -1223,20 +1223,21 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
   // handle bulk deletion
-  const deleteBulk = () => {
-    let deleteList: any = [];
-    selectedRecords.forEach((element: any) => {
-      deleteList.push(element.id);
-    });
-    deleteManySolidEntities(deleteList)
-      .unwrap()
-      .then(() => {
-        dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
-        setDeleteRecordsDialogVisible(false);
-      })
-      .catch((error) => {
-        dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
-      });
+  const deleteBulk = async () => {
+    const deleteList = selectedRecords.map((element: any) => element.id);
+    if (deleteList.length === 0) {
+      setDeleteRecordsDialogVisible(false);
+      return;
+    }
+
+    try {
+      await deleteManySolidEntities(deleteList).unwrap();
+      dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
+      setDeleteRecordsDialogVisible(false);
+      await loadRootGroups(getPagination("root").offset);
+    } catch (error: any) {
+      dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
+    }
   };
 
   // handle closing of the delete dialog...
@@ -1247,13 +1248,31 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   };
 
 
-  const recoverAll = () => {
-    let recoverList: any = [];
-    selectedRecoverRecords.forEach((element: any) => {
-      recoverList.push(element.id);
-    });
-    triggerRecoverSolidEntities(recoverList);
-    setRecoverDialogVisible(false);
+  const recoverAll = async () => {
+    const recoverList = selectedRecoverRecords.map((element: any) => element.id);
+    if (recoverList.length === 0) {
+      setRecoverDialogVisible(false);
+      return;
+    }
+
+    try {
+      const response: any = await triggerRecoverSolidEntities(recoverList).unwrap();
+      setRecoverDialogVisible(false);
+      dispatch(showToast({
+        severity: "success",
+        summary: "Success",
+        detail: response?.data?.message || "Records recovered successfully.",
+        life: 3000,
+      }));
+      await loadRootGroups(getPagination("root").offset);
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Recover Failed",
+        detail: error?.data?.message || error?.message || "Unable to recover the selected records.",
+        life: 4000,
+      }));
+    }
   };
 
 
@@ -1401,21 +1420,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const report = `${start} - ${end} of ${total}`;
 
     return (
-      <div className="w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background">
-        <div className="solid-paginator-meta flex items-center gap-2 sm:ml-auto">
+      <div className="w-full solid-table-paginator solid-table-paginator-align-end solid-tree-root-paginator flex flex-wrap items-center justify-between gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background">
+        <div className="solid-paginator-meta solid-tree-root-paginator-meta flex flex-wrap items-center gap-2 sm:ml-auto">
           <span className="solid-paginator-label">Rows</span>
           <SolidSelect
             value={limit}
-            className="solid-paginator-select"
+            className="solid-paginator-select solid-tree-page-size-select"
             options={pageSizeOptions.map((option) => ({ label: String(option), value: option }))}
             native={false}
+            menuPlacement="top"
             onChange={(event) => {
               setGlobalLimit(Number(event.value));
             }}
           />
           <span className="solid-paginator-report">{report}</span>
         </div>
-        <div className="solid-paginator-actions flex items-center gap-2">
+        <div className="solid-paginator-actions solid-tree-root-paginator-actions flex items-center gap-2">
           <button
             type="button"
             className="solid-paginator-btn"
@@ -1533,7 +1553,9 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
       if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
+        setSelectedSolidViewData(undefined);
         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.ENTITY_DELETE, life: 3000 }));
+        await loadRootGroups(getPagination("root").offset);
       } else {
         dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: response?.error?.data?.error, sticky: true }));
       }
@@ -1542,7 +1564,47 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     }
   };
 
+  const handleRecoverRecord = async (record: any) => {
+    if (!record?.id) return;
+
+    try {
+      const response: any = await triggerRecoverSolidEntitiesById(record.id).unwrap();
+      dispatch(showToast({
+        severity: "success",
+        summary: "Success",
+        detail: response?.data?.message || "Record recovered successfully.",
+        life: 3000,
+      }));
+      await loadRootGroups(getPagination("root").offset);
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Recover Failed",
+        detail: error?.data?.message || error?.message || "Unable to recover the selected record.",
+        life: 4000,
+      }));
+    }
+  };
+
   const renderRowActions = (rowData: any) => {
+    if (rowData?.deletedAt) {
+      return (
+        <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={(event) => event.stopPropagation()}>
+          <button
+            type="button"
+            className="solid-tree-row-menu-trigger"
+            aria-label="Recover row"
+            data-no-row-click="true"
+            onClick={() => {
+              void handleRecoverRecord(rowData);
+            }}
+          >
+            <RotateCcw size={14} />
+          </button>
+        </div>
+      );
+    }
+
     const customContextMenuButtons = getContextMenuButtons(rowData);
     const hasAnyContextMenuActions =
       canEditRow(rowData, true) ||
@@ -1550,7 +1612,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       customContextMenuButtons.length > 0;
 
     return (
-      <div className="flex items-center justify-end gap-1" onClick={(event) => event.stopPropagation()}>
+      <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={(event) => event.stopPropagation()}>
 
         {/* ---------------- CUSTOM ROW BUTTONS ---------------- */}
         {solidTreeViewLayout?.attrs?.rowButtons &&
@@ -1701,12 +1763,12 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             <div className="flex justify-between w-full">
               <div className="flex gap-4 items-center w-full solid-list-toolbar-left">
                 <div className="flex items-center gap-2">
-                  {params.embeded !== true && (
+                  {/* {params.embeded !== true && (
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                       <SolidIcon name="si-th-large" />
                     </div>
-                  )}
-                  <p className="m-0 view-title solid-text-wrapper">{treeViewTitle}</p>
+                  )} */}
+                  {/* <p className="m-0 view-title solid-text-wrapper">{treeViewTitle}</p> */}
                 </div>
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
