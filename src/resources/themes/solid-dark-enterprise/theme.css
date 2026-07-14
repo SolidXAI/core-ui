@@ -1,4 +1,4 @@
-@import url("/themes/solid-dark-blue/theme.css");
+@import url("/themes/solid-dark-purple/theme.css");
 @import url("/themes/solid-dark-enterprise/theme-variables.css");
 
 @layer solid-theme {
@@ -272,15 +272,15 @@
     background: linear-gradient(180deg, rgba(21, 31, 45, 0.99), rgba(16, 24, 35, 0.99));
     border-bottom: 1px solid rgba(86, 117, 158, 0.24);
     border-radius: 14px 14px 0 0;
-    padding: 0.95rem 1.1rem;
+    padding: 0.8rem 1rem 0.5rem !important;
   }
 
   .solid-form-header,
   .solid-form-toolbar-row {
-    background: linear-gradient(180deg, rgba(21, 31, 45, 0.99), rgba(16, 24, 35, 0.99));
-    border-bottom: 1px solid rgba(86, 117, 158, 0.24);
-    border-radius: 14px 14px 0 0;
-    padding: 1rem 1.2rem;
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+    min-height: auto;
   }
 
   .solid-form-content,
@@ -313,16 +313,20 @@
     box-shadow: inset 0 0 0 1px rgba(110, 168, 254, 0.1);
   }
 
+  .solid-form-header .view-title,
+  .solid-form-toolbar-row .view-title,
+  .solid-form-header .form-wrapper-title {
+    padding: 0;
+    gap: 0.35rem;
+    background: transparent;
+    box-shadow: none;
+  }
+
   .solid-list-toolbar .view-title::before,
   .solid-form-header .view-title::before,
   .solid-form-toolbar-row .view-title::before,
   .solid-form-header .form-wrapper-title::before {
-    content: "";
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #93c0ff 0%, #6ea8fe 100%);
-    box-shadow: 0 0 0 0.2rem rgba(110, 168, 254, 0.14);
+    box-shadow: none;
   }
 
   .solid-list-toolbar .solid-global-search-element,
@@ -332,6 +336,12 @@
     background: rgba(18, 27, 41, 0.9);
     border: 1px solid rgba(86, 117, 158, 0.2);
     border-radius: 10px;
+  }
+
+  .solid-form-toolbar-actions .solid-icon-button,
+  .solid-form-toolbar-row .p-button,
+  .solid-form-header .p-button {
+    min-height: 2.2rem;
   }
 
   .solid-list-toolbar .solid-global-search-element:focus-within {
