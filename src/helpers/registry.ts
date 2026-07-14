@@ -61,6 +61,8 @@ import { SolidLovTypeChangeFormEditWidget } from "../components/core/extension/s
 import mqMessageOnFormLoadHandler from "../components/core/extension/solid-core/mqMessage/form/mqMessageOnFormLoadHandler";
 import { SolidMqMessageStageFormViewWIdget } from "../components/core/extension/solid-core/mqMessage/form/SolidMqMessageStageFormViewWIdget";
 import solidXGenAiCodeBuilderConfigWidget from "../components/core/extension/solid-core/settings/solidXGenAiCodeBuilderConfigWidget";
+import openWorkflowDefinitionEditorHeaderAction from "../components/core/extension/solid-core/workflowDefinition/list/openWorkflowDefinitionEditorHeaderAction";
+import openWorkflowDefinitionEditorRowAction from "../components/core/extension/solid-core/workflowDefinition/list/openWorkflowDefinitionEditorRowAction";
 import { DefaultDashboardKpiWidget } from "../components/core/dashboard/widgets/DefaultDashboardKpiWidget";
 import { DefaultDashboardLineChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardLineChartWidget";
 import { DefaultDashboardBarChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardBarChartWidget";
@@ -404,6 +406,8 @@ registerExtensionComponent("QueueSlaHeatmapWidget", QueueSlaHeatmapWidget, Exten
 registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange, ExtensionFunctionTypes.onFieldChange);
 registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad, ExtensionFunctionTypes.onFormLayoutLoad);
 registerExtensionFunction("moduleMetadataListOnLoad", moduleMetadataListOnLoad, ExtensionFunctionTypes.onListLoad);
+registerExtensionFunction("openWorkflowDefinitionEditorHeaderAction", openWorkflowDefinitionEditorHeaderAction, ExtensionFunctionTypes.onListLoad);
+registerExtensionFunction("openWorkflowDefinitionEditorRowAction", openWorkflowDefinitionEditorRowAction, ExtensionFunctionTypes.onListLoad);
 
 // Model Sequence 
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"

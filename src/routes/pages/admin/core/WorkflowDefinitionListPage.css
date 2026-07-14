@@ -1,0 +1,151 @@
+.workflow-definition-list-page {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+  min-height: 0;
+  align-content: start;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 22rem),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.05), transparent 24rem),
+    var(--surface-ground, #f8fafc);
+}
+
+.workflow-definition-list-shell {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem 0.9rem;
+  border: 1px solid var(--surface-border, #dbe3f0);
+  border-radius: 1rem;
+  background: var(--surface-card, #ffffff);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+  align-content: start;
+}
+
+.workflow-definition-list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.workflow-definition-list-header-actions,
+.workflow-definition-list-toolbar-actions,
+.workflow-definition-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.workflow-definition-list-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(520px, 100%);
+  min-height: 2.35rem;
+  padding: 0.28rem 0.75rem;
+  border: 1px solid var(--surface-border, #dbe3f0);
+  border-radius: 0.75rem;
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.workflow-definition-list-search input {
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+  font-size: 0.95rem;
+}
+
+.workflow-definition-list-clear {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 0.86rem;
+  opacity: 0.72;
+}
+
+.workflow-definition-list-inline-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.84rem;
+  opacity: 0.75;
+}
+
+.workflow-definition-list-table-wrap {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  align-content: start;
+}
+
+.workflow-definition-table {
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.workflow-definition-table .solid-data-table-th,
+.workflow-definition-table .solid-data-table-td {
+  vertical-align: middle;
+}
+
+.workflow-definition-table-id {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.workflow-definition-table-id__primary {
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.96);
+}
+
+.workflow-definition-table-id__secondary,
+.workflow-definition-table-description,
+.workflow-definition-table-muted {
+  opacity: 0.7;
+}
+
+.workflow-definition-table-description {
+  max-width: 26rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workflow-definition-table-namespace {
+  font-weight: 600;
+  color: rgba(30, 41, 59, 0.96);
+}
+
+.workflow-definition-table-paginator {
+  margin-top: 0;
+}
+
+.workflow-definition-list-loading,
+.workflow-definition-list-error {
+  display: grid;
+  place-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--surface-border, #dbe3f0);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+  text-align: center;
+}
+
+@media (max-width: 960px) {
+  .workflow-definition-list-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .workflow-definition-list-search {
+    width: 100%;
+  }
+
+  .workflow-definition-list-header-actions,
+  .workflow-definition-list-toolbar-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
