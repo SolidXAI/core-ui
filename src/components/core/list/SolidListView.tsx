@@ -518,7 +518,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
   // Get the list view data.
-  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error },] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading,isFetching: isListViewFetching, error }] = useLazyGetSolidEntitiesQuery();
 
   const [
     triggerRecoverSolidEntitiesById,
@@ -1248,6 +1248,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const isListViewEmptyWithoutFilters =
     !loading &&
     !isLoading &&
+    !isListViewFetching &&
     listViewData.length === 0 &&
     !hasAppliedFilterValues &&
     !hasFilterPredicatesApplied;
@@ -1257,12 +1258,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       ? "Deleting..."
       : recoverByIdIsLoading || recoverByIsLoading
         ? "Recovering..."
-        : loading || isLoading || solidListViewMetaDataIsLoading || !queryDataLoaded
+        : loading || isLoading || isListViewFetching || solidListViewMetaDataIsLoading || !queryDataLoaded
           ? "Loading..."
           : null;
 
   const showListBodyLoadingPlaceholder =
-    (loading || isLoading || solidListViewMetaDataIsLoading || !queryDataLoaded) &&
+    (loading || isLoading || isListViewFetching || solidListViewMetaDataIsLoading || !queryDataLoaded) &&
     listViewData.length === 0 &&
     params.embeded === false &&
     viewMode !== "view";
