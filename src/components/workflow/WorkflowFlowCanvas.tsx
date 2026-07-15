@@ -116,8 +116,8 @@ const DIMENSIONS = {
   workflowHeight: 118,
   triggerWidth: 248,
   triggerHeight: 108,
-  insertWidth: 140,
-  insertHeight: 56,
+  insertWidth: 160,
+  insertHeight: 40,
   sectionLabelWidth: 104,
   sectionLabelHeight: 28,
   groupPaddingX: 28,
@@ -463,21 +463,57 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
     >
       <div className="workflow-flow-node-card__typebar">
         <span>{nodeTypeLabel}</span>
-        <button
-          type="button"
-          className="workflow-flow-help-button nodrag nopan nowheel"
-          aria-label={`Open ${nodeTypeLabel} documentation`}
-          title="Documentation"
-          onPointerDown={(event) => {
-            event.stopPropagation();
-          }}
-          onClick={(event) => {
-            event.stopPropagation();
-            data.onViewDocs(String(workflowNode.id));
-          }}
-        >
-          <CircleHelp size={12} />
-        </button>
+        <span className="workflow-flow-node-card__quick-actions">
+          {!data.readOnly ? (
+            <>
+              <button
+                type="button"
+                className="workflow-flow-icon-button nodrag nopan nowheel"
+                aria-label={`Edit ${nodeTitle}`}
+                title="Edit"
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  data.onEditNode(String(workflowNode.id));
+                }}
+              >
+                <Pencil size={12} />
+              </button>
+              <button
+                type="button"
+                className="workflow-flow-icon-button workflow-flow-icon-button--danger nodrag nopan nowheel"
+                aria-label={`Delete ${nodeTitle}`}
+                title="Delete"
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  data.onDeleteNode(String(workflowNode.id));
+                }}
+              >
+                <Trash2 size={12} />
+              </button>
+            </>
+          ) : null}
+          <button
+            type="button"
+            className="workflow-flow-icon-button nodrag nopan nowheel"
+            aria-label={`Open ${nodeTypeLabel} documentation`}
+            title="Documentation"
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              data.onViewDocs(String(workflowNode.id));
+            }}
+          >
+            <CircleHelp size={12} />
+          </button>
+        </span>
       </div>
       <div className="workflow-flow-node-card__body">
         <div className="workflow-flow-node-card__header-main">
@@ -498,40 +534,6 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
         </div>
       ) : null}
 
-      {!data.readOnly ? (
-        <div className="workflow-flow-node-card__actions">
-          <SolidButton
-            size="small"
-            variant="ghost"
-            onClick={(event) => {
-              event.stopPropagation();
-              data.onEditNode(String(workflowNode.id));
-            }}
-          >
-            <Pencil size={14} />
-          </SolidButton>
-          <SolidButton
-            size="small"
-            variant="ghost"
-            onClick={(event) => {
-              event.stopPropagation();
-              data.onViewDocs(String(workflowNode.id));
-            }}
-          >
-            <BookOpen size={14} />
-          </SolidButton>
-          <SolidButton
-            size="small"
-            variant="ghost"
-            onClick={(event) => {
-              event.stopPropagation();
-              data.onDeleteNode(String(workflowNode.id));
-            }}
-          >
-            <Trash2 size={14} />
-          </SolidButton>
-        </div>
-      ) : null}
       <Handle
         type="target"
         position={Position.Top}
@@ -1236,7 +1238,7 @@ function WorkflowFlowCanvasInner(props: WorkflowFlowCanvasProps) {
         fitView
         fitViewOptions={{
           padding: props.readOnly ? 0.28 : 0.24,
-          maxZoom: props.readOnly ? 0.82 : 0.9,
+          maxZoom: props.readOnly ? 0.92 : 1,
         }}
         minZoom={0.25}
         maxZoom={1.6}

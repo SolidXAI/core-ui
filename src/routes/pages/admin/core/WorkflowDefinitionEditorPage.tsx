@@ -1197,14 +1197,32 @@ export function WorkflowDefinitionEditorPage() {
     [],
   );
 
-  const createNodeFromType = (nodeType: WorkflowNodeMetadataResponse): WorkflowNodeRecord => ({
-    id: buildNodeId(nodeType.type, definitionDraft),
-    kind: nodeType.kind,
-    type: nodeType.type,
-    name: nodeType.label ?? nodeType.type,
-    description: nodeType.description ?? "",
-    configuration: nodeType.authoring?.defaultConfiguration ?? {},
-  });
+  const createNodeFromType = (nodeType: WorkflowNodeMetadataResponse): WorkflowNodeRecord => {
+    const nextNode: WorkflowNodeRecord = {
+      id: buildNodeId(nodeType.type, definitionDraft),
+      kind: nodeType.kind,
+      type: nodeType.type,
+      name: nodeType.label ?? nodeType.type,
+      description: nodeType.description ?? "",
+      configuration: nodeType.authoring?.defaultConfiguration ?? {},
+    };
+
+    (nodeType.authoring?.childSlots ?? []).forEach((slot) => {
+      if (slot.kind === "branch-collection") {
+        const branchCount = Math.max(slot.minItems ?? 0, slot.required ? 1 : 0);
+        nextNode.branches = Array.from({ length: branchCount }, (_, index) => ({
+          id: `${nextNode.id}Branch${index + 1}`,
+          name: `Branch ${index + 1}`,
+          nodes: [],
+        }));
+        return;
+      }
+
+      nextNode[slot.key] = nextNode[slot.key] ?? [];
+    });
+
+    return nextNode;
+  };
 
   const validateCurrentDefinition = React.useCallback(
     async (options?: { showSuccessToast?: boolean }) => {
@@ -1327,20 +1345,19 @@ export function WorkflowDefinitionEditorPage() {
     syncDraftToCode(nextDraft);
   };
 
-  const handleUpdateSelectedNodeConfiguration = (configuration: Record<string, any>) => {
+  const handleUpdateSelectedNode = (nextNode: WorkflowNodeRecord) => {
     if (!selectedNode) {
       return;
     }
 
     const nextDraft = {
       ...definitionDraft,
-      nodes: updateNodeById(definitionDraft.nodes, selectedNode.id, (node) => ({
-        ...node,
-        configuration,
-      })),
+      nodes: updateNodeById(definitionDraft.nodes, selectedNode.id, () => nextNode),
     };
 
     syncDraftToCode(nextDraft);
+    setSelectedNodeId(nextNode.id);
+    setDocsNodeTypeKey(nextNode.type);
   };
 
   const handleRemoveNode = (nodeId: string) => {
@@ -2439,10 +2456,9 @@ export function WorkflowDefinitionEditorPage() {
           open={editorOpen}
           onOpenChange={setEditorOpen}
           nodeType={selectedNodeType}
-          value={selectedNode.configuration ?? {}}
-          onChange={handleUpdateSelectedNodeConfiguration}
-          onSubmit={(nextValue) => {
-            handleUpdateSelectedNodeConfiguration(nextValue);
+          nodeValue={selectedNode}
+          onNodeSubmit={(nextValue) => {
+            handleUpdateSelectedNode(nextValue);
             setEditorOpen(false);
           }}
           title={`${selectedNode.name ?? selectedNode.id} · ${selectedNodeType.label ?? selectedNodeType.type}`}

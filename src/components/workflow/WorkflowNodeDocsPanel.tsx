@@ -291,8 +291,6 @@ export function WorkflowNodeDocsPanel({
   const inputs = resolvedDocs.inputs ?? [];
   const examples = resolvedDocs.examples ?? [];
   const outputs = resolvedDocs.outputs ?? [];
-  const metrics = resolvedDocs.metrics ?? [];
-  const definitions = resolvedDocs.definitions ?? [];
 
   return (
     <div className={cx("workflow-node-docs", className)}>
@@ -330,23 +328,6 @@ export function WorkflowNodeDocsPanel({
           </SolidAccordionItem>
         ) : null}
 
-        {examples.length ? (
-          <SolidAccordionItem value="examples" className="workflow-node-docs-section">
-            <SolidAccordionTrigger className="workflow-node-docs-section-trigger">
-              <SectionTitle title="Examples" count={examples.length} />
-            </SolidAccordionTrigger>
-            <SolidAccordionContent className="workflow-node-docs-section-content">
-              <SolidAccordion
-                type="multiple"
-                defaultValue={examples.map((example) => `example-${example.key}`)}
-                className="workflow-node-docs-inner-accordion"
-              >
-                {examples.map((example) => renderExample(example))}
-              </SolidAccordion>
-            </SolidAccordionContent>
-          </SolidAccordionItem>
-        ) : null}
-
         {outputs.length ? (
           <SolidAccordionItem value="outputs" className="workflow-node-docs-section">
             <SolidAccordionTrigger className="workflow-node-docs-section-trigger">
@@ -360,27 +341,18 @@ export function WorkflowNodeDocsPanel({
           </SolidAccordionItem>
         ) : null}
 
-        {metrics.length ? (
-          <SolidAccordionItem value="metrics" className="workflow-node-docs-section">
+        {examples.length ? (
+          <SolidAccordionItem value="examples" className="workflow-node-docs-section">
             <SolidAccordionTrigger className="workflow-node-docs-section-trigger">
-              <SectionTitle title="Metrics" count={metrics.length} />
+              <SectionTitle title="Examples" count={examples.length} />
             </SolidAccordionTrigger>
             <SolidAccordionContent className="workflow-node-docs-section-content">
-              <SolidAccordion type="multiple" className="workflow-node-docs-inner-accordion">
-                {metrics.map((metric) => renderMetric(metric))}
-              </SolidAccordion>
-            </SolidAccordionContent>
-          </SolidAccordionItem>
-        ) : null}
-
-        {definitions.length ? (
-          <SolidAccordionItem value="definitions" className="workflow-node-docs-section">
-            <SolidAccordionTrigger className="workflow-node-docs-section-trigger">
-              <SectionTitle title="Definitions" count={definitions.length} />
-            </SolidAccordionTrigger>
-            <SolidAccordionContent className="workflow-node-docs-section-content">
-              <SolidAccordion type="multiple" className="workflow-node-docs-inner-accordion">
-                {definitions.map((definition) => renderDefinition(definition))}
+              <SolidAccordion
+                type="multiple"
+                defaultValue={examples.map((example) => `example-${example.key}`)}
+                className="workflow-node-docs-inner-accordion"
+              >
+                {examples.map((example) => renderExample(example))}
               </SolidAccordion>
             </SolidAccordionContent>
           </SolidAccordionItem>
