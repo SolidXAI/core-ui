@@ -52,6 +52,8 @@ type KanbanSwimlaneDefinition = {
   label: string;
 };
 
+const DEFAULT_RECORD_SORT = ["id:desc"];
+
 const getKanbanSortParam = (sortValue?: string) => {
   if (!sortValue) {
     return "id:asc";
@@ -78,13 +80,26 @@ const createEmptyKanbanGroup = (
   },
 });
 
+const sortRecordsByNewest = (records: any[] = []) =>
+  [...records].sort((left: any, right: any) => {
+    const leftId = Number(left?.id ?? 0);
+    const rightId = Number(right?.id ?? 0);
+    return rightId - leftId;
+  });
+
 const mergeKanbanGroupsWithDefinitions = (
   groupRecords: any[],
   swimlaneDefinitions: KanbanSwimlaneDefinition[],
   recordsInSwimlane: number
 ) => {
   if (!swimlaneDefinitions.length) {
-    return groupRecords;
+    return (groupRecords || []).map((group: any) => ({
+      ...group,
+      groupData: {
+        ...group?.groupData,
+        records: sortRecordsByNewest(group?.groupData?.records || []),
+      },
+    }));
   }
 
   const groupMap = new Map(
@@ -104,6 +119,10 @@ const mergeKanbanGroupsWithDefinitions = (
         ...existingGroup,
         groupName: definition.value,
         groupLabel: definition.label,
+        groupData: {
+          ...existingGroup.groupData,
+          records: sortRecordsByNewest(existingGroup.groupData?.records || []),
+        },
       };
     }
 
@@ -538,6 +557,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               limit: Number(queryObject.groupFilter.limit) + Number(queryObject.groupFilter.offset) || kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane,
               offset: 0,
               filters: filters,
+              sort: DEFAULT_RECORD_SORT,
               // @ts-ignore
               populate: queryObject.groupFilter.populate || toPopulate,
               // @ts-ignore
@@ -573,6 +593,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane || 10,
               offset: 0,
               filters: defaultFilters,
+              sort: DEFAULT_RECORD_SORT,
               populate: toPopulate,
               populateMedia: toPopulateMedia
             }
@@ -616,6 +637,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: nextFilters,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia,
         },
@@ -729,7 +751,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             $in: [groupByField],
           },
           ...filters
-        }
+        },
+        sort: DEFAULT_RECORD_SORT,
       });
 
 
@@ -902,6 +925,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: filters,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia
 
@@ -977,6 +1001,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: updatedFilter,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia
         }

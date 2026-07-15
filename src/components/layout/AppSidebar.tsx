@@ -75,6 +75,13 @@ function isMenuPathActive(itemPath: string | undefined, currentPathname: string,
     return doesSearchParamsMatchSubset(itemSearchParams, currentSearchParams);
 }
 
+function cloneMenuItems(items: SolidMenuItem[] = []): SolidMenuItem[] {
+    return items.map((item) => ({
+        ...item,
+        children: item.children ? cloneMenuItems(item.children) : [],
+    }));
+}
+
 function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[] {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) return items;
@@ -83,6 +90,13 @@ function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[]
     items.forEach((item) => {
         const children = item.children ? filterMenuItems(item.children, normalizedQuery) : [];
         const matchesSelf = item.title.toLowerCase().includes(normalizedQuery);
+        const isPathlessParentMatch = matchesSelf && !item.path && item.children && item.children.length > 0;
+
+        if (isPathlessParentMatch) {
+            next.push({ ...item, children: cloneMenuItems(item.children) });
+            return;
+        }
+
         if (matchesSelf || children.length > 0) {
             next.push({ ...item, children });
         }

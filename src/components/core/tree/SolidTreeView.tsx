@@ -39,7 +39,10 @@ import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, Soli
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getRelationDisplayText } from "../../../helpers/relationDisplay";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -113,6 +116,8 @@ type PaginationEntry = {
 
 const DEFAULT_PAGE_SIZE = 25;
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+const DEFAULT_RECORD_SORT_FIELD = "id";
+const DEFAULT_RECORD_SORT_ORDER: 1 | -1 = -1;
 const resolveDefaultPageSize = (options: number[]) => (
   options.includes(DEFAULT_PAGE_SIZE) ? DEFAULT_PAGE_SIZE : options[0]
 );
@@ -151,8 +156,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [expandedKeys, setExpandedKeys] = useState<any>({});
   const [treeLoading, setTreeLoading] = useState<boolean>(false);
 
-  const [sortField, setSortField] = useState<string>("");
-  const [sortOrder, setSortOrder] = useState<number>(0);
+  const [sortField, setSortField] = useState<string>(DEFAULT_RECORD_SORT_FIELD);
+  const [sortOrder, setSortOrder] = useState<number>(DEFAULT_RECORD_SORT_ORDER);
 
   const [pageSizeOptions, setPageSizeOptions] = useState<number[]>([10, 25, 50]);
   const [globalLimit, setGlobalLimit] = useState<number>(25);
@@ -178,6 +183,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [viewModes, setViewModes] = useState<any>([]);
+  const [openLightbox, setOpenLightbox] = useState(false);
+  const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
 
   const headerRequestStatusLabel = treeLoading ? "Loading..." : null;
 
@@ -413,8 +420,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     if (queryObject) {
       setToPopulate(queryObject.populate || []);
       setToPopulateMedia(queryObject.populateMedia || []);
-      setSortField(queryObject.sortField || "");
-      setSortOrder(queryObject.sortOrder || 0);
+      setSortField(queryObject.sortField || DEFAULT_RECORD_SORT_FIELD);
+      setSortOrder(queryObject.sortOrder || DEFAULT_RECORD_SORT_ORDER);
       setShowArchived(
         queryObject.showArchived === true ||
         queryObject.showArchived === "true" ||
@@ -453,6 +460,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
       setToPopulate(nextPopulate);
       setToPopulateMedia(nextPopulateMedia);
+      setSortField(DEFAULT_RECORD_SORT_FIELD);
+      setSortOrder(DEFAULT_RECORD_SORT_ORDER);
       setGlobalLimit(resolveDefaultPageSize(currentOptions));
       setShowArchived(false);
     }
@@ -1304,8 +1313,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         solidListViewMetaData: solidTreeViewMetaData,
         fieldMetadata,
         column,
-        setLightboxUrls: () => { },
-        setOpenLightbox: () => { },
+        setLightboxUrls,
+        setOpenLightbox,
       });
 
       if (!React.isValidElement(listColumn)) return null;
@@ -1502,6 +1511,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
+
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) return null;
+
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
+    : [];
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
@@ -2132,6 +2157,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <SolidButton label="Yes" size="sm" severity="danger" onClick={recoverAll} />
         </SolidDialogFooter>
       </SolidDialog>
+      {openLightbox && (
+        <SolidLightbox
+          open={openLightbox}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
+        />
+      )}
 
     </div>
   );
