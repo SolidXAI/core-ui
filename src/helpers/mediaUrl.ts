@@ -9,10 +9,12 @@ export type ResolvedMediaUrl = {
 const trimTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 const backendRoot = trimTrailingSlash(env("NEXT_PUBLIC_BACKEND_API_URL"));
 const backendApiRoot = backendRoot ? `${backendRoot}/api` : "";
-const protectedMediaPathPattern = /^\/(?:api\/)?media\/\d+\/download(?:[/?#]|$)/;
+const protectedMediaPathPattern = /^\/(?:api\/)?media\/[^/]+\/download(?:[/?#]|$)/;
 
+// Checks whether a URL already includes an absolute protocol and host.
 const isAbsoluteUrl = (value: string) => /^[a-z][a-z0-9+.-]*:\/\//i.test(value);
 
+// Detects whether a media URL points to the signed private download route.
 export const isProtectedMediaUrl = (value?: string): boolean => {
     if (!value) return false;
 
@@ -31,26 +33,49 @@ export const isProtectedMediaUrl = (value?: string): boolean => {
     return false;
 };
 
+// Normalizes media paths into absolute browser-safe URLs.
 export const getAbsoluteMediaUrl = (value?: string): string => {
     if (!value) return "";
-    if (value.startsWith("blob:") || value.startsWith("data:") || isAbsoluteUrl(value)) {
+    if (value.startsWith("blob:") || value.startsWith("data:")) {
         return value;
     }
-    if (!backendRoot) {
-        return value;
+
+    let resolvedUrl = value;
+
+    if (!isAbsoluteUrl(value)) {
+        if (!backendRoot) {
+            return value.startsWith("/") ? value : `/${value.replace(/^\/+/, "")}`;
+        }
+
+        if (value.startsWith("/api/")) {
+            resolvedUrl = `${backendRoot}${value}`;
+        } else if (value.startsWith("/media/")) {
+            resolvedUrl = `${backendApiRoot}${value}`;
+        } else if (value.startsWith("/")) {
+            resolvedUrl = `${backendRoot}${value}`;
+        } else {
+            resolvedUrl = `${backendRoot}/${value.replace(/^\/+/, "")}`;
+        }
     }
-    if (value.startsWith("/api/")) {
-        return `${backendRoot}${value}`;
-    }
-    if (value.startsWith("/media/")) {
-        return `${backendApiRoot}${value}`;
-    }
-    if (value.startsWith("/")) {
-        return `${backendRoot}${value}`;
-    }
-    return `${backendRoot}/${value.replace(/^\/+/, "")}`;
+
+    return new URL(resolvedUrl).toString();
 };
 
+// Opens a media URL in a new tab for direct browser handling.
+export const openMediaInNewTab = async (value?: string) => {
+    if (typeof window === "undefined") {
+        return;
+    }
+
+    const url = getAbsoluteMediaUrl(value);
+    if (!url) {
+        return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+};
+
+// Resolves preview URLs and converts protected media into temporary blob URLs.
 export const resolveMediaPreviewUrl = async (value?: string): Promise<ResolvedMediaUrl> => {
     const absoluteUrl = getAbsoluteMediaUrl(value);
     if (!absoluteUrl || !isProtectedMediaUrl(value)) {

@@ -22,16 +22,14 @@ import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { getAbsoluteMediaUrl, resolveMediaPreviewUrl } from "../../../../helpers/mediaUrl";
+import { getAbsoluteMediaUrl, openMediaInNewTab, resolveMediaPreviewUrl } from "../../../../helpers/mediaUrl";
+import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { buildMediaFieldKey, getPersistedMediaId } from "./mediaFieldUtils";
-
-const getMediaExtension = (fileUrl: string, fileName?: string) =>
-    (fileName || fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase();
 
 export class SolidMediaMultipleField implements ISolidField {
 
@@ -228,7 +226,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                 mediaId: getPersistedMediaId(file),
                                 fileKey: buildMediaFieldKey(file),
                                 fileUrl: resolved.url,
-                                originalUrl: getAbsoluteMediaUrl(file._full_url),
+                                originalUrl: getAbsoluteMediaUrl(file._full_url || file.relativeUri),
                             };
                         }
 
@@ -260,8 +258,8 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                 size: file.fileSize,
                                 mediaId: getPersistedMediaId(file),
                                 fileKey: buildMediaFieldKey(file),
-                                fileUrl: getAbsoluteMediaUrl(file._full_url),
-                                originalUrl: getAbsoluteMediaUrl(file._full_url),
+                                fileUrl: getAbsoluteMediaUrl(file._full_url || file.relativeUri),
+                                originalUrl: getAbsoluteMediaUrl(file._full_url || file.relativeUri),
                             };
                         }
                         return null;
@@ -383,24 +381,25 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     }
 
     const handleFileView = (url: any) => {
-        const downloadOnlyExt = [
-            "txt", "zip", "rar",
-            "doc", "docx",
-            "xls", "xlsx",
-            "ppt", "pptx"
-        ];
+        const previewKind = getMediaPreviewKind({
+            url: url?.originalUrl || url?.fileUrl,
+            fileName: url?.name,
+            mimeType: url?.type,
+        });
 
-        const fileUrl = url?.fileUrl || "";
-        const ext = getMediaExtension(fileUrl, url?.name);
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
-        } else {
+        if (isLightboxMediaKind(previewKind)) {
             setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
+                {
+                    src: url.fileUrl,
+                    downloadUrl: url.fileUrl,
+                    type: previewKind === "video" ? "video" : undefined
+                },
             ]);
             setOpenLightbox?.(true);
+            return;
         }
+
+        void openMediaInNewTab(url?.originalUrl || url?.fileUrl);
     }
 
 
@@ -437,34 +436,41 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 }
             </div>
             {fileDetails.length > 0 &&
-                <div className="solid-file-upload-wrapper">
-                    <div className="flex items-center md:gap-2">
+                <div className={`${styles.mediaAttachmentCard} mt-4`}>
+                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
                         <FileReaderExt fileDetails={fileDetails[0]} />
-                        <div className="w-full flex flex-col gap-1">
-                                <div className="flex items-center justify-between">
-                                    <p className="m-0 w-9 font-normal text-[var(--primary-color)] solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            className="solid-file-icon-btn"
-                                            disabled={isFieldDisabled || isFieldReadonly}
-                                            aria-label="Download file"
-                                            onClick={() => downloadMediaFile(fileDetails[0]?.originalUrl || fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
-                                        >
-                                            <SolidIcon name="si-download" aria-hidden />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="solid-file-icon-btn is-danger"
-                                            disabled={isFieldDisabled || isFieldReadonly}
-                                            aria-label="Remove file"
-                                            onClick={() => confirmDeleteFile(fileDetails[0].fileKey)}
-                                        >
-                                            <SolidIcon name="si-times" aria-hidden />
-                                        </button>
-                                    </div>
+                        <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                            <div className="flex items-start justify-between gap-4">
+                                <button
+                                    type="button"
+                                    className={styles.mediaAttachmentName}
+                                    onClick={() => handleFileView(fileDetails[0])}
+                                    title={fileDetails[0].name}
+                                >
+                                    {fileDetails[0].name}
+                                </button>
+                                <div className={`${styles.mediaAttachmentActions} flex items-center gap-2`}>
+                                    <button
+                                        type="button"
+                                        className="solid-file-icon-btn"
+                                        disabled={isFieldDisabled || isFieldReadonly}
+                                        aria-label="Download file"
+                                        onClick={() => downloadMediaFile(fileDetails[0]?.originalUrl || fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
+                                    >
+                                        <SolidIcon name="si-download" aria-hidden />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="solid-file-icon-btn is-danger"
+                                        disabled={isFieldDisabled || isFieldReadonly}
+                                        aria-label="Remove file"
+                                        onClick={() => confirmDeleteFile(fileDetails[0].fileKey)}
+                                    >
+                                        <SolidIcon name="si-times" aria-hidden />
+                                    </button>
                                 </div>
-                            <div className="flex items-center gap-2 text-sm">
+                            </div>
+                            <div className={styles.mediaAttachmentSize}>
                                 {formatFileSize(fileDetails[0].size)}
                             </div>
                         </div>
@@ -499,35 +505,44 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     fileDetails.map((file, index) => {
                         const fileId = file.fileKey;
                         return (
-                            <div key={fileId} className="solid-file-upload-wrapper">
-                                <div className="flex items-center md:gap-2">
-                                    <FileReaderExt fileDetails={file} />
-                                    <div className="w-full flex flex-col gap-1">
-                                        <div className="flex items-center justify-between">
-                                            <p className="m-0 w-11 font-normal text-[var(--primary-color)] solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
-                                            <div className="flex items-center gap-2">
+                            <div key={fileId} className={index === fileDetails.length - 1 ? "" : "mb-3"}>
+                                <div className={styles.mediaAttachmentCard}>
+                                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                                        <FileReaderExt fileDetails={file} />
+                                        <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                                            <div className="flex items-start justify-between gap-4">
                                                 <button
                                                     type="button"
-                                                    className="solid-file-icon-btn"
-                                                    disabled={isFieldDisabled || isFieldReadonly}
-                                                    aria-label="Download file"
-                                                    onClick={() => downloadMediaFile(file?.originalUrl || file?.fileUrl, file?.name)}
+                                                    className={styles.mediaAttachmentName}
+                                                    onClick={() => handleFileView(file)}
+                                                    title={file.name}
                                                 >
-                                                    <SolidIcon name="si-download" aria-hidden />
+                                                    {file.name}
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    className="solid-file-icon-btn is-danger"
-                                                    disabled={isFieldDisabled || isFieldReadonly}
-                                                    aria-label="Remove file"
-                                                    onClick={() => confirmDeleteFile(fileId)}
-                                                >
-                                                    <SolidIcon name="si-times" aria-hidden />
-                                                </button>
+                                                <div className={`${styles.mediaAttachmentActions} flex items-center gap-2`}>
+                                                    <button
+                                                        type="button"
+                                                        className="solid-file-icon-btn"
+                                                        disabled={isFieldDisabled || isFieldReadonly}
+                                                        aria-label="Download file"
+                                                        onClick={() => downloadMediaFile(file?.originalUrl || file?.fileUrl, file?.name)}
+                                                    >
+                                                        <SolidIcon name="si-download" aria-hidden />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="solid-file-icon-btn is-danger"
+                                                        disabled={isFieldDisabled || isFieldReadonly}
+                                                        aria-label="Remove file"
+                                                        onClick={() => confirmDeleteFile(fileId)}
+                                                    >
+                                                        <SolidIcon name="si-times" aria-hidden />
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            {formatFileSize(file.size)}
+                                            <div className={styles.mediaAttachmentSize}>
+                                                {formatFileSize(file.size)}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -613,7 +628,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                 size: file.fileSize,
                                 id: file.id,
                                 fileUrl: resolved.url,
-                                originalUrl: getAbsoluteMediaUrl(file._full_url),
+                                originalUrl: getAbsoluteMediaUrl(file._full_url || file.relativeUri),
                             };
                         }
 
@@ -643,8 +658,8 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         type: file.mimeType,
                         size: file.fileSize,
                         id: file.id,
-                        fileUrl: getAbsoluteMediaUrl(file._full_url),
-                        originalUrl: getAbsoluteMediaUrl(file._full_url),
+                        fileUrl: getAbsoluteMediaUrl(file._full_url || file.relativeUri),
+                        originalUrl: getAbsoluteMediaUrl(file._full_url || file.relativeUri),
                     })));
                 return;
             }
@@ -658,24 +673,25 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleFileView = (url: any) => {
-        const downloadOnlyExt = [
-            "txt", "zip", "rar",
-            "doc", "docx",
-            "xls", "xlsx",
-            "ppt", "pptx"
-        ];
+        const previewKind = getMediaPreviewKind({
+            url: url?.originalUrl || url?.fileUrl,
+            fileName: url?.name,
+            mimeType: url?.type,
+        });
 
-        const fileUrl = url?.fileUrl || "";
-        const ext = getMediaExtension(fileUrl, url?.name);
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
-        } else {
+        if (isLightboxMediaKind(previewKind)) {
             setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
+                {
+                    src: url.fileUrl,
+                    downloadUrl: url.fileUrl,
+                    type: previewKind === "video" ? "video" : undefined
+                },
             ]);
             setOpenLightbox?.(true);
+            return;
         }
+
+        void openMediaInNewTab(url?.originalUrl || url?.fileUrl);
     }
 
     const renderMediaFileCard = (file: { name: string; type: string; size: number; id: number | string; fileUrl: string; originalUrl?: string }, className = "") => (

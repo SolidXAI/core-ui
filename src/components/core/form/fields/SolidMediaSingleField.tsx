@@ -21,7 +21,8 @@ import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { getAbsoluteMediaUrl, resolveMediaPreviewUrl } from "../../../../helpers/mediaUrl";
+import { getAbsoluteMediaUrl, openMediaInNewTab, resolveMediaPreviewUrl } from "../../../../helpers/mediaUrl";
+import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
 import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
@@ -36,9 +37,6 @@ type SingleMediaFileDetail = {
     fileSize: number;
     originalUrl?: string;
 };
-
-const getMediaExtension = (fileUrl: string, fileName?: string) =>
-    (fileName || fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase();
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -306,7 +304,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                         revokeFns.push(resolved.revoke);
                     }
                     fileUrl = resolved.url;
-                    originalUrl = getAbsoluteMediaUrl(fieldValue._full_url);
+                    originalUrl = getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri);
                     fileName = fieldValue.originalFileName;
                     fileSize = fieldValue.fileSize;
                 }
@@ -337,9 +335,9 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 setFileDetails({
                     name: fieldValue.originalFileName,
                     type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
-                    fileUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                    fileUrl: getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri),
                     fileSize: fieldValue.fileSize,
-                    originalUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                    originalUrl: getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri),
                 });
                 return;
             }
@@ -381,24 +379,25 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     }
 
     const handleFileView = (url: any) => {
-        const downloadOnlyExt = [
-            "txt", "zip", "rar",
-            "doc", "docx",
-            "xls", "xlsx",
-            "ppt", "pptx"
-        ];
+        const previewKind = getMediaPreviewKind({
+            url: url?.originalUrl || url?.fileUrl,
+            fileName: url?.name,
+            mimeType: url?.type,
+        });
 
-        const fileUrl = url?.fileUrl || "";
-        const ext = getMediaExtension(fileUrl, url?.name);
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
-        } else {
+        if (isLightboxMediaKind(previewKind)) {
             setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
+                {
+                    src: url.fileUrl,
+                    downloadUrl: url.fileUrl,
+                    type: previewKind === "video" ? "video" : undefined
+                },
             ]);
             setOpenLightbox?.(true);
+            return;
         }
+
+        void openMediaInNewTab(url?.originalUrl || url?.fileUrl);
     }
 
 
@@ -565,7 +564,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                         revokeFns.push(resolved.revoke);
                     }
                     fileUrl = resolved.url;
-                    originalUrl = getAbsoluteMediaUrl(fieldValue._full_url);
+                    originalUrl = getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri);
                     fileName = fieldValue.originalFileName;
                     fileSize = fieldValue.fileSize;
                 }
@@ -594,9 +593,9 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                 setFileDetails({
                     name: fieldValue.originalFileName,
                     type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
-                    fileUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                    fileUrl: getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri),
                     fileSize: fieldValue.fileSize,
-                    originalUrl: getAbsoluteMediaUrl(fieldValue._full_url),
+                    originalUrl: getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri),
                 });
                 return;
             }
@@ -609,24 +608,25 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleFileView = (url: any) => {
-        const downloadOnlyExt = [
-            "txt", "zip", "rar",
-            "doc", "docx",
-            "xls", "xlsx",
-            "ppt", "pptx"
-        ];
+        const previewKind = getMediaPreviewKind({
+            url: url?.originalUrl || url?.fileUrl,
+            fileName: url?.name,
+            mimeType: url?.type,
+        });
 
-        const fileUrl = url?.fileUrl || "";
-        const ext = getMediaExtension(fileUrl, url?.name);
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            downloadMediaFile(url?.originalUrl || url.fileUrl, url?.name);
-        } else {
+        if (isLightboxMediaKind(previewKind)) {
             setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
+                {
+                    src: url.fileUrl,
+                    downloadUrl: url.fileUrl,
+                    type: previewKind === "video" ? "video" : undefined
+                },
             ]);
             setOpenLightbox?.(true);
+            return;
         }
+
+        void openMediaInNewTab(url?.originalUrl || url?.fileUrl);
     }
 
     return (

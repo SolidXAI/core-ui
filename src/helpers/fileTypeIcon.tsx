@@ -27,18 +27,26 @@ const FILE_TYPE_ICON_MAP: Record<string, FileTypeIconTone> = {
     wav: { bg: "#DB2777", corner: "#F9A8D4" }
 };
 
-const getFileExtension = (fileUrl: string) => {
-    const cleanUrl = fileUrl.split("?")[0];
-    return cleanUrl.split(".").pop()?.toLowerCase() ?? "";
+const getFileExtension = (...values: Array<string | undefined>) => {
+    for (const value of values) {
+        if (!value) continue;
+        const cleanValue = value.split("?")[0];
+        const extension = cleanValue.split(".").pop()?.toLowerCase();
+        if (extension) {
+            return extension;
+        }
+    }
+
+    return "";
 };
 
-export const getFileTypeIconTone = (fileUrl: string) => {
-    const extension = getFileExtension(fileUrl);
+export const getFileTypeIconTone = (fileUrl: string, fileName?: string) => {
+    const extension = getFileExtension(fileName, fileUrl);
     return FILE_TYPE_ICON_MAP[extension] ?? DEFAULT_FILE_ICON;
 };
 
-export const SolidFileTypeIcon = ({ fileUrl, size = 24, className }: { fileUrl: string; size?: number; className?: string }) => {
-    const icon = getFileTypeIconTone(fileUrl);
+export const SolidFileTypeIcon = ({ fileUrl, fileName, size = 24, className }: { fileUrl: string; fileName?: string; size?: number; className?: string }) => {
+    const icon = getFileTypeIconTone(fileUrl, fileName);
 
     return (
         <svg
