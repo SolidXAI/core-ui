@@ -9,6 +9,7 @@ import { ERROR_MESSAGES } from '../../../constants/error-messages'
 import { permissionExpression } from '../../../helpers/permissions'
 import { SolidButton, SolidMessage } from '../../shad-cn-ui'
 import { Inbox, Loader2 } from 'lucide-react'
+import { renderMessageBodyMentions } from './chatterMentions'
 
 interface FilterState {
     name: string;
@@ -132,7 +133,8 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         user: msg.user?.fullName || "System",
                         userId: msg.user?.id,
                         messageType: "custom",
-                        message: msg.messageBody,
+                        message: renderMessageBodyMentions(msg.messageBody, msg.messageBodyMentions),
+                        messageBodyMentions: msg.messageBodyMentions,
                         time: new Date(displayTimeSource).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         createdAt: displayTimeSource,
                         date: formatDate(displayTimeSource),
@@ -245,6 +247,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                             userId={message.userId}
                             messageType={message.messageType}
                             message={message.message}
+                            messageBodyMentions={message.messageBodyMentions}
                             time={message.time}
                             auditRecord={message.auditRecord}
                             media={message.media}
