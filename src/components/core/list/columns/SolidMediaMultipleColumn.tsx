@@ -184,7 +184,11 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                 type="button"
                                 className="solid-file-icon-btn"
                                 aria-label="Download file"
-                                onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    downloadMediaFile(file?.fileUrl, file?.name);
+                                }}
                             >
                                 <SolidIcon name="si-download" aria-hidden />
                             </button>

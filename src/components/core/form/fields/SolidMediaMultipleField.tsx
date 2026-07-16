@@ -410,15 +410,19 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                     {fileDetails[0].name}
                                 </button>
                                 <div className={`${styles.mediaAttachmentActions} flex items-center gap-2`}>
-                                    <button
-                                        type="button"
-                                        className="solid-file-icon-btn"
-                                        disabled={isFieldDisabled || isFieldReadonly}
-                                        aria-label="Download file"
-                                        onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
-                                    >
-                                        <SolidIcon name="si-download" aria-hidden />
-                                    </button>
+                                        <button
+                                            type="button"
+                                            className="solid-file-icon-btn"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Download file"
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name);
+                                            }}
+                                        >
+                                            <SolidIcon name="si-download" aria-hidden />
+                                        </button>
                                     <button
                                         type="button"
                                         className="solid-file-icon-btn is-danger"
@@ -485,7 +489,11 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                         className="solid-file-icon-btn"
                                                         disabled={isFieldDisabled || isFieldReadonly}
                                                         aria-label="Download file"
-                                                        onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                                        onClick={(event) => {
+                                                            event.preventDefault();
+                                                            event.stopPropagation();
+                                                            downloadMediaFile(file?.fileUrl, file?.name);
+                                                        }}
                                                     >
                                                         <SolidIcon name="si-download" aria-hidden />
                                                     </button>
@@ -640,7 +648,11 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                 type="button"
                                 className="solid-file-icon-btn"
                                 aria-label="Download file"
-                                onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    downloadMediaFile(file?.fileUrl, file?.name);
+                                }}
                             >
                                 <SolidIcon name="si-download" aria-hidden />
                             </button>

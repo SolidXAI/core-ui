@@ -418,7 +418,11 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                             className="solid-file-icon-btn"
                                             disabled={isFieldDisabled || isFieldReadonly}
                                             aria-label="Download file"
-                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name);
+                                            }}
                                         >
                                             <SolidIcon name="si-download" aria-hidden />
                                         </button>
@@ -588,7 +592,11 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                         type="button"
                                         className="solid-file-icon-btn"
                                         aria-label="Download file"
-                                        onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name);
+                                        }}
                                     >
                                         <SolidIcon name="si-download" aria-hidden />
                                     </button>
