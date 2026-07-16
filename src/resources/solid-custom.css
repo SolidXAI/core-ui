@@ -3850,6 +3850,10 @@ html.dark .solid-header-cog-trigger:hover,
   padding-bottom: 8px;
 }
 
+.solid-table-paginator:focus-within {
+  z-index: 8;
+}
+
 .solid-table-paginator-align-end {
   align-self: end;
 }
@@ -4385,7 +4389,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   justify-content: space-between;
   gap: 1rem;
   padding: 0.625rem 0.85rem;
-  border-top: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  overflow: visible;
   background: color-mix(in srgb, var(--card) 94%, transparent);
 }
 

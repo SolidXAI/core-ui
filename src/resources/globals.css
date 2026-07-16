@@ -878,6 +878,20 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
   word-break: break-word;
 }
 
+.solid-popover-content.solid-field-tooltip-popover {
+  z-index: 9999;
+  border: none;
+  border-radius: 6px;
+  background: #111827;
+  color: #fff;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.3;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  max-width: 280px;
+  word-break: break-word;
+}
+
 .form-wrapper-subtitle {
   font-size: 0.75rem !important;
   font-weight: 700;

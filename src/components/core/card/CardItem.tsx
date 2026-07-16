@@ -16,6 +16,7 @@ interface CardItemProps {
   editButtonUrl?: string;
   cardNode?: any;
   DynamicCardWidget?: any;
+  onDelete?: (record: any) => void;
   onRecover?: (record: any) => void;
   setLightboxUrls?: any;
   setOpenLightbox?: any;
@@ -28,6 +29,7 @@ const CardItem: React.FC<CardItemProps> = ({
   editButtonUrl,
   cardNode,
   DynamicCardWidget,
+  onDelete,
   onRecover,
   setLightboxUrls,
   setOpenLightbox,
@@ -83,6 +85,15 @@ const CardItem: React.FC<CardItemProps> = ({
                 >
                   <SolidIcon name="si-refresh" className="solid-header-action-button-icon" aria-hidden />
                   <span className="solid-header-action-button-label">Recover</span>
+                </SolidDropdownMenuItem>
+              ) : null}
+              {onDelete && !isArchivedRecord ? (
+                <SolidDropdownMenuItem
+                  className="solid-header-dropdown-item solid-header-dropdown-item-danger"
+                  onSelect={() => onDelete(data)}
+                >
+                  <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
+                  <span className="solid-header-action-button-label">Delete</span>
                 </SolidDropdownMenuItem>
               ) : null}
             </SolidDropdownMenuContent>

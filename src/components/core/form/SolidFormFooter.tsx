@@ -3,7 +3,7 @@
 import { useLazyNavigationQuery } from "../../../redux/api/modelApi";
 import { useEffect, useState } from "react";
 import qs from "qs";
-import { setFilterObjectToLocalStorageByUrl, getFilterObjectFromLocalStorageByUrl } from "../list/SolidListView";
+import { setFilterObjectToLocalStorageByUrl, getFilterObjectFromLocalStorageByUrl } from "../common/globalSearchPersistence";
 import { SolidFormViewProps } from "./SolidFormView";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";

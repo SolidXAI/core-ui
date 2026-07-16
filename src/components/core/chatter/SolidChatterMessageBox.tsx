@@ -10,6 +10,9 @@ import { SolidButton, SolidLightbox, SolidTag, SolidTooltip, SolidTooltipContent
 import type { SolidLightboxSlide } from '../../shad-cn-ui/SolidLightbox'
 import { usePatchChatterMessageMutation, useUpdateChatterNoteMessageMutation } from '../../../redux/api/solidChatterMessageApi'
 import { useSession } from '../../../hooks/useSession'
+import { buildMessageBodyWithMentionTokens, parseMessageBodyMentions } from './chatterMentions'
+import { useChatterMentions } from './useChatterMentions'
+import { SolidChatterMentionMenu } from './SolidChatterMentionMenu'
 
 interface Props {
     messageId?: number | string,
@@ -17,6 +20,7 @@ interface Props {
     userId?: number,
     messageType?: string,
     message?: any,
+    messageBodyMentions?: unknown,
     time?: string,
     auditRecord?: any,
     messageSubType?: string,
@@ -56,7 +60,7 @@ const getFileIcon = (mimeType: string): SolidIconName => {
 };
 
 export const SolidChatterMessageBox = (props: Props) => {
-    const { messageId, user, userId, messageType, message, time, auditRecord, media, messageSubType, status, modelDisplayName, modelUserKey, onRefresh } = props;
+    const { messageId, user, userId, messageType, message, messageBodyMentions, time, auditRecord, media, messageSubType, status, modelDisplayName, modelUserKey, onRefresh } = props;
     const [lightboxSlides, setLightboxSlides] = useState<SolidLightboxSlide[]>([]);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [taskStatus, setTaskStatus] = useState<string | undefined>(status);
@@ -69,9 +73,27 @@ export const SolidChatterMessageBox = (props: Props) => {
     const [optimisticRemovedAttachmentIds, setOptimisticRemovedAttachmentIds] = useState<number[]>([]);
     const [hasPendingOptimisticAttachmentUpdate, setHasPendingOptimisticAttachmentUpdate] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const editTextareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [patchChatterMessage, { isLoading: isUpdatingTaskStatus }] = usePatchChatterMessageMutation();
     const [updateChatterNoteMessage, { isLoading: isUpdatingNote }] = useUpdateChatterNoteMessageMutation();
     const { data: session } = useSession();
+    const {
+        mentions: editMentions,
+        mentionRange,
+        mentionSuggestions,
+        activeMentionIndex,
+        isFetchingMentionUsers,
+        handleMentionTextChange,
+        handleMentionKeyDown,
+        handleMentionKeyUp,
+        handleMentionClick,
+        handleSelectMention,
+        resetMentions,
+    } = useChatterMentions({
+        value: editedMessage,
+        onChange: setEditedMessage,
+        textareaRef: editTextareaRef,
+    });
 
     const avatarStyle = useMemo(() => {
         const bg = stringToColor(user)
@@ -208,8 +230,10 @@ export const SolidChatterMessageBox = (props: Props) => {
         }
         setIsEditing(false);
         try {
+            const messageBody = buildMessageBodyWithMentionTokens(nextMessage, editMentions);
             const formData = new FormData();
-            formData.append('messageBody', nextMessage);
+            formData.append('messageBody', messageBody.body);
+            formData.append('messageBodyMentions', JSON.stringify(messageBody.mentions));
             if (removedAttachmentIds.length > 0) {
                 formData.append('removeAttachmentIds', removedAttachmentIds.join(','));
             }
@@ -227,10 +251,21 @@ export const SolidChatterMessageBox = (props: Props) => {
         }
     };
 
+    const handleEditKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        handleMentionKeyDown(event);
+        if (event.defaultPrevented) return;
+
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            event.preventDefault();
+            handleEditSave();
+        }
+    };
+
     const handleCancelEdit = () => {
         setEditedMessage(localMessage ?? '');
         setSelectedFiles([]);
         setRemovedAttachmentIds([]);
+        resetMentions(parseMessageBodyMentions(messageBodyMentions));
         setIsEditing(false);
     };
 
@@ -290,7 +325,10 @@ export const SolidChatterMessageBox = (props: Props) => {
                                         variant="ghost"
                                         className="solid-icon-button"
                                         leftIcon={<Pencil size={12} />}
-                                        onClick={() => setIsEditing(true)}
+                                        onClick={() => {
+                                            resetMentions(parseMessageBodyMentions(messageBodyMentions));
+                                            setIsEditing(true);
+                                        }}
                                         aria-label="Edit note"
                                         title="Edit note"
                                     />
@@ -314,11 +352,26 @@ export const SolidChatterMessageBox = (props: Props) => {
                         {isEditing && (
                             <div className='flex flex-col gap-2'>
                                 <SolidTextarea
+                                    ref={editTextareaRef}
                                     value={editedMessage}
-                                    onChange={(e) => setEditedMessage(e.target.value)}
+                                    onChange={handleMentionTextChange}
+                                    onKeyDown={handleEditKeyDown}
+                                    onKeyUp={handleMentionKeyUp}
+                                    onClick={handleMentionClick}
                                     rows={4}
                                     className="w-full py-2"
                                 />
+                                <p className={styles.chatterComposerHelp}>
+                                    Type @ to mention a user. Press Ctrl+Enter to save.
+                                </p>
+                                {mentionRange && (
+                                    <SolidChatterMentionMenu
+                                        isLoading={isFetchingMentionUsers}
+                                        users={mentionSuggestions}
+                                        activeIndex={activeMentionIndex}
+                                        onSelect={handleSelectMention}
+                                    />
+                                )}
                                 <div className='flex flex-col gap-2'>
                                     <input
                                         ref={fileInputRef}

@@ -1,10 +1,12 @@
 import styles from './chatter.module.css'
-import { useCreateChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
+import { usePostChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
 import { useEffect, useState, useRef } from 'react'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
-import { useSession } from '../../../hooks/useSession'
 import { SolidButton, SolidTextarea } from '../../shad-cn-ui'
 import { FileText, Paperclip, X } from 'lucide-react'
+import { buildMessageBodyWithMentionTokens } from './chatterMentions'
+import { useChatterMentions } from './useChatterMentions'
+import { SolidChatterMentionMenu } from './SolidChatterMentionMenu'
 
 interface SolidMessageComposerProps {
     type?: string;
@@ -19,18 +21,28 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-    const { data: session, status } = useSession();
-    const user = session?.user;
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
     // const { data: viewLayoutData } = useGetSolidViewLayoutQuery(null);
-    const [createChatterMessage, { isLoading, isSuccess, isError }] = useCreateChatterMessageMutation();
-
-    const tempEmails = [
-        "johndoe@gmal.com",
-        "tempmail@gmail.com",
-        "example@mail.com"
-    ]
+    const [postChatterMessage, { isLoading, isSuccess }] = usePostChatterMessageMutation();
+    const {
+        mentions,
+        mentionRange,
+        mentionSuggestions,
+        activeMentionIndex,
+        isFetchingMentionUsers,
+        handleMentionTextChange,
+        handleMentionKeyDown,
+        handleMentionKeyUp,
+        handleMentionClick,
+        handleSelectMention,
+        resetMentions,
+    } = useChatterMentions({
+        value: message,
+        onChange: setMessage,
+        textareaRef,
+    });
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -44,26 +56,46 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
         if (!message.trim() && selectedFiles.length === 0) return;
 
         try {
+            const messageBody = buildMessageBodyWithMentionTokens(message, mentions);
             const formData = new FormData();
-            formData.append('messageType', "custom");
             formData.append('messageSubType', "note");
-            formData.append('messageBody', message);
+            formData.append('messageBody', messageBody.body);
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);
-            formData.append('userId', user?.id || 1);
+            if (messageBody.mentions.length > 0) {
+                formData.append('messageBodyMentions', JSON.stringify(messageBody.mentions));
+            }
 
             if (modelUserKey) formData.append('modelUserKey', modelUserKey);
-            selectedFiles.forEach((file, index) => {
+            selectedFiles.forEach((file) => {
                 formData.append(`messageAttachments`, file);
             });
 
-            await createChatterMessage(formData).unwrap();
+            await postChatterMessage(formData).unwrap();
             setMessage('');
             setSelectedFiles([]);
+            resetMentions();
             onCancel?.();
         } catch (error) {
             console.error(ERROR_MESSAGES.FETCHING_MESSAGE, error);
         }
+    };
+
+    const handleComposerKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        handleMentionKeyDown(event);
+        if (event.defaultPrevented) return;
+
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            event.preventDefault();
+            event.currentTarget.form?.requestSubmit();
+        }
+    };
+
+    const resetComposer = () => {
+        setMessage('');
+        setSelectedFiles([]);
+        resetMentions();
+        onCancel?.();
     };
 
     useEffect(() => {
@@ -109,12 +141,27 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                     </p>
                 </div>
                 <SolidTextarea
+                    ref={textareaRef}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={handleMentionTextChange}
+                    onKeyDown={handleComposerKeyDown}
+                    onKeyUp={handleMentionKeyUp}
+                    onClick={handleMentionClick}
                     placeholder={type === 'email' ? 'Send a message to followers' : 'Log an internal note.'}
                     className="w-full p-2"
                     rows={4}
                 />
+                <p className={styles.chatterComposerHelp}>
+                    Type @ to mention a user. Press Ctrl+Enter to save.
+                </p>
+                {mentionRange && (
+                    <SolidChatterMentionMenu
+                        isLoading={isFetchingMentionUsers}
+                        users={mentionSuggestions}
+                        activeIndex={activeMentionIndex}
+                        onSelect={handleSelectMention}
+                    />
+                )}
                 <div className='flex items-center justify-between flex-wrap gap-2'>
                     <div className='flex items-center gap-2'>
                         <input
@@ -151,11 +198,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                             type='button'
                             size='sm'
                             variant='ghost'
-                            onClick={() => {
-                                setMessage('');
-                                setSelectedFiles([]);
-                                onCancel?.();
-                            }}
+                            onClick={resetComposer}
                         >
                             Cancel
                         </SolidButton>

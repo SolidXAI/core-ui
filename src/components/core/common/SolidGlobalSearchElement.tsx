@@ -4,7 +4,7 @@ import { toTitleCase } from "../../../helpers/helpers";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import { getFilterObjectFromLocalStorage } from "../list/SolidListView";
+import { getFilterObjectFromLocalStorage } from "./globalSearchPersistence";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";

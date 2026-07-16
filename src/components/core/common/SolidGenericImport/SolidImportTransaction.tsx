@@ -315,8 +315,10 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                                                         value={fieldMapping[sample.cellHeader]}
                                                         options={dropdownOptions}
                                                         onChange={(e) => handleChange(sample.cellHeader, e.value)}
-                                                        className="w-full"
+                                                        className="solid-import-mapping-select"
                                                         placeholder="Select field"
+                                                        native={false}
+                                                        menuPlacement="top"
                                                     />
                                                     {!isRequired ? (
                                                         <button

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { env } from "../adapters/env";
 import { getSession } from "../adapters/auth";
+import { handleSessionInvalidation, isSessionInvalidError } from "../adapters/auth/sessionInvalidation";
 import { backendHealthMonitor } from "../helpers/backendHealthMonitor";
 
 const baseURL = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
@@ -37,7 +38,7 @@ solidAxios.interceptors.response.use(
     backendHealthMonitor.reportSuccess();
     return response;
   },
-  (error) => {
+  async (error) => {
     const status = error?.response?.status;
     const isNetwork = !status || status >= 500;
     if (isNetwork) {
@@ -49,6 +50,11 @@ solidAxios.interceptors.response.use(
     } else {
       backendHealthMonitor.reportSuccess();
     }
+
+    if (isSessionInvalidError(error?.response?.data, status)) {
+      await handleSessionInvalidation();
+    }
+
     return Promise.reject(error);
   }
 );

@@ -1,6 +1,7 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query/react";
 import { getSession } from "../../adapters/auth/index";
+import { handleSessionInvalidation, isSessionInvalidError } from "../../adapters/auth/sessionInvalidation";
 import { env } from "../../adapters/env";
 import { logger } from "../../helpers/logger";
 import { backendHealthMonitor } from "../../helpers/backendHealthMonitor";
@@ -64,6 +65,10 @@ export const baseQueryWithAuth: BaseQueryFn<
       });
     } else {
       backendHealthMonitor.reportSuccess();
+    }
+
+    if (isSessionInvalidError((result.error as any)?.data, status)) {
+      await handleSessionInvalidation();
     }
   }
 
