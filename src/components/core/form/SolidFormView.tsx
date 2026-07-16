@@ -1,5 +1,5 @@
 import { useSession } from '../../../hooks/useSession'
-import { permissionExpression } from "../../../helpers/permissions";
+import { getFormViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery, useLazyGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -751,15 +751,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     useEffect(() => {
         const fetchPermissions = async () => {
             if (params.modelName) {
-                const permissionNames = [
-                    permissionExpression(params.modelName, 'create'),
-                    permissionExpression(params.modelName, 'delete'),
-                    permissionExpression(params.modelName, 'update'),
-                    permissionExpression(params.modelName, 'findOne'),
-                    permissionExpression(params.modelName, 'publish'),
-                    permissionExpression(params.modelName, 'unpublish'),
-                    permissionExpression('chatterMessage', 'findMany')
-                ]
+                const permissionNames = getFormViewPermissionNames(params.modelName);
                 const queryData = {
                     permissionNames: permissionNames
                 };
