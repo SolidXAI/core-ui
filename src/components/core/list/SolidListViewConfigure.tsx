@@ -92,7 +92,7 @@ export const SolidListViewConfigure = (
                 setView(pathSegments[pathSegments.length - 1]);
             }
         }
-    }, [])
+    }, [pathname])
 
     //Build a map of actionKey → boolean at the top level
     const headerActions = solidListViewLayout?.attrs ?? {};

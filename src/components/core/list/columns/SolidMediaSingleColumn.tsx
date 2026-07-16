@@ -150,6 +150,7 @@ export const DefaultMediaSingleListWidget = ({
     setOpenLightbox
 }: SolidMediaListFieldWidgetProps) => {
     if (!rowData?._media?.[fieldMetadata.name]) return null;
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
     const mediaUrls = rowData._media[fieldMetadata.name].map((i: any) => i._full_url);
 
     const firstUrl = mediaUrls[0];
@@ -160,8 +161,9 @@ export const DefaultMediaSingleListWidget = ({
             src={firstUrl}
             alt="media"
             onClick={(event) => {
-                // Only open lightbox for image, video, or audio
                 event.stopPropagation()
+                if (isArchivedRecord) return;
+                // Only open lightbox for image, video, or audio
                 if (isImageFile(cleanUrl) || isVideoFile(cleanUrl) || isAudioFile(cleanUrl)) {
                     setLightboxUrls([{ src: firstUrl, downloadUrl: firstUrl }]);
                     setOpenLightbox(true);

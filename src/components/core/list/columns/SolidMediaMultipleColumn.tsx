@@ -149,6 +149,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
     const [isShowAllFiles, setShowAllFiles] = useState(false);
 
     if (!rowData?._media?.[fieldMetadata.name]) return null;
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
 
     const fullrecord = rowData._media[fieldMetadata.name]?.map((file: any) => ({
         name: file.originalFileName,
@@ -164,6 +165,8 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
 
     const handleFileView = (file: any) => {
+        if (isArchivedRecord) return;
+
         const fileUrl = file?.fileUrl || "";
         // const cleanUrl = fileUrl.split("?")[0];
         // const ext = cleanUrl.split(".").pop()?.toLowerCase();
@@ -187,6 +190,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 src={fullrecord[0]?.fileUrl}
                 onClick={(event) => {
                     event.stopPropagation();
+                    if (isArchivedRecord) return;
 
                     // const cleanUrl = fullrecord[0]?.fileUrl.split("?")[0];
                     // const ext = cleanUrl.split(".").pop()?.toLowerCase();
@@ -219,6 +223,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 }}
                 onClick={(event) => {
                     event.stopPropagation();
+                    if (isArchivedRecord) return;
 
                     if (isDocumentType(fullrecord[0]?.fileUrl)) {
                         setShowAllFiles(true);

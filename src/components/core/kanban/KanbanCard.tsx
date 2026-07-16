@@ -128,22 +128,24 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           >
             {renderKanbanAction(data)}
             {DynamicCardWidget ? (
-              <DynamicCardWidget
-                rowData={data}
-                solidKanbanViewMetaData={solidKanbanViewMetaData}
-                solidView={solidKanbanViewMetaData?.solidView}
-                solidFieldsMetadata={solidKanbanViewMetaData?.solidFieldsMetadata}
-                card={cardNode}
-                layoutAttrs={solidKanbanViewMetaData?.solidView?.layout?.attrs || {}}
-                groupedView={true}
-                groupByFieldName={groupByFieldName}
-                group={group}
-                editButtonUrl={editButtonUrl}
-                setLightboxUrls={setLightboxUrls}
-                setOpenLightbox={setOpenLightbox}
-                openRecord={openRecord}
-                openEdit={openEdit}
-              />
+              <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
+                <DynamicCardWidget
+                  rowData={data}
+                  solidKanbanViewMetaData={solidKanbanViewMetaData}
+                  solidView={solidKanbanViewMetaData?.solidView}
+                  solidFieldsMetadata={solidKanbanViewMetaData?.solidFieldsMetadata}
+                  card={cardNode}
+                  layoutAttrs={solidKanbanViewMetaData?.solidView?.layout?.attrs || {}}
+                  groupedView={true}
+                  groupByFieldName={groupByFieldName}
+                  group={group}
+                  editButtonUrl={editButtonUrl}
+                  setLightboxUrls={isArchivedRecord ? undefined : setLightboxUrls}
+                  setOpenLightbox={isArchivedRecord ? undefined : setOpenLightbox}
+                  openRecord={openRecord}
+                  openEdit={openEdit}
+                />
+              </div>
             ) : null}
           </div>
         </div>
