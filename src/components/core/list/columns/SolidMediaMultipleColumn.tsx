@@ -139,7 +139,6 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
         size: file.fileSize,
         id: file.id,
         fileUrl: getAbsoluteMediaUrl(file?._full_url || file?.relativeUri),
-        originalUrl: getAbsoluteMediaUrl(file?._full_url || file?.relativeUri),
         previewKind: getMediaPreviewKind({
             url: file?._full_url || file?.relativeUri,
             fileName: file?.originalFileName,
@@ -163,7 +162,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
             return;
         }
 
-        void openMediaInNewTab(file?.originalUrl || file?.fileUrl);
+        openMediaInNewTab(file?.fileUrl);
     };
 
     const renderMediaFileCard = (file: any, className = "") => (
@@ -185,7 +184,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                 type="button"
                                 className="solid-file-icon-btn"
                                 aria-label="Download file"
-                                onClick={() => downloadMediaFile(file?.originalUrl || file?.fileUrl, file?.name)}
+                                onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
                             >
                                 <SolidIcon name="si-download" aria-hidden />
                             </button>

@@ -170,7 +170,7 @@ export const DefaultMediaSingleListWidget = ({
                     return;
                 }
 
-                void openMediaInNewTab(firstFile.fileUrl);
+                openMediaInNewTab(firstFile.fileUrl);
             }}
         />
     );

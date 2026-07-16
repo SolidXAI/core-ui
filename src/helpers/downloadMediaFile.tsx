@@ -5,7 +5,6 @@ const triggerBrowserDownload = (url: string, fileName?: string) => {
     const link = document.createElement("a");
     link.href = url;
     link.download = fileName || "";
-    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -36,15 +35,12 @@ export const downloadMediaFile = async (fileUrl: string, fileName?: string) => {
     }
 
     const absoluteUrl = getAbsoluteMediaUrl(fileUrl);
-    if (!isProtectedMediaUrl(fileUrl)) {
-        triggerBrowserDownload(absoluteUrl, fileName);
-        return;
-    }
-
-    const session = await getSession();
     const headers = new Headers();
-    if (session?.user?.accessToken) {
-        headers.set("Authorization", `Bearer ${session.user.accessToken}`);
+    if (isProtectedMediaUrl(fileUrl)) {
+        const session = await getSession();
+        if (session?.user?.accessToken) {
+            headers.set("Authorization", `Bearer ${session.user.accessToken}`);
+        }
     }
 
     const response = await fetch(absoluteUrl, { headers });

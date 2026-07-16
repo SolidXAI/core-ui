@@ -27,17 +27,14 @@ const FILE_TYPE_ICON_MAP: Record<string, FileTypeIconTone> = {
     wav: { bg: "#DB2777", corner: "#F9A8D4" }
 };
 
-const getFileExtension = (...values: Array<string | undefined>) => {
-    for (const value of values) {
-        if (!value) continue;
-        const cleanValue = value.split("?")[0];
-        const extension = cleanValue.split(".").pop()?.toLowerCase();
-        if (extension) {
-            return extension;
-        }
+const getFileExtension = (fileName?: string, fileUrl?: string) => {
+    const value = fileName || fileUrl;
+    if (!value) {
+        return "";
     }
 
-    return "";
+    const cleanValue = value.split("?")[0];
+    return cleanValue.split(".").pop()?.toLowerCase() ?? "";
 };
 
 export const getFileTypeIconTone = (fileUrl: string, fileName?: string) => {
