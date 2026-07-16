@@ -1,5 +1,5 @@
 import { getSession } from "../adapters/auth";
-import { getAbsoluteMediaUrl, isProtectedMediaUrl } from "./mediaUrl";
+import { isProtectedMediaUrl } from "./mediaUrl";
 
 const triggerBrowserDownload = (url: string, fileName?: string) => {
     const link = document.createElement("a");
@@ -34,7 +34,6 @@ export const downloadMediaFile = async (fileUrl: string, fileName?: string) => {
         return;
     }
 
-    const absoluteUrl = getAbsoluteMediaUrl(fileUrl);
     const headers = new Headers();
     if (isProtectedMediaUrl(fileUrl)) {
         const session = await getSession();
@@ -43,7 +42,7 @@ export const downloadMediaFile = async (fileUrl: string, fileName?: string) => {
         }
     }
 
-    const response = await fetch(absoluteUrl, { headers });
+    const response = await fetch(fileUrl, { headers });
     if (!response.ok) {
         throw new Error(`Failed to download media: ${response.status}`);
     }

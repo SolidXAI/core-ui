@@ -21,7 +21,7 @@ import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { getAbsoluteMediaUrl, openMediaInNewTab } from "../../../../helpers/mediaUrl";
+import { openMediaInNewTab } from "../../../../helpers/mediaUrl";
 import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
 import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
@@ -299,7 +299,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             return () => URL.revokeObjectURL(fileUrl);
         }
 
-        const fileUrl = getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri);
+        const fileUrl = fieldValue._full_url;
         if (!fileUrl) {
             setFileDetails(null);
             return;
@@ -525,7 +525,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
             return () => URL.revokeObjectURL(fileUrl);
         }
 
-        const fileUrl = getAbsoluteMediaUrl(fieldValue._full_url || fieldValue.relativeUri);
+        const fileUrl = fieldValue._full_url;
         if (!fileUrl) {
             setFileDetails(null);
             return;

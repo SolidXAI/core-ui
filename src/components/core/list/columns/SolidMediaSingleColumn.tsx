@@ -7,7 +7,7 @@ import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
 import { getMediaPreviewKind, isLightboxMediaKind, type MediaPreviewKind } from '../../../../helpers/mediaType';
-import { getAbsoluteMediaUrl, openMediaInNewTab } from '../../../../helpers/mediaUrl';
+import { openMediaInNewTab } from '../../../../helpers/mediaUrl';
 
 // Media component with fallback for broken links
 const MediaWithFallback = ({
@@ -135,7 +135,7 @@ export const DefaultMediaSingleListWidget = ({
 }: SolidMediaListFieldWidgetProps) => {
     if (!rowData?._media?.[fieldMetadata.name]) return null;
     const mediaFiles = rowData._media[fieldMetadata.name].map((file: any) => {
-        const fileUrl = getAbsoluteMediaUrl(file?._full_url || file?.relativeUri);
+        const fileUrl = file?._full_url;
         const previewKind = getMediaPreviewKind({
             url: fileUrl,
             fileName: file?.originalFileName,

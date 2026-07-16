@@ -22,7 +22,7 @@ import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { getAbsoluteMediaUrl, openMediaInNewTab } from "../../../../helpers/mediaUrl";
+import { openMediaInNewTab } from "../../../../helpers/mediaUrl";
 import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
@@ -214,7 +214,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     };
                 }
 
-                const fileUrl = getAbsoluteMediaUrl(file?._full_url || file?.relativeUri);
+                const fileUrl = file?._full_url;
                 if (!fileUrl) {
                     return null;
                 }
@@ -577,7 +577,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                     };
                 }
 
-                const fileUrl = getAbsoluteMediaUrl(file?._full_url || file?.relativeUri);
+                const fileUrl = file?._full_url;
                 if (!fileUrl) {
                     return null;
                 }

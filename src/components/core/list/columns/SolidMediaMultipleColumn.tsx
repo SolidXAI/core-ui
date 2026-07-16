@@ -9,7 +9,7 @@ import { FileReaderExt } from '../../../../components/common/FileReaderExt';
 import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle, SolidIcon } from "../../../shad-cn-ui";
 import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
 import { getMediaPreviewKind, isLightboxMediaKind, type MediaPreviewKind } from '../../../../helpers/mediaType';
-import { getAbsoluteMediaUrl, openMediaInNewTab } from '../../../../helpers/mediaUrl';
+import { openMediaInNewTab } from '../../../../helpers/mediaUrl';
 import { downloadMediaFile } from '../../../../helpers/downloadMediaFile';
 import styles from "../../form/fields/solidFields.module.css";
 
@@ -138,9 +138,9 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
         type: file.mimeType,
         size: file.fileSize,
         id: file.id,
-        fileUrl: getAbsoluteMediaUrl(file?._full_url || file?.relativeUri),
+        fileUrl: file?._full_url,
         previewKind: getMediaPreviewKind({
-            url: file?._full_url || file?.relativeUri,
+            url: file?._full_url,
             fileName: file?.originalFileName,
             mimeType: file?.mimeType,
         })
