@@ -42,15 +42,11 @@ type WorkflowNodeEditorValue = {
   retryPolicy?: Record<string, any>;
   onError?: "fail" | "continue";
   configuration?: Record<string, any>;
-  children?: WorkflowNodeEditorValue[];
-  nodes?: WorkflowNodeEditorValue[];
+  tasks?: WorkflowNodeEditorValue[];
   then?: WorkflowNodeEditorValue[];
   else?: WorkflowNodeEditorValue[];
-  branches?: Array<{
-    id: string;
-    name?: string;
-    nodes: WorkflowNodeEditorValue[];
-  }>;
+  defaults?: WorkflowNodeEditorValue[];
+  cases?: Record<string, WorkflowNodeEditorValue[]>;
 };
 
 type WorkflowNodeEditorDialogProps = WorkflowNodeSchemaEditorProps & {
@@ -135,8 +131,8 @@ function setPathValue(value: Record<string, any>, pathOrKey: string, nextValue: 
 }
 
 function getSlotCount(node: WorkflowNodeEditorValue, slot: WorkflowNodeChildSlotDefinition) {
-  if (slot.kind === "branch-collection") {
-    return Array.isArray(node.branches) ? node.branches.length : 0;
+  if (slot.kind === "case-collection") {
+    return Object.keys(node.cases ?? {}).length;
   }
 
   const value = node[slot.key];

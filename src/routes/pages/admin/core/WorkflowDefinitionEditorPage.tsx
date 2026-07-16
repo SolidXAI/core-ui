@@ -3,16 +3,13 @@ import {
   ArrowLeft,
   BookOpen,
   Braces,
-  ChevronLeft,
-  ChevronRight,
-  GitBranchPlus,
+  Workflow,
   Layers3,
   Play,
   RefreshCw,
   Save,
   Settings2,
   ShieldCheck,
-  X,
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -76,15 +73,11 @@ type WorkflowNodeRecord = {
   onError?: "fail" | "continue";
   configuration?: Record<string, any>;
   metadata?: Record<string, any>;
-  children?: WorkflowNodeRecord[];
-  nodes?: WorkflowNodeRecord[];
+  tasks?: WorkflowNodeRecord[];
   then?: WorkflowNodeRecord[];
   else?: WorkflowNodeRecord[];
-  branches?: Array<{
-    id: string;
-    name?: string;
-    nodes: WorkflowNodeRecord[];
-  }>;
+  defaults?: WorkflowNodeRecord[];
+  cases?: Record<string, WorkflowNodeRecord[]>;
 };
 
 type WorkflowDefinitionDsl = {
@@ -104,11 +97,22 @@ type ValidationState = {
   errors: string[];
 };
 
+type WorkflowDefinitionParseResult =
+  | {
+      ok: true;
+      definition: WorkflowDefinitionDsl;
+      yaml: string;
+    }
+  | {
+      ok: false;
+      errors: string[];
+      yaml: string;
+    };
+
 type WorkflowDetailTab =
   | "overview"
   | "topology"
   | "executions"
-  | "edit"
   | "revisions"
   | "triggers"
   | "logs"
@@ -158,41 +162,260 @@ function parseYamlValue<T>(value: string, fallback: T): T {
   return (parsed ?? fallback) as T;
 }
 
-function normalizeWorkflowDefinition(
-  definitionYaml: WorkflowDefinitionRecord["definitionYaml"],
-): WorkflowDefinitionDsl {
-  if (!definitionYaml) {
-    return createEmptyWorkflowDefinition();
-  }
-
-  let parsed: any = definitionYaml;
-  if (typeof definitionYaml === "string") {
-    try {
-      parsed = YAML.parse(definitionYaml);
-    } catch {
-      return createEmptyWorkflowDefinition();
-    }
-  }
-
+function normalizeWorkflowDefinition(parsed: Record<string, any>): WorkflowDefinitionDsl {
   return {
     ...createEmptyWorkflowDefinition(),
     ...(parsed ?? {}),
-    nodes: Array.isArray((parsed as any)?.nodes) ? (parsed as any).nodes : [],
-    triggers: Array.isArray((parsed as any)?.triggers)
-      ? (parsed as any).triggers
-      : [],
+    nodes: parsed.nodes,
+    triggers: parsed.triggers ?? [],
+  };
+}
+
+function validateWorkflowDefinitionSchema(
+  value: unknown,
+  nodeTypes: WorkflowNodeMetadataResponse[],
+  options: {
+    workflowKey?: string;
+    requireWorkflowKey?: boolean;
+    requireRootNode?: boolean;
+  } = {},
+): string[] {
+  const errors: string[] = [];
+  const nodeTypeMap = new Map(nodeTypes.map((item) => [item.type, item]));
+  const seenNodeIds = new Set<string>();
+  const validNodeKinds = new Set(["task", "control", "subflow"]);
+  const canonicalChildKeys = ["tasks", "then", "else", "defaults"];
+  const unsupportedChildKeys = ["children", "branches", "nodes"];
+
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return ["Workflow definition YAML must resolve to an object."];
+  }
+
+  const definition = value as Record<string, any>;
+
+  if (options.requireWorkflowKey && !String(options.workflowKey ?? "").trim()) {
+    errors.push("Workflow key is required.");
+  }
+
+  if (!Array.isArray(definition.nodes)) {
+    errors.push("Workflow definition YAML must include a nodes array.");
+  } else if (options.requireRootNode && !definition.nodes.length) {
+    errors.push("Workflow definition must contain at least one root node.");
+  }
+
+  if (
+    definition.triggers !== undefined &&
+    definition.triggers !== null &&
+    !Array.isArray(definition.triggers)
+  ) {
+    errors.push("Workflow definition triggers must be an array when provided.");
+  }
+
+  const validateNodeSequence = (nodes: unknown, scopeLabel: string) => {
+    if (!Array.isArray(nodes)) {
+      errors.push(`${scopeLabel} must be an array.`);
+      return;
+    }
+
+    nodes.forEach((nodeValue, index) => {
+      const prefix = `${scopeLabel} node ${index + 1}`;
+      if (!nodeValue || typeof nodeValue !== "object" || Array.isArray(nodeValue)) {
+        errors.push(`${prefix} must be an object.`);
+        return;
+      }
+
+      const node = nodeValue as WorkflowNodeRecord;
+      unsupportedChildKeys.forEach((key) => {
+        if (Object.prototype.hasOwnProperty.call(node, key)) {
+          errors.push(
+            `${prefix} uses unsupported child key "${key}". Use "tasks", "then", "else", "defaults", or "cases" instead.`,
+          );
+        }
+      });
+
+      canonicalChildKeys.forEach((key) => {
+        if (
+          node[key] !== undefined &&
+          node[key] !== null &&
+          !Array.isArray(node[key])
+        ) {
+          errors.push(`${prefix} field "${key}" must be an array when provided.`);
+        }
+      });
+
+      if (
+        node.cases !== undefined &&
+        node.cases !== null &&
+        (typeof node.cases !== "object" || Array.isArray(node.cases))
+      ) {
+        errors.push(`${prefix} field "cases" must be an object of arrays when provided.`);
+      } else if (node.cases && typeof node.cases === "object") {
+        Object.entries(node.cases).forEach(([caseKey, caseNodes]) => {
+          if (!Array.isArray(caseNodes)) {
+            errors.push(`${prefix} case "${caseKey}" must be an array.`);
+          }
+        });
+      }
+
+      if (!node.id) {
+        errors.push(`${prefix} is missing an id.`);
+      } else if (seenNodeIds.has(String(node.id))) {
+        errors.push(`Duplicate workflow node id "${node.id}".`);
+      } else {
+        seenNodeIds.add(String(node.id));
+      }
+
+      if (!node.kind) {
+        errors.push(`${prefix} is missing a kind.`);
+      } else if (!validNodeKinds.has(String(node.kind))) {
+        errors.push(
+          `${prefix} has unsupported kind "${node.kind}". Expected task, control, or subflow.`,
+        );
+      }
+
+      if (!node.type) {
+        errors.push(`${prefix} is missing a type.`);
+      }
+
+      const nodeType = node.type ? nodeTypeMap.get(String(node.type)) : undefined;
+      if (node.type && nodeTypes.length && !nodeType) {
+        errors.push(`Node "${node.id ?? prefix}" uses unregistered type "${node.type}".`);
+      }
+
+      if (node.kind && nodeType && node.kind !== nodeType.kind) {
+        errors.push(
+          `Node "${node.id}" kind "${node.kind}" does not match registered type "${node.type}" kind "${nodeType.kind}".`,
+        );
+      }
+
+      const configuration = node.configuration ?? {};
+      if (
+        node.configuration !== undefined &&
+        node.configuration !== null &&
+        (typeof node.configuration !== "object" || Array.isArray(node.configuration))
+      ) {
+        errors.push(`Node "${node.id ?? prefix}" configuration must be an object.`);
+      }
+
+      (nodeType?.authoring?.configurationFields ?? []).forEach((field) => {
+        if (!field.required) {
+          return;
+        }
+
+        const valueForField =
+          configuration && typeof configuration === "object"
+            ? getFieldValue(configuration, field.path ?? field.key)
+            : undefined;
+        const isEmptyArray = Array.isArray(valueForField) && valueForField.length === 0;
+        const isMissing =
+          valueForField === undefined ||
+          valueForField === null ||
+          valueForField === "" ||
+          isEmptyArray;
+
+        if (isMissing) {
+          errors.push(
+            `Node "${node.id}" is missing required field "${field.label ?? field.key}".`,
+          );
+        }
+      });
+
+      (nodeType?.authoring?.childSlots ?? []).forEach((slot) => {
+        const slotNodes =
+          slot.kind === "case-collection"
+            ? Object.values(node.cases ?? {}).flat()
+            : Array.isArray(node[slot.key])
+              ? node[slot.key]
+              : [];
+        const slotCount =
+          slot.kind === "case-collection"
+            ? Object.keys(node.cases ?? {}).length
+            : slotNodes.length;
+        if (slot.required && slotCount === 0) {
+          errors.push(
+            `Node "${node.id}" requires at least one child node in "${slot.label ?? slot.key}".`,
+          );
+        }
+        if (slot.minItems && slotCount < slot.minItems) {
+          errors.push(
+            `Node "${node.id}" requires at least ${slot.minItems} nodes in "${slot.label ?? slot.key}".`,
+          );
+        }
+      });
+
+      validateNodeSequence(node.tasks ?? [], `${node.id ?? prefix} tasks`);
+      validateNodeSequence(node.then ?? [], `${node.id ?? prefix} then`);
+      validateNodeSequence(node.else ?? [], `${node.id ?? prefix} else`);
+      validateNodeSequence(node.defaults ?? [], `${node.id ?? prefix} defaults`);
+      Object.entries(node.cases ?? {}).forEach(([caseKey, caseNodes]) => {
+        validateNodeSequence(caseNodes, `${node.id ?? prefix} case "${caseKey}"`);
+      });
+    });
+  };
+
+  if (Array.isArray(definition.nodes)) {
+    validateNodeSequence(definition.nodes, "root");
+  }
+
+  return errors;
+}
+
+function parseWorkflowDefinitionYaml(
+  definitionYaml: WorkflowDefinitionRecord["definitionYaml"],
+  nodeTypes: WorkflowNodeMetadataResponse[],
+): WorkflowDefinitionParseResult {
+  if (!definitionYaml) {
+    const definition = createEmptyWorkflowDefinition();
+    return {
+      ok: true,
+      definition,
+      yaml: serializeWorkflowDefinitionYaml(definition),
+    };
+  }
+
+  let parsed: unknown = definitionYaml;
+  const yaml =
+    typeof definitionYaml === "string"
+      ? definitionYaml
+      : serializeWorkflowDefinitionYaml(definitionYaml);
+
+  if (typeof definitionYaml === "string") {
+    try {
+      parsed = YAML.parse(definitionYaml);
+    } catch (error: any) {
+      return {
+        ok: false,
+        errors: [`Invalid workflow YAML: ${error?.message ?? "Unable to parse YAML."}`],
+        yaml,
+      };
+    }
+  }
+
+  const errors = validateWorkflowDefinitionSchema(parsed, nodeTypes);
+  if (errors.length) {
+    return {
+      ok: false,
+      errors,
+      yaml,
+    };
+  }
+
+  return {
+    ok: true,
+    definition: normalizeWorkflowDefinition(parsed as Record<string, any>),
+    yaml,
   };
 }
 
 function flattenWorkflowNodeIds(nodes: WorkflowNodeRecord[]): string[] {
   return nodes.flatMap((node) => [
     String(node.id),
-    ...flattenWorkflowNodeIds(node.children ?? []),
-    ...flattenWorkflowNodeIds(node.nodes ?? []),
+    ...flattenWorkflowNodeIds(node.tasks ?? []),
     ...flattenWorkflowNodeIds(node.then ?? []),
     ...flattenWorkflowNodeIds(node.else ?? []),
-    ...(node.branches ?? []).flatMap((branch) =>
-      flattenWorkflowNodeIds(branch.nodes ?? []),
+    ...flattenWorkflowNodeIds(node.defaults ?? []),
+    ...Object.values(node.cases ?? {}).flatMap((caseNodes) =>
+      flattenWorkflowNodeIds(caseNodes),
     ),
   ]);
 }
@@ -212,30 +435,17 @@ function buildNodeId(type: string, definition: WorkflowDefinitionDsl) {
   return attempt;
 }
 
-function buildBranchId(parentNodeId: string, node: WorkflowNodeRecord) {
-  const existingIds = new Set((node.branches ?? []).map((branch) => branch.id));
-  let counter = (node.branches ?? []).length + 1;
-  let nextId = `${parentNodeId}Branch${counter}`;
-
-  while (existingIds.has(nextId)) {
-    counter += 1;
-    nextId = `${parentNodeId}Branch${counter}`;
-  }
-
-  return nextId;
-}
-
 function countNodes(nodes: WorkflowNodeRecord[]): number {
   return nodes.reduce(
     (sum, node) =>
       sum +
       1 +
-      countNodes(node.children ?? []) +
-      countNodes(node.nodes ?? []) +
+      countNodes(node.tasks ?? []) +
       countNodes(node.then ?? []) +
       countNodes(node.else ?? []) +
-      (node.branches ?? []).reduce(
-        (branchSum, branch) => branchSum + countNodes(branch.nodes ?? []),
+      countNodes(node.defaults ?? []) +
+      Object.values(node.cases ?? {}).reduce(
+        (caseSum, caseNodes) => caseSum + countNodes(caseNodes),
         0,
       ),
     0,
@@ -425,14 +635,13 @@ function findNodeById(
     }
 
     const fromChildren =
-      findNodeById(node.children ?? [], nodeId) ??
-      findNodeById(node.nodes ?? [], nodeId) ??
+      findNodeById(node.tasks ?? [], nodeId) ??
       findNodeById(node.then ?? [], nodeId) ??
       findNodeById(node.else ?? [], nodeId) ??
-      (node.branches ?? []).reduce<WorkflowNodeRecord | undefined>(
-        (found, branch) => found ?? findNodeById(branch.nodes ?? [], nodeId),
-        undefined,
-      );
+      findNodeById(node.defaults ?? [], nodeId) ??
+      Object.values(node.cases ?? {})
+        .map((caseNodes) => findNodeById(caseNodes, nodeId))
+        .find(Boolean);
 
     if (fromChildren) {
       return fromChildren;
@@ -458,16 +667,20 @@ function updateNodeById(
 
     return {
       ...node,
-      children: node.children
-        ? updateNodeById(node.children, nodeId, updater)
-        : node.children,
-      nodes: node.nodes ? updateNodeById(node.nodes, nodeId, updater) : node.nodes,
+      tasks: node.tasks ? updateNodeById(node.tasks, nodeId, updater) : node.tasks,
       then: node.then ? updateNodeById(node.then, nodeId, updater) : node.then,
       else: node.else ? updateNodeById(node.else, nodeId, updater) : node.else,
-      branches: node.branches?.map((branch) => ({
-        ...branch,
-        nodes: updateNodeById(branch.nodes ?? [], nodeId, updater),
-      })),
+      defaults: node.defaults
+        ? updateNodeById(node.defaults, nodeId, updater)
+        : node.defaults,
+      cases: node.cases
+        ? Object.fromEntries(
+            Object.entries(node.cases).map(([caseKey, caseNodes]) => [
+              caseKey,
+              updateNodeById(caseNodes, nodeId, updater),
+            ]),
+          )
+        : node.cases,
     };
   });
 }
@@ -480,14 +693,20 @@ function removeNodeById(
     .filter((node) => String(node.id) !== nodeId)
     .map((node) => ({
       ...node,
-      children: node.children ? removeNodeById(node.children, nodeId) : node.children,
-      nodes: node.nodes ? removeNodeById(node.nodes, nodeId) : node.nodes,
+      tasks: node.tasks ? removeNodeById(node.tasks, nodeId) : node.tasks,
       then: node.then ? removeNodeById(node.then, nodeId) : node.then,
       else: node.else ? removeNodeById(node.else, nodeId) : node.else,
-      branches: node.branches?.map((branch) => ({
-        ...branch,
-        nodes: removeNodeById(branch.nodes ?? [], nodeId),
-      })),
+      defaults: node.defaults
+        ? removeNodeById(node.defaults, nodeId)
+        : node.defaults,
+      cases: node.cases
+        ? Object.fromEntries(
+            Object.entries(node.cases).map(([caseKey, caseNodes]) => [
+              caseKey,
+              removeNodeById(caseNodes, nodeId),
+            ]),
+          )
+        : node.cases,
     }));
 }
 
@@ -511,48 +730,28 @@ function insertNodeIntoDefinition(
   return {
     ...definition,
     nodes: updateNodeById(definition.nodes, target.parentNodeId, (node) => {
-      if (target.scope === "slot") {
-        const slotNodes = Array.isArray(node[target.slotKey])
-          ? (node[target.slotKey] as WorkflowNodeRecord[])
+      if (target.scope === "case") {
+        const cases = node.cases ?? {};
+        const caseNodes = Array.isArray(cases[target.caseKey])
+          ? cases[target.caseKey]
           : [];
         return {
           ...node,
-          [target.slotKey]: insertAt(slotNodes, target.index, nodeToInsert),
+          cases: {
+            ...cases,
+            [target.caseKey]: insertAt(caseNodes, target.index, nodeToInsert),
+          },
         };
       }
 
+      const slotNodes = Array.isArray(node[target.slotKey])
+        ? (node[target.slotKey] as WorkflowNodeRecord[])
+        : [];
       return {
         ...node,
-        branches: (node.branches ?? []).map((branch) =>
-          branch.id === target.branchId
-            ? {
-                ...branch,
-                nodes: insertAt(branch.nodes ?? [], target.index, nodeToInsert),
-              }
-            : branch,
-        ),
+        [target.slotKey]: insertAt(slotNodes, target.index, nodeToInsert),
       };
     }),
-  };
-}
-
-function appendBranchToDefinition(
-  definition: WorkflowDefinitionDsl,
-  parentNodeId: string,
-): WorkflowDefinitionDsl {
-  return {
-    ...definition,
-    nodes: updateNodeById(definition.nodes, parentNodeId, (node) => ({
-      ...node,
-      branches: [
-        ...(node.branches ?? []),
-        {
-          id: buildBranchId(parentNodeId, node),
-          name: `Branch ${(node.branches ?? []).length + 1}`,
-          nodes: [],
-        },
-      ],
-    })),
   };
 }
 
@@ -573,108 +772,11 @@ function validateWorkflowDefinitionClient(
   nodeTypes: WorkflowNodeMetadataResponse[],
   workflowKey: string,
 ): string[] {
-  const errors: string[] = [];
-  const nodeTypeMap = new Map(nodeTypes.map((item) => [item.type, item]));
-  const seenNodeIds = new Set<string>();
-
-  if (!workflowKey.trim()) {
-    errors.push("Workflow key is required.");
-  }
-
-  if (!Array.isArray(definition.nodes) || !definition.nodes.length) {
-    errors.push("Workflow definition must contain at least one root node.");
-  }
-
-  const validateNodeSequence = (nodes: WorkflowNodeRecord[], scopeLabel: string) => {
-    nodes.forEach((node, index) => {
-      const prefix = `${scopeLabel} node ${index + 1}`;
-
-      if (!node.id) {
-        errors.push(`${prefix} is missing an id.`);
-      } else if (seenNodeIds.has(node.id)) {
-        errors.push(`Duplicate workflow node id "${node.id}".`);
-      } else {
-        seenNodeIds.add(node.id);
-      }
-
-      if (!node.type) {
-        errors.push(`${prefix} is missing a type.`);
-        return;
-      }
-
-      const nodeType = nodeTypeMap.get(node.type);
-      if (!nodeType) {
-        errors.push(`Node "${node.id}" uses unregistered type "${node.type}".`);
-        return;
-      }
-
-      const configuration = node.configuration ?? {};
-      (nodeType.authoring?.configurationFields ?? []).forEach((field) => {
-        if (!field.required) {
-          return;
-        }
-
-        const value = getFieldValue(configuration, field.path ?? field.key);
-        const isEmptyArray = Array.isArray(value) && value.length === 0;
-        const isMissing =
-          value === undefined ||
-          value === null ||
-          value === "" ||
-          isEmptyArray;
-
-        if (isMissing) {
-          errors.push(
-            `Node "${node.id}" is missing required field "${field.label ?? field.key}".`,
-          );
-        }
-      });
-
-      (nodeType.authoring?.childSlots ?? []).forEach((slot) => {
-        if (slot.kind === "branch-collection") {
-          const branchCount = Array.isArray(node.branches) ? node.branches.length : 0;
-          if (slot.required && branchCount === 0) {
-            errors.push(
-              `Node "${node.id}" requires at least one branch in "${slot.label ?? slot.key}".`,
-            );
-          }
-          if (slot.minItems && branchCount < slot.minItems) {
-            errors.push(
-              `Node "${node.id}" requires at least ${slot.minItems} branches in "${slot.label ?? slot.key}".`,
-            );
-          }
-        } else {
-          const slotNodes = Array.isArray(node[slot.key]) ? node[slot.key] : [];
-          if (slot.required && slotNodes.length === 0) {
-            errors.push(
-              `Node "${node.id}" requires at least one child node in "${slot.label ?? slot.key}".`,
-            );
-          }
-          if (slot.minItems && slotNodes.length < slot.minItems) {
-            errors.push(
-              `Node "${node.id}" requires at least ${slot.minItems} nodes in "${slot.label ?? slot.key}".`,
-            );
-          }
-        }
-      });
-
-      validateNodeSequence(node.children ?? [], `${node.id} children`);
-      validateNodeSequence(node.nodes ?? [], `${node.id} nodes`);
-      validateNodeSequence(node.then ?? [], `${node.id} then`);
-      validateNodeSequence(node.else ?? [], `${node.id} else`);
-      (node.branches ?? []).forEach((branch, branchIndex) => {
-        if (!branch.id) {
-          errors.push(`Node "${node.id}" has a branch without an id.`);
-        }
-        validateNodeSequence(
-          branch.nodes ?? [],
-          `${node.id} branch ${branch.name ?? branch.id ?? branchIndex + 1}`,
-        );
-      });
-    });
-  };
-
-  validateNodeSequence(definition.nodes, "root");
-  return errors;
+  return validateWorkflowDefinitionSchema(definition, nodeTypes, {
+    workflowKey,
+    requireWorkflowKey: true,
+    requireRootNode: true,
+  });
 }
 
 export function WorkflowDefinitionEditorPage() {
@@ -751,7 +853,6 @@ export function WorkflowDefinitionEditorPage() {
   const [workflowInputsValue, setWorkflowInputsValue] = React.useState("{}");
   const [workflowVariablesValue, setWorkflowVariablesValue] = React.useState("{}");
   const [workflowTriggersValue, setWorkflowTriggersValue] = React.useState("[]");
-  const [docsOpen, setDocsOpen] = React.useState(false);
   const [docsNodeTypeKey, setDocsNodeTypeKey] = React.useState<string>("");
   const [topologyDocsOpen, setTopologyDocsOpen] = React.useState(false);
   const [topologyDocsNodeTypeKey, setTopologyDocsNodeTypeKey] =
@@ -759,13 +860,8 @@ export function WorkflowDefinitionEditorPage() {
   const [topologyDocsModel, setTopologyDocsModel] =
     React.useState<WorkflowDocsModel | undefined>();
   const [detailTab, setDetailTab] = React.useState<WorkflowDetailTab>(
-    workflowDefinitionId === "new" ? "edit" : "overview",
+    workflowDefinitionId === "new" ? "topology" : "overview",
   );
-  const [activePanel, setActivePanel] = React.useState<"code" | "flow" | "docs">(
-    "flow",
-  );
-  const [toolsOpen, setToolsOpen] = React.useState(false);
-  const [codePaneOpen, setCodePaneOpen] = React.useState(false);
   const [topologyViewOpen, setTopologyViewOpen] = React.useState(true);
   const [topologyYamlViewOpen, setTopologyYamlViewOpen] = React.useState(false);
   const [topologySplitPercent, setTopologySplitPercent] = React.useState(
@@ -780,7 +876,7 @@ export function WorkflowDefinitionEditorPage() {
   });
 
   React.useEffect(() => {
-    setDetailTab(workflowDefinitionId === "new" ? "edit" : "overview");
+    setDetailTab(workflowDefinitionId === "new" ? "topology" : "overview");
   }, [workflowDefinitionId]);
 
   React.useEffect(() => {
@@ -803,21 +899,39 @@ export function WorkflowDefinitionEditorPage() {
       return;
     }
 
-    if (!record) {
+    if (!record || (isNodeTypesLoading && !nodeTypes.length)) {
       return;
     }
 
-    const normalized = normalizeWorkflowDefinition(record.definitionYaml);
+    const parsed = parseWorkflowDefinitionYaml(record.definitionYaml, nodeTypes);
     setWorkflowKey(record.key ?? "");
     setWorkflowDisplayName(record.displayName ?? "");
-    setWorkflowDescription(record.description ?? normalized.description ?? "");
-    setDefinitionDraft(normalized);
-    setCodeValue(serializeWorkflowDefinitionYaml(normalized));
-    setCodeError(null);
-    setSelectedNodeId(getFirstNodeId(normalized.nodes));
+    setSelectedNodeId("");
     setSelectedTriggerId("");
+    setCodeValue(parsed.yaml);
+
+    if (!parsed.ok) {
+      const nextError = parsed.errors.join("\n");
+      setWorkflowDescription(record.description ?? "");
+      setDefinitionDraft(createEmptyWorkflowDefinition());
+      setCodeError(nextError);
+      setValidationState({
+        status: "invalid",
+        source: "client",
+        message: "Workflow definition YAML is invalid.",
+        errors: parsed.errors,
+      });
+      setDetailTab("topology");
+      setTopologyYamlViewOpen(true);
+      return;
+    }
+
+    setWorkflowDescription(record.description ?? parsed.definition.description ?? "");
+    setDefinitionDraft(parsed.definition);
+    setCodeError(null);
+    setSelectedNodeId(getFirstNodeId(parsed.definition.nodes));
     setValidationState({ status: "idle", errors: [] });
-  }, [record, workflowDefinitionId]);
+  }, [isNodeTypesLoading, nodeTypes, record, workflowDefinitionId]);
 
   React.useEffect(() => {
     if (!paletteNodeTypeKey && nodeTypes.length) {
@@ -1151,21 +1265,22 @@ export function WorkflowDefinitionEditorPage() {
     const safeValue = nextValue ?? "";
     setCodeValue(safeValue);
 
-    try {
-      const parsed = YAML.parse(safeValue);
-      const normalized = normalizeWorkflowDefinition(parsed);
-      setDefinitionDraft(normalized);
-      setCodeError(null);
-      setValidationState({ status: "idle", errors: [] });
-    } catch (error: any) {
-      setCodeError(error?.message ?? "Invalid YAML");
+    const parsed = parseWorkflowDefinitionYaml(safeValue, nodeTypes);
+    if (!parsed.ok) {
+      const nextError = parsed.errors.join("\n");
+      setCodeError(nextError);
       setValidationState({
         status: "invalid",
         source: "client",
         message: "Definition YAML is invalid.",
-        errors: [error?.message ?? "Invalid YAML"],
+        errors: parsed.errors,
       });
+      return;
     }
+
+    setDefinitionDraft(parsed.definition);
+    setCodeError(null);
+    setValidationState({ status: "idle", errors: [] });
   };
 
   const startTopologySplitResize = React.useCallback(
@@ -1208,13 +1323,11 @@ export function WorkflowDefinitionEditorPage() {
     };
 
     (nodeType.authoring?.childSlots ?? []).forEach((slot) => {
-      if (slot.kind === "branch-collection") {
-        const branchCount = Math.max(slot.minItems ?? 0, slot.required ? 1 : 0);
-        nextNode.branches = Array.from({ length: branchCount }, (_, index) => ({
-          id: `${nextNode.id}Branch${index + 1}`,
-          name: `Branch ${index + 1}`,
-          nodes: [],
-        }));
+      if (slot.kind === "case-collection") {
+        nextNode[slot.key] = nextNode[slot.key] ?? {
+          true: [],
+          false: [],
+        };
         return;
       }
 
@@ -1234,7 +1347,7 @@ export function WorkflowDefinitionEditorPage() {
           errors: [codeError],
         };
         setValidationState(nextState);
-        setActivePanel("code");
+        setDetailTab("topology");
         return { valid: false, errors: nextState.errors };
       }
 
@@ -1261,7 +1374,7 @@ export function WorkflowDefinitionEditorPage() {
           errors: clientErrors,
         };
         setValidationState(nextState);
-        setActivePanel("flow");
+        setDetailTab("topology");
         return { valid: false, errors: clientErrors };
       }
 
@@ -1304,7 +1417,7 @@ export function WorkflowDefinitionEditorPage() {
           errors: [detail],
         };
         setValidationState(nextState);
-        setActivePanel("flow");
+        setDetailTab("topology");
         return { valid: false, errors: [detail] };
       }
     },
@@ -1337,12 +1450,7 @@ export function WorkflowDefinitionEditorPage() {
     setSelectedNodeId(nextNode.id);
     setDocsNodeTypeKey(nextNode.type);
     setEditorOpen(true);
-    setActivePanel("flow");
-  };
-
-  const handleAddBranch = (parentNodeId: string) => {
-    const nextDraft = appendBranchToDefinition(definitionDraft, parentNodeId);
-    syncDraftToCode(nextDraft);
+    setDetailTab("topology");
   };
 
   const handleUpdateSelectedNode = (nextNode: WorkflowNodeRecord) => {
@@ -1525,7 +1633,7 @@ export function WorkflowDefinitionEditorPage() {
             <SolidButton leftIcon={<Save size={16} />} onClick={handleSave}>
               Save Workflow
             </SolidButton>
-            <SolidButton variant="outline" onClick={() => setDetailTab("edit")}>
+            <SolidButton variant="outline" onClick={() => setDetailTab("topology")}>
               Continue Editing
             </SolidButton>
           </div>
@@ -1535,7 +1643,7 @@ export function WorkflowDefinitionEditorPage() {
       <div className="workflow-editor-overview workflow-editor-overview--empty">
         <div className="workflow-editor-overview-cta">
           <div className="workflow-editor-overview-cta__art">
-            <GitBranchPlus size={28} />
+            <Workflow size={28} />
           </div>
           <div className="workflow-editor-overview-cta__copy">
             <h2>{workflowDisplayName || record?.displayName || workflowKey || "Workflow"}</h2>
@@ -1552,7 +1660,7 @@ export function WorkflowDefinitionEditorPage() {
             >
               Execute Workflow
             </SolidButton>
-            <SolidButton variant="outline" onClick={() => setDetailTab("edit")}>
+            <SolidButton variant="outline" onClick={() => setDetailTab("topology")}>
               Open Builder
             </SolidButton>
           </div>
@@ -1564,8 +1672,8 @@ export function WorkflowDefinitionEditorPage() {
             <p>Execution KPIs and health snapshots appear here after the first successful run.</p>
           </div>
           <div className="workflow-editor-overview-guide-card">
-            <h3>Edit</h3>
-            <p>Refine YAML, topology, nodes, inputs, and triggers inside the builder workspace.</p>
+            <h3>Topology</h3>
+            <p>Refine YAML, topology, nodes, inputs, and triggers inside the topology workspace.</p>
           </div>
           <div className="workflow-editor-overview-guide-card">
             <h3>Executions</h3>
@@ -1755,7 +1863,7 @@ export function WorkflowDefinitionEditorPage() {
               >
                 Execute Again
               </SolidButton>
-              <SolidButton variant="outline" onClick={() => setDetailTab("edit")}>
+              <SolidButton variant="outline" onClick={() => setDetailTab("topology")}>
                 Open Builder
               </SolidButton>
               <SolidButton
@@ -1771,67 +1879,86 @@ export function WorkflowDefinitionEditorPage() {
       </div>
     );
 
-  const hasTopologyGraph =
-    definitionDraft.nodes.length || (definitionDraft.triggers?.length ?? 0) > 0;
-
-  const topologyCanvasView = hasTopologyGraph ? (
-    <div className="workflow-editor-canvas-shell workflow-editor-canvas-shell--readonly">
-      <WorkflowFlowCanvas
-        definition={definitionDraft}
-        nodeTypes={nodeTypes}
-        selectedNodeId={selectedNodeId}
-        selectedTriggerId={selectedTriggerId}
-        onSelectNode={(nodeId) => {
-          setSelectedNodeId(nodeId);
-          setSelectedTriggerId("");
-          const node = findNodeById(definitionDraft.nodes, nodeId);
-          if (node?.type) {
-            setDocsNodeTypeKey(node.type);
-          }
-        }}
-        onSelectTrigger={(triggerId) => {
-          setSelectedTriggerId(triggerId);
-          setSelectedNodeId("");
-          setDocsNodeTypeKey("");
-        }}
-        onEditNode={() => {}}
-        onDeleteNode={() => {}}
-        onViewDocs={(nodeId) => {
-          const node = findNodeById(definitionDraft.nodes, nodeId);
-          if (node?.type) {
+  const topologyCanvasView = (
+    <div className="workflow-editor-canvas-shell">
+      {codeError ? (
+        <div className="workflow-editor-definition-error">
+          <div className="workflow-editor-definition-error__icon">
+            <Braces size={20} />
+          </div>
+          <div className="workflow-editor-definition-error__content">
+            <h3>Workflow definition YAML is invalid</h3>
+            <p>
+              The topology cannot be rendered until the saved YAML parses and matches
+              the current workflow schema.
+            </p>
+            <pre>{codeError}</pre>
+            {!topologyYamlViewOpen ? (
+              <SolidButton
+                size="small"
+                variant="outline"
+                onClick={() => setTopologyYamlViewOpen(true)}
+              >
+                Show YAML
+              </SolidButton>
+            ) : null}
+          </div>
+        </div>
+      ) : (
+        <WorkflowFlowCanvas
+          definition={definitionDraft}
+          nodeTypes={nodeTypes}
+          selectedNodeId={selectedNodeId}
+          selectedTriggerId={selectedTriggerId}
+          activePaletteNodeType={paletteNodeType}
+          onSelectNode={(nodeId) => {
             setSelectedNodeId(nodeId);
             setSelectedTriggerId("");
-            setDocsNodeTypeKey(node.type);
-            setTopologyDocsNodeTypeKey(node.type);
-            setTopologyDocsModel(undefined);
+            const node = findNodeById(definitionDraft.nodes, nodeId);
+            if (node?.type) {
+              setDocsNodeTypeKey(node.type);
+            }
+          }}
+          onSelectTrigger={(triggerId) => {
+            setSelectedTriggerId(triggerId);
+            setSelectedNodeId("");
+            setDocsNodeTypeKey("");
+          }}
+          onEditNode={(nodeId) => {
+            setSelectedNodeId(nodeId);
+            setSelectedTriggerId("");
+            const node = findNodeById(definitionDraft.nodes, nodeId);
+            if (node?.type) {
+              setDocsNodeTypeKey(node.type);
+            }
+            setEditorOpen(true);
+          }}
+          onDeleteNode={handleRemoveNode}
+          onViewDocs={(nodeId) => {
+            const node = findNodeById(definitionDraft.nodes, nodeId);
+            if (node?.type) {
+              setSelectedNodeId(nodeId);
+              setSelectedTriggerId("");
+              setDocsNodeTypeKey(node.type);
+              setTopologyDocsNodeTypeKey(node.type);
+              setTopologyDocsModel(undefined);
+              setTopologyDocsOpen(true);
+            }
+          }}
+          onViewTriggerDocs={(triggerId) => {
+            const trigger = (definitionDraft.triggers ?? []).find(
+              (item) => String(item.id) === triggerId,
+            );
+            setSelectedTriggerId(triggerId);
+            setSelectedNodeId("");
+            setDocsNodeTypeKey("");
+            setTopologyDocsNodeTypeKey("");
+            setTopologyDocsModel(trigger ? buildTriggerDocsModel(trigger) : undefined);
             setTopologyDocsOpen(true);
-          }
-        }}
-        onViewTriggerDocs={(triggerId) => {
-          const trigger = (definitionDraft.triggers ?? []).find(
-            (item) => String(item.id) === triggerId,
-          );
-          setSelectedTriggerId(triggerId);
-          setSelectedNodeId("");
-          setDocsNodeTypeKey("");
-          setTopologyDocsNodeTypeKey("");
-          setTopologyDocsModel(trigger ? buildTriggerDocsModel(trigger) : undefined);
-          setTopologyDocsOpen(true);
-        }}
-        onInsertNode={() => {}}
-        onAddBranch={() => {}}
-        readOnly
-      />
-    </div>
-  ) : (
-    <div className="workflow-editor-placeholder workflow-editor-placeholder--topology">
-      <div className="workflow-editor-placeholder__icon">
-        <Activity size={20} />
-      </div>
-      <div className="workflow-editor-placeholder__copy">
-        <h3>Topology</h3>
-        <p>Save or add workflow nodes to generate a read-only topology view.</p>
-      </div>
+          }}
+          onInsertNode={handleInsertNode}
+        />
+      )}
     </div>
   );
 
@@ -1852,14 +1979,18 @@ export function WorkflowDefinitionEditorPage() {
         value={codeValue}
         onChange={handleCodeChange}
       />
-      {codeError ? <div className="workflow-editor-error">{codeError}</div> : null}
+      {codeError ? (
+        <pre className="workflow-editor-error workflow-editor-error--block">
+          {codeError}
+        </pre>
+      ) : null}
     </div>
   );
 
   const topologyContent = (
     <div className="workflow-editor-topology-tab">
       <div className="workflow-editor-topology-actionbar">
-        <div className="workflow-editor-topology-actionbar__spacer" />
+        <div className="workflow-editor-topology-actionbar__left" />
         <div className="workflow-editor-view-toggle" aria-label="Topology views">
           <button
             type="button"
@@ -1933,7 +2064,6 @@ export function WorkflowDefinitionEditorPage() {
         "Execution history and drill-downs will land here in the next pass.",
       ),
     },
-    { value: "edit", label: "Edit", content: null },
     {
       value: "revisions",
       label: "Revisions",
@@ -2015,9 +2145,15 @@ export function WorkflowDefinitionEditorPage() {
             variant="outline"
             leftIcon={<BookOpen size={16} />}
             onClick={() => {
-              setDetailTab("edit");
-              setDocsOpen(true);
-              setActivePanel("docs");
+              setDetailTab("topology");
+              if (docsNodeType) {
+                setTopologyDocsNodeTypeKey(docsNodeType.type);
+                setTopologyDocsModel(undefined);
+              } else {
+                setTopologyDocsNodeTypeKey("");
+                setTopologyDocsModel(docsModel);
+              }
+              setTopologyDocsOpen(true);
             }}
           >
             Docs
@@ -2056,7 +2192,7 @@ export function WorkflowDefinitionEditorPage() {
           tabs={detailTabs.map((tab) => ({
             value: tab.value,
             label: tab.label,
-            content: tab.value === "edit" ? null : tab.content,
+            content: tab.content,
           }))}
           value={detailTab}
           onValueChange={(value) => setDetailTab(value as WorkflowDetailTab)}
@@ -2064,392 +2200,6 @@ export function WorkflowDefinitionEditorPage() {
           panelClassName="workflow-editor-detail-tabs__panel"
         />
       </div>
-
-      {detailTab === "edit" ? (
-        <>
-          <div className="workflow-editor-focus-switcher">
-            {(["flow", "code", "docs"] as const).map((panel) => (
-              <button
-                key={panel}
-                type="button"
-                className={`workflow-editor-focus-pill ${activePanel === panel ? "is-active" : ""}`}
-                onClick={() => setActivePanel(panel)}
-              >
-                {panel === "flow" ? "Flow" : panel === "code" ? "Code" : "Docs"}
-              </button>
-            ))}
-          </div>
-
-          <div
-            className={`workflow-editor-shell workflow-editor-shell--two-panel ${codePaneOpen ? "workflow-editor-shell--code-open" : "workflow-editor-shell--code-collapsed"}`}
-          >
-            <section
-              className={`workflow-editor-surface workflow-editor-surface--code ${activePanel === "code" ? "is-active" : ""}`}
-            >
-              <div className="workflow-editor-surface-header">
-                <div>
-                  <div className="workflow-editor-surface-eyebrow">Code</div>
-                  <h2 className="workflow-editor-surface-title">Definition YAML</h2>
-                </div>
-                {codeError ? (
-                  <SolidTag tone="danger">Invalid YAML</SolidTag>
-                ) : (
-                  <SolidTag tone="success">Synced</SolidTag>
-                )}
-              </div>
-              <div className="workflow-editor-surface-body">
-                <SolidPanel header="Workflow Identity">
-                  <div className="workflow-editor-form-grid">
-                    <div className="workflow-editor-field">
-                      <label>Key</label>
-                      <SolidInput
-                        value={workflowKey}
-                        onChange={(event) => setWorkflowKey(event.target.value)}
-                      />
-                    </div>
-                    <div className="workflow-editor-field">
-                      <label>Display Name</label>
-                      <SolidInput
-                        value={workflowDisplayName}
-                        onChange={(event) => setWorkflowDisplayName(event.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="workflow-editor-field">
-                    <label>Description</label>
-                    <SolidTextarea
-                      value={workflowDescription}
-                      onChange={(event) => setWorkflowDescription(event.target.value)}
-                    />
-                  </div>
-                </SolidPanel>
-
-                <SolidPanel header="Definition YAML">
-                  <SolidCodeEditor
-                    language="yaml"
-                    height="calc(100vh - 390px)"
-                    value={codeValue}
-                    onChange={handleCodeChange}
-                  />
-                  {codeError ? (
-                    <div className="workflow-editor-error">{codeError}</div>
-                  ) : null}
-                </SolidPanel>
-              </div>
-            </section>
-
-            <section
-              className={`workflow-editor-surface workflow-editor-surface--flow ${activePanel !== "code" ? "is-active" : ""}`}
-            >
-              <div className="workflow-editor-surface-header">
-                <div className="workflow-editor-flow-header-main">
-                  <div className="workflow-editor-surface-eyebrow">Flow</div>
-                  <div className="workflow-editor-flow-header-title-row">
-                    <h2 className="workflow-editor-surface-title">Topology Builder</h2>
-                    <SolidTag tone={validationTag.tone}>{validationTag.label}</SolidTag>
-                    <SolidTag>{workflowStats.nodeCount} nodes</SolidTag>
-                    {workflowStats.triggerCount ? (
-                      <SolidTag>{workflowStats.triggerCount} triggers</SolidTag>
-                    ) : null}
-                    {paletteNodeType?.label ? (
-                      <SolidTag>{paletteNodeType.label}</SolidTag>
-                    ) : null}
-                  </div>
-                  <div className="workflow-editor-flow-header-selection">
-                    {selectedNode && selectedNodeType ? (
-                      <>
-                        <strong>{selectedNode.name ?? selectedNode.id}</strong>
-                        <span className="workflow-editor-node-card-subtitle">
-                          {selectedNodeType.label ?? selectedNode.type}
-                        </span>
-                      </>
-                    ) : selectedTrigger ? (
-                      <>
-                        <strong>
-                          {selectedTrigger.label ??
-                            selectedTrigger.name ??
-                            selectedTrigger.id}
-                        </strong>
-                        <span className="workflow-editor-node-card-subtitle">
-                          {selectedTrigger.type ?? "Trigger"}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="workflow-editor-flow-toolbar__empty">
-                        Select a node or trigger to inspect it.
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="workflow-editor-surface-header-actions">
-                  <SolidButton
-                    size="small"
-                    variant="outline"
-                    leftIcon={
-                      codePaneOpen ? (
-                        <ChevronLeft size={14} />
-                      ) : (
-                        <ChevronRight size={14} />
-                      )
-                    }
-                    onClick={() => setCodePaneOpen((current) => !current)}
-                  >
-                    {codePaneOpen ? "Hide code" : "Show code"}
-                  </SolidButton>
-                  <SolidButton
-                    size="small"
-                    variant="outline"
-                    leftIcon={<Braces size={14} />}
-                    onClick={() => {
-                      setCodePaneOpen(true);
-                      setActivePanel("code");
-                    }}
-                  >
-                    Code
-                  </SolidButton>
-                  <SolidButton
-                    size="small"
-                    variant="outline"
-                    leftIcon={<Layers3 size={14} />}
-                    onClick={() => setToolsOpen((current) => !current)}
-                  >
-                    {toolsOpen ? "Hide library" : "Library"}
-                  </SolidButton>
-                  <SolidButton
-                    size="small"
-                    variant="outline"
-                    leftIcon={<BookOpen size={14} />}
-                    onClick={() => {
-                      setDocsOpen(true);
-                      setActivePanel("docs");
-                    }}
-                  >
-                    {docsNodeType || docsModel ? "View docs" : "Open docs"}
-                  </SolidButton>
-                  <SolidButton
-                    size="small"
-                    variant="outline"
-                    leftIcon={<Settings2 size={14} />}
-                    onClick={() => setWorkflowSettingsOpen(true)}
-                  >
-                    Workflow
-                  </SolidButton>
-                </div>
-              </div>
-              <div className="workflow-editor-surface-body workflow-editor-surface-body--flow">
-                <div className="workflow-editor-flow-workspace">
-                  {toolsOpen ? (
-                    <aside className="workflow-editor-tools-drawer">
-                      <div className="workflow-editor-tools-drawer__header">
-                        <div>
-                          <div className="workflow-editor-surface-eyebrow">
-                            Builder Tools
-                          </div>
-                          <h3 className="workflow-editor-surface-title">
-                            Node Library & Inspector
-                          </h3>
-                        </div>
-                        <SolidButton
-                          size="small"
-                          variant="ghost"
-                          onClick={() => setToolsOpen(false)}
-                        >
-                          <X size={16} />
-                        </SolidButton>
-                      </div>
-
-                      <div className="workflow-editor-tools-drawer__body">
-                        <SolidPanel header="Node Types">
-                          <WorkflowNodePalette
-                            nodeTypes={nodeTypes}
-                            value={paletteNodeType?.type}
-                            onSelect={(nodeType) => {
-                              setPaletteNodeTypeKey(nodeType.type);
-                              setDocsNodeTypeKey(nodeType.type);
-                            }}
-                          />
-                        </SolidPanel>
-
-                        <SolidPanel header="Selection">
-                          {selectedNode && selectedNodeType ? (
-                            <div className="workflow-editor-selected-node-summary">
-                              <div>
-                                <strong>{selectedNode.name ?? selectedNode.id}</strong>
-                                <div className="workflow-editor-node-card-subtitle">
-                                  {selectedNodeType.label ?? selectedNode.type}
-                                </div>
-                              </div>
-                              <div className="workflow-editor-selected-node-actions">
-                                <SolidButton
-                                  size="small"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setDocsNodeTypeKey(selectedNode.type);
-                                    setDocsOpen(true);
-                                    setActivePanel("docs");
-                                  }}
-                                >
-                                  Docs
-                                </SolidButton>
-                                <SolidButton
-                                  size="small"
-                                  onClick={() => setEditorOpen(true)}
-                                >
-                                  Edit
-                                </SolidButton>
-                              </div>
-                            </div>
-                          ) : selectedTrigger ? (
-                            <div className="workflow-editor-selected-node-summary">
-                              <div>
-                                <strong>
-                                  {selectedTrigger.label ??
-                                    selectedTrigger.name ??
-                                    selectedTrigger.id}
-                                </strong>
-                                <div className="workflow-editor-node-card-subtitle">
-                                  {selectedTrigger.type ?? "Trigger"}
-                                </div>
-                              </div>
-                              <div className="workflow-editor-selected-node-actions">
-                                <SolidButton
-                                  size="small"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setDocsOpen(true);
-                                    setActivePanel("docs");
-                                  }}
-                                >
-                                  Docs
-                                </SolidButton>
-                                <SolidButton
-                                  size="small"
-                                  onClick={() => setWorkflowSettingsOpen(true)}
-                                >
-                                  Workflow
-                                </SolidButton>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="workflow-editor-empty-state workflow-editor-empty-state--compact">
-                              Select a node or trigger on the canvas to inspect it.
-                            </div>
-                          )}
-                        </SolidPanel>
-
-                        <SolidPanel header="Validation">
-                          <div className="workflow-editor-validation-summary">
-                            <div
-                              className={`workflow-editor-validation-state workflow-editor-validation-state--${validationState.status}`}
-                            >
-                              {validationState.message ??
-                                "Validation has not been run yet."}
-                            </div>
-                            {validationState.errors.length ? (
-                              <ul className="workflow-editor-validation-list">
-                                {validationState.errors.map((error) => (
-                                  <li key={error}>{error}</li>
-                                ))}
-                              </ul>
-                            ) : null}
-                          </div>
-                        </SolidPanel>
-                      </div>
-                    </aside>
-                  ) : null}
-
-                  <div className="workflow-editor-flow-main">
-                    <div className="workflow-editor-canvas-shell">
-                      <WorkflowFlowCanvas
-                        definition={definitionDraft}
-                        nodeTypes={nodeTypes}
-                        selectedNodeId={selectedNodeId}
-                        selectedTriggerId={selectedTriggerId}
-                        activePaletteNodeType={paletteNodeType}
-                        onSelectNode={(nodeId) => {
-                          setSelectedNodeId(nodeId);
-                          setSelectedTriggerId("");
-                          const node = findNodeById(definitionDraft.nodes, nodeId);
-                          if (node?.type) {
-                            setDocsNodeTypeKey(node.type);
-                          }
-                        }}
-                        onSelectTrigger={(triggerId) => {
-                          setSelectedTriggerId(triggerId);
-                          setSelectedNodeId("");
-                          setDocsNodeTypeKey("");
-                        }}
-                        onEditNode={(nodeId) => {
-                          setSelectedNodeId(nodeId);
-                          setSelectedTriggerId("");
-                          const node = findNodeById(definitionDraft.nodes, nodeId);
-                          if (node?.type) {
-                            setDocsNodeTypeKey(node.type);
-                          }
-                          setEditorOpen(true);
-                        }}
-                        onDeleteNode={handleRemoveNode}
-                        onViewDocs={(nodeId) => {
-                          const node = findNodeById(definitionDraft.nodes, nodeId);
-                          if (node?.type) {
-                            setSelectedNodeId(nodeId);
-                            setDocsNodeTypeKey(node.type);
-                            setDocsOpen(true);
-                            setActivePanel("docs");
-                          }
-                        }}
-                        onViewTriggerDocs={(triggerId) => {
-                          setSelectedTriggerId(triggerId);
-                          setSelectedNodeId("");
-                          setDocsNodeTypeKey("");
-                          setDocsOpen(true);
-                          setActivePanel("docs");
-                        }}
-                        onInsertNode={handleInsertNode}
-                        onAddBranch={handleAddBranch}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {docsOpen ? (
-                <aside
-                  className={`workflow-editor-docs-drawer ${activePanel === "docs" ? "is-active" : ""}`}
-                >
-                  <div className="workflow-editor-docs-drawer__header">
-                    <div>
-                      <div className="workflow-editor-surface-eyebrow">Docs</div>
-                      <h3 className="workflow-editor-surface-title">
-                        {docsNodeType?.label ?? docsModel?.title ?? "Documentation"}
-                      </h3>
-                    </div>
-                    <SolidButton
-                      size="small"
-                      variant="ghost"
-                      onClick={() => setDocsOpen(false)}
-                    >
-                      <X size={16} />
-                    </SolidButton>
-                  </div>
-                  <div className="workflow-editor-docs-drawer__body">
-                    {docsNodeType || docsModel ? (
-                      <WorkflowNodeDocsPanel
-                        nodeType={docsNodeType}
-                        docsModel={docsModel}
-                      />
-                    ) : (
-                      <div className="workflow-editor-empty-state">
-                        Pick a node, trigger, or workflow surface to open its documentation.
-                      </div>
-                    )}
-                  </div>
-                </aside>
-              ) : null}
-            </section>
-          </div>
-        </>
-      ) : null}
 
       {selectedNode && selectedNodeType ? (
         <WorkflowNodeEditorDialog

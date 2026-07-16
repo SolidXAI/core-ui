@@ -32,7 +32,8 @@ export interface WorkflowNodeChildSlotDefinition {
   key: string;
   label?: string;
   description?: string;
-  kind: "sequence" | "branch-collection";
+  kind: "sequence" | "case-collection";
+  layout?: "sequential" | "parallel";
   required?: boolean;
   minItems?: number;
   maxItems?: number;

@@ -2,11 +2,12 @@ import React from "react";
 import {
   Background,
   BackgroundVariant,
+  BaseEdge,
   Controls,
+  type EdgeProps,
   type Edge,
   Handle,
   MarkerType,
-  MiniMap,
   type Node,
   Position,
   ReactFlow,
@@ -23,18 +24,19 @@ import "./WorkflowFlowCanvas.css";
 
 type WorkflowNodeRecord = Record<string, any>;
 type WorkflowTriggerRecord = Record<string, any>;
+type WorkflowSequenceSlotKey = "tasks" | "then" | "else" | "defaults";
 
 type WorkflowInsertScope =
   | { scope: "root" }
   | {
       scope: "slot";
       parentNodeId: string;
-      slotKey: "children" | "nodes" | "then" | "else";
+      slotKey: WorkflowSequenceSlotKey;
     }
   | {
-      scope: "branch";
+      scope: "case";
       parentNodeId: string;
-      branchId: string;
+      caseKey: string;
     };
 
 export type WorkflowInsertTarget =
@@ -45,13 +47,13 @@ export type WorkflowInsertTarget =
   | {
       scope: "slot";
       parentNodeId: string;
-      slotKey: "children" | "nodes" | "then" | "else";
+      slotKey: WorkflowSequenceSlotKey;
       index: number;
     }
   | {
-      scope: "branch";
+      scope: "case";
       parentNodeId: string;
-      branchId: string;
+      caseKey: string;
       index: number;
     };
 
@@ -69,7 +71,6 @@ type WorkflowCanvasNodeData =
       workflowNode: WorkflowNodeRecord;
       nodeType?: WorkflowNodeMetadataResponse;
       selected?: boolean;
-      readOnly?: boolean;
       onSelectNode: (nodeId: string) => void;
       onEditNode: (nodeId: string) => void;
       onDeleteNode: (nodeId: string) => void;
@@ -79,7 +80,6 @@ type WorkflowCanvasNodeData =
       kind: "workflow-trigger";
       trigger: WorkflowTriggerRecord;
       selected?: boolean;
-      readOnly?: boolean;
       onSelectTrigger: (triggerId: string) => void;
       onViewDocs: (triggerId: string) => void;
     }
@@ -88,6 +88,9 @@ type WorkflowCanvasNodeData =
       enabled?: boolean;
       selectedTypeLabel?: string;
       onInsert: () => void;
+    }
+  | {
+      kind: "junction";
     }
   | {
       kind: "section-label";
@@ -107,8 +110,6 @@ type WorkflowFlowCanvasProps = {
   onViewDocs: (nodeId: string) => void;
   onViewTriggerDocs: (triggerId: string) => void;
   onInsertNode: (target: WorkflowInsertTarget) => void;
-  onAddBranch: (parentNodeId: string) => void;
-  readOnly?: boolean;
 };
 
 const DIMENSIONS = {
@@ -116,23 +117,30 @@ const DIMENSIONS = {
   workflowHeight: 118,
   triggerWidth: 248,
   triggerHeight: 108,
-  insertWidth: 160,
+  insertWidth: 40,
   insertHeight: 40,
+  junctionWidth: 8,
+  junctionHeight: 8,
   sectionLabelWidth: 104,
   sectionLabelHeight: 28,
-  groupPaddingX: 28,
-  groupPaddingTop: 42,
-  groupPaddingBottom: 22,
+  groupPaddingX: 36,
+  groupPaddingTop: 58,
+  groupPaddingBottom: 36,
   loopGroupPaddingX: 70,
-  loopGroupPaddingTop: 46,
-  loopGroupPaddingBottom: 34,
-  controlChildLabelOffsetY: 138,
-  controlChildStartOffsetY: 150,
+  loopGroupPaddingTop: 62,
+  loopGroupPaddingBottom: 44,
+  sequenceInsertToNodeGap: 88,
+  sequenceNodeToInsertGap: 48,
+  controlNodeToChildGap: 78,
+  controlBranchLabelGap: 42,
+  controlBranchGap: 120,
+  controlJoinGap: 92,
+  groupExteriorEdgeGap: 44,
 };
 
 type WorkflowLayoutResult = {
-  entryId: string;
-  exitId: string;
+  entryIds: string[];
+  exitIds: string[];
   endY: number;
   width: number;
 };
@@ -142,7 +150,6 @@ type GraphBuildContext = {
   nodes: Node<WorkflowCanvasNodeData>[];
   edges: Edge[];
   nodeTypeMap: Map<string, WorkflowNodeMetadataResponse>;
-  readOnly?: boolean;
   activePaletteNodeType?: WorkflowNodeMetadataResponse;
   selectedNodeId?: string;
   selectedTriggerId?: string;
@@ -153,7 +160,6 @@ type GraphBuildContext = {
   onViewDocs: (nodeId: string) => void;
   onViewTriggerDocs: (triggerId: string) => void;
   onInsertNode: (target: WorkflowInsertTarget) => void;
-  onAddBranch: (parentNodeId: string) => void;
 };
 
 function normalizeChildSlots(
@@ -165,13 +171,16 @@ function normalizeChildSlots(
   }
 
   const slots: WorkflowNodeChildSlotDefinition[] = [];
-  if (Array.isArray(node.then) || Array.isArray(node.else)) {
+  if (node.cases && typeof node.cases === "object" && !Array.isArray(node.cases)) {
+    slots.push({ key: "cases", label: "Cases", kind: "case-collection" });
+    if (Array.isArray(node.defaults)) {
+      slots.push({ key: "defaults", label: "Default", kind: "sequence" });
+    }
+  } else if (Array.isArray(node.then) || Array.isArray(node.else)) {
     slots.push({ key: "then", label: "Then", kind: "sequence" });
     slots.push({ key: "else", label: "Else", kind: "sequence" });
-  } else if (Array.isArray(node.branches)) {
-    slots.push({ key: "branches", label: "Branches", kind: "branch-collection" });
-  } else if (Array.isArray(node.children) || Array.isArray(node.nodes)) {
-    slots.push({ key: "children", label: "Children", kind: "sequence" });
+  } else if (Array.isArray(node.tasks)) {
+    slots.push({ key: "tasks", label: "Tasks", kind: "sequence" });
   }
 
   return slots;
@@ -199,28 +208,83 @@ function isLoopNode(
   );
 }
 
-function getNodeRect(node: Node<WorkflowCanvasNodeData>) {
-  const width =
-    node.type === "workflow"
-      ? DIMENSIONS.workflowWidth
-      : node.type === "trigger"
-        ? DIMENSIONS.triggerWidth
-        : node.type === "insert"
-          ? DIMENSIONS.insertWidth
-          : node.type === "sectionLabel"
-            ? DIMENSIONS.sectionLabelWidth
-            : Number(node.style?.width ?? 0);
+function getSequenceSlotNodes(
+  workflowNode: WorkflowNodeRecord,
+  slotKey: string,
+): WorkflowNodeRecord[] {
+  if (Array.isArray(workflowNode[slotKey])) {
+    return workflowNode[slotKey];
+  }
 
-  const height =
-    node.type === "workflow"
-      ? DIMENSIONS.workflowHeight
-      : node.type === "trigger"
-        ? DIMENSIONS.triggerHeight
-        : node.type === "insert"
-          ? DIMENSIONS.insertHeight
-          : node.type === "sectionLabel"
-            ? DIMENSIONS.sectionLabelHeight
-            : Number(node.style?.height ?? 0);
+  if (slotKey === "tasks") {
+    return [];
+  }
+
+  return [];
+}
+
+function getSwitchCaseEntries(
+  workflowNode: WorkflowNodeRecord,
+): Array<{ key: string; label: string; nodes: WorkflowNodeRecord[]; scope: WorkflowInsertScope }> {
+  const cases =
+    workflowNode.cases &&
+    typeof workflowNode.cases === "object" &&
+    !Array.isArray(workflowNode.cases)
+      ? workflowNode.cases
+      : {};
+
+  const entries: Array<{
+    key: string;
+    label: string;
+    nodes: WorkflowNodeRecord[];
+    scope: WorkflowInsertScope;
+  }> = Object.entries(cases).map(([caseKey, nodes]) => ({
+    key: `case-${caseKey}`,
+    label: caseKey,
+    nodes: Array.isArray(nodes) ? nodes : [],
+    scope: {
+      scope: "case" as const,
+      parentNodeId: String(workflowNode.id),
+      caseKey,
+    },
+  }));
+
+  if (Array.isArray(workflowNode.defaults)) {
+    entries.push({
+      key: "default",
+      label: "Default",
+      nodes: workflowNode.defaults,
+      scope: {
+        scope: "slot" as const,
+        parentNodeId: String(workflowNode.id),
+        slotKey: "defaults" as const,
+      },
+    });
+  }
+
+  return entries;
+}
+
+function getNodeRect(node: Node<WorkflowCanvasNodeData>) {
+  let width = Number(node.style?.width ?? 0);
+  let height = Number(node.style?.height ?? 0);
+
+  if (node.type === "workflow") {
+    width = DIMENSIONS.workflowWidth;
+    height = DIMENSIONS.workflowHeight;
+  } else if (node.type === "trigger") {
+    width = DIMENSIONS.triggerWidth;
+    height = DIMENSIONS.triggerHeight;
+  } else if (node.type === "insert") {
+    width = DIMENSIONS.insertWidth;
+    height = DIMENSIONS.insertHeight;
+  } else if (node.type === "junction") {
+    width = DIMENSIONS.junctionWidth;
+    height = DIMENSIONS.junctionHeight;
+  } else if (node.type === "sectionLabel") {
+    width = DIMENSIONS.sectionLabelWidth;
+    height = DIMENSIONS.sectionLabelHeight;
+  }
 
   return {
     left: node.position.x,
@@ -230,20 +294,121 @@ function getNodeRect(node: Node<WorkflowCanvasNodeData>) {
   };
 }
 
-function createEdge(source: string, target: string): Edge {
+function createEdge(
+  source: string,
+  target: string,
+  options: {
+    marker?: boolean;
+    kind?: "default" | "merge" | "split";
+    busY?: number;
+    splitMode?: "fromJunction";
+  } = {},
+): Edge {
+  const edgeKind = options.kind ?? (options.marker === false ? "merge" : "default");
+  const data =
+    options.busY == null && options.splitMode == null
+      ? undefined
+      : {
+          busY: options.busY,
+          splitMode: options.splitMode,
+        };
+
   return {
     id: `${source}->${target}`,
     source,
     target,
-    type: "smoothstep",
-    markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14 },
+    type:
+      edgeKind === "merge"
+        ? "workflowMerge"
+        : edgeKind === "split"
+          ? "workflowSplit"
+          : "smoothstep",
+    data,
+    markerEnd:
+      options.marker === false
+        ? undefined
+        : {
+            type: MarkerType.ArrowClosed,
+            width: 12,
+            height: 12,
+            color: "rgba(203, 213, 225, 0.94)",
+          },
     style: {
-      stroke: "rgba(191, 219, 254, 0.88)",
+      stroke: "rgba(203, 213, 225, 0.94)",
       strokeWidth: 2,
-      strokeDasharray: "5 5",
+      strokeDasharray: "6 7",
     },
-    zIndex: 2,
+    animated: true,
+    zIndex: 1,
   };
+}
+
+function WorkflowMergeEdge({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  style,
+}: EdgeProps) {
+  const mergeY = targetY;
+  const path = `M ${sourceX} ${sourceY} V ${mergeY} H ${targetX}`;
+
+  return (
+    <BaseEdge
+      id={id}
+      path={path}
+      style={style}
+      interactionWidth={18}
+    />
+  );
+}
+
+function WorkflowSplitEdge({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  markerEnd,
+  style,
+  data,
+}: EdgeProps) {
+  if (data?.splitMode === "fromJunction") {
+    const path = `M ${sourceX} ${sourceY} H ${targetX} V ${targetY}`;
+
+    return (
+      <BaseEdge
+        id={id}
+        path={path}
+        markerEnd={markerEnd}
+        style={style}
+        interactionWidth={18}
+      />
+    );
+  }
+
+  const requestedBusY =
+    typeof data?.busY === "number"
+      ? data.busY
+      : sourceY + Math.max(24, (targetY - sourceY) * 0.42);
+  const minBusY = Math.min(sourceY, targetY) + 12;
+  const maxBusY = Math.max(sourceY, targetY) - 12;
+  const busY =
+    maxBusY > minBusY
+      ? Math.min(maxBusY, Math.max(minBusY, requestedBusY))
+      : (sourceY + targetY) / 2;
+  const path = `M ${sourceX} ${sourceY} V ${busY} H ${targetX} V ${targetY}`;
+
+  return (
+    <BaseEdge
+      id={id}
+      path={path}
+      markerEnd={markerEnd}
+      style={style}
+      interactionWidth={18}
+    />
+  );
 }
 
 function resolveWorkflowNodeIcon(nodeType?: WorkflowNodeMetadataResponse) {
@@ -276,7 +441,7 @@ function estimateWorkflowNodeWidth(
     (slot) => slot.key === "then" || slot.key === "else",
   );
   if (branchSlots.length >= 2) {
-    const branchGap = 60;
+    const branchGap = DIMENSIONS.controlBranchGap;
     const branchWidths = branchSlots.map((slot) =>
       estimateSequenceWidth(
         Array.isArray(workflowNode[slot.key]) ? workflowNode[slot.key] : [],
@@ -289,27 +454,40 @@ function estimateWorkflowNodeWidth(
     return Math.max(DIMENSIONS.workflowWidth, totalBranchWidth);
   }
 
-  if (slotDefinitions.length === 1 && slotDefinitions[0].kind === "sequence") {
-    const slotKey = slotDefinitions[0].key as "children" | "nodes" | "then" | "else";
-    return Math.max(
-      DIMENSIONS.workflowWidth,
-      estimateSequenceWidth(
-        Array.isArray(workflowNode[slotKey]) ? workflowNode[slotKey] : [],
-        nodeTypeMap,
-      ),
-    );
-  }
-
-  if (slotDefinitions.length === 1 && slotDefinitions[0].kind === "branch-collection") {
-    const branchGap = 56;
-    const branches = Array.isArray(workflowNode.branches) ? workflowNode.branches : [];
-    const branchWidths = branches.map((branch: any) =>
-      estimateSequenceWidth(Array.isArray(branch.nodes) ? branch.nodes : [], nodeTypeMap),
+  if (slotDefinitions.some((slot) => slot.kind === "case-collection")) {
+    const caseEntries = getSwitchCaseEntries(workflowNode);
+    const branchGap = DIMENSIONS.controlBranchGap;
+    const branchWidths = caseEntries.map((entry) =>
+      estimateSequenceWidth(entry.nodes, nodeTypeMap),
     );
     const totalBranchWidth =
       branchWidths.reduce((sum, width) => sum + width, 0) +
       branchGap * Math.max(branchWidths.length - 1, 0);
     return Math.max(DIMENSIONS.workflowWidth, totalBranchWidth);
+  }
+
+  if (slotDefinitions.length === 1 && slotDefinitions[0].kind === "sequence") {
+    const slot = slotDefinitions[0];
+    const slotKey = slot.key as WorkflowSequenceSlotKey;
+    const childNodes = getSequenceSlotNodes(workflowNode, slotKey);
+    if (slot.layout === "parallel") {
+      const childWidths = childNodes.map((childNode: WorkflowNodeRecord) =>
+        estimateWorkflowNodeWidth(
+          childNode,
+          nodeTypeMap,
+          nodeTypeMap.get(String(childNode.type)),
+        ),
+      );
+      const totalChildWidth =
+        childWidths.reduce((sum, width) => sum + width, 0) +
+        DIMENSIONS.controlBranchGap * Math.max(childWidths.length - 1, 0);
+      return Math.max(DIMENSIONS.workflowWidth, totalChildWidth);
+    }
+
+    return Math.max(
+      DIMENSIONS.workflowWidth,
+      estimateSequenceWidth(childNodes, nodeTypeMap),
+    );
   }
 
   return DIMENSIONS.workflowWidth;
@@ -352,14 +530,50 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
           type="button"
           onClick={data.onInsert}
           className="workflow-flow-insert-node__button"
+          aria-label={
+            data.enabled
+              ? `Add ${data.selectedTypeLabel ?? "node"}`
+              : "Pick a node type to insert"
+          }
+          title={
+            data.enabled
+              ? `Add ${data.selectedTypeLabel ?? "node"}`
+              : "Pick a node type to insert"
+          }
         >
           <Plus size={16} />
         </button>
-        <div className="workflow-flow-insert-node__label">
-          {data.enabled
-            ? `Add ${data.selectedTypeLabel ?? "node"}`
-            : "Pick a node type to insert"}
-        </div>
+        <Handle
+          type="target"
+          position={Position.Top}
+          className="workflow-flow-insert-node__handle workflow-flow-insert-node__handle--top"
+          isConnectable={false}
+        />
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          className="workflow-flow-insert-node__handle workflow-flow-insert-node__handle--bottom"
+          isConnectable={false}
+        />
+      </div>
+    );
+  }
+
+  if (data.kind === "junction") {
+    return (
+      <div className="workflow-flow-junction-node">
+        <Handle
+          type="target"
+          position={Position.Top}
+          className="workflow-flow-junction-node__handle workflow-flow-junction-node__handle--top"
+          isConnectable={false}
+        />
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          className="workflow-flow-junction-node__handle workflow-flow-junction-node__handle--bottom"
+          isConnectable={false}
+        />
       </div>
     );
   }
@@ -369,13 +583,11 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
   }
 
   if (data.kind === "workflow-trigger") {
-    const triggerTitle = data.readOnly
-      ? String(data.trigger.id)
-      : data.trigger.name ?? data.trigger.label ?? data.trigger.id;
+    const triggerTitle = data.trigger.name ?? data.trigger.label ?? data.trigger.id;
 
     return (
       <div
-        className={`workflow-flow-node-card workflow-flow-node-card--trigger ${data.selected ? "is-selected" : ""} ${data.readOnly ? "is-readonly workflow-flow-node-card--readonly-compact" : ""}`}
+        className={`workflow-flow-node-card workflow-flow-node-card--trigger ${data.selected ? "is-selected" : ""}`}
         onClick={() => data.onSelectTrigger(String(data.trigger.id))}
         role="button"
         tabIndex={0}
@@ -395,38 +607,32 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
               <div className="workflow-flow-node-card__title">
                 {triggerTitle}
               </div>
-              {!data.readOnly ? (
-                <div className="workflow-flow-node-card__subtitle">
-                  {data.trigger.type ?? "Trigger"}
-                </div>
-              ) : null}
+              <div className="workflow-flow-node-card__subtitle">
+                {data.trigger.type ?? "Trigger"}
+              </div>
             </div>
           </div>
-          {!data.readOnly ? (
-            <div className="workflow-flow-node-card__tags">
-              {data.trigger.disabled ? <SolidTag tone="warn">disabled</SolidTag> : <SolidTag>trigger</SolidTag>}
-            </div>
-          ) : null}
+          <div className="workflow-flow-node-card__tags">
+            {data.trigger.disabled ? <SolidTag tone="warn">disabled</SolidTag> : <SolidTag>trigger</SolidTag>}
+          </div>
         </div>
-        {!data.readOnly && data.trigger.description ? (
+        {data.trigger.description ? (
           <div className="workflow-flow-node-card__description">
             {data.trigger.description}
           </div>
         ) : null}
-        {!data.readOnly ? (
-          <div className="workflow-flow-node-card__actions">
-            <SolidButton
-              size="small"
-              variant="ghost"
-              onClick={(event) => {
-                event.stopPropagation();
-                data.onViewDocs(String(data.trigger.id));
-              }}
-            >
-              <BookOpen size={14} />
-            </SolidButton>
-          </div>
-        ) : null}
+        <div className="workflow-flow-node-card__actions">
+          <SolidButton
+            size="small"
+            variant="ghost"
+            onClick={(event) => {
+              event.stopPropagation();
+              data.onViewDocs(String(data.trigger.id));
+            }}
+          >
+            <BookOpen size={14} />
+          </SolidButton>
+        </div>
         <Handle
           type="target"
           position={Position.Top}
@@ -445,12 +651,12 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
 
   const { workflowNode, nodeType, selected } = data;
   const iconName = resolveWorkflowNodeIcon(nodeType);
-  const nodeTitle = data.readOnly ? String(workflowNode.id) : workflowNode.name ?? workflowNode.id;
+  const nodeTitle = workflowNode.name ?? workflowNode.id;
   const nodeTypeLabel = nodeType?.label ?? workflowNode.type ?? workflowNode.kind ?? "node";
 
   return (
     <div
-      className={`workflow-flow-node-card ${selected ? "is-selected" : ""} ${data.readOnly ? "is-readonly workflow-flow-node-card--readonly-compact" : ""}`}
+      className={`workflow-flow-node-card ${selected ? "is-selected" : ""}`}
       onClick={() => data.onSelectNode(String(workflowNode.id))}
       role="button"
       tabIndex={0}
@@ -464,40 +670,36 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
       <div className="workflow-flow-node-card__typebar">
         <span>{nodeTypeLabel}</span>
         <span className="workflow-flow-node-card__quick-actions">
-          {!data.readOnly ? (
-            <>
-              <button
-                type="button"
-                className="workflow-flow-icon-button nodrag nopan nowheel"
-                aria-label={`Edit ${nodeTitle}`}
-                title="Edit"
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                }}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  data.onEditNode(String(workflowNode.id));
-                }}
-              >
-                <Pencil size={12} />
-              </button>
-              <button
-                type="button"
-                className="workflow-flow-icon-button workflow-flow-icon-button--danger nodrag nopan nowheel"
-                aria-label={`Delete ${nodeTitle}`}
-                title="Delete"
-                onPointerDown={(event) => {
-                  event.stopPropagation();
-                }}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  data.onDeleteNode(String(workflowNode.id));
-                }}
-              >
-                <Trash2 size={12} />
-              </button>
-            </>
-          ) : null}
+          <button
+            type="button"
+            className="workflow-flow-icon-button nodrag nopan nowheel"
+            aria-label={`Edit ${nodeTitle}`}
+            title="Edit"
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              data.onEditNode(String(workflowNode.id));
+            }}
+          >
+            <Pencil size={12} />
+          </button>
+          <button
+            type="button"
+            className="workflow-flow-icon-button workflow-flow-icon-button--danger nodrag nopan nowheel"
+            aria-label={`Delete ${nodeTitle}`}
+            title="Delete"
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+            onClick={(event) => {
+              event.stopPropagation();
+              data.onDeleteNode(String(workflowNode.id));
+            }}
+          >
+            <Trash2 size={12} />
+          </button>
           <button
             type="button"
             className="workflow-flow-icon-button nodrag nopan nowheel"
@@ -528,7 +730,7 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
         </div>
       </div>
 
-      {!data.readOnly && workflowNode.description ? (
+      {workflowNode.description ? (
         <div className="workflow-flow-node-card__description">
           {workflowNode.description}
         </div>
@@ -555,7 +757,13 @@ const canvasNodeTypes: any = {
   workflow: WorkflowCanvasNodeRenderer,
   trigger: WorkflowCanvasNodeRenderer,
   insert: WorkflowCanvasNodeRenderer,
+  junction: WorkflowCanvasNodeRenderer,
   sectionLabel: WorkflowCanvasNodeRenderer,
+};
+
+const canvasEdgeTypes = {
+  workflowMerge: WorkflowMergeEdge,
+  workflowSplit: WorkflowSplitEdge,
 };
 
 function pushGroupNode(
@@ -568,7 +776,7 @@ function pushGroupNode(
   nodeType?: WorkflowNodeMetadataResponse,
 ) {
   if (!subset.length) {
-    return;
+    return undefined;
   }
 
   const bounds = subset.reduce(
@@ -596,12 +804,15 @@ function pushGroupNode(
   const paddingBottom =
     tone === "loop" ? DIMENSIONS.loopGroupPaddingBottom : DIMENSIONS.groupPaddingBottom;
 
+  const groupTop = bounds.top - paddingTop;
+  const groupBottom = bounds.bottom + paddingBottom;
+
   ctx.backgroundNodes.push({
     id,
     type: "group",
     position: {
       x: bounds.left - paddingX,
-      y: bounds.top - paddingTop,
+      y: groupTop,
     },
     draggable: false,
     selectable: false,
@@ -619,6 +830,11 @@ function pushGroupNode(
       onViewDocs: ctx.onViewDocs,
     },
   });
+
+  return {
+    top: groupTop,
+    bottom: groupBottom,
+  };
 }
 
 function pushInsertNode(
@@ -631,14 +847,46 @@ function pushInsertNode(
   ctx.nodes.push({
     id,
     type: "insert",
-    position: { x, y },
+    position: {
+      x: x - DIMENSIONS.insertWidth / 2,
+      y,
+    },
     draggable: false,
     selectable: false,
+    style: {
+      zIndex: 5,
+    },
     data: {
       kind: "insert",
       enabled: !!ctx.activePaletteNodeType,
       selectedTypeLabel: ctx.activePaletteNodeType?.label,
       onInsert: () => ctx.onInsertNode(target),
+    },
+    sourcePosition: Position.Bottom,
+    targetPosition: Position.Top,
+  });
+}
+
+function pushJunctionNode(
+  ctx: GraphBuildContext,
+  id: string,
+  x: number,
+  y: number,
+) {
+  ctx.nodes.push({
+    id,
+    type: "junction",
+    position: {
+      x: x - DIMENSIONS.junctionWidth / 2,
+      y: y - DIMENSIONS.junctionHeight / 2,
+    },
+    draggable: false,
+    selectable: false,
+    style: {
+      zIndex: 2,
+    },
+    data: {
+      kind: "junction",
     },
     sourcePosition: Position.Bottom,
     targetPosition: Position.Top,
@@ -657,12 +905,14 @@ function pushWorkflowNode(
     type: "workflow",
     position: { x, y },
     draggable: false,
+    style: {
+      zIndex: 4,
+    },
     data: {
       kind: "workflow-node",
       workflowNode,
       nodeType,
       selected: ctx.selectedNodeId === String(workflowNode.id),
-      readOnly: ctx.readOnly,
       onSelectNode: ctx.onSelectNode,
       onEditNode: ctx.onEditNode,
       onDeleteNode: ctx.onDeleteNode,
@@ -685,25 +935,20 @@ function pushTriggerNode(
     position: { x, y },
     draggable: false,
     selectable: false,
+    style: {
+      zIndex: 4,
+    },
     sourcePosition: Position.Bottom,
     targetPosition: Position.Top,
     data: {
       kind: "workflow-trigger",
       trigger,
       selected: ctx.selectedTriggerId === String(trigger.id),
-      readOnly: ctx.readOnly,
       onSelectTrigger: ctx.onSelectTrigger,
       onViewDocs: ctx.onViewTriggerDocs,
     },
   });
 }
-
-type ReadOnlySequenceLayoutResult = {
-  entryIds: string[];
-  exitIds: string[];
-  endY: number;
-  width: number;
-};
 
 function pushSectionLabelNode(
   ctx: GraphBuildContext,
@@ -718,6 +963,9 @@ function pushSectionLabelNode(
     position: { x, y },
     draggable: false,
     selectable: false,
+    style: {
+      zIndex: 5,
+    },
     data: {
       kind: "section-label",
       label,
@@ -731,18 +979,30 @@ function buildSequenceGraph(
   laneX: number,
   startY: number,
   scope: WorkflowInsertScope,
+  options: {
+    idSuffix?: string;
+    indexOffset?: number;
+    boundaryInserts?: boolean;
+  } = {},
 ): WorkflowLayoutResult {
   let cursorY = startY;
-  let previousGraphNodeId: string | null = null;
   let maxWidth = DIMENSIONS.workflowWidth;
+  const indexOffset = options.indexOffset ?? 0;
+  const idSuffix = options.idSuffix ? `-${options.idSuffix}` : "";
+  const boundaryInserts = options.boundaryInserts ?? true;
 
-  const initialInsertId = `insert-${JSON.stringify(scope)}-0`;
-  pushInsertNode(ctx, initialInsertId, laneX, cursorY, {
-    ...scope,
-    index: 0,
-  } as WorkflowInsertTarget);
-  previousGraphNodeId = initialInsertId;
-  let exitId = initialInsertId;
+  const entryIds: string[] = [];
+  let previousExitIds: string[] = [];
+
+  if (boundaryInserts) {
+    const initialInsertId = `insert-${JSON.stringify(scope)}-${indexOffset}${idSuffix}`;
+    pushInsertNode(ctx, initialInsertId, laneX, cursorY, {
+      ...scope,
+      index: indexOffset,
+    } as WorkflowInsertTarget);
+    entryIds.push(initialInsertId);
+    previousExitIds = [initialInsertId];
+  }
 
   for (let index = 0; index < sequence.length; index += 1) {
     const workflowNode = sequence[index];
@@ -756,22 +1016,86 @@ function buildSequenceGraph(
     );
     maxWidth = Math.max(maxWidth, estimatedNodeWidth);
     const subtreeStartIndex = ctx.nodes.length;
+    const groupTone = isLoopNode(workflowNode, nodeType) ? "loop" : "control";
+    const controlTopPadding =
+      groupTone === "loop" ? DIMENSIONS.loopGroupPaddingTop : DIMENSIONS.groupPaddingTop;
+    const nodeGap = isControlNode
+      ? controlTopPadding + DIMENSIONS.insertHeight + DIMENSIONS.groupExteriorEdgeGap
+      : DIMENSIONS.sequenceInsertToNodeGap;
 
-    cursorY += 82;
-    pushWorkflowNode(ctx, workflowNode, laneX - 56, cursorY);
-    if (previousGraphNodeId) {
-      ctx.edges.push(createEdge(previousGraphNodeId, String(workflowNode.id)));
+    cursorY += nodeGap;
+    pushWorkflowNode(
+      ctx,
+      workflowNode,
+      laneX - DIMENSIONS.workflowWidth / 2,
+      cursorY,
+    );
+    if (!entryIds.length) {
+      entryIds.push(String(workflowNode.id));
     }
+    previousExitIds.forEach((sourceId) => {
+      ctx.edges.push(createEdge(sourceId, String(workflowNode.id)));
+    });
 
     let deepestY = cursorY;
-    let connectionSources: string[] = [String(workflowNode.id)];
+    const childStartY =
+      cursorY + DIMENSIONS.workflowHeight + DIMENSIONS.controlNodeToChildGap;
+    let exitIds: string[] = [String(workflowNode.id)];
+    let usesMergeJunction = false;
 
     const branchSlots = slotDefinitions.filter(
       (slot) => slot.key === "then" || slot.key === "else",
     );
+    const caseEntries = slotDefinitions.some((slot) => slot.kind === "case-collection")
+      ? getSwitchCaseEntries(workflowNode)
+      : [];
 
-    if (branchSlots.length >= 2) {
-      const branchGap = 60;
+    if (caseEntries.length > 0) {
+      const branchGap = DIMENSIONS.controlBranchGap;
+      const branchWidths = caseEntries.map((entry) =>
+        estimateSequenceWidth(entry.nodes, ctx.nodeTypeMap),
+      );
+      const totalBranchWidth =
+        branchWidths.reduce((sum, width) => sum + width, 0) +
+        branchGap * Math.max(branchWidths.length - 1, 0);
+      const branchStartX = laneX - totalBranchWidth / 2;
+      const branchLayouts = caseEntries.map((entry, branchIndex) => {
+        const beforeWidth = branchWidths
+          .slice(0, branchIndex)
+          .reduce((sum, width) => sum + width, 0);
+        const branchLaneX =
+          branchStartX +
+          beforeWidth +
+          branchGap * branchIndex +
+          branchWidths[branchIndex] / 2;
+        const labelX = branchLaneX - DIMENSIONS.sectionLabelWidth / 2;
+        const labelY = childStartY - DIMENSIONS.controlBranchLabelGap;
+        pushSectionLabelNode(
+          ctx,
+          `${workflowNode.id}-${entry.key}-label`,
+          labelX,
+          labelY,
+          entry.label,
+        );
+        const childLayout = buildSequenceGraph(
+          entry.nodes,
+          ctx,
+          branchLaneX,
+          childStartY,
+          entry.scope,
+        );
+        childLayout.entryIds.forEach((entryId) => {
+          ctx.edges.push(createEdge(String(workflowNode.id), entryId));
+        });
+        deepestY = Math.max(deepestY, childLayout.endY);
+        maxWidth = Math.max(maxWidth, childLayout.width);
+        return childLayout;
+      });
+
+      const branchExitIds = branchLayouts.flatMap((layout) => layout.exitIds);
+      exitIds = branchExitIds.length ? branchExitIds : [String(workflowNode.id)];
+    } else if (branchSlots.length >= 2) {
+      const branchGap = DIMENSIONS.controlBranchGap;
       const branchWidths = branchSlots.map((slot) =>
         estimateSequenceWidth(
           Array.isArray(workflowNode[slot.key]) ? workflowNode[slot.key] : [],
@@ -793,8 +1117,8 @@ function buildSequenceGraph(
           beforeWidth +
           branchGap * branchIndex +
           branchWidths[branchIndex] / 2;
-        const labelX = branchLaneX + 24;
-        const labelY = cursorY + 60;
+        const labelX = branchLaneX - DIMENSIONS.sectionLabelWidth / 2;
+        const labelY = childStartY - DIMENSIONS.controlBranchLabelGap;
         pushSectionLabelNode(
           ctx,
           `${workflowNode.id}-${slotKey}-label`,
@@ -806,320 +1130,213 @@ function buildSequenceGraph(
           childNodes,
           ctx,
           branchLaneX,
-          cursorY + 82,
+          childStartY,
           {
             scope: "slot",
             parentNodeId: String(workflowNode.id),
             slotKey,
           },
         );
-        ctx.edges.push(createEdge(String(workflowNode.id), childLayout.entryId));
+        childLayout.entryIds.forEach((entryId) => {
+          ctx.edges.push(createEdge(String(workflowNode.id), entryId));
+        });
         deepestY = Math.max(deepestY, childLayout.endY);
         maxWidth = Math.max(maxWidth, childLayout.width);
         return childLayout;
       });
 
-      connectionSources = branchLayouts.map((layout) => layout.exitId);
+      const branchExitIds = branchLayouts.flatMap((layout) => layout.exitIds);
+      exitIds = branchExitIds.length ? branchExitIds : [String(workflowNode.id)];
     } else if (slotDefinitions.length === 1 && slotDefinitions[0].kind === "sequence") {
       const slot = slotDefinitions[0];
-      const slotKey = slot.key as "children" | "nodes" | "then" | "else";
-      const childNodes = Array.isArray(workflowNode[slotKey]) ? workflowNode[slotKey] : [];
-      if (slot.label) {
-        const isLoop = isLoopNode(workflowNode, nodeType);
+      const slotKey = slot.key as WorkflowSequenceSlotKey;
+      const childNodes = getSequenceSlotNodes(workflowNode, slotKey);
+      if (slot.label && slotKey !== "tasks") {
         pushSectionLabelNode(
           ctx,
           `${workflowNode.id}-${slotKey}-label`,
-          laneX + 24,
-          cursorY + (isLoop ? DIMENSIONS.controlChildLabelOffsetY : 132),
-          isLoop ? slot.label ?? "Loop Body" : slot.label,
+          laneX - DIMENSIONS.sectionLabelWidth / 2,
+          childStartY - DIMENSIONS.controlBranchLabelGap,
+          slot.label,
         );
       }
-      const childLayout = buildSequenceGraph(
-        childNodes,
-        ctx,
-        laneX,
-        cursorY + DIMENSIONS.controlChildStartOffsetY,
-        {
+      if (slot.layout === "parallel") {
+        const childWidths = childNodes.map((childNode: WorkflowNodeRecord) =>
+          estimateWorkflowNodeWidth(
+            childNode,
+            ctx.nodeTypeMap,
+            ctx.nodeTypeMap.get(String(childNode.type)),
+          ),
+        );
+        const totalChildWidth =
+          childWidths.reduce((sum, width) => sum + width, 0) +
+          DIMENSIONS.controlBranchGap * Math.max(childWidths.length - 1, 0);
+        const childStartX = laneX - totalChildWidth / 2;
+        const collectionInsertId = `insert-${JSON.stringify({
           scope: "slot",
           parentNodeId: String(workflowNode.id),
           slotKey,
-        },
-      );
-      ctx.edges.push(createEdge(String(workflowNode.id), childLayout.entryId));
-      deepestY = Math.max(deepestY, childLayout.endY);
-      maxWidth = Math.max(maxWidth, childLayout.width);
-      connectionSources = [childLayout.exitId];
-    } else if (slotDefinitions.length === 1 && slotDefinitions[0].kind === "branch-collection") {
-      const branches = Array.isArray(workflowNode.branches) ? workflowNode.branches : [];
-      const branchGap = 56;
-      const branchWidths = branches.map((branch: any) =>
-        estimateSequenceWidth(Array.isArray(branch.nodes) ? branch.nodes : [], ctx.nodeTypeMap),
-      );
-      const totalBranchWidth =
-        branchWidths.reduce((sum, width) => sum + width, 0) +
-        branchGap * Math.max(branchWidths.length - 1, 0);
-      const branchStartX = laneX - totalBranchWidth / 2;
-
-      const branchLayouts = branches.map((branch: any, branchIndex) => {
-        const beforeWidth = branchWidths
-          .slice(0, branchIndex)
-          .reduce((sum, width) => sum + width, 0);
-        const branchLaneX =
-          branchStartX +
-          beforeWidth +
-          branchGap * branchIndex +
-          branchWidths[branchIndex] / 2;
-        pushSectionLabelNode(
+        })}-${childNodes.length}-${workflowNode.id}-${slotKey}-collection`;
+        const collectionInsertY =
+          cursorY +
+          DIMENSIONS.workflowHeight +
+          Math.round(DIMENSIONS.controlNodeToChildGap * 0.22);
+        pushInsertNode(
           ctx,
-          `${workflowNode.id}-${branch.id}-label`,
-          branchLaneX + 24,
-          cursorY + 60,
-          branch.name ?? branch.id,
-        );
-        const branchLayout = buildSequenceGraph(
-          Array.isArray(branch.nodes) ? branch.nodes : [],
-          ctx,
-          branchLaneX,
-          cursorY + 82,
+          collectionInsertId,
+          laneX,
+          collectionInsertY,
           {
-            scope: "branch",
+            scope: "slot",
             parentNodeId: String(workflowNode.id),
-            branchId: String(branch.id),
+            slotKey,
+            index: childNodes.length,
           },
         );
-        ctx.edges.push(createEdge(String(workflowNode.id), branchLayout.entryId));
-        deepestY = Math.max(deepestY, branchLayout.endY);
-        maxWidth = Math.max(maxWidth, branchLayout.width);
-        return branchLayout;
-      });
-
-      connectionSources = branchLayouts.length
-        ? branchLayouts.map((layout) => layout.exitId)
-        : [String(workflowNode.id)];
-    }
-
-    if (isControlNode) {
-      pushGroupNode(
-        ctx,
-        `group-${String(workflowNode.id)}`,
-        workflowNode.name ?? workflowNode.id,
-        isLoopNode(workflowNode, nodeType) ? "loop" : "control",
-        ctx.nodes.slice(subtreeStartIndex),
-        workflowNode,
-        nodeType,
-      );
-    }
-
-    cursorY = Math.max(cursorY + 82, deepestY + (isControlNode ? 40 : 0));
-    const afterInsertId = `insert-${JSON.stringify(scope)}-${index + 1}-${workflowNode.id}`;
-    pushInsertNode(ctx, afterInsertId, laneX, cursorY, {
-      ...scope,
-      index: index + 1,
-    } as WorkflowInsertTarget);
-    connectionSources.forEach((sourceId) => {
-      ctx.edges.push(createEdge(sourceId, afterInsertId));
-    });
-    previousGraphNodeId = afterInsertId;
-    exitId = afterInsertId;
-  }
-
-  return {
-    entryId: initialInsertId,
-    exitId,
-    endY: cursorY,
-    width: maxWidth,
-  };
-}
-
-function buildReadOnlySequenceGraph(
-  sequence: WorkflowNodeRecord[],
-  ctx: GraphBuildContext,
-  laneX: number,
-  startY: number,
-): ReadOnlySequenceLayoutResult {
-  let cursorY = startY;
-  let previousExitIds: string[] = [];
-  let entryIds: string[] = [];
-  let maxWidth = sequence.length ? DIMENSIONS.workflowWidth : 0;
-
-  for (const workflowNode of sequence) {
-    const nodeType = ctx.nodeTypeMap.get(String(workflowNode.type));
-    const slotDefinitions = normalizeChildSlots(workflowNode, nodeType);
-    const isControlNode = nodeType?.kind === "control" || slotDefinitions.length > 0;
-    const estimatedNodeWidth = estimateWorkflowNodeWidth(
-      workflowNode,
-      ctx.nodeTypeMap,
-      nodeType,
-    );
-    maxWidth = Math.max(maxWidth, estimatedNodeWidth);
-    const subtreeStartIndex = ctx.nodes.length;
-
-    cursorY += 82;
-    pushWorkflowNode(ctx, workflowNode, laneX - 56, cursorY);
-
-    if (!entryIds.length) {
-      entryIds = [String(workflowNode.id)];
-    }
-    previousExitIds.forEach((sourceId) => {
-      ctx.edges.push(createEdge(sourceId, String(workflowNode.id)));
-    });
-
-    let deepestY = cursorY;
-    let exitIds: string[] = [String(workflowNode.id)];
-
-    const branchSlots = slotDefinitions.filter(
-      (slot) => slot.key === "then" || slot.key === "else",
-    );
-
-    if (branchSlots.length >= 2) {
-      const branchGap = 60;
-      const branchWidths = branchSlots.map((slot) =>
-        estimateSequenceWidth(
-          Array.isArray(workflowNode[slot.key]) ? workflowNode[slot.key] : [],
-          ctx.nodeTypeMap,
-        ),
-      );
-      const totalBranchWidth =
-        branchWidths.reduce((sum, width) => sum + width, 0) +
-        branchGap * Math.max(branchWidths.length - 1, 0);
-      const branchStartX = laneX - totalBranchWidth / 2;
-
-      const branchLayouts = branchSlots
-        .map((slot, branchIndex) => {
-          const slotKey = slot.key as "then" | "else";
-          const childNodes = Array.isArray(workflowNode[slotKey])
-            ? workflowNode[slotKey]
-            : [];
-          const beforeWidth = branchWidths
-            .slice(0, branchIndex)
+        maxWidth = Math.max(maxWidth, totalChildWidth);
+        const splitJunctionY =
+          cursorY +
+          DIMENSIONS.workflowHeight +
+          Math.round(DIMENSIONS.controlNodeToChildGap * 0.78);
+        const splitJunctionId = `${workflowNode.id}-${slotKey}-split`;
+        if (childNodes.length > 1) {
+          pushJunctionNode(ctx, splitJunctionId, laneX, splitJunctionY);
+          ctx.edges.push(createEdge(String(workflowNode.id), collectionInsertId));
+          ctx.edges.push(createEdge(collectionInsertId, splitJunctionId, { marker: false }));
+          deepestY = Math.max(deepestY, splitJunctionY);
+        } else if (childNodes.length === 0) {
+          ctx.edges.push(createEdge(String(workflowNode.id), collectionInsertId));
+          exitIds = [collectionInsertId];
+          deepestY = Math.max(deepestY, collectionInsertY + DIMENSIONS.insertHeight);
+        }
+        const childLayouts = childNodes.map((childNode: WorkflowNodeRecord, childIndex: number) => {
+          const beforeWidth = childWidths
+            .slice(0, childIndex)
             .reduce((sum, width) => sum + width, 0);
-          const branchLaneX =
-            branchStartX +
+          const childLaneX =
+            childStartX +
             beforeWidth +
-            branchGap * branchIndex +
-            branchWidths[branchIndex] / 2;
-          pushSectionLabelNode(
+            DIMENSIONS.controlBranchGap * childIndex +
+            childWidths[childIndex] / 2;
+          const childLayout = buildSequenceGraph(
+            [childNode],
             ctx,
-            `${workflowNode.id}-${slotKey}-label`,
-            branchLaneX + 24,
-            cursorY + 60,
-            slot.label ?? slotKey,
-          );
-          const childLayout = buildReadOnlySequenceGraph(
-            childNodes,
-            ctx,
-            branchLaneX,
-            cursorY + 82,
+            childLaneX,
+            childStartY,
+            {
+              scope: "slot",
+              parentNodeId: String(workflowNode.id),
+              slotKey,
+            },
+            {
+              idSuffix: `${workflowNode.id}-${slotKey}-${childIndex}`,
+              indexOffset: childIndex,
+              boundaryInserts: false,
+            },
           );
           childLayout.entryIds.forEach((entryId) => {
-            ctx.edges.push(createEdge(String(workflowNode.id), entryId));
+            if (childNodes.length > 1) {
+              ctx.edges.push(
+                createEdge(splitJunctionId, entryId, {
+                  kind: "split",
+                  splitMode: "fromJunction",
+                }),
+              );
+              return;
+            }
+
+            ctx.edges.push(createEdge(String(workflowNode.id), collectionInsertId));
+            ctx.edges.push(createEdge(collectionInsertId, entryId));
           });
           deepestY = Math.max(deepestY, childLayout.endY);
           maxWidth = Math.max(maxWidth, childLayout.width);
           return childLayout;
-        })
-        .filter((layout) => layout.entryIds.length);
-
-      exitIds = branchLayouts.length
-        ? branchLayouts.flatMap((layout) => layout.exitIds)
-        : [String(workflowNode.id)];
-    } else if (slotDefinitions.length === 1 && slotDefinitions[0].kind === "sequence") {
-      const slot = slotDefinitions[0];
-      const slotKey = slot.key as "children" | "nodes" | "then" | "else";
-      const childNodes = Array.isArray(workflowNode[slotKey]) ? workflowNode[slotKey] : [];
-      if (slot.label) {
-        const isLoop = isLoopNode(workflowNode, nodeType);
-        pushSectionLabelNode(
+        });
+        const childExitIds = childLayouts.flatMap((layout: WorkflowLayoutResult) => layout.exitIds);
+        exitIds = childExitIds.length ? childExitIds : exitIds;
+      } else {
+        const childLayout = buildSequenceGraph(
+          childNodes,
           ctx,
-          `${workflowNode.id}-${slotKey}-label`,
-          laneX + 24,
-          cursorY + (isLoop ? DIMENSIONS.controlChildLabelOffsetY : 132),
-          isLoop ? slot.label ?? "Loop Body" : slot.label,
+          laneX,
+          childStartY,
+          {
+            scope: "slot",
+            parentNodeId: String(workflowNode.id),
+            slotKey,
+          },
         );
+        childLayout.entryIds.forEach((entryId) => {
+          ctx.edges.push(createEdge(String(workflowNode.id), entryId));
+        });
+        deepestY = Math.max(deepestY, childLayout.endY);
+        maxWidth = Math.max(maxWidth, childLayout.width);
+        exitIds = childLayout.exitIds.length ? childLayout.exitIds : [String(workflowNode.id)];
       }
-      const childLayout = buildReadOnlySequenceGraph(
-        childNodes,
-        ctx,
-        laneX,
-        cursorY + DIMENSIONS.controlChildStartOffsetY,
-      );
-      childLayout.entryIds.forEach((entryId) => {
-        ctx.edges.push(createEdge(String(workflowNode.id), entryId));
-      });
-      deepestY = Math.max(deepestY, childLayout.endY);
-      maxWidth = Math.max(maxWidth, childLayout.width);
-      exitIds = childLayout.exitIds.length ? childLayout.exitIds : [String(workflowNode.id)];
-    } else if (slotDefinitions.length === 1 && slotDefinitions[0].kind === "branch-collection") {
-      const branches = Array.isArray(workflowNode.branches) ? workflowNode.branches : [];
-      const branchGap = 56;
-      const branchWidths = branches.map((branch: any) =>
-        estimateSequenceWidth(Array.isArray(branch.nodes) ? branch.nodes : [], ctx.nodeTypeMap),
-      );
-      const totalBranchWidth =
-        branchWidths.reduce((sum, width) => sum + width, 0) +
-        branchGap * Math.max(branchWidths.length - 1, 0);
-      const branchStartX = laneX - totalBranchWidth / 2;
-
-      const branchLayouts = branches
-        .map((branch: any, branchIndex) => {
-          const beforeWidth = branchWidths
-            .slice(0, branchIndex)
-            .reduce((sum, width) => sum + width, 0);
-          const branchLaneX =
-            branchStartX +
-            beforeWidth +
-            branchGap * branchIndex +
-            branchWidths[branchIndex] / 2;
-          pushSectionLabelNode(
-            ctx,
-            `${workflowNode.id}-${branch.id}-label`,
-            branchLaneX + 24,
-            cursorY + 60,
-            branch.name ?? branch.id,
-          );
-          const branchLayout = buildReadOnlySequenceGraph(
-            Array.isArray(branch.nodes) ? branch.nodes : [],
-            ctx,
-            branchLaneX,
-            cursorY + 82,
-          );
-          branchLayout.entryIds.forEach((entryId) => {
-            ctx.edges.push(createEdge(String(workflowNode.id), entryId));
-          });
-          deepestY = Math.max(deepestY, branchLayout.endY);
-          maxWidth = Math.max(maxWidth, branchLayout.width);
-          return branchLayout;
-        })
-        .filter((layout) => layout.entryIds.length);
-
-      exitIds = branchLayouts.length
-        ? branchLayouts.flatMap((layout) => layout.exitIds)
-        : [String(workflowNode.id)];
     }
 
-    if (isControlNode) {
-      pushGroupNode(
+    if (isControlNode && exitIds.length > 1) {
+      const junctionY = Math.max(
+        cursorY + DIMENSIONS.workflowHeight + DIMENSIONS.sequenceNodeToInsertGap,
+        deepestY + DIMENSIONS.controlJoinGap,
+      );
+      const junctionId = `junction-${String(workflowNode.id)}`;
+      pushJunctionNode(ctx, junctionId, laneX, junctionY);
+      exitIds.forEach((sourceId) => {
+        ctx.edges.push(createEdge(sourceId, junctionId, { marker: false }));
+      });
+      exitIds = [junctionId];
+      deepestY = Math.max(deepestY, junctionY);
+      usesMergeJunction = true;
+    }
+
+    const groupBounds = isControlNode
+      ? pushGroupNode(
         ctx,
         `group-${String(workflowNode.id)}`,
         workflowNode.name ?? workflowNode.id,
-        isLoopNode(workflowNode, nodeType) ? "loop" : "control",
+        groupTone,
         ctx.nodes.slice(subtreeStartIndex),
         workflowNode,
         nodeType,
-      );
-    }
+      )
+      : undefined;
 
-    cursorY = Math.max(cursorY + 82, deepestY + (isControlNode ? 40 : 0));
-    previousExitIds = exitIds;
+    const nextInsertY = usesMergeJunction
+      ? deepestY + DIMENSIONS.sequenceNodeToInsertGap
+      : deepestY + (isControlNode ? DIMENSIONS.sequenceNodeToInsertGap : 0);
+    const afterGroupInsertY =
+      groupBounds == null
+        ? nextInsertY
+        : groupBounds.bottom + DIMENSIONS.groupExteriorEdgeGap;
+    cursorY = Math.max(
+      cursorY + DIMENSIONS.workflowHeight + DIMENSIONS.sequenceNodeToInsertGap,
+      afterGroupInsertY,
+    );
+    if (boundaryInserts) {
+      const afterInsertIndex = indexOffset + index + 1;
+      const afterInsertId = `insert-${JSON.stringify(scope)}-${afterInsertIndex}-${workflowNode.id}${idSuffix}`;
+      pushInsertNode(ctx, afterInsertId, laneX, cursorY, {
+        ...scope,
+        index: afterInsertIndex,
+      } as WorkflowInsertTarget);
+      exitIds.forEach((sourceId) => {
+        ctx.edges.push(createEdge(sourceId, afterInsertId));
+      });
+      previousExitIds = [afterInsertId];
+    } else {
+      previousExitIds = exitIds;
+    }
   }
 
   return {
-    entryIds,
+    entryIds: entryIds.length ? entryIds : previousExitIds,
     exitIds: previousExitIds,
     endY: cursorY,
     width: maxWidth,
   };
 }
+
 
 function buildGraph(
   definition: { nodes: WorkflowNodeRecord[]; triggers?: WorkflowTriggerRecord[] },
@@ -1131,7 +1348,6 @@ function buildGraph(
     nodes: [],
     edges: [],
     nodeTypeMap: new Map(nodeTypes.map((item) => [item.type, item])),
-    readOnly: props.readOnly,
     activePaletteNodeType: props.activePaletteNodeType,
     selectedNodeId: props.selectedNodeId,
     selectedTriggerId: props.selectedTriggerId,
@@ -1142,7 +1358,6 @@ function buildGraph(
     onViewDocs: props.onViewDocs,
     onViewTriggerDocs: props.onViewTriggerDocs,
     onInsertNode: props.onInsertNode,
-    onAddBranch: props.onAddBranch,
   };
 
   const triggers = Array.isArray(definition.triggers) ? definition.triggers : [];
@@ -1165,25 +1380,18 @@ function buildGraph(
     startY = triggerY + 2;
   }
 
-  if (props.readOnly) {
-    const readOnlyLayout = buildReadOnlySequenceGraph(
-      definition.nodes ?? [],
-      ctx,
-      80,
-      startY,
-    );
-    if (previousTriggerId) {
-      const triggerSourceId = previousTriggerId;
-      readOnlyLayout.entryIds.forEach((entryId) => {
-        ctx.edges.push(createEdge(triggerSourceId, entryId));
-      });
-    }
-  } else {
-    buildSequenceGraph(definition.nodes ?? [], ctx, 80, startY, { scope: "root" });
-    if (previousTriggerId) {
-      const firstRootInsertId = `insert-${JSON.stringify({ scope: "root" })}-0`;
-      ctx.edges.push(createEdge(previousTriggerId, firstRootInsertId));
-    }
+  const layout = buildSequenceGraph(
+    definition.nodes ?? [],
+    ctx,
+    80,
+    startY,
+    { scope: "root" },
+  );
+  if (previousTriggerId) {
+    const triggerSourceId = previousTriggerId;
+    layout.entryIds.forEach((entryId) => {
+      ctx.edges.push(createEdge(triggerSourceId, entryId));
+    });
   }
 
   return {
@@ -1206,14 +1414,11 @@ function WorkflowFlowCanvasInner(props: WorkflowFlowCanvasProps) {
         onViewDocs: props.onViewDocs,
         onViewTriggerDocs: props.onViewTriggerDocs,
         onInsertNode: props.onInsertNode,
-        onAddBranch: props.onAddBranch,
-        readOnly: props.readOnly,
       }),
     [
       props.activePaletteNodeType,
       props.definition,
       props.nodeTypes,
-      props.onAddBranch,
       props.onDeleteNode,
       props.onEditNode,
       props.onInsertNode,
@@ -1221,38 +1426,33 @@ function WorkflowFlowCanvasInner(props: WorkflowFlowCanvasProps) {
       props.onSelectTrigger,
       props.onViewDocs,
       props.onViewTriggerDocs,
-      props.readOnly,
       props.selectedNodeId,
       props.selectedTriggerId,
     ],
   );
 
   return (
-    <div
-      className={`workflow-flow-canvas ${props.readOnly ? "workflow-flow-canvas--readonly" : ""}`}
-    >
+    <div className="workflow-flow-canvas">
       <ReactFlow
         nodes={graph.nodes}
         edges={graph.edges}
         nodeTypes={canvasNodeTypes}
+        edgeTypes={canvasEdgeTypes}
         fitView
         fitViewOptions={{
-          padding: props.readOnly ? 0.28 : 0.24,
-          maxZoom: props.readOnly ? 0.92 : 1,
+          padding: 0.16,
+          maxZoom: 1.25,
         }}
         minZoom={0.25}
         maxZoom={1.6}
         proOptions={{ hideAttribution: true }}
-        defaultEdgeOptions={{ zIndex: 2 }}
+        defaultEdgeOptions={{ zIndex: 1 }}
         nodesDraggable={false}
         nodesConnectable={false}
-        elementsSelectable={!props.readOnly}
+        elementsSelectable
         panOnDrag
         zoomOnDoubleClick={false}
       >
-        {!props.readOnly ? (
-          <MiniMap pannable zoomable className="workflow-flow-canvas__minimap" />
-        ) : null}
         <Controls showInteractive={false} />
         <Background
           variant={BackgroundVariant.Dots}
