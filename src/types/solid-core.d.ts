@@ -19,6 +19,7 @@ export type CommonEntity = {
     isPublished?: boolean;
     isLatest?: boolean;
     initialEntityVersionId?: number | null;
+    publishedTracker?: string;
 };
 
 // Model

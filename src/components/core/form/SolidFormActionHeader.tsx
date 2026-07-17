@@ -30,9 +30,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const user = session?.user;
 
     const isPublished = formData?.isPublished ?? (publish && publish !== 'null');   // fallback keeps older API responses working
+    const isLatestVersion = formData?.isLatest !== false;
     const showDraftPublishActions = Boolean(
         draftEnabled &&
-        params.id !== 'new'
+        params.id !== 'new' &&
+        isLatestVersion
     );
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
     // const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
@@ -117,8 +119,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     );
 
     const FormActionDropdown = () => {
-        const canPublish = actionsAllowed.includes(permissionExpression(params.modelName, 'publish'));
-        const canUnpublish = actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish'));
         const closeMenu = () => setFormActionsMenuOpen(false);
 
         return (
@@ -174,33 +174,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 closeMenu();
                             }}
                         />
-                        {showDraftPublishActions && (
-                            <>
-                                {!isPublished && canPublish && (
-                                    <FormActionMenuButton
-                                        label="Publish"
-                                        icon="si si-cloud-upload"
-                                        onClick={() => {
-                                            handleDraftPublishWorkFlow('publish');
-                                            closeMenu();
-                                        }}
-                                    />
-                                )}
-
-                                {isPublished && canUnpublish && (
-                                    <FormActionMenuButton
-                                        label="Unpublish"
-                                        icon="si si-cloud-download"
-                                        danger
-                                        onClick={() => {
-                                            handleDraftPublishWorkFlow('unpublish');
-                                            closeMenu();
-                                        }}
-                                    />
-                                )}
-                            </>
-                        )}
-
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
                                 <SolidFormViewContextMenuHeaderButton
@@ -474,6 +447,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     formViewLayout.attrs?.showEditFormButton !== false &&
                                     params.embeded !== true &&
                                     viewMode === "view" &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     <>
                                         <div className="hidden lg:flex">
@@ -489,6 +463,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                                 {
                                     params.embeded !== true &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
                                     shouldShowSaveForExistingRecord &&
@@ -525,6 +500,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                                 {
                                     params.embeded == true &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
                                     shouldShowSaveForExistingRecord &&

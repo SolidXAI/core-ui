@@ -12,7 +12,8 @@ import ExportModulePackageRowAction from "../components/core/extension/solid-cor
 import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
-import { DefaultDateFormEditWidget, DefaultDateFormViewWidget, PublishedStatusListViewWidget } from "../components/core/form/fields/SolidDateField";
+import { DefaultDateFormEditWidget, DefaultDateFormViewWidget } from "../components/core/form/fields/SolidDateField";
+import { PublishedStatusListViewWidget } from "../components/core/list/widgets/PublishedStatusListViewWidget";
 import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "../components/core/form/fields/SolidDateTimeField";
 import { DefaultDecimalFormEditWidget, DefaultDecimalFormViewWidget } from "../components/core/form/fields/SolidDecimalField";
 import { DefaultEmailFormEditWidget } from "../components/core/form/fields/SolidEmailField";

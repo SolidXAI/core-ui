@@ -1,0 +1,37 @@
+.publishedStatusCell {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 94px;
+}
+
+.publishedStatusPill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.publishedStatusPill.published {
+    color: #166534;
+    border-color: #22c55e40;
+    background: #dcfce7;
+}
+
+.publishedStatusPill.unpublished {
+    color: #991b1b;
+    border-color: #ef444440;
+    background: #fee2e2;
+}
+
+.publishedStatusTime {
+    color: var(--muted-foreground);
+    font-size: 10.5px;
+    line-height: 1.25;
+}

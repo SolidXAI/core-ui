@@ -1418,12 +1418,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     solidListViewLayout?.attrs?.edit !== false &&
     solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
     solidListViewLayout?.attrs?.showRowEditInContextMenu !== false &&
-    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
+    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isLatest === false);
 
   const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
     solidListViewLayout?.attrs?.delete !== false &&
     solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
-    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
+    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isLatest === false);
 
   const hasCustomContextMenuButtons =
     solidListViewLayout?.attrs?.rowButtons?.some(
@@ -1770,7 +1770,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         <Column
                           header="Edit"
                           body={(rowData) => {
-                            const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
+                            const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isLatest === false;
                             return (
                               <>
                                 {!shouldHideEditOrDeleteButton && (
@@ -1811,7 +1811,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         <Column
                           header="Delete"
                           body={(rowData) => {
-                            const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
+                            const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isLatest === false;
                             return (
                               <>
                                 {(!shouldHideEditOrDeleteButton) && (
