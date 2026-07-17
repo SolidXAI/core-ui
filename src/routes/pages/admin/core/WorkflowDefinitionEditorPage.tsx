@@ -32,8 +32,8 @@ import {
   type WorkflowInsertTarget,
 } from "../../../../components/workflow/WorkflowFlowCanvas";
 import {
+  WorkflowAddNodeDialog,
   WorkflowNodeEditorDialog,
-  WorkflowNodePalette,
 } from "../../../../components/workflow/WorkflowNodeSchemaEditor";
 import type { WorkflowNodeMetadataResponse } from "../../../../types/workflow-node";
 import {
@@ -845,7 +845,6 @@ export function WorkflowDefinitionEditorPage() {
     serializeWorkflowDefinitionYaml(createEmptyWorkflowDefinition()),
   );
   const [codeError, setCodeError] = React.useState<string | null>(null);
-  const [paletteNodeTypeKey, setPaletteNodeTypeKey] = React.useState<string>("");
   const [selectedNodeId, setSelectedNodeId] = React.useState<string>("");
   const [selectedTriggerId, setSelectedTriggerId] = React.useState<string>("");
   const [editorOpen, setEditorOpen] = React.useState(false);
@@ -854,6 +853,8 @@ export function WorkflowDefinitionEditorPage() {
   const [workflowVariablesValue, setWorkflowVariablesValue] = React.useState("{}");
   const [workflowTriggersValue, setWorkflowTriggersValue] = React.useState("[]");
   const [docsNodeTypeKey, setDocsNodeTypeKey] = React.useState<string>("");
+  const [pendingInsertTarget, setPendingInsertTarget] =
+    React.useState<WorkflowInsertTarget | null>(null);
   const [topologyDocsOpen, setTopologyDocsOpen] = React.useState(false);
   const [topologyDocsNodeTypeKey, setTopologyDocsNodeTypeKey] =
     React.useState<string>("");
@@ -934,12 +935,6 @@ export function WorkflowDefinitionEditorPage() {
   }, [isNodeTypesLoading, nodeTypes, record, workflowDefinitionId]);
 
   React.useEffect(() => {
-    if (!paletteNodeTypeKey && nodeTypes.length) {
-      setPaletteNodeTypeKey(nodeTypes[0].type);
-    }
-  }, [nodeTypes, paletteNodeTypeKey]);
-
-  React.useEffect(() => {
     if (!selectedNodeId) {
       return;
     }
@@ -983,11 +978,6 @@ export function WorkflowDefinitionEditorPage() {
     setWorkflowTriggersValue(YAML.stringify(definitionDraft.triggers ?? []));
   }, [definitionDraft, workflowSettingsOpen]);
 
-  const paletteNodeType = React.useMemo(
-    () => nodeTypes.find((nodeType) => nodeType.type === paletteNodeTypeKey),
-    [nodeTypes, paletteNodeTypeKey],
-  );
-
   const selectedNode = React.useMemo(
     () => findNodeById(definitionDraft.nodes, selectedNodeId),
     [definitionDraft.nodes, selectedNodeId],
@@ -1012,11 +1002,10 @@ export function WorkflowDefinitionEditorPage() {
     if (docsNodeTypeKey) {
       return nodeTypes.find((nodeType) => nodeType.type === docsNodeTypeKey);
     }
-    return selectedTrigger ? undefined : selectedNodeType ?? paletteNodeType;
+    return selectedTrigger ? undefined : selectedNodeType;
   }, [
     docsNodeTypeKey,
     nodeTypes,
-    paletteNodeType,
     selectedNodeType,
     selectedTrigger,
   ]);
@@ -1433,23 +1422,25 @@ export function WorkflowDefinitionEditorPage() {
   );
 
   const handleInsertNode = (target: WorkflowInsertTarget) => {
-    if (!paletteNodeType) {
-      dispatch(
-        showToast({
-          severity: "warn",
-          summary: "Pick a node type",
-          detail: "Select a node type from the palette before inserting into the flow.",
-        }),
-      );
+    setPendingInsertTarget(target);
+    setDetailTab("topology");
+  };
+
+  const handleAddNodeSubmit = (nextNode: WorkflowNodeRecord) => {
+    if (!pendingInsertTarget) {
       return;
     }
 
-    const nextNode = createNodeFromType(paletteNodeType);
-    const nextDraft = insertNodeIntoDefinition(definitionDraft, target, nextNode);
+    const nextDraft = insertNodeIntoDefinition(
+      definitionDraft,
+      pendingInsertTarget,
+      nextNode,
+    );
     syncDraftToCode(nextDraft);
     setSelectedNodeId(nextNode.id);
+    setSelectedTriggerId("");
     setDocsNodeTypeKey(nextNode.type);
-    setEditorOpen(true);
+    setPendingInsertTarget(null);
     setDetailTab("topology");
   };
 
@@ -1910,7 +1901,7 @@ export function WorkflowDefinitionEditorPage() {
           nodeTypes={nodeTypes}
           selectedNodeId={selectedNodeId}
           selectedTriggerId={selectedTriggerId}
-          activePaletteNodeType={paletteNodeType}
+          activePaletteNodeType={undefined}
           onSelectNode={(nodeId) => {
             setSelectedNodeId(nodeId);
             setSelectedTriggerId("");
@@ -2214,6 +2205,18 @@ export function WorkflowDefinitionEditorPage() {
           title={`${selectedNode.name ?? selectedNode.id} · ${selectedNodeType.label ?? selectedNodeType.type}`}
         />
       ) : null}
+
+      <WorkflowAddNodeDialog
+        open={!!pendingInsertTarget}
+        nodeTypes={nodeTypes}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingInsertTarget(null);
+          }
+        }}
+        createNodeValue={createNodeFromType}
+        onSubmit={handleAddNodeSubmit}
+      />
 
       <SolidDialog
         open={topologyDocsOpen}

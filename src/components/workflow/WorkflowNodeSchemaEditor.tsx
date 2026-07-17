@@ -1,5 +1,16 @@
 import React from "react";
 import YAML from "yaml";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CircleHelp,
+  GitBranch,
+  Plus,
+  Search,
+  Trash2,
+  Workflow,
+  Zap,
+} from "lucide-react";
 import { getExtensionComponent } from "../../helpers/registry";
 import type {
   WorkflowNodeChildSlotDefinition,
@@ -14,12 +25,18 @@ import {
   SolidDialogFooter,
   SolidInput,
   SolidNumberInput,
-  SolidPanel,
   SolidSelect,
   SolidSwitch,
+  SolidTabGroup,
   SolidTag,
   SolidTextarea,
+  SolidTooltip,
+  SolidTooltipContent,
+  SolidTooltipTrigger,
+  SolidIcon,
+  normalizeSolidIconName,
 } from "../shad-cn-ui";
+import "./WorkflowNodeSchemaEditor.css";
 
 type WorkflowNodeSchemaEditorProps = {
   nodeType: WorkflowNodeMetadataResponse;
@@ -63,6 +80,14 @@ type WorkflowNodePaletteProps = {
   value?: string;
   onSelect?: (nodeType: WorkflowNodeMetadataResponse) => void;
   className?: string;
+};
+
+type WorkflowAddNodeDialogProps = {
+  open: boolean;
+  nodeTypes: WorkflowNodeMetadataResponse[];
+  onOpenChange: (open: boolean) => void;
+  createNodeValue: (nodeType: WorkflowNodeMetadataResponse) => WorkflowNodeEditorValue;
+  onSubmit: (nodeValue: WorkflowNodeEditorValue) => void;
 };
 
 type FieldEditorProps = {
@@ -139,13 +164,316 @@ function getSlotCount(node: WorkflowNodeEditorValue, slot: WorkflowNodeChildSlot
   return Array.isArray(value) ? value.length : 0;
 }
 
-function renderFieldHint(field: WorkflowNodeConfigurationFieldDefinition) {
+function hasRuntimeFields(nodeType: WorkflowNodeMetadataResponse) {
+  const authoring = nodeType.authoring;
+  return Boolean(
+    authoring?.supportsDisableToggle ||
+      authoring?.supportsTimeoutMs ||
+      authoring?.supportsOnError ||
+      authoring?.supportsRetryPolicy,
+  );
+}
+
+function getNodeTypeIconName(nodeType: WorkflowNodeMetadataResponse) {
+  return nodeType.ui?.icon ?? nodeType.icon;
+}
+
+function WorkflowNodeTypeIcon({
+  nodeType,
+  size = 18,
+}: {
+  nodeType: WorkflowNodeMetadataResponse;
+  size?: number;
+}) {
+  const iconName = getNodeTypeIconName(nodeType);
+  const normalizedIconName = normalizeSolidIconName(iconName);
+
+  if (normalizedIconName) {
+    return <SolidIcon name={normalizedIconName} size={size} aria-hidden />;
+  }
+
+  if (nodeType.kind === "control") {
+    return <GitBranch size={size} strokeWidth={1.9} />;
+  }
+
+  if (nodeType.kind === "subflow") {
+    return <Workflow size={size} strokeWidth={1.9} />;
+  }
+
+  return <Zap size={size} strokeWidth={1.9} />;
+}
+
+function normalizeGroupLabel(value: string | undefined, fallback: string) {
+  const trimmed = value?.trim();
+  return trimmed || fallback;
+}
+
+function getNodeTypeSearchText(nodeType: WorkflowNodeMetadataResponse) {
+  return [
+    nodeType.type,
+    nodeType.kind,
+    nodeType.label,
+    nodeType.description,
+    nodeType.category,
+    nodeType.subcategory,
+    ...(nodeType.tags ?? []),
+    ...(nodeType.authoring?.searchableText ?? []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function createSelectOptions(values: string[], allLabel: string) {
+  return [
+    { label: allLabel, value: "" },
+    ...values
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b))
+      .map((value) => ({ label: value, value })),
+  ];
+}
+
+function isConfigurationFieldVisible(
+  field: WorkflowNodeConfigurationFieldDefinition,
+  draft: Record<string, any>,
+) {
+  const visibleWhen = field.uiSchema?.visibleWhen as
+    | {
+        field?: string;
+        path?: string;
+        equals?: any;
+        notEquals?: any;
+        includes?: any[];
+      }
+    | undefined;
+
+  if (!visibleWhen) {
+    return true;
+  }
+
+  const dependencyPath = visibleWhen.path ?? visibleWhen.field;
+  if (!dependencyPath) {
+    return true;
+  }
+
+  const dependencyValue = getPathValue(draft, dependencyPath);
+
+  if ("equals" in visibleWhen) {
+    return dependencyValue === visibleWhen.equals;
+  }
+
+  if ("notEquals" in visibleWhen) {
+    return dependencyValue !== visibleWhen.notEquals;
+  }
+
+  if (Array.isArray(visibleWhen.includes)) {
+    return visibleWhen.includes.includes(dependencyValue);
+  }
+
+  return true;
+}
+
+function getConfigurationFieldWidth(field: WorkflowNodeConfigurationFieldDefinition) {
+  const width = field.uiSchema?.layout?.width;
+  return width === "full" || width === "field" ? width : "half";
+}
+
+function getFieldHintItems(field: WorkflowNodeConfigurationFieldDefinition) {
+  return [
+    field.valueType ? { key: "valueType", label: field.valueType } : null,
+    field.required ? { key: "required", label: "required", tone: "warn" as const } : null,
+    field.expressionAllowed ? { key: "expressions", label: "expressions" } : null,
+    field.secretAllowed ? { key: "secret", label: "secret", tone: "success" as const } : null,
+  ].filter(Boolean) as Array<{
+    key: string;
+    label: string;
+    tone?: "warn" | "success";
+  }>;
+}
+
+function WorkflowFieldHelp({ field }: { field: WorkflowNodeConfigurationFieldDefinition }) {
+  const hintItems = getFieldHintItems(field);
+
+  if (!field.description && !hintItems.length) {
+    return null;
+  }
+
   return (
-    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-      {field.valueType ? <SolidTag>{field.valueType}</SolidTag> : null}
-      {field.required ? <SolidTag tone="warn">required</SolidTag> : null}
-      {field.expressionAllowed ? <SolidTag>expressions</SolidTag> : null}
-      {field.secretAllowed ? <SolidTag tone="success">secret</SolidTag> : null}
+    <SolidTooltip delayDuration={120}>
+      <SolidTooltipTrigger asChild>
+        <button
+          type="button"
+          className="workflow-node-editor-help-trigger"
+          aria-label={`${field.label ?? field.key} help`}
+        >
+          <CircleHelp size={13} />
+        </button>
+      </SolidTooltipTrigger>
+      <SolidTooltipContent
+        side="top"
+        align="end"
+        className="workflow-node-editor-help-tooltip"
+      >
+        {field.description ? (
+          <div className="workflow-node-editor-help-section">
+            <div className="workflow-node-editor-help-title">Help</div>
+            <div className="workflow-node-editor-help-copy">{field.description}</div>
+          </div>
+        ) : null}
+        {hintItems.length ? (
+          <div className="workflow-node-editor-help-section">
+            <div className="workflow-node-editor-help-title">Allowed</div>
+            <div className="workflow-node-editor-help-pills">
+              {hintItems.map((item) => (
+                <SolidTag key={item.key} tone={item.tone}>
+                  {item.label}
+                </SolidTag>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </SolidTooltipContent>
+    </SolidTooltip>
+  );
+}
+
+function normalizeKeyValueRows(value: any) {
+  if (Array.isArray(value)) {
+    return value.map((item) => ({
+      key: String(item?.key ?? item?.name ?? ""),
+      value: item?.value ?? "",
+    }));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.entries(value).map(([key, rowValue]) => ({
+      key,
+      value:
+        rowValue === undefined || rowValue === null
+          ? ""
+          : typeof rowValue === "string"
+            ? rowValue
+            : YAML.stringify(rowValue).trim(),
+    }));
+  }
+
+  return [];
+}
+
+function rowsToKeyValueObject(rows: Array<{ key: string; value: any }>) {
+  return rows.reduce<Record<string, any>>((acc, row) => {
+    const key = row.key.trim();
+    if (!key) {
+      return acc;
+    }
+    acc[key] = row.value;
+    return acc;
+  }, {});
+}
+
+function keyValueRowsSignature(rows: Array<{ key: string; value: any }>) {
+  return JSON.stringify(rowsToKeyValueObject(rows));
+}
+
+function WorkflowKeyValueEditor({
+  value,
+  readOnly,
+  onChange,
+}: {
+  value: any;
+  readOnly?: boolean;
+  onChange: (value: Record<string, any>) => void;
+}) {
+  const normalizedRows = normalizeKeyValueRows(value);
+  const [rows, setRows] = React.useState<Array<{ key: string; value: any }>>(
+    normalizedRows.length ? normalizedRows : [{ key: "", value: "" }],
+  );
+  const lastEmittedSignatureRef = React.useRef(keyValueRowsSignature(normalizedRows));
+
+  React.useEffect(() => {
+    const nextRows = normalizeKeyValueRows(value);
+    const nextSignature = keyValueRowsSignature(nextRows);
+    if (nextSignature === lastEmittedSignatureRef.current) {
+      return;
+    }
+
+    setRows(nextRows.length ? nextRows : [{ key: "", value: "" }]);
+    lastEmittedSignatureRef.current = nextSignature;
+  }, [value]);
+
+  const emitRows = (nextRows: Array<{ key: string; value: any }>) => {
+    const nextValue = rowsToKeyValueObject(nextRows);
+    lastEmittedSignatureRef.current = JSON.stringify(nextValue);
+    onChange(nextValue);
+  };
+
+  const updateRow = (
+    index: number,
+    patch: Partial<{ key: string; value: any }>,
+  ) => {
+    const nextRows = rows.map((row, rowIndex) =>
+      rowIndex === index ? { ...row, ...patch } : row,
+    );
+    setRows(nextRows);
+    emitRows(nextRows);
+  };
+
+  const removeRow = (index: number) => {
+    const nextRows = rows.filter((_, rowIndex) => rowIndex !== index);
+    const displayRows = nextRows.length ? nextRows : [{ key: "", value: "" }];
+    setRows(displayRows);
+    emitRows(displayRows);
+  };
+
+  const addRow = () => {
+    setRows([...rows, { key: "", value: "" }]);
+  };
+
+  return (
+    <div className="workflow-node-key-value-editor">
+      <div className="workflow-node-key-value-header">
+        <span>Key</span>
+        <span>Value</span>
+        <span />
+      </div>
+      {rows.map((row, index) => (
+        <div
+          className="workflow-node-key-value-row"
+          key={`${row.key || "row"}-${index}`}
+        >
+          <SolidInput
+            value={row.key}
+            disabled={readOnly}
+            placeholder="key"
+            onChange={(event) => updateRow(index, { key: event.target.value })}
+          />
+          <SolidInput
+            value={row.value ?? ""}
+            disabled={readOnly}
+            placeholder="value"
+            onChange={(event) => updateRow(index, { value: event.target.value })}
+          />
+          <button
+            type="button"
+            className="workflow-node-key-value-action"
+            disabled={readOnly || rows.length === 1}
+            aria-label="Remove row"
+            onClick={() => removeRow(index)}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="workflow-node-key-value-add"
+        disabled={readOnly}
+        onClick={addRow}
+      >
+        <Plus size={14} />
+        Add row
+      </button>
     </div>
   );
 }
@@ -189,6 +517,16 @@ function WorkflowNodeFieldEditor({
     );
   }
 
+  if (field.widgetHint === "key-value-editor") {
+    return (
+      <WorkflowKeyValueEditor
+        value={normalizedValue}
+        readOnly={readOnly}
+        onChange={onChange}
+      />
+    );
+  }
+
   if (field.valueType === "boolean") {
     return (
       <SolidSwitch
@@ -205,6 +543,26 @@ function WorkflowNodeFieldEditor({
         value={normalizedValue}
         disabled={readOnly}
         onChange={(event) => onChange(event.value)}
+      />
+    );
+  }
+
+  if (field.widgetHint === "raw-editor") {
+    const stringValue =
+      typeof normalizedValue === "string"
+        ? normalizedValue
+        : normalizedValue === undefined || normalizedValue === null
+          ? ""
+          : JSON.stringify(normalizedValue, null, 2);
+    const editorLanguage = field.uiSchema?.editor?.language ?? "json";
+
+    return (
+      <SolidCodeEditor
+        language={editorLanguage}
+        height="220px"
+        readOnly={readOnly}
+        value={stringValue}
+        onChange={(next) => onChange(next ?? "")}
       />
     );
   }
@@ -285,7 +643,10 @@ export function WorkflowNodeSchemaEditor({
 
   const fields = nodeType.authoring?.configurationFields ?? [];
   const groupOrder = nodeType.ui?.layoutHints?.groupOrder ?? [];
-  const groupedFields = fields.reduce<Record<string, WorkflowNodeConfigurationFieldDefinition[]>>(
+  const visibleFields = fields.filter((field) =>
+    isConfigurationFieldVisible(field, draft),
+  );
+  const groupedFields = visibleFields.reduce<Record<string, WorkflowNodeConfigurationFieldDefinition[]>>(
     (acc, field) => {
       const group = field.group ?? "General";
       acc[group] = acc[group] ?? [];
@@ -316,40 +677,80 @@ export function WorkflowNodeSchemaEditor({
     onChange?.(nextDraft);
   };
 
+  if (!orderedGroups.length) {
+    return (
+      <div className={`workflow-node-editor-empty ${className ?? ""}`}>
+        This node does not expose configuration fields yet.
+      </div>
+    );
+  }
+
   return (
-    <div className={className} style={{ display: "grid", gap: "1rem" }}>
+    <div className={`workflow-node-editor-config ${className ?? ""}`}>
       {orderedGroups.map((group) => (
-        <SolidPanel key={group} header={group}>
-          <div style={{ display: "grid", gap: "1rem" }}>
-            {groupedFields[group].map((field) => (
-              <div key={field.key} style={{ display: "grid", gap: "0.5rem" }}>
-                <div style={{ display: "grid", gap: "0.35rem" }}>
-                  <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
-                    <strong>{field.label ?? field.key}</strong>
-                    {renderFieldHint(field)}
+        <section key={group} className="workflow-node-editor-section">
+          {orderedGroups.length > 1 || group !== "General" ? (
+            <div className="workflow-node-editor-section-heading">{group}</div>
+          ) : null}
+          <div className="workflow-node-editor-form-grid">
+            {groupedFields[group].map((field) => {
+              const fieldWidth = getConfigurationFieldWidth(field);
+              return (
+                <div
+                  key={field.key}
+                  className={`workflow-node-editor-field workflow-node-editor-field--${fieldWidth}`}
+                >
+                  <div className="workflow-node-editor-field-heading">
+                    <div className="workflow-node-editor-label-row">
+                      <label className="workflow-node-editor-label">
+                        {field.label ?? field.key}
+                      </label>
+                      <WorkflowFieldHelp field={field} />
+                    </div>
                   </div>
-                  {field.description ? (
-                    <div style={{ opacity: 0.8 }}>{field.description}</div>
-                  ) : null}
+                  <WorkflowNodeFieldEditor
+                    nodeType={nodeType}
+                    field={field}
+                    value={getPathValue(draft, field.path ?? field.key)}
+                    readOnly={readOnly}
+                    onChange={(nextValue) => updateField(field, nextValue)}
+                  />
                 </div>
-                <WorkflowNodeFieldEditor
-                  nodeType={nodeType}
-                  field={field}
-                  value={getPathValue(draft, field.path ?? field.key)}
-                  readOnly={readOnly}
-                  onChange={(nextValue) => updateField(field, nextValue)}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </SolidPanel>
+        </section>
       ))}
 
       {!readOnly && onSubmit ? (
-        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <div className="workflow-node-editor-inline-actions">
           <SolidButton onClick={() => onSubmit(draft)}>Save</SolidButton>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function WorkflowNodeTags({ nodeType }: { nodeType: WorkflowNodeMetadataResponse }) {
+  return (
+    <div className="workflow-node-editor-tags">
+      <SolidTag>{nodeType.kind}</SolidTag>
+      {nodeType.category ? <SolidTag>{nodeType.category}</SolidTag> : null}
+      {nodeType.ui?.defaultEditorMode ? <SolidTag>{nodeType.ui.defaultEditorMode}</SolidTag> : null}
+    </div>
+  );
+}
+
+function WorkflowNodeHeaderMeta({ nodeType }: { nodeType: WorkflowNodeMetadataResponse }) {
+  return (
+    <div className="workflow-node-editor-dialog-meta">
+      <span className="workflow-node-editor-dialog-icon">
+        <WorkflowNodeTypeIcon nodeType={nodeType} size={15} />
+      </span>
+      <SolidTag>{nodeType.kind}</SolidTag>
+      <SolidTag>{nodeType.type}</SolidTag>
+      {nodeType.category ? <SolidTag>{nodeType.category}</SolidTag> : null}
+      {nodeType.subcategory ? <SolidTag>{nodeType.subcategory}</SolidTag> : null}
     </div>
   );
 }
@@ -371,26 +772,24 @@ function WorkflowNodeCommonFields({
   };
 
   return (
-    <SolidPanel header="Node">
-      <div style={{ display: "grid", gap: "1rem" }}>
-        <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-          <div style={{ display: "grid", gap: "0.45rem" }}>
-            <strong>Id</strong>
-            <SolidInput
-              value={draft.id ?? ""}
-              disabled={readOnly}
-              onChange={(event) => update({ id: event.target.value })}
-            />
-          </div>
-          <div style={{ display: "grid", gap: "0.45rem" }}>
-            <strong>Type</strong>
-            <SolidInput value={draft.type ?? nodeType.type} disabled />
-          </div>
+    <section className="workflow-node-editor-section">
+      <div className="workflow-node-editor-form-grid">
+        <div className="workflow-node-editor-field">
+          <label className="workflow-node-editor-label">Id</label>
+          <SolidInput
+            value={draft.id ?? ""}
+            disabled={readOnly}
+            onChange={(event) => update({ id: event.target.value })}
+          />
+        </div>
+        <div className="workflow-node-editor-field">
+          <label className="workflow-node-editor-label">Type</label>
+          <SolidInput value={draft.type ?? nodeType.type} disabled />
         </div>
 
         {authoring?.supportsName !== false ? (
-          <div style={{ display: "grid", gap: "0.45rem" }}>
-            <strong>Name</strong>
+          <div className="workflow-node-editor-field">
+            <label className="workflow-node-editor-label">Name</label>
             <SolidInput
               value={draft.name ?? ""}
               disabled={readOnly}
@@ -399,9 +798,14 @@ function WorkflowNodeCommonFields({
           </div>
         ) : null}
 
+        <div className="workflow-node-editor-field">
+          <label className="workflow-node-editor-label">Kind</label>
+          <WorkflowNodeTags nodeType={nodeType} />
+        </div>
+
         {authoring?.supportsDescription ? (
-          <div style={{ display: "grid", gap: "0.45rem" }}>
-            <strong>Description</strong>
+          <div className="workflow-node-editor-field workflow-node-editor-field--wide">
+            <label className="workflow-node-editor-label">Description</label>
             <SolidTextarea
               value={draft.description ?? ""}
               disabled={readOnly}
@@ -409,16 +813,8 @@ function WorkflowNodeCommonFields({
             />
           </div>
         ) : null}
-
-        <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
-          <SolidTag>{nodeType.kind}</SolidTag>
-          {nodeType.category ? <SolidTag>{nodeType.category}</SolidTag> : null}
-          {nodeType.ui?.defaultEditorMode ? (
-            <SolidTag>{nodeType.ui.defaultEditorMode}</SolidTag>
-          ) : null}
-        </div>
       </div>
-    </SolidPanel>
+    </section>
   );
 }
 
@@ -434,13 +830,8 @@ function WorkflowNodeRuntimeFields({
   onChange: (value: WorkflowNodeEditorValue) => void;
 }) {
   const authoring = nodeType.authoring;
-  const hasRuntimeFields =
-    authoring?.supportsDisableToggle ||
-    authoring?.supportsTimeoutMs ||
-    authoring?.supportsOnError ||
-    authoring?.supportsRetryPolicy;
 
-  if (!hasRuntimeFields) {
+  if (!hasRuntimeFields(nodeType)) {
     return null;
   }
 
@@ -449,54 +840,54 @@ function WorkflowNodeRuntimeFields({
   };
 
   return (
-    <SolidPanel header="Runtime">
-      <div style={{ display: "grid", gap: "1rem" }}>
-        {authoring?.supportsDisableToggle ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
-            <div>
-              <strong>Disabled</strong>
-              <div style={{ opacity: 0.75 }}>Skip this node during execution.</div>
+    <section className="workflow-node-editor-section">
+      {authoring?.supportsDisableToggle ? (
+        <div className="workflow-node-editor-toggle-row">
+          <div>
+            <div className="workflow-node-editor-toggle-title">Disabled</div>
+            <div className="workflow-node-editor-description">
+              Skip this node during execution.
             </div>
-            <SolidSwitch
-              checked={!!draft.disabled}
+          </div>
+          <SolidSwitch
+            checked={!!draft.disabled}
+            disabled={readOnly}
+            onChange={(checked) => update({ disabled: checked || undefined })}
+          />
+        </div>
+      ) : null}
+
+      <div className="workflow-node-editor-form-grid">
+        {authoring?.supportsTimeoutMs ? (
+          <div className="workflow-node-editor-field">
+            <label className="workflow-node-editor-label">Timeout (ms)</label>
+            <SolidNumberInput
+              value={draft.timeoutMs}
               disabled={readOnly}
-              onChange={(checked) => update({ disabled: checked || undefined })}
+              onChange={(event) => update({ timeoutMs: event.value ?? undefined })}
             />
           </div>
         ) : null}
 
-        <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-          {authoring?.supportsTimeoutMs ? (
-            <div style={{ display: "grid", gap: "0.45rem" }}>
-              <strong>Timeout (ms)</strong>
-              <SolidNumberInput
-                value={draft.timeoutMs}
-                disabled={readOnly}
-                onChange={(event) => update({ timeoutMs: event.value ?? undefined })}
-              />
-            </div>
-          ) : null}
-
-          {authoring?.supportsOnError ? (
-            <div style={{ display: "grid", gap: "0.45rem" }}>
-              <strong>On error</strong>
-              <SolidSelect
-                value={draft.onError ?? "fail"}
-                disabled={readOnly}
-                options={[
-                  { label: "Fail workflow", value: "fail" },
-                  { label: "Continue", value: "continue" },
-                ]}
-                onChange={(event) => update({ onError: event.value })}
-              />
-            </div>
-          ) : null}
-        </div>
+        {authoring?.supportsOnError ? (
+          <div className="workflow-node-editor-field">
+            <label className="workflow-node-editor-label">On error</label>
+            <SolidSelect
+              value={draft.onError ?? "fail"}
+              disabled={readOnly}
+              options={[
+                { label: "Fail workflow", value: "fail" },
+                { label: "Continue", value: "continue" },
+              ]}
+              onChange={(event) => update({ onError: event.value })}
+            />
+          </div>
+        ) : null}
 
         {authoring?.supportsRetryPolicy ? (
-          <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-            <div style={{ display: "grid", gap: "0.45rem" }}>
-              <strong>Max retries</strong>
+          <>
+            <div className="workflow-node-editor-field">
+              <label className="workflow-node-editor-label">Max retries</label>
               <SolidNumberInput
                 value={draft.retryPolicy?.maxRetries}
                 disabled={readOnly}
@@ -510,8 +901,8 @@ function WorkflowNodeRuntimeFields({
                 }
               />
             </div>
-            <div style={{ display: "grid", gap: "0.45rem" }}>
-              <strong>Retry delay (ms)</strong>
+            <div className="workflow-node-editor-field">
+              <label className="workflow-node-editor-label">Retry delay (ms)</label>
               <SolidNumberInput
                 value={draft.retryPolicy?.delayMs}
                 disabled={readOnly}
@@ -525,10 +916,10 @@ function WorkflowNodeRuntimeFields({
                 }
               />
             </div>
-          </div>
+          </>
         ) : null}
       </div>
-    </SolidPanel>
+    </section>
   );
 }
 
@@ -545,38 +936,26 @@ function WorkflowNodeChildSlotsSummary({
   }
 
   return (
-    <SolidPanel header="Topology Slots">
-      <div style={{ display: "grid", gap: "0.65rem" }}>
+    <section className="workflow-node-editor-section">
+      <div className="workflow-node-editor-slot-list">
         {childSlots.map((slot) => (
-          <div
-            key={slot.key}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1rem",
-              padding: "0.65rem 0.75rem",
-              border: "1px solid var(--surface-border, #dbe3f0)",
-              borderRadius: "0.5rem",
-              background: "rgba(248, 250, 252, 0.68)",
-            }}
-          >
-            <div style={{ display: "grid", gap: "0.2rem" }}>
-              <strong>{slot.label ?? slot.key}</strong>
-              <span style={{ opacity: 0.76 }}>
+          <div key={slot.key} className="workflow-node-editor-slot-row">
+            <div className="workflow-node-editor-slot-copy">
+              <div className="workflow-node-editor-slot-title">{slot.label ?? slot.key}</div>
+              <div className="workflow-node-editor-description">
                 {slot.description ??
                   "Use the topology canvas to add, reorder, or remove child nodes."}
-              </span>
+              </div>
             </div>
             <SolidTag>{getSlotCount(draft, slot)}</SolidTag>
           </div>
         ))}
-        <div style={{ opacity: 0.75 }}>
-          Child node membership is edited from the topology canvas. This dialog edits the
-          control node itself.
-        </div>
       </div>
-    </SolidPanel>
+      <div className="workflow-node-editor-note">
+        Child node membership is edited from the topology canvas. This dialog edits the
+        control node itself.
+      </div>
+    </section>
   );
 }
 
@@ -592,34 +971,79 @@ function WorkflowNodeFullEditor({
   readOnly?: boolean;
 }) {
   const configuration = value.configuration ?? {};
+  const [activeTab, setActiveTab] = React.useState("basic");
+  const hasConfiguration = Boolean(nodeType.authoring?.configurationFields?.length);
+  const childSlots = nodeType.authoring?.childSlots ?? [];
+
+  const tabs = [
+    {
+      value: "basic",
+      label: "Basic Info",
+      content: (
+        <WorkflowNodeCommonFields
+          nodeType={nodeType}
+          draft={value}
+          readOnly={readOnly}
+          onChange={onChange}
+        />
+      ),
+    },
+    hasConfiguration
+      ? {
+          value: "configuration",
+          label: "Configuration",
+          content: (
+            <WorkflowNodeSchemaEditor
+              nodeType={nodeType}
+              value={configuration}
+              readOnly={readOnly}
+              onChange={(nextConfiguration) =>
+                onChange({
+                  ...value,
+                  configuration: nextConfiguration,
+                })
+              }
+            />
+          ),
+        }
+      : null,
+    hasRuntimeFields(nodeType)
+      ? {
+          value: "runtime",
+          label: "Runtime",
+          content: (
+            <WorkflowNodeRuntimeFields
+              nodeType={nodeType}
+              draft={value}
+              readOnly={readOnly}
+              onChange={onChange}
+            />
+          ),
+        }
+      : null,
+    childSlots.length
+      ? {
+          value: "topology",
+          label: "Topology",
+          content: <WorkflowNodeChildSlotsSummary nodeType={nodeType} draft={value} />,
+        }
+      : null,
+  ].filter(Boolean) as Array<{ value: string; label: string; content: React.ReactNode }>;
+
+  React.useEffect(() => {
+    if (!tabs.some((tab) => tab.value === activeTab)) {
+      setActiveTab(tabs[0]?.value ?? "basic");
+    }
+  }, [activeTab, tabs]);
 
   return (
-    <div style={{ display: "grid", gap: "1rem" }}>
-      <WorkflowNodeCommonFields
-        nodeType={nodeType}
-        draft={value}
-        readOnly={readOnly}
-        onChange={onChange}
-      />
-      <WorkflowNodeSchemaEditor
-        nodeType={nodeType}
-        value={configuration}
-        readOnly={readOnly}
-        onChange={(nextConfiguration) =>
-          onChange({
-            ...value,
-            configuration: nextConfiguration,
-          })
-        }
-      />
-      <WorkflowNodeRuntimeFields
-        nodeType={nodeType}
-        draft={value}
-        readOnly={readOnly}
-        onChange={onChange}
-      />
-      <WorkflowNodeChildSlotsSummary nodeType={nodeType} draft={value} />
-    </div>
+    <SolidTabGroup
+      tabs={tabs}
+      value={activeTab}
+      onValueChange={setActiveTab}
+      className="workflow-node-editor-tabs"
+      panelClassName="workflow-node-editor-tab-panel"
+    />
   );
 }
 
@@ -664,6 +1088,10 @@ export function WorkflowNodeEditorDialog({
   const CustomEditor = editorComponentKey ? getExtensionComponent(editorComponentKey) : null;
   const useCustomEditor = !!CustomEditor && nodeType.ui?.defaultEditorMode === "custom";
   const isFullNodeMode = !!nodeValue || !!onNodeSubmit || !!onNodeChange;
+  const dialogTitle = title ?? nodeType.label ?? nodeType.type;
+  const dialogSubtitle = isFullNodeMode
+    ? "Review the node details and configuration for this workflow step."
+    : "Review the configuration fields for this workflow node.";
 
   const handleNodeChange = (nextValue: WorkflowNodeEditorValue) => {
     setNodeDraft(nextValue);
@@ -675,14 +1103,20 @@ export function WorkflowNodeEditorDialog({
     <SolidDialog
       open={open}
       onOpenChange={onOpenChange}
-      header={title ?? nodeType.label ?? nodeType.type}
+      header={
+        <div className="workflow-node-editor-dialog-heading">
+          <div className="workflow-node-editor-dialog-title">{dialogTitle}</div>
+          <div className="workflow-node-editor-dialog-subtitle">{dialogSubtitle}</div>
+          <WorkflowNodeHeaderMeta nodeType={nodeType} />
+        </div>
+      }
       className={`solid-workflow-node-editor-dialog solid-workflow-node-editor-dialog--${nodeType.ui?.modalSize ?? "lg"}`}
       style={{
-        width: nodeType.ui?.modalSize === "full" ? "96vw" : "min(1100px, 92vw)",
+        width: nodeType.ui?.modalSize === "full" ? "96vw" : "min(780px, 92vw)",
         maxWidth: "96vw",
       }}
     >
-      <SolidDialogBody>
+      <SolidDialogBody className="workflow-node-editor-dialog-body">
         {useCustomEditor ? (
           <CustomEditor
             nodeType={nodeType}
@@ -701,6 +1135,7 @@ export function WorkflowNodeEditorDialog({
           />
         ) : (
           <WorkflowNodeSchemaEditor
+            className="workflow-node-editor-standalone-config"
             nodeType={nodeType}
             value={draft}
             onChange={(nextValue) => {
@@ -716,7 +1151,7 @@ export function WorkflowNodeEditorDialog({
         )}
       </SolidDialogBody>
       {!readOnly && (onSubmit || onNodeSubmit) ? (
-        <SolidDialogFooter>
+        <SolidDialogFooter className="workflow-node-editor-dialog-footer">
           <SolidButton variant="secondary" onClick={() => onOpenChange(false)}>
             Cancel
           </SolidButton>
@@ -733,6 +1168,324 @@ export function WorkflowNodeEditorDialog({
           </SolidButton>
         </SolidDialogFooter>
       ) : null}
+    </SolidDialog>
+  );
+}
+
+export function WorkflowAddNodeDialog({
+  open,
+  nodeTypes,
+  onOpenChange,
+  createNodeValue,
+  onSubmit,
+}: WorkflowAddNodeDialogProps) {
+  const [step, setStep] = React.useState<"select" | "configure">("select");
+  const [query, setQuery] = React.useState("");
+  const [categoryFilter, setCategoryFilter] = React.useState("");
+  const [subcategoryFilter, setSubcategoryFilter] = React.useState("");
+  const [kindFilter, setKindFilter] = React.useState("");
+  const [typeFilter, setTypeFilter] = React.useState("");
+  const [selectedType, setSelectedType] = React.useState("");
+  const [nodeDraft, setNodeDraft] = React.useState<WorkflowNodeEditorValue | null>(null);
+
+  React.useEffect(() => {
+    if (!open) {
+      setStep("select");
+      setQuery("");
+      setCategoryFilter("");
+      setSubcategoryFilter("");
+      setKindFilter("");
+      setTypeFilter("");
+      setSelectedType("");
+      setNodeDraft(null);
+    }
+  }, [open]);
+
+  const selectedNodeType = React.useMemo(
+    () => nodeTypes.find((nodeType) => nodeType.type === selectedType),
+    [nodeTypes, selectedType],
+  );
+
+  const categoryOptions = React.useMemo(
+    () =>
+      createSelectOptions(
+        Array.from(
+          new Set(nodeTypes.map((nodeType) => nodeType.category ?? "").filter(Boolean)),
+        ),
+        "All categories",
+      ),
+    [nodeTypes],
+  );
+
+  const subcategoryOptions = React.useMemo(() => {
+    const source = categoryFilter
+      ? nodeTypes.filter((nodeType) => nodeType.category === categoryFilter)
+      : nodeTypes;
+    return createSelectOptions(
+      Array.from(
+        new Set(source.map((nodeType) => nodeType.subcategory ?? "").filter(Boolean)),
+      ),
+      "All subcategories",
+    );
+  }, [categoryFilter, nodeTypes]);
+
+  const kindOptions = React.useMemo(
+    () =>
+      createSelectOptions(
+        Array.from(new Set(nodeTypes.map((nodeType) => nodeType.kind).filter(Boolean))),
+        "All kinds",
+      ),
+    [nodeTypes],
+  );
+
+  const typeOptions = React.useMemo(
+    () =>
+      createSelectOptions(
+        Array.from(new Set(nodeTypes.map((nodeType) => nodeType.type).filter(Boolean))),
+        "All types",
+      ),
+    [nodeTypes],
+  );
+
+  React.useEffect(() => {
+    if (
+      subcategoryFilter &&
+      !subcategoryOptions.some((option) => option.value === subcategoryFilter)
+    ) {
+      setSubcategoryFilter("");
+    }
+  }, [subcategoryFilter, subcategoryOptions]);
+
+  const filteredNodeTypes = React.useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return nodeTypes.filter((nodeType) => {
+      if (categoryFilter && nodeType.category !== categoryFilter) {
+        return false;
+      }
+      if (subcategoryFilter && nodeType.subcategory !== subcategoryFilter) {
+        return false;
+      }
+      if (kindFilter && nodeType.kind !== kindFilter) {
+        return false;
+      }
+      if (typeFilter && nodeType.type !== typeFilter) {
+        return false;
+      }
+      if (!normalizedQuery) {
+        return true;
+      }
+      return getNodeTypeSearchText(nodeType).includes(normalizedQuery);
+    });
+  }, [
+    categoryFilter,
+    kindFilter,
+    nodeTypes,
+    query,
+    subcategoryFilter,
+    typeFilter,
+  ]);
+
+  const groupedNodeTypes = React.useMemo(() => {
+    const grouped = new Map<
+      string,
+      Map<string, WorkflowNodeMetadataResponse[]>
+    >();
+
+    filteredNodeTypes.forEach((nodeType) => {
+      const category = normalizeGroupLabel(nodeType.category, "Uncategorized");
+      const subcategory = normalizeGroupLabel(nodeType.subcategory, "General");
+      const categoryGroup = grouped.get(category) ?? new Map();
+      const subcategoryGroup = categoryGroup.get(subcategory) ?? [];
+      subcategoryGroup.push(nodeType);
+      categoryGroup.set(subcategory, subcategoryGroup);
+      grouped.set(category, categoryGroup);
+    });
+
+    return Array.from(grouped.entries())
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([category, subcategories]) => ({
+        category,
+        subcategories: Array.from(subcategories.entries())
+          .sort(([left], [right]) => left.localeCompare(right))
+          .map(([subcategory, nodes]) => ({
+            subcategory,
+            nodes: nodes.sort((left, right) =>
+              (left.label ?? left.type).localeCompare(right.label ?? right.type),
+            ),
+          })),
+      }));
+  }, [filteredNodeTypes]);
+
+  const goToConfigureStep = (nodeType = selectedNodeType) => {
+    if (!nodeType) {
+      return;
+    }
+
+    setSelectedType(nodeType.type);
+    setNodeDraft(createNodeValue(nodeType));
+    setStep("configure");
+  };
+
+  const handleSubmit = () => {
+    if (!nodeDraft) {
+      return;
+    }
+
+    onSubmit(nodeDraft);
+    onOpenChange(false);
+  };
+
+  const header = (
+    <div className="workflow-node-editor-dialog-heading">
+      <div className="workflow-node-editor-dialog-title">
+        {step === "select" ? "Add Node" : `Configure ${selectedNodeType?.label ?? selectedNodeType?.type ?? "Node"}`}
+      </div>
+      <div className="workflow-node-editor-dialog-subtitle">
+        {step === "select"
+          ? "Choose the workflow node type to insert at this point in the flow."
+          : "Review the node details and configuration before adding it to the workflow."}
+      </div>
+      {selectedNodeType ? <WorkflowNodeHeaderMeta nodeType={selectedNodeType} /> : null}
+    </div>
+  );
+
+  return (
+    <SolidDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      header={header}
+      className="solid-workflow-node-editor-dialog solid-workflow-add-node-dialog"
+      style={{ width: "min(1040px, 94vw)", maxWidth: "96vw" }}
+    >
+      <SolidDialogBody className="workflow-node-editor-dialog-body workflow-add-node-dialog-body">
+        {step === "select" ? (
+          <div className="workflow-add-node-picker">
+            <div className="workflow-add-node-search-row">
+              <div className="workflow-add-node-search">
+                <Search size={15} />
+                <SolidInput
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search node types"
+                />
+              </div>
+              <div className="workflow-add-node-filters">
+                <SolidSelect
+                  value={categoryFilter}
+                  options={categoryOptions}
+                  onChange={(event) => setCategoryFilter(event.value ?? "")}
+                />
+                <SolidSelect
+                  value={subcategoryFilter}
+                  options={subcategoryOptions}
+                  onChange={(event) => setSubcategoryFilter(event.value ?? "")}
+                />
+                <SolidSelect
+                  value={kindFilter}
+                  options={kindOptions}
+                  onChange={(event) => setKindFilter(event.value ?? "")}
+                />
+                <SolidSelect
+                  value={typeFilter}
+                  options={typeOptions}
+                  onChange={(event) => setTypeFilter(event.value ?? "")}
+                />
+              </div>
+            </div>
+
+            <div className="workflow-add-node-results">
+              {groupedNodeTypes.length ? (
+                groupedNodeTypes.map((categoryGroup) => (
+                  <section
+                    key={categoryGroup.category}
+                    className="workflow-add-node-category"
+                  >
+                    <div className="workflow-add-node-category-title">
+                      {categoryGroup.category}
+                    </div>
+                    <div className="workflow-add-node-subcategory-list">
+                      {categoryGroup.subcategories.map((subcategoryGroup) => (
+                        <div
+                          key={`${categoryGroup.category}-${subcategoryGroup.subcategory}`}
+                          className="workflow-add-node-subcategory"
+                        >
+                          <div className="workflow-add-node-subcategory-title">
+                            {subcategoryGroup.subcategory}
+                          </div>
+                          <div className="workflow-add-node-grid">
+                            {subcategoryGroup.nodes.map((nodeType) => (
+                              <button
+                                key={nodeType.type}
+                                type="button"
+                                className={`workflow-add-node-card ${selectedType === nodeType.type ? "is-active" : ""}`}
+                                onClick={() => setSelectedType(nodeType.type)}
+                                onDoubleClick={() => goToConfigureStep(nodeType)}
+                              >
+                                <span className={`workflow-add-node-card-icon workflow-add-node-card-icon--${nodeType.kind}`}>
+                                  <WorkflowNodeTypeIcon nodeType={nodeType} />
+                                </span>
+                                <span className="workflow-add-node-card-copy">
+                                  <span className="workflow-add-node-card-title">
+                                    {nodeType.label ?? nodeType.type}
+                                  </span>
+                                  <span className="workflow-add-node-card-description">
+                                    {nodeType.description ?? nodeType.type}
+                                  </span>
+                                  <span className="workflow-add-node-card-meta">
+                                    <SolidTag>{nodeType.kind}</SolidTag>
+                                    <SolidTag>{nodeType.type}</SolidTag>
+                                  </span>
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <div className="workflow-node-editor-empty">
+                  No node types match the current search and filters.
+                </div>
+              )}
+            </div>
+          </div>
+        ) : selectedNodeType && nodeDraft ? (
+          <WorkflowNodeFullEditor
+            nodeType={selectedNodeType}
+            value={nodeDraft}
+            onChange={setNodeDraft}
+          />
+        ) : null}
+      </SolidDialogBody>
+      <SolidDialogFooter className="workflow-node-editor-dialog-footer">
+        {step === "select" ? (
+          <>
+            <SolidButton variant="secondary" onClick={() => onOpenChange(false)}>
+              Cancel
+            </SolidButton>
+            <SolidButton
+              leftIcon={<ArrowRight size={14} />}
+              disabled={!selectedNodeType}
+              onClick={() => goToConfigureStep()}
+            >
+              Next
+            </SolidButton>
+          </>
+        ) : (
+          <>
+            <SolidButton
+              variant="secondary"
+              leftIcon={<ArrowLeft size={14} />}
+              onClick={() => setStep("select")}
+            >
+              Back
+            </SolidButton>
+            <SolidButton onClick={handleSubmit}>Add Node</SolidButton>
+          </>
+        )}
+      </SolidDialogFooter>
     </SolidDialog>
   );
 }
