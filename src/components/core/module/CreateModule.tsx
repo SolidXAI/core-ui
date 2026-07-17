@@ -291,7 +291,7 @@ const CreateModule = ({ params, data }: any) => {
   };
 
   const generalInfoContent = (
-    <div className={`solid-module-general-info-content ${!isCreateMode ? "is-tabbed" : ""}`}>
+    <div className={`solid-module-general-info-content px-3 pt-3 md:px-4 ${!isCreateMode ? "is-tabbed" : ""}`}>
       {!isCreateMode && shouldShowGeneralSave && formik.dirty && (
         <div className="solid-module-general-info-actions">
           <SolidButton
@@ -306,12 +306,12 @@ const CreateModule = ({ params, data }: any) => {
       )}
       <form
         id="module-general-info-form"
-        style={{ width: '100%', background: "#fff" }}
+        style={{ width: '100%' }}
         onSubmit={formik.handleSubmit}
       >
         <div className="solid-form-content">
           <SolidPanel header={"Basic Info"} className="solid-column-panel">
-            <div className="mt-3 flex flex-wrap -mx-2 -mt-2">
+            <div className="mt-3 flex flex-wrap -mx-2 ">
               <div className="field w-full px-2 pt-2 pb-3 lg:w-1/2 lg:pb-0">
                 <div className={styles.fieldWrapper}>
                   <label htmlFor="displayName" className={`${styles.fieldLabel} form-field-label`}>
@@ -478,6 +478,7 @@ const CreateModule = ({ params, data }: any) => {
                       completeMethod={defaultDataSourceField.searchItems}
                       onChange={defaultDataSourceField.handleChange}
                       dropdown
+                      portal
                       field="label"
                       className="w-full"
                     />

@@ -1,7 +1,8 @@
 import axios from "axios";
 import { env } from "../adapters/env";
 import { getSession } from "../adapters/auth";
-import { eventBus, AppEvents } from "../helpers/eventBus";
+import { handleSessionInvalidation, isSessionInvalidError } from "../adapters/auth/sessionInvalidation";
+import { backendHealthMonitor } from "../helpers/backendHealthMonitor";
 
 const baseURL = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
 
@@ -33,17 +34,27 @@ solidAxios.interceptors.request.use(async (config) => {
 });
 
 solidAxios.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  (response) => {
+    backendHealthMonitor.reportSuccess();
+    return response;
+  },
+  async (error) => {
     const status = error?.response?.status;
     const isNetwork = !status || status >= 500;
     if (isNetwork) {
-      eventBus.emit(AppEvents.GlobalError, {
+      backendHealthMonitor.reportFailure({
         status: status ?? "FETCH_ERROR",
-        message: "Unable to reach the server. Please try again later.",
+        message: "Unable to reach the server. Reconnecting...",
         error,
       });
+    } else {
+      backendHealthMonitor.reportSuccess();
     }
+
+    if (isSessionInvalidError(error?.response?.data, status)) {
+      await handleSessionInvalidation();
+    }
+
     return Promise.reject(error);
   }
 );

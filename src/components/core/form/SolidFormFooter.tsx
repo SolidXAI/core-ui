@@ -3,7 +3,7 @@
 import { useLazyNavigationQuery } from "../../../redux/api/modelApi";
 import { useEffect, useState } from "react";
 import qs from "qs";
-import { setFilterObjectToLocalStorageByUrl, getFilterObjectFromLocalStorageByUrl } from "../list/SolidListView";
+import { setFilterObjectToLocalStorageByUrl, getFilterObjectFromLocalStorageByUrl } from "../common/globalSearchPersistence";
 import { SolidFormViewProps } from "./SolidFormView";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
@@ -196,7 +196,7 @@ export const SolidFormFooter = ({ params, internationalisationEnabled = false }:
     // -----------------------------
     return (
         <div
-            className="flex justify-end items-center gap-2 p-1"
+            className="solid-form-footer flex justify-end items-center gap-2 p-1"
         >{meta &&
             <span className="solid-form-footer-pagination-meta p-2">{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
             }

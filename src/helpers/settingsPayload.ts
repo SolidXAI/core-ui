@@ -30,6 +30,7 @@ export type AdminSettingDefinition = {
   encrypted?: boolean;
   label?: string;
   description?: string;
+  helpText?: string;
   placeholder?: string;
   group?: string;
   sortOrder?: number;

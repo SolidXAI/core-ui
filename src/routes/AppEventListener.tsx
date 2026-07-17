@@ -5,6 +5,7 @@ import { SolidStudio, PreviewModePersist } from "../components/layout/SolidAiStu
 import { useDispatch } from "react-redux";
 import { showToast } from "../redux/features/toastSlice";
 import { env } from "../adapters/env";
+import { backendHealthMonitor, type BackendHealthState } from "../helpers/backendHealthMonitor";
 
 type GlobalErrorPayload = {
   status?: number | string;
@@ -85,6 +86,34 @@ export function AppEventListener() {
     });
     return () => off();
   }, [dispatch, pathname]);
+
+  useEffect(() => {
+    let previousStatus: BackendHealthState["status"] = backendHealthMonitor.getState().status;
+
+    return backendHealthMonitor.subscribe((state) => {
+      const nextStatus = state.status;
+      const didBecomeOffline = previousStatus !== "offline" && nextStatus === "offline";
+      previousStatus = nextStatus;
+
+      if (!didBecomeOffline) {
+        return;
+      }
+
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Server unreachable",
+          detail: isDevMode() ? buildDevErrorDetail({
+            status: state.statusCode,
+            message: state.message || "Unable to reach the server. Please try again later.",
+            error: state.error,
+          }) : `We have been trying to reconnect to the server for over ${Math.max(1, Math.round(state.unavailableToastDelayMs / 1000))} seconds.`,
+          sticky: isDevMode(),
+          life: isDevMode() ? 10000 : 5000,
+        })
+      );
+    });
+  }, [dispatch]);
 
   return (
     <>

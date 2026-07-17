@@ -4,6 +4,7 @@ import qs from "qs";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn, isFieldSortable } from "./SolidListViewColumn";
+import { SolidCustomListViewColumn } from "./SolidCustomListViewColumn";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -31,6 +32,8 @@ import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { getSettingsMap } from "../../../helpers/settingsPayload";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
@@ -38,6 +41,11 @@ import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersiste
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import {
+  getFilterObjectFromLocalStorage,
+  hasStoredFilterPredicates,
+  setFilterObjectToLocalStorage,
+} from "../common/globalSearchPersistence";
 import {
   SolidButton,
   SolidConfirmDialog,
@@ -55,101 +63,6 @@ import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const hasMeaningfulPersistedFilterValue = (value: any): boolean => {
-  if (value === null || value === undefined) return false;
-  if (typeof value === "string") return value.trim().length > 0;
-  if (typeof value === "number" || typeof value === "boolean") return true;
-  if (Array.isArray(value)) return value.some((item) => hasMeaningfulPersistedFilterValue(item));
-  if (typeof value === "object") return hasMeaningfulPersistedFilter(value);
-  return false;
-};
-
-export const hasMeaningfulPersistedFilter = (filterObject: any): boolean => {
-  if (!filterObject || typeof filterObject !== "object") return false;
-
-  if (Array.isArray(filterObject)) {
-    return filterObject.some((item) => hasMeaningfulPersistedFilter(item) || hasMeaningfulPersistedFilterValue(item));
-  }
-
-  return Object.entries(filterObject).some(([key, val]) => {
-    if (key === "matchMode" || key === "operator") return false;
-    if (key === "value") return hasMeaningfulPersistedFilterValue(val);
-    if ((key === "$and" || key === "$or") && Array.isArray(val)) {
-      return val.some((item) => hasMeaningfulPersistedFilter(item) || hasMeaningfulPersistedFilterValue(item));
-    }
-    if (typeof val === "object") return hasMeaningfulPersistedFilter(val);
-    return hasMeaningfulPersistedFilterValue(val);
-  });
-};
-
-export const hasStoredFilterPredicates = (queryObject: any): boolean =>
-  hasMeaningfulPersistedFilter(queryObject?.custom_filter_predicate) ||
-  hasMeaningfulPersistedFilter(queryObject?.search_predicate) ||
-  hasMeaningfulPersistedFilter(queryObject?.saved_filter_predicate) ||
-  hasMeaningfulPersistedFilter(queryObject?.predefined_search_predicate);
-
-export const getFilterObjectFromLocalStorage = () => {
-  const currentPageUrl = window.location.pathname; // Get the current page URL
-  const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
-
-  if (encodedQueryString) {
-    try {
-      const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
-      const parsedParams = JSON.parse(decodedQueryString); // Parse the decoded string into an object
-      return parsedParams;
-    } catch (error) {
-      console.error(
-        ERROR_MESSAGES.ERROR_DECODING,
-        error
-      );
-    }
-  }
-};
-
-
-export const getFilterObjectFromLocalStorageByUrl = (url: string) => {
-  const currentPageUrl = url; // Get the current page URL
-  const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
-
-  if (encodedQueryString) {
-    try {
-      const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
-      const parsedParams = JSON.parse(decodedQueryString); // Parse the decoded string into an object
-      return parsedParams;
-    } catch (error) {
-      console.error(
-        ERROR_MESSAGES.ERROR_DECODING,
-        error
-      );
-    }
-  }
-};
-
-export const setFilterObjectToLocalStorage = (queryObject: any) => {
-  if (queryObject) {
-    const stringifiedObject = JSON.stringify(queryObject);
-    // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
-    const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
-    const currentPageUrl = window.location.pathname; // Get the current page URL
-    localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
-    return encodedQueryString;
-  }
-  return null;
-};
-
-
-export const setFilterObjectToLocalStorageByUrl = (url: string, queryObject: any) => {
-  if (queryObject) {
-    const stringifiedObject = JSON.stringify(queryObject);
-    // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
-    const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
-    const currentPageUrl = url; // Get the current page URL
-    localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
-    return encodedQueryString;
-  }
-  return null;
 };
 
 type SolidListViewParams = {
@@ -238,8 +151,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
-
-
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
   const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
   const [solidListViewLayout, setSolidListViewLayout] = useState<any>(null);
   const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
@@ -299,6 +212,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
+  const rowClickFormMode = useMemo(() => {
+    const isSystemModule = solidListViewMetaData?.data?.solidView?.module?.isSystem === true;
+
+    if (isSystemModule) {
+      return "view";
+    }
+
+    return solidSettingsMap?.rowClickAction === "view" ? "view" : "edit";
+  }, [solidListViewMetaData, solidSettingsMap]);
 
   const resolveLocaleFromFilter = (filterNode: any): string | null => {
     if (!filterNode || typeof filterNode !== "object") return null;
@@ -448,6 +370,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const currentLayout = params.customLayout ? params.customLayout : solidView?.layout;
     for (let i = 0; i < currentLayout?.children.length; i++) {
       const column = currentLayout?.children[i];
+      if (column?.type === "custom") {
+        continue;
+      }
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
         showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
@@ -593,7 +518,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
   // Get the list view data.
-  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error },] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading,isFetching: isListViewFetching, error }] = useLazyGetSolidEntitiesQuery();
 
   const [
     triggerRecoverSolidEntitiesById,
@@ -1221,6 +1146,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const currentLayout = solidListViewLayout;
 
     return currentLayout.children?.map((column: any) => {
+      if (column?.type === "custom") {
+        return SolidCustomListViewColumn({
+          solidListViewMetaData,
+          column,
+          embeded: params.embeded
+        });
+      }
+
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
       if (!fieldMetadata) {
         return;
@@ -1315,6 +1248,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const isListViewEmptyWithoutFilters =
     !loading &&
     !isLoading &&
+    !isListViewFetching &&
     listViewData.length === 0 &&
     !hasAppliedFilterValues &&
     !hasFilterPredicatesApplied;
@@ -1324,12 +1258,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       ? "Deleting..."
       : recoverByIdIsLoading || recoverByIsLoading
         ? "Recovering..."
-        : loading || isLoading || solidListViewMetaDataIsLoading || !queryDataLoaded
+        : loading || isLoading || isListViewFetching || solidListViewMetaDataIsLoading || !queryDataLoaded
           ? "Loading..."
           : null;
 
   const showListBodyLoadingPlaceholder =
-    (loading || isLoading || solidListViewMetaDataIsLoading || !queryDataLoaded) &&
+    (loading || isLoading || isListViewFetching || solidListViewMetaDataIsLoading || !queryDataLoaded) &&
     listViewData.length === 0 &&
     params.embeded === false &&
     viewMode !== "view";
@@ -1432,6 +1366,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
+  const isEmbeddedList = params.embeded === true;
 
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
@@ -1441,9 +1376,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   //   }
   // };
   return (
-    <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
-      <div className={`solid-list-content  flex flex-col flex-grow-1 ${styles.ListContentWrapper}`}>
-        <div className="solid-list-surface flex flex-col flex-1 min-h-0">
+    <div className={`page-parent-wrapper ${isEmbeddedList ? "solid-list-page-wrapper-embedded" : "solid-list-page-wrapper"} flex ${isEmbeddedList ? "min-h-0 overflow-visible" : "h-full min-h-0 overflow-hidden"}`}>
+      <div className={`solid-list-content flex flex-col ${isEmbeddedList ? "min-h-0" : "flex-grow-1"} ${styles.ListContentWrapper}`}>
+        <div className={`solid-list-surface flex flex-col min-h-0 ${isEmbeddedList ? "" : "flex-1"}`}>
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-col lg:flex-row">
               {/* <div> */}
@@ -1624,11 +1559,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
               ) : (
                 <div
-                  className={`solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden ${styles.listTableArea}`}
+                  className={`solid-datatable-wrapper solid-list-table-area min-h-0 ${isEmbeddedList ? "overflow-visible" : "flex-1 overflow-hidden"} ${styles.listTableArea}`}
                 >
                   <DataTable
                     value={listViewData}
-                    // viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 128px)"}
+                    viewportHeight={isEmbeddedList ? "auto" : undefined}
                     rowClassName={(rowData) => {
                       return rowData.deletedAt ? "greyed-out-row" : "";
                     }}
@@ -1688,7 +1623,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
                         storeCurrentModelViewContext();
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${buildEditNavigationQueryString(rowData)}`);
+                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
                       }
                     }
                     }

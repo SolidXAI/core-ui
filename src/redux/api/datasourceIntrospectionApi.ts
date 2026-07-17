@@ -39,6 +39,10 @@ export type DatasourceIntrospectionTableRecord = {
   suggestedUserKeyField: string;
   columnCount: number;
   physicalColumnCount: number;
+  hasPrimaryKey: boolean;
+  primaryKeyColumnCount: number;
+  primaryKeyColumnNames: string[];
+  mappingBlockedReason: string | null;
 };
 
 export type DatasourceIntrospectionTablesResponse = {

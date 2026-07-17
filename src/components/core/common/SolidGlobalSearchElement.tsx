@@ -1,9 +1,10 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
+import { toTitleCase } from "../../../helpers/helpers";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import { getFilterObjectFromLocalStorage } from "../list/SolidListView";
+import { getFilterObjectFromLocalStorage } from "./globalSearchPersistence";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
@@ -1087,7 +1088,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         return false;
                 }
             });
-
+            
             // Optionally map to a minimal structure if needed for UI
             let finalSearchableFieldsList: any = searchableFieldsList.map((field: any) => ({
                 fieldName: field.value,
@@ -1095,7 +1096,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 searchField: field.searchField ?? "",
                 matchMode: field.matchMode
             }));
-
+            
             setSearchableFields(finalSearchableFieldsList);
 
             let finalGroupableFieldsList: any = groupableFieldsList.map((field: any) => ({
@@ -1883,23 +1884,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             <li key={chip.id}>
                                 <div className={`search-filter-chip-type solid-chip-pill solid-chip-tone-${chip.type}`}>
                                     {chip.onOpen ? (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className="solid-chip-open-button"
-                                                title={chip.label}
-                                                aria-label={`Open ${chip.label}`}
-                                                onMouseDown={(e) => e.preventDefault()}
-                                                onClick={() => handleManagedChipOpen(chip)}
-                                            >
-                                                <span className="solid-chip-open-icon" aria-hidden="true">
-                                                    <Filter size={12} />
-                                                </span>
-                                            </button>
-                                            <span className="custom-chip-value solid-chip-pill-label solid-chip-open-label" title={chip.label}>
+                                        <button
+                                            type="button"
+                                            className="solid-chip-label-button"
+                                            title={chip.label}
+                                            aria-label={`Open ${chip.label}`}
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={() => handleManagedChipOpen(chip)}
+                                        >
+                                            <span className="custom-chip-value solid-chip-pill-label" title={chip.label}>
                                                 {chip.label}
                                             </span>
-                                        </>
+                                        </button>
                                     ) : (
                                         <span className="custom-chip-value solid-chip-pill-label" title={chip.label}>
                                             {chip.label}
@@ -2062,7 +2058,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         }}
                                                         onMouseEnter={() => setFocusedIndex(index)}
                                                     >
-                                                        Search <strong style={{paddingLeft:"2px"}}>{value.displayName.trim()}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
+                                                        Search <strong style={{paddingLeft:"2px"}}>{toTitleCase(value.displayName.trim())}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
                                                     </SolidButton>
                                                 )
                                             })
@@ -2096,7 +2092,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                     >
                                                         <div className="flex items-center gap-1">
                                                             <strong>{predefinedSearch.name}:</strong>
-                                                            <span className="font-bold text-color">{inputValue}</span>
+                                                            <span className="font-bold text-color pr-1">{inputValue} </span>
                                                         </div>
                                                         <div className="text-xs">{predefinedSearch.description}</div>
                                                     </SolidButton>

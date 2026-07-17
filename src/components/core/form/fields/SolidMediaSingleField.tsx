@@ -21,11 +21,21 @@ import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
+import { openMediaInNewTab } from "../../../../helpers/mediaUrl";
+import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
 import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
+import { getPersistedMediaId } from "./mediaFieldUtils";
+
+type SingleMediaFileDetail = {
+    name: string;
+    type: string;
+    fileUrl: string;
+    fileSize: number;
+};
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -169,8 +179,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     const isFieldReadonly = formReadonly || fieldReadonly || readOnlyPermission;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
-    const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
-    const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
+    const [fileDetails, setFileDetails] = useState<SingleMediaFileDetail | null>(null);
     const [isReplaceImageDialogVisible, setReplaceImageDialogVisible] = useState(false);
     const [newFileToUpload, setNewFileToUpload] = useState<any>(null);
     const [fileSizeError, setFileSizeError] = useState<string | null>(null);
@@ -181,17 +190,9 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             : `${(size / 1024).toFixed(1)} KB`;
     };
 
-    const [
-        deleteMedia,
-        { isLoading: isMediaDeleted, isSuccess: isDeleteMediaSuceess, isError: isMediaDeleteError, error: mediaDeleteError, data: DeletedMedia },
-    ] = useDeleteMediaMutation();
+    const [deleteMedia] = useDeleteMediaMutation();
 
-    const handleCancelUpload = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (imageToBeDeletedData) {
-            deleteMedia(imageToBeDeletedData);
-        }
-        e.stopPropagation();
+    const clearSelectedFile = () => {
         setFileDetails(null);
         fieldContext.onChange(
             {
@@ -203,6 +204,26 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             } as any,
             "onFieldChange"
         );
+    };
+
+    const deletePersistedMediaIfNeeded = async (value: unknown) => {
+        console.log("DeletePersistedMedia Called");
+        
+        const mediaId = getPersistedMediaId(value);
+        if (mediaId !== null) {
+            await deleteMedia(mediaId).unwrap();
+        }
+    };
+
+    const handleCancelUpload = async (e: React.MouseEvent) => {
+        console.log("handleCancelUpload called");
+        e.stopPropagation();
+        try {
+            await deletePersistedMediaIfNeeded(formik?.values[fieldLayoutInfo.attrs.name]);
+            clearSelectedFile();
+        } catch (error) {
+            console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
+        }
         setDeleteImageDialogVisible(false);
     };
 
@@ -242,63 +263,56 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         );
     };
 
-    const handleReplaceFile = () => {
-        // Delete the existing file first
-        if (imageToBeDeletedData) {
-            deleteMedia(imageToBeDeletedData);
-        }
-        setFileDetails(null);
-        fieldContext.onChange(
-            {
-                target: {
-                    name: fieldLayoutInfo.attrs.name,
-                    value: null,
-                    type: "text",
-                },
-            } as any,
-            "onFieldChange"
-        );
+    const handleReplaceFile = async () => {
+        try {
+            await deletePersistedMediaIfNeeded(formik?.values[fieldLayoutInfo.attrs.name]);
+            clearSelectedFile();
 
-        // Proceed with uploading new file
-        if (newFileToUpload) {
-            uploadFile(newFileToUpload);
-            setNewFileToUpload(null);
+            // Proceed with uploading new file
+            if (newFileToUpload) {
+                uploadFile(newFileToUpload);
+                setNewFileToUpload(null);
+            }
+        } catch (error) {
+            console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
         }
-
         setReplaceImageDialogVisible(false);
     };
 
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
+        if (!fieldValue || typeof fieldValue !== "object") {
+            setFileDetails(null);
+            return;
+        }
 
-        if (fieldValue && typeof fieldValue === "object") {
-            let fileUrl = "";
-            let fileName = "Unknown File";
-            let fileSize = 0;
-
-            if (fieldValue instanceof File) {
-                fileUrl = URL.createObjectURL(fieldValue);
-                fileName = fieldValue.name;
-                fileSize = fieldValue.size;
-            } else if (fieldValue._full_url) {
-                fileUrl = fieldValue._full_url;
-                fileName = fieldValue.originalFileName;
-                fileSize = fieldValue.fileSize;
-            }
-
+        if (fieldValue instanceof File) {
+            const fileUrl = URL.createObjectURL(fieldValue);
             setFileDetails({
-                name: fileName,
-                type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
+                name: fieldValue.name,
+                type: fieldValue.type,
                 fileUrl,
-                fileSize
+                fileSize: fieldValue.size,
             });
 
-            // Set file ID for delete operation
-            setImageToBeDeletedData(fieldValue.id);
-
-            // Ensure formik has the correct value
             formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+            return () => URL.revokeObjectURL(fileUrl);
         }
+
+        const fileUrl = fieldValue._full_url;
+        if (!fileUrl) {
+            setFileDetails(null);
+            return;
+        }
+
+        setFileDetails({
+            name: fieldValue.originalFileName,
+            type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
+            fileUrl,
+            fileSize: fieldValue.fileSize,
+        });
+
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const {
@@ -331,32 +345,25 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     }
 
     const handleFileView = (url: any) => {
-        const downloadOnlyExt = [
-            "txt", "zip", "rar",
-            "doc", "docx",
-            "xls", "xlsx",
-            "ppt", "pptx"
-        ];
+        const previewKind = getMediaPreviewKind({
+            url: url?.fileUrl,
+            fileName: url?.name,
+            mimeType: url?.type,
+        });
 
-        const fileUrl = url?.fileUrl || "";
-        const cleanUrl = fileUrl.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            const link = document.createElement('a');
-            link.href = url.fileUrl;
-            link.download = ''; // or specify a file name like 'file.pdf'
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-        } else {
+        if (isLightboxMediaKind(previewKind)) {
             setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
+                {
+                    src: url.fileUrl,
+                    downloadUrl: url.fileUrl,
+                    type: previewKind === "video" ? "video" : undefined
+                },
             ]);
             setOpenLightbox?.(true);
+            return;
         }
+
+        openMediaInNewTab(url?.fileUrl);
     }
 
 
@@ -411,7 +418,11 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                             className="solid-file-icon-btn"
                                             disabled={isFieldDisabled || isFieldReadonly}
                                             aria-label="Download file"
-                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name);
+                                            }}
                                         >
                                             <SolidIcon name="si-download" aria-hidden />
                                         </button>
@@ -483,7 +494,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 }
 
 export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaFormFieldWidgetProps) => {
-    const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
+    const [fileDetails, setFileDetails] = useState<SingleMediaFileDetail | null>(null);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
@@ -501,60 +512,57 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
 
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
-
-        if (fieldValue && typeof fieldValue === "object") {
-            let fileUrl = "";
-            let fileName = "Unknown File";
-            let fileSize = 0;
-
-            if (fieldValue instanceof File) {
-                fileUrl = URL.createObjectURL(fieldValue);
-                fileName = fieldValue.name;
-                fileSize = fieldValue.size;
-            } else if (fieldValue._full_url) {
-                fileUrl = fieldValue._full_url;
-                fileName = fieldValue.originalFileName;
-                fileSize = fieldValue.fileSize;
-            }
-
-            setFileDetails({
-                name: fileName,
-                type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
-                fileUrl,
-                fileSize
-            });
-            // Ensure formik has the correct value
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
+        if (!fieldValue || typeof fieldValue !== "object") {
+            setFileDetails(null);
+            return;
         }
+
+        if (fieldValue instanceof File) {
+            const fileUrl = URL.createObjectURL(fieldValue);
+            setFileDetails({
+                name: fieldValue.name,
+                type: fieldValue.type,
+                fileUrl,
+                fileSize: fieldValue.size,
+            });
+
+            return () => URL.revokeObjectURL(fileUrl);
+        }
+
+        const fileUrl = fieldValue._full_url;
+        if (!fileUrl) {
+            setFileDetails(null);
+            return;
+        }
+
+        setFileDetails({
+            name: fieldValue.originalFileName,
+            type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
+            fileUrl,
+            fileSize: fieldValue.fileSize,
+        });
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleFileView = (url: any) => {
-        const downloadOnlyExt = [
-            "txt", "zip", "rar",
-            "doc", "docx",
-            "xls", "xlsx",
-            "ppt", "pptx"
-        ];
+        const previewKind = getMediaPreviewKind({
+            url: url?.fileUrl,
+            fileName: url?.name,
+            mimeType: url?.type,
+        });
 
-        const fileUrl = url?.fileUrl || "";
-        const cleanUrl = fileUrl.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            const link = document.createElement('a');
-            link.href = url.fileUrl;
-            link.download = ''; // or specify a file name like 'file.pdf'
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-        } else {
+        if (isLightboxMediaKind(previewKind)) {
             setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
+                {
+                    src: url.fileUrl,
+                    downloadUrl: url.fileUrl,
+                    type: previewKind === "video" ? "video" : undefined
+                },
             ]);
             setOpenLightbox?.(true);
+            return;
         }
+
+        openMediaInNewTab(url?.fileUrl);
     }
 
     return (
@@ -584,7 +592,11 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                         type="button"
                                         className="solid-file-icon-btn"
                                         aria-label="Download file"
-                                        onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                            downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name);
+                                        }}
                                     >
                                         <SolidIcon name="si-download" aria-hidden />
                                     </button>

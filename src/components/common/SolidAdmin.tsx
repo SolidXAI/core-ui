@@ -1,12 +1,17 @@
 import { env } from "../../adapters/env";
-import SolidLogo from '../../resources/images/SolidXLogo-dark.svg'
+import { useContext } from "react";
+import SolidLogoDark from '../../resources/images/SolidXLogo-dark.svg'
+import SolidLogoLight from '../../resources/images/SolidXLogo-light.svg'
 import { ChatIcon } from "../layout/SolidAiStudioLayout";
+import { LayoutContext } from "../layout/context/layoutcontext";
 
 export const SolidAdmin = () => {
+  const layoutContext = useContext(LayoutContext);
   const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL");
   const hasRedirect = Boolean(redirectUrl);
   const aiChatUrl = env("VITE_SOLIDX_AI_URL");
   const canOpenChat = Boolean(aiChatUrl);
+  const solidLogo = layoutContext?.themeMode === "dark" ? SolidLogoLight : SolidLogoDark;
 
   const handleChatLaunch = () => {
     if (!aiChatUrl) return;
@@ -129,7 +134,7 @@ export const SolidAdmin = () => {
           <div className="welcome-card-header">
             <img
               alt="solid logo"
-              src={SolidLogo}
+              src={solidLogo}
               className="mb-2 w-4rem flex-shrink-0"
               style={{ opacity: 0.9 }}
             />

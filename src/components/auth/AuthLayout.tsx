@@ -13,6 +13,7 @@ import { normalizeAssetUrl, toCssBackgroundImage } from "../../helpers/assetUrl"
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 import { SolidToastProvider } from "../common/SolidToastProvider";
 import { SolidSpinner } from "../shad-cn-ui";
+import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
@@ -100,6 +101,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const appSubtitle = solidSettingsData?.data?.appSubtitle || "";
     const appDescription = solidSettingsData?.data?.appDescription || "";
     const showAuthContent = solidSettingsData?.data?.showAuthContent === true;
+    const showLegalLinks = solidSettingsData?.data?.showLegalLinks === true;
+    const appTnc = solidSettingsData?.data?.appTnc || "";
+    const appPrivacyPolicy = solidSettingsData?.data?.appPrivacyPolicy || "";
+    const copyright = solidSettingsData?.data?.copyright || "";
 
     const renderBrand = (align: "center" | "start" = "start") => {
       if (!authLogoSrc && !appTitle) return null;
@@ -122,6 +127,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const isCenter = authLayout === "center";
     const isLeft = authLayout === "left";
     const isRight = authLayout === "right";
+    const shouldRenderFooter = showLegalLinks || Boolean(copyright);
     const authSettingsContextValue = useMemo(
         () => ({
             solidSettingsData,
@@ -131,11 +137,60 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         [solidSettingsData, isLoadingAuthSettings, loadAuthSettings]
     );
 
+    const legalFooter = shouldRenderFooter ? (
+        <div className="solid-auth-legal-footer hidden md:flex">
+            <div className="solid-auth-legal-footer-row">
+                {showLegalLinks ? (
+                    <p className="solid-auth-legal-copy">
+                        <span>Made with</span>
+                        <svg
+                            aria-hidden="true"
+                            className="solid-auth-legal-heart"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z"
+                                fill="#ff0000"
+                            />
+                        </svg>
+                        <span>in Mumbai</span>
+                    </p>
+                ) : null}
+                {(appTnc || appPrivacyPolicy) && (
+                    <div className="solid-auth-legal-links">
+                        {appTnc ? (
+                            <Link className="solid-auth-legal-link" href={appTnc}>
+                                Terms of Service
+                            </Link>
+                        ) : null}
+                        {appPrivacyPolicy ? (
+                            <Link className="solid-auth-legal-link" href={appPrivacyPolicy}>
+                                Privacy Policy
+                            </Link>
+                        ) : null}
+                    </div>
+                )}
+                {copyright ? (
+                    <p className="solid-auth-legal-copy solid-auth-legal-copy--muted">{copyright}</p>
+                ) : null}
+            </div>
+        </div>
+    ) : null;
+
     const formPane = (
         <div className="solid-auth-form-pane solid-login-dark-bg">
             <div className="solid-auth-form-pane-inner">
-                {renderBrand("start")}
-                {authChildren}
+                <div className="solid-auth-form-pane-brand">
+                    {renderBrand("start")}
+                </div>
+                <div className="solid-auth-form-pane-content">
+                    {authChildren}
+                </div>
+                {legalFooter}
             </div>
         </div>
     );
@@ -191,6 +246,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     />
                 ) : null}
                 <SolidToastProvider />
+                <BackendReconnectIndicator variant="floating" />
                 {!isCenter && (
                     <div className="solid-auth-split">
                         {isLeft && formPane}
@@ -210,39 +266,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         }
                         {authChildren}
                     </div>
+                    {legalFooter}
                 </div>}
-                {/* {solidSettingsData?.data?.showLegalLinks === true && */}
-                <div className={`absolute hidden md:flex ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'solid-auth-footer flex flex-col sm:flex-row items-center justify-between' : 'solid-auth-footer-2 grid'}`}>
-                    {solidSettingsData?.data?.authPagesLayout !== 'left' &&
-                        <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'w-1/2 px-2 pt-2 flex justify-center' : ''}>
-                            {solidSettingsData?.data?.showLegalLinks === true &&
-                                <p className={`solid-auth-input-label text-sm m-0 ${solidSettingsData?.data?.authPagesLayout}`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
-                            }
-                        </div>
-                    }
-                    <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-6 flex justify-center' : ''}>
-                        {solidSettingsData?.data?.showLegalLinks === true && <div className={`flex flex-col sm:flex-row items-center gap-1 sm:gap-5 solid-auth-subtitle mr-3 ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'left' : ''}`}>
-                            {solidSettingsData?.data?.appTnc !== "" && <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData?.data?.appTnc}>Terms of Service</Link></p>}
-                            {solidSettingsData?.data?.appPrivacyPolicy !== "" && <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData?.data?.appPrivacyPolicy}>Privacy Policy.</Link></p>}
-                        </div>
-                        }
-                        {solidSettingsData?.data?.copyright !== "" &&
-                            <div className="mt-1">
-                                <p className="m-0 text-sm font-normal">{solidSettingsData?.data?.copyright}</p>
-                            </div>
-                        }
-                    </div>
-                    {
-                        solidSettingsData?.data?.authPagesLayout === 'left' &&
-                    <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'w-1/2 lg:w-[41.666667%] xl:w-1/2 px-2 pt-2 flex justify-center' : ''}>
-                            {solidSettingsData?.data?.showLegalLinks === true &&
-                                <p className={`solid-auth-input-label text-sm m-0 right`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
-                            }
-                        </div>
-                    }
-                </div >
-
-            {/* } */}
             <SolidDialog
                 visible={isRestricted}
                 onHide={handleRegistration}

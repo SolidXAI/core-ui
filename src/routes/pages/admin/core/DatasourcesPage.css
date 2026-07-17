@@ -272,6 +272,21 @@
   background: color-mix(in srgb, var(--card) 96%, white 4%);
 }
 
+.sdm-switch {
+  min-width: 44px;
+  appearance: none;
+  -webkit-appearance: none;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.sdm-switch .solid-switch-thumb {
+  display: block;
+  flex: 0 0 18px;
+}
+
 .sdm-switch-field strong {
   display: block;
   font-size: 13px;
