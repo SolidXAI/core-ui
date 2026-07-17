@@ -7,15 +7,20 @@ export const permissionExpression = (modelName: string, permissionName : string)
 };
 
 export const importPermissionExpressions = [
+    "ImportTransactionController.create",
     "ImportTransactionController.getImportTemplate",
     "ImportTransactionController.getImportInstructions",
     "ImportTransactionController.getImportMappingInfo",
+    "ImportTransactionController.partialUpdate",
     "ImportTransactionController.startImportSync",
     "ImportTransactionController.startImportAsync",
     "ImportTransactionController.exportFailedImportedImports",
 ];
 
 export const exportPermissionExpressions = [
+    "ExportTemplateController.create",
+    "ExportTemplateController.delete",
+    "ExportTemplateController.findMany",
     "ExportTemplateController.startExportSync",
     "ExportTemplateController.startExportAsync",
 ];
