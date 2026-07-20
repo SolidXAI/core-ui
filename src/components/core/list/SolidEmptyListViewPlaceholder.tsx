@@ -1,4 +1,4 @@
-import { permissionExpression } from '../../../helpers/permissions'
+import { canImportRecords, permissionExpression } from '../../../helpers/permissions'
 import { SolidCreateButton } from '../common/SolidCreateButton'
 import { useHandleListCustomButtonClick } from '../../../components/common/useHandleListCustomButtonClick'
 import { isButtonVisibleInCurrentEnv } from '../../../helpers/buttonEnvironment'
@@ -48,8 +48,7 @@ export const SolidEmptyListViewPlaceholder = ({
     const canImport =
         params.embeded !== true &&
         importAction.enabled &&
-        actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-        actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) &&
+        canImportRecords(actionsAllowed, params.modelName) &&
         (importAction.roles.length === 0 || hasAnyRole(user?.roles, importAction.roles));
 
     const CustomActionButtons = () => {
