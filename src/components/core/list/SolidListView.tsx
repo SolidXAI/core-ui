@@ -44,6 +44,7 @@ import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus"
 import {
   getFilterObjectFromLocalStorage,
   hasStoredFilterPredicates,
+  hasStoredSearchUiState,
   setFilterObjectToLocalStorage,
 } from "../common/globalSearchPersistence";
 import {
@@ -876,6 +877,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
       fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
       fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
+      fileterTobeStored.predefined_search_chip = latestFilterPredicatesRef.current.predefined_search_chip || null;
       setFilterObjectToLocalStorage(fileterTobeStored);
     }
     triggerGetSolidEntities(queryString);
@@ -1367,6 +1369,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
   const isEmbeddedList = params.embeded === true;
+  const shouldShowMobileSearchElement =
+    showGlobalSearchElement ||
+    hasStoredSearchUiState(filterPredicates) ||
+    hasStoredSearchUiState(getFilterObjectFromLocalStorage());
 
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
@@ -1524,7 +1530,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 </div>
               </div>
               {/* </div> */}
-              {showGlobalSearchElement && params.embeded === false && window.innerWidth < 991 && (
+              {shouldShowMobileSearchElement && params.embeded === false && (
                 <div className="flex lg:hidden">
                   <SolidGlobalSearchElement
                     viewType="list"

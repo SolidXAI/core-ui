@@ -177,6 +177,10 @@ export const SolidListViewConfigure = (
         return Array.from(uniqueByType.values());
     })();
     const showSwitchType = visibleViewModes.length > 0;
+    const visibleHeaderButtons = (solidListViewLayout?.attrs?.headerButtons ?? []).filter((rb: any) => isButtonVisibleInCurrentEnv(rb?.attrs));
+    const contextMenuHeaderButtons = visibleHeaderButtons.filter((rb: any) => rb?.attrs?.actionInContextMenu === true);
+    const mobileOnlyHeaderButtons = visibleHeaderButtons.filter((rb: any) => rb?.attrs?.actionInContextMenu !== true);
+
     const handleViewTypeChange = (nextType: string) => {
         const nextView = visibleViewModes.find((option: ViewMode) => option.type === nextType);
         if (nextView) {
@@ -205,8 +209,8 @@ export const SolidListViewConfigure = (
                         isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) ||
                         isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
                         isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
-                        (solidListViewLayout?.attrs?.headerButtons
-                            ?.some((rb: any) => rb.attrs.actionInContextMenu === true && isButtonVisibleInCurrentEnv(rb?.attrs))) ||
+                        contextMenuHeaderButtons.length > 0 ||
+                        mobileOnlyHeaderButtons.length > 0 ||
                         viewData?.data?.solidView?.model?.enableSoftDelete
                     ) && (
                         <>
@@ -246,9 +250,7 @@ export const SolidListViewConfigure = (
                                     <span className="solid-header-action-button-label">Export</span>
                                 </SolidDropdownMenuItem>
                             )}
-                            {solidListViewLayout?.attrs?.headerButtons
-                                ?.filter((rb: any) => isButtonVisibleInCurrentEnv(rb?.attrs))
-                                ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
+                            {contextMenuHeaderButtons
                                 ?.map((button: any, index: number) => (
                                     <SolidListViewHeaderContextMenuButton
                                         key={index}
@@ -256,9 +258,26 @@ export const SolidListViewConfigure = (
                                         params={params}
                                         solidListViewMetaData={listViewMetaData}
                                         handleCustomButtonClick={handleCustomButtonClick}
+                                        selectedRecords={selectedRecords}
+                                        filters={filters}
                                         onActionComplete={() => setIsCogMenuOpen(false)}
                                     />
                                 ))}
+                            <div className="lg:hidden flex flex-col gap-1">
+                                {mobileOnlyHeaderButtons
+                                    ?.map((button: any, index: number) => (
+                                        <SolidListViewHeaderContextMenuButton
+                                            key={`mobile-${index}`}
+                                            button={button}
+                                            params={params}
+                                            solidListViewMetaData={listViewMetaData}
+                                            handleCustomButtonClick={handleCustomButtonClick}
+                                            selectedRecords={selectedRecords}
+                                            filters={filters}
+                                            onActionComplete={() => setIsCogMenuOpen(false)}
+                                        />
+                                    ))}
+                            </div>
                             {viewData?.data?.solidView?.model?.enableSoftDelete && (
                                 <SolidDropdownMenuCheckboxItem
                                     checked={showArchived}

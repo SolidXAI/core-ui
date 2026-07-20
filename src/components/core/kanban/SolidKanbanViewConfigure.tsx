@@ -6,6 +6,7 @@ import { useSearchParams } from "../../../hooks/useSearchParams";
 import { useEffect, useState } from "react";
 import { SolidExport } from "../../../components/common/SolidExport";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
+import { SolidListViewHeaderContextMenuButton } from "../list/SolidListViewHeaderContextMenuButton";
 import {
     SolidDropdownMenu,
     SolidDropdownMenuCheckboxItem,
@@ -55,8 +56,12 @@ const normalizeViewModes = (viewModes: any[] = []) => {
 
 export const SolidKanbanViewConfigure = ({
     solidKanbanViewMetaData,
+    params,
     modelName,
     actionsAllowed,
+    headerButtons,
+    handleCustomButtonClick,
+    selectedRecords,
     setLayoutDialogVisible,
     viewModes,
     setShowArchived,
@@ -140,6 +145,8 @@ export const SolidKanbanViewConfigure = ({
     const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
     const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
     const canShowArchivedRecords = Boolean(solidKanbanViewMetaData?.data?.solidView?.model?.enableSoftDelete);
+    const contextMenuHeaderButtons = (headerButtons ?? []).filter((button: any) => button?.attrs?.actionInContextMenu === true);
+    const mobileOnlyHeaderButtons = (headerButtons ?? []).filter((button: any) => button?.attrs?.actionInContextMenu !== true);
 
     return (
         <div className="position-relative">
@@ -179,6 +186,34 @@ export const SolidKanbanViewConfigure = ({
                             <span className="solid-header-action-button-label">Export</span>
                         </SolidDropdownMenuItem>
                     )}
+
+                    {contextMenuHeaderButtons.map((button: any, index: number) => (
+                        <SolidListViewHeaderContextMenuButton
+                            key={button?.attrs?.action ?? index}
+                            button={button}
+                            params={params}
+                            solidListViewMetaData={solidKanbanViewMetaData}
+                            handleCustomButtonClick={handleCustomButtonClick}
+                            selectedRecords={selectedRecords}
+                            filters={filters}
+                            onActionComplete={() => setIsCogMenuOpen(false)}
+                        />
+                    ))}
+
+                    <div className="lg:hidden flex flex-col gap-1">
+                        {mobileOnlyHeaderButtons.map((button: any, index: number) => (
+                            <SolidListViewHeaderContextMenuButton
+                                key={`mobile-${button?.attrs?.action ?? index}`}
+                                button={button}
+                                params={params}
+                                solidListViewMetaData={solidKanbanViewMetaData}
+                                handleCustomButtonClick={handleCustomButtonClick}
+                                selectedRecords={selectedRecords}
+                                filters={filters}
+                                onActionComplete={() => setIsCogMenuOpen(false)}
+                            />
+                        ))}
+                    </div>
 
                     {canShowArchivedRecords && (
                         <SolidDropdownMenuCheckboxItem

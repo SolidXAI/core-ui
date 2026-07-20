@@ -258,6 +258,7 @@
   gap: 1rem;
   padding: 0.65rem 0.9rem 0.55rem;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 76%, transparent);
+  flex-wrap: wrap;
 }
 
 .solid-module-explorer-main-title {
@@ -661,5 +662,12 @@
 
   .solid-module-explorer-resizer {
     display: none;
+  }
+}
+
+
+@media (max-width: 640px) {
+  .solid-module-explorer-main-actions{
+    gap: 0;
   }
 }
