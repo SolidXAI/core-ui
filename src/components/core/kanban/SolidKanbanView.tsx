@@ -105,7 +105,7 @@ const mergeKanbanGroupsWithDefinitions = (
       return {
         ...existingGroup,
         groupName: definition.value,
-        groupLabel: definition.label
+        groupLabel: definition.label,
       };
     }
 
