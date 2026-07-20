@@ -1,4 +1,4 @@
-import { permissionExpression } from "../../../helpers/permissions";
+import { getCollectionViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -184,16 +184,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   useEffect(() => {
     const fetchPermissions = async () => {
       if (params.modelName) {
-        const permissionNames = [
-          permissionExpression(params.modelName, 'create'),
-          permissionExpression(params.modelName, 'delete'),
-          permissionExpression(params.modelName, 'update'),
-          permissionExpression(params.modelName, 'findMany'),
-          permissionExpression('importTransaction', 'create'),
-          permissionExpression('exportTransaction', 'create'),
-          permissionExpression('userViewMetadata', 'create'),
-          permissionExpression('savedFilters', 'create')
-        ]
+        const permissionNames = getCollectionViewPermissionNames(params.modelName, {
+          includeDeleteMany: false,
+          includeFindOne: false,
+          includeInsertMany: false,
+        });
         const queryData = {
           permissionNames: permissionNames
         };

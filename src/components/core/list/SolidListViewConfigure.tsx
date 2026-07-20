@@ -1,5 +1,5 @@
 import { useSession } from "../../../hooks/useSession";
-import { permissionExpression } from "../../../helpers/permissions";
+import { canExportRecords, canImportRecords, permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useEffect, useRef, useState } from "react";
@@ -136,6 +136,8 @@ export const SolidListViewConfigure = (
         // 3. No restrictions → enabled
         return true;
     };
+    const canImport = isHeaderActionEnabled("import") && canImportRecords(actionsAllowed, params.modelName);
+    const canExport = isHeaderActionEnabled("export") && canExportRecords(actionsAllowed, params.modelName);
 
     const clearLocalstorageCache = () => {
         const currentPageUrl = window.location.pathname; // Get the current page URL
@@ -205,8 +207,8 @@ export const SolidListViewConfigure = (
                         (actionsAllowed.includes(`${permissionExpression(params.modelName, 'deleteMany')}`) &&
                             viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
                             selectedRecords.length > 0) ||
-                        isHeaderActionEnabled('import') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) ||
-                        isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) ||
+                        canImport ||
+                        canExport ||
                         isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
                         isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
                         contextMenuHeaderButtons.length > 0 ||
@@ -226,7 +228,7 @@ export const SolidListViewConfigure = (
                                     <span className="solid-header-action-button-label">Delete</span>
                                 </SolidDropdownMenuItem>
                             )}
-                            {isHeaderActionEnabled("import") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) && (
+                            {canImport && (
                                 <SolidDropdownMenuItem
                                     className="solid-header-dropdown-item"
                                     onSelect={() => {
@@ -238,7 +240,7 @@ export const SolidListViewConfigure = (
                                     <span className="solid-header-action-button-label">Import</span>
                                 </SolidDropdownMenuItem>
                             )}
-                            {isHeaderActionEnabled("export") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) && (
+                            {canExport && (
                                 <SolidDropdownMenuItem
                                     className="solid-header-dropdown-item"
                                     onSelect={() => {

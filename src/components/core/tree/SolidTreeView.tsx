@@ -14,7 +14,7 @@ import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import qs from "qs";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
-import { permissionExpression } from "../../../helpers/permissions";
+import { getCollectionViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { AggregationRule, GroupingRule } from "../common/GroupingComponent";
@@ -284,19 +284,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   useEffect(() => {
     const fetchPermissions = async () => {
       if (params.modelName) {
-        const permissionNames = [
-          permissionExpression(params.modelName, 'create'),
-          permissionExpression(params.modelName, 'delete'),
-          permissionExpression(params.modelName, 'update'),
-          permissionExpression(params.modelName, 'deleteMany'),
-          permissionExpression(params.modelName, 'findOne'),
-          permissionExpression(params.modelName, 'findMany'),
-          permissionExpression(params.modelName, 'insertMany'),
-          permissionExpression('importTransaction', 'create'),
-          permissionExpression('exportTransaction', 'create'),
-          permissionExpression('userViewMetadata', 'create'),
-          permissionExpression('savedFilters', 'create')
-        ];
+        const permissionNames = getCollectionViewPermissionNames(params.modelName);
         const queryData = {
           permissionNames: permissionNames,
         };
