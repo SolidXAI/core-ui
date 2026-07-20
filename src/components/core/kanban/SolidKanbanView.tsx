@@ -80,26 +80,13 @@ const createEmptyKanbanGroup = (
   },
 });
 
-const sortRecordsByNewest = (records: any[] = []) =>
-  [...records].sort((left: any, right: any) => {
-    const leftId = Number(left?.id ?? 0);
-    const rightId = Number(right?.id ?? 0);
-    return rightId - leftId;
-  });
-
 const mergeKanbanGroupsWithDefinitions = (
   groupRecords: any[],
   swimlaneDefinitions: KanbanSwimlaneDefinition[],
   recordsInSwimlane: number
 ) => {
   if (!swimlaneDefinitions.length) {
-    return (groupRecords || []).map((group: any) => ({
-      ...group,
-      groupData: {
-        ...group?.groupData,
-        records: sortRecordsByNewest(group?.groupData?.records || []),
-      },
-    }));
+    return groupRecords;
   }
 
   const groupMap = new Map(
@@ -118,11 +105,7 @@ const mergeKanbanGroupsWithDefinitions = (
       return {
         ...existingGroup,
         groupName: definition.value,
-        groupLabel: definition.label,
-        groupData: {
-          ...existingGroup.groupData,
-          records: sortRecordsByNewest(existingGroup.groupData?.records || []),
-        },
+        groupLabel: definition.label
       };
     }
 
