@@ -324,6 +324,21 @@
   justify-content: flex-end;
 }
 
+.solid-module-explorer-field-name-note {
+  margin: 0.75rem 0.9rem 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid color-mix(in srgb, #d97706 28%, transparent);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, #f59e0b 9%, var(--surface-card, #fff));
+  color: color-mix(in srgb, #b45309 82%, var(--foreground));
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.solid-module-explorer-field-name-note strong {
+  font-weight: 700;
+}
+
 .solid-module-explorer-actions-menu {
   min-width: 11rem;
 }
