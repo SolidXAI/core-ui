@@ -1,6 +1,6 @@
 import { ReactNode, useContext } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { usePathname } from "../../hooks/usePathname";
+// import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
 import { useSession } from "../../hooks/useSession";
 import { env } from "../../adapters/env";
@@ -40,7 +40,7 @@ const ThemeToggleIcon = () => (
 );
 
 export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActionsProps) => {
-  const pathname = usePathname();
+  // const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
   const { data: session } = useSession();
@@ -49,7 +49,7 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
   const isAdmin = hasAnyRole(user?.roles, ["Admin"]);
   const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
   const isDev = env("VITE_SOLIDX_ENV") === "dev";
-  const showBack = /\/admin\/core\/[^/]+\/[^/]+\/form\/[^/]+/.test(pathname);
+  // const showBack = /\/admin\/core\/[^/]+\/[^/]+\/form\/[^/]+/.test(pathname);
 
   const actions: AdminAction[] = [
     ...(isAdmin && isDev && !isStudioMode
@@ -71,14 +71,14 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
       title: "Toggle theme",
       icon: <ThemeToggleIcon />,
     },
-    ...(showBack
-      ? [{
-        key: "back",
-        label: "Back",
-        onClick: () => router.back(),
-        title: "Go back",
-      }]
-      : []),
+    // ...(showBack
+    //   ? [{
+    //     key: "back",
+    //     label: "Back",
+    //     onClick: () => router.back(),
+    //     title: "Go back",
+    //   }]
+    //   : []),
   ];
 
   if (!actions.length) {

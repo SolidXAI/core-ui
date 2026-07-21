@@ -134,6 +134,7 @@ export const DefaultMediaSingleListWidget = ({
     setOpenLightbox
 }: SolidMediaListFieldWidgetProps) => {
     if (!rowData?._media?.[fieldMetadata.name]) return null;
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
     const mediaFiles = rowData._media[fieldMetadata.name].map((file: any) => {
         const fileUrl = file?._full_url;
         const previewKind = getMediaPreviewKind({
@@ -160,6 +161,7 @@ export const DefaultMediaSingleListWidget = ({
             previewKind={firstFile.previewKind}
             onClick={(event) => {
                 event.stopPropagation();
+                if (isArchivedRecord) return;
                 if (firstFile.opensInLightbox) {
                     setLightboxUrls([{
                         src: firstFile.fileUrl,

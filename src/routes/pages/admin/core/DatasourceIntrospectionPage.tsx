@@ -2822,6 +2822,7 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                   placeholder="Datasource"
                   className="sdix-toolbar-select sdix-toolbar-select--compact"
                   onChange={(event) => setSelectedDatasource(event.value)}
+                  native={false}
                 />
                 <SolidButton
                   size="small"

@@ -109,8 +109,8 @@ const SolidChangeForcePassword = () => {
 
     return (
         <>
-            <form onSubmit={formik.handleSubmit} className='flex flex-col gap-4 auth-form'>
-                <div className="flex flex-col gap-2 mt-2" style={{}}>
+            <form onSubmit={formik.handleSubmit} className="flex flex-col gap-5">
+                <div className="flex flex-col gap-2">
                     <label htmlFor="currentPassword" className="solid-auth-input-label">Current Password</label>
                     <SolidPasswordInput
                         id="currentPassword"
@@ -130,8 +130,8 @@ const SolidChangeForcePassword = () => {
                         />
                     )}
                 </div>
-                <div className="flex flex-col gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
-                    <label htmlFor="password" className="solid-auth-input-label">New Password</label>
+                <div className="flex flex-col gap-2">
+                    <label htmlFor="newPassword" className="solid-auth-input-label">New Password</label>
                     <SolidPasswordInput
                         id="newPassword"
                         name="newPassword"
@@ -150,8 +150,8 @@ const SolidChangeForcePassword = () => {
                         />
                     )}
                 </div>
-                <div className="flex flex-col gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
-                    <label htmlFor="password" className="solid-auth-input-label">Confirm Password</label>
+                <div className="flex flex-col gap-2">
+                    <label htmlFor="confirmPassword" className="solid-auth-input-label">Confirm Password</label>
                     <SolidPasswordInput
                         id="confirmPassword"
                         name="confirmPassword"
@@ -201,10 +201,11 @@ const SolidChangeForcePassword = () => {
                         </div>
                     </div>
                 )}
-                <div className="mt-6">
+                <div className="pt-2">
                     <SolidButton
                         type="submit"
-                        className="w-full font-light auth-submit-button"
+                        fullWidth
+                        className="font-light auth-submit-button"
                         label="Change Password"
                         disabled={formik.isSubmitting}
                         loading={formik.isSubmitting}

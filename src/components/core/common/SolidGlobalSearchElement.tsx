@@ -1,10 +1,11 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { toTitleCase } from "../../../helpers/helpers";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import { getFilterObjectFromLocalStorage } from "./globalSearchPersistence";
+import {clearFilterObjectFromLocalStorage,getFilterObjectFromLocalStorage,
+} from "./globalSearchPersistence";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
@@ -540,6 +541,9 @@ const extractChips = (node: any): any[] => {
     return [];
 };
 
+const areFilterStateValuesEqual = (left: any, right: any) =>
+    JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+
 
 
 type RelationCache = Map<string, { label: string; value: number }>;
@@ -816,6 +820,56 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         viewData?.data?.solidView?.model?.id,
         user?.id
     ])
+// Updates search, custom filter, grouping, aggregation, and UI state from a single shared filter source.
+    const syncFilterUiStateFromSharedSource = useCallback(async (queryObject: any | null) => {
+        const nextSearchFilter = queryObject?.search_predicate || null;
+        const nextSearchChips = nextSearchFilter ? extractChips(nextSearchFilter) : [];
+        const nextCustomFilter =
+            queryObject?.custom_filter_predicate && Object.keys(queryObject.custom_filter_predicate).length !== 0
+                ? queryObject.custom_filter_predicate
+                : null;
+        const nextPredefinedBaseFilter = queryObject?.predefined_search_predicate || null;
+
+        setSearchFilter((prev: any) => areFilterStateValuesEqual(prev, nextSearchFilter) ? prev : nextSearchFilter);
+        setSearchChips((prev) => areFilterStateValuesEqual(prev, nextSearchChips) ? prev : nextSearchChips);
+        setCustomFilter((prev: any) => areFilterStateValuesEqual(prev, nextCustomFilter) ? prev : nextCustomFilter);
+        setPredefinedSearchBaseFilter((prev: any) => areFilterStateValuesEqual(prev, nextPredefinedBaseFilter) ? prev : nextPredefinedBaseFilter);
+
+        if (nextCustomFilter && viewData?.data) {
+            const rules: FilterRule = transformFiltersToRules(nextCustomFilter);
+            const hydratedRules = await hydrateRelationRules([rules], viewData);
+            setFilterRules((prev) => areFilterStateValuesEqual(prev, hydratedRules) ? prev : hydratedRules);
+        } else {
+            setFilterRules((prev) => areFilterStateValuesEqual(prev, initialState) ? prev : initialState);
+        }
+
+        const hasGroupingRules = queryObject?.grouping_rules?.some((rule: any) => rule.fieldName !== null);
+        let nextGroupingRules: GroupingRule[] = [{ id: 1, fieldName: null, dateGrouping: null }];
+
+        if (hasGroupingRules) {
+            nextGroupingRules = queryObject.grouping_rules;
+        } else {
+            const layoutGroupBy = viewData?.data?.solidView?.layout?.attrs?.groupBy;
+            if (Array.isArray(layoutGroupBy) && layoutGroupBy.length > 0) {
+                nextGroupingRules = layoutGroupBy.map((groupStr: string, index: number) => {
+                    const [fieldName, dateGrouping] = groupStr.split(":");
+                    return {
+                        id: Date.now() + index,
+                        fieldName: fieldName || null,
+                        dateGrouping: (dateGrouping as DateGroupingFormat) || null,
+                    };
+                });
+            }
+        }
+
+        const nextAggregationRules =
+            Array.isArray(queryObject?.aggregation_rules) && queryObject.aggregation_rules.length > 0
+                ? queryObject.aggregation_rules
+                : [{ id: 1, operator: "count", fieldName: "id", locked: true }];
+
+        setGroupingRules((prev) => areFilterStateValuesEqual(prev, nextGroupingRules) ? prev : nextGroupingRules);
+        setAggregationRules((prev) => areFilterStateValuesEqual(prev, nextAggregationRules) ? prev : nextAggregationRules);
+    }, [initialState, viewData]);
 
     const resetAppliedFilters = ({ preserveGrouping = false }: { preserveGrouping?: boolean } = {}) => {
         setSearchChips([]);
@@ -834,9 +888,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setShowOverlay(false);
         setShowChipManager(false);
         setInputValue("");
-
-        const currentPageUrl = window.location.pathname;
-        localStorage.removeItem(currentPageUrl);
+        clearFilterObjectFromLocalStorage();
 
         if (activeSavedFilter) {
             const params = new URLSearchParams(searchParams.toString());
@@ -867,9 +919,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     }));
 
     useEffect(() => {
+        if (!viewData?.data?.solidView?.id) return;
+        void syncFilterUiStateFromSharedSource(getFilterObjectFromLocalStorage());
+    }, [syncFilterUiStateFromSharedSource, viewData?.data?.solidView?.id]);
+
+    useEffect(() => {
         const fn = async () => {
-            let searchChips: any;
-            let customChips: any;
             if (savedFiltersLoaded) {
 
                 if (activeSavedFilter && availableSavedFilters.length === 0) return;
@@ -934,61 +989,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     // }
                     // );
                     // setSearchChips(formattedChips);
-
-                    const formattedChips = extractChips(searchChips);
-                    setSearchChips(formattedChips);
-
-                }
-                if (customChips && Object.keys(customChips).length !== 0) {
-                    setCustomFilter(customChips);
-                    const rules: FilterRule = transformFiltersToRules(customChips);
-                    const hydratedRules = await hydrateRelationRules([rules], viewData);
-                    setFilterRules(hydratedRules);
-                }
-                const hasGroupingRules = (queryObject?.grouping_rules?.some((rule: any) => rule.fieldName !== null));
-
-                if (hasGroupingRules) {
-                    setGroupingRules(queryObject?.grouping_rules);
-                } else {
-                    // If no grouping rules in localStorage check layout
-                    const layoutGroupBy = viewData?.data?.solidView?.layout?.attrs?.groupBy;
-
-                    if (Array.isArray(layoutGroupBy) && layoutGroupBy.length > 0) {
-                        const initialGroupingRules: GroupingRule[] = layoutGroupBy.map((groupStr: string, index: number) => {
-                            const [fieldName, dateGrouping] = groupStr.split(":");
-                            return {
-                                id: Date.now() + index,
-                                fieldName: fieldName || null,
-                                dateGrouping: (dateGrouping as DateGroupingFormat) || null
-                            };
-                        });
-                        setGroupingRules(initialGroupingRules);
-                    }
-                }
-
-                if (queryObject?.aggregation_rules && queryObject?.aggregation_rules !== aggregationRules) {
-                    setAggregationRules(queryObject?.aggregation_rules);
-                }
-
+                await syncFilterUiStateFromSharedSource(queryObject);
 
                 setRefreshKey((prev) => prev + 1)
                 setHasSearched(true);
             }
         }
         fn()
-    }, [viewData?.data?.solidView?.id, activeSavedFilter, savedFiltersLoaded])
+    }, [activeSavedFilter, savedFilters, savedFiltersLoaded, syncFilterUiStateFromSharedSource, viewData?.data?.solidView?.id])
 
     useEffect(() => {
         const fn = async () => {
-            if (filterPredicates) {
-                if (filterPredicates?.custom_filter_predicate && filterPredicates?.custom_filter_predicate !== customFilter) {
-                    setCustomFilter(filterPredicates?.custom_filter_predicate);
-                    const rules: FilterRule = transformFiltersToRules(filterPredicates.custom_filter_predicate);
-                    const hydratedRules = await hydrateRelationRules([rules], viewData);
-                    setFilterRules(hydratedRules);
-                }
-                if (filterPredicates?.search_predicate && filterPredicates?.search_predicate !== searchFilter) {
-                    setSearchFilter(filterPredicates?.search_predicate);
+            if (filterPredicates !== undefined && filterPredicates !== null) {
                     // const formattedChips = filterPredicates.search_predicate?.$and.map((chip: any, key: any) => {
                     //     const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
                     //     const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
@@ -1000,27 +1012,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     // }
                     // );
                     // setSearchChips(formattedChips);
-                    const formattedChips = extractChips(filterPredicates.search_predicate);
-                    setSearchChips(formattedChips);
-
-                }
+                await syncFilterUiStateFromSharedSource(filterPredicates);
             }
         }
         fn()
-    }, [filterPredicates])
+    }, [filterPredicates, syncFilterUiStateFromSharedSource])
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
-            // Reset search state when switching views
-            setSearchChips([]);
-            setSearchFilter(null);
-            setFilterRules(initialState);
-            setCustomFilter(null);
-            setPredefinedSearchChip(null);
-            setPredefinedSearchBaseFilter(null);
             setInputValue("");
-
-
             let fieldsData = viewData?.data?.solidFieldsMetadata;
             // console.log(`fiels data while rendering solid global search element: `);
             // console.log(fieldsData);
@@ -1393,10 +1393,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setFilterRules(initialState);
                 setCustomFilter(null)
                 setPredefinedSearchChip(null);
-                const currentPageUrl = window.location.pathname; // Get the current page URL
-                localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
-
                 setPredefinedSearchBaseFilter(null);
+                clearFilterObjectFromLocalStorage();
                 setTimeout(() => {
                     router.push(buildSavedFilterUrl(formValues.id));
                 }, 500)
@@ -1418,9 +1416,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setCustomFilter(null)
                 setPredefinedSearchChip(null);
                 setPredefinedSearchBaseFilter(null);
-
-                const currentPageUrl = window.location.pathname; // Get the current page URL
-                localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
+                clearFilterObjectFromLocalStorage();
 
                 setTimeout(() => {
                     router.push(buildSavedFilterUrl(result.data.id));
@@ -1509,8 +1505,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setCustomFilter(null)
         setPredefinedSearchChip(null);
         setPredefinedSearchBaseFilter(null);
-        const currentPageUrl = window.location.pathname; // Get the current page URL
-        localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
+        clearFilterObjectFromLocalStorage();
         if (savedfilter?.systemKey) {
             setCurrentSavedFilterData(savedfilter);
             try {
@@ -1808,7 +1803,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         if (e.key === "Enter") {
             if (currentValue || focusedIndex >= 0) {
                 e.preventDefault();
-                const activeOption = overlayOptions[focusedIndex] || (currentValue ? overlayOptions[0] : null);
+                const activeOption = overlayOptions[focusedIndex] || (currentValue
+                    ? overlayOptions.find((option) => option.kind === "field" || option.kind === "predefined")
+                    : null);
 
                 if (activeOption?.kind === "field") {
                     applyFieldOption(activeOption.field);

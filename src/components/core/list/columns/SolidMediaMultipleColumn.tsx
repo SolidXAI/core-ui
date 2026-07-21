@@ -132,6 +132,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
     const [isShowAllFiles, setShowAllFiles] = useState(false);
 
     if (!rowData?._media?.[fieldMetadata.name]) return null;
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
 
     const fullrecord = rowData._media[fieldMetadata.name]?.map((file: any) => ({
         name: file.originalFileName,
@@ -152,6 +153,8 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
 
     const handleFileView = (file: any) => {
+        if (isArchivedRecord) return;
+
         if (isLightboxMediaKind(file?.previewKind)) {
             setLightboxUrls?.([{
                 src: file.fileUrl,
@@ -187,6 +190,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                 onClick={(event) => {
                                     event.preventDefault();
                                     event.stopPropagation();
+                                    if (isArchivedRecord) return;
                                     downloadMediaFile(file?.fileUrl, file?.name);
                                 }}
                             >
@@ -225,6 +229,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 }}
                 onClick={(event) => {
                     event.stopPropagation();
+                    if (isArchivedRecord) return;
                     setShowAllFiles(true);
                 }}
             >
