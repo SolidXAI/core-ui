@@ -31,6 +31,7 @@ import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, hasStoredSe
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { useRouter } from "../../../hooks/useRouter";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { usePathname } from "../../../hooks/usePathname";
@@ -38,6 +39,8 @@ import { useHandleListCustomButtonClick } from "../../../components/common/useHa
 import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import { SolidButton, SolidConfirmDialog, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon, SolidSelect } from "../../shad-cn-ui";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getRelationDisplayText } from "../../../helpers/relationDisplay";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
@@ -162,6 +165,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [isDeleteRecordsDialogVisible, setDeleteRecordsDialogVisible] = useState(false);
   const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [openLightbox, setOpenLightbox] = useState(false);
+  const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
 
 
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
@@ -180,6 +185,25 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [viewModes, setViewModes] = useState<any>([]);
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) {
+          return null;
+        }
+
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
+    : [];
 
   const headerRequestStatusLabel = treeLoading ? "Loading..." : null;
 
@@ -1370,8 +1394,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         solidListViewMetaData: solidTreeViewMetaData,
         fieldMetadata,
         column,
-        setLightboxUrls: () => { },
-        setOpenLightbox: () => { },
+        setLightboxUrls,
+        setOpenLightbox,
       });
 
       if (!React.isValidElement(listColumn)) return null;
@@ -2216,6 +2240,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <SolidButton label="Yes" size="sm" severity="danger" onClick={recoverAll} />
         </SolidDialogFooter>
       </SolidDialog>
+
+      {openLightbox && (
+        <SolidLightbox
+          open={openLightbox}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
+        />
+      )}
 
     </div>
   );

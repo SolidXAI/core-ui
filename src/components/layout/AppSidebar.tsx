@@ -2,7 +2,7 @@ import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { hideNavbar, toggleNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { useSession } from "../../hooks/useSession";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AdminHeaderActions } from "./AdminHeaderActions";
 import UserProfileMenu from "./user-profile-menu";
@@ -206,6 +206,7 @@ const AppSidebar = () => {
     const searchParams = useSearchParams();
     const visibleNavbar = useSelector((state: any) => state.navbarState.visibleNavbar);
     const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
+    const workspaceSwitcherRef = useRef<HTMLDivElement | null>(null);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [workspaceOpen, setWorkspaceOpen] = useState(false);
@@ -293,6 +294,24 @@ const AppSidebar = () => {
         return () => window.removeEventListener(SIDEBAR_TOGGLE_EVENT, onToggleRequest);
     }, [dispatch]);
 
+    useEffect(() => {
+        if (!workspaceOpen) return;
+
+        const handlePointerDown = (event: MouseEvent) => {
+            const switcher = workspaceSwitcherRef.current;
+            const target = event.target as Node;
+
+            if (!switcher || switcher.contains(target)) {
+                return;
+            }
+
+            setWorkspaceOpen(false);
+        };
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        return () => document.removeEventListener("pointerdown", handlePointerDown);
+    }, [workspaceOpen]);
+
     const workspaces: SolidMenuItem[] = menu?.data || [];
     const selectedWorkspace = workspaces.find((m) => m.key === selectedWorkspaceKey) || workspaces[0];
     const selectedWorkspaceChildren = selectedWorkspace?.children || [];
@@ -322,7 +341,7 @@ const AppSidebar = () => {
 
             <aside className={shellClasses}>
                 <div className="solid-sidebar-header">
-                    <div className="solid-workspace-switcher">
+                    <div className="solid-workspace-switcher" ref={workspaceSwitcherRef}>
                         <button
                             type="button"
                             className="solid-workspace-trigger"

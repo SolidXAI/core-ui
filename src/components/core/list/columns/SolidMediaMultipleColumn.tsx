@@ -132,6 +132,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
     const [isShowAllFiles, setShowAllFiles] = useState(false);
 
     if (!rowData?._media?.[fieldMetadata.name]) return null;
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
 
     const fullrecord = rowData._media[fieldMetadata.name]?.map((file: any) => ({
         name: file.originalFileName,
@@ -152,12 +153,17 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
 
     const handleFileView = (file: any) => {
-        if (isLightboxMediaKind(file?.previewKind)) {
-            setLightboxUrls?.([{
-                src: file.fileUrl,
-                downloadUrl: file.fileUrl,
-                type: file.previewKind === "video" ? "video" : undefined
-            }]);
+        if (isArchivedRecord) return;
+
+        const fileUrl = file?.fileUrl || "";
+        // const cleanUrl = fileUrl.split("?")[0];
+        // const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+        if (isDocumentType(fileUrl)) {
+            downloadFile(file?.fileUrl, "")
+
+        } else {
+            setLightboxUrls?.([{ src: file.fileUrl, downloadUrl: file.fileUrl }]);
             setOpenLightbox?.(true);
             return;
         }
@@ -212,7 +218,27 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 previewKind={fullrecord[0]?.previewKind}
                 onClick={(event) => {
                     event.stopPropagation();
-                    handleFileView(fullrecord[0]);
+                    if (isArchivedRecord) return;
+
+                    // const cleanUrl = fullrecord[0]?.fileUrl.split("?")[0];
+                    // const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+                    if (isDocumentType(fullrecord[0]?.fileUrl) && fullrecord?.length > 1) {
+                        setShowAllFiles(true)
+                        return;
+                    }
+
+                    else if (isDocumentType(fullrecord[0]?.fileUrl)) {
+                        downloadFile(fullrecord[0]?.fileUrl, "")
+                        return;
+                    }
+                    // FIRST FILE IS MEDIA ⇒ OPEN LIGHTBOX
+                    const urlsWithType = fullrecord.map((file: any) => ({
+                        src: file.fileUrl,
+                        downloadUrl: file.fileUrl,
+                    }));
+                    setLightboxUrls(urlsWithType);
+                    setOpenLightbox(true);
                 }}
             />
 
@@ -225,7 +251,18 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 }}
                 onClick={(event) => {
                     event.stopPropagation();
-                    setShowAllFiles(true);
+                    if (isArchivedRecord) return;
+
+                    if (isDocumentType(fullrecord[0]?.fileUrl)) {
+                        setShowAllFiles(true);
+                    } else {
+                        const urlsWithType = fullrecord.map((file: any) => ({
+                            src: file.fileUrl,
+                            downloadUrl: file.fileUrl
+                        }));
+                        setLightboxUrls(urlsWithType);
+                        setOpenLightbox(true);
+                    }
                 }}
             >
                 +{fullrecord.length - 1}

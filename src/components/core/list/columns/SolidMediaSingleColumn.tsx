@@ -134,24 +134,12 @@ export const DefaultMediaSingleListWidget = ({
     setOpenLightbox
 }: SolidMediaListFieldWidgetProps) => {
     if (!rowData?._media?.[fieldMetadata.name]) return null;
-    const mediaFiles = rowData._media[fieldMetadata.name].map((file: any) => {
-        const fileUrl = file?._full_url;
-        const previewKind = getMediaPreviewKind({
-            url: fileUrl,
-            fileName: file?.originalFileName,
-            mimeType: file?.mimeType,
-        });
-        return {
-            fileUrl,
-            fileName: file?.originalFileName,
-            previewKind,
-            opensInLightbox: isLightboxMediaKind(previewKind),
-            lightboxType: previewKind === "video" ? "video" : undefined,
-        };
-    });
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
+    const mediaUrls = rowData._media[fieldMetadata.name].map((i: any) => i._full_url);
 
-    const firstFile = mediaFiles[0];
-    if (!firstFile?.fileUrl) return <div style={{ height: 40, width: 40 }} />;
+    const firstUrl = mediaUrls[0];
+    if (!firstUrl) return <div style={{ height: 40, width: 40 }} />;
+    const cleanUrl = getCleanUrl(firstUrl);
     return (
         <MediaWithFallback
             src={firstFile.fileUrl}
@@ -159,13 +147,11 @@ export const DefaultMediaSingleListWidget = ({
             fileName={firstFile.fileName}
             previewKind={firstFile.previewKind}
             onClick={(event) => {
-                event.stopPropagation();
-                if (firstFile.opensInLightbox) {
-                    setLightboxUrls([{
-                        src: firstFile.fileUrl,
-                        downloadUrl: firstFile.fileUrl,
-                        type: firstFile.lightboxType
-                    }]);
+                event.stopPropagation()
+                if (isArchivedRecord) return;
+                // Only open lightbox for image, video, or audio
+                if (isImageFile(cleanUrl) || isVideoFile(cleanUrl) || isAudioFile(cleanUrl)) {
+                    setLightboxUrls([{ src: firstUrl, downloadUrl: firstUrl }]);
                     setOpenLightbox(true);
                     return;
                 }

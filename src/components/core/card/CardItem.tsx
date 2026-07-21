@@ -100,20 +100,22 @@ const CardItem: React.FC<CardItemProps> = ({
           </SolidDropdownMenu>
         </div>
         {DynamicCardWidget ? (
-          <DynamicCardWidget
-            rowData={data}
-            solidKanbanViewMetaData={solidCardViewMetaData}
-            solidView={solidCardViewMetaData?.solidView}
-            solidFieldsMetadata={solidCardViewMetaData?.solidFieldsMetadata}
-            card={cardNode}
-            layoutAttrs={solidCardViewMetaData?.solidView?.layout?.attrs || {}}
-            groupedView={false}
-            editButtonUrl={editButtonUrl}
-            setLightboxUrls={setLightboxUrls}
-            setOpenLightbox={setOpenLightbox}
-            openRecord={openRecord}
-            openEdit={openEdit}
-          />
+          <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
+            <DynamicCardWidget
+              rowData={data}
+              solidKanbanViewMetaData={solidCardViewMetaData}
+              solidView={solidCardViewMetaData?.solidView}
+              solidFieldsMetadata={solidCardViewMetaData?.solidFieldsMetadata}
+              card={cardNode}
+              layoutAttrs={solidCardViewMetaData?.solidView?.layout?.attrs || {}}
+              groupedView={false}
+              editButtonUrl={editButtonUrl}
+              setLightboxUrls={isArchivedRecord ? undefined : setLightboxUrls}
+              setOpenLightbox={isArchivedRecord ? undefined : setOpenLightbox}
+              openRecord={openRecord}
+              openEdit={openEdit}
+            />
+          </div>
         ) : null}
       </div>
     </div>
