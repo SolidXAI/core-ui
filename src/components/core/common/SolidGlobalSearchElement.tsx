@@ -1720,7 +1720,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         if (e.key === "Enter") {
             if (currentValue || focusedIndex >= 0) {
                 e.preventDefault();
-                const activeOption = overlayOptions[focusedIndex] || (currentValue ? overlayOptions[0] : null);
+                const activeOption = overlayOptions[focusedIndex] || (currentValue
+                    ? overlayOptions.find((option) => option.kind === "field" || option.kind === "predefined")
+                    : null);
 
                 if (activeOption?.kind === "field") {
                     applyFieldOption(activeOption.field);
