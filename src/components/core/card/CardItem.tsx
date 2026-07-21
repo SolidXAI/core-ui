@@ -14,6 +14,7 @@ interface CardItemProps {
   data: any;
   solidCardViewMetaData: any;
   editButtonUrl?: string;
+  recordClickAction?: "view" | "edit";
   cardNode?: any;
   DynamicCardWidget?: any;
   onDelete?: (record: any) => void;
@@ -27,6 +28,7 @@ const CardItem: React.FC<CardItemProps> = ({
   data,
   solidCardViewMetaData,
   editButtonUrl,
+  recordClickAction = "edit",
   cardNode,
   DynamicCardWidget,
   onDelete,
@@ -41,7 +43,7 @@ const CardItem: React.FC<CardItemProps> = ({
   const openRecord = () => {
     if (isArchivedRecord) return;
     storeCurrentModelViewContext();
-    router.push(`${editButtonUrl}/${data?.id}`);
+    router.push(`${editButtonUrl}/${data?.id}?viewMode=${recordClickAction}`);
   };
 
   const openEdit = () => {

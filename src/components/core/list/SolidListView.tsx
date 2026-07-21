@@ -32,7 +32,7 @@ import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { getSettingsMap } from "../../../helpers/settingsPayload";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -220,7 +220,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       return "view";
     }
 
-    return solidSettingsMap?.rowClickAction === "view" ? "view" : "edit";
+    return resolveRecordClickAction(solidSettingsMap, { isSystemModule });
   }, [solidListViewMetaData, solidSettingsMap]);
 
   const resolveLocaleFromFilter = (filterNode: any): string | null => {

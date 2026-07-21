@@ -45,6 +45,8 @@ import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersiste
 import { getRelationDisplayText } from "../../../helpers/relationDisplay";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
 import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -134,6 +136,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const user = session?.data?.user;
 
   const pathname = usePathname();
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = getSettingsMap(solidSettingsData);
   const solidGlobalSearchElementRef = useRef<any>(null);
 
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
@@ -362,6 +366,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const editBaseUrl = useMemo(
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
+  );
+  const rowClickFormMode = useMemo(
+    () =>
+      resolveRecordClickAction(solidSettingsMap, {
+        isSystemModule: solidTreeViewMetaData?.data?.solidView?.module?.isSystem === true,
+      }),
+    [solidSettingsMap, solidTreeViewMetaData],
   );
 
   const [
@@ -2081,7 +2092,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   // params.handleEditClickForEmbeddedView(rowData?.id);
                   // } else {
                   storeCurrentModelViewContext();
-                  router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+                  router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${new URLSearchParams(editActionQueryParams).toString()}`);
                   // }
                 }
                 }

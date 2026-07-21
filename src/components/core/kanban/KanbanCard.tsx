@@ -27,6 +27,7 @@ interface KanbanCardProps {
   setLightboxUrls?: any;
   setOpenLightbox?: any;
   editButtonUrl?: string;
+  recordClickAction?: "view" | "edit";
   groupByFieldName?: string;
   group?: any;
   cardNode?: any;
@@ -36,7 +37,7 @@ interface KanbanCardProps {
   showArchived?: boolean;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived }) => {
   const router = useRouter()
   const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
 
@@ -47,7 +48,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   const openRecord = () => {
     if (isArchivedRecord) return;
     persistReturnView();
-    router.push(`${editButtonUrl}/${data?.id}`);
+    router.push(`${editButtonUrl}/${data?.id}?viewMode=${recordClickAction}`);
   };
 
   const openEdit = () => {

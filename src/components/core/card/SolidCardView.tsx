@@ -12,6 +12,8 @@ import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { SolidEmptyListViewPlaceholder } from "../list/SolidEmptyListViewPlaceholder";
@@ -106,6 +108,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const solidGlobalSearchElementRef = useRef<any>();
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = getSettingsMap(solidSettingsData);
 
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
@@ -180,6 +184,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const {data: solidCardViewMetaDataResponse,isLoading: solidCardViewMetaDataIsLoading,} = useGetSolidViewLayoutQuery(cardViewMetaDataQs);
 
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
+  const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
+    isSystemModule: solidCardViewMetaDataResponse?.data?.solidView?.module?.isSystem === true,
+  });
   const rowsOptions = rowsPerPageOptions && rowsPerPageOptions.length > 0 ? rowsPerPageOptions : [12, 24, 48];
   const paginationStart = totalRecords === 0 ? 0 : first + 1;
   const paginationEnd = Math.min(first + rows, totalRecords);
@@ -574,6 +581,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                     records={cards}
                     solidCardViewMetaData={solidCardViewMetaDataResponse?.data}
                     editButtonUrl={editBaseUrl}
+                    recordClickAction={recordClickAction}
                     onDelete={canDeleteCards ? handleOpenDeleteDialog : undefined}
                     onRecover={handleRecoverRecord}
                     setLightboxUrls={setLightboxUrls}
