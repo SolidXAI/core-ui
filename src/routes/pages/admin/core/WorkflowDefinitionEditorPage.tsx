@@ -1,15 +1,17 @@
 import {
   Activity,
   ArrowLeft,
-  BookOpen,
   Braces,
+  ChevronRight,
+  Copy,
   Workflow,
   Layers3,
   Play,
-  RefreshCw,
+  Search,
   Save,
-  Settings2,
   ShieldCheck,
+  Trash2,
+  X,
 } from "lucide-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -17,6 +19,7 @@ import { useDispatch } from "react-redux";
 import qs from "qs";
 import YAML from "yaml";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
+import { useGetmodulesQuery } from "../../../../redux/api/moduleApi";
 import { useGetWorkflowNodeTypesQuery } from "../../../../redux/api/workflowNodeApi";
 import {
   useExecuteWorkflowDefinitionMutation,
@@ -37,27 +40,36 @@ import {
 } from "../../../../components/workflow/WorkflowNodeSchemaEditor";
 import type { WorkflowNodeMetadataResponse } from "../../../../types/workflow-node";
 import {
+  SolidAutocomplete,
   SolidButton,
+  SolidCheckbox,
   SolidCodeEditor,
   SolidDatePicker,
   SolidDialog,
   SolidDialogBody,
-  SolidDialogFooter,
   SolidInput,
   SolidPanel,
+  SolidSelect,
   SolidSpinner,
   SolidTabGroup,
   SolidTag,
   SolidTextarea,
 } from "../../../../components/shad-cn-ui";
+import { SolidJsonEditor } from "../../../../components/core/json/SolidJsonEditor";
 import "./WorkflowDefinitionEditorPage.css";
 
 type WorkflowDefinitionRecord = {
   id: number;
   key?: string;
   displayName?: string;
+  moduleMetadata?: Record<string, any> | null;
+  moduleMetadataId?: number | null;
+  moduleMetadataUserKey?: string | null;
+  namespace?: string;
   description?: string;
+  status?: string;
   definitionYaml?: WorkflowDefinitionDsl | string | null;
+  tags?: unknown;
 };
 
 type WorkflowNodeRecord = {
@@ -97,6 +109,10 @@ type ValidationState = {
   errors: string[];
 };
 
+type WorkflowIdentityErrors = Partial<
+  Record<"displayName" | "key" | "moduleMetadata" | "namespace" | "tags", string>
+>;
+
 type WorkflowDefinitionParseResult =
   | {
       ok: true;
@@ -111,21 +127,94 @@ type WorkflowDefinitionParseResult =
 
 type WorkflowDetailTab =
   | "overview"
+  | "inputs"
   | "topology"
   | "executions"
-  | "revisions"
-  | "triggers"
-  | "logs"
-  | "metrics";
+  | "triggers";
+
+type WorkflowTriggerGuideMode = "curl" | "api" | "scheduled";
 
 type WorkflowExecutionRecord = {
   id: number;
+  executionIdentifier?: string | null;
+  workflowKey?: string | null;
+  workflowDisplayName?: string | null;
   status?: string | null;
   triggerType?: string | null;
   startedAt?: string | null;
   finishedAt?: string | null;
   durationMs?: number | string | null;
+  inputPayload?: unknown;
+  outputPayload?: unknown;
+  definitionVersion?: string | null;
+  definitionChecksum?: string | null;
+  definitionSnapshot?: string | null;
+  errorSummary?: string | null;
+  errorDetails?: unknown;
+  requestedByUserId?: number | string | null;
   createdAt?: string | null;
+};
+
+type WorkflowExecutionLogRecord = {
+  id: number;
+  logKey?: string | null;
+  level?: string | null;
+  message?: string | null;
+  eventType?: string | null;
+  source?: string | null;
+  nodeId?: string | null;
+  nodeType?: string | null;
+  sequenceNumber?: number | null;
+  occurredAt?: string | null;
+  context?: unknown;
+  metadata?: unknown;
+  createdAt?: string | null;
+};
+
+type WorkflowStepExecutionRecord = {
+  id: number;
+  stepExecutionKey?: string | null;
+  nodeId?: string | null;
+  nodeName?: string | null;
+  nodeKind?: string | null;
+  nodeType?: string | null;
+  status?: string | null;
+  attemptNumber?: number | null;
+  retryCount?: number | null;
+  maxRetries?: number | null;
+  parentNodeId?: string | null;
+  parentStepExecutionKey?: string | null;
+  sequenceNumber?: number | null;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  durationMs?: number | string | null;
+  timeoutMs?: number | string | null;
+  inputPayload?: unknown;
+  outputPayload?: unknown;
+  runtimeContext?: unknown;
+  nodeSnapshot?: unknown;
+  errorSummary?: string | null;
+  errorDetails?: unknown;
+  createdAt?: string | null;
+};
+
+type WorkflowExecutionOutputEntry = {
+  key: string;
+  label: string;
+  nodeId?: string;
+  nodeType?: string;
+  value: unknown;
+};
+
+type WorkflowInputEntry = {
+  key: string;
+  definition: {
+    type: string;
+    label: string;
+    required: boolean;
+    default: any;
+    description: string;
+  };
 };
 
 const createEmptyWorkflowDefinition = (): WorkflowDefinitionDsl => ({
@@ -140,6 +229,76 @@ const createEmptyWorkflowDefinition = (): WorkflowDefinitionDsl => ({
 
 const TOPOLOGY_SPLIT_STORAGE_KEY = "solid.workflow.editor.topologySplitPercent";
 
+const WORKFLOW_STATUS_OPTIONS = [
+  { label: "Draft", value: "draft" },
+  { label: "Active", value: "active" },
+  { label: "Inactive", value: "inactive" },
+];
+
+const WORKFLOW_INPUT_TYPE_OPTIONS = [
+  { label: "String", value: "string" },
+  { label: "Number", value: "number" },
+  { label: "Boolean", value: "boolean" },
+  { label: "Date", value: "date" },
+  { label: "Object", value: "object" },
+  { label: "Array", value: "array" },
+];
+
+const WORKFLOW_TRIGGER_GUIDE_OPTIONS: Array<{
+  label: string;
+  value: WorkflowTriggerGuideMode;
+  description: string;
+}> = [
+  {
+    label: "CURL",
+    value: "curl",
+    description: "Run this workflow through the authenticated execution endpoint.",
+  },
+  {
+    label: "API",
+    value: "api",
+    description: "Call this workflow from a SolidX service, subscriber, or job.",
+  },
+  {
+    label: "Scheduled",
+    value: "scheduled",
+    description: "Persist CRON metadata so the scheduler can run this workflow.",
+  },
+];
+
+const WORKFLOW_EXECUTION_STATUS_OPTIONS = [
+  { label: "All statuses", value: "all" },
+  { label: "Success", value: "success" },
+  { label: "Failed", value: "failed" },
+  { label: "Running", value: "running" },
+  { label: "Pending", value: "pending" },
+];
+
+const WORKFLOW_EXECUTION_PAGE_SIZE = 25;
+
+const WORKFLOW_LOG_LEVEL_OPTIONS = [
+  { label: "All levels", value: "all" },
+  { label: "Debug", value: "debug" },
+  { label: "Info", value: "info" },
+  { label: "Warn", value: "warn" },
+  { label: "Error", value: "error" },
+];
+
+const WORKFLOW_CRON_EXAMPLES = [
+  { label: "Every hour", value: "0 * * * *" },
+  { label: "Weekdays at 9 AM", value: "0 9 * * 1-5" },
+  { label: "Mondays at 2 AM", value: "0 2 * * 1" },
+  { label: "Daily midnight", value: "0 0 * * *" },
+];
+
+const WORKFLOW_CRON_FIELD_HELP = [
+  { key: "minute", label: "Minute", placeholder: "0", help: "0-59, * or */5" },
+  { key: "hour", label: "Hour", placeholder: "9", help: "0-23, * or */2" },
+  { key: "dayOfMonth", label: "Day", placeholder: "*", help: "1-31 or *" },
+  { key: "month", label: "Month", placeholder: "*", help: "1-12 or *" },
+  { key: "dayOfWeek", label: "Weekday", placeholder: "*", help: "0-7, 1-5 or *" },
+] as const;
+
 function readStoredTopologySplitPercent() {
   if (typeof window === "undefined") {
     return 62;
@@ -149,17 +308,451 @@ function readStoredTopologySplitPercent() {
   return Number.isFinite(storedValue) ? Math.min(78, Math.max(22, storedValue)) : 62;
 }
 
+function splitCronExpression(expression: string) {
+  const parts = String(expression ?? "").trim().split(/\s+/).filter(Boolean);
+  const normalized = parts.length === 5 ? parts : ["0", "9", "*", "*", "*"];
+  return {
+    minute: normalized[0] ?? "0",
+    hour: normalized[1] ?? "9",
+    dayOfMonth: normalized[2] ?? "*",
+    month: normalized[3] ?? "*",
+    dayOfWeek: normalized[4] ?? "*",
+  };
+}
+
+function joinCronExpression(parts: ReturnType<typeof splitCronExpression>) {
+  return [
+    parts.minute || "*",
+    parts.hour || "*",
+    parts.dayOfMonth || "*",
+    parts.month || "*",
+    parts.dayOfWeek || "*",
+  ].join(" ");
+}
+
+function isValidSimpleCronExpression(expression: string) {
+  return String(expression ?? "").trim().split(/\s+/).filter(Boolean).length === 5;
+}
+
+function isNumericCronPart(value: string) {
+  return /^\d+$/.test(String(value ?? ""));
+}
+
+function getCronMinuteStep(value: string) {
+  const match = String(value ?? "").match(/^\*\/(\d+)$/);
+  return match?.[1] ?? null;
+}
+
+function formatCronNumber(value: string) {
+  return String(Number(value)).padStart(2, "0");
+}
+
+function describeCronDayScope(dayOfMonth: string, month: string, dayOfWeek: string) {
+  if (dayOfMonth !== "*" || month !== "*") {
+    return "";
+  }
+  if (dayOfWeek === "*") {
+    return "";
+  }
+  if (dayOfWeek === "1") {
+    return " on Mondays";
+  }
+  if (dayOfWeek === "1-5") {
+    return " on weekdays";
+  }
+  if (dayOfWeek === "0" || dayOfWeek === "7") {
+    return " on Sundays";
+  }
+  return ` on weekday ${dayOfWeek}`;
+}
+
+function describeWorkflowCronExpression(expression: string, timezone = "UTC") {
+  const cron = String(expression ?? "").trim();
+  if (!isValidSimpleCronExpression(cron)) {
+    return "Enter exactly five CRON fields: minute hour day month weekday.";
+  }
+
+  const parts = splitCronExpression(cron);
+  const numericHour = isNumericCronPart(parts.hour) ? formatCronNumber(parts.hour) : null;
+  const numericMinute = isNumericCronPart(parts.minute) ? formatCronNumber(parts.minute) : null;
+  const minuteStep = getCronMinuteStep(parts.minute);
+  const time = numericHour && numericMinute ? `${numericHour}:${numericMinute}` : null;
+  const timezoneSuffix = timezone ? ` (${timezone})` : "";
+  const dayScope = describeCronDayScope(parts.dayOfMonth, parts.month, parts.dayOfWeek);
+
+  if (cron === "* * * * *") {
+    return `Runs every minute${timezoneSuffix}.`;
+  }
+  if (
+    /^\*\/\d+$/.test(parts.minute) &&
+    parts.hour === "*" &&
+    parts.dayOfMonth === "*" &&
+    parts.month === "*" &&
+    parts.dayOfWeek === "*"
+  ) {
+    return `Runs every ${parts.minute.replace("*/", "")} minutes${timezoneSuffix}.`;
+  }
+  if (minuteStep && numericHour && parts.dayOfMonth === "*" && parts.month === "*") {
+    return `Runs every ${minuteStep} minutes between ${numericHour}:00 and ${numericHour}:59${dayScope}${timezoneSuffix}.`;
+  }
+  if (time && parts.dayOfMonth === "*" && parts.month === "*" && parts.dayOfWeek === "*") {
+    return `Runs every day at ${time}${timezoneSuffix}.`;
+  }
+  if (time && parts.dayOfMonth === "*" && parts.month === "*" && parts.dayOfWeek === "1") {
+    return `Runs every Monday at ${time}${timezoneSuffix}.`;
+  }
+  if (time && parts.dayOfMonth === "*" && parts.month === "*" && parts.dayOfWeek === "1-5") {
+    return `Runs every weekday at ${time}${timezoneSuffix}.`;
+  }
+  return `Runs on the schedule ${cron}${timezoneSuffix}.`;
+}
+
+function workflowInputHasDefault(value: any) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return (
+      Object.prototype.hasOwnProperty.call(value, "default") &&
+      value.default !== undefined &&
+      value.default !== null
+    );
+  }
+  return value !== undefined && value !== null;
+}
+
 function serializeWorkflowDefinitionYaml(definition: WorkflowDefinitionDsl) {
   return YAML.stringify(definition);
 }
 
-function parseYamlValue<T>(value: string, fallback: T): T {
-  if (!value.trim()) {
-    return fallback;
+function serializeJsonDtoValue(value: unknown, fallback: unknown = null) {
+  if (typeof value === "string") {
+    return value;
   }
 
-  const parsed = YAML.parse(value);
-  return (parsed ?? fallback) as T;
+  return JSON.stringify(value ?? fallback);
+}
+
+function formatReadonlyJson(value: unknown, emptyValue = "{}") {
+  if (value === undefined || value === null || value === "") {
+    return emptyValue;
+  }
+
+  if (typeof value === "string") {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2);
+    } catch {
+      return value;
+    }
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
+function formatReadonlyYaml(value: unknown) {
+  if (value === undefined || value === null || value === "") {
+    return "";
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return YAML.stringify(value);
+}
+
+function normalizeJsonDisplayValue(value: unknown) {
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+}
+
+function isPlainObjectValue(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function formatOutputVisualValue(value: unknown) {
+  if (value === null || value === undefined) {
+    return "null";
+  }
+  if (typeof value === "boolean") {
+    return value ? "true" : "false";
+  }
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+  return JSON.stringify(value);
+}
+
+function isUrlLike(value: string) {
+  return /^https?:\/\//i.test(value);
+}
+
+function summarizeOutputValue(value: unknown) {
+  const normalizedValue = normalizeJsonDisplayValue(value);
+
+  if (normalizedValue === null || normalizedValue === undefined) {
+    return "No output";
+  }
+
+  if (Array.isArray(normalizedValue)) {
+    return `${normalizedValue.length} item${normalizedValue.length === 1 ? "" : "s"}`;
+  }
+
+  if (isPlainObjectValue(normalizedValue)) {
+    const count = Object.keys(normalizedValue).length;
+    return `${count} field${count === 1 ? "" : "s"}`;
+  }
+
+  return String(formatOutputVisualValue(normalizedValue));
+}
+
+function slugifyWorkflowKey(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function camelizeWorkflowInputKey(value: string) {
+  const words = String(value ?? "")
+    .trim()
+    .replace(/['’]/g, "")
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean);
+
+  if (!words.length) {
+    return "";
+  }
+
+  return words
+    .map((word, index) => {
+      const normalized = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      return index === 0 ? normalized.charAt(0).toLowerCase() + normalized.slice(1) : normalized;
+    })
+    .join("");
+}
+
+function buildUniqueWorkflowInputKey(baseKey: string, existingKeys: string[]) {
+  const fallbackKey = camelizeWorkflowInputKey(baseKey) || "input";
+  const existing = new Set(existingKeys);
+  if (!existing.has(fallbackKey)) {
+    return fallbackKey;
+  }
+
+  let index = 2;
+  while (existing.has(`${fallbackKey}${index}`)) {
+    index += 1;
+  }
+  return `${fallbackKey}${index}`;
+}
+
+function normalizeWorkflowTag(value: string) {
+  return value.trim();
+}
+
+function parseWorkflowTagInput(value: string) {
+  return value
+    .split(",")
+    .map(normalizeWorkflowTag)
+    .filter(Boolean);
+}
+
+function formatWorkflowTags(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((tag) => String(tag).trim()).filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map((tag) => String(tag).trim()).filter(Boolean);
+      }
+    } catch {
+      return parseWorkflowTagInput(value);
+    }
+  }
+
+  return [];
+}
+
+function buildUniqueWorkflowKey(baseKey: string, existingKeys: string[]) {
+  const fallbackKey = slugifyWorkflowKey(baseKey) || "item";
+  const existing = new Set(existingKeys);
+  if (!existing.has(fallbackKey)) {
+    return fallbackKey;
+  }
+
+  let index = 2;
+  while (existing.has(`${fallbackKey}-${index}`)) {
+    index += 1;
+  }
+  return `${fallbackKey}-${index}`;
+}
+
+function normalizeWorkflowInputDefinition(value: any) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return {
+      type: value.type ?? "string",
+      label: value.label ?? "",
+      required: Boolean(value.required),
+      default: value.default ?? "",
+      description: value.description ?? "",
+    };
+  }
+
+  return {
+    type: "string",
+    label: "",
+    required: false,
+    default: value ?? "",
+    description: "",
+  };
+}
+
+function getWorkflowInputEntries(inputs?: Record<string, any>): WorkflowInputEntry[] {
+  return Object.entries(inputs ?? {}).map(([key, value]) => ({
+    key,
+    definition: normalizeWorkflowInputDefinition(value),
+  }));
+}
+
+function stringifyWorkflowRunInputDefault(value: unknown, type: string) {
+  if (value === undefined || value === null) {
+    return type === "boolean" ? false : "";
+  }
+
+  if (type === "object" || type === "array") {
+    return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+  }
+
+  if (type === "boolean") {
+    return Boolean(value);
+  }
+
+  return String(value);
+}
+
+function buildWorkflowRunInputDefaults(entries: WorkflowInputEntry[]) {
+  return entries.reduce<Record<string, any>>((values, entry) => {
+    values[entry.key] = stringifyWorkflowRunInputDefault(
+      entry.definition.default,
+      entry.definition.type,
+    );
+    return values;
+  }, {});
+}
+
+function hasWorkflowInputDefaultValue(value: unknown) {
+  return value !== undefined && value !== null && value !== "";
+}
+
+function formatWorkflowInputDefaultSummary(value: unknown) {
+  if (!hasWorkflowInputDefaultValue(value)) {
+    return "No default value set";
+  }
+
+  if (typeof value === "object") {
+    const serialized = JSON.stringify(value);
+    return `Default - ${serialized.length > 58 ? `${serialized.slice(0, 58)}...` : serialized}`;
+  }
+
+  const serialized = String(value);
+  return `Default - ${serialized.length > 58 ? `${serialized.slice(0, 58)}...` : serialized}`;
+}
+
+function getWorkflowInputDefaultEditorValue(value: unknown, type: string) {
+  if (!hasWorkflowInputDefaultValue(value)) {
+    if (type === "array") {
+      return [];
+    }
+    if (type === "object") {
+      return {};
+    }
+    if (type === "boolean") {
+      return false;
+    }
+    return "";
+  }
+
+  if (type === "object" || type === "array") {
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return type === "array" ? [] : {};
+      }
+    }
+    return value;
+  }
+
+  if (type === "boolean") {
+    return Boolean(value);
+  }
+
+  return String(value);
+}
+
+function parseWorkflowRunInputValue(value: any, type: string) {
+  if (type === "boolean") {
+    return Boolean(value);
+  }
+
+  if (type === "number") {
+    if (value === "" || value === null || value === undefined) {
+      return null;
+    }
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      throw new Error("Enter a valid number.");
+    }
+    return numericValue;
+  }
+
+  if (type === "object" || type === "array") {
+    const trimmedValue = String(value ?? "").trim();
+    if (!trimmedValue) {
+      return type === "array" ? [] : {};
+    }
+    const parsed = JSON.parse(trimmedValue);
+    if (type === "array" && !Array.isArray(parsed)) {
+      throw new Error("Enter a valid JSON array.");
+    }
+    if (type === "object" && !isPlainObjectValue(parsed)) {
+      throw new Error("Enter a valid JSON object.");
+    }
+    return parsed;
+  }
+
+  return value ?? "";
+}
+
+function normalizeWorkflowTriggerDefinition(value: any) {
+  const configuration =
+    value?.configuration && typeof value.configuration === "object" && !Array.isArray(value.configuration)
+      ? value.configuration
+      : {};
+
+  return {
+    id: value?.id ? String(value.id) : "",
+    name: value?.name ? String(value.name) : "",
+    type: value?.type ? String(value.type) : "schedule",
+    disabled: Boolean(value?.disabled),
+    configuration,
+    metadata:
+      value?.metadata && typeof value.metadata === "object" && !Array.isArray(value.metadata)
+        ? value.metadata
+        : undefined,
+  };
 }
 
 function normalizeWorkflowDefinition(parsed: Record<string, any>): WorkflowDefinitionDsl {
@@ -357,6 +950,50 @@ function validateWorkflowDefinitionSchema(
     validateNodeSequence(definition.nodes, "root");
   }
 
+  if (Array.isArray(definition.triggers)) {
+    const triggerIds = new Set<string>();
+    const activeScheduleTriggers = definition.triggers.filter(
+      (trigger) => trigger?.type === "schedule" && !trigger.disabled,
+    );
+
+    definition.triggers.forEach((trigger, index) => {
+      const prefix = `Trigger ${index + 1}`;
+      if (!trigger || typeof trigger !== "object" || Array.isArray(trigger)) {
+        errors.push(`${prefix} must be an object.`);
+        return;
+      }
+
+      if (!trigger.id) {
+        errors.push(`${prefix} is missing an id.`);
+      } else if (triggerIds.has(String(trigger.id))) {
+        errors.push(`Duplicate workflow trigger id "${trigger.id}".`);
+      } else {
+        triggerIds.add(String(trigger.id));
+      }
+
+      if (!["schedule", "webhook"].includes(String(trigger.type))) {
+        errors.push(`${prefix} has unsupported type "${trigger.type}".`);
+      }
+
+      if (trigger.type === "schedule") {
+        const cronExpression = trigger.configuration?.cronExpression ?? trigger.configuration?.cron;
+        if (!cronExpression || !isValidSimpleCronExpression(String(cronExpression))) {
+          errors.push(`${prefix} requires a five-field CRON expression.`);
+        }
+      }
+    });
+
+    if (activeScheduleTriggers.length) {
+      Object.entries(definition.inputs ?? {}).forEach(([inputKey, inputDefinition]) => {
+        if (!workflowInputHasDefault(inputDefinition)) {
+          errors.push(
+            `Input "${inputKey}" requires a default value before enabling a scheduled trigger.`,
+          );
+        }
+      });
+    }
+  }
+
   return errors;
 }
 
@@ -420,6 +1057,56 @@ function flattenWorkflowNodeIds(nodes: WorkflowNodeRecord[]): string[] {
   ]);
 }
 
+function flattenWorkflowNodes(nodes: WorkflowNodeRecord[]): WorkflowNodeRecord[] {
+  return nodes.flatMap((node) => [
+    node,
+    ...flattenWorkflowNodes(node.tasks ?? []),
+    ...flattenWorkflowNodes(node.then ?? []),
+    ...flattenWorkflowNodes(node.else ?? []),
+    ...flattenWorkflowNodes(node.defaults ?? []),
+    ...Object.values(node.cases ?? {}).flatMap((caseNodes) =>
+      flattenWorkflowNodes(caseNodes),
+    ),
+  ]);
+}
+
+function buildExecutionOutputEntries(
+  outputPayload: unknown,
+  nodes: WorkflowNodeRecord[],
+): WorkflowExecutionOutputEntry[] {
+  const normalizedValue = normalizeJsonDisplayValue(outputPayload);
+
+  if (normalizedValue === null || normalizedValue === undefined) {
+    return [];
+  }
+
+  const nodeMap = new Map(
+    flattenWorkflowNodes(nodes).map((node) => [String(node.id), node]),
+  );
+
+  if (isPlainObjectValue(normalizedValue)) {
+    return Object.entries(normalizedValue).map(([key, value]) => {
+      const node = nodeMap.get(key);
+
+      return {
+        key,
+        label: node?.name ?? key,
+        nodeId: key,
+        nodeType: node?.type,
+        value,
+      };
+    });
+  }
+
+  return [
+    {
+      key: "execution-output",
+      label: "Execution Output",
+      value: normalizedValue,
+    },
+  ];
+}
+
 function buildNodeId(type: string, definition: WorkflowDefinitionDsl) {
   const suffix = type.split(".").pop() ?? "node";
   const base = suffix.replace(/[^a-zA-Z0-9]+/g, "");
@@ -456,6 +1143,36 @@ function countTriggers(triggers?: Array<Record<string, any>>): number {
   return Array.isArray(triggers) ? triggers.length : 0;
 }
 
+function buildWorkflowInputExample(inputs?: Record<string, any>) {
+  return Object.entries(inputs ?? {}).reduce<Record<string, any>>(
+    (acc, [key, inputDefinition]) => {
+      const normalized = normalizeWorkflowInputDefinition(inputDefinition);
+
+      if (workflowInputHasDefault(normalized.default)) {
+        acc[key] = normalized.default;
+        return acc;
+      }
+
+      if (normalized.type === "number") {
+        acc[key] = 123;
+      } else if (normalized.type === "boolean") {
+        acc[key] = true;
+      } else if (normalized.type === "date") {
+        acc[key] = "2026-07-21";
+      } else if (normalized.type === "object") {
+        acc[key] = { example: true };
+      } else if (normalized.type === "array") {
+        acc[key] = ["example"];
+      } else {
+        acc[key] = `<${key}>`;
+      }
+
+      return acc;
+    },
+    {},
+  );
+}
+
 function formatExecutionDate(value?: string | null) {
   if (!value) {
     return "Not available";
@@ -475,9 +1192,43 @@ function formatExecutionDate(value?: string | null) {
   });
 }
 
-function formatDurationMs(value?: number | string | null) {
+function formatExecutionLogTime(value?: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "-";
+  }
+
+  return parsed.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function parseExecutionTimestamp(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value).getTime();
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function getNumericDurationMs(value?: number | string | null) {
   const numericValue =
     typeof value === "string" ? Number(value) : typeof value === "number" ? value : null;
+
+  return typeof numericValue === "number" && Number.isFinite(numericValue)
+    ? numericValue
+    : null;
+}
+
+function formatDurationMs(value?: number | string | null) {
+  const numericValue = getNumericDurationMs(value);
 
   if (numericValue == null || Number.isNaN(numericValue) || numericValue <= 0) {
     return "Not available";
@@ -516,15 +1267,32 @@ function getExecutionStatusCategory(status?: string | null) {
   return "other";
 }
 
+function workflowLogLevelTone(level?: string | null) {
+  const value = (level ?? "").toLowerCase();
+  if (value === "error" || value === "fatal") {
+    return "danger";
+  }
+  if (value === "warn" || value === "warning") {
+    return "warn";
+  }
+  if (value === "info") {
+    return "success";
+  }
+  return undefined;
+}
+
 function buildWorkflowExecutionQueryString(options: {
   workflowDefinitionId: number;
   startDate?: Date | null;
   endDate?: Date | null;
+  status?: string;
+  search?: string;
   limit?: number;
+  offset?: number;
 }) {
   const queryData: Record<string, any> = {
-    limit: options.limit ?? 100,
-    offset: 0,
+    limit: options.limit ?? WORKFLOW_EXECUTION_PAGE_SIZE,
+    offset: options.offset ?? 0,
     sort: ["startedAt:desc", "id:desc"],
     filters: {
       workflowDefinition: {
@@ -534,6 +1302,18 @@ function buildWorkflowExecutionQueryString(options: {
       },
     },
   };
+
+  if (options.status && options.status !== "all") {
+    queryData.filters.status = {
+      $eqi: options.status,
+    };
+  }
+
+  if (options.search?.trim()) {
+    queryData.filters.executionIdentifier = {
+      $containsi: options.search.trim(),
+    };
+  }
 
   if (options.startDate || options.endDate) {
     queryData.filters.startedAt = {};
@@ -548,6 +1328,64 @@ function buildWorkflowExecutionQueryString(options: {
       queryData.filters.startedAt.$lte = endDate.toISOString();
     }
   }
+
+  return qs.stringify(queryData, { encodeValuesOnly: true });
+}
+
+function buildWorkflowExecutionLogQueryString(options: {
+  workflowExecutionId: number;
+  level?: string;
+  search?: string;
+}) {
+  const queryData: Record<string, any> = {
+    limit: 200,
+    offset: 0,
+    populate: ["workflowStepExecution"],
+    sort: ["sequenceNumber:asc", "occurredAt:asc", "id:asc"],
+    filters: {
+      workflowExecution: {
+        id: {
+          $eq: options.workflowExecutionId,
+        },
+      },
+    },
+  };
+
+  if (options.level && options.level !== "all") {
+    queryData.filters.level = {
+      $eqi: options.level,
+    };
+  }
+
+  const trimmedSearch = options.search?.trim();
+  if (trimmedSearch) {
+    queryData.filters.$or = [
+      { message: { $containsi: trimmedSearch } },
+      { nodeId: { $containsi: trimmedSearch } },
+      { nodeType: { $containsi: trimmedSearch } },
+      { source: { $containsi: trimmedSearch } },
+      { eventType: { $containsi: trimmedSearch } },
+    ];
+  }
+
+  return qs.stringify(queryData, { encodeValuesOnly: true });
+}
+
+function buildWorkflowStepExecutionQueryString(options: {
+  workflowExecutionId: number;
+}) {
+  const queryData: Record<string, any> = {
+    limit: 500,
+    offset: 0,
+    sort: ["startedAt:asc", "sequenceNumber:asc", "id:asc"],
+    filters: {
+      workflowExecution: {
+        id: {
+          $eq: options.workflowExecutionId,
+        },
+      },
+    },
+  };
 
   return qs.stringify(queryData, { encodeValuesOnly: true });
 }
@@ -595,33 +1433,6 @@ function buildTriggerDocsModel(trigger: Record<string, any>): WorkflowDocsModel 
               ? "object"
               : "string",
     })),
-  };
-}
-
-function buildWorkflowDocsModel(definition: WorkflowDefinitionDsl): WorkflowDocsModel {
-  return {
-    title: "Workflow Definition",
-    subtitle: "Workflow-level settings",
-    summary:
-      "Top-level inputs, variables, triggers, and description live here. Use workflow settings when the change is not about a single node.",
-    badges: ["workflow", "settings"],
-    definitions: [
-      {
-        key: "inputs",
-        label: "Inputs",
-        content: `\`\`\`yaml\n${YAML.stringify(definition.inputs ?? {})}\`\`\``,
-      },
-      {
-        key: "variables",
-        label: "Variables",
-        content: `\`\`\`yaml\n${YAML.stringify(definition.variables ?? {})}\`\`\``,
-      },
-      {
-        key: "triggers",
-        label: "Triggers",
-        content: `\`\`\`yaml\n${YAML.stringify(definition.triggers ?? [])}\`\`\``,
-      },
-    ],
   };
 }
 
@@ -792,6 +1603,14 @@ export function WorkflowDefinitionEditorPage() {
     () => createSolidEntityApi("workflowExecution"),
     [],
   );
+  const workflowExecutionLogApi = React.useMemo(
+    () => createSolidEntityApi("workflowExecutionLog"),
+    [],
+  );
+  const workflowStepExecutionApi = React.useMemo(
+    () => createSolidEntityApi("workflowStepExecution"),
+    [],
+  );
   const {
     useCreateSolidEntityMutation,
     useGetSolidEntityByIdQuery,
@@ -800,6 +1619,12 @@ export function WorkflowDefinitionEditorPage() {
   const {
     useLazyGetSolidEntitiesQuery: useLazyGetWorkflowExecutionsQuery,
   } = workflowExecutionApi;
+  const {
+    useLazyGetSolidEntitiesQuery: useLazyGetWorkflowExecutionLogsQuery,
+  } = workflowExecutionLogApi;
+  const {
+    useLazyGetSolidEntitiesQuery: useLazyGetWorkflowStepExecutionsQuery,
+  } = workflowStepExecutionApi;
 
   const workflowDefinitionId = params.id ?? "";
   const moduleName = params.moduleName ?? "solid-core";
@@ -809,7 +1634,7 @@ export function WorkflowDefinitionEditorPage() {
     isLoading: isWorkflowDefinitionLoading,
     refetch,
   } = useGetSolidEntityByIdQuery(
-    { id: workflowDefinitionId, qs: "" },
+    { id: workflowDefinitionId, qs: "populate[0]=moduleMetadata" },
     { skip: !workflowDefinitionId || workflowDefinitionId === "new" },
   );
   const [createWorkflowDefinition, { isLoading: isCreating }] =
@@ -824,6 +1649,13 @@ export function WorkflowDefinitionEditorPage() {
     useLazyGetWorkflowExecutionsQuery();
   const [triggerGetWorkflowExecutionPresence, workflowExecutionPresenceQuery] =
     useLazyGetWorkflowExecutionsQuery();
+  const [triggerGetWorkflowExecutionLogs, workflowExecutionLogsQuery] =
+    useLazyGetWorkflowExecutionLogsQuery();
+  const [triggerGetWorkflowStepExecutions, workflowStepExecutionsQuery] =
+    useLazyGetWorkflowStepExecutionsQuery();
+  const { data: moduleMetadataResponse } = useGetmodulesQuery(
+    "offset=0&limit=100&sort[0]=displayName%3Aasc",
+  );
 
   const {
     data: nodeTypes = [],
@@ -834,10 +1666,36 @@ export function WorkflowDefinitionEditorPage() {
   const record = workflowDefinitionResponse?.data as
     | WorkflowDefinitionRecord
     | undefined;
+  const moduleRecords = React.useMemo(
+    () => ((moduleMetadataResponse?.records ?? []) as Record<string, any>[]),
+    [moduleMetadataResponse?.records],
+  );
 
   const [workflowKey, setWorkflowKey] = React.useState("");
   const [workflowDisplayName, setWorkflowDisplayName] = React.useState("");
+  const [workflowModule, setWorkflowModule] = React.useState<Record<string, any> | null>(null);
+  const [workflowModuleSuggestions, setWorkflowModuleSuggestions] = React.useState<
+    Record<string, any>[]
+  >([]);
+  const [workflowNamespace, setWorkflowNamespace] = React.useState("");
   const [workflowDescription, setWorkflowDescription] = React.useState("");
+  const [workflowStatus, setWorkflowStatus] = React.useState("draft");
+  const [workflowTags, setWorkflowTags] = React.useState<string[]>([]);
+  const [workflowTagDraft, setWorkflowTagDraft] = React.useState("");
+  const [workflowIdentityErrors, setWorkflowIdentityErrors] =
+    React.useState<WorkflowIdentityErrors>({});
+  const [triggerGuideMode, setTriggerGuideMode] =
+    React.useState<WorkflowTriggerGuideMode>("curl");
+  const [runInputsOpen, setRunInputsOpen] = React.useState(false);
+  const [runInputValues, setRunInputValues] = React.useState<Record<string, any>>({});
+  const [runInputErrors, setRunInputErrors] = React.useState<Record<string, string>>({});
+  const [defaultValueEditorInputKey, setDefaultValueEditorInputKey] =
+    React.useState<string | null>(null);
+  const [defaultValueEditorDraft, setDefaultValueEditorDraft] = React.useState<any>("");
+  const [defaultValueEditorJsonText, setDefaultValueEditorJsonText] = React.useState("");
+  const [defaultValueEditorError, setDefaultValueEditorError] = React.useState("");
+  const [defaultValueEditorResetToken, setDefaultValueEditorResetToken] =
+    React.useState("default-value-editor");
   const [definitionDraft, setDefinitionDraft] = React.useState<WorkflowDefinitionDsl>(
     createEmptyWorkflowDefinition(),
   );
@@ -848,11 +1706,6 @@ export function WorkflowDefinitionEditorPage() {
   const [selectedNodeId, setSelectedNodeId] = React.useState<string>("");
   const [selectedTriggerId, setSelectedTriggerId] = React.useState<string>("");
   const [editorOpen, setEditorOpen] = React.useState(false);
-  const [workflowSettingsOpen, setWorkflowSettingsOpen] = React.useState(false);
-  const [workflowInputsValue, setWorkflowInputsValue] = React.useState("{}");
-  const [workflowVariablesValue, setWorkflowVariablesValue] = React.useState("{}");
-  const [workflowTriggersValue, setWorkflowTriggersValue] = React.useState("[]");
-  const [docsNodeTypeKey, setDocsNodeTypeKey] = React.useState<string>("");
   const [pendingInsertTarget, setPendingInsertTarget] =
     React.useState<WorkflowInsertTarget | null>(null);
   const [topologyDocsOpen, setTopologyDocsOpen] = React.useState(false);
@@ -861,7 +1714,7 @@ export function WorkflowDefinitionEditorPage() {
   const [topologyDocsModel, setTopologyDocsModel] =
     React.useState<WorkflowDocsModel | undefined>();
   const [detailTab, setDetailTab] = React.useState<WorkflowDetailTab>(
-    workflowDefinitionId === "new" ? "topology" : "overview",
+    "overview",
   );
   const [topologyViewOpen, setTopologyViewOpen] = React.useState(true);
   const [topologyYamlViewOpen, setTopologyYamlViewOpen] = React.useState(false);
@@ -871,32 +1724,104 @@ export function WorkflowDefinitionEditorPage() {
   const topologySplitRef = React.useRef<HTMLDivElement | null>(null);
   const [overviewStartDate, setOverviewStartDate] = React.useState<Date | null>(null);
   const [overviewEndDate, setOverviewEndDate] = React.useState<Date | null>(null);
+  const [executionPage, setExecutionPage] = React.useState(1);
+  const [executionStatusFilter, setExecutionStatusFilter] = React.useState("all");
+  const [executionSearchFilter, setExecutionSearchFilter] = React.useState("");
+  const [executionWorkspaceTab, setExecutionWorkspaceTab] =
+    React.useState<"summary" | "list">("summary");
+  const [selectedExecution, setSelectedExecution] =
+    React.useState<WorkflowExecutionRecord | null>(null);
+  const [selectedExecutionTab, setSelectedExecutionTab] = React.useState("summary");
+  const [selectedExecutionOutputMode, setSelectedExecutionOutputMode] =
+    React.useState<"visual" | "json">("visual");
+  const [expandedExecutionOutputKey, setExpandedExecutionOutputKey] =
+    React.useState<string | null>(null);
+  const [executionLogLevelFilter, setExecutionLogLevelFilter] = React.useState("all");
+  const [executionLogSearch, setExecutionLogSearch] = React.useState("");
+  const [expandedExecutionLogId, setExpandedExecutionLogId] =
+    React.useState<number | null>(null);
+  const [expandedTimelineStepId, setExpandedTimelineStepId] =
+    React.useState<number | null>(null);
   const [validationState, setValidationState] = React.useState<ValidationState>({
     status: "idle",
     errors: [],
   });
 
   React.useEffect(() => {
-    setDetailTab(workflowDefinitionId === "new" ? "topology" : "overview");
+    setDetailTab("overview");
   }, [workflowDefinitionId]);
 
   React.useEffect(() => {
     setOverviewStartDate(null);
     setOverviewEndDate(null);
+    setExecutionPage(1);
+    setExecutionStatusFilter("all");
+    setExecutionSearchFilter("");
+    setExecutionWorkspaceTab("summary");
+    setSelectedExecution(null);
+    setSelectedExecutionTab("summary");
+    setSelectedExecutionOutputMode("visual");
+    setExecutionLogLevelFilter("all");
+    setExecutionLogSearch("");
+    setExpandedExecutionLogId(null);
+    setExpandedTimelineStepId(null);
   }, [workflowDefinitionId]);
+
+  React.useEffect(() => {
+    if (workflowDefinitionId === "new") {
+      if (!moduleRecords.length) {
+        return;
+      }
+
+      setWorkflowModule((current) =>
+        current ??
+        moduleRecords.find((module) => module.name === moduleName) ??
+        moduleRecords[0] ??
+        null,
+      );
+      return;
+    }
+
+    if (!record) {
+      return;
+    }
+
+    const selectedModule =
+      record.moduleMetadata ??
+      moduleRecords.find(
+        (module) =>
+          module.id === record.moduleMetadataId ||
+          module.name === record.moduleMetadataUserKey,
+      ) ??
+      null;
+
+    if (selectedModule) {
+      setWorkflowModule(selectedModule);
+    }
+  }, [moduleName, moduleRecords, record, workflowDefinitionId]);
 
   React.useEffect(() => {
     if (workflowDefinitionId === "new") {
       const emptyDefinition = createEmptyWorkflowDefinition();
       setWorkflowKey("");
       setWorkflowDisplayName("");
+      setWorkflowNamespace("");
       setWorkflowDescription("");
+      setWorkflowStatus("draft");
+      setWorkflowTags([]);
+      setWorkflowTagDraft("");
+      setWorkflowIdentityErrors({});
       setDefinitionDraft(emptyDefinition);
       setCodeValue(serializeWorkflowDefinitionYaml(emptyDefinition));
       setCodeError(null);
       setSelectedNodeId("");
       setSelectedTriggerId("");
       setValidationState({ status: "idle", errors: [] });
+    }
+  }, [workflowDefinitionId]);
+
+  React.useEffect(() => {
+    if (workflowDefinitionId === "new") {
       return;
     }
 
@@ -907,6 +1832,11 @@ export function WorkflowDefinitionEditorPage() {
     const parsed = parseWorkflowDefinitionYaml(record.definitionYaml, nodeTypes);
     setWorkflowKey(record.key ?? "");
     setWorkflowDisplayName(record.displayName ?? "");
+    setWorkflowNamespace(record.namespace ?? "");
+    setWorkflowStatus(record.status ?? "draft");
+    setWorkflowTags(formatWorkflowTags(record.tags));
+    setWorkflowTagDraft("");
+    setWorkflowIdentityErrors({});
     setSelectedNodeId("");
     setSelectedTriggerId("");
     setCodeValue(parsed.yaml);
@@ -968,16 +1898,6 @@ export function WorkflowDefinitionEditorPage() {
     );
   }, [topologySplitPercent]);
 
-  React.useEffect(() => {
-    if (!workflowSettingsOpen) {
-      return;
-    }
-
-    setWorkflowInputsValue(YAML.stringify(definitionDraft.inputs ?? {}));
-    setWorkflowVariablesValue(YAML.stringify(definitionDraft.variables ?? {}));
-    setWorkflowTriggersValue(YAML.stringify(definitionDraft.triggers ?? []));
-  }, [definitionDraft, workflowSettingsOpen]);
-
   const selectedNode = React.useMemo(
     () => findNodeById(definitionDraft.nodes, selectedNodeId),
     [definitionDraft.nodes, selectedNodeId],
@@ -990,35 +1910,130 @@ export function WorkflowDefinitionEditorPage() {
     return nodeTypes.find((nodeType) => nodeType.type === selectedNode.type);
   }, [nodeTypes, selectedNode]);
 
-  const selectedTrigger = React.useMemo(
-    () =>
-      (definitionDraft.triggers ?? []).find(
-        (trigger) => String(trigger.id) === selectedTriggerId,
-      ),
-    [definitionDraft.triggers, selectedTriggerId],
-  );
+  const validateWorkflowIdentity = React.useCallback(() => {
+    const errors: WorkflowIdentityErrors = {};
+    const displayName = workflowDisplayName.trim();
+    const key = workflowKey.trim();
+    const namespace = workflowNamespace.trim();
+    const pendingTags = parseWorkflowTagInput(workflowTagDraft);
+    const tags = [...workflowTags, ...pendingTags];
 
-  const docsNodeType = React.useMemo(() => {
-    if (docsNodeTypeKey) {
-      return nodeTypes.find((nodeType) => nodeType.type === docsNodeTypeKey);
+    if (!displayName) {
+      errors.displayName = "Workflow name is required.";
     }
-    return selectedTrigger ? undefined : selectedNodeType;
+
+    if (!workflowModule?.id && !workflowModule?.name) {
+      errors.moduleMetadata = "Module is required.";
+    }
+
+    if (!key) {
+      errors.key = "Key is required.";
+    } else if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key)) {
+      errors.key = "Key can only contain lowercase letters, numbers, and hyphens.";
+    }
+
+    if (namespace && !/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/.test(namespace)) {
+      errors.namespace =
+        "Namespace can only contain lowercase letters, numbers, dots, and hyphens.";
+    }
+
+    if (tags.some((tag) => !/^[\w.-]+$/.test(tag))) {
+      errors.tags = "Tags can only contain letters, numbers, underscores, dots, and hyphens.";
+    }
+
+    setWorkflowIdentityErrors(errors);
+    return errors;
   }, [
-    docsNodeTypeKey,
-    nodeTypes,
-    selectedNodeType,
-    selectedTrigger,
+    workflowDisplayName,
+    workflowKey,
+    workflowModule,
+    workflowNamespace,
+    workflowTagDraft,
+    workflowTags,
   ]);
 
-  const docsModel = React.useMemo(() => {
-    if (selectedTrigger) {
-      return buildTriggerDocsModel(selectedTrigger);
+  const hasWorkflowIdentityErrors = (errors: WorkflowIdentityErrors) =>
+    Object.keys(errors).length > 0;
+
+  const handleWorkflowDisplayNameChange = (nextDisplayName: string) => {
+    setWorkflowDisplayName(nextDisplayName);
+
+    if (workflowDefinitionId === "new") {
+      setWorkflowKey(slugifyWorkflowKey(nextDisplayName));
     }
-    if (!selectedNode && !selectedTrigger) {
-      return buildWorkflowDocsModel(definitionDraft);
+
+    setWorkflowIdentityErrors((current) => ({
+      ...current,
+      displayName: undefined,
+      key: undefined,
+    }));
+  };
+
+  const handleWorkflowNamespaceChange = (nextNamespace: string) => {
+    setWorkflowNamespace(nextNamespace);
+    setWorkflowIdentityErrors((current) => ({ ...current, namespace: undefined }));
+  };
+
+  const searchWorkflowModules = React.useCallback(
+    ({ query }: { query: string }) => {
+      const normalizedQuery = query.trim().toLowerCase();
+      const nextSuggestions = normalizedQuery
+        ? moduleRecords.filter((module) =>
+            [module.displayName, module.name]
+              .filter(Boolean)
+              .some((value) => String(value).toLowerCase().includes(normalizedQuery)),
+          )
+        : moduleRecords;
+      setWorkflowModuleSuggestions(nextSuggestions);
+    },
+    [moduleRecords],
+  );
+
+  const handleWorkflowModuleChange = ({ value }: { value: any }) => {
+    setWorkflowModule(value ?? null);
+    setWorkflowIdentityErrors((current) => ({ ...current, moduleMetadata: undefined }));
+  };
+
+  const commitWorkflowTags = React.useCallback((value = workflowTagDraft) => {
+    const nextTags = parseWorkflowTagInput(value);
+    if (!nextTags.length) {
+      setWorkflowTagDraft("");
+      return;
     }
-    return undefined;
-  }, [definitionDraft, selectedNode, selectedTrigger]);
+
+    setWorkflowTags((current) => {
+      const seen = new Set(current.map((tag) => tag.toLowerCase()));
+      const merged = [...current];
+      nextTags.forEach((tag) => {
+        const normalizedKey = tag.toLowerCase();
+        if (!seen.has(normalizedKey)) {
+          seen.add(normalizedKey);
+          merged.push(tag);
+        }
+      });
+      return merged;
+    });
+    setWorkflowTagDraft("");
+    setWorkflowIdentityErrors((current) => ({ ...current, tags: undefined }));
+  }, [workflowTagDraft]);
+
+  const removeWorkflowTag = (tagToRemove: string) => {
+    setWorkflowTags((current) => current.filter((tag) => tag !== tagToRemove));
+    setWorkflowIdentityErrors((current) => ({ ...current, tags: undefined }));
+  };
+
+  const handleWorkflowTagKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      commitWorkflowTags();
+      return;
+    }
+
+    if (event.key === "Backspace" && !workflowTagDraft && workflowTags.length) {
+      event.preventDefault();
+      setWorkflowTags((current) => current.slice(0, -1));
+    }
+  };
 
   const topologyDocsNodeType = React.useMemo(() => {
     if (!topologyDocsNodeTypeKey) {
@@ -1061,7 +2076,7 @@ export function WorkflowDefinitionEditorPage() {
     return { tone: undefined, label: "Not validated" };
   }, [validationState.status]);
 
-  const loadWorkflowExecutions = React.useCallback(async () => {
+  const loadWorkflowExecutions = React.useCallback(async (page = executionPage) => {
     if (!numericWorkflowDefinitionId) {
       return;
     }
@@ -1071,21 +2086,28 @@ export function WorkflowDefinitionEditorPage() {
         workflowDefinitionId: numericWorkflowDefinitionId,
         startDate: overviewStartDate,
         endDate: overviewEndDate,
+        status: executionStatusFilter,
+        search: executionSearchFilter,
+        limit: WORKFLOW_EXECUTION_PAGE_SIZE,
+        offset: (page - 1) * WORKFLOW_EXECUTION_PAGE_SIZE,
       }),
     );
   }, [
+    executionPage,
+    executionSearchFilter,
+    executionStatusFilter,
     numericWorkflowDefinitionId,
     overviewEndDate,
     overviewStartDate,
     triggerGetWorkflowExecutions,
   ]);
 
-  React.useEffect(() => {
+  const loadWorkflowExecutionPresence = React.useCallback(async () => {
     if (!numericWorkflowDefinitionId || workflowDefinitionId === "new") {
       return;
     }
 
-    void triggerGetWorkflowExecutionPresence(
+    await triggerGetWorkflowExecutionPresence(
       buildWorkflowExecutionQueryString({
         workflowDefinitionId: numericWorkflowDefinitionId,
         limit: 1,
@@ -1098,8 +2120,12 @@ export function WorkflowDefinitionEditorPage() {
   ]);
 
   React.useEffect(() => {
+    void loadWorkflowExecutionPresence();
+  }, [loadWorkflowExecutionPresence]);
+
+  React.useEffect(() => {
     if (
-      detailTab !== "overview" ||
+      detailTab !== "executions" ||
       !numericWorkflowDefinitionId ||
       workflowDefinitionId === "new"
     ) {
@@ -1114,10 +2140,999 @@ export function WorkflowDefinitionEditorPage() {
     workflowDefinitionId,
   ]);
 
+  const refreshWorkflowExecutionData = React.useCallback(async () => {
+    if (!numericWorkflowDefinitionId || workflowDefinitionId === "new") {
+      return;
+    }
+
+    setExecutionPage(1);
+    await Promise.all([loadWorkflowExecutionPresence(), loadWorkflowExecutions(1)]);
+  }, [
+    loadWorkflowExecutionPresence,
+    loadWorkflowExecutions,
+    numericWorkflowDefinitionId,
+    workflowDefinitionId,
+  ]);
+
   const executionRecords = React.useMemo(
     () => ((workflowExecutionsQuery.data?.records ?? []) as WorkflowExecutionRecord[]),
     [workflowExecutionsQuery.data?.records],
   );
+  const executionTotalRecords = workflowExecutionsQuery.data?.meta?.totalRecords ?? 0;
+  const executionTotalPages = Math.max(
+    1,
+    Math.ceil(executionTotalRecords / WORKFLOW_EXECUTION_PAGE_SIZE),
+  );
+  const executionPageStart = executionTotalRecords
+    ? (executionPage - 1) * WORKFLOW_EXECUTION_PAGE_SIZE + 1
+    : 0;
+  const executionPageEnd = Math.min(
+    executionPage * WORKFLOW_EXECUTION_PAGE_SIZE,
+    executionTotalRecords,
+  );
+  const openExecutionDetails = React.useCallback((execution: WorkflowExecutionRecord) => {
+    setSelectedExecution(execution);
+    setSelectedExecutionTab("summary");
+    setSelectedExecutionOutputMode("visual");
+    setExpandedExecutionOutputKey(null);
+    setExecutionLogLevelFilter("all");
+    setExecutionLogSearch("");
+    setExpandedExecutionLogId(null);
+    setExpandedTimelineStepId(null);
+  }, []);
+
+  const loadSelectedExecutionLogs = React.useCallback(async () => {
+    if (!selectedExecution?.id) {
+      return;
+    }
+
+    await triggerGetWorkflowExecutionLogs(
+      buildWorkflowExecutionLogQueryString({
+        workflowExecutionId: selectedExecution.id,
+        level: executionLogLevelFilter,
+        search: executionLogSearch,
+      }),
+    );
+  }, [
+    executionLogLevelFilter,
+    executionLogSearch,
+    selectedExecution?.id,
+    triggerGetWorkflowExecutionLogs,
+  ]);
+
+  React.useEffect(() => {
+    if (!selectedExecution?.id) {
+      return;
+    }
+
+    void loadSelectedExecutionLogs();
+  }, [loadSelectedExecutionLogs, selectedExecution?.id]);
+
+  const loadSelectedExecutionSteps = React.useCallback(async () => {
+    if (!selectedExecution?.id) {
+      return;
+    }
+
+    await triggerGetWorkflowStepExecutions(
+      buildWorkflowStepExecutionQueryString({
+        workflowExecutionId: selectedExecution.id,
+      }),
+    );
+  }, [selectedExecution?.id, triggerGetWorkflowStepExecutions]);
+
+  React.useEffect(() => {
+    if (!selectedExecution?.id) {
+      return;
+    }
+
+    void loadSelectedExecutionSteps();
+  }, [loadSelectedExecutionSteps, selectedExecution?.id]);
+
+  const executionLogRecords = React.useMemo(
+    () => ((workflowExecutionLogsQuery.data?.records ?? []) as WorkflowExecutionLogRecord[]),
+    [workflowExecutionLogsQuery.data?.records],
+  );
+
+  const executionStepRecords = React.useMemo(
+    () => ((workflowStepExecutionsQuery.data?.records ?? []) as WorkflowStepExecutionRecord[]),
+    [workflowStepExecutionsQuery.data?.records],
+  );
+
+  const executionTimeline = React.useMemo(() => {
+    if (!selectedExecution) {
+      return {
+        rows: [],
+        totalDurationMs: 0,
+        startLabel: "-",
+        endLabel: "-",
+        slowestStep: null as WorkflowStepExecutionRecord | null,
+        statusCounts: {} as Record<string, number>,
+      };
+    }
+
+    const executionStart =
+      parseExecutionTimestamp(selectedExecution.startedAt) ??
+      parseExecutionTimestamp(selectedExecution.createdAt) ??
+      Date.now();
+    const executionFinish =
+      parseExecutionTimestamp(selectedExecution.finishedAt) ??
+      (getNumericDurationMs(selectedExecution.durationMs) != null
+        ? executionStart + (getNumericDurationMs(selectedExecution.durationMs) ?? 0)
+        : executionStart);
+
+    const sortedSteps = [...executionStepRecords].sort((first, second) => {
+      const firstSequence = first.sequenceNumber ?? first.id;
+      const secondSequence = second.sequenceNumber ?? second.id;
+      const firstStart = parseExecutionTimestamp(first.startedAt) ?? executionStart;
+      const secondStart = parseExecutionTimestamp(second.startedAt) ?? executionStart;
+      return firstStart - secondStart || firstSequence - secondSequence;
+    });
+
+    const normalizedSteps = sortedSteps.map((step) => {
+      const durationMs = getNumericDurationMs(step.durationMs) ?? 0;
+      const startedAt =
+        parseExecutionTimestamp(step.startedAt) ??
+        parseExecutionTimestamp(step.createdAt) ??
+        executionStart;
+      const finishedAt =
+        parseExecutionTimestamp(step.finishedAt) ??
+        (durationMs > 0 ? startedAt + durationMs : startedAt);
+
+      return {
+        step,
+        startedAt,
+        finishedAt: Math.max(finishedAt, startedAt),
+        durationMs: Math.max(durationMs, Math.max(finishedAt - startedAt, 0)),
+      };
+    });
+
+    const startMs = Math.min(
+      executionStart,
+      ...normalizedSteps.map((item) => item.startedAt),
+    );
+    const endMs = Math.max(
+      executionFinish,
+      ...normalizedSteps.map((item) => item.finishedAt),
+      startMs + 1,
+    );
+    const spanMs = Math.max(endMs - startMs, 1);
+    const statusCounts: Record<string, number> = {};
+    let slowestStep: WorkflowStepExecutionRecord | null = null;
+    let slowestDuration = -1;
+
+    const rows = normalizedSteps.map((item, index) => {
+      const status = (item.step.status ?? "unknown").toLowerCase();
+      statusCounts[status] = (statusCounts[status] ?? 0) + 1;
+      if (item.durationMs > slowestDuration) {
+        slowestDuration = item.durationMs;
+        slowestStep = item.step;
+      }
+
+      const width = Math.max((item.durationMs / spanMs) * 100, item.durationMs > 0 ? 1.2 : 0.55);
+
+      return {
+        ...item,
+        index,
+        label: item.step.nodeName || item.step.nodeId || item.step.stepExecutionKey || `Step ${index + 1}`,
+        startOffsetPercent: Math.min(Math.max(((item.startedAt - startMs) / spanMs) * 100, 0), 100),
+        widthPercent: Math.min(width, 100),
+        depth: item.step.parentStepExecutionKey || item.step.parentNodeId ? 1 : 0,
+        status,
+      };
+    });
+
+    return {
+      rows,
+      totalDurationMs: spanMs,
+      startLabel: formatExecutionLogTime(new Date(startMs).toISOString()),
+      endLabel: formatExecutionLogTime(new Date(endMs).toISOString()),
+      slowestStep,
+      statusCounts,
+    };
+  }, [executionStepRecords, selectedExecution]);
+
+  const renderOutputPrimitive = React.useCallback((value: unknown) => {
+    if (typeof value === "string" && isUrlLike(value)) {
+      return (
+        <a href={value} target="_blank" rel="noreferrer">
+          {value}
+        </a>
+      );
+    }
+
+    return formatOutputVisualValue(value);
+  }, []);
+
+  const renderOutputVisual = React.useCallback(
+    (
+      value: unknown,
+      options: {
+        hideSummary?: boolean;
+      } = {},
+    ): React.ReactNode => {
+      const normalizedValue = normalizeJsonDisplayValue(value);
+
+      if (normalizedValue === null || normalizedValue === undefined) {
+        return (
+          <div className="workflow-editor-output-empty">
+            <h4>No output produced</h4>
+            <p>This execution completed without returning an output payload.</p>
+          </div>
+        );
+      }
+
+      if (!isPlainObjectValue(normalizedValue) && !Array.isArray(normalizedValue)) {
+        return (
+          <div className="workflow-editor-output-primitive">
+            <span>Result</span>
+            <strong>{renderOutputPrimitive(normalizedValue)}</strong>
+          </div>
+        );
+      }
+
+      if (Array.isArray(normalizedValue)) {
+        if (!normalizedValue.length) {
+          return (
+            <div className="workflow-editor-output-empty">
+              <h4>Empty array</h4>
+              <p>The execution returned an empty collection.</p>
+            </div>
+          );
+        }
+
+        const objectRows = normalizedValue.filter(isPlainObjectValue);
+        const tableKeys = Array.from(
+          new Set(
+            objectRows
+              .flatMap((item) => Object.keys(item))
+              .filter((key) =>
+                objectRows.some((item) => {
+                  const cell = item[key];
+                  return !isPlainObjectValue(cell) && !Array.isArray(cell);
+                }),
+              ),
+          ),
+        ).slice(0, 6);
+
+        if (objectRows.length === normalizedValue.length && tableKeys.length) {
+          return (
+            <div className="workflow-editor-output-visual">
+              {options.hideSummary ? null : (
+                <div className="workflow-editor-output-visual__summary">
+                  <strong>{normalizedValue.length}</strong>
+                  <span>items returned</span>
+                </div>
+              )}
+              <div className="workflow-editor-output-table-wrap">
+                <table className="workflow-editor-output-table">
+                  <thead>
+                    <tr>
+                      {tableKeys.map((key) => (
+                        <th key={key}>{key}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {objectRows.slice(0, 25).map((item, index) => (
+                      <tr key={index}>
+                        {tableKeys.map((key) => (
+                          <td key={key}>{renderOutputPrimitive(item[key])}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {normalizedValue.length > 25 ? (
+                <p className="workflow-editor-output-note">
+                  Showing the first 25 rows. Switch to JSON to inspect the full payload.
+                </p>
+              ) : null}
+            </div>
+          );
+        }
+
+        return (
+          <div className="workflow-editor-output-list">
+            {normalizedValue.slice(0, 25).map((item, index) => (
+              <div key={index} className="workflow-editor-output-list-item">
+                <span>Item {index + 1}</span>
+                <strong>{renderOutputPrimitive(item)}</strong>
+              </div>
+            ))}
+          </div>
+        );
+      }
+
+      const entries = Object.entries(normalizedValue);
+      return (
+        <div className="workflow-editor-output-object">
+          {options.hideSummary ? null : (
+            <div className="workflow-editor-output-visual__summary">
+              <strong>{entries.length}</strong>
+              <span>top-level fields</span>
+            </div>
+          )}
+          <div className="workflow-editor-output-object-grid">
+            {entries.map(([key, item]) => {
+              const isNested = isPlainObjectValue(item) || Array.isArray(item);
+              return (
+                <div
+                  key={key}
+                  className={`workflow-editor-output-field ${isNested ? "is-nested" : ""}`}
+                >
+                  <span>{key}</span>
+                  {isNested ? (
+                    <pre>{formatReadonlyJson(item)}</pre>
+                  ) : (
+                    <strong>{renderOutputPrimitive(item)}</strong>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    },
+    [renderOutputPrimitive],
+  );
+
+  const selectedExecutionModalTabs = React.useMemo(() => {
+    if (!selectedExecution) {
+      return [];
+    }
+
+    const summaryContent = (
+      <div className="workflow-editor-execution-detail-summary">
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Status</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.status ?? "Unknown"}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Execution Identifier</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.executionIdentifier ?? "-"}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Workflow</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.workflowDisplayName ??
+              workflowDisplayName ??
+              record?.displayName ??
+              "-"}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Workflow Key</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.workflowKey ?? workflowKey ?? "-"}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Trigger Type</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.triggerType ?? "manual"}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Started</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {formatExecutionDate(selectedExecution.startedAt || selectedExecution.createdAt)}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Finished</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {formatExecutionDate(selectedExecution.finishedAt)}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Duration</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {formatDurationMs(selectedExecution.durationMs)}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Definition Version</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.definitionVersion ?? "-"}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Definition Checksum</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.definitionChecksum ?? "-"}
+          </div>
+        </div>
+        <div className="workflow-editor-execution-detail-kv">
+          <div className="workflow-editor-execution-detail-kv__label">Requested By</div>
+          <div className="workflow-editor-execution-detail-kv__value">
+            {selectedExecution.requestedByUserId ?? "-"}
+          </div>
+        </div>
+      </div>
+    );
+
+    const timelineContent = (
+      <div className="workflow-editor-execution-timeline">
+        <div className="workflow-editor-execution-timeline__hero">
+          <div>
+            <h4>Execution Timeline</h4>
+            <p>
+              Step-level timing across this execution. Parallel work appears as
+              overlapping bars; sequential work appears left-to-right.
+            </p>
+          </div>
+          <div className="workflow-editor-execution-timeline__stats">
+            <div>
+              <span>Total span</span>
+              <strong>{formatDurationMs(executionTimeline.totalDurationMs)}</strong>
+            </div>
+            <div>
+              <span>Steps</span>
+              <strong>{executionTimeline.rows.length}</strong>
+            </div>
+            <div>
+              <span>Slowest</span>
+              <strong>
+                {executionTimeline.slowestStep?.nodeName ??
+                  executionTimeline.slowestStep?.nodeId ??
+                  "-"}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        {workflowStepExecutionsQuery.isFetching && !executionTimeline.rows.length ? (
+          <div className="workflow-editor-execution-timeline__loading">
+            <SolidSpinner />
+            <span>Loading step timeline...</span>
+          </div>
+        ) : executionTimeline.rows.length ? (
+          <>
+            <div className="workflow-editor-execution-timeline__legend">
+              {Object.entries(executionTimeline.statusCounts).map(([status, count]) => (
+                <SolidTag key={status} tone={workflowLogLevelTone(status) as any}>
+                  {status}: {count}
+                </SolidTag>
+              ))}
+            </div>
+
+            <div className="workflow-editor-execution-gantt">
+              <div className="workflow-editor-execution-gantt__ruler">
+                <span>{executionTimeline.startLabel}</span>
+                <span>{formatDurationMs(executionTimeline.totalDurationMs)}</span>
+                <span>{executionTimeline.endLabel}</span>
+              </div>
+
+              <div className="workflow-editor-execution-gantt__rows">
+                {executionTimeline.rows.map((row) => {
+                  const isExpanded = expandedTimelineStepId === row.step.id;
+
+                  return (
+                    <div
+                      key={row.step.id}
+                      className={`workflow-editor-execution-gantt-row workflow-editor-execution-gantt-row--${row.status} ${isExpanded ? "is-expanded" : ""}`}
+                    >
+                      <button
+                        type="button"
+                        className="workflow-editor-execution-gantt-row__main"
+                        aria-expanded={isExpanded}
+                        onClick={() =>
+                          setExpandedTimelineStepId((current) =>
+                            current === row.step.id ? null : row.step.id,
+                          )
+                        }
+                      >
+                        <span className="workflow-editor-execution-gantt-row__toggle">
+                          <ChevronRight size={14} />
+                        </span>
+                      <span
+                        className="workflow-editor-execution-gantt-row__identity"
+                        style={{ "--workflow-step-depth": row.depth } as React.CSSProperties}
+                      >
+                        <strong>{row.label}</strong>
+                        <span>{row.step.nodeType ?? row.step.nodeKind ?? "step"}</span>
+                      </span>
+                        <span className="workflow-editor-execution-gantt-row__track">
+                          <span
+                            className="workflow-editor-execution-gantt-row__bar"
+                            style={{
+                              left: `${row.startOffsetPercent}%`,
+                              width: `${row.widthPercent}%`,
+                            }}
+                          />
+                        </span>
+                        <SolidTag tone={workflowLogLevelTone(row.status) as any}>
+                          {row.step.status ?? "unknown"}
+                        </SolidTag>
+                        <span className="workflow-editor-execution-gantt-row__duration">
+                          {formatDurationMs(row.durationMs)}
+                        </span>
+                      </button>
+
+                      {isExpanded ? (
+                        <div className="workflow-editor-execution-gantt-row__details">
+                          <div className="workflow-editor-execution-step-inspector">
+                            <div className="workflow-editor-execution-step-inspector__header">
+                              <div>
+                                <span>Step Detail</span>
+                                <h4>{row.label}</h4>
+                              </div>
+                              <button
+                                type="button"
+                                aria-label="Collapse step detail"
+                                onClick={() => setExpandedTimelineStepId(null)}
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+
+                            <div className="workflow-editor-execution-step-inspector__meta">
+                              <div>
+                                <span>Status</span>
+                                <strong>{row.step.status ?? "unknown"}</strong>
+                              </div>
+                              <div>
+                                <span>Node Id</span>
+                                <strong>{row.step.nodeId ?? "-"}</strong>
+                              </div>
+                              <div>
+                                <span>Node Type</span>
+                                <strong>{row.step.nodeType ?? "-"}</strong>
+                              </div>
+                              <div>
+                                <span>Attempt</span>
+                                <strong>{row.step.attemptNumber ?? 1}</strong>
+                              </div>
+                              <div>
+                                <span>Started</span>
+                                <strong>{formatExecutionDate(row.step.startedAt)}</strong>
+                              </div>
+                              <div>
+                                <span>Finished</span>
+                                <strong>{formatExecutionDate(row.step.finishedAt)}</strong>
+                              </div>
+                              <div>
+                                <span>Duration</span>
+                                <strong>{formatDurationMs(row.durationMs)}</strong>
+                              </div>
+                              <div>
+                                <span>Step Key</span>
+                                <strong>{row.step.stepExecutionKey ?? "-"}</strong>
+                              </div>
+                            </div>
+
+                            {row.step.errorSummary ? (
+                              <div className="workflow-editor-execution-step-inspector__error">
+                                {row.step.errorSummary}
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="workflow-editor-execution-timeline__empty">
+            <h4>No step timing captured</h4>
+            <p>
+              This execution does not have persisted step execution records yet. Once
+              step lifecycle records are present, this tab renders a proportional
+              Gantt-style timeline automatically.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+
+    const logLevelCounts = executionLogRecords.reduce<Record<string, number>>(
+      (counts, log) => {
+        const key = (log.level ?? "unknown").toLowerCase();
+        counts[key] = (counts[key] ?? 0) + 1;
+        return counts;
+      },
+      {},
+    );
+    const logsContent = (
+      <div className="workflow-editor-execution-logs">
+        <div className="workflow-editor-execution-logs__hero">
+          <div>
+            <h4>Execution Log Stream</h4>
+            <p>
+              Runtime messages emitted while this execution was processed, ordered by
+              sequence and occurrence time.
+            </p>
+          </div>
+          <div className="workflow-editor-execution-logs__stats">
+            <span>{workflowExecutionLogsQuery.isFetching ? "Loading" : `${executionLogRecords.length} logs`}</span>
+            {Object.entries(logLevelCounts).map(([level, count]) => (
+              <SolidTag key={level} tone={workflowLogLevelTone(level) as any}>
+                {level}: {count}
+              </SolidTag>
+            ))}
+          </div>
+        </div>
+
+        <div className="workflow-editor-execution-logs__filters">
+          <div className="workflow-editor-execution-logs__search">
+            <Search size={14} />
+            <SolidInput
+              value={executionLogSearch}
+              placeholder="Search message, node, source"
+              onChange={(event) => {
+                setExecutionLogSearch(event.target.value);
+                setExpandedExecutionLogId(null);
+              }}
+            />
+          </div>
+          <SolidSelect
+            value={executionLogLevelFilter}
+            options={WORKFLOW_LOG_LEVEL_OPTIONS}
+            onChange={(event) => {
+              setExecutionLogLevelFilter(event.value ?? "all");
+              setExpandedExecutionLogId(null);
+            }}
+          />
+        </div>
+
+        {workflowExecutionLogsQuery.isFetching && !executionLogRecords.length ? (
+          <div className="workflow-editor-execution-logs__loading">
+            <SolidSpinner />
+            <span>Loading execution logs...</span>
+          </div>
+        ) : executionLogRecords.length ? (
+          <div className="workflow-editor-execution-log-list">
+            {executionLogRecords.map((log) => {
+              const isSelected = expandedExecutionLogId === log.id;
+              return (
+                <div
+                  key={log.id}
+                  className={`workflow-editor-execution-log-row workflow-editor-execution-log-row--${(log.level ?? "info").toLowerCase()} ${isSelected ? "is-selected" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="workflow-editor-execution-log-row__main"
+                    aria-expanded={isSelected}
+                    onClick={() =>
+                      setExpandedExecutionLogId((current) =>
+                        current === log.id ? null : log.id,
+                      )
+                    }
+                  >
+                    <span className="workflow-editor-execution-log-row__toggle">
+                      <ChevronRight size={14} />
+                    </span>
+                    <span className="workflow-editor-execution-log-row__sequence">
+                      {log.sequenceNumber ?? log.id}
+                    </span>
+                    <span className="workflow-editor-execution-log-row__time">
+                      {formatExecutionLogTime(log.occurredAt || log.createdAt)}
+                    </span>
+                    <SolidTag tone={workflowLogLevelTone(log.level) as any}>
+                      {log.level ?? "info"}
+                    </SolidTag>
+                    <span className="workflow-editor-execution-log-row__node">
+                      {log.nodeId ?? log.source ?? "runtime"}
+                    </span>
+                    <span className="workflow-editor-execution-log-row__message">
+                      {log.message ?? "No message"}
+                    </span>
+                    {log.eventType ? (
+                      <span className="workflow-editor-execution-log-row__event">
+                        {log.eventType}
+                      </span>
+                    ) : null}
+                  </button>
+                  {isSelected ? (
+                    <div className="workflow-editor-execution-log-row__details">
+                      <div className="workflow-editor-execution-log-inspector">
+                        <div className="workflow-editor-execution-log-inspector__header">
+                          <div>
+                            <span>Log Detail</span>
+                            <h4>{log.message ?? "No message"}</h4>
+                          </div>
+                          <button
+                            type="button"
+                            aria-label="Collapse log detail"
+                            onClick={() => setExpandedExecutionLogId(null)}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+
+                        <div className="workflow-editor-execution-log-inspector__meta">
+                          <div>
+                            <span>Level</span>
+                            <strong>{log.level ?? "info"}</strong>
+                          </div>
+                          <div>
+                            <span>Sequence</span>
+                            <strong>{log.sequenceNumber ?? log.id}</strong>
+                          </div>
+                          <div>
+                            <span>Occurred</span>
+                            <strong>
+                              {formatExecutionDate(log.occurredAt || log.createdAt)}
+                            </strong>
+                          </div>
+                          <div>
+                            <span>Node</span>
+                            <strong>{log.nodeId ?? "-"}</strong>
+                          </div>
+                          <div>
+                            <span>Node Type</span>
+                            <strong>{log.nodeType ?? "-"}</strong>
+                          </div>
+                          <div>
+                            <span>Source</span>
+                            <strong>{log.source ?? "-"}</strong>
+                          </div>
+                          <div>
+                            <span>Event Type</span>
+                            <strong>{log.eventType ?? "-"}</strong>
+                          </div>
+                          <div>
+                            <span>Log Key</span>
+                            <strong>{log.logKey ?? "-"}</strong>
+                          </div>
+                        </div>
+
+                        {log.context || log.metadata ? (
+                          <div className="workflow-editor-execution-log-inspector__payloads">
+                            <div>
+                              <h5>Context</h5>
+                              <SolidCodeEditor
+                                language="json"
+                                height="180px"
+                                fontSize={12}
+                                readOnly
+                                value={formatReadonlyJson(log.context)}
+                              />
+                            </div>
+                            <div>
+                              <h5>Metadata</h5>
+                              <SolidCodeEditor
+                                language="json"
+                                height="180px"
+                                fontSize={12}
+                                readOnly
+                                value={formatReadonlyJson(log.metadata)}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="workflow-editor-execution-log-inspector__empty">
+                            No structured context or metadata was captured for this log.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="workflow-editor-execution-logs__empty">
+            <h4>No logs found</h4>
+            <p>
+              This execution has no log entries matching the current filters. Try another
+              level or clear the search text.
+            </p>
+          </div>
+        )}
+      </div>
+    );
+
+    const selectedExecutionOutputEntries = buildExecutionOutputEntries(
+      selectedExecution.outputPayload,
+      definitionDraft.nodes,
+    );
+
+    const outputContent = (
+      <div className="workflow-editor-output-viewer">
+        <div className="workflow-editor-output-viewer__toolbar">
+          <div>
+            <h4>Execution Output</h4>
+            <p>Inspect node outputs visually or switch to the raw JSON payload.</p>
+          </div>
+          <div className="workflow-editor-view-toggle" aria-label="Output view">
+            <button
+              type="button"
+              className={`workflow-editor-view-toggle__button ${selectedExecutionOutputMode === "visual" ? "is-active" : ""}`}
+              aria-label="Show visual output"
+              title="Visual output"
+              onClick={() => setSelectedExecutionOutputMode("visual")}
+            >
+              <Layers3 size={14} />
+            </button>
+            <button
+              type="button"
+              className={`workflow-editor-view-toggle__button ${selectedExecutionOutputMode === "json" ? "is-active" : ""}`}
+              aria-label="Show JSON output"
+              title="JSON output"
+              onClick={() => setSelectedExecutionOutputMode("json")}
+            >
+              <Braces size={14} />
+            </button>
+          </div>
+        </div>
+
+        {selectedExecutionOutputMode === "json" ? (
+          <div className="workflow-editor-output-json-editor">
+            <SolidJsonEditor
+              value={normalizeJsonDisplayValue(selectedExecution.outputPayload)}
+              resetToken={`execution-output-${selectedExecution.id}-${selectedExecutionOutputMode}`}
+              readOnly
+              className="sdix-json-editor workflow-editor-output-json-host"
+            />
+          </div>
+        ) : selectedExecutionOutputEntries.length ? (
+          <div className="workflow-editor-output-node-list">
+            {selectedExecutionOutputEntries.map((entry, index) => {
+              const isExpanded = expandedExecutionOutputKey === entry.key;
+
+              return (
+                <div
+                  key={entry.key}
+                  className={`workflow-editor-output-node-row ${isExpanded ? "is-expanded" : ""}`}
+                >
+                  <button
+                    type="button"
+                    className="workflow-editor-output-node-row__header"
+                    aria-expanded={isExpanded}
+                    onClick={() =>
+                      setExpandedExecutionOutputKey((current) =>
+                        current === entry.key ? null : entry.key,
+                      )
+                    }
+                  >
+                    <span className="workflow-editor-output-node-row__toggle">
+                      <ChevronRight size={15} />
+                    </span>
+                    <span className="workflow-editor-output-node-row__sequence">
+                      {index + 1}
+                    </span>
+                    <span className="workflow-editor-output-node-row__identity">
+                      <strong>{entry.label}</strong>
+                    </span>
+                    <span className="workflow-editor-output-node-row__node-key">
+                      {entry.nodeId ?? entry.key}
+                    </span>
+                    {entry.nodeType ? <SolidTag>{entry.nodeType}</SolidTag> : null}
+                    <span className="workflow-editor-output-node-row__summary">
+                      {summarizeOutputValue(entry.value)}
+                    </span>
+                  </button>
+
+                  {isExpanded ? (
+                    <div className="workflow-editor-output-node-row__body">
+                      <div className="workflow-editor-output-node-detail">
+                        <div className="workflow-editor-output-node-detail__header">
+                          <div>
+                            <span>Output Detail</span>
+                            <h4>{entry.label}</h4>
+                          </div>
+                          <button
+                            type="button"
+                            aria-label="Collapse output detail"
+                            onClick={() => setExpandedExecutionOutputKey(null)}
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                        {renderOutputVisual(entry.value, { hideSummary: true })}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="workflow-editor-output-empty">
+            <h4>No output produced</h4>
+            <p>This execution completed without returning an output payload.</p>
+          </div>
+        )}
+      </div>
+    );
+
+    return [
+      {
+        value: "summary",
+        label: "Summary",
+        content: summaryContent,
+      },
+      {
+        value: "timeline",
+        label: "Timeline",
+        content: timelineContent,
+      },
+      {
+        value: "logs",
+        label: "Logs",
+        content: logsContent,
+      },
+      {
+        value: "input",
+        label: "Input",
+        content: (
+          <SolidCodeEditor
+            language="json"
+            height="calc(100vh - 260px)"
+            fontSize={12}
+            readOnly
+            value={formatReadonlyJson(selectedExecution.inputPayload)}
+          />
+        ),
+      },
+      {
+        value: "output",
+        label: "Output",
+        content: outputContent,
+      },
+      {
+        value: "error",
+        label: "Error",
+        content: (
+          <div className="workflow-editor-execution-detail-error">
+            <div className="workflow-editor-execution-detail-kv">
+              <div className="workflow-editor-execution-detail-kv__label">Error Summary</div>
+              <div className="workflow-editor-execution-detail-kv__value">
+                {selectedExecution.errorSummary ?? "-"}
+              </div>
+            </div>
+            <SolidCodeEditor
+              language="json"
+              height="calc(100vh - 320px)"
+              fontSize={12}
+              readOnly
+              value={formatReadonlyJson(selectedExecution.errorDetails)}
+            />
+          </div>
+        ),
+      },
+      {
+        value: "definition",
+        label: "Definition",
+        content: (
+          <SolidCodeEditor
+            language="yaml"
+            height="calc(100vh - 260px)"
+            fontSize={12}
+            readOnly
+            value={formatReadonlyYaml(selectedExecution.definitionSnapshot)}
+          />
+        ),
+      },
+    ];
+  }, [
+    executionLogLevelFilter,
+    executionLogRecords,
+    executionLogSearch,
+    executionTimeline,
+    expandedExecutionOutputKey,
+    expandedExecutionLogId,
+    expandedTimelineStepId,
+    definitionDraft.nodes,
+    record?.displayName,
+    renderOutputVisual,
+    selectedExecution,
+    selectedExecutionOutputMode,
+    workflowDisplayName,
+    workflowExecutionLogsQuery.isFetching,
+    workflowStepExecutionsQuery.isFetching,
+    workflowKey,
+  ]);
 
   const hasExecutions = React.useMemo(
     () => (workflowExecutionPresenceQuery.data?.meta?.totalRecords ?? 0) > 0,
@@ -1169,86 +3184,12 @@ export function WorkflowDefinitionEditorPage() {
     };
   }, [executionRecords]);
 
-  const overviewDateFilterLabel = React.useMemo(() => {
-    if (!overviewStartDate && !overviewEndDate) {
-      return "All dates";
-    }
-
-    const formatDateOnly = (value: Date | null) =>
-      value
-        ? value.toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })
-        : null;
-
-    const start = formatDateOnly(overviewStartDate);
-    const end = formatDateOnly(overviewEndDate);
-
-    if (start && end) {
-      return `${start} - ${end}`;
-    }
-    if (start) {
-      return `From ${start}`;
-    }
-    return `Until ${end}`;
-  }, [overviewEndDate, overviewStartDate]);
-
   const syncDraftToCode = React.useCallback((nextDraft: WorkflowDefinitionDsl) => {
     setDefinitionDraft(nextDraft);
     setCodeValue(serializeWorkflowDefinitionYaml(nextDraft));
     setCodeError(null);
     setValidationState({ status: "idle", errors: [] });
   }, []);
-
-  const handleSaveWorkflowSettings = React.useCallback(() => {
-    try {
-      const nextInputs = parseYamlValue<Record<string, any>>(workflowInputsValue, {});
-      const nextVariables = parseYamlValue<Record<string, any>>(workflowVariablesValue, {});
-      const nextTriggers = parseYamlValue<Array<Record<string, any>>>(workflowTriggersValue, []);
-
-      if (!Array.isArray(nextTriggers)) {
-        throw new Error("Triggers must be a YAML sequence.");
-      }
-
-      const nextDraft: WorkflowDefinitionDsl = {
-        ...definitionDraft,
-        description: workflowDescription,
-        inputs: nextInputs,
-        variables: nextVariables,
-        triggers: nextTriggers,
-      };
-
-      syncDraftToCode(nextDraft);
-      setWorkflowSettingsOpen(false);
-      dispatch(
-        showToast({
-          severity: "success",
-          summary: "Workflow settings updated",
-          detail: "Inputs, variables, and triggers were updated in the draft.",
-        }),
-      );
-    } catch (error: any) {
-      dispatch(
-        showToast({
-          severity: "error",
-          summary: "Invalid workflow settings",
-          detail:
-            error?.message ??
-            "Fix the workflow-level YAML blocks before saving the settings.",
-        }),
-      );
-    }
-  }, [
-    definitionDraft,
-    dispatch,
-    syncDraftToCode,
-    workflowDescription,
-    workflowInputsValue,
-    workflowTriggersValue,
-    workflowVariablesValue,
-  ]);
 
   const handleCodeChange = (nextValue: string | undefined) => {
     const safeValue = nextValue ?? "";
@@ -1328,6 +3269,16 @@ export function WorkflowDefinitionEditorPage() {
 
   const validateCurrentDefinition = React.useCallback(
     async (options?: { showSuccessToast?: boolean }) => {
+      const identityErrors = validateWorkflowIdentity();
+      if (hasWorkflowIdentityErrors(identityErrors)) {
+        setDetailTab("overview");
+        return {
+          valid: false,
+          errors: Object.values(identityErrors).filter(Boolean) as string[],
+          fieldErrors: true,
+        };
+      }
+
       if (codeError) {
         const nextState: ValidationState = {
           status: "invalid",
@@ -1416,8 +3367,14 @@ export function WorkflowDefinitionEditorPage() {
       dispatch,
       nodeTypes,
       validateWorkflowDefinition,
+      validateWorkflowIdentity,
       workflowDescription,
       workflowKey,
+      workflowModule,
+      workflowNamespace,
+      workflowStatus,
+      workflowTagDraft,
+      workflowTags,
     ],
   );
 
@@ -1439,7 +3396,6 @@ export function WorkflowDefinitionEditorPage() {
     syncDraftToCode(nextDraft);
     setSelectedNodeId(nextNode.id);
     setSelectedTriggerId("");
-    setDocsNodeTypeKey(nextNode.type);
     setPendingInsertTarget(null);
     setDetailTab("topology");
   };
@@ -1456,7 +3412,6 @@ export function WorkflowDefinitionEditorPage() {
 
     syncDraftToCode(nextDraft);
     setSelectedNodeId(nextNode.id);
-    setDocsNodeTypeKey(nextNode.type);
   };
 
   const handleRemoveNode = (nodeId: string) => {
@@ -1473,34 +3428,42 @@ export function WorkflowDefinitionEditorPage() {
   const handleSave = async () => {
     const validation = await validateCurrentDefinition();
     if (!validation.valid) {
-      dispatch(
-        showToast({
-          severity: "error",
-          summary: "Validation failed",
-          detail: validation.errors[0] ?? "Fix validation errors before saving.",
-        }),
-      );
+      if (!(validation as any).fieldErrors) {
+        dispatch(
+          showToast({
+            severity: "error",
+            summary: "Validation failed",
+            detail: validation.errors[0] ?? "Fix validation errors before saving.",
+          }),
+        );
+      }
       return;
     }
 
     const payload = {
       key: workflowKey,
       displayName: workflowDisplayName,
+      moduleMetadataId: workflowModule?.id,
+      moduleMetadataUserKey: workflowModule?.name,
+      namespace: workflowNamespace || null,
       description: workflowDescription,
+      status: workflowStatus,
       definitionYaml: serializeWorkflowDefinitionYaml({
         ...definitionDraft,
         description: workflowDescription,
       }),
+      tags: serializeJsonDtoValue(
+        [...workflowTags, ...parseWorkflowTagInput(workflowTagDraft)],
+        [],
+      ),
     };
+    const selectedModuleName = workflowModule?.name ?? moduleName;
 
     try {
       if (record?.id) {
         await updateWorkflowDefinition({
           id: record.id,
-          data: {
-            ...record,
-            ...payload,
-          },
+          data: payload,
         }).unwrap();
         dispatch(
           showToast({
@@ -1509,7 +3472,14 @@ export function WorkflowDefinitionEditorPage() {
             detail: "Workflow definition updated successfully.",
           }),
         );
-        refetch();
+        if (selectedModuleName !== moduleName) {
+          navigate(
+            `/admin/core/${selectedModuleName}/workflow-definition/editor/${record.id}`,
+            { replace: true },
+          );
+        } else {
+          refetch();
+        }
       } else {
         const result: any = await createWorkflowDefinition(payload).unwrap();
         const createdId = result?.data?.id ?? result?.id;
@@ -1522,7 +3492,7 @@ export function WorkflowDefinitionEditorPage() {
         );
         if (createdId) {
           navigate(
-            `/admin/core/${moduleName}/workflow-definition/editor/${createdId}`,
+            `/admin/core/${selectedModuleName}/workflow-definition/editor/${createdId}`,
             { replace: true },
           );
         }
@@ -1536,6 +3506,141 @@ export function WorkflowDefinitionEditorPage() {
             error?.data?.message ??
             error?.message ??
             "Failed to save workflow definition.",
+        }),
+      );
+    }
+  };
+
+  const workflowInputEntries = React.useMemo(
+    () => getWorkflowInputEntries(definitionDraft.inputs),
+    [definitionDraft.inputs],
+  );
+  const workflowExecutionReference =
+    workflowDefinitionId && workflowDefinitionId !== "new"
+      ? workflowDefinitionId
+      : "{workflowDefinitionId}";
+  const workflowExecutionKeyReference = workflowKey || "{workflowKey}";
+  const workflowExecutionInputExample = React.useMemo(
+    () => buildWorkflowInputExample(definitionDraft.inputs),
+    [definitionDraft.inputs],
+  );
+  const workflowExecutionRequestBody = React.useMemo(
+    () => ({
+      input: workflowExecutionInputExample,
+      triggerType: "api",
+    }),
+    [workflowExecutionInputExample],
+  );
+  const workflowCurlExample = React.useMemo(
+    () =>
+      [
+        `curl -X POST "http://localhost:3000/api/workflow-definition/${workflowExecutionReference}/execute" \\`,
+        `  -H "Authorization: Bearer <access-token>" \\`,
+        `  -H "Content-Type: application/json" \\`,
+        `  -d '${JSON.stringify(workflowExecutionRequestBody, null, 2)}'`,
+      ].join("\n"),
+    [workflowExecutionReference, workflowExecutionRequestBody],
+  );
+  const workflowApiExample = React.useMemo(
+    () =>
+      [
+        `import { Injectable } from "@nestjs/common";`,
+        `import { WorkflowInvocationService } from "@solidxai/core";`,
+        ``,
+        `@Injectable()`,
+        `export class CustomerWorkflowSubscriber {`,
+        `  constructor(private readonly workflows: WorkflowInvocationService) {}`,
+        ``,
+        `  async handleCustomerEvent() {`,
+        `    return this.workflows.executeByKey(`,
+        `      "${workflowExecutionKeyReference}",`,
+        `      ${JSON.stringify(workflowExecutionRequestBody, null, 6).replace(/\n/g, "\n      ")},`,
+        `    );`,
+        `  }`,
+        `}`,
+      ].join("\n"),
+    [workflowExecutionKeyReference, workflowExecutionRequestBody],
+  );
+  const defaultValueEditorEntry = React.useMemo(
+    () =>
+      workflowInputEntries.find((entry) => entry.key === defaultValueEditorInputKey) ??
+      null,
+    [defaultValueEditorInputKey, workflowInputEntries],
+  );
+
+  const copyWorkflowTriggerExample = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Copied",
+          detail: "Workflow trigger example copied to clipboard.",
+        }),
+      );
+    } catch {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Copy failed",
+          detail: "Unable to copy the workflow trigger example.",
+        }),
+      );
+    }
+  };
+
+  const executeWorkflowWithInput = async (input?: Record<string, any>) => {
+    if (!record?.id) {
+      dispatch(
+        showToast({
+          severity: "warn",
+          summary: "Save first",
+          detail: "Create the workflow definition before launching execution.",
+        }),
+      );
+      return;
+    }
+
+    const validation = await validateCurrentDefinition();
+    if (!validation.valid) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Execution blocked",
+          detail: validation.errors[0] ?? "Workflow validation failed.",
+        }),
+      );
+      return;
+    }
+
+    try {
+      const response: any = await executeWorkflowDefinition({
+        id: record.id,
+        ...(input ? { input } : {}),
+      }).unwrap();
+      dispatch(
+        showToast({
+          severity: response?.status === "failed" ? "error" : "success",
+          summary:
+            response?.status === "failed"
+              ? "Execution failed"
+              : "Execution started",
+          detail:
+            response?.executionIdentifier ??
+            response?.errorSummary ??
+            "Workflow execution request completed.",
+        }),
+      );
+      void refreshWorkflowExecutionData();
+    } catch (error: any) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Execution failed",
+          detail:
+            error?.data?.message ??
+            error?.message ??
+            "Failed to execute workflow definition.",
         }),
       );
     }
@@ -1565,72 +3670,825 @@ export function WorkflowDefinitionEditorPage() {
       return;
     }
 
-    try {
-      const response: any = await executeWorkflowDefinition({ id: record.id }).unwrap();
-      dispatch(
-        showToast({
-          severity: response?.status === "failed" ? "error" : "success",
-          summary:
-            response?.status === "failed"
-              ? "Execution failed"
-              : "Execution started",
-          detail:
-            response?.executionIdentifier ??
-            response?.errorSummary ??
-            "Workflow execution request completed.",
-        }),
-      );
-    } catch (error: any) {
-      dispatch(
-        showToast({
-          severity: "error",
-          summary: "Execution failed",
-          detail:
-            error?.data?.message ??
-            error?.message ??
-            "Failed to execute workflow definition.",
-        }),
-      );
+    if (workflowInputEntries.length) {
+      setRunInputValues(buildWorkflowRunInputDefaults(workflowInputEntries));
+      setRunInputErrors({});
+      setRunInputsOpen(true);
+      return;
     }
+
+    await executeWorkflowWithInput();
   };
 
-  const renderPlaceholderTab = (label: string, message: string) => (
-    <div className="workflow-editor-placeholder">
-      <div className="workflow-editor-placeholder__icon">
-        <Activity size={20} />
+  const handleRunInputsSubmit = async () => {
+    const errors: Record<string, string> = {};
+    const input: Record<string, any> = {};
+
+    for (const entry of workflowInputEntries) {
+      const rawValue = runInputValues[entry.key];
+      const isEmpty =
+        entry.definition.type === "boolean"
+          ? false
+          : rawValue === undefined || rawValue === null || String(rawValue).trim() === "";
+
+      if (entry.definition.required && isEmpty) {
+        errors[entry.key] = "This input is required.";
+        continue;
+      }
+
+      if (!entry.definition.required && isEmpty) {
+        continue;
+      }
+
+      try {
+        input[entry.key] = parseWorkflowRunInputValue(
+          rawValue,
+          entry.definition.type,
+        );
+      } catch (error: any) {
+        errors[entry.key] = error?.message ?? "Enter a valid value.";
+      }
+    }
+
+    setRunInputErrors(errors);
+    if (Object.keys(errors).length) {
+      return;
+    }
+
+    setRunInputsOpen(false);
+    await executeWorkflowWithInput(input);
+  };
+
+  const identityFieldClass = (field: keyof WorkflowIdentityErrors) =>
+    `workflow-editor-field ${workflowIdentityErrors[field] ? "is-invalid" : ""}`;
+
+  const renderWorkflowTagsInput = () => (
+    <div
+      className={`workflow-editor-tag-input ${workflowIdentityErrors.tags ? "is-invalid" : ""}`}
+    >
+      {workflowTags.map((tag) => (
+        <span key={tag} className="workflow-editor-tag-pill">
+          <span>{tag}</span>
+          <button
+            type="button"
+            aria-label={`Remove ${tag}`}
+            onClick={() => removeWorkflowTag(tag)}
+          >
+            <X size={12} />
+          </button>
+        </span>
+      ))}
+      <SolidInput
+        value={workflowTagDraft}
+        placeholder={workflowTags.length ? "Add tag" : "Type tag and press Enter"}
+        onChange={(event) => {
+          setWorkflowTagDraft(event.target.value);
+          setWorkflowIdentityErrors((current) => ({ ...current, tags: undefined }));
+        }}
+        onKeyDown={handleWorkflowTagKeyDown}
+        onBlur={() => commitWorkflowTags()}
+      />
+    </div>
+  );
+
+  const renderWorkflowIdentityForm = () => (
+    <SolidPanel header="Workflow Identity">
+      <div className="workflow-editor-create-form">
+        <div className={identityFieldClass("moduleMetadata")}>
+          <label>Module</label>
+          <SolidAutocomplete
+            value={workflowModule}
+            suggestions={workflowModuleSuggestions}
+            completeMethod={searchWorkflowModules}
+            onChange={handleWorkflowModuleChange}
+            dropdown
+            forceSelection
+            field="displayName"
+            placeholder="Select module"
+            className="workflow-editor-autocomplete"
+            inputClassName={workflowIdentityErrors.moduleMetadata ? "is-invalid" : undefined}
+          />
+          {workflowIdentityErrors.moduleMetadata ? (
+            <div className="workflow-editor-field-error">
+              {workflowIdentityErrors.moduleMetadata}
+            </div>
+          ) : null}
+        </div>
+
+        <div className={identityFieldClass("displayName")}>
+          <label>Workflow Name</label>
+          <SolidInput
+            value={workflowDisplayName}
+            placeholder="Send Welcome Email"
+            className={workflowIdentityErrors.displayName ? "is-invalid" : undefined}
+            onChange={(event) => handleWorkflowDisplayNameChange(event.target.value)}
+          />
+          {workflowIdentityErrors.displayName ? (
+            <div className="workflow-editor-field-error">
+              {workflowIdentityErrors.displayName}
+            </div>
+          ) : null}
+        </div>
+
+        <div className={identityFieldClass("key")}>
+          <label>Key</label>
+          <SolidInput
+            value={workflowKey}
+            readOnly
+            placeholder="generated-from-workflow-name"
+            className={workflowIdentityErrors.key ? "is-invalid" : undefined}
+          />
+          {workflowIdentityErrors.key ? (
+            <div className="workflow-editor-field-error">{workflowIdentityErrors.key}</div>
+          ) : null}
+        </div>
+
+        <div className={identityFieldClass("namespace")}>
+          <label>Namespace</label>
+          <SolidInput
+            value={workflowNamespace}
+            placeholder="customer.onboarding"
+            className={workflowIdentityErrors.namespace ? "is-invalid" : undefined}
+            onChange={(event) => handleWorkflowNamespaceChange(event.target.value)}
+          />
+          {workflowIdentityErrors.namespace ? (
+            <div className="workflow-editor-field-error">
+              {workflowIdentityErrors.namespace}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="workflow-editor-field">
+          <label>Status</label>
+          <SolidSelect
+            value={workflowStatus}
+            options={WORKFLOW_STATUS_OPTIONS}
+            onChange={(event) => setWorkflowStatus(event.value ?? "draft")}
+          />
+        </div>
+
+        <div className={identityFieldClass("tags")}>
+          <label>Tags</label>
+          {renderWorkflowTagsInput()}
+          {workflowIdentityErrors.tags ? (
+            <div className="workflow-editor-field-error">{workflowIdentityErrors.tags}</div>
+          ) : null}
+        </div>
+
+        <div className="workflow-editor-field workflow-editor-field--wide">
+          <label>Description</label>
+          <SolidTextarea
+            value={workflowDescription}
+            placeholder="Describe what this workflow does and when it should run."
+            onChange={(event) => setWorkflowDescription(event.target.value)}
+          />
+        </div>
       </div>
-      <div className="workflow-editor-placeholder__copy">
-        <h3>{label}</h3>
-        <p>{message}</p>
+    </SolidPanel>
+  );
+
+  const overviewContent = (
+    <div className="workflow-editor-overview workflow-editor-overview--create">
+      {renderWorkflowIdentityForm()}
+    </div>
+  );
+
+  const renderOptionalAuthoringEmptyState = ({
+    icon,
+    title,
+    body,
+    examples,
+    primaryLabel,
+    onPrimaryClick,
+  }: {
+    icon: React.ReactNode;
+    title: string;
+    body: string;
+    examples: string[];
+    primaryLabel: string;
+    onPrimaryClick: () => void;
+  }) => (
+    <div className="workflow-editor-optional-state">
+      <div className="workflow-editor-placeholder__icon">{icon}</div>
+      <div className="workflow-editor-optional-state__copy">
+        <h3>{title}</h3>
+        <p>{body}</p>
+      </div>
+      <div className="workflow-editor-optional-state__examples">
+        {examples.map((example) => (
+          <SolidTag key={example}>{example}</SolidTag>
+        ))}
+      </div>
+      <div className="workflow-editor-optional-state__actions">
+        <SolidButton onClick={onPrimaryClick}>{primaryLabel}</SolidButton>
+        <SolidButton variant="outline" onClick={() => setDetailTab("topology")}>
+          Configure Flow
+        </SolidButton>
       </div>
     </div>
   );
 
-  const overviewContent =
-    workflowDefinitionId === "new" ? (
-      <div className="workflow-editor-overview workflow-editor-overview--empty">
-        <div className="workflow-editor-overview-cta">
-          <div className="workflow-editor-overview-cta__art">
-            <Save size={26} />
+  const triggerEntries = (definitionDraft.triggers ?? []).map((trigger, index) => ({
+    index,
+    trigger: normalizeWorkflowTriggerDefinition(trigger),
+  }));
+  const scheduledTriggerEntries = triggerEntries.filter(
+    ({ trigger }) => trigger.type === "schedule",
+  );
+
+  const updateWorkflowInputs = (nextInputs: Record<string, any>) => {
+    syncDraftToCode({
+      ...definitionDraft,
+      inputs: nextInputs,
+    });
+  };
+
+  const addWorkflowInput = () => {
+    const nextKey = buildUniqueWorkflowInputKey("Input", Object.keys(definitionDraft.inputs ?? {}));
+    updateWorkflowInputs({
+      ...(definitionDraft.inputs ?? {}),
+      [nextKey]: {
+        type: "string",
+        label: "Input",
+        required: false,
+        default: "",
+        description: "",
+      },
+    });
+  };
+
+  const updateWorkflowInputLabel = (currentKey: string, nextLabel: string) => {
+    const currentInputs = definitionDraft.inputs ?? {};
+    const nextKey = buildUniqueWorkflowInputKey(
+      nextLabel || currentKey,
+      Object.keys(currentInputs).filter((key) => key !== currentKey),
+    );
+
+    if (!nextKey) {
+      return;
+    }
+
+    const nextInputs: Record<string, any> = {};
+    Object.entries(currentInputs).forEach(([key, value]) => {
+      nextInputs[key === currentKey
+        ? nextKey
+        : key] = key === currentKey
+          ? {
+              ...normalizeWorkflowInputDefinition(value),
+              label: nextLabel,
+            }
+          : value;
+    });
+    updateWorkflowInputs(nextInputs);
+  };
+
+  const updateWorkflowInput = (key: string, patch: Record<string, any>) => {
+    const currentInputs = definitionDraft.inputs ?? {};
+    updateWorkflowInputs({
+      ...currentInputs,
+      [key]: {
+        ...normalizeWorkflowInputDefinition(currentInputs[key]),
+        ...patch,
+      },
+    });
+  };
+
+  const closeDefaultValueEditor = () => {
+    setDefaultValueEditorInputKey(null);
+    setDefaultValueEditorDraft("");
+    setDefaultValueEditorJsonText("");
+    setDefaultValueEditorError("");
+  };
+
+  const openDefaultValueEditor = (key: string) => {
+    const definition = normalizeWorkflowInputDefinition((definitionDraft.inputs ?? {})[key]);
+    const editorValue = getWorkflowInputDefaultEditorValue(
+      definition.default,
+      definition.type,
+    );
+
+    setDefaultValueEditorInputKey(key);
+    setDefaultValueEditorDraft(editorValue);
+    setDefaultValueEditorJsonText(
+      definition.type === "object" || definition.type === "array"
+        ? JSON.stringify(editorValue, null, 2)
+        : "",
+    );
+    setDefaultValueEditorError("");
+    setDefaultValueEditorResetToken(`default-value-editor-${key}-${Date.now()}`);
+  };
+
+  const saveDefaultValueEditor = () => {
+    if (!defaultValueEditorEntry) {
+      return;
+    }
+
+    const type = defaultValueEditorEntry.definition.type;
+    let nextDefaultValue: any = defaultValueEditorDraft;
+
+    try {
+      if (type === "object" || type === "array") {
+        const trimmedText = defaultValueEditorJsonText.trim();
+        nextDefaultValue = trimmedText
+          ? JSON.parse(trimmedText)
+          : type === "array"
+            ? []
+            : {};
+
+        if (type === "array" && !Array.isArray(nextDefaultValue)) {
+          throw new Error("Default value must be a JSON array.");
+        }
+
+        if (type === "object" && !isPlainObjectValue(nextDefaultValue)) {
+          throw new Error("Default value must be a JSON object.");
+        }
+      } else if (type === "number") {
+        if (nextDefaultValue === "" || nextDefaultValue === null || nextDefaultValue === undefined) {
+          nextDefaultValue = "";
+        } else {
+          const numericValue = Number(nextDefaultValue);
+          if (!Number.isFinite(numericValue)) {
+            throw new Error("Default value must be a valid number.");
+          }
+          nextDefaultValue = numericValue;
+        }
+      } else if (type === "boolean") {
+        nextDefaultValue = Boolean(nextDefaultValue);
+      } else {
+        nextDefaultValue = nextDefaultValue ?? "";
+      }
+    } catch (error: any) {
+      setDefaultValueEditorError(
+        error?.message ? String(error.message) : "Default value is invalid.",
+      );
+      return;
+    }
+
+    updateWorkflowInput(defaultValueEditorEntry.key, { default: nextDefaultValue });
+    closeDefaultValueEditor();
+  };
+
+  const clearDefaultValueEditor = () => {
+    if (!defaultValueEditorEntry) {
+      return;
+    }
+
+    updateWorkflowInput(defaultValueEditorEntry.key, { default: "" });
+    closeDefaultValueEditor();
+  };
+
+  const removeWorkflowInput = (keyToRemove: string) => {
+    const nextInputs = { ...(definitionDraft.inputs ?? {}) };
+    delete nextInputs[keyToRemove];
+    updateWorkflowInputs(nextInputs);
+  };
+
+  const renderDefaultValueEditorField = () => {
+    if (!defaultValueEditorEntry) {
+      return null;
+    }
+
+    const type = defaultValueEditorEntry.definition.type;
+
+    if (type === "object" || type === "array") {
+      return (
+        <SolidJsonEditor
+          value={defaultValueEditorDraft}
+          resetToken={defaultValueEditorResetToken}
+          className="workflow-editor-default-dialog__json-editor"
+          onValueChange={(value) => {
+            setDefaultValueEditorDraft(value);
+            setDefaultValueEditorError("");
+          }}
+          onTextChange={(text) => setDefaultValueEditorJsonText(text)}
+          onErrorChange={(message) => setDefaultValueEditorError(message ?? "")}
+        />
+      );
+    }
+
+    if (type === "boolean") {
+      return (
+        <SolidCheckbox
+          checked={Boolean(defaultValueEditorDraft)}
+          label="Use true as the default value"
+          onChange={(event) => {
+            setDefaultValueEditorDraft(event.currentTarget.checked);
+            setDefaultValueEditorError("");
+          }}
+        />
+      );
+    }
+
+    return (
+      <SolidInput
+        type={type === "number" ? "number" : type === "date" ? "date" : "text"}
+        value={defaultValueEditorDraft ?? ""}
+        placeholder={type === "date" ? "Select date" : "Enter default value"}
+        onChange={(event) => {
+          setDefaultValueEditorDraft(event.target.value);
+          setDefaultValueEditorError("");
+        }}
+      />
+    );
+  };
+
+  const updateWorkflowTriggers = (nextTriggers: Array<Record<string, any>>) => {
+    syncDraftToCode({
+      ...definitionDraft,
+      triggers: nextTriggers,
+    });
+  };
+
+  const addWorkflowTrigger = () => {
+    const nextId = buildUniqueWorkflowKey(
+      "trigger",
+      (definitionDraft.triggers ?? []).map((trigger) => String(trigger.id ?? "")),
+    );
+    updateWorkflowTriggers([
+      ...(definitionDraft.triggers ?? []),
+      {
+        id: nextId,
+        name: "Trigger",
+        type: "schedule",
+        disabled: false,
+        configuration: {
+          cron: "0 9 * * *",
+          timezone: "UTC",
+        },
+      },
+    ]);
+  };
+
+  const updateWorkflowTrigger = (index: number, patch: Record<string, any>) => {
+    const nextTriggers = (definitionDraft.triggers ?? []).map((trigger, triggerIndex) => {
+      if (triggerIndex !== index) {
+        return trigger;
+      }
+
+      const currentTrigger = normalizeWorkflowTriggerDefinition(trigger);
+      const nextTrigger = {
+        ...currentTrigger,
+        ...patch,
+      };
+
+      if (patch.type && patch.type !== currentTrigger.type) {
+        nextTrigger.configuration =
+          patch.type === "schedule"
+            ? { cron: "0 9 * * *", timezone: "UTC" }
+            : { method: "POST", path: `/${currentTrigger.id || "trigger"}` };
+      }
+
+      return nextTrigger;
+    });
+    updateWorkflowTriggers(nextTriggers);
+  };
+
+  const updateWorkflowTriggerConfiguration = (
+    index: number,
+    patch: Record<string, any>,
+  ) => {
+    const currentTrigger = normalizeWorkflowTriggerDefinition(
+      (definitionDraft.triggers ?? [])[index],
+    );
+    updateWorkflowTrigger(index, {
+      configuration: {
+        ...currentTrigger.configuration,
+        ...patch,
+      },
+    });
+  };
+
+  const removeWorkflowTrigger = (indexToRemove: number) => {
+    updateWorkflowTriggers(
+      (definitionDraft.triggers ?? []).filter((_, index) => index !== indexToRemove),
+    );
+  };
+
+  const renderTriggerConfigurationFields = (
+    trigger: ReturnType<typeof normalizeWorkflowTriggerDefinition>,
+    index: number,
+  ) => {
+    const cronExpression = trigger.configuration.cron ?? "0 9 * * *";
+    const cronParts = splitCronExpression(cronExpression);
+    const timezone = "UTC";
+    const setCronPart = (key: keyof typeof cronParts, value: string) => {
+      updateWorkflowTriggerConfiguration(index, {
+        timezone: "UTC",
+        cron: joinCronExpression({
+          ...cronParts,
+          [key]: value.trim() || "*",
+        }),
+      });
+    };
+    const inputsMissingDefaults = Object.entries(definitionDraft.inputs ?? {})
+      .filter(([, inputDefinition]) => !workflowInputHasDefault(inputDefinition))
+      .map(([inputKey]) => inputKey);
+
+    return (
+      <div className="workflow-editor-cron-builder workflow-editor-field--wide">
+        <div className="workflow-editor-cron-builder__header">
+          <div>
+            <label>Schedule</label>
+            <p>Define when this workflow should run. Times are evaluated in UTC.</p>
           </div>
-          <div className="workflow-editor-overview-cta__copy">
-            <h2>Save this workflow to unlock the overview.</h2>
-            <p>
-              Once this definition exists, the overview tab will switch to execution
-              analytics, KPI summaries, and date-based filtering.
-            </p>
-          </div>
-          <div className="workflow-editor-overview-cta__actions">
-            <SolidButton leftIcon={<Save size={16} />} onClick={handleSave}>
-              Save Workflow
-            </SolidButton>
-            <SolidButton variant="outline" onClick={() => setDetailTab("topology")}>
-              Continue Editing
-            </SolidButton>
+          <div className="workflow-editor-cron-builder__header-meta">
+            <span>Generated expression</span>
+            <code>{cronExpression}</code>
+            <span>Timezone</span>
+            <code>UTC</code>
           </div>
         </div>
+        <div className="workflow-editor-cron-builder__grid">
+          {WORKFLOW_CRON_FIELD_HELP.map((field) => (
+            <div className="workflow-editor-cron-builder__part" key={field.key}>
+              <label>{field.label}</label>
+              <SolidInput
+                value={cronParts[field.key]}
+                placeholder={field.placeholder}
+                onChange={(event) => setCronPart(field.key, event.target.value)}
+              />
+              <span>{field.help}</span>
+            </div>
+          ))}
+        </div>
+        <div className="workflow-editor-cron-builder__examples">
+          {WORKFLOW_CRON_EXAMPLES.map((example) => (
+            <SolidButton
+              key={example.value}
+              variant="outline"
+              size="small"
+              onClick={() =>
+                updateWorkflowTriggerConfiguration(index, {
+                  cron: example.value,
+                  timezone: "UTC",
+                })
+              }
+            >
+              {example.label}
+            </SolidButton>
+          ))}
+        </div>
+        <div
+          className={`workflow-editor-cron-builder__explanation${
+            isValidSimpleCronExpression(cronExpression) ? "" : " is-invalid"
+          }`}
+        >
+          {describeWorkflowCronExpression(cronExpression, timezone)}
+        </div>
+        {inputsMissingDefaults.length ? (
+          <div className="workflow-editor-cron-builder__warning">
+            Scheduled workflows run without a user present. Add default values for:
+            {" "}
+            {inputsMissingDefaults.join(", ")}.
+          </div>
+        ) : null}
       </div>
-    ) : !hasExecutions ? (
+    );
+  };
+
+  const inputsContent = workflowInputEntries.length ? (
+    <div className="workflow-editor-authoring-tab">
+      <div className="workflow-editor-authoring-header">
+        <div>
+          <h3>Inputs</h3>
+          <p>Define values that callers can provide when this workflow runs.</p>
+        </div>
+        <SolidButton onClick={addWorkflowInput}>Add Input</SolidButton>
+      </div>
+
+      <div className="workflow-editor-input-table">
+        <div className="workflow-editor-input-table__header" role="row">
+          <span>Label</span>
+          <span>Type</span>
+          <span>Required</span>
+          <span>Description</span>
+          <span className="workflow-editor-input-table__actions-header">Actions</span>
+        </div>
+        {workflowInputEntries.map(({ key, definition }, index) => (
+          <div className="workflow-editor-input-table__row" key={`input-row-${index}`} role="row">
+            <div className="workflow-editor-input-table__label-cell">
+              <SolidInput
+                value={definition.label}
+                placeholder="Customer ID"
+                onChange={(event) => updateWorkflowInputLabel(key, event.target.value)}
+              />
+              <span>
+                We will use input field with name <strong>{key}</strong>.
+              </span>
+            </div>
+            <div className="workflow-editor-input-table__type-cell">
+              <div className="workflow-editor-input-table__type-row">
+                <SolidSelect
+                  value={definition.type}
+                  options={WORKFLOW_INPUT_TYPE_OPTIONS}
+                  onChange={(event) =>
+                    updateWorkflowInput(key, { type: event.value ?? "string" })
+                  }
+                />
+                <button
+                  type="button"
+                  className="workflow-editor-input-table__default-button"
+                  aria-label={`Configure default value for ${key}`}
+                  title="Configure default value"
+                  onClick={() => openDefaultValueEditor(key)}
+                >
+                  <Braces size={14} />
+                </button>
+              </div>
+              <span
+                className={`workflow-editor-input-table__default-summary${
+                  hasWorkflowInputDefaultValue(definition.default) ? "" : " is-empty"
+                }`}
+              >
+                {formatWorkflowInputDefaultSummary(definition.default)}
+              </span>
+            </div>
+            <div className="workflow-editor-input-table__required">
+              <SolidCheckbox
+                checked={definition.required}
+                label=""
+                onChange={(event) =>
+                  updateWorkflowInput(key, { required: event.currentTarget.checked })
+                }
+              />
+            </div>
+            <SolidInput
+              value={definition.description}
+              placeholder="Describe this input"
+              onChange={(event) =>
+                updateWorkflowInput(key, { description: event.target.value })
+              }
+            />
+            <button
+              type="button"
+              className="workflow-editor-input-table__delete"
+              aria-label={`Remove ${key}`}
+              title="Remove input"
+              onClick={() => removeWorkflowInput(key)}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : (
+    renderOptionalAuthoringEmptyState({
+      icon: <Braces size={20} />,
+      title: "No inputs defined",
+      body:
+        "Inputs are optional. Add them when this workflow needs values at run time, such as a customer id, email, date range, or amount. If this workflow can run with fixed configuration or values produced inside the flow, you can skip inputs and configure the flow directly.",
+      examples: ["customerId", "email", "startDate", "approvalAmount"],
+      primaryLabel: "Add Input",
+      onPrimaryClick: addWorkflowInput,
+    })
+  );
+
+  const renderWorkflowTriggerCodeExample = (value: string) => (
+    <div className="workflow-editor-trigger-guide-code">
+      <pre>
+        <code>{value}</code>
+      </pre>
+      <SolidButton
+        variant="outline"
+        size="small"
+        onClick={() => void copyWorkflowTriggerExample(value)}
+      >
+        <Copy size={14} />
+        Copy
+      </SolidButton>
+    </div>
+  );
+
+  const scheduledTriggersContent = scheduledTriggerEntries.length ? (
+    <div className="workflow-editor-authoring-list">
+      {scheduledTriggerEntries.map(({ trigger, index }) => (
+        <SolidPanel key={`${trigger.id}-${index}`} header={trigger.name || trigger.id}>
+          <div className="workflow-editor-form-grid">
+            <div className="workflow-editor-field">
+              <label>Id</label>
+              <SolidInput
+                value={trigger.id}
+                onChange={(event) =>
+                  updateWorkflowTrigger(index, {
+                    id: slugifyWorkflowKey(event.target.value) || trigger.id,
+                  })
+                }
+              />
+            </div>
+            <div className="workflow-editor-field">
+              <label>Name</label>
+              <SolidInput
+                value={trigger.name}
+                onChange={(event) =>
+                  updateWorkflowTrigger(index, { name: event.target.value })
+                }
+              />
+            </div>
+            <div className="workflow-editor-field">
+              <SolidCheckbox
+                checked={trigger.disabled}
+                label="Disabled"
+                onChange={(event) =>
+                  updateWorkflowTrigger(index, {
+                    disabled: event.currentTarget.checked,
+                  })
+                }
+              />
+            </div>
+            {renderTriggerConfigurationFields(trigger, index)}
+          </div>
+          <div className="workflow-editor-authoring-card-actions">
+            <SolidButton
+              variant="ghost"
+              size="small"
+              onClick={() => removeWorkflowTrigger(index)}
+            >
+              Remove Trigger
+            </SolidButton>
+          </div>
+        </SolidPanel>
+      ))}
+    </div>
+  ) : (
+    renderOptionalAuthoringEmptyState({
+      icon: <Activity size={20} />,
+      title: "No scheduled triggers configured",
+      body:
+        "Scheduled triggers are optional. Add one when this workflow should run automatically on a CRON cadence. Scheduled workflows run without a user present, so every required input must have a default value.",
+      examples: ["Every weekday at 09:00", "Every 15 minutes", "Every Monday at 02:00"],
+      primaryLabel: "Add Scheduled Trigger",
+      onPrimaryClick: addWorkflowTrigger,
+    })
+  );
+
+  const triggersContent = (
+    <div className="workflow-editor-authoring-tab workflow-editor-trigger-guide">
+      <div className="workflow-editor-authoring-header">
+        <div>
+          <h3>Triggers</h3>
+          <p>
+            Choose how this workflow should be started. Only scheduled triggers are saved
+            into YAML; CURL and API are authenticated execution examples.
+          </p>
+        </div>
+        {triggerGuideMode === "scheduled" && scheduledTriggerEntries.length ? (
+          <SolidButton onClick={addWorkflowTrigger}>Add Scheduled Trigger</SolidButton>
+        ) : null}
+      </div>
+
+      <div className="workflow-editor-trigger-guide-mode" role="radiogroup" aria-label="Trigger type">
+        {WORKFLOW_TRIGGER_GUIDE_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={triggerGuideMode === option.value}
+            className={`workflow-editor-trigger-guide-mode__button${
+              triggerGuideMode === option.value ? " is-active" : ""
+            }`}
+            onClick={() => setTriggerGuideMode(option.value)}
+          >
+            <span>{option.label}</span>
+            <small>{option.description}</small>
+          </button>
+        ))}
+      </div>
+
+      {triggerGuideMode === "curl" ? (
+        <div className="workflow-editor-trigger-guide-card">
+          <div>
+            <h4>Run With CURL</h4>
+            <p>
+              Use this from scripts, Postman, or external systems that can call private
+              SolidX APIs with a bearer token. The request creates a normal workflow
+              execution with <code>triggerType</code> set to <code>api</code>.
+            </p>
+          </div>
+          {renderWorkflowTriggerCodeExample(workflowCurlExample)}
+        </div>
+      ) : null}
+
+      {triggerGuideMode === "api" ? (
+        <div className="workflow-editor-trigger-guide-card">
+          <div>
+            <h4>Run From SolidX Code</h4>
+            <p>
+              Inject the workflow invocation service inside a SolidX subscriber, service,
+              scheduled job, or controller when workflow execution is part of application
+              logic.
+            </p>
+          </div>
+          {renderWorkflowTriggerCodeExample(workflowApiExample)}
+        </div>
+      ) : null}
+
+      {triggerGuideMode === "scheduled" ? scheduledTriggersContent : null}
+    </div>
+  );
+
+  const executionsContent =
+    workflowDefinitionId === "new" || !hasExecutions ? (
       <div className="workflow-editor-overview workflow-editor-overview--empty">
         <div className="workflow-editor-overview-cta">
           <div className="workflow-editor-overview-cta__art">
@@ -1652,35 +4510,53 @@ export function WorkflowDefinitionEditorPage() {
               Execute Workflow
             </SolidButton>
             <SolidButton variant="outline" onClick={() => setDetailTab("topology")}>
-              Open Builder
+              Open Topology
             </SolidButton>
-          </div>
-        </div>
-
-        <div className="workflow-editor-overview-guides">
-          <div className="workflow-editor-overview-guide-card">
-            <h3>Overview</h3>
-            <p>Execution KPIs and health snapshots appear here after the first successful run.</p>
-          </div>
-          <div className="workflow-editor-overview-guide-card">
-            <h3>Topology</h3>
-            <p>Refine YAML, topology, nodes, inputs, and triggers inside the topology workspace.</p>
-          </div>
-          <div className="workflow-editor-overview-guide-card">
-            <h3>Executions</h3>
-            <p>Execution history and drill-downs will become available as runs accumulate.</p>
           </div>
         </div>
       </div>
     ) : (
-      <div className="workflow-editor-overview">
-        <div className="workflow-editor-overview-filterbar">
+      <div className="workflow-editor-executions">
+        <div
+          className="workflow-editor-execution-subtabs"
+          role="tablist"
+          aria-label="Execution workspace views"
+        >
+          <button
+            type="button"
+            className={`workflow-editor-execution-subtabs__button${
+              executionWorkspaceTab === "summary" ? " is-active" : ""
+            }`}
+            role="tab"
+            aria-selected={executionWorkspaceTab === "summary"}
+            onClick={() => setExecutionWorkspaceTab("summary")}
+          >
+            Summary
+          </button>
+          <button
+            type="button"
+            className={`workflow-editor-execution-subtabs__button${
+              executionWorkspaceTab === "list" ? " is-active" : ""
+            }`}
+            role="tab"
+            aria-selected={executionWorkspaceTab === "list"}
+            onClick={() => setExecutionWorkspaceTab("list")}
+          >
+            List
+          </button>
+        </div>
+
+        {executionWorkspaceTab === "list" ? (
+          <div className="workflow-editor-overview-filterbar">
           <div className="workflow-editor-overview-filterbar__left">
             <div className="workflow-editor-overview-filter">
               <label>Date From</label>
               <SolidDatePicker
                 selected={overviewStartDate}
-                onChange={(date: Date | null) => setOverviewStartDate(date)}
+                onChange={(date: Date | null) => {
+                  setOverviewStartDate(date);
+                  setExecutionPage(1);
+                }}
                 placeholderText="Start date"
               />
             </div>
@@ -1688,41 +4564,60 @@ export function WorkflowDefinitionEditorPage() {
               <label>Date To</label>
               <SolidDatePicker
                 selected={overviewEndDate}
-                onChange={(date: Date | null) => setOverviewEndDate(date)}
+                onChange={(date: Date | null) => {
+                  setOverviewEndDate(date);
+                  setExecutionPage(1);
+                }}
                 placeholderText="End date"
               />
             </div>
-            <SolidButton size="small" variant="outline" onClick={loadWorkflowExecutions}>
-              Apply
-            </SolidButton>
-            {(overviewStartDate || overviewEndDate) && (
+            <div className="workflow-editor-overview-filter">
+              <label>Status</label>
+              <SolidSelect
+                value={executionStatusFilter}
+                options={WORKFLOW_EXECUTION_STATUS_OPTIONS}
+                onChange={(event) => {
+                  setExecutionStatusFilter(event.value ?? "all");
+                  setExecutionPage(1);
+                }}
+              />
+            </div>
+            <div className="workflow-editor-overview-filter workflow-editor-overview-filter--search">
+              <label>Execution</label>
+              <SolidInput
+                value={executionSearchFilter}
+                placeholder="Search identifier"
+                onChange={(event) => {
+                  setExecutionSearchFilter(event.target.value);
+                  setExecutionPage(1);
+                }}
+              />
+            </div>
+            {(overviewStartDate ||
+              overviewEndDate ||
+              executionStatusFilter !== "all" ||
+              executionSearchFilter) && (
               <SolidButton
                 size="small"
                 variant="ghost"
                 onClick={() => {
                   setOverviewStartDate(null);
                   setOverviewEndDate(null);
+                  setExecutionStatusFilter("all");
+                  setExecutionSearchFilter("");
+                  setExecutionPage(1);
                 }}
               >
                 Clear
               </SolidButton>
             )}
           </div>
-          <div className="workflow-editor-overview-filterbar__right">
-            <SolidTag>{overviewDateFilterLabel}</SolidTag>
-            <SolidButton
-              size="small"
-              variant="outline"
-              leftIcon={<RefreshCw size={14} />}
-              loading={workflowExecutionsQuery.isFetching}
-              onClick={loadWorkflowExecutions}
-            >
-              Refresh
-            </SolidButton>
           </div>
-        </div>
+        ) : null}
 
-        <div className="workflow-editor-overview-stats">
+        {executionWorkspaceTab === "summary" ? (
+          <>
+            <div className="workflow-editor-overview-stats">
           <div className="workflow-editor-overview-stat">
             <span className="workflow-editor-overview-stat-label">Success Ratio</span>
             <strong className="workflow-editor-overview-stat-value">
@@ -1759,9 +4654,9 @@ export function WorkflowDefinitionEditorPage() {
               Created or queued executions
             </span>
           </div>
-        </div>
+            </div>
 
-        <div className="workflow-editor-overview-grid">
+            <div className="workflow-editor-overview-grid">
           <SolidPanel header="Workflow Summary">
             <div className="workflow-editor-overview-section">
               <div className="workflow-editor-overview-kv">
@@ -1820,53 +4715,116 @@ export function WorkflowDefinitionEditorPage() {
             )}
           </SolidPanel>
 
-          <SolidPanel header="Recent Executions">
-            {workflowExecutionsQuery.isFetching && !executionRecords.length ? (
-              <div className="workflow-editor-loading">
-                <SolidSpinner />
-              </div>
-            ) : executionRecords.length ? (
-              <div className="workflow-editor-overview-list">
-                {executionRecords.slice(0, 6).map((execution, index) => (
-                  <div key={execution.id} className="workflow-editor-overview-list-item">
-                    <div className="workflow-editor-overview-list-index">{index + 1}</div>
-                    <div className="workflow-editor-overview-list-copy">
-                      <strong>{execution.status ?? "Unknown"}</strong>
-                      <span>{formatExecutionDate(execution.startedAt || execution.createdAt)}</span>
-                    </div>
-                    <SolidTag>{formatDurationMs(execution.durationMs)}</SolidTag>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="workflow-editor-empty-state workflow-editor-empty-state--compact">
-                No executions match the current date filter.
-              </div>
-            )}
-          </SolidPanel>
-
-          <SolidPanel header="Actions">
-            <div className="workflow-editor-overview-actions">
-              <SolidButton
-                leftIcon={<Play size={16} />}
-                loading={isExecuting}
-                onClick={() => void handleExecute()}
-              >
-                Execute Again
-              </SolidButton>
-              <SolidButton variant="outline" onClick={() => setDetailTab("topology")}>
-                Open Builder
-              </SolidButton>
-              <SolidButton
-                variant="outline"
-                leftIcon={<Settings2 size={16} />}
-                onClick={() => setWorkflowSettingsOpen(true)}
-              >
-                Workflow Settings
-              </SolidButton>
             </div>
+          </>
+        ) : null}
+
+        {executionWorkspaceTab === "list" ? (
+          <SolidPanel header="Executions">
+          {workflowExecutionsQuery.isFetching && !executionRecords.length ? (
+            <div className="workflow-editor-loading">
+              <SolidSpinner />
+            </div>
+          ) : executionRecords.length ? (
+            <div className="workflow-editor-execution-table-wrap">
+              <table className="workflow-editor-execution-table">
+                <thead>
+                  <tr>
+                    <th>Id</th>
+                    <th>Execution Identifier</th>
+                    <th>Status</th>
+                    <th>Trigger</th>
+                    <th>Started</th>
+                    <th>Finished</th>
+                    <th>Duration</th>
+                    <th>Error</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {executionRecords.map((execution) => (
+                    <tr
+                      key={execution.id}
+                      className="workflow-editor-execution-table__row"
+                      tabIndex={0}
+                      role="button"
+                      onClick={() => openExecutionDetails(execution)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          openExecutionDetails(execution);
+                        }
+                      }}
+                    >
+                      <td>{execution.id}</td>
+                      <td className="workflow-editor-execution-table__identifier">
+                        {execution.executionIdentifier ?? "-"}
+                      </td>
+                      <td>
+                        <SolidTag>{execution.status ?? "Unknown"}</SolidTag>
+                      </td>
+                      <td>{execution.triggerType ?? "manual"}</td>
+                      <td>{formatExecutionDate(execution.startedAt || execution.createdAt)}</td>
+                      <td>{formatExecutionDate(execution.finishedAt)}</td>
+                      <td>{formatDurationMs(execution.durationMs)}</td>
+                      <td className="workflow-editor-execution-table__error">
+                        {execution.errorSummary ?? "-"}
+                      </td>
+                      <td>
+                        <SolidButton
+                          size="small"
+                          variant="outline"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openExecutionDetails(execution);
+                          }}
+                        >
+                          View
+                        </SolidButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="workflow-editor-execution-pagination">
+                <span>
+                  Showing {executionPageStart}-{executionPageEnd} of {executionTotalRecords}
+                </span>
+                <div className="workflow-editor-execution-pagination__actions">
+                  <SolidButton
+                    size="small"
+                    variant="outline"
+                    disabled={executionPage <= 1}
+                    onClick={() => setExecutionPage((current) => Math.max(1, current - 1))}
+                  >
+                    Previous
+                  </SolidButton>
+                  <SolidTag>
+                    Page {executionPage} of {executionTotalPages}
+                  </SolidTag>
+                  <SolidButton
+                    size="small"
+                    variant="outline"
+                    disabled={executionPage >= executionTotalPages}
+                    onClick={() =>
+                      setExecutionPage((current) =>
+                        Math.min(executionTotalPages, current + 1),
+                      )
+                    }
+                  >
+                    Next
+                  </SolidButton>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="workflow-editor-empty-state workflow-editor-empty-state--compact">
+              No executions match the current filters.
+            </div>
+          )}
           </SolidPanel>
-        </div>
+        ) : null}
       </div>
     );
 
@@ -1905,23 +4863,14 @@ export function WorkflowDefinitionEditorPage() {
           onSelectNode={(nodeId) => {
             setSelectedNodeId(nodeId);
             setSelectedTriggerId("");
-            const node = findNodeById(definitionDraft.nodes, nodeId);
-            if (node?.type) {
-              setDocsNodeTypeKey(node.type);
-            }
           }}
           onSelectTrigger={(triggerId) => {
             setSelectedTriggerId(triggerId);
             setSelectedNodeId("");
-            setDocsNodeTypeKey("");
           }}
           onEditNode={(nodeId) => {
             setSelectedNodeId(nodeId);
             setSelectedTriggerId("");
-            const node = findNodeById(definitionDraft.nodes, nodeId);
-            if (node?.type) {
-              setDocsNodeTypeKey(node.type);
-            }
             setEditorOpen(true);
           }}
           onDeleteNode={handleRemoveNode}
@@ -1930,7 +4879,6 @@ export function WorkflowDefinitionEditorPage() {
             if (node?.type) {
               setSelectedNodeId(nodeId);
               setSelectedTriggerId("");
-              setDocsNodeTypeKey(node.type);
               setTopologyDocsNodeTypeKey(node.type);
               setTopologyDocsModel(undefined);
               setTopologyDocsOpen(true);
@@ -1942,7 +4890,6 @@ export function WorkflowDefinitionEditorPage() {
             );
             setSelectedTriggerId(triggerId);
             setSelectedNodeId("");
-            setDocsNodeTypeKey("");
             setTopologyDocsNodeTypeKey("");
             setTopologyDocsModel(trigger ? buildTriggerDocsModel(trigger) : undefined);
             setTopologyDocsOpen(true);
@@ -2043,6 +4990,11 @@ export function WorkflowDefinitionEditorPage() {
   const detailTabs = [
     { value: "overview", label: "Overview", content: overviewContent },
     {
+      value: "inputs",
+      label: "Inputs",
+      content: inputsContent,
+    },
+    {
       value: "topology",
       label: "Topology",
       content: topologyContent,
@@ -2050,44 +5002,27 @@ export function WorkflowDefinitionEditorPage() {
     {
       value: "executions",
       label: "Executions",
-      content: renderPlaceholderTab(
-        "Executions",
-        "Execution history and drill-downs will land here in the next pass.",
-      ),
-    },
-    {
-      value: "revisions",
-      label: "Revisions",
-      content: renderPlaceholderTab(
-        "Revisions",
-        "Revision history is not wired yet, but the tab shell is ready.",
-      ),
+      content: executionsContent,
     },
     {
       value: "triggers",
       label: "Triggers",
-      content: renderPlaceholderTab(
-        "Triggers",
-        "Trigger management will be added here after the overview pass is settled.",
-      ),
-    },
-    {
-      value: "logs",
-      label: "Logs",
-      content: renderPlaceholderTab(
-        "Logs",
-        "Workflow-level log browsing will be added in a later pass.",
-      ),
-    },
-    {
-      value: "metrics",
-      label: "Metrics",
-      content: renderPlaceholderTab(
-        "Metrics",
-        "Metrics will appear here once the backing persistence is introduced.",
-      ),
+      content: triggersContent,
     },
   ] as const;
+
+  const handleDetailTabChange = (value: string) => {
+    const nextTab = value as WorkflowDetailTab;
+    if (workflowDefinitionId === "new" && nextTab !== "overview") {
+      const errors = validateWorkflowIdentity();
+      if (hasWorkflowIdentityErrors(errors)) {
+        setDetailTab("overview");
+        return;
+      }
+    }
+
+    setDetailTab(nextTab);
+  };
 
   if (isWorkflowDefinitionLoading || isNodeTypesLoading) {
     return (
@@ -2126,32 +5061,6 @@ export function WorkflowDefinitionEditorPage() {
           <SolidButton
             size="small"
             variant="outline"
-            leftIcon={<Settings2 size={16} />}
-            onClick={() => setWorkflowSettingsOpen(true)}
-          >
-            Workflow
-          </SolidButton>
-          <SolidButton
-            size="small"
-            variant="outline"
-            leftIcon={<BookOpen size={16} />}
-            onClick={() => {
-              setDetailTab("topology");
-              if (docsNodeType) {
-                setTopologyDocsNodeTypeKey(docsNodeType.type);
-                setTopologyDocsModel(undefined);
-              } else {
-                setTopologyDocsNodeTypeKey("");
-                setTopologyDocsModel(docsModel);
-              }
-              setTopologyDocsOpen(true);
-            }}
-          >
-            Docs
-          </SolidButton>
-          <SolidButton
-            size="small"
-            variant="outline"
             leftIcon={<ShieldCheck size={16} />}
             loading={isServerValidating}
             onClick={() => void validateCurrentDefinition({ showSuccessToast: true })}
@@ -2186,11 +5095,271 @@ export function WorkflowDefinitionEditorPage() {
             content: tab.content,
           }))}
           value={detailTab}
-          onValueChange={(value) => setDetailTab(value as WorkflowDetailTab)}
+          onValueChange={handleDetailTabChange}
           listClassName="workflow-editor-detail-tabs__list"
           panelClassName="workflow-editor-detail-tabs__panel"
         />
       </div>
+
+      <SolidDialog
+        open={Boolean(defaultValueEditorEntry)}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeDefaultValueEditor();
+          }
+        }}
+        header={
+          defaultValueEditorEntry
+            ? `Default Value - ${defaultValueEditorEntry.definition.label || defaultValueEditorEntry.key}`
+            : "Default Value"
+        }
+        className="workflow-editor-default-dialog"
+        style={{ width: "min(560px, 94vw)" }}
+        footer={
+          <div className="workflow-editor-default-dialog__footer">
+            <SolidButton
+              type="button"
+              variant="secondary"
+              onClick={clearDefaultValueEditor}
+            >
+              Clear Default
+            </SolidButton>
+            <div>
+              <SolidButton
+                type="button"
+                variant="secondary"
+                onClick={closeDefaultValueEditor}
+              >
+                Cancel
+              </SolidButton>
+              <SolidButton
+                type="button"
+                onClick={saveDefaultValueEditor}
+              >
+                Save Default
+              </SolidButton>
+            </div>
+          </div>
+        }
+      >
+        <SolidDialogBody>
+          {defaultValueEditorEntry ? (
+            <div className="workflow-editor-default-dialog__body">
+              <p>
+                This value is used when callers do not provide{" "}
+                <code>{defaultValueEditorEntry.key}</code>.
+              </p>
+              {renderDefaultValueEditorField()}
+              {defaultValueEditorError ? (
+                <div className="workflow-editor-field-error">
+                  {defaultValueEditorError}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </SolidDialogBody>
+      </SolidDialog>
+
+      <SolidDialog
+        open={runInputsOpen}
+        onOpenChange={(open) => {
+          if (!isExecuting) {
+            setRunInputsOpen(open);
+          }
+        }}
+        header="Run Workflow"
+        className="workflow-editor-run-input-dialog"
+        style={{ width: "min(620px, 94vw)" }}
+        footer={
+          <div className="workflow-editor-run-input-dialog__footer">
+            <SolidButton
+              type="button"
+              variant="secondary"
+              disabled={isExecuting}
+              onClick={() => setRunInputsOpen(false)}
+            >
+              Cancel
+            </SolidButton>
+            <SolidButton
+              type="button"
+              loading={isExecuting}
+              onClick={() => void handleRunInputsSubmit()}
+            >
+              Run Workflow
+            </SolidButton>
+          </div>
+        }
+      >
+        <SolidDialogBody>
+          <form
+            className="workflow-editor-run-input-dialog__form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleRunInputsSubmit();
+            }}
+          >
+            <div className="workflow-editor-run-input-dialog__intro">
+              <h3>{workflowDisplayName || record?.displayName || workflowKey || "Workflow"}</h3>
+              <p>Provide the runtime inputs required for this execution.</p>
+            </div>
+
+            {workflowInputEntries.map(({ key, definition }) => {
+              const fieldId = `workflow-run-input-${key}`;
+              const fieldError = runInputErrors[key];
+              const label = definition.label || key;
+              const type = definition.type || "string";
+
+              return (
+                <div
+                  key={key}
+                  className={`workflow-editor-run-input-field ${fieldError ? "is-invalid" : ""}`}
+                >
+                  {type === "boolean" ? (
+                    <SolidCheckbox
+                      checked={Boolean(runInputValues[key])}
+                      label={`${label}${definition.required ? " *" : ""}`}
+                      onChange={(event) => {
+                        setRunInputValues((current) => ({
+                          ...current,
+                          [key]: event.currentTarget.checked,
+                        }));
+                        setRunInputErrors((current) => ({ ...current, [key]: "" }));
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <label htmlFor={fieldId}>
+                        {label}
+                        {definition.required ? <span> *</span> : null}
+                      </label>
+                      {type === "object" || type === "array" ? (
+                        <SolidTextarea
+                          id={fieldId}
+                          value={runInputValues[key] ?? ""}
+                          placeholder={type === "array" ? "[]" : "{}"}
+                          rows={5}
+                          onChange={(event) => {
+                            setRunInputValues((current) => ({
+                              ...current,
+                              [key]: event.target.value,
+                            }));
+                            setRunInputErrors((current) => ({ ...current, [key]: "" }));
+                          }}
+                        />
+                      ) : (
+                        <SolidInput
+                          id={fieldId}
+                          type={type === "number" ? "number" : type === "date" ? "date" : "text"}
+                          value={runInputValues[key] ?? ""}
+                          onChange={(event) => {
+                            setRunInputValues((current) => ({
+                              ...current,
+                              [key]: event.target.value,
+                            }));
+                            setRunInputErrors((current) => ({ ...current, [key]: "" }));
+                          }}
+                        />
+                      )}
+                    </>
+                  )}
+                  {definition.description ? (
+                    <p className="workflow-editor-run-input-field__help">
+                      {definition.description}
+                    </p>
+                  ) : null}
+                  {fieldError ? (
+                    <div className="workflow-editor-field-error">{fieldError}</div>
+                  ) : null}
+                </div>
+              );
+            })}
+          </form>
+        </SolidDialogBody>
+      </SolidDialog>
+
+      {selectedExecution ? (
+        <div
+          className="workflow-editor-execution-modal-backdrop"
+          role="presentation"
+          onClick={() => setSelectedExecution(null)}
+        >
+          <section
+            className="workflow-editor-execution-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="workflow-execution-detail-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="workflow-editor-execution-modal__header">
+              <div>
+                <div className="workflow-editor-execution-modal__eyebrow">
+                  Execution Detail
+                </div>
+                <h3 id="workflow-execution-detail-title">
+                  {selectedExecution.executionIdentifier ?? `Execution ${selectedExecution.id}`}
+                </h3>
+                <div className="workflow-editor-execution-modal__meta">
+                  <SolidTag>{selectedExecution.status ?? "Unknown"}</SolidTag>
+                  <span>{formatDurationMs(selectedExecution.durationMs)}</span>
+                  <span>{formatExecutionDate(selectedExecution.startedAt)}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="workflow-editor-execution-modal__close"
+                aria-label="Close execution detail"
+                onClick={() => setSelectedExecution(null)}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="workflow-editor-execution-modal-tabs">
+              <div
+                className="workflow-editor-execution-modal-tabs__list"
+                role="tablist"
+                aria-label="Execution detail sections"
+              >
+                {selectedExecutionModalTabs.map((tab) => {
+                  const isActive = selectedExecutionTab === tab.value;
+
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-controls={`workflow-execution-modal-tab-${tab.value}`}
+                      id={`workflow-execution-modal-tab-trigger-${tab.value}`}
+                      className={`workflow-editor-execution-modal-tabs__trigger ${isActive ? "is-active" : ""}`}
+                      onClick={() => setSelectedExecutionTab(tab.value)}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {selectedExecutionModalTabs.map((tab) => {
+                const isActive = selectedExecutionTab === tab.value;
+
+                return (
+                  <div
+                    key={tab.value}
+                    role="tabpanel"
+                    id={`workflow-execution-modal-tab-${tab.value}`}
+                    aria-labelledby={`workflow-execution-modal-tab-trigger-${tab.value}`}
+                    className="workflow-editor-execution-modal-tabs__panel"
+                    hidden={!isActive}
+                  >
+                    {isActive ? tab.content : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+      ) : null}
 
       {selectedNode && selectedNodeType ? (
         <WorkflowNodeEditorDialog
@@ -2247,79 +5416,6 @@ export function WorkflowDefinitionEditorPage() {
         </SolidDialogBody>
       </SolidDialog>
 
-      <SolidDialog
-        open={workflowSettingsOpen}
-        onOpenChange={setWorkflowSettingsOpen}
-        header="Workflow Settings"
-        className="solid-workflow-node-editor-dialog solid-workflow-node-editor-dialog--full"
-        style={{ width: "min(1200px, 94vw)", maxWidth: "96vw" }}
-      >
-        <SolidDialogBody>
-          <div className="workflow-editor-workflow-settings">
-            <SolidPanel header="Workflow Identity">
-              <div className="workflow-editor-form-grid">
-                <div className="workflow-editor-field">
-                  <label>Key</label>
-                  <SolidInput
-                    value={workflowKey}
-                    onChange={(event) => setWorkflowKey(event.target.value)}
-                  />
-                </div>
-                <div className="workflow-editor-field">
-                  <label>Display Name</label>
-                  <SolidInput
-                    value={workflowDisplayName}
-                    onChange={(event) => setWorkflowDisplayName(event.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="workflow-editor-field">
-                <label>Description</label>
-                <SolidTextarea
-                  value={workflowDescription}
-                  onChange={(event) => setWorkflowDescription(event.target.value)}
-                />
-              </div>
-            </SolidPanel>
-
-            <SolidPanel header="Inputs">
-              <SolidCodeEditor
-                language="yaml"
-                height="220px"
-                value={workflowInputsValue}
-                onChange={(value) => setWorkflowInputsValue(value ?? "{}")}
-              />
-            </SolidPanel>
-
-            <SolidPanel header="Variables">
-              <SolidCodeEditor
-                language="yaml"
-                height="220px"
-                value={workflowVariablesValue}
-                onChange={(value) => setWorkflowVariablesValue(value ?? "{}")}
-              />
-            </SolidPanel>
-
-            <SolidPanel header="Triggers">
-              <SolidCodeEditor
-                language="yaml"
-                height="260px"
-                value={workflowTriggersValue}
-                onChange={(value) => setWorkflowTriggersValue(value ?? "[]")}
-              />
-            </SolidPanel>
-          </div>
-        </SolidDialogBody>
-        <SolidDialogFooter>
-          <SolidButton
-            variant="secondary"
-            onClick={() => setWorkflowSettingsOpen(false)}
-          >
-            Cancel
-          </SolidButton>
-          <SolidButton onClick={handleSaveWorkflowSettings}>Apply</SolidButton>
-        </SolidDialogFooter>
-      </SolidDialog>
     </div>
   );
 }

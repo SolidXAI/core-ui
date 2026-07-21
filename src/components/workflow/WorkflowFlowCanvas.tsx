@@ -415,6 +415,24 @@ function resolveWorkflowNodeIcon(nodeType?: WorkflowNodeMetadataResponse) {
   return normalizeSolidIconName(nodeType?.ui?.icon ?? nodeType?.icon) ?? "si-th-large";
 }
 
+function getWorkflowNodeIconStyle(
+  nodeType?: WorkflowNodeMetadataResponse,
+): React.CSSProperties | undefined {
+  const backgroundColor = nodeType?.ui?.iconBackgroundColor;
+  const color = nodeType?.ui?.iconColor;
+  const borderColor = nodeType?.ui?.iconBorderColor;
+
+  if (!backgroundColor && !color && !borderColor) {
+    return undefined;
+  }
+
+  return {
+    ...(backgroundColor ? { backgroundColor } : null),
+    ...(color ? { color } : null),
+    ...(borderColor ? { borderColor } : null),
+  };
+}
+
 function estimateSequenceWidth(
   sequence: WorkflowNodeRecord[],
   nodeTypeMap: Map<string, WorkflowNodeMetadataResponse>,
@@ -528,17 +546,23 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
       <div className="workflow-flow-insert-node">
         <button
           type="button"
-          onClick={data.onInsert}
-          className="workflow-flow-insert-node__button"
+          onPointerDown={(event) => {
+            event.stopPropagation();
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            data.onInsert();
+          }}
+          className="workflow-flow-insert-node__button nodrag nopan nowheel"
           aria-label={
             data.enabled
               ? `Add ${data.selectedTypeLabel ?? "node"}`
-              : "Pick a node type to insert"
+              : "Add node"
           }
           title={
             data.enabled
               ? `Add ${data.selectedTypeLabel ?? "node"}`
-              : "Pick a node type to insert"
+              : "Add node"
           }
         >
           <Plus size={16} />
@@ -719,7 +743,10 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
       </div>
       <div className="workflow-flow-node-card__body">
         <div className="workflow-flow-node-card__header-main">
-          <div className="workflow-flow-node-card__icon-shell">
+          <div
+            className="workflow-flow-node-card__icon-shell"
+            style={getWorkflowNodeIconStyle(nodeType)}
+          >
             <SolidIcon name={iconName} size={16} aria-hidden />
           </div>
           <div>
@@ -858,7 +885,7 @@ function pushInsertNode(
     },
     data: {
       kind: "insert",
-      enabled: !!ctx.activePaletteNodeType,
+      enabled: true,
       selectedTypeLabel: ctx.activePaletteNodeType?.label,
       onInsert: () => ctx.onInsertNode(target),
     },

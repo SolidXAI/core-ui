@@ -2,13 +2,14 @@ import React from "react";
 import YAML from "yaml";
 import {
   ArrowLeft,
-  ArrowRight,
   CircleHelp,
+  Filter,
   GitBranch,
   Plus,
   Search,
   Trash2,
   Workflow,
+  X,
   Zap,
 } from "lucide-react";
 import { getExtensionComponent } from "../../helpers/registry";
@@ -98,6 +99,9 @@ type FieldEditorProps = {
   onChange: (value: any) => void;
 };
 
+const EMPTY_YAML_OBJECT = {};
+const EMPTY_YAML_ARRAY: any[] = [];
+
 function normalizeFieldValue(
   field: WorkflowNodeConfigurationFieldDefinition,
   currentValue: any,
@@ -109,15 +113,19 @@ function normalizeFieldValue(
   return field.defaultValue;
 }
 
-function parseYamlValue(input: string, fallback: any) {
-  if (!input.trim()) {
-    return {};
+function stringifyYamlEditorValue(value: any, emptyValue: any) {
+  if (typeof value === "string") {
+    return value;
   }
 
+  return YAML.stringify(value ?? emptyValue);
+}
+
+function getYamlValueSignature(value: any) {
   try {
-    return YAML.parse(input);
+    return JSON.stringify(value);
   } catch {
-    return fallback;
+    return String(value);
   }
 }
 
@@ -201,6 +209,24 @@ function WorkflowNodeTypeIcon({
   }
 
   return <Zap size={size} strokeWidth={1.9} />;
+}
+
+function getWorkflowNodeIconStyle(
+  nodeType: WorkflowNodeMetadataResponse,
+): React.CSSProperties | undefined {
+  const backgroundColor = nodeType.ui?.iconBackgroundColor;
+  const color = nodeType.ui?.iconColor;
+  const borderColor = nodeType.ui?.iconBorderColor;
+
+  if (!backgroundColor && !color && !borderColor) {
+    return undefined;
+  }
+
+  return {
+    ...(backgroundColor ? { backgroundColor } : null),
+    ...(color ? { color } : null),
+    ...(borderColor ? { borderColor } : null),
+  };
 }
 
 function normalizeGroupLabel(value: string | undefined, fallback: string) {
@@ -478,6 +504,64 @@ function WorkflowKeyValueEditor({
   );
 }
 
+function WorkflowYamlFieldEditor({
+  value,
+  readOnly,
+  onChange,
+  emptyValue = {},
+}: {
+  value: any;
+  readOnly?: boolean;
+  onChange: (value: any) => void;
+  emptyValue?: any;
+}) {
+  const [textValue, setTextValue] = React.useState(() =>
+    stringifyYamlEditorValue(value, emptyValue),
+  );
+  const [parseError, setParseError] = React.useState<string | null>(null);
+  const lastEmittedSignatureRef = React.useRef(getYamlValueSignature(value ?? emptyValue));
+
+  React.useEffect(() => {
+    const nextSignature = getYamlValueSignature(value ?? emptyValue);
+    if (nextSignature === lastEmittedSignatureRef.current) {
+      return;
+    }
+
+    setTextValue(stringifyYamlEditorValue(value, emptyValue));
+    setParseError(null);
+    lastEmittedSignatureRef.current = nextSignature;
+  }, [emptyValue, value]);
+
+  const handleEditorChange = (nextText: string | undefined) => {
+    const safeText = nextText ?? "";
+    setTextValue(safeText);
+
+    try {
+      const parsedValue = safeText.trim() ? YAML.parse(safeText) : emptyValue;
+      setParseError(null);
+      lastEmittedSignatureRef.current = getYamlValueSignature(parsedValue);
+      onChange(parsedValue);
+    } catch (error: any) {
+      setParseError(error?.message ?? "YAML is invalid.");
+    }
+  };
+
+  return (
+    <div className="workflow-node-yaml-field-editor">
+      <SolidCodeEditor
+        language="yaml"
+        height="220px"
+        readOnly={readOnly}
+        value={textValue}
+        onChange={handleEditorChange}
+      />
+      {parseError ? (
+        <div className="workflow-node-yaml-field-error">{parseError}</div>
+      ) : null}
+    </div>
+  );
+}
+
 function WorkflowNodeFieldEditor({
   nodeType,
   field,
@@ -574,34 +658,23 @@ function WorkflowNodeFieldEditor({
     field.widgetHint === "json-editor" ||
     field.widgetHint === "yaml-editor"
   ) {
-    const stringValue =
-      typeof normalizedValue === "string"
-        ? normalizedValue
-        : YAML.stringify(normalizedValue ?? {});
-
     return (
-      <SolidCodeEditor
-        language="yaml"
-        height="220px"
+      <WorkflowYamlFieldEditor
+        value={normalizedValue}
         readOnly={readOnly}
-        value={stringValue}
-        onChange={(next) => onChange(parseYamlValue(next ?? "", normalizedValue))}
+        onChange={onChange}
+        emptyValue={field.valueType === "array" ? EMPTY_YAML_ARRAY : EMPTY_YAML_OBJECT}
       />
     );
   }
 
   if (field.valueType === "any") {
     return (
-      <SolidCodeEditor
-        language="yaml"
-        height="220px"
+      <WorkflowYamlFieldEditor
+        value={normalizedValue}
         readOnly={readOnly}
-        value={
-          typeof normalizedValue === "string"
-            ? normalizedValue
-            : YAML.stringify(normalizedValue ?? null)
-        }
-        onChange={(next) => onChange(parseYamlValue(next ?? "", normalizedValue))}
+        onChange={onChange}
+        emptyValue={null}
       />
     );
   }
@@ -744,7 +817,10 @@ function WorkflowNodeTags({ nodeType }: { nodeType: WorkflowNodeMetadataResponse
 function WorkflowNodeHeaderMeta({ nodeType }: { nodeType: WorkflowNodeMetadataResponse }) {
   return (
     <div className="workflow-node-editor-dialog-meta">
-      <span className="workflow-node-editor-dialog-icon">
+      <span
+        className="workflow-node-editor-dialog-icon"
+        style={getWorkflowNodeIconStyle(nodeType)}
+      >
         <WorkflowNodeTypeIcon nodeType={nodeType} size={15} />
       </span>
       <SolidTag>{nodeType.kind}</SolidTag>
@@ -807,6 +883,7 @@ function WorkflowNodeCommonFields({
           <div className="workflow-node-editor-field workflow-node-editor-field--wide">
             <label className="workflow-node-editor-label">Description</label>
             <SolidTextarea
+              className="workflow-node-editor-description-input"
               value={draft.description ?? ""}
               disabled={readOnly}
               onChange={(event) => update({ description: event.target.value })}
@@ -1184,7 +1261,7 @@ export function WorkflowAddNodeDialog({
   const [categoryFilter, setCategoryFilter] = React.useState("");
   const [subcategoryFilter, setSubcategoryFilter] = React.useState("");
   const [kindFilter, setKindFilter] = React.useState("");
-  const [typeFilter, setTypeFilter] = React.useState("");
+  const [filtersOpen, setFiltersOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState("");
   const [nodeDraft, setNodeDraft] = React.useState<WorkflowNodeEditorValue | null>(null);
 
@@ -1195,7 +1272,7 @@ export function WorkflowAddNodeDialog({
       setCategoryFilter("");
       setSubcategoryFilter("");
       setKindFilter("");
-      setTypeFilter("");
+      setFiltersOpen(false);
       setSelectedType("");
       setNodeDraft(null);
     }
@@ -1238,15 +1315,6 @@ export function WorkflowAddNodeDialog({
     [nodeTypes],
   );
 
-  const typeOptions = React.useMemo(
-    () =>
-      createSelectOptions(
-        Array.from(new Set(nodeTypes.map((nodeType) => nodeType.type).filter(Boolean))),
-        "All types",
-      ),
-    [nodeTypes],
-  );
-
   React.useEffect(() => {
     if (
       subcategoryFilter &&
@@ -1268,9 +1336,6 @@ export function WorkflowAddNodeDialog({
       if (kindFilter && nodeType.kind !== kindFilter) {
         return false;
       }
-      if (typeFilter && nodeType.type !== typeFilter) {
-        return false;
-      }
       if (!normalizedQuery) {
         return true;
       }
@@ -1282,7 +1347,6 @@ export function WorkflowAddNodeDialog({
     nodeTypes,
     query,
     subcategoryFilter,
-    typeFilter,
   ]);
 
   const groupedNodeTypes = React.useMemo(() => {
@@ -1368,29 +1432,45 @@ export function WorkflowAddNodeDialog({
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search node types"
                 />
+                <button
+                  type="button"
+                  className={`workflow-add-node-search-action ${filtersOpen ? "is-active" : ""}`}
+                  aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+                  title={filtersOpen ? "Hide filters" : "Show filters"}
+                  onClick={() => setFiltersOpen((current) => !current)}
+                >
+                  <Filter size={14} />
+                </button>
+                <button
+                  type="button"
+                  className="workflow-add-node-search-action"
+                  aria-label="Clear search"
+                  title="Clear search"
+                  disabled={!query}
+                  onClick={() => setQuery("")}
+                >
+                  <X size={14} />
+                </button>
               </div>
-              <div className="workflow-add-node-filters">
-                <SolidSelect
-                  value={categoryFilter}
-                  options={categoryOptions}
-                  onChange={(event) => setCategoryFilter(event.value ?? "")}
-                />
-                <SolidSelect
-                  value={subcategoryFilter}
-                  options={subcategoryOptions}
-                  onChange={(event) => setSubcategoryFilter(event.value ?? "")}
-                />
-                <SolidSelect
-                  value={kindFilter}
-                  options={kindOptions}
-                  onChange={(event) => setKindFilter(event.value ?? "")}
-                />
-                <SolidSelect
-                  value={typeFilter}
-                  options={typeOptions}
-                  onChange={(event) => setTypeFilter(event.value ?? "")}
-                />
-              </div>
+              {filtersOpen ? (
+                <div className="workflow-add-node-filters">
+                  <SolidSelect
+                    value={categoryFilter}
+                    options={categoryOptions}
+                    onChange={(event) => setCategoryFilter(event.value ?? "")}
+                  />
+                  <SolidSelect
+                    value={subcategoryFilter}
+                    options={subcategoryOptions}
+                    onChange={(event) => setSubcategoryFilter(event.value ?? "")}
+                  />
+                  <SolidSelect
+                    value={kindFilter}
+                    options={kindOptions}
+                    onChange={(event) => setKindFilter(event.value ?? "")}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="workflow-add-node-results">
@@ -1418,10 +1498,12 @@ export function WorkflowAddNodeDialog({
                                 key={nodeType.type}
                                 type="button"
                                 className={`workflow-add-node-card ${selectedType === nodeType.type ? "is-active" : ""}`}
-                                onClick={() => setSelectedType(nodeType.type)}
-                                onDoubleClick={() => goToConfigureStep(nodeType)}
+                                onClick={() => goToConfigureStep(nodeType)}
                               >
-                                <span className={`workflow-add-node-card-icon workflow-add-node-card-icon--${nodeType.kind}`}>
+                                <span
+                                  className={`workflow-add-node-card-icon workflow-add-node-card-icon--${nodeType.kind}`}
+                                  style={getWorkflowNodeIconStyle(nodeType)}
+                                >
                                   <WorkflowNodeTypeIcon nodeType={nodeType} />
                                 </span>
                                 <span className="workflow-add-node-card-copy">
@@ -1430,10 +1512,6 @@ export function WorkflowAddNodeDialog({
                                   </span>
                                   <span className="workflow-add-node-card-description">
                                     {nodeType.description ?? nodeType.type}
-                                  </span>
-                                  <span className="workflow-add-node-card-meta">
-                                    <SolidTag>{nodeType.kind}</SolidTag>
-                                    <SolidTag>{nodeType.type}</SolidTag>
                                   </span>
                                 </span>
                               </button>
@@ -1461,18 +1539,9 @@ export function WorkflowAddNodeDialog({
       </SolidDialogBody>
       <SolidDialogFooter className="workflow-node-editor-dialog-footer">
         {step === "select" ? (
-          <>
-            <SolidButton variant="secondary" onClick={() => onOpenChange(false)}>
-              Cancel
-            </SolidButton>
-            <SolidButton
-              leftIcon={<ArrowRight size={14} />}
-              disabled={!selectedNodeType}
-              onClick={() => goToConfigureStep()}
-            >
-              Next
-            </SolidButton>
-          </>
+          <SolidButton variant="secondary" onClick={() => onOpenChange(false)}>
+            Cancel
+          </SolidButton>
         ) : (
           <>
             <SolidButton

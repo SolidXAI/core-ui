@@ -271,6 +271,7 @@
   display: grid;
   place-items: center;
   position: relative;
+  cursor: default;
 }
 
 .workflow-flow-insert-node__button {
@@ -285,6 +286,10 @@
   box-shadow:
     0 10px 20px rgba(15, 23, 42, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 3;
 }
 
 .workflow-flow-insert-node__button:hover {

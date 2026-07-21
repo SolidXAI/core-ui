@@ -346,17 +346,24 @@ export function WorkflowDefinitionListPage() {
                 field="key"
                 header="Id"
                 sortable
+                className="workflow-definition-table-cell--id"
+                headerClassName="workflow-definition-table-cell--id"
                 body={(row: WorkflowDefinitionListRecord) => (
-                  <div className="workflow-definition-table-id">
-                    <div className="workflow-definition-table-id__primary">
-                      {row.key || row.displayName || `workflow-${row.id}`}
-                    </div>
-                    {row.displayName && row.displayName !== row.key ? (
-                      <div className="workflow-definition-table-id__secondary">
-                        {row.displayName}
-                      </div>
-                    ) : null}
-                  </div>
+                  <span className="workflow-definition-table-id">
+                    {row.key || `workflow-${row.id}`}
+                  </span>
+                )}
+              />
+              <Column
+                field="displayName"
+                header="Name"
+                sortable
+                className="workflow-definition-table-cell--name"
+                headerClassName="workflow-definition-table-cell--name"
+                body={(row: WorkflowDefinitionListRecord) => (
+                  <span className="workflow-definition-table-name">
+                    {row.displayName || row.key || `Workflow ${row.id}`}
+                  </span>
                 )}
               />
               <Column
@@ -414,8 +421,12 @@ export function WorkflowDefinitionListPage() {
                 field="updatedAt"
                 header="Updated"
                 sortable
+                className="workflow-definition-table-cell--updated"
+                headerClassName="workflow-definition-table-cell--updated"
                 body={(row: WorkflowDefinitionListRecord) => (
-                  <span>{formatDate(row.updatedAt || row.createdAt)}</span>
+                  <span className="workflow-definition-table-date">
+                    {formatDate(row.updatedAt || row.createdAt)}
+                  </span>
                 )}
               />
               <Column

@@ -127,6 +127,9 @@ export interface WorkflowNodeDocumentationMetadata {
 
 export interface WorkflowNodeUiMetadata {
   icon?: string;
+  iconColor?: string;
+  iconBackgroundColor?: string;
+  iconBorderColor?: string;
   editorComponentKey?: string;
   docsComponentKey?: string;
   paletteComponentKey?: string;
