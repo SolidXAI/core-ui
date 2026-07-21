@@ -75,25 +75,6 @@
   gap: 0.2rem;
 }
 
-.solid-locale-status-banner {
-  margin: 0.25rem 0 0;
-  padding: 0 0.7rem;
-  overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-  background: color-mix(in srgb, var(--card) 97%, var(--background) 3%);
-}
-
-.solid-locale-status-banner.is-published {
-  border-color: color-mix(in srgb, #16a34a 24%, var(--border) 76%);
-  background: color-mix(in srgb, #16a34a 8%, var(--card) 92%);
-}
-
-.solid-locale-status-banner.is-unpublished {
-  border-color: color-mix(in srgb, #ef4444 24%, var(--border) 76%);
-  background: color-mix(in srgb, #ef4444 7%, var(--card) 93%);
-}
-
 .solid-locale-status-copy {
   margin: 0 1rem;
   padding: 0.7rem 0;
@@ -101,23 +82,6 @@
   line-height: 1.4;
 }
 
-.solid-locale-status-banner.is-published .solid-locale-status-copy {
-  color: #15803d;
-}
-
-.solid-locale-status-banner.is-unpublished .solid-locale-status-copy {
-  color: #dc2626;
-}
-
-.dark .solid-locale-status-banner.is-published .solid-locale-status-copy,
-.theme-dark .solid-locale-status-banner.is-published .solid-locale-status-copy {
-  color: #4ade80;
-}
-
-.dark .solid-locale-status-banner.is-unpublished .solid-locale-status-copy,
-.theme-dark .solid-locale-status-banner.is-unpublished .solid-locale-status-copy {
-  color: #fda4af;
-}
 
 .solid-locale-info-card {
   margin-top: 0.55rem;

@@ -144,20 +144,6 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
         <div className="flex flex-col p-0 m-0 solid-locale-stack">
             <div className="flex justify-end gap-4">
             </div>
-            {isDraftPublishWorkflowEnabled && solidFormViewData && (viewMode === 'edit') &&
-                (<div className={`w-full solid-locale-status-banner ${published !== null ? 'is-published' : 'is-unpublished'}`}>
-                    {published !== null ? (
-                        <li className="w-full text-left list-disc solid-locale-status-copy">
-                            Editing <span className="font-bold">published version</span>
-                        </li>
-                    ) : (
-                        <li className="w-full text-left list-disc solid-locale-status-copy">
-                            Editing <span className="font-bold">unpublished version</span>
-                        </li>
-                    )}
-                </div>
-                )
-            }
             {shouldShowInformationCard && (
                 <div className="solid-locale-info-card">
                     <div className="solid-locale-info-card-header">

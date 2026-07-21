@@ -829,11 +829,30 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 ? queryObject.custom_filter_predicate
                 : null;
         const nextPredefinedBaseFilter = queryObject?.predefined_search_predicate || null;
+        const nextSavedFilter = queryObject?.saved_filter_predicate || null;
+        const nextSavedFilterData = nextSavedFilter
+            ? availableSavedFilters.find((savedFilter: any) => {
+                if (queryObject?.saved_filter_system_key) {
+                    return savedFilter?.systemKey === queryObject.saved_filter_system_key;
+                }
+                if (queryObject?.saved_filter_id) {
+                    return String(savedFilter?.id) === String(queryObject.saved_filter_id);
+                }
+                return false;
+            }) || {
+                id: queryObject?.saved_filter_id,
+                systemKey: queryObject?.saved_filter_system_key,
+                name: queryObject?.saved_filter_name || 'Saved Filter',
+                filterQueryJson: JSON.stringify(nextSavedFilter),
+            }
+            : null;
 
         setSearchFilter((prev: any) => areFilterStateValuesEqual(prev, nextSearchFilter) ? prev : nextSearchFilter);
         setSearchChips((prev) => areFilterStateValuesEqual(prev, nextSearchChips) ? prev : nextSearchChips);
         setCustomFilter((prev: any) => areFilterStateValuesEqual(prev, nextCustomFilter) ? prev : nextCustomFilter);
         setPredefinedSearchBaseFilter((prev: any) => areFilterStateValuesEqual(prev, nextPredefinedBaseFilter) ? prev : nextPredefinedBaseFilter);
+        setCurrentSavedFilterData((prev: any) => areFilterStateValuesEqual(prev, nextSavedFilterData) ? prev : nextSavedFilterData);
+        setCurrentSavedFilterQuery((prev: any) => areFilterStateValuesEqual(prev, nextSavedFilter) ? prev : nextSavedFilter);
 
         if (nextCustomFilter && viewData?.data) {
             const rules: FilterRule = transformFiltersToRules(nextCustomFilter);
@@ -869,7 +888,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
         setGroupingRules((prev) => areFilterStateValuesEqual(prev, nextGroupingRules) ? prev : nextGroupingRules);
         setAggregationRules((prev) => areFilterStateValuesEqual(prev, nextAggregationRules) ? prev : nextAggregationRules);
-    }, [initialState, viewData]);
+    }, [availableSavedFilters, initialState, viewData]);
 
     const resetAppliedFilters = ({ preserveGrouping = false }: { preserveGrouping?: boolean } = {}) => {
         setSearchChips([]);
@@ -930,73 +949,31 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 if (activeSavedFilter && availableSavedFilters.length === 0) return;
 
                 const queryObject = getFilterObjectFromLocalStorage();
-                // const savedQuery = parsedSearchParams?.get("savedQuery");
+                let nextQueryObject = queryObject;
                 if (activeSavedFilter) {
                     const currentSavedFilterId = Number(activeSavedFilter);
                     const currentSavedFilterData: any = availableSavedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
-                    setCurrentSavedFilterData(currentSavedFilterData);
                     if (currentSavedFilterData) {
                         const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
                         if (filterJson) {
-                            let finalSavedFilter = filterJson
-                            setCurrentSavedFilterQuery(finalSavedFilter)
+                            nextQueryObject = {
+                                ...(queryObject || {}),
+                                saved_filter_predicate: filterJson,
+                                saved_filter_id: currentSavedFilterData.id,
+                                saved_filter_system_key: currentSavedFilterData.systemKey,
+                                saved_filter_name: currentSavedFilterData.name,
+                            };
                         }
                     }
                 }
-                if (queryObject) {
-                    if (queryObject) {
-                        searchChips = queryObject?.search_predicate || null;
-                        customChips = queryObject?.custom_filter_predicate || null;
-                    }
-                }
-                if (!activeSavedFilter) {
-                    const storedSavedFilterPredicate = queryObject?.saved_filter_predicate || null;
-                    const storedSavedFilterData = storedSavedFilterPredicate
-                        ? availableSavedFilters.find((savedFilter: any) => {
-                            if (queryObject?.saved_filter_system_key) {
-                                return savedFilter?.systemKey === queryObject.saved_filter_system_key;
-                            }
-                            if (queryObject?.saved_filter_id) {
-                                return String(savedFilter?.id) === String(queryObject.saved_filter_id);
-                            }
-                            return false;
-                        })
-                        : null;
-
-                    if (storedSavedFilterPredicate) {
-                        setCurrentSavedFilterData(storedSavedFilterData || {
-                            id: queryObject?.saved_filter_id,
-                            systemKey: queryObject?.saved_filter_system_key,
-                            name: queryObject?.saved_filter_name || 'Saved Filter',
-                            filterQueryJson: JSON.stringify(storedSavedFilterPredicate),
-                        });
-                        setCurrentSavedFilterQuery(storedSavedFilterPredicate);
-                    } else {
-                        setCurrentSavedFilterData(null)
-                        setCurrentSavedFilterQuery(null)
-                    }
-                }
-                if (searchChips) {
-                    setSearchFilter(searchChips);
-                    // const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
-                    //     const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
-                    //     const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
-                    //     const chipdata = {
-                    //         columnName: chipKey,
-                    //         value: chipValue
-                    //     };
-                    //     return chipdata
-                    // }
-                    // );
-                    // setSearchChips(formattedChips);
-                await syncFilterUiStateFromSharedSource(queryObject);
+                await syncFilterUiStateFromSharedSource(nextQueryObject);
 
                 setRefreshKey((prev) => prev + 1)
                 setHasSearched(true);
             }
         }
         fn()
-    }, [activeSavedFilter, savedFilters, savedFiltersLoaded, syncFilterUiStateFromSharedSource, viewData?.data?.solidView?.id])
+    }, [activeSavedFilter, availableSavedFilters, savedFiltersLoaded, syncFilterUiStateFromSharedSource, viewData?.data?.solidView?.id])
 
     useEffect(() => {
         const fn = async () => {
