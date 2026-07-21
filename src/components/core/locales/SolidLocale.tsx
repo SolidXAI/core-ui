@@ -64,6 +64,8 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
     const data = solidFormViewData?.data;
     const isDraftPublishWorkflowEnabled = Boolean(solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow);
     const isInternationalisationEnabled = Boolean(solidFormViewMetaData?.data?.solidView?.model?.internationalisation);
+    const shouldShowInformationCard = !(createMode && isDraftPublishWorkflowEnabled);
+    const shouldShowCreateInfoPlaceholder = createMode && isDraftPublishWorkflowEnabled && !isInternationalisationEnabled;
     const isPublished = isDraftPublishWorkflowEnabled && Boolean(data?.isPublished ?? published);
     const statusLabel = workflowStatusLabel || (isPublished ? 'Published' : 'Draft');
     const publishedBy = isDraftPublishWorkflowEnabled && isPublished && data?.publishedAt ? data?.updatedBy : null;
@@ -156,25 +158,40 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                 </div>
                 )
             }
-            <div className="solid-locale-info-card">
-                <div className="solid-locale-info-card-header">
-                    <h3 className="solid-locale-section-title p-0 m-0">Information</h3>
-                    {isDraftPublishWorkflowEnabled && <StatusPill value={statusLabel} />}
+            {shouldShowInformationCard && (
+                <div className="solid-locale-info-card">
+                    <div className="solid-locale-info-card-header">
+                        <h3 className="solid-locale-section-title p-0 m-0">Information</h3>
+                        {isDraftPublishWorkflowEnabled && <StatusPill value={statusLabel} />}
+                    </div>
+                    <div className="solid-locale-info-grid">
+                        <InfoRow label="Document ID" value={documentId ? `#${documentId}` : '-'} />
+                        <InfoRow label="Created At" value={formatToDDMMYYWithTime(data?.createdAt)} />
+                        <InfoRow label="Created By" value={getUserDisplay(data?.createdBy)} />
+                        <InfoRow label="Updated At" value={formatToDDMMYYWithTime(data?.updatedAt)} />
+                        <InfoRow label="Updated By" value={getUserDisplay(data?.updatedBy)} />
+                        {isDraftPublishWorkflowEnabled && (
+                            <>
+                                <InfoRow label="Published At" value={formatToDDMMYYWithTime(data?.publishedAt ?? published ?? '')} />
+                                <InfoRow label="Published By" value={getUserDisplay(publishedBy)} />
+                            </>
+                        )}
+                    </div>
                 </div>
-                <div className="solid-locale-info-grid">
-                    <InfoRow label="Document ID" value={documentId ? `#${documentId}` : '-'} />
-                    <InfoRow label="Created At" value={formatToDDMMYYWithTime(data?.createdAt)} />
-                    <InfoRow label="Created By" value={getUserDisplay(data?.createdBy)} />
-                    <InfoRow label="Updated At" value={formatToDDMMYYWithTime(data?.updatedAt)} />
-                    <InfoRow label="Updated By" value={getUserDisplay(data?.updatedBy)} />
-                    {isDraftPublishWorkflowEnabled && (
-                        <>
-                            <InfoRow label="Published At" value={formatToDDMMYYWithTime(data?.publishedAt ?? published ?? '')} />
-                            <InfoRow label="Published By" value={getUserDisplay(publishedBy)} />
-                        </>
-                    )}
+            )}
+            {shouldShowCreateInfoPlaceholder && (
+                <div className="solid-locale-info-card solid-locale-empty-info-card">
+                    <div className="solid-locale-info-card-header">
+                        <h3 className="solid-locale-section-title p-0 m-0">Information</h3>
+                    </div>
+                    <div className="solid-locale-empty-info-body">
+                        <p className="solid-locale-empty-info-title m-0">Details will appear after the first save</p>
+                        <p className="solid-locale-empty-info-copy m-0">
+                            Status, document ID, and audit timestamps are created once this draft record is saved.
+                        </p>
+                    </div>
                 </div>
-            </div>
+            )}
             {isInternationalisationEnabled &&
                 <div className="solid-locale-info-card solid-locale-i18n-panel">
                     <div className="solid-locale-info-card-header">
@@ -196,9 +213,6 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                                 disabled={createMode}
                             />
                         </div>
-                        {createMode && (
-                            <p className="solid-locale-helper-copy m-0">New records start in <b>{defaultLocaleLabel}</b>.</p>
-                        )}
                     </div>
                 </div>
             }

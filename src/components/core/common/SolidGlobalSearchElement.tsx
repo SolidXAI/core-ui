@@ -420,7 +420,7 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
 }
 
 const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter }: any) => {
-    const isActive = Number(activeSavedFilter) == savedfilter.id;
+    const isActive = savedfilter?.systemKey ? activeSavedFilter === savedfilter.systemKey : Number(activeSavedFilter) == savedfilter.id;
 
     return (
         <div className="solid-saved-filter-item" onMouseEnter={onMouseEnter}>
@@ -439,7 +439,7 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
                 </SolidButton>
             </div>
             <div className="solid-saved-filter-actions">
-                {savedfilter.isSeeded !== true &&
+                {savedfilter.isSeeded !== true && !savedfilter.systemKey &&
                     <>
                         <SolidButton
                             variant="outline"
@@ -699,6 +699,29 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const [savedFilters, setSavedFilters] = useState([]);
     const [savedFiltersLoaded, setSavedFiltersLoaded] = useState(false);
+    const isDraftPublishWorkflowEnabled = viewData?.data?.solidView?.model?.draftPublishWorkflow === true;
+    
+    const workflowPublishedVersionsSavedFilter = useMemo(() => {
+        if (!isDraftPublishWorkflowEnabled) return null;
+        return {
+            id: "system-published-versions",
+            systemKey: "workflow-published-versions",
+            name: "Published Versions",
+            description: "Shows current published records, including records that are published but not latest.",
+            isSeeded: true,
+            filterQueryJson: JSON.stringify({
+                isPublished: { $eq: true },
+                isLatest: { $in: [true, false] },
+            }),
+        };
+    }, [isDraftPublishWorkflowEnabled]);
+
+    const availableSavedFilters = useMemo(
+        () => workflowPublishedVersionsSavedFilter
+            ? [workflowPublishedVersionsSavedFilter, ...(savedFilters || [])]
+            : (savedFilters || []),
+        [workflowPublishedVersionsSavedFilter, savedFilters]
+    );
 
     const entityApi = createSolidEntityApi("savedFilters");
     const {
@@ -849,13 +872,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             let customChips: any;
             if (savedFiltersLoaded) {
 
-                if (activeSavedFilter && savedFilters.length === 0) return;
+                if (activeSavedFilter && availableSavedFilters.length === 0) return;
 
                 const queryObject = getFilterObjectFromLocalStorage();
                 // const savedQuery = parsedSearchParams?.get("savedQuery");
                 if (activeSavedFilter) {
                     const currentSavedFilterId = Number(activeSavedFilter);
-                    const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
+                    const currentSavedFilterData: any = availableSavedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
                     setCurrentSavedFilterData(currentSavedFilterData);
                     if (currentSavedFilterData) {
                         const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
@@ -864,14 +887,38 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             setCurrentSavedFilterQuery(finalSavedFilter)
                         }
                     }
-                } else {
-                    setCurrentSavedFilterData(null)
-                    setCurrentSavedFilterQuery(null)
                 }
                 if (queryObject) {
                     if (queryObject) {
                         searchChips = queryObject?.search_predicate || null;
                         customChips = queryObject?.custom_filter_predicate || null;
+                    }
+                }
+                if (!activeSavedFilter) {
+                    const storedSavedFilterPredicate = queryObject?.saved_filter_predicate || null;
+                    const storedSavedFilterData = storedSavedFilterPredicate
+                        ? availableSavedFilters.find((savedFilter: any) => {
+                            if (queryObject?.saved_filter_system_key) {
+                                return savedFilter?.systemKey === queryObject.saved_filter_system_key;
+                            }
+                            if (queryObject?.saved_filter_id) {
+                                return String(savedFilter?.id) === String(queryObject.saved_filter_id);
+                            }
+                            return false;
+                        })
+                        : null;
+
+                    if (storedSavedFilterPredicate) {
+                        setCurrentSavedFilterData(storedSavedFilterData || {
+                            id: queryObject?.saved_filter_id,
+                            systemKey: queryObject?.saved_filter_system_key,
+                            name: queryObject?.saved_filter_name || 'Saved Filter',
+                            filterQueryJson: JSON.stringify(storedSavedFilterPredicate),
+                        });
+                        setCurrentSavedFilterQuery(storedSavedFilterPredicate);
+                    } else {
+                        setCurrentSavedFilterData(null)
+                        setCurrentSavedFilterQuery(null)
                     }
                 }
                 if (searchChips) {
@@ -1239,6 +1286,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
             const finalCustomFilter = customFilter
             const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter, groupingRules, aggregationRules)
+            if (currentSavedFilterData?.id) {
+                finalFilter.saved_filter_id = currentSavedFilterData.id;
+            }
+            if (currentSavedFilterData?.systemKey) {
+                finalFilter.saved_filter_system_key = currentSavedFilterData.systemKey;
+            }
+            if (currentSavedFilterData?.name) {
+                finalFilter.saved_filter_name = currentSavedFilterData.name;
+            }
             handleApplyCustomFilter(finalFilter, true);
             setHasSearched(false)
             // }
@@ -1281,7 +1337,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const savedfilterId = savedfilter.id;
             // router.push(`?savedQuery=${savedfilter.id}`);
             setShowOverlay(false);
-            const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === savedfilterId);
+            const currentSavedFilterData: any = availableSavedFilters.find((savedFilter: any) => savedFilter.id === savedfilterId);
             setCurrentSavedFilterData(currentSavedFilterData);
             if (currentSavedFilterData) {
                 const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
@@ -1455,6 +1511,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setPredefinedSearchBaseFilter(null);
         const currentPageUrl = window.location.pathname; // Get the current page URL
         localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
+        if (savedfilter?.systemKey) {
+            setCurrentSavedFilterData(savedfilter);
+            try {
+                const filterJson = JSON.parse(savedfilter.filterQueryJson);
+                if (filterJson) {
+                    setCurrentSavedFilterQuery(filterJson);
+                }
+            } catch {
+                console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
+            }
+            setShowOverlay(false);
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1);
+            return;
+        }
         // push the savedQuery=1 in url 
         if (savedfilter?.id) {
             router.push(buildSavedFilterUrl(savedfilter.id));
@@ -1466,10 +1537,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const removeSavedFilter = () => {
         setCurrentSavedFilterData(null);
-        setCurrentSavedFilterQuery(null)
+        setCurrentSavedFilterQuery(null);
+        setCurrentSavedFilterRules(null);
+        setShowSavedFilterComponent(false);
         if (searchParams.has("savedQuery")) {
-            router.push(buildSavedFilterUrl(null));
+            router.replace(buildSavedFilterUrl(null));
         }
+        setHasSearched(true);
+        setRefreshKey((prev) => prev + 1);
     }
 
     const SavedFiltersChip = () => {
@@ -1602,7 +1677,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 type: "custom",
                 label: `${customRuleCount} custom rules applied`,
                 onRemove: () => clearCustomFilter(),
-                onOpen:() => setShowGlobalSearchElement(true)
+                onOpen: () => setShowGlobalSearchElement(true)
             });
         }
 
@@ -1612,7 +1687,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 type: "grouping",
                 label: `${groupingRules.length} grouping rules applied`,
                 onRemove: () => removeGrouping(),
-                onOpen:() => setShowGroupFilterElement(true)
+                onOpen: () => setShowGroupFilterElement(true)
 
             });
         }
@@ -1678,7 +1753,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     predefined: p,
                 }))
                 : [];
-        const saved: OverlayOption[] = (savedFilters || []).map((s: any) => ({
+        const saved: OverlayOption[] = (availableSavedFilters || []).map((s: any) => ({
             id: `saved:${s.id}`,
             kind: "saved" as const,
             saved: s,
@@ -1696,7 +1771,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 : [];
 
         return [...fields, ...predefined, ...saved, ...custom, ...grouping];
-    }, [inputValue, searchableFields, predefinedSearches, savedFilters, viewType]);
+    }, [inputValue, searchableFields, predefinedSearches, availableSavedFilters, viewType]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const currentValue = inputValue?.trim() || "";
@@ -2058,7 +2133,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         }}
                                                         onMouseEnter={() => setFocusedIndex(index)}
                                                     >
-                                                        Search <strong style={{paddingLeft:"2px"}}>{toTitleCase(value.displayName.trim())}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
+                                                        Search <strong style={{ paddingLeft: "2px" }}>{toTitleCase(value.displayName.trim())}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
                                                     </SolidButton>
                                                 )
                                             })
@@ -2121,7 +2196,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     <div className="solid-filter-dialog-sep" />
                                 </>
                             }
-                            {savedFilters.length > 0 &&
+                            {availableSavedFilters.length > 0 &&
                                 <>
                                     <div className="p-3 solid-search-overlay-section">
                                         <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact">
@@ -2136,11 +2211,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                             </div>
                                         </div>
                                         <div className="flex flex-col solid-search-overlay-saved-list">
-                                            {savedFilters.map((savedfilter: any, index: number) => (
+                                            {availableSavedFilters.map((savedfilter: any, index: number) => (
                                                 <SavedFilterList
                                                     key={savedfilter.id}
                                                     savedfilter={savedfilter}
-                                                    activeSavedFilter={activeSavedFilter}
+                                                    activeSavedFilter={activeSavedFilter || currentSavedFilterData?.systemKey || currentSavedFilterData?.id}
                                                     applySavedFilter={applySavedFilter}
                                                     openSavedCustomFilter={openSavedCustomFilter}
                                                     setSavedFilterTobeDeleted={setSavedFilterTobeDeleted}

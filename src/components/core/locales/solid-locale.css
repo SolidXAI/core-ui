@@ -185,6 +185,30 @@
   overflow-wrap: anywhere;
 }
 
+.solid-locale-empty-info-card {
+  border-style: dashed;
+}
+
+.solid-locale-empty-info-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 0.8rem;
+}
+
+.solid-locale-empty-info-title {
+  color: color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground) 12%);
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.solid-locale-empty-info-copy {
+  color: var(--muted-foreground);
+  font-size: 0.67rem;
+  line-height: 1.4;
+}
+
 .solid-locale-i18n-panel {
   margin-top: 0.65rem;
 }

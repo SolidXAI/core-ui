@@ -875,6 +875,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
       fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      fileterTobeStored.saved_filter_id = latestFilterPredicatesRef.current.saved_filter_id || null;
+      fileterTobeStored.saved_filter_system_key = latestFilterPredicatesRef.current.saved_filter_system_key || null;
+      fileterTobeStored.saved_filter_name = latestFilterPredicatesRef.current.saved_filter_name || null;
       fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
       setFilterObjectToLocalStorage(fileterTobeStored);
     }
@@ -1050,7 +1053,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   ]);
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
-  const selectedDataRef = useRef<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
 
   // Recover functions
@@ -1351,13 +1353,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
     solidListViewLayout?.attrs?.edit !== false &&
     solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
-    solidListViewLayout?.attrs?.showRowEditInContextMenu !== false &&
-    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isLatest === false);
+    solidListViewLayout?.attrs?.showRowEditInContextMenu !== false;
 
   const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
     solidListViewLayout?.attrs?.delete !== false &&
-    solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
-    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isLatest === false);
+    solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false;
 
   const hasCustomContextMenuButtons =
     solidListViewLayout?.attrs?.rowButtons?.some(
@@ -1791,8 +1791,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             </div>
                           ) : (
                             <>
-                              {solidListViewLayout?.attrs?.showRowContextMenu !==
-                                false && (
+                              {solidListViewLayout?.attrs?.showRowContextMenu !== false &&
+                                !(isDraftPublishWorkflowEnabled && rowData?.isLatest === false) && (
                                   <div className="flex justify-end" data-no-row-click="true">
                                     <SolidListViewRowActionsMenu
                                       rowData={rowData}
@@ -1805,7 +1805,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       handleCustomButtonClick={handleCustomButtonClick}
                                       contentClassName={styles.rowActionsOverlay}
                                       onSelectRow={(selectedRow: any) => {
-                                        selectedDataRef.current = selectedRow;
                                         setSelectedSolidViewData(selectedRow);
                                       }}
                                       onEdit={(selectedRow: any) => {
