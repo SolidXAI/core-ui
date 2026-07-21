@@ -1,12 +1,18 @@
-import { ERROR_MESSAGES } from "../constants/error-messages";
-import { env } from "../adapters/env";
+const triggerBrowserDownload = (url: string, fileName?: string) => {
+    const link = document.createElement("a");
+    const downloadUrl = new URL(url, window.location.origin);
+    downloadUrl.searchParams.set("disposition", "attachment");
+    link.href = downloadUrl.toString();
+    link.download = fileName || "";
+    document.body.appendChild(link);
+    link.click()    ;
+    document.body.removeChild(link);
+};
 
 export const downloadMediaFile = (fileUrl: string, fileName?: string) => {
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.download = fileName || "";
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!fileUrl) {
+        return;
+    }
+
+    triggerBrowserDownload(fileUrl, fileName);
 };

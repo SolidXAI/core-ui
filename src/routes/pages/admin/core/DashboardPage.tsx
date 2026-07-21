@@ -781,6 +781,7 @@ export function DashboardPage() {
             optionLabel="label"
             optionValue="value"
             placeholder={`Select ${label} preset`}
+            native={false}
             onChange={(event) => {
               const selectedPreset = `${event?.value ?? "custom"}`;
               if (selectedPreset === "custom") {
@@ -906,6 +907,7 @@ export function DashboardPage() {
           optionLabel="label"
           optionValue="value"
           placeholder={`Select ${label}`}
+          native={false}
           onChange={(event) => handleDraftVariableChange(variableName, event.value ? `${event.value}` : "")}
         />
       </div>
