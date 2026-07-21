@@ -17,6 +17,14 @@ export function useSession(): UseSessionResult {
   );
 
   const update = async () => {
+    const storedSession = loadSession();
+
+    if (!storedSession?.user?.accessToken) {
+      setData(null);
+      setStatus("unauthenticated");
+      return null;
+    }
+
     setStatus("loading");
     const session = await getSession();
     setData(session);

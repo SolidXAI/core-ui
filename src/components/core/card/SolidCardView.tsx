@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
 import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
@@ -12,6 +12,8 @@ import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { SolidEmptyListViewPlaceholder } from "../list/SolidEmptyListViewPlaceholder";
@@ -131,6 +133,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const [showArchived, setShowArchived] = useState(false);
   const [selectedCardForDelete, setSelectedCardForDelete] = useState<any>(null);
   const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
 
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
@@ -178,6 +182,10 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const { data: solidCardViewMetaDataResponse } = useGetSolidViewLayoutQuery(cardViewMetaDataQs);
 
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
+  const recordClickViewMode = useMemo(() => {
+    const isSystemModule = solidCardViewMetaDataResponse?.data?.solidView?.module?.isSystem === true;
+    return resolveRecordClickAction(solidSettingsMap, { isSystemModule });
+  }, [solidCardViewMetaDataResponse, solidSettingsMap]);
   const rowsOptions = rowsPerPageOptions && rowsPerPageOptions.length > 0 ? rowsPerPageOptions : [12, 24, 48];
   const paginationStart = totalRecords === 0 ? 0 : first + 1;
   const paginationEnd = Math.min(first + rows, totalRecords);
@@ -549,6 +557,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   records={cards}
                   solidCardViewMetaData={solidCardViewMetaDataResponse?.data}
                   editButtonUrl={editBaseUrl}
+                  recordClickViewMode={recordClickViewMode}
                   onDelete={canDeleteCards ? handleOpenDeleteDialog : undefined}
                   onRecover={handleRecoverRecord}
                   setLightboxUrls={setLightboxUrls}

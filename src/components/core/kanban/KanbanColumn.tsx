@@ -31,6 +31,7 @@ interface KanbanColumnProps {
   group: Group;
   groupData: GroupData[];
   isKanbanDragEnabled?: boolean;
+  recordClickViewMode?: "edit" | "view";
   cardNode?: any;
   DynamicCardWidget?: any;
   toggleFold: (groupByField: string) => void;
@@ -43,7 +44,7 @@ interface KanbanColumnProps {
 }
 
 // @ts-ignore
-const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, showArchived }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, recordClickViewMode = "edit", cardNode, DynamicCardWidget, toggleFold, handleLoadMore, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, showArchived }: KanbanColumnProps) => {
   return (
     <div className={group.folded ? "kanban-column kanban-column-folded" : "kanban-column"}>
       <div className="kaban-heading-area">
@@ -97,7 +98,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
             >
               {groupData.map((data, index) => (
                 // @ts-ignore
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled || Boolean(data?.deletedAt)} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} onDelete={onDelete} onRecover={onRecover} showArchived={showArchived} />
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled || Boolean(data?.deletedAt)} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} recordClickViewMode={recordClickViewMode} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} onDelete={onDelete} onRecover={onRecover} showArchived={showArchived} />
               ))}
               {asCompatibleReactNode(provided.placeholder)}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&

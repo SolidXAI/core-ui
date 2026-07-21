@@ -19,6 +19,7 @@ export const CardGrid = ({
   records,
   solidCardViewMetaData,
   editButtonUrl,
+  recordClickViewMode,
   onDelete,
   onRecover,
   setLightboxUrls,
@@ -73,6 +74,7 @@ export const CardGrid = ({
           data={record}
           solidCardViewMetaData={solidCardViewMetaData}
           editButtonUrl={editButtonUrl}
+          recordClickViewMode={recordClickViewMode}
           onDelete={onDelete}
           cardNode={cardNode}
           DynamicCardWidget={DynamicCardWidget}

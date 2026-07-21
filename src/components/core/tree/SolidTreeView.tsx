@@ -40,6 +40,8 @@ import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus"
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getRelationDisplayText } from "../../../helpers/relationDisplay";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -130,6 +132,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const pathname = usePathname();
   const solidGlobalSearchElementRef = useRef<any>(null);
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
 
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
@@ -349,6 +353,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
+  const recordClickViewMode = useMemo(() => {
+    const isSystemModule = solidTreeViewMetaData?.data?.solidView?.module?.isSystem === true;
+    return resolveRecordClickAction(solidSettingsMap, { isSystemModule });
+  }, [solidSettingsMap, solidTreeViewMetaData]);
 
   const [
     deleteSolidSingleEntiry,
@@ -1957,7 +1965,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   // params.handleEditClickForEmbeddedView(rowData?.id);
                   // } else {
                   storeCurrentModelViewContext();
-                  router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+                  router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${recordClickViewMode}&${new URLSearchParams(editActionQueryParams).toString()}`);
                   // }
                 }
                 }
