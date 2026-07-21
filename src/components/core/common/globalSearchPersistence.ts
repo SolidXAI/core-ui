@@ -1,5 +1,18 @@
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
+const decodeStoredFilterObject = (encodedQueryString: string | null) => {
+  if (!encodedQueryString) return null;
+
+  try {
+    const decodedQueryString = atob(encodedQueryString);
+    return JSON.parse(decodedQueryString);
+  } catch (error) {
+    console.error(ERROR_MESSAGES.ERROR_DECODING, error);
+    return null;
+  }
+};
+
+
 const hasMeaningfulPersistedFilterValue = (value: any): boolean => {
   if (value === null || value === undefined) return false;
   if (typeof value === "string") return value.trim().length > 0;
@@ -33,39 +46,20 @@ export const hasStoredFilterPredicates = (queryObject: any): boolean =>
   hasMeaningfulPersistedFilter(queryObject?.saved_filter_predicate) ||
   hasMeaningfulPersistedFilter(queryObject?.predefined_search_predicate);
 
+export const hasStoredSearchUiState = (queryObject: any): boolean =>
+  hasStoredFilterPredicates(queryObject) ||
+  Boolean(queryObject?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null)) ||
+  Boolean(queryObject?.aggregation_rules?.some?.((rule: any) => Boolean(rule?.fieldName)));
+
 export const getFilterObjectFromLocalStorage = () => {
-  if (typeof window === "undefined") return null;
-
   const currentPageUrl = window.location.pathname;
-  const encodedQueryString = localStorage.getItem(currentPageUrl);
-
-  if (encodedQueryString) {
-    try {
-      const decodedQueryString = atob(encodedQueryString);
-      return JSON.parse(decodedQueryString);
-    } catch (error) {
-      console.error(ERROR_MESSAGES.ERROR_DECODING, error);
-    }
-  }
-
-  return null;
+  if (!currentPageUrl || typeof window === "undefined") return null;
+  return decodeStoredFilterObject(localStorage.getItem(currentPageUrl));
 };
 
 export const getFilterObjectFromLocalStorageByUrl = (url: string) => {
   if (typeof window === "undefined") return null;
-
-  const encodedQueryString = localStorage.getItem(url);
-
-  if (encodedQueryString) {
-    try {
-      const decodedQueryString = atob(encodedQueryString);
-      return JSON.parse(decodedQueryString);
-    } catch (error) {
-      console.error(ERROR_MESSAGES.ERROR_DECODING, error);
-    }
-  }
-
-  return null;
+  return decodeStoredFilterObject(localStorage.getItem(url));
 };
 
 export const setFilterObjectToLocalStorage = (queryObject: any) => {
@@ -85,4 +79,17 @@ export const setFilterObjectToLocalStorageByUrl = (url: string, queryObject: any
   const encodedQueryString = btoa(stringifiedObject);
   localStorage.setItem(url, encodedQueryString);
   return encodedQueryString;
+};
+
+export const clearFilterObjectFromLocalStorage = () => {
+  const currentPageUrl = window.location.pathname;
+  if (!currentPageUrl || typeof window === "undefined") return;
+
+  localStorage.removeItem(currentPageUrl);
+};
+
+export const clearFilterObjectFromLocalStorageByUrl = (url: string) => {
+  if (typeof window === "undefined") return;
+
+  localStorage.removeItem(url);
 };
