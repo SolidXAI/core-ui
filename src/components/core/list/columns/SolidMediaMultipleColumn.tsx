@@ -155,15 +155,12 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
     const handleFileView = (file: any) => {
         if (isArchivedRecord) return;
 
-        const fileUrl = file?.fileUrl || "";
-        // const cleanUrl = fileUrl.split("?")[0];
-        // const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-        if (isDocumentType(fileUrl)) {
-            downloadFile(file?.fileUrl, "")
-
-        } else {
-            setLightboxUrls?.([{ src: file.fileUrl, downloadUrl: file.fileUrl }]);
+        if (isLightboxMediaKind(file?.previewKind)) {
+            setLightboxUrls?.([{
+                src: file.fileUrl,
+                downloadUrl: file.fileUrl,
+                type: file.previewKind === "video" ? "video" : undefined
+            }]);
             setOpenLightbox?.(true);
             return;
         }
@@ -193,6 +190,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                 onClick={(event) => {
                                     event.preventDefault();
                                     event.stopPropagation();
+                                    if (isArchivedRecord) return;
                                     downloadMediaFile(file?.fileUrl, file?.name);
                                 }}
                             >
@@ -218,27 +216,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 previewKind={fullrecord[0]?.previewKind}
                 onClick={(event) => {
                     event.stopPropagation();
-                    if (isArchivedRecord) return;
-
-                    // const cleanUrl = fullrecord[0]?.fileUrl.split("?")[0];
-                    // const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-                    if (isDocumentType(fullrecord[0]?.fileUrl) && fullrecord?.length > 1) {
-                        setShowAllFiles(true)
-                        return;
-                    }
-
-                    else if (isDocumentType(fullrecord[0]?.fileUrl)) {
-                        downloadFile(fullrecord[0]?.fileUrl, "")
-                        return;
-                    }
-                    // FIRST FILE IS MEDIA ⇒ OPEN LIGHTBOX
-                    const urlsWithType = fullrecord.map((file: any) => ({
-                        src: file.fileUrl,
-                        downloadUrl: file.fileUrl,
-                    }));
-                    setLightboxUrls(urlsWithType);
-                    setOpenLightbox(true);
+                    handleFileView(fullrecord[0]);
                 }}
             />
 
@@ -252,17 +230,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 onClick={(event) => {
                     event.stopPropagation();
                     if (isArchivedRecord) return;
-
-                    if (isDocumentType(fullrecord[0]?.fileUrl)) {
-                        setShowAllFiles(true);
-                    } else {
-                        const urlsWithType = fullrecord.map((file: any) => ({
-                            src: file.fileUrl,
-                            downloadUrl: file.fileUrl
-                        }));
-                        setLightboxUrls(urlsWithType);
-                        setOpenLightbox(true);
-                    }
+                    setShowAllFiles(true);
                 }}
             >
                 +{fullrecord.length - 1}
