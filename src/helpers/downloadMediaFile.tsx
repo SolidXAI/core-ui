@@ -1,6 +1,11 @@
-const triggerLinkClick = (href: string, fileName?: string) => {
+const triggerLinkClick = (href: string, fileName?: string, openInNewTab = false) => {
     const link = document.createElement("a");
     link.href = href;
+
+    if (openInNewTab) {
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+    }
     link.download = fileName || "";
     document.body.appendChild(link);
     link.click();
@@ -22,11 +27,12 @@ const triggerBrowserDownload = async (url: string, fileName?: string) => {
         const blobUrl = URL.createObjectURL(blob);
         triggerLinkClick(blobUrl, fileName);
         URL.revokeObjectURL(blobUrl);
-    } catch {
+    } catch(e) {
+        console.error("Failed to download file via fetch, falling back to direct link:", e);
         // Fallback for cases fetch can't handle (e.g. no CORS on the host).
         // This won't force a download for cross-origin URLs, but it's the
         // best available option when the blob fetch fails.
-        triggerLinkClick(url, fileName);
+        triggerLinkClick(url, fileName, true);
     }
 };
 
