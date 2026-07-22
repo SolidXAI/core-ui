@@ -102,7 +102,7 @@ type FieldEditorProps = {
   onChange: (value: any) => void;
 };
 
-export type WorkflowExpressionSuggestionGroup = "Inputs" | "Variables" | "Outputs";
+export type WorkflowExpressionSuggestionGroup = "Inputs" | "Variables" | "Secrets" | "Outputs";
 
 export type WorkflowExpressionSuggestion = {
   group: WorkflowExpressionSuggestionGroup;
@@ -742,7 +742,7 @@ function getWorkflowAutocompletePortalPosition(
   };
 }
 
-function WorkflowExpressionAutocompleteField({
+export function WorkflowExpressionAutocompleteField({
   value,
   readOnly,
   multiline,
@@ -952,7 +952,7 @@ function WorkflowExpressionAutocompleteField({
       onWheelCapture={handleMenuWheel}
     >
       <div className="workflow-expression-autocomplete-help">
-        Start typing to choose from available variables, inputs, or outputs.
+        Start typing to choose from available variables, inputs, secrets, or outputs.
       </div>
       {filteredSuggestions.length ? (
         Object.entries(groupedSuggestions).map(([group, groupSuggestions]) => (

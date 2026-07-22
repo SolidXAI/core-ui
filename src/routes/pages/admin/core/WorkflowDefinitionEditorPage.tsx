@@ -36,6 +36,7 @@ import {
 } from "../../../../components/workflow/WorkflowFlowCanvas";
 import {
   WorkflowAddNodeDialog,
+  WorkflowExpressionAutocompleteField,
   WorkflowNodeEditorDialog,
   type WorkflowExpressionSuggestion,
 } from "../../../../components/workflow/WorkflowNodeSchemaEditor";
@@ -111,6 +112,15 @@ type WorkflowDefinitionDsl = {
   nodes: WorkflowNodeRecord[];
   triggers?: Array<Record<string, any>>;
   metadata?: Record<string, any>;
+};
+
+type WorkflowSecretSuggestionRecord = {
+  id?: number;
+  key?: string;
+  displayName?: string;
+  description?: string;
+  valueType?: string;
+  status?: string;
 };
 
 type ValidationState = {
@@ -486,6 +496,10 @@ function workflowInputHasDefault(value: any) {
     );
   }
   return value !== undefined && value !== null;
+}
+
+function isWorkflowExpressionString(value: unknown) {
+  return typeof value === "string" && /^\s*\{\{\s*.+?\s*\}\}\s*$/.test(value);
 }
 
 function serializeWorkflowDefinitionYaml(definition: WorkflowDefinitionDsl) {
@@ -1730,6 +1744,7 @@ function buildWorkflowExpressionSuggestions(
   definition: WorkflowDefinitionDsl,
   nodeTypes: WorkflowNodeMetadataResponse[],
   currentNodeId: string,
+  workflowSecrets: WorkflowSecretSuggestionRecord[] = [],
 ): WorkflowExpressionSuggestion[] {
   const nodeTypesByType = new Map(nodeTypes.map((nodeType) => [nodeType.type, nodeType]));
   const suggestions: WorkflowExpressionSuggestion[] = [];
@@ -1778,6 +1793,24 @@ function buildWorkflowExpressionSuggestions(
       ),
     );
   });
+
+  workflowSecrets
+    .filter((secret) => String(secret.status ?? "active") === "active")
+    .forEach((secret) => {
+      const key = String(secret.key ?? "").trim();
+      if (!key) {
+        return;
+      }
+      addSuggestion(
+        createExpressionSuggestion(
+          "Secrets",
+          secret.displayName ? `${secret.displayName} (${key})` : key,
+          `secrets.${key}`,
+          secret.valueType ?? "secret",
+          secret.description,
+        ),
+      );
+    });
 
   const addNodeOutputs = (node: WorkflowNodeRecord) => {
     getNodeOutputSuggestions(node, nodeTypesByType, {
@@ -2012,6 +2045,10 @@ export function WorkflowDefinitionEditorPage() {
     () => createSolidEntityApi("workflowStepExecution"),
     [],
   );
+  const workflowSecretApi = React.useMemo(
+    () => createSolidEntityApi("workflowSecret"),
+    [],
+  );
   const {
     useCreateSolidEntityMutation,
     useGetSolidEntityByIdQuery,
@@ -2026,6 +2063,9 @@ export function WorkflowDefinitionEditorPage() {
   const {
     useLazyGetSolidEntitiesQuery: useLazyGetWorkflowStepExecutionsQuery,
   } = workflowStepExecutionApi;
+  const {
+    useGetSolidEntitiesQuery: useGetWorkflowSecretsQuery,
+  } = workflowSecretApi;
 
   const workflowDefinitionId = params.id ?? "";
 
@@ -2056,6 +2096,9 @@ export function WorkflowDefinitionEditorPage() {
   const { data: moduleMetadataResponse } = useGetmodulesQuery(
     "offset=0&limit=100&sort[0]=displayName%3Aasc",
   );
+  const { data: workflowSecretsResponse } = useGetWorkflowSecretsQuery(
+    "offset=0&limit=1000&fields[0]=id&fields[1]=key&fields[2]=displayName&fields[3]=description&fields[4]=valueType&fields[5]=status&filters[status][$eq]=active&sort[0]=key%3Aasc",
+  );
 
   const {
     data: nodeTypes = [],
@@ -2073,6 +2116,10 @@ export function WorkflowDefinitionEditorPage() {
   const selectableModuleRecords = React.useMemo(
     () => moduleRecords.filter(isWorkflowModuleSelectable),
     [moduleRecords],
+  );
+  const workflowSecretRecords = React.useMemo(
+    () => ((workflowSecretsResponse?.records ?? []) as WorkflowSecretSuggestionRecord[]),
+    [workflowSecretsResponse?.records],
   );
 
   const [workflowKey, setWorkflowKey] = React.useState("");
@@ -2333,9 +2380,10 @@ export function WorkflowDefinitionEditorPage() {
             definitionDraft,
             nodeTypes,
             selectedNodeId,
+            workflowSecretRecords,
           )
         : [],
-    [definitionDraft, nodeTypes, selectedNodeId],
+    [definitionDraft, nodeTypes, selectedNodeId, workflowSecretRecords],
   );
 
   const validateWorkflowIdentity = React.useCallback(() => {
@@ -4436,6 +4484,8 @@ export function WorkflowDefinitionEditorPage() {
         if (type === "object" && !isPlainObjectValue(nextDefaultValue)) {
           throw new Error("Default value must be a JSON object.");
         }
+      } else if (isWorkflowExpressionString(nextDefaultValue)) {
+        nextDefaultValue = String(nextDefaultValue).trim();
       } else if (type === "number") {
         if (nextDefaultValue === "" || nextDefaultValue === null || nextDefaultValue === undefined) {
           nextDefaultValue = "";
@@ -4636,6 +4686,8 @@ export function WorkflowDefinitionEditorPage() {
         if (type === "object" && !isPlainObjectValue(nextValue)) {
           throw new Error("Variable value must be a JSON object.");
         }
+      } else if (isWorkflowExpressionString(nextValue)) {
+        nextValue = String(nextValue).trim();
       } else if (type === "number") {
         const numericValue = Number(nextValue);
         if (!Number.isFinite(numericValue)) {
@@ -4695,12 +4747,12 @@ export function WorkflowDefinitionEditorPage() {
     }
 
     return (
-      <SolidInput
-        type={type === "number" ? "number" : type === "date" ? "date" : "text"}
-        value={defaultValueEditorDraft ?? ""}
+      <WorkflowExpressionAutocompleteField
+        value={String(defaultValueEditorDraft ?? "")}
         placeholder={type === "date" ? "Select date" : "Enter default value"}
-        onChange={(event) => {
-          setDefaultValueEditorDraft(event.target.value);
+        suggestions={selectedNodeExpressionSuggestions}
+        onChange={(value) => {
+          setDefaultValueEditorDraft(value);
           setDefaultValueEditorError("");
         }}
       />
@@ -4744,12 +4796,12 @@ export function WorkflowDefinitionEditorPage() {
     }
 
     return (
-      <SolidInput
-        type={type === "number" ? "number" : type === "date" ? "date" : "text"}
-        value={variableValueEditorDraft ?? ""}
+      <WorkflowExpressionAutocompleteField
+        value={String(variableValueEditorDraft ?? "")}
         placeholder={type === "date" ? "Select date" : "Enter variable value"}
-        onChange={(event) => {
-          setVariableValueEditorDraft(event.target.value);
+        suggestions={selectedNodeExpressionSuggestions}
+        onChange={(value) => {
+          setVariableValueEditorDraft(value);
           setVariableValueEditorError("");
         }}
       />
