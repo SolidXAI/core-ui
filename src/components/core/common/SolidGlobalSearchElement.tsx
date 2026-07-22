@@ -2211,7 +2211,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             <button
                                 type="button"
                                 className={`flex flex-col px-3 py-2 solid-search-overlay-footer-action ${overlayOptions[focusedIndex]?.id === "footer:custom" ? "solid-search-overlay-option-active" : ""}`}
-                                onClick={openCustomFilterDialog}
+                                onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    openCustomFilterDialog();
+                                }}
                                 onMouseEnter={() => {
                                     const optIndex = overlayOptions.findIndex((o) => o.id === "footer:custom");
                                     if (optIndex !== -1) setFocusedIndex(optIndex);
@@ -2235,7 +2238,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 <button
                                     type="button"
                                     className={`flex flex-col px-3 py-2 solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary ${overlayOptions[focusedIndex]?.id === "footer:grouping" ? "solid-search-overlay-option-active" : ""}`}
-                                    onClick={openGroupingDialog}
+                                    onMouseDown={(event) => {
+                                        event.preventDefault();
+                                        openGroupingDialog();
+                                    }}
                                     onMouseEnter={() => {
                                         const optIndex = overlayOptions.findIndex((o) => o.id === "footer:grouping");
                                         if (optIndex !== -1) setFocusedIndex(optIndex);
