@@ -72,7 +72,9 @@
 
 .resultsMeta {
   display: inline-flex;
+  flex-direction: row;
   align-items: center;
+  flex-shrink: 0;
   min-height: 1.75rem;
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
@@ -80,6 +82,7 @@
   color: var(--primary-color, #7c3aed);
   font-size: 0.76rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .legend {
