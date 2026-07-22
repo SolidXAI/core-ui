@@ -140,6 +140,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
         size: file.fileSize,
         id: file.id,
         fileUrl: file?._full_url,
+        downloadUrl: file?._download_url || file?._full_url,
         previewKind: getMediaPreviewKind({
             url: file?._full_url,
             fileName: file?.originalFileName,
@@ -158,7 +159,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
         if (isLightboxMediaKind(file?.previewKind)) {
             setLightboxUrls?.([{
                 src: file.fileUrl,
-                downloadUrl: file.fileUrl,
+                downloadUrl: file.downloadUrl || file.fileUrl,
                 type: file.previewKind === "video" ? "video" : undefined
             }]);
             setOpenLightbox?.(true);
@@ -191,7 +192,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                     event.preventDefault();
                                     event.stopPropagation();
                                     if (isArchivedRecord) return;
-                                    downloadMediaFile(file?.fileUrl, file?.name);
+                                    downloadMediaFile(file?.downloadUrl || file?.fileUrl, file?.name);
                                 }}
                             >
                                 <SolidIcon name="si-download" aria-hidden />

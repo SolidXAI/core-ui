@@ -162,7 +162,7 @@ export class SolidMediaMultipleField implements ISolidField {
 
 
 export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaFormFieldWidgetProps) => {
-    type MediaFileDetail = { name: string; type: string; size: number; mediaId: number | string | null; fileKey: string; fileUrl: string };
+    type MediaFileDetail = { name: string; type: string; size: number; mediaId: number | string | null; fileKey: string; fileUrl: string; downloadUrl?: string };
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -211,6 +211,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         mediaId: null,
                         fileKey: buildMediaFieldKey(file),
                         fileUrl,
+                        downloadUrl: fileUrl,
                     };
                 }
 
@@ -226,6 +227,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     mediaId: getPersistedMediaId(file),
                     fileKey: buildMediaFieldKey(file),
                     fileUrl,
+                    downloadUrl: file._download_url || fileUrl,
                 };
             })
             .filter((detail): detail is MediaFileDetail => detail !== null);
@@ -351,7 +353,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             setLightboxUrls?.([
                 {
                     src: url.fileUrl,
-                    downloadUrl: url.fileUrl,
+                    downloadUrl: url.downloadUrl || url.fileUrl,
                     type: previewKind === "video" ? "video" : undefined
                 },
             ]);
@@ -418,7 +420,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                             onClick={(event) => {
                                                 event.preventDefault();
                                                 event.stopPropagation();
-                                                downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name);
+                                                downloadMediaFile(fileDetails[0]?.downloadUrl || fileDetails[0]?.fileUrl, fileDetails[0]?.name);
                                             }}
                                         >
                                             <SolidIcon name="si-download" aria-hidden />
@@ -492,7 +494,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                         onClick={(event) => {
                                                             event.preventDefault();
                                                             event.stopPropagation();
-                                                            downloadMediaFile(file?.fileUrl, file?.name);
+                                                            downloadMediaFile(file?.downloadUrl || file?.fileUrl, file?.name);
                                                         }}
                                                     >
                                                         <SolidIcon name="si-download" aria-hidden />
@@ -582,6 +584,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         size: file.size,
                         id: `${file.name}-${file.size}`,
                         fileUrl,
+                        downloadUrl: fileUrl,
                     };
                 }
 
@@ -596,9 +599,10 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                     size: file.fileSize,
                     id: file.id,
                     fileUrl,
+                    downloadUrl: file._download_url || fileUrl,
                 };
             })
-            .filter(Boolean) as { name: string; type: string; size: number; id: number | string; fileUrl: string }[];
+            .filter(Boolean) as { name: string; type: string; size: number; id: number | string; fileUrl: string; downloadUrl?: string }[];
 
         setFileDetails(details);
 
@@ -618,7 +622,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
             setLightboxUrls?.([
                 {
                     src: url.fileUrl,
-                    downloadUrl: url.fileUrl,
+                    downloadUrl: url.downloadUrl || url.fileUrl,
                     type: previewKind === "video" ? "video" : undefined
                 },
             ]);
@@ -629,7 +633,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
         openMediaInNewTab(url?.fileUrl);
     }
 
-    const renderMediaFileCard = (file: { name: string; type: string; size: number; id: number | string; fileUrl: string }, className = "") => (
+    const renderMediaFileCard = (file: { name: string; type: string; size: number; id: number | string; fileUrl: string; downloadUrl?: string }, className = "") => (
         <div className={`${styles.mediaAttachmentCard} ${className}`.trim()}>
             <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
                 <FileReaderExt fileDetails={file} />
@@ -651,7 +655,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                 onClick={(event) => {
                                     event.preventDefault();
                                     event.stopPropagation();
-                                    downloadMediaFile(file?.fileUrl, file?.name);
+                                    downloadMediaFile(file?.downloadUrl || file?.fileUrl, file?.name);
                                 }}
                             >
                                 <SolidIcon name="si-download" aria-hidden />
