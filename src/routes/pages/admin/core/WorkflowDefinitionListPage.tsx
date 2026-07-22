@@ -6,19 +6,26 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Column, type DataTableStateEvent, SolidDataTable } from "../../../../components/core/list/SolidDataTable";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
+import { useGetmodulesQuery } from "../../../../redux/api/moduleApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import {
   SolidButton,
+  SolidConfirmDialog,
   SolidInput,
   SolidSpinner,
   SolidTag,
 } from "../../../../components/shad-cn-ui";
 import "./WorkflowDefinitionListPage.css";
 
+const RESERVED_WORKFLOW_MODULE_NAMES = new Set(["solid-core"]);
+
 type WorkflowDefinitionListRecord = {
   id: number;
   key?: string | null;
   displayName?: string | null;
+  moduleMetadata?: Record<string, any> | null;
+  moduleMetadataId?: number | null;
+  moduleMetadataUserKey?: string | null;
   description?: string | null;
   namespace?: string | null;
   status?: string | null;
@@ -120,6 +127,11 @@ function statusTone(status?: string | null) {
   return undefined;
 }
 
+function isWorkflowModuleSelectable(module?: Record<string, any> | null) {
+  const moduleName = String(module?.name ?? "").trim();
+  return Boolean(moduleName) && !RESERVED_WORKFLOW_MODULE_NAMES.has(moduleName);
+}
+
 export function WorkflowDefinitionListPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -140,11 +152,21 @@ export function WorkflowDefinitionListPage() {
   const [sortOrder, setSortOrder] = React.useState<1 | -1 | 0>(-1);
   const [searchInput, setSearchInput] = React.useState("");
   const [searchValue, setSearchValue] = React.useState("");
+  const [deleteCandidate, setDeleteCandidate] =
+    React.useState<WorkflowDefinitionListRecord | null>(null);
 
   const [triggerGetWorkflowDefinitions, { data, isLoading, isFetching, error }] =
     useLazyGetSolidEntitiesQuery();
   const [deleteWorkflowDefinition, { isLoading: isDeleting }] =
     useDeleteSolidEntityMutation();
+  const { data: moduleMetadataResponse } = useGetmodulesQuery(
+    "offset=0&limit=100&sort[0]=displayName%3Aasc",
+  );
+
+  const defaultWorkflowModuleName = React.useMemo(() => {
+    const moduleRecords = ((moduleMetadataResponse?.records ?? []) as Record<string, any>[]);
+    return moduleRecords.find(isWorkflowModuleSelectable)?.name ?? "";
+  }, [moduleMetadataResponse?.records]);
 
   const loadData = React.useCallback(
     async (nextState?: Partial<{
@@ -185,15 +207,17 @@ export function WorkflowDefinitionListPage() {
     () => ((data?.records ?? []) as WorkflowDefinitionListRecord[]),
     [data],
   );
-  const handleDelete = async (record: WorkflowDefinitionListRecord) => {
-    const confirmed = window.confirm(
-      `Delete workflow definition "${record.displayName || record.key || record.id}"?`,
-    );
+  const handleDelete = (record: WorkflowDefinitionListRecord) => {
+    setDeleteCandidate(record);
+  };
 
-    if (!confirmed) {
+  const confirmDelete = async () => {
+    if (!deleteCandidate) {
       return;
     }
 
+    const record = deleteCandidate;
+    setDeleteCandidate(null);
     try {
       await deleteWorkflowDefinition(record.id).unwrap();
       dispatch(
@@ -265,6 +289,7 @@ export function WorkflowDefinitionListPage() {
               onClick={() =>
                 navigate("/admin/core/solid-core/workflow-definition/editor/new")
               }
+              disabled={!defaultWorkflowModuleName}
             >
               New workflow
             </SolidButton>
@@ -461,6 +486,25 @@ export function WorkflowDefinitionListPage() {
           </div>
         )}
       </section>
+      <SolidConfirmDialog
+        open={Boolean(deleteCandidate)}
+        onCancel={() => setDeleteCandidate(null)}
+        onConfirm={() => void confirmDelete()}
+        className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
+        headerClassName="solid-shadcn-dialog-head"
+        bodyClassName="solid-shadcn-dialog-body"
+        footerClassName="solid-shadcn-dialog-actions"
+        separatorClassName="solid-shadcn-dialog-sep"
+        showSeparator
+        title="Delete Workflow Definition"
+        message={
+          <p className="solid-shadcn-dialog-text">
+            {`Are you sure you want to delete workflow definition "${deleteCandidate?.displayName || deleteCandidate?.key || deleteCandidate?.id}"?`}
+          </p>
+        }
+        confirmLabel={isDeleting ? "Deleting..." : "Delete"}
+        cancelLabel="Cancel"
+      />
     </div>
   );
 }

@@ -101,6 +101,7 @@ export interface WorkflowNodeReferenceDefinition {
 export interface WorkflowNodeAuthoringMetadata {
   defaultConfiguration?: Record<string, any>;
   configurationFields?: WorkflowNodeConfigurationFieldDefinition[];
+  configurationLayout?: WorkflowNodeConfigurationLayoutDefinition;
   childSlots?: WorkflowNodeChildSlotDefinition[];
   outputs?: WorkflowNodeOutputDefinition[];
   supportsExpressions?: boolean;
@@ -111,6 +112,18 @@ export interface WorkflowNodeAuthoringMetadata {
   supportsName?: boolean;
   supportsDescription?: boolean;
   searchableText?: string[];
+}
+
+export interface WorkflowNodeConfigurationLayoutDefinition {
+  type: "tabs";
+  tabs: WorkflowNodeConfigurationLayoutTabDefinition[];
+}
+
+export interface WorkflowNodeConfigurationLayoutTabDefinition {
+  key: string;
+  label: string;
+  fields?: string[];
+  groups?: string[];
 }
 
 export interface WorkflowNodeRuntimeMetadata {

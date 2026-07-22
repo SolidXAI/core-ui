@@ -37,8 +37,12 @@ import {
 import {
   WorkflowAddNodeDialog,
   WorkflowNodeEditorDialog,
+  type WorkflowExpressionSuggestion,
 } from "../../../../components/workflow/WorkflowNodeSchemaEditor";
-import type { WorkflowNodeMetadataResponse } from "../../../../types/workflow-node";
+import type {
+  WorkflowNodeConfigurationFieldDefinition,
+  WorkflowNodeMetadataResponse,
+} from "../../../../types/workflow-node";
 import {
   SolidAutocomplete,
   SolidButton,
@@ -57,6 +61,13 @@ import {
 } from "../../../../components/shad-cn-ui";
 import { SolidJsonEditor } from "../../../../components/core/json/SolidJsonEditor";
 import "./WorkflowDefinitionEditorPage.css";
+
+const RESERVED_WORKFLOW_MODULE_NAMES = new Set(["solid-core"]);
+
+function isWorkflowModuleSelectable(module?: Record<string, any> | null) {
+  const moduleName = String(module?.name ?? "").trim();
+  return Boolean(moduleName) && !RESERVED_WORKFLOW_MODULE_NAMES.has(moduleName);
+}
 
 type WorkflowDefinitionRecord = {
   id: number;
@@ -128,6 +139,7 @@ type WorkflowDefinitionParseResult =
 type WorkflowDetailTab =
   | "overview"
   | "inputs"
+  | "variables"
   | "topology"
   | "executions"
   | "triggers";
@@ -213,6 +225,16 @@ type WorkflowInputEntry = {
     label: string;
     required: boolean;
     default: any;
+    description: string;
+  };
+};
+
+type WorkflowVariableEntry = {
+  key: string;
+  definition: {
+    type: string;
+    label: string;
+    value: any;
     description: string;
   };
 };
@@ -347,10 +369,43 @@ function formatCronNumber(value: string) {
   return String(Number(value)).padStart(2, "0");
 }
 
-function describeCronDayScope(dayOfMonth: string, month: string, dayOfWeek: string) {
-  if (dayOfMonth !== "*" || month !== "*") {
+function describeCronList(value: string) {
+  const items = String(value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (items.length <= 1) {
+    return value;
+  }
+  if (items.length === 2) {
+    return items.join(" and ");
+  }
+
+  return `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+}
+
+function describeCronMonthScope(month: string) {
+  if (month === "*") {
     return "";
   }
+  if (/^\d+(,\d+)*$/.test(month)) {
+    return ` in months ${describeCronList(month)}`;
+  }
+  return ` in month ${month}`;
+}
+
+function describeCronDateScope(dayOfMonth: string) {
+  if (dayOfMonth === "*") {
+    return "";
+  }
+  if (/^\d+(,\d+)*$/.test(dayOfMonth)) {
+    return ` on dates ${describeCronList(dayOfMonth)}`;
+  }
+  return ` on day ${dayOfMonth}`;
+}
+
+function describeCronWeekdayScope(dayOfWeek: string) {
   if (dayOfWeek === "*") {
     return "";
   }
@@ -366,6 +421,14 @@ function describeCronDayScope(dayOfMonth: string, month: string, dayOfWeek: stri
   return ` on weekday ${dayOfWeek}`;
 }
 
+function describeCronCalendarScope(dayOfMonth: string, month: string, dayOfWeek: string) {
+  return [
+    describeCronDateScope(dayOfMonth),
+    describeCronWeekdayScope(dayOfWeek),
+    describeCronMonthScope(month),
+  ].join("");
+}
+
 function describeWorkflowCronExpression(expression: string, timezone = "UTC") {
   const cron = String(expression ?? "").trim();
   if (!isValidSimpleCronExpression(cron)) {
@@ -378,7 +441,11 @@ function describeWorkflowCronExpression(expression: string, timezone = "UTC") {
   const minuteStep = getCronMinuteStep(parts.minute);
   const time = numericHour && numericMinute ? `${numericHour}:${numericMinute}` : null;
   const timezoneSuffix = timezone ? ` (${timezone})` : "";
-  const dayScope = describeCronDayScope(parts.dayOfMonth, parts.month, parts.dayOfWeek);
+  const calendarScope = describeCronCalendarScope(
+    parts.dayOfMonth,
+    parts.month,
+    parts.dayOfWeek,
+  );
 
   if (cron === "* * * * *") {
     return `Runs every minute${timezoneSuffix}.`;
@@ -392,8 +459,8 @@ function describeWorkflowCronExpression(expression: string, timezone = "UTC") {
   ) {
     return `Runs every ${parts.minute.replace("*/", "")} minutes${timezoneSuffix}.`;
   }
-  if (minuteStep && numericHour && parts.dayOfMonth === "*" && parts.month === "*") {
-    return `Runs every ${minuteStep} minutes between ${numericHour}:00 and ${numericHour}:59${dayScope}${timezoneSuffix}.`;
+  if (minuteStep && numericHour) {
+    return `Runs every ${minuteStep} minutes between ${numericHour}:00 and ${numericHour}:59${calendarScope}${timezoneSuffix}.`;
   }
   if (time && parts.dayOfMonth === "*" && parts.month === "*" && parts.dayOfWeek === "*") {
     return `Runs every day at ${time}${timezoneSuffix}.`;
@@ -403,6 +470,9 @@ function describeWorkflowCronExpression(expression: string, timezone = "UTC") {
   }
   if (time && parts.dayOfMonth === "*" && parts.month === "*" && parts.dayOfWeek === "1-5") {
     return `Runs every weekday at ${time}${timezoneSuffix}.`;
+  }
+  if (time) {
+    return `Runs at ${time}${calendarScope}${timezoneSuffix}.`;
   }
   return `Runs on the schedule ${cron}${timezoneSuffix}.`;
 }
@@ -535,14 +605,32 @@ function camelizeWorkflowInputKey(value: string) {
 
   return words
     .map((word, index) => {
-      const normalized = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      return index === 0 ? normalized.charAt(0).toLowerCase() + normalized.slice(1) : normalized;
+      const hasLowercase = /[a-z]/.test(word);
+      const hasUppercase = /[A-Z]/.test(word);
+      const normalizedWord = hasLowercase && hasUppercase ? word : word.toLowerCase();
+      return index === 0
+        ? normalizedWord.charAt(0).toLowerCase() + normalizedWord.slice(1)
+        : normalizedWord.charAt(0).toUpperCase() + normalizedWord.slice(1);
     })
     .join("");
 }
 
 function buildUniqueWorkflowInputKey(baseKey: string, existingKeys: string[]) {
   const fallbackKey = camelizeWorkflowInputKey(baseKey) || "input";
+  const existing = new Set(existingKeys);
+  if (!existing.has(fallbackKey)) {
+    return fallbackKey;
+  }
+
+  let index = 2;
+  while (existing.has(`${fallbackKey}${index}`)) {
+    index += 1;
+  }
+  return `${fallbackKey}${index}`;
+}
+
+function buildUniqueWorkflowVariableKey(baseKey: string, existingKeys: string[]) {
+  const fallbackKey = camelizeWorkflowInputKey(baseKey) || "variable";
   const existing = new Set(existingKeys);
   if (!existing.has(fallbackKey)) {
     return fallbackKey;
@@ -626,6 +714,55 @@ function getWorkflowInputEntries(inputs?: Record<string, any>): WorkflowInputEnt
   }));
 }
 
+function getWorkflowVariableMetadata(metadata?: Record<string, any>) {
+  const variableDefinitions = metadata?.variableDefinitions;
+  return variableDefinitions && typeof variableDefinitions === "object" && !Array.isArray(variableDefinitions)
+    ? variableDefinitions as Record<string, any>
+    : {};
+}
+
+function inferWorkflowVariableType(value: unknown, metadataType?: string) {
+  if (
+    metadataType &&
+    WORKFLOW_INPUT_TYPE_OPTIONS.some((option) => option.value === metadataType)
+  ) {
+    return metadataType;
+  }
+  if (Array.isArray(value)) {
+    return "array";
+  }
+  if (value && typeof value === "object") {
+    return "object";
+  }
+  if (typeof value === "number") {
+    return "number";
+  }
+  if (typeof value === "boolean") {
+    return "boolean";
+  }
+  return "string";
+}
+
+function getWorkflowVariableEntries(
+  variables?: Record<string, any>,
+  metadata?: Record<string, any>,
+): WorkflowVariableEntry[] {
+  const variableMetadata = getWorkflowVariableMetadata(metadata);
+  return Object.entries(variables ?? {}).map(([key, value]) => {
+    const meta = variableMetadata[key] ?? {};
+    const label = typeof meta.label === "string" ? meta.label : key;
+    return {
+      key,
+      definition: {
+        type: inferWorkflowVariableType(value, meta.type),
+        label,
+        value,
+        description: typeof meta.description === "string" ? meta.description : "",
+      },
+    };
+  });
+}
+
 function stringifyWorkflowRunInputDefault(value: unknown, type: string) {
   if (value === undefined || value === null) {
     return type === "boolean" ? false : "";
@@ -670,6 +807,20 @@ function formatWorkflowInputDefaultSummary(value: unknown) {
   return `Default - ${serialized.length > 58 ? `${serialized.slice(0, 58)}...` : serialized}`;
 }
 
+function formatWorkflowVariableValueSummary(value: unknown) {
+  if (typeof value === "object" && value !== null) {
+    const serialized = JSON.stringify(value);
+    return `Value - ${serialized.length > 58 ? `${serialized.slice(0, 58)}...` : serialized}`;
+  }
+
+  if (value === "") {
+    return 'Value - ""';
+  }
+
+  const serialized = String(value ?? "");
+  return `Value - ${serialized.length > 58 ? `${serialized.slice(0, 58)}...` : serialized}`;
+}
+
 function getWorkflowInputDefaultEditorValue(value: unknown, type: string) {
   if (!hasWorkflowInputDefaultValue(value)) {
     if (type === "array") {
@@ -699,6 +850,42 @@ function getWorkflowInputDefaultEditorValue(value: unknown, type: string) {
     return Boolean(value);
   }
 
+  return String(value);
+}
+
+function getWorkflowVariableInitialValue(type: string) {
+  if (type === "array") {
+    return [];
+  }
+  if (type === "object") {
+    return {};
+  }
+  if (type === "boolean") {
+    return false;
+  }
+  if (type === "number") {
+    return 0;
+  }
+  return "";
+}
+
+function getWorkflowVariableEditorValue(value: unknown, type: string) {
+  if (value === undefined || value === null) {
+    return getWorkflowVariableInitialValue(type);
+  }
+  if (type === "object" || type === "array") {
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return getWorkflowVariableInitialValue(type);
+      }
+    }
+    return value;
+  }
+  if (type === "boolean") {
+    return Boolean(value);
+  }
   return String(value);
 }
 
@@ -892,6 +1079,14 @@ function validateWorkflowDefinitionSchema(
 
       (nodeType?.authoring?.configurationFields ?? []).forEach((field) => {
         if (!field.required) {
+          return;
+        }
+
+        if (
+          configuration &&
+          typeof configuration === "object" &&
+          !isConfigurationFieldVisibleForValidation(field, configuration)
+        ) {
           return;
         }
 
@@ -1462,6 +1657,172 @@ function findNodeById(
   return undefined;
 }
 
+function createExpressionSuggestion(
+  group: WorkflowExpressionSuggestion["group"],
+  label: string,
+  path: string,
+  detail?: string,
+  description?: string,
+): WorkflowExpressionSuggestion {
+  return {
+    group,
+    label,
+    insertText: `{{ ${path} }}`,
+    detail,
+    description,
+  };
+}
+
+function inferWorkflowValueType(value: any) {
+  if (Array.isArray(value)) {
+    return "array";
+  }
+  if (value === null || value === undefined) {
+    return undefined;
+  }
+  return typeof value === "object" ? "object" : typeof value;
+}
+
+function getNodeOutputSuggestions(
+  node: WorkflowNodeRecord,
+  nodeTypesByType: Map<string, WorkflowNodeMetadataResponse>,
+  options: {
+    prefix?: string;
+    labelPrefix?: string;
+    includeParallelTaskOutputs?: boolean;
+  } = {},
+): WorkflowExpressionSuggestion[] {
+  const nodeId = String(node.id ?? "").trim();
+  if (!nodeId) {
+    return [];
+  }
+
+  const nodeType = nodeTypesByType.get(String(node.type ?? ""));
+  const outputDefinitions = nodeType?.authoring?.outputs ?? [];
+  const prefix = options.prefix ?? `outputs.${nodeId}`;
+  const labelPrefix = options.labelPrefix ?? nodeId;
+  const suggestions = outputDefinitions.map((output) => {
+    const outputPath = output.path ?? output.key;
+    return createExpressionSuggestion(
+      "Outputs",
+      `${labelPrefix}.${outputPath}`,
+      `${prefix}.${outputPath}`,
+      output.valueType,
+      output.description,
+    );
+  });
+
+  if (node.type === "parallel" && options.includeParallelTaskOutputs) {
+    (node.tasks ?? []).forEach((task, index) => {
+      suggestions.push(
+        ...getNodeOutputSuggestions(task, nodeTypesByType, {
+          prefix: `${prefix}.tasks.${index}.outputs.${task.id}`,
+          labelPrefix: `${labelPrefix}.tasks.${index}.${task.id}`,
+        }),
+      );
+    });
+  }
+
+  return suggestions;
+}
+
+function buildWorkflowExpressionSuggestions(
+  definition: WorkflowDefinitionDsl,
+  nodeTypes: WorkflowNodeMetadataResponse[],
+  currentNodeId: string,
+): WorkflowExpressionSuggestion[] {
+  const nodeTypesByType = new Map(nodeTypes.map((nodeType) => [nodeType.type, nodeType]));
+  const suggestions: WorkflowExpressionSuggestion[] = [];
+  const seenInsertText = new Set<string>();
+
+  const addSuggestion = (suggestion: WorkflowExpressionSuggestion) => {
+    if (seenInsertText.has(suggestion.insertText)) {
+      return;
+    }
+    seenInsertText.add(suggestion.insertText);
+    suggestions.push(suggestion);
+  };
+
+  Object.entries(definition.inputs ?? {}).forEach(([inputKey, inputDefinition]) => {
+    const definitionObject =
+      inputDefinition && typeof inputDefinition === "object" && !Array.isArray(inputDefinition)
+        ? inputDefinition
+        : {};
+    addSuggestion(
+      createExpressionSuggestion(
+        "Inputs",
+        inputKey,
+        `inputs.${inputKey}`,
+        definitionObject.type ?? inferWorkflowValueType(inputDefinition),
+        definitionObject.description,
+      ),
+    );
+  });
+
+  const variableDefinitions =
+    definition.metadata?.variableDefinitions &&
+    typeof definition.metadata.variableDefinitions === "object" &&
+    !Array.isArray(definition.metadata.variableDefinitions)
+      ? definition.metadata.variableDefinitions
+      : {};
+
+  Object.entries(definition.variables ?? {}).forEach(([variableKey, variableValue]) => {
+    const variableDefinition = variableDefinitions[variableKey] ?? {};
+    addSuggestion(
+      createExpressionSuggestion(
+        "Variables",
+        variableDefinition.label ?? variableKey,
+        `variables.${variableKey}`,
+        variableDefinition.type ?? inferWorkflowValueType(variableValue),
+        variableDefinition.description,
+      ),
+    );
+  });
+
+  const addNodeOutputs = (node: WorkflowNodeRecord) => {
+    getNodeOutputSuggestions(node, nodeTypesByType, {
+      includeParallelTaskOutputs: true,
+    }).forEach(addSuggestion);
+  };
+
+  const visitSequence = (nodes: WorkflowNodeRecord[]): boolean => {
+    for (const node of nodes ?? []) {
+      if (String(node.id) === currentNodeId) {
+        return true;
+      }
+
+      if (node.type === "parallel" && Array.isArray(node.tasks)) {
+        const foundInParallelBranch = node.tasks.some((task) => visitSequence([task]));
+        if (foundInParallelBranch) {
+          return true;
+        }
+      } else {
+        const childSequences = [
+          node.tasks,
+          node.then,
+          node.else,
+          node.defaults,
+          ...Object.values(node.cases ?? {}),
+        ].filter(Array.isArray) as WorkflowNodeRecord[][];
+
+        for (const childSequence of childSequences) {
+          if (visitSequence(childSequence)) {
+            return true;
+          }
+        }
+      }
+
+      addNodeOutputs(node);
+    }
+
+    return false;
+  };
+
+  visitSequence(definition.nodes ?? []);
+
+  return suggestions;
+}
+
 function getFirstNodeId(nodes: WorkflowNodeRecord[]): string {
   return nodes[0]?.id ?? "";
 }
@@ -1578,6 +1939,46 @@ function getFieldValue(value: Record<string, any>, pathOrKey: string) {
   return current;
 }
 
+function isConfigurationFieldVisibleForValidation(
+  field: WorkflowNodeConfigurationFieldDefinition,
+  configuration: Record<string, any>,
+) {
+  const visibleWhen = field.uiSchema?.visibleWhen as
+    | {
+        field?: string;
+        path?: string;
+        equals?: any;
+        notEquals?: any;
+        includes?: any[];
+      }
+    | undefined;
+
+  if (!visibleWhen) {
+    return true;
+  }
+
+  const dependencyPath = visibleWhen.path ?? visibleWhen.field;
+  if (!dependencyPath) {
+    return true;
+  }
+
+  const dependencyValue = getFieldValue(configuration, dependencyPath);
+
+  if ("equals" in visibleWhen) {
+    return dependencyValue === visibleWhen.equals;
+  }
+
+  if ("notEquals" in visibleWhen) {
+    return dependencyValue !== visibleWhen.notEquals;
+  }
+
+  if (Array.isArray(visibleWhen.includes)) {
+    return visibleWhen.includes.includes(dependencyValue);
+  }
+
+  return true;
+}
+
 function validateWorkflowDefinitionClient(
   definition: WorkflowDefinitionDsl,
   nodeTypes: WorkflowNodeMetadataResponse[],
@@ -1627,7 +2028,6 @@ export function WorkflowDefinitionEditorPage() {
   } = workflowStepExecutionApi;
 
   const workflowDefinitionId = params.id ?? "";
-  const moduleName = params.moduleName ?? "solid-core";
 
   const {
     data: workflowDefinitionResponse,
@@ -1670,6 +2070,10 @@ export function WorkflowDefinitionEditorPage() {
     () => ((moduleMetadataResponse?.records ?? []) as Record<string, any>[]),
     [moduleMetadataResponse?.records],
   );
+  const selectableModuleRecords = React.useMemo(
+    () => moduleRecords.filter(isWorkflowModuleSelectable),
+    [moduleRecords],
+  );
 
   const [workflowKey, setWorkflowKey] = React.useState("");
   const [workflowDisplayName, setWorkflowDisplayName] = React.useState("");
@@ -1696,6 +2100,13 @@ export function WorkflowDefinitionEditorPage() {
   const [defaultValueEditorError, setDefaultValueEditorError] = React.useState("");
   const [defaultValueEditorResetToken, setDefaultValueEditorResetToken] =
     React.useState("default-value-editor");
+  const [variableValueEditorKey, setVariableValueEditorKey] =
+    React.useState<string | null>(null);
+  const [variableValueEditorDraft, setVariableValueEditorDraft] = React.useState<any>("");
+  const [variableValueEditorJsonText, setVariableValueEditorJsonText] = React.useState("");
+  const [variableValueEditorError, setVariableValueEditorError] = React.useState("");
+  const [variableValueEditorResetToken, setVariableValueEditorResetToken] =
+    React.useState("variable-value-editor");
   const [definitionDraft, setDefinitionDraft] = React.useState<WorkflowDefinitionDsl>(
     createEmptyWorkflowDefinition(),
   );
@@ -1769,14 +2180,13 @@ export function WorkflowDefinitionEditorPage() {
 
   React.useEffect(() => {
     if (workflowDefinitionId === "new") {
-      if (!moduleRecords.length) {
+      if (!selectableModuleRecords.length) {
         return;
       }
 
       setWorkflowModule((current) =>
-        current ??
-        moduleRecords.find((module) => module.name === moduleName) ??
-        moduleRecords[0] ??
+        (current && isWorkflowModuleSelectable(current) ? current : null) ??
+        selectableModuleRecords[0] ??
         null,
       );
       return;
@@ -1795,10 +2205,16 @@ export function WorkflowDefinitionEditorPage() {
       ) ??
       null;
 
-    if (selectedModule) {
+    if (selectedModule && isWorkflowModuleSelectable(selectedModule)) {
       setWorkflowModule(selectedModule);
+    } else if (selectedModule) {
+      setWorkflowModule(null);
+      setWorkflowIdentityErrors((current) => ({
+        ...current,
+        moduleMetadata: "Workflows cannot be saved to Solid Core. Select an application module.",
+      }));
     }
-  }, [moduleName, moduleRecords, record, workflowDefinitionId]);
+  }, [moduleRecords, record, selectableModuleRecords, workflowDefinitionId]);
 
   React.useEffect(() => {
     if (workflowDefinitionId === "new") {
@@ -1910,6 +2326,18 @@ export function WorkflowDefinitionEditorPage() {
     return nodeTypes.find((nodeType) => nodeType.type === selectedNode.type);
   }, [nodeTypes, selectedNode]);
 
+  const selectedNodeExpressionSuggestions = React.useMemo(
+    () =>
+      selectedNodeId
+        ? buildWorkflowExpressionSuggestions(
+            definitionDraft,
+            nodeTypes,
+            selectedNodeId,
+          )
+        : [],
+    [definitionDraft, nodeTypes, selectedNodeId],
+  );
+
   const validateWorkflowIdentity = React.useCallback(() => {
     const errors: WorkflowIdentityErrors = {};
     const displayName = workflowDisplayName.trim();
@@ -1924,6 +2352,8 @@ export function WorkflowDefinitionEditorPage() {
 
     if (!workflowModule?.id && !workflowModule?.name) {
       errors.moduleMetadata = "Module is required.";
+    } else if (!isWorkflowModuleSelectable(workflowModule)) {
+      errors.moduleMetadata = "Workflows cannot be saved to Solid Core. Select an application module.";
     }
 
     if (!key) {
@@ -1978,18 +2408,27 @@ export function WorkflowDefinitionEditorPage() {
     ({ query }: { query: string }) => {
       const normalizedQuery = query.trim().toLowerCase();
       const nextSuggestions = normalizedQuery
-        ? moduleRecords.filter((module) =>
+        ? selectableModuleRecords.filter((module) =>
             [module.displayName, module.name]
               .filter(Boolean)
               .some((value) => String(value).toLowerCase().includes(normalizedQuery)),
           )
-        : moduleRecords;
+        : selectableModuleRecords;
       setWorkflowModuleSuggestions(nextSuggestions);
     },
-    [moduleRecords],
+    [selectableModuleRecords],
   );
 
   const handleWorkflowModuleChange = ({ value }: { value: any }) => {
+    if (value && !isWorkflowModuleSelectable(value)) {
+      setWorkflowModule(null);
+      setWorkflowIdentityErrors((current) => ({
+        ...current,
+        moduleMetadata: "Workflows cannot be saved to Solid Core. Select an application module.",
+      }));
+      return;
+    }
+
     setWorkflowModule(value ?? null);
     setWorkflowIdentityErrors((current) => ({ ...current, moduleMetadata: undefined }));
   };
@@ -2171,15 +2610,8 @@ export function WorkflowDefinitionEditorPage() {
     executionTotalRecords,
   );
   const openExecutionDetails = React.useCallback((execution: WorkflowExecutionRecord) => {
-    setSelectedExecution(execution);
-    setSelectedExecutionTab("summary");
-    setSelectedExecutionOutputMode("visual");
-    setExpandedExecutionOutputKey(null);
-    setExecutionLogLevelFilter("all");
-    setExecutionLogSearch("");
-    setExpandedExecutionLogId(null);
-    setExpandedTimelineStepId(null);
-  }, []);
+    navigate(`/admin/core/solid-core/workflow-execution/detail/${execution.id}`);
+  }, [navigate]);
 
   const loadSelectedExecutionLogs = React.useCallback(async () => {
     if (!selectedExecution?.id) {
@@ -3457,7 +3889,6 @@ export function WorkflowDefinitionEditorPage() {
         [],
       ),
     };
-    const selectedModuleName = workflowModule?.name ?? moduleName;
 
     try {
       if (record?.id) {
@@ -3472,14 +3903,7 @@ export function WorkflowDefinitionEditorPage() {
             detail: "Workflow definition updated successfully.",
           }),
         );
-        if (selectedModuleName !== moduleName) {
-          navigate(
-            `/admin/core/${selectedModuleName}/workflow-definition/editor/${record.id}`,
-            { replace: true },
-          );
-        } else {
-          refetch();
-        }
+        refetch();
       } else {
         const result: any = await createWorkflowDefinition(payload).unwrap();
         const createdId = result?.data?.id ?? result?.id;
@@ -3492,7 +3916,7 @@ export function WorkflowDefinitionEditorPage() {
         );
         if (createdId) {
           navigate(
-            `/admin/core/${selectedModuleName}/workflow-definition/editor/${createdId}`,
+            `/admin/core/solid-core/workflow-definition/editor/${createdId}`,
             { replace: true },
           );
         }
@@ -3514,6 +3938,10 @@ export function WorkflowDefinitionEditorPage() {
   const workflowInputEntries = React.useMemo(
     () => getWorkflowInputEntries(definitionDraft.inputs),
     [definitionDraft.inputs],
+  );
+  const workflowVariableEntries = React.useMemo(
+    () => getWorkflowVariableEntries(definitionDraft.variables, definitionDraft.metadata),
+    [definitionDraft.metadata, definitionDraft.variables],
   );
   const workflowExecutionReference =
     workflowDefinitionId && workflowDefinitionId !== "new"
@@ -3566,6 +3994,12 @@ export function WorkflowDefinitionEditorPage() {
       workflowInputEntries.find((entry) => entry.key === defaultValueEditorInputKey) ??
       null,
     [defaultValueEditorInputKey, workflowInputEntries],
+  );
+  const variableValueEditorEntry = React.useMemo(
+    () =>
+      workflowVariableEntries.find((entry) => entry.key === variableValueEditorKey) ??
+      null,
+    [variableValueEditorKey, workflowVariableEntries],
   );
 
   const copyWorkflowTriggerExample = async (value: string) => {
@@ -4043,6 +4477,187 @@ export function WorkflowDefinitionEditorPage() {
     updateWorkflowInputs(nextInputs);
   };
 
+  const updateWorkflowVariables = (
+    nextVariables: Record<string, any>,
+    nextVariableMetadata?: Record<string, any>,
+  ) => {
+    const currentMetadata = definitionDraft.metadata ?? {};
+    const variableDefinitions =
+      nextVariableMetadata ?? getWorkflowVariableMetadata(currentMetadata);
+    syncDraftToCode({
+      ...definitionDraft,
+      variables: nextVariables,
+      metadata: {
+        ...currentMetadata,
+        variableDefinitions,
+      },
+    });
+  };
+
+  const addWorkflowVariable = () => {
+    const nextKey = buildUniqueWorkflowVariableKey(
+      "Variable",
+      Object.keys(definitionDraft.variables ?? {}),
+    );
+    updateWorkflowVariables(
+      {
+        ...(definitionDraft.variables ?? {}),
+        [nextKey]: "",
+      },
+      {
+        ...getWorkflowVariableMetadata(definitionDraft.metadata),
+        [nextKey]: {
+          label: "Variable",
+          type: "string",
+          description: "",
+        },
+      },
+    );
+  };
+
+  const updateWorkflowVariableLabel = (currentKey: string, nextLabel: string) => {
+    const currentVariables = definitionDraft.variables ?? {};
+    const currentVariableMetadata = getWorkflowVariableMetadata(definitionDraft.metadata);
+    const existingKeys = Object.keys(currentVariables).filter((key) => key !== currentKey);
+    const nextKey = camelizeWorkflowInputKey(nextLabel)
+      ? buildUniqueWorkflowVariableKey(nextLabel, existingKeys)
+      : currentKey;
+
+    if (!nextKey) {
+      return;
+    }
+
+    const nextVariables: Record<string, any> = {};
+    const nextVariableMetadata: Record<string, any> = {};
+
+    Object.entries(currentVariables).forEach(([key, value]) => {
+      const outputKey = key === currentKey ? nextKey : key;
+      nextVariables[outputKey] = value;
+      nextVariableMetadata[outputKey] = {
+        ...(currentVariableMetadata[key] ?? {}),
+        label: key === currentKey ? nextLabel : currentVariableMetadata[key]?.label,
+      };
+    });
+
+    updateWorkflowVariables(nextVariables, nextVariableMetadata);
+  };
+
+  const updateWorkflowVariable = (key: string, patch: Record<string, any>) => {
+    const currentVariables = definitionDraft.variables ?? {};
+    const currentVariableMetadata = getWorkflowVariableMetadata(definitionDraft.metadata);
+    const currentEntry =
+      workflowVariableEntries.find((entry) => entry.key === key)?.definition ?? {
+        type: inferWorkflowVariableType(currentVariables[key], currentVariableMetadata[key]?.type),
+        label: key,
+        description: "",
+      };
+    const nextType = patch.type ?? currentEntry.type;
+    const nextValue = patch.value !== undefined
+      ? patch.value
+      : patch.type && patch.type !== currentEntry.type
+        ? getWorkflowVariableInitialValue(nextType)
+        : currentVariables[key];
+
+    updateWorkflowVariables(
+      {
+        ...currentVariables,
+        [key]: nextValue,
+      },
+      {
+        ...currentVariableMetadata,
+        [key]: {
+          ...(currentVariableMetadata[key] ?? {}),
+          label: patch.label ?? currentEntry.label,
+          type: nextType,
+          description: patch.description ?? currentEntry.description,
+        },
+      },
+    );
+  };
+
+  const removeWorkflowVariable = (keyToRemove: string) => {
+    const nextVariables = { ...(definitionDraft.variables ?? {}) };
+    const nextVariableMetadata = {
+      ...getWorkflowVariableMetadata(definitionDraft.metadata),
+    };
+    delete nextVariables[keyToRemove];
+    delete nextVariableMetadata[keyToRemove];
+    updateWorkflowVariables(nextVariables, nextVariableMetadata);
+  };
+
+  const closeVariableValueEditor = () => {
+    setVariableValueEditorKey(null);
+    setVariableValueEditorDraft("");
+    setVariableValueEditorJsonText("");
+    setVariableValueEditorError("");
+  };
+
+  const openVariableValueEditor = (key: string) => {
+    const entry = workflowVariableEntries.find((variableEntry) => variableEntry.key === key);
+    if (!entry) {
+      return;
+    }
+
+    const editorValue = getWorkflowVariableEditorValue(
+      entry.definition.value,
+      entry.definition.type,
+    );
+
+    setVariableValueEditorKey(key);
+    setVariableValueEditorDraft(editorValue);
+    setVariableValueEditorJsonText(
+      entry.definition.type === "object" || entry.definition.type === "array"
+        ? JSON.stringify(editorValue, null, 2)
+        : "",
+    );
+    setVariableValueEditorError("");
+    setVariableValueEditorResetToken(`variable-value-editor-${key}-${Date.now()}`);
+  };
+
+  const saveVariableValueEditor = () => {
+    if (!variableValueEditorEntry) {
+      return;
+    }
+
+    const type = variableValueEditorEntry.definition.type;
+    let nextValue: any = variableValueEditorDraft;
+
+    try {
+      if (type === "object" || type === "array") {
+        const trimmedText = variableValueEditorJsonText.trim();
+        nextValue = trimmedText
+          ? JSON.parse(trimmedText)
+          : getWorkflowVariableInitialValue(type);
+
+        if (type === "array" && !Array.isArray(nextValue)) {
+          throw new Error("Variable value must be a JSON array.");
+        }
+
+        if (type === "object" && !isPlainObjectValue(nextValue)) {
+          throw new Error("Variable value must be a JSON object.");
+        }
+      } else if (type === "number") {
+        const numericValue = Number(nextValue);
+        if (!Number.isFinite(numericValue)) {
+          throw new Error("Variable value must be a valid number.");
+        }
+        nextValue = numericValue;
+      } else if (type === "boolean") {
+        nextValue = Boolean(nextValue);
+      } else {
+        nextValue = nextValue ?? "";
+      }
+    } catch (error: any) {
+      setVariableValueEditorError(
+        error?.message ? String(error.message) : "Variable value is invalid.",
+      );
+      return;
+    }
+
+    updateWorkflowVariable(variableValueEditorEntry.key, { value: nextValue });
+    closeVariableValueEditor();
+  };
+
   const renderDefaultValueEditorField = () => {
     if (!defaultValueEditorEntry) {
       return null;
@@ -4087,6 +4702,55 @@ export function WorkflowDefinitionEditorPage() {
         onChange={(event) => {
           setDefaultValueEditorDraft(event.target.value);
           setDefaultValueEditorError("");
+        }}
+      />
+    );
+  };
+
+  const renderVariableValueEditorField = () => {
+    if (!variableValueEditorEntry) {
+      return null;
+    }
+
+    const type = variableValueEditorEntry.definition.type;
+
+    if (type === "object" || type === "array") {
+      return (
+        <SolidJsonEditor
+          value={variableValueEditorDraft}
+          resetToken={variableValueEditorResetToken}
+          className="workflow-editor-default-dialog__json-editor"
+          onValueChange={(value) => {
+            setVariableValueEditorDraft(value);
+            setVariableValueEditorError("");
+          }}
+          onTextChange={(text) => setVariableValueEditorJsonText(text)}
+          onErrorChange={(message) => setVariableValueEditorError(message ?? "")}
+        />
+      );
+    }
+
+    if (type === "boolean") {
+      return (
+        <SolidCheckbox
+          checked={Boolean(variableValueEditorDraft)}
+          label="Use true as the variable value"
+          onChange={(event) => {
+            setVariableValueEditorDraft(event.currentTarget.checked);
+            setVariableValueEditorError("");
+          }}
+        />
+      );
+    }
+
+    return (
+      <SolidInput
+        type={type === "number" ? "number" : type === "date" ? "date" : "text"}
+        value={variableValueEditorDraft ?? ""}
+        placeholder={type === "date" ? "Select date" : "Enter variable value"}
+        onChange={(event) => {
+          setVariableValueEditorDraft(event.target.value);
+          setVariableValueEditorError("");
         }}
       />
     );
@@ -4341,6 +5005,90 @@ export function WorkflowDefinitionEditorPage() {
       examples: ["customerId", "email", "startDate", "approvalAmount"],
       primaryLabel: "Add Input",
       onPrimaryClick: addWorkflowInput,
+    })
+  );
+
+  const variablesContent = workflowVariableEntries.length ? (
+    <div className="workflow-editor-authoring-tab">
+      <div className="workflow-editor-authoring-header">
+        <div>
+          <h3>Variables</h3>
+          <p>Define reusable values owned by this workflow.</p>
+        </div>
+        <SolidButton onClick={addWorkflowVariable}>Add Variable</SolidButton>
+      </div>
+
+      <div className="workflow-editor-input-table workflow-editor-variable-table">
+        <div className="workflow-editor-input-table__header" role="row">
+          <span>Name</span>
+          <span>Type & value</span>
+          <span>Description</span>
+          <span className="workflow-editor-input-table__actions-header">Actions</span>
+        </div>
+        {workflowVariableEntries.map(({ key, definition }, index) => (
+          <div className="workflow-editor-input-table__row" key={`variable-row-${index}`} role="row">
+            <div className="workflow-editor-input-table__label-cell">
+              <SolidInput
+                value={definition.label}
+                placeholder="API Base URL"
+                onChange={(event) => updateWorkflowVariableLabel(key, event.target.value)}
+              />
+              <span>
+                We will use variable <strong>{key}</strong>.
+              </span>
+            </div>
+            <div className="workflow-editor-input-table__type-cell">
+              <div className="workflow-editor-input-table__type-row">
+                <SolidSelect
+                  value={definition.type}
+                  options={WORKFLOW_INPUT_TYPE_OPTIONS}
+                  onChange={(event) =>
+                    updateWorkflowVariable(key, { type: event.value ?? "string" })
+                  }
+                />
+                <button
+                  type="button"
+                  className="workflow-editor-input-table__default-button"
+                  aria-label={`Configure value for ${key}`}
+                  title="Configure value"
+                  onClick={() => openVariableValueEditor(key)}
+                >
+                  <Braces size={14} />
+                </button>
+              </div>
+              <span className="workflow-editor-input-table__default-summary">
+                {formatWorkflowVariableValueSummary(definition.value)}
+              </span>
+            </div>
+            <SolidInput
+              value={definition.description}
+              placeholder="Describe this variable"
+              onChange={(event) =>
+                updateWorkflowVariable(key, { description: event.target.value })
+              }
+            />
+            <button
+              type="button"
+              className="workflow-editor-input-table__delete"
+              aria-label={`Remove ${key}`}
+              title="Remove variable"
+              onClick={() => removeWorkflowVariable(key)}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : (
+    renderOptionalAuthoringEmptyState({
+      icon: <Braces size={20} />,
+      title: "No variables defined",
+      body:
+        "Variables are optional workflow-owned values. Use them for constants shared across nodes, such as base URLs, thresholds, labels, or feature flags. Callers do not provide variables when executing the workflow.",
+      examples: ["apiBaseUrl", "retryDelayMs", "notificationChannel", "featureEnabled"],
+      primaryLabel: "Add Variable",
+      onPrimaryClick: addWorkflowVariable,
     })
   );
 
@@ -4742,48 +5490,56 @@ export function WorkflowDefinitionEditorPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {executionRecords.map((execution) => (
-                    <tr
-                      key={execution.id}
-                      className="workflow-editor-execution-table__row"
-                      tabIndex={0}
-                      role="button"
-                      onClick={() => openExecutionDetails(execution)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          openExecutionDetails(execution);
-                        }
-                      }}
-                    >
-                      <td>{execution.id}</td>
-                      <td className="workflow-editor-execution-table__identifier">
-                        {execution.executionIdentifier ?? "-"}
-                      </td>
-                      <td>
-                        <SolidTag>{execution.status ?? "Unknown"}</SolidTag>
-                      </td>
-                      <td>{execution.triggerType ?? "manual"}</td>
-                      <td>{formatExecutionDate(execution.startedAt || execution.createdAt)}</td>
-                      <td>{formatExecutionDate(execution.finishedAt)}</td>
-                      <td>{formatDurationMs(execution.durationMs)}</td>
-                      <td className="workflow-editor-execution-table__error">
-                        {execution.errorSummary ?? "-"}
-                      </td>
-                      <td>
-                        <SolidButton
-                          size="small"
-                          variant="outline"
-                          onClick={(event) => {
-                            event.stopPropagation();
+                  {executionRecords.map((execution) => {
+                    const statusCategory = getExecutionStatusCategory(execution.status);
+
+                    return (
+                      <tr
+                        key={execution.id}
+                        className="workflow-editor-execution-table__row"
+                        tabIndex={0}
+                        role="button"
+                        onClick={() => openExecutionDetails(execution)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
                             openExecutionDetails(execution);
-                          }}
-                        >
-                          View
-                        </SolidButton>
-                      </td>
-                    </tr>
-                  ))}
+                          }
+                        }}
+                      >
+                        <td>{execution.id}</td>
+                        <td className="workflow-editor-execution-table__identifier">
+                          {execution.executionIdentifier ?? "-"}
+                        </td>
+                        <td>
+                          <SolidTag
+                            className={`workflow-editor-execution-status-pill workflow-editor-execution-status-pill--${statusCategory}`}
+                          >
+                            {execution.status ?? "Unknown"}
+                          </SolidTag>
+                        </td>
+                        <td>{execution.triggerType ?? "manual"}</td>
+                        <td>{formatExecutionDate(execution.startedAt || execution.createdAt)}</td>
+                        <td>{formatExecutionDate(execution.finishedAt)}</td>
+                        <td>{formatDurationMs(execution.durationMs)}</td>
+                        <td className="workflow-editor-execution-table__error">
+                          {execution.errorSummary ?? "-"}
+                        </td>
+                        <td>
+                          <SolidButton
+                            size="small"
+                            variant="outline"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openExecutionDetails(execution);
+                            }}
+                          >
+                            View
+                          </SolidButton>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
 
@@ -4995,6 +5751,11 @@ export function WorkflowDefinitionEditorPage() {
       content: inputsContent,
     },
     {
+      value: "variables",
+      label: "Variables",
+      content: variablesContent,
+    },
+    {
       value: "topology",
       label: "Topology",
       content: topologyContent,
@@ -5051,7 +5812,7 @@ export function WorkflowDefinitionEditorPage() {
             variant="ghost"
             leftIcon={<ArrowLeft size={16} />}
             onClick={() =>
-              navigate(`/admin/core/${moduleName}/workflow-definition/list`)
+              navigate("/admin/core/solid-core/workflow-definition/list")
             }
           >
             Back
@@ -5153,6 +5914,56 @@ export function WorkflowDefinitionEditorPage() {
               {defaultValueEditorError ? (
                 <div className="workflow-editor-field-error">
                   {defaultValueEditorError}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </SolidDialogBody>
+      </SolidDialog>
+
+      <SolidDialog
+        open={Boolean(variableValueEditorEntry)}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeVariableValueEditor();
+          }
+        }}
+        header={
+          variableValueEditorEntry
+            ? `Variable Value - ${variableValueEditorEntry.definition.label || variableValueEditorEntry.key}`
+            : "Variable Value"
+        }
+        className="workflow-editor-default-dialog"
+        style={{ width: "min(520px, 92vw)" }}
+        footer={
+          <div className="workflow-editor-default-dialog__footer">
+            <SolidButton
+              type="button"
+              variant="secondary"
+              onClick={closeVariableValueEditor}
+            >
+              Cancel
+            </SolidButton>
+            <SolidButton
+              type="button"
+              onClick={saveVariableValueEditor}
+            >
+              Save Value
+            </SolidButton>
+          </div>
+        }
+      >
+        <SolidDialogBody>
+          {variableValueEditorEntry ? (
+            <div className="workflow-editor-default-dialog__body">
+              <p>
+                Nodes can reference this value as{" "}
+                <code>{`{{ variables.${variableValueEditorEntry.key} }}`}</code>.
+              </p>
+              {renderVariableValueEditorField()}
+              {variableValueEditorError ? (
+                <div className="workflow-editor-field-error">
+                  {variableValueEditorError}
                 </div>
               ) : null}
             </div>
@@ -5277,96 +6088,13 @@ export function WorkflowDefinitionEditorPage() {
         </SolidDialogBody>
       </SolidDialog>
 
-      {selectedExecution ? (
-        <div
-          className="workflow-editor-execution-modal-backdrop"
-          role="presentation"
-          onClick={() => setSelectedExecution(null)}
-        >
-          <section
-            className="workflow-editor-execution-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="workflow-execution-detail-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="workflow-editor-execution-modal__header">
-              <div>
-                <div className="workflow-editor-execution-modal__eyebrow">
-                  Execution Detail
-                </div>
-                <h3 id="workflow-execution-detail-title">
-                  {selectedExecution.executionIdentifier ?? `Execution ${selectedExecution.id}`}
-                </h3>
-                <div className="workflow-editor-execution-modal__meta">
-                  <SolidTag>{selectedExecution.status ?? "Unknown"}</SolidTag>
-                  <span>{formatDurationMs(selectedExecution.durationMs)}</span>
-                  <span>{formatExecutionDate(selectedExecution.startedAt)}</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="workflow-editor-execution-modal__close"
-                aria-label="Close execution detail"
-                onClick={() => setSelectedExecution(null)}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="workflow-editor-execution-modal-tabs">
-              <div
-                className="workflow-editor-execution-modal-tabs__list"
-                role="tablist"
-                aria-label="Execution detail sections"
-              >
-                {selectedExecutionModalTabs.map((tab) => {
-                  const isActive = selectedExecutionTab === tab.value;
-
-                  return (
-                    <button
-                      key={tab.value}
-                      type="button"
-                      role="tab"
-                      aria-selected={isActive}
-                      aria-controls={`workflow-execution-modal-tab-${tab.value}`}
-                      id={`workflow-execution-modal-tab-trigger-${tab.value}`}
-                      className={`workflow-editor-execution-modal-tabs__trigger ${isActive ? "is-active" : ""}`}
-                      onClick={() => setSelectedExecutionTab(tab.value)}
-                    >
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {selectedExecutionModalTabs.map((tab) => {
-                const isActive = selectedExecutionTab === tab.value;
-
-                return (
-                  <div
-                    key={tab.value}
-                    role="tabpanel"
-                    id={`workflow-execution-modal-tab-${tab.value}`}
-                    aria-labelledby={`workflow-execution-modal-tab-trigger-${tab.value}`}
-                    className="workflow-editor-execution-modal-tabs__panel"
-                    hidden={!isActive}
-                  >
-                    {isActive ? tab.content : null}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        </div>
-      ) : null}
-
       {selectedNode && selectedNodeType ? (
         <WorkflowNodeEditorDialog
           open={editorOpen}
           onOpenChange={setEditorOpen}
           nodeType={selectedNodeType}
           nodeValue={selectedNode}
+          expressionSuggestions={selectedNodeExpressionSuggestions}
           onNodeSubmit={(nextValue) => {
             handleUpdateSelectedNode(nextValue);
             setEditorOpen(false);

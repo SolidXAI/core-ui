@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import YAML from "yaml";
 import {
   ArrowLeft,
@@ -44,6 +45,7 @@ type WorkflowNodeSchemaEditorProps = {
   value?: Record<string, any>;
   onChange?: (value: Record<string, any>) => void;
   onSubmit?: (value: Record<string, any>) => void;
+  expressionSuggestions?: WorkflowExpressionSuggestion[];
   readOnly?: boolean;
   className?: string;
 };
@@ -95,8 +97,26 @@ type FieldEditorProps = {
   nodeType: WorkflowNodeMetadataResponse;
   field: WorkflowNodeConfigurationFieldDefinition;
   value: any;
+  expressionSuggestions?: WorkflowExpressionSuggestion[];
   readOnly?: boolean;
   onChange: (value: any) => void;
+};
+
+export type WorkflowExpressionSuggestionGroup = "Inputs" | "Variables" | "Outputs";
+
+export type WorkflowExpressionSuggestion = {
+  group: WorkflowExpressionSuggestionGroup;
+  label: string;
+  insertText: string;
+  detail?: string;
+  description?: string;
+};
+
+type WorkflowExpressionAutocompletePosition = {
+  left: number;
+  top: number;
+  width: number;
+  maxHeight: number;
 };
 
 const EMPTY_YAML_OBJECT = {};
@@ -119,6 +139,14 @@ function stringifyYamlEditorValue(value: any, emptyValue: any) {
   }
 
   return YAML.stringify(value ?? emptyValue);
+}
+
+function stringifyJsonEditorValue(value: any, emptyValue: any) {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  return JSON.stringify(value ?? emptyValue, null, 2);
 }
 
 function getYamlValueSignature(value: any) {
@@ -303,6 +331,60 @@ function isConfigurationFieldVisible(
 function getConfigurationFieldWidth(field: WorkflowNodeConfigurationFieldDefinition) {
   const width = field.uiSchema?.layout?.width;
   return width === "full" || width === "field" ? width : "half";
+}
+
+function normalizeCssLength(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return `${value}px`;
+  }
+
+  if (typeof value === "string" && value.trim()) {
+    return value;
+  }
+
+  return undefined;
+}
+
+function getConfigurationFieldEditorHeight(
+  field: WorkflowNodeConfigurationFieldDefinition,
+  fallback = "220px",
+) {
+  return (
+    normalizeCssLength(field.uiSchema?.editor?.height) ??
+    normalizeCssLength(field.uiSchema?.layout?.height) ??
+    normalizeCssLength(field.uiSchema?.layout?.minHeight) ??
+    fallback
+  );
+}
+
+function getWorkflowNodeEditorDialogStyle(
+  nodeType: WorkflowNodeMetadataResponse,
+): React.CSSProperties {
+  const modalSize = nodeType.ui?.modalSize ?? "lg";
+
+  if (modalSize === "full") {
+    return {
+      width: "96vw",
+      maxWidth: "96vw",
+      height: "92vh",
+      maxHeight: "92vh",
+    };
+  }
+
+  if (modalSize === "xl") {
+    return {
+      width: "min(1240px, 94vw)",
+      maxWidth: "94vw",
+      height: "min(880px, 90vh)",
+      maxHeight: "90vh",
+    };
+  }
+
+  return {
+    width: "min(780px, 92vw)",
+    maxWidth: "92vw",
+    maxHeight: "90vh",
+  };
 }
 
 function getFieldHintItems(field: WorkflowNodeConfigurationFieldDefinition) {
@@ -509,14 +591,25 @@ function WorkflowYamlFieldEditor({
   readOnly,
   onChange,
   emptyValue = {},
+  format = "yaml",
+  height = "220px",
 }: {
   value: any;
   readOnly?: boolean;
   onChange: (value: any) => void;
   emptyValue?: any;
+  format?: "json" | "yaml";
+  height?: string;
 }) {
+  const stringifyValue = React.useCallback(
+    (nextValue: any, nextEmptyValue: any) =>
+      format === "json"
+        ? stringifyJsonEditorValue(nextValue, nextEmptyValue)
+        : stringifyYamlEditorValue(nextValue, nextEmptyValue),
+    [format],
+  );
   const [textValue, setTextValue] = React.useState(() =>
-    stringifyYamlEditorValue(value, emptyValue),
+    stringifyValue(value, emptyValue),
   );
   const [parseError, setParseError] = React.useState<string | null>(null);
   const lastEmittedSignatureRef = React.useRef(getYamlValueSignature(value ?? emptyValue));
@@ -527,30 +620,35 @@ function WorkflowYamlFieldEditor({
       return;
     }
 
-    setTextValue(stringifyYamlEditorValue(value, emptyValue));
+    setTextValue(stringifyValue(value, emptyValue));
     setParseError(null);
     lastEmittedSignatureRef.current = nextSignature;
-  }, [emptyValue, value]);
+  }, [emptyValue, stringifyValue, value]);
 
   const handleEditorChange = (nextText: string | undefined) => {
     const safeText = nextText ?? "";
     setTextValue(safeText);
 
     try {
-      const parsedValue = safeText.trim() ? YAML.parse(safeText) : emptyValue;
+      const parsedValue = safeText.trim()
+        ? format === "json"
+          ? JSON.parse(safeText)
+          : YAML.parse(safeText)
+        : emptyValue;
       setParseError(null);
       lastEmittedSignatureRef.current = getYamlValueSignature(parsedValue);
       onChange(parsedValue);
     } catch (error: any) {
-      setParseError(error?.message ?? "YAML is invalid.");
+      setParseError(error?.message ?? `${format.toUpperCase()} is invalid.`);
     }
   };
 
   return (
     <div className="workflow-node-yaml-field-editor">
       <SolidCodeEditor
-        language="yaml"
-        height="220px"
+        language={format}
+        height={height}
+        fontSize={12}
         readOnly={readOnly}
         value={textValue}
         onChange={handleEditorChange}
@@ -562,10 +660,363 @@ function WorkflowYamlFieldEditor({
   );
 }
 
+function getExpressionSearchTerm(value: string, caretIndex: number) {
+  const prefix = value.slice(0, caretIndex);
+  const expressionStart = prefix.lastIndexOf("{{");
+  if (expressionStart >= 0 && prefix.lastIndexOf("}}") < expressionStart) {
+    return prefix.slice(expressionStart + 2).trim();
+  }
+
+  const wordMatch = prefix.match(/[A-Za-z0-9_.-]*$/);
+  return wordMatch?.[0] ?? "";
+}
+
+function insertExpressionAtCaret(
+  value: string,
+  caretIndex: number,
+  insertText: string,
+) {
+  const prefix = value.slice(0, caretIndex);
+  const suffix = value.slice(caretIndex);
+  const expressionStart = prefix.lastIndexOf("{{");
+  const expressionEndInSuffix = suffix.indexOf("}}");
+
+  if (expressionStart >= 0 && prefix.lastIndexOf("}}") < expressionStart) {
+    const endIndex =
+      expressionEndInSuffix >= 0
+        ? caretIndex + expressionEndInSuffix + 2
+        : caretIndex;
+    return {
+      value: `${value.slice(0, expressionStart)}${insertText}${value.slice(endIndex)}`,
+      caretIndex: expressionStart + insertText.length,
+    };
+  }
+
+  const wordMatch = prefix.match(/[A-Za-z0-9_.-]*$/);
+  const replaceStart = wordMatch ? caretIndex - wordMatch[0].length : caretIndex;
+  const spacerBefore =
+    replaceStart > 0 && !/\s/.test(value.charAt(replaceStart - 1)) ? " " : "";
+  const spacerAfter =
+    suffix && !/^\s/.test(suffix) ? " " : "";
+  const replacement = `${spacerBefore}${insertText}${spacerAfter}`;
+
+  return {
+    value: `${value.slice(0, replaceStart)}${replacement}${suffix}`,
+    caretIndex: replaceStart + spacerBefore.length + insertText.length,
+  };
+}
+
+function getWorkflowAutocompletePortalPosition(
+  anchor: HTMLElement | null,
+): WorkflowExpressionAutocompletePosition | null {
+  if (!anchor || typeof window === "undefined") {
+    return null;
+  }
+
+  const rect = anchor.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const gutter = 12;
+  const offset = 6;
+  const preferredWidth = Math.max(rect.width, 420);
+  const width = Math.min(preferredWidth, viewportWidth - gutter * 2);
+  const left = Math.min(
+    Math.max(rect.left, gutter),
+    Math.max(viewportWidth - width - gutter, gutter),
+  );
+  const spaceBelow = viewportHeight - rect.bottom - gutter;
+  const spaceAbove = rect.top - gutter;
+  const renderAbove = spaceBelow < 220 && spaceAbove > spaceBelow;
+  const availableHeight = Math.max(
+    160,
+    Math.min(320, renderAbove ? spaceAbove - offset : spaceBelow - offset),
+  );
+
+  return {
+    left,
+    top: renderAbove
+      ? Math.max(gutter, rect.top - offset - availableHeight)
+      : Math.min(viewportHeight - gutter - availableHeight, rect.bottom + offset),
+    width,
+    maxHeight: availableHeight,
+  };
+}
+
+function WorkflowExpressionAutocompleteField({
+  value,
+  readOnly,
+  multiline,
+  placeholder,
+  suggestions = [],
+  onChange,
+}: {
+  value: string;
+  readOnly?: boolean;
+  multiline?: boolean;
+  placeholder?: string;
+  suggestions?: WorkflowExpressionSuggestion[];
+  onChange: (value: string) => void;
+}) {
+  const inputRef = React.useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [portalPosition, setPortalPosition] =
+    React.useState<WorkflowExpressionAutocompletePosition | null>(null);
+
+  const filteredSuggestions = React.useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return suggestions;
+    }
+
+    return suggestions.filter((suggestion) =>
+      [
+        suggestion.group,
+        suggestion.label,
+        suggestion.insertText,
+        suggestion.detail,
+        suggestion.description,
+      ]
+        .filter(Boolean)
+        .some((entry) => String(entry).toLowerCase().includes(normalizedQuery)),
+    );
+  }, [query, suggestions]);
+
+  React.useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
+  const updatePortalPosition = React.useCallback(() => {
+    setPortalPosition(getWorkflowAutocompletePortalPosition(inputRef.current));
+  }, []);
+
+  React.useLayoutEffect(() => {
+    if (!open) {
+      setPortalPosition(null);
+      return;
+    }
+
+    updatePortalPosition();
+  }, [open, updatePortalPosition, value, filteredSuggestions.length]);
+
+  React.useEffect(() => {
+    if (!open || typeof window === "undefined") {
+      return;
+    }
+
+    window.addEventListener("resize", updatePortalPosition);
+    window.addEventListener("scroll", updatePortalPosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePortalPosition);
+      window.removeEventListener("scroll", updatePortalPosition, true);
+    };
+  }, [open, updatePortalPosition]);
+
+  const openPicker = () => {
+    const input = inputRef.current;
+    const caretIndex = input?.selectionStart ?? value.length;
+    setQuery(getExpressionSearchTerm(value, caretIndex));
+    setPortalPosition(getWorkflowAutocompletePortalPosition(input));
+    setOpen(true);
+  };
+
+  const closePicker = () => {
+    setOpen(false);
+    setQuery("");
+    setActiveIndex(0);
+    setPortalPosition(null);
+  };
+
+  const selectSuggestion = (suggestion: WorkflowExpressionSuggestion) => {
+    const input = inputRef.current;
+    const caretIndex = input?.selectionStart ?? value.length;
+    const next = insertExpressionAtCaret(value, caretIndex, suggestion.insertText);
+    onChange(next.value);
+    closePicker();
+
+    window.requestAnimationFrame(() => {
+      input?.focus();
+      input?.setSelectionRange(next.caretIndex, next.caretIndex);
+    });
+  };
+
+  const handleKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    if (event.ctrlKey && event.code === "Space") {
+      event.preventDefault();
+      if (!readOnly) {
+        openPicker();
+      }
+      return;
+    }
+
+    if (!open) {
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closePicker();
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveIndex((current) =>
+        Math.min(current + 1, Math.max(filteredSuggestions.length - 1, 0)),
+      );
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveIndex((current) => Math.max(current - 1, 0));
+      return;
+    }
+
+    if (event.key === "Enter" && filteredSuggestions[activeIndex]) {
+      event.preventDefault();
+      selectSuggestion(filteredSuggestions[activeIndex]);
+    }
+  };
+
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const nextValue = event.target.value;
+    onChange(nextValue);
+
+    if (open) {
+      setQuery(getExpressionSearchTerm(nextValue, event.target.selectionStart ?? nextValue.length));
+    }
+  };
+
+  const groupedSuggestions = filteredSuggestions.reduce<Record<string, WorkflowExpressionSuggestion[]>>(
+    (acc, suggestion) => {
+      acc[suggestion.group] = acc[suggestion.group] ?? [];
+      acc[suggestion.group].push(suggestion);
+      return acc;
+    },
+    {},
+  );
+
+  const inputProps = {
+    ref: inputRef as any,
+    value,
+    disabled: readOnly,
+    placeholder,
+    onChange: handleChange,
+    onKeyDown: handleKeyDown,
+    onBlur: () => window.setTimeout(() => setOpen(false), 120),
+  };
+
+  const handleMenuWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const menuElement = event.currentTarget;
+    const canScrollVertically =
+      menuElement.scrollHeight > menuElement.clientHeight;
+    const canScrollHorizontally =
+      menuElement.scrollWidth > menuElement.clientWidth;
+
+    if (!canScrollVertically && !canScrollHorizontally) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (canScrollVertically) {
+      menuElement.scrollTop += event.deltaY;
+    }
+
+    if (event.shiftKey && canScrollHorizontally) {
+      menuElement.scrollLeft += event.deltaY || event.deltaX;
+    } else if (canScrollHorizontally && Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+      menuElement.scrollLeft += event.deltaX;
+    }
+  };
+
+  const menu = open && portalPosition && typeof document !== "undefined" ? (
+    <div
+      className="workflow-expression-autocomplete-menu"
+      data-solid-dialog-outside-safe="true"
+      style={{
+        left: portalPosition.left,
+        top: portalPosition.top,
+        width: portalPosition.width,
+        maxHeight: portalPosition.maxHeight,
+      }}
+      onMouseDown={(event) => event.preventDefault()}
+      onWheelCapture={handleMenuWheel}
+    >
+      <div className="workflow-expression-autocomplete-help">
+        Start typing to choose from available variables, inputs, or outputs.
+      </div>
+      {filteredSuggestions.length ? (
+        Object.entries(groupedSuggestions).map(([group, groupSuggestions]) => (
+          <div key={group} className="workflow-expression-autocomplete-group">
+            <div className="workflow-expression-autocomplete-group-title">{group}</div>
+            {groupSuggestions.map((suggestion) => {
+              const absoluteIndex = filteredSuggestions.indexOf(suggestion);
+              const isActive = absoluteIndex === activeIndex;
+
+              return (
+                <button
+                  key={`${suggestion.group}-${suggestion.insertText}`}
+                  type="button"
+                  className={`workflow-expression-autocomplete-option ${isActive ? "is-active" : ""}`}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    selectSuggestion(suggestion);
+                  }}
+                >
+                  <span className="workflow-expression-autocomplete-option-main">
+                    <span className="workflow-expression-autocomplete-option-label">
+                      {suggestion.label}
+                    </span>
+                    {suggestion.detail ? (
+                      <span className="workflow-expression-autocomplete-option-detail">
+                        {suggestion.detail}
+                      </span>
+                    ) : null}
+                  </span>
+                  {suggestion.description ? (
+                    <span className="workflow-expression-autocomplete-option-description">
+                      {suggestion.description}
+                    </span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        ))
+      ) : (
+        <div className="workflow-expression-autocomplete-empty">
+          No matching expression references.
+        </div>
+      )}
+    </div>
+  ) : null;
+
+  return (
+    <div className="workflow-expression-autocomplete">
+      {multiline ? (
+        <SolidTextarea {...inputProps} />
+      ) : (
+        <SolidInput {...inputProps} />
+      )}
+      {menu ? createPortal(menu, document.body) : null}
+    </div>
+  );
+}
+
 function WorkflowNodeFieldEditor({
   nodeType,
   field,
   value,
+  expressionSuggestions,
   readOnly,
   onChange,
 }: FieldEditorProps) {
@@ -643,7 +1094,8 @@ function WorkflowNodeFieldEditor({
     return (
       <SolidCodeEditor
         language={editorLanguage}
-        height="220px"
+        height={getConfigurationFieldEditorHeight(field)}
+        fontSize={12}
         readOnly={readOnly}
         value={stringValue}
         onChange={(next) => onChange(next ?? "")}
@@ -664,6 +1116,8 @@ function WorkflowNodeFieldEditor({
         readOnly={readOnly}
         onChange={onChange}
         emptyValue={field.valueType === "array" ? EMPTY_YAML_ARRAY : EMPTY_YAML_OBJECT}
+        format={field.widgetHint === "yaml-editor" ? "yaml" : "json"}
+        height={getConfigurationFieldEditorHeight(field)}
       />
     );
   }
@@ -675,16 +1129,41 @@ function WorkflowNodeFieldEditor({
         readOnly={readOnly}
         onChange={onChange}
         emptyValue={null}
+        format="yaml"
+        height={getConfigurationFieldEditorHeight(field)}
       />
     );
   }
 
   if (field.widgetHint === "textarea") {
+    if (field.expressionAllowed) {
+      return (
+        <WorkflowExpressionAutocompleteField
+          value={normalizedValue ?? ""}
+          readOnly={readOnly}
+          multiline
+          suggestions={expressionSuggestions}
+          onChange={onChange}
+        />
+      );
+    }
+
     return (
       <SolidTextarea
         value={normalizedValue ?? ""}
         disabled={readOnly}
         onChange={(event) => onChange(event.target.value)}
+      />
+    );
+  }
+
+  if (field.expressionAllowed) {
+    return (
+      <WorkflowExpressionAutocompleteField
+        value={normalizedValue ?? ""}
+        readOnly={readOnly}
+        suggestions={expressionSuggestions}
+        onChange={onChange}
       />
     );
   }
@@ -698,38 +1177,20 @@ function WorkflowNodeFieldEditor({
   );
 }
 
-export function WorkflowNodeSchemaEditor({
-  nodeType,
-  value,
-  onChange,
-  onSubmit,
-  readOnly,
-  className,
-}: WorkflowNodeSchemaEditorProps) {
-  const [draft, setDraft] = React.useState<Record<string, any>>(
-    value ?? nodeType.authoring?.defaultConfiguration ?? {},
-  );
+type WorkflowConfigurationSection = {
+  key: string;
+  label: string;
+  fields: WorkflowNodeConfigurationFieldDefinition[];
+};
 
-  React.useEffect(() => {
-    setDraft(value ?? nodeType.authoring?.defaultConfiguration ?? {});
-  }, [nodeType, value]);
+type WorkflowConfigurationTab = {
+  key: string;
+  label: string;
+  sections: WorkflowConfigurationSection[];
+};
 
-  const fields = nodeType.authoring?.configurationFields ?? [];
-  const groupOrder = nodeType.ui?.layoutHints?.groupOrder ?? [];
-  const visibleFields = fields.filter((field) =>
-    isConfigurationFieldVisible(field, draft),
-  );
-  const groupedFields = visibleFields.reduce<Record<string, WorkflowNodeConfigurationFieldDefinition[]>>(
-    (acc, field) => {
-      const group = field.group ?? "General";
-      acc[group] = acc[group] ?? [];
-      acc[group].push(field);
-      return acc;
-    },
-    {},
-  );
-
-  const orderedGroups = Object.keys(groupedFields).sort((left, right) => {
+function orderGroupLabels(groupLabels: string[], groupOrder: string[]) {
+  return [...groupLabels].sort((left, right) => {
     const leftIndex = groupOrder.indexOf(left);
     const rightIndex = groupOrder.indexOf(right);
     if (leftIndex >= 0 && rightIndex >= 0) {
@@ -743,30 +1204,106 @@ export function WorkflowNodeSchemaEditor({
     }
     return left.localeCompare(right);
   });
+}
 
-  const updateField = (field: WorkflowNodeConfigurationFieldDefinition, nextValue: any) => {
-    const nextDraft = setPathValue(draft, field.path ?? field.key, nextValue);
-    setDraft(nextDraft);
-    onChange?.(nextDraft);
-  };
+function buildConfigurationSections(
+  fields: WorkflowNodeConfigurationFieldDefinition[],
+  groupOrder: string[],
+) {
+  const groupedFields = fields.reduce<Record<string, WorkflowNodeConfigurationFieldDefinition[]>>(
+    (acc, field) => {
+      const group = field.group ?? "General";
+      acc[group] = acc[group] ?? [];
+      acc[group].push(field);
+      return acc;
+    },
+    {},
+  );
 
-  if (!orderedGroups.length) {
-    return (
-      <div className={`workflow-node-editor-empty ${className ?? ""}`}>
-        This node does not expose configuration fields yet.
-      </div>
-    );
+  return orderGroupLabels(Object.keys(groupedFields), groupOrder).map((group) => ({
+    key: group,
+    label: group,
+    fields: groupedFields[group],
+  }));
+}
+
+function getFieldLayoutKeys(field: WorkflowNodeConfigurationFieldDefinition) {
+  return [field.key, field.path].filter(Boolean) as string[];
+}
+
+function buildConfigurationTabs(
+  fields: WorkflowNodeConfigurationFieldDefinition[],
+  groupOrder: string[],
+  layout: NonNullable<WorkflowNodeMetadataResponse["authoring"]>["configurationLayout"] | undefined,
+): WorkflowConfigurationTab[] {
+  if (layout?.type !== "tabs" || !Array.isArray(layout.tabs) || !layout.tabs.length) {
+    return [];
   }
 
+  const assignedFieldKeys = new Set<string>();
+  const tabs = layout.tabs
+    .map((tab) => {
+      const tabFieldKeys = new Set(tab.fields ?? []);
+      const tabGroupLabels = new Set(tab.groups ?? []);
+      const tabFields = fields.filter((field) => {
+        const isFieldMatch = getFieldLayoutKeys(field).some((key) => tabFieldKeys.has(key));
+        const isGroupMatch = tabGroupLabels.has(field.group ?? "General");
+
+        if (isFieldMatch || isGroupMatch) {
+          getFieldLayoutKeys(field).forEach((key) => assignedFieldKeys.add(key));
+          return true;
+        }
+
+        return false;
+      });
+
+      return {
+        key: tab.key,
+        label: tab.label,
+        sections: buildConfigurationSections(tabFields, groupOrder),
+      };
+    })
+    .filter((tab) => tab.sections.some((section) => section.fields.length));
+
+  const unassignedFields = fields.filter(
+    (field) => !getFieldLayoutKeys(field).some((key) => assignedFieldKeys.has(key)),
+  );
+
+  if (unassignedFields.length) {
+    tabs.push({
+      key: "other",
+      label: "Other",
+      sections: buildConfigurationSections(unassignedFields, groupOrder),
+    });
+  }
+
+  return tabs;
+}
+
+function WorkflowConfigurationSections({
+  sections,
+  nodeType,
+  draft,
+  expressionSuggestions,
+  readOnly,
+  updateField,
+}: {
+  sections: WorkflowConfigurationSection[];
+  nodeType: WorkflowNodeMetadataResponse;
+  draft: Record<string, any>;
+  expressionSuggestions?: WorkflowExpressionSuggestion[];
+  readOnly?: boolean;
+  updateField: (field: WorkflowNodeConfigurationFieldDefinition, nextValue: any) => void;
+}) {
   return (
-    <div className={`workflow-node-editor-config ${className ?? ""}`}>
-      {orderedGroups.map((group) => (
-        <section key={group} className="workflow-node-editor-section">
-          {orderedGroups.length > 1 || group !== "General" ? (
-            <div className="workflow-node-editor-section-heading">{group}</div>
+    <>
+      {sections.map((section) => (
+        <section key={section.key} className="workflow-node-editor-section">
+          {sections.length > 1 || section.label !== "General" ? (
+            <div className="workflow-node-editor-section-heading">{section.label}</div>
           ) : null}
           <div className="workflow-node-editor-form-grid">
-            {groupedFields[group].map((field) => {
+            {section.fields.map((field) => {
               const fieldWidth = getConfigurationFieldWidth(field);
               return (
                 <div
@@ -785,6 +1322,7 @@ export function WorkflowNodeSchemaEditor({
                     nodeType={nodeType}
                     field={field}
                     value={getPathValue(draft, field.path ?? field.key)}
+                    expressionSuggestions={expressionSuggestions}
                     readOnly={readOnly}
                     onChange={(nextValue) => updateField(field, nextValue)}
                   />
@@ -794,6 +1332,98 @@ export function WorkflowNodeSchemaEditor({
           </div>
         </section>
       ))}
+    </>
+  );
+}
+
+export function WorkflowNodeSchemaEditor({
+  nodeType,
+  value,
+  onChange,
+  onSubmit,
+  expressionSuggestions,
+  readOnly,
+  className,
+}: WorkflowNodeSchemaEditorProps) {
+  const [draft, setDraft] = React.useState<Record<string, any>>(
+    value ?? nodeType.authoring?.defaultConfiguration ?? {},
+  );
+  const [activeConfigurationTab, setActiveConfigurationTab] = React.useState("");
+
+  React.useEffect(() => {
+    setDraft(value ?? nodeType.authoring?.defaultConfiguration ?? {});
+  }, [nodeType, value]);
+
+  const fields = nodeType.authoring?.configurationFields ?? [];
+  const groupOrder = nodeType.ui?.layoutHints?.groupOrder ?? [];
+  const visibleFields = fields.filter((field) =>
+    isConfigurationFieldVisible(field, draft),
+  );
+  const configurationSections = buildConfigurationSections(visibleFields, groupOrder);
+  const configurationTabs = buildConfigurationTabs(
+    visibleFields,
+    groupOrder,
+    nodeType.authoring?.configurationLayout,
+  );
+  const activeConfigurationTabValue =
+    activeConfigurationTab || configurationTabs[0]?.key || "";
+
+  const updateField = (field: WorkflowNodeConfigurationFieldDefinition, nextValue: any) => {
+    const nextDraft = setPathValue(draft, field.path ?? field.key, nextValue);
+    setDraft(nextDraft);
+    onChange?.(nextDraft);
+  };
+
+  React.useEffect(() => {
+    if (
+      configurationTabs.length &&
+      !configurationTabs.some((tab) => tab.key === activeConfigurationTab)
+    ) {
+      setActiveConfigurationTab(configurationTabs[0].key);
+    }
+  }, [activeConfigurationTab, configurationTabs]);
+
+  if (!configurationSections.length) {
+    return (
+      <div className={`workflow-node-editor-empty ${className ?? ""}`}>
+        This node does not expose configuration fields yet.
+      </div>
+    );
+  }
+
+  return (
+    <div className={`workflow-node-editor-config ${className ?? ""}`}>
+      {configurationTabs.length > 1 ? (
+        <SolidTabGroup
+          tabs={configurationTabs.map((tab) => ({
+            value: tab.key,
+            label: tab.label,
+            content: (
+              <WorkflowConfigurationSections
+                sections={tab.sections}
+                nodeType={nodeType}
+                draft={draft}
+                expressionSuggestions={expressionSuggestions}
+                readOnly={readOnly}
+                updateField={updateField}
+              />
+            ),
+          }))}
+          value={activeConfigurationTabValue}
+          onValueChange={setActiveConfigurationTab}
+          className="workflow-node-editor-config-tabs"
+          panelClassName="workflow-node-editor-config-tab-panel"
+        />
+      ) : (
+        <WorkflowConfigurationSections
+          sections={configurationTabs[0]?.sections ?? configurationSections}
+          nodeType={nodeType}
+          draft={draft}
+          expressionSuggestions={expressionSuggestions}
+          readOnly={readOnly}
+          updateField={updateField}
+        />
+      )}
 
       {!readOnly && onSubmit ? (
         <div className="workflow-node-editor-inline-actions">
@@ -1040,11 +1670,13 @@ function WorkflowNodeFullEditor({
   nodeType,
   value,
   onChange,
+  expressionSuggestions,
   readOnly,
 }: {
   nodeType: WorkflowNodeMetadataResponse;
   value: WorkflowNodeEditorValue;
   onChange: (value: WorkflowNodeEditorValue) => void;
+  expressionSuggestions?: WorkflowExpressionSuggestion[];
   readOnly?: boolean;
 }) {
   const configuration = value.configuration ?? {};
@@ -1073,6 +1705,7 @@ function WorkflowNodeFullEditor({
             <WorkflowNodeSchemaEditor
               nodeType={nodeType}
               value={configuration}
+              expressionSuggestions={expressionSuggestions}
               readOnly={readOnly}
               onChange={(nextConfiguration) =>
                 onChange({
@@ -1132,6 +1765,7 @@ export function WorkflowNodeEditorDialog({
   value,
   onChange,
   onSubmit,
+  expressionSuggestions,
   readOnly,
   nodeValue,
   onNodeChange,
@@ -1188,10 +1822,7 @@ export function WorkflowNodeEditorDialog({
         </div>
       }
       className={`solid-workflow-node-editor-dialog solid-workflow-node-editor-dialog--${nodeType.ui?.modalSize ?? "lg"}`}
-      style={{
-        width: nodeType.ui?.modalSize === "full" ? "96vw" : "min(780px, 92vw)",
-        maxWidth: "96vw",
-      }}
+      style={getWorkflowNodeEditorDialogStyle(nodeType)}
     >
       <SolidDialogBody className="workflow-node-editor-dialog-body">
         {useCustomEditor ? (
@@ -1208,6 +1839,7 @@ export function WorkflowNodeEditorDialog({
             nodeType={nodeType}
             value={nodeDraft}
             onChange={handleNodeChange}
+            expressionSuggestions={expressionSuggestions}
             readOnly={readOnly}
           />
         ) : (
@@ -1215,6 +1847,7 @@ export function WorkflowNodeEditorDialog({
             className="workflow-node-editor-standalone-config"
             nodeType={nodeType}
             value={draft}
+            expressionSuggestions={expressionSuggestions}
             onChange={(nextValue) => {
               setDraft(nextValue);
               onChange?.(nextValue);

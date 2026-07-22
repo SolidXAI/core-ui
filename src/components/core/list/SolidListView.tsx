@@ -53,7 +53,7 @@ import {
   SolidDialogTitle,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
-import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
+import { ArrowRight, LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -1437,15 +1437,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       .filter((slide): slide is SolidLightboxSlide => !!slide)
     : [];
 
+  const showRowEditInContextMenu =
+    solidListViewLayout?.attrs?.showRowEditInContextMenu ??
+    solidListViewLayout?.attrs?.showRowActionsInContextMenu;
+  const showRowDeleteInContextMenu =
+    solidListViewLayout?.attrs?.showRowDeleteInContextMenu ??
+    solidListViewLayout?.attrs?.showRowActionsInContextMenu;
+
   const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
     solidListViewLayout?.attrs?.edit !== false &&
     solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
-    solidListViewLayout?.attrs?.showRowEditInContextMenu !== false &&
+    showRowEditInContextMenu !== false &&
     !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
 
   const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
     solidListViewLayout?.attrs?.delete !== false &&
-    solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
+    showRowDeleteInContextMenu !== false &&
     !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
 
   const hasCustomContextMenuButtons =
@@ -1456,6 +1463,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
   const isEmbeddedList = params.embeded === true;
+  const showRowActionsAsIconOnly = solidListViewLayout?.attrs?.showRowActionsAsIconOnly === true;
+  const showRowEditAsIconOnly =
+    showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowEditAsIconOnly === true;
+  const showRowDeleteAsIconOnly =
+    showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowDeleteAsIconOnly === true;
 
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
@@ -1789,10 +1801,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       `${permissionExpression(params.modelName, 'update')}`
                     ) &&
                       solidListViewLayout?.attrs?.edit !== false &&
-                      solidListViewLayout?.attrs?.showRowEditInContextMenu ===
-                      false && (
+                      showRowEditInContextMenu === false && (
                         <Column
-                          header="Edit"
+                          header={showRowEditAsIconOnly ? "" : "Edit"}
                           body={(rowData) => {
                             const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                             return (
@@ -1803,7 +1814,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     variant="ghost"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
                                     size="small"
-                                    leftIcon={<Pencil size={14} />}
+                                    leftIcon={showRowEditAsIconOnly ? <ArrowRight size={14} /> : <Pencil size={14} />}
+                                    tooltip={showRowEditAsIconOnly ? "Edit" : undefined}
+                                    aria-label="Edit"
                                     onClick={() => {
                                       if (params.embeded == true) {
                                         params.handleEditClickForEmbeddedView(rowData?.id);
@@ -1827,13 +1840,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     ) &&
                       solidListViewLayout?.attrs?.delete !== false &&
                       (params.embeded ||
-                        (solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== undefined &&
-                          solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== true)
+                        (showRowDeleteInContextMenu !== undefined &&
+                          showRowDeleteInContextMenu !== true)
                       )
                       &&
                       (
                         <Column
-                          header="Delete"
+                          header={showRowDeleteAsIconOnly ? "" : "Delete"}
                           body={(rowData) => {
                             const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                             return (
@@ -1845,6 +1858,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     size="small"
                                     variant="ghost"
                                     leftIcon={<Trash2 size={14} />}
+                                    tooltip={showRowDeleteAsIconOnly ? "Delete" : undefined}
+                                    aria-label="Delete"
                                     onClick={() => {
                                       if (params?.embededFieldRelationType === "many-to-many") {
                                         params?.handleDeleteClick(rowData.id);

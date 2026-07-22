@@ -41,6 +41,7 @@ import { SolidIconEditWidget } from "../components/core/form/fields/widgets/Soli
 import { SolidIconViewWidget } from "../components/core/form/fields/widgets/SolidIconViewWidget";
 import { SolidManyToManyRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
 import { SolidManyToOneRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
+import { PillWidget } from "../components/core/list/widgets/PillWidget";
 import { SolidUserBlockedStatusListWidget } from "../components/core/list/widgets/SolidUserBlockedStatusListWidget";
 import { SolidShortTextFieldAvatarWidget } from "../components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "../components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
@@ -175,6 +176,9 @@ registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelation
 
 // - users status
 registerExtensionComponent("SolidUserBlockedStatusListWidget", SolidUserBlockedStatusListWidget, ExtensionComponentTypes.listFieldWidget);
+
+// - generic selection/status pill
+registerExtensionComponent("PillWidget", PillWidget, ExtensionComponentTypes.listFieldWidget);
 
 // - relation.datetime
 registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, ExtensionComponentTypes.listFieldWidget);
