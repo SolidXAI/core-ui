@@ -34,7 +34,6 @@ type SingleMediaFileDetail = {
     name: string;
     type: string;
     fileUrl: string;
-    downloadUrl?: string;
     fileSize: number;
 };
 
@@ -293,7 +292,6 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 name: fieldValue.name,
                 type: fieldValue.type,
                 fileUrl,
-                downloadUrl: fileUrl,
                 fileSize: fieldValue.size,
             });
 
@@ -311,7 +309,6 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             name: fieldValue.originalFileName,
             type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
             fileUrl,
-            downloadUrl: fieldValue._download_url || fileUrl,
             fileSize: fieldValue.fileSize,
         });
 
@@ -358,7 +355,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             setLightboxUrls?.([
                 {
                     src: url.fileUrl,
-                    downloadUrl: url.downloadUrl || url.fileUrl,
+                    downloadUrl: url.fileUrl,
                     type: previewKind === "video" ? "video" : undefined
                 },
             ]);
@@ -424,7 +421,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                             onClick={(event) => {
                                                 event.preventDefault();
                                                 event.stopPropagation();
-                                                downloadMediaFile(fileDetails?.downloadUrl || fileDetails?.fileUrl, fileDetails?.name);
+                                                downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name);
                                             }}
                                         >
                                             <SolidIcon name="si-download" aria-hidden />
@@ -526,7 +523,6 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                 name: fieldValue.name,
                 type: fieldValue.type,
                 fileUrl,
-                downloadUrl: fileUrl,
                 fileSize: fieldValue.size,
             });
 
@@ -543,7 +539,6 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
             name: fieldValue.originalFileName,
             type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
             fileUrl,
-            downloadUrl: fieldValue._download_url || fileUrl,
             fileSize: fieldValue.fileSize,
         });
     }, [formik.values, fieldLayoutInfo.attrs.name]);
@@ -559,7 +554,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
             setLightboxUrls?.([
                 {
                     src: url.fileUrl,
-                    downloadUrl: url.downloadUrl || url.fileUrl,
+                    downloadUrl: url.fileUrl,
                     type: previewKind === "video" ? "video" : undefined
                 },
             ]);
@@ -600,7 +595,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                         onClick={(event) => {
                                             event.preventDefault();
                                             event.stopPropagation();
-                                            downloadMediaFile(fileDetails?.downloadUrl || fileDetails?.fileUrl, fileDetails?.name);
+                                            downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name);
                                         }}
                                     >
                                         <SolidIcon name="si-download" aria-hidden />
