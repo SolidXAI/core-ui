@@ -1,0 +1,31 @@
+:root {
+  --solid-border-soft: rgba(201, 187, 164, 0.48);
+  --solid-border-default: rgba(205, 190, 166, 0.78);
+  --solid-border-strong: rgba(189, 175, 151, 0.82);
+  --solid-border-contrast: rgba(46, 46, 46, 0.22);
+  --solid-surface-2: #f0eadf;
+  --solid-interactive-bg: #2e2e2e;
+  --solid-focus-ring: rgba(46, 46, 46, 0.18);
+  --accent: #f6f1e7;
+  --accent-foreground: #5c4b3e;
+  --primary: #2e2e2e;
+  --primary-foreground: #fdfbf6;
+  --ring: rgba(46, 46, 46, 0.18);
+  --primary-color: var(--primary);
+  --primary-color-text: var(--primary-foreground);
+  --focus-ring: 0 0 0 0.2rem var(--ring, rgba(46, 46, 46, 0.18));
+  --primary-light-color: #e4dbbd;
+  --highlight-text-color: #2e2e2e;
+  --highlight-bg: rgba(46, 46, 46, 0.08);
+  --solid-dashboard-welcome-bg: #f7f2e8;
+  --solid-admin-card-color-1: #2e2e2e;
+  --solid-admin-card-color-2: #434343;
+  --solid-admin-card-color-3: #b7c184;
+  --sidebar-background: #f7f1e6;
+  --sidebar-foreground: #3e332b;
+  --sidebar-border: var(--solid-border-soft);
+  --sidebar-accent: rgba(255, 255, 255, 0.72);
+  --sidebar-accent-foreground: #2e251f;
+  --sidebar-primary: #2e2e2e;
+  --sidebar-primary-foreground: #fdfbf6;
+}
