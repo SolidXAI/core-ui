@@ -152,7 +152,7 @@ const ICON_MAP = {
 
 export type SolidIconName = keyof typeof ICON_MAP;
 
-const SPIN_CLASSNAMES = new Set(["pi-spin", "si-spin"]);
+const SPIN_CLASSNAMES = new Set(["si-spin"]);
 
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");

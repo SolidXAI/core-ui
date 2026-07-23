@@ -1738,7 +1738,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               <SolidButton
                 key={index}
                 type="button"
-                icon={button?.attrs?.icon ?? "pi pi-pencil"}
+                icon={button?.attrs?.icon}
+                leftIcon={!button?.attrs?.icon ? <Pencil size={14} aria-hidden /> : undefined}
                 className={`gap-2 ${button?.attrs?.className ?? ""}`}
                 label={
                   button.attrs.showLabel !== false
