@@ -854,7 +854,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         useCreateSolidEntityMutation,
         useDeleteSolidEntityMutation,
         useGetSolidEntityByIdQuery,
-        useLazyGetSolidEntitiesQuery,
         useUpdateSolidEntityMutation,
         usePatchUpdateSolidEntityMutation,
         usePublishSolidEntityMutation,
@@ -890,8 +889,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         unpublishSolidEntity,
         { isSuccess: isEntityUnpublishedSuccess, isError: isEntityUnpublishedError, error: entityUnpublishedError },
     ] = useUnpublishSolidEntityMutation();
-
-    const [getWorkflowVersions] = useLazyGetSolidEntitiesQuery();
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
@@ -1162,7 +1159,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         encodeValuesOnly: true,
     });
     const [initialEntityData, setInitialEntityData] = useState({});
-    const [workflowVersionRecords, setWorkflowVersionRecords] = useState<any[]>([]);
     const {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
@@ -1190,57 +1186,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     const isDraftPublishWorkflowEnabled = solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow === true;
     const currentWorkflowStatusLabel = isDraftPublishWorkflowEnabled && params.id !== 'new'
-        ? getWorkflowStatusLabel(solidFormViewData?.data, workflowVersionRecords)
+        ? getWorkflowStatusLabel(solidFormViewData?.data)
         : null;
-
-    useEffect(() => {
-        const currentRecord = solidFormViewData?.data;
-        const chainId = currentRecord?.initialEntityVersionId || currentRecord?.id;
-
-        if (!isDraftPublishWorkflowEnabled || params.id === 'new' || !chainId) {
-            setWorkflowVersionRecords(currentRecord ? [currentRecord] : []);
-            return;
-        }
-
-        let cancelled = false;
-        const fetchWorkflowVersions = async () => {
-            const queryString = qs.stringify({
-                filters: {
-                    $or: [
-                        { initialEntityVersionId: { $eq: chainId } },
-                        { id: { $eq: chainId } },
-                    ],
-                },
-                fields: ['id', 'isPublished', 'isLatest', 'publishedAt'],
-                sort: ['createdAt:desc'],
-            }, { encodeValuesOnly: true });
-            try {
-                const response: any = await getWorkflowVersions(queryString);
-                if (!cancelled) {
-                    const records = response?.data?.records || [];
-                    const hasCurrentRecord = records.some((record: any) => String(record.id) === String(currentRecord?.id));
-                    setWorkflowVersionRecords(hasCurrentRecord || !currentRecord ? records : [...records, currentRecord]);
-                }
-            } catch (error) {
-                if (!cancelled) {
-                    setWorkflowVersionRecords(currentRecord ? [currentRecord] : []);
-                }
-            }
-        };
-
-        fetchWorkflowVersions();
-        return () => {
-            cancelled = true;
-        };
-    }, [
-        isDraftPublishWorkflowEnabled,
-        params.id,
-        solidFormViewData?.data?.id,
-        solidFormViewData?.data?.initialEntityVersionId,
-        solidFormViewData?.data?.isPublished,
-        solidFormViewData?.data?.isLatest,
-        solidFormViewData?.data?.publishedAt,
-    ]);
 
     // useEffect(() => {
     //     const handleOnFormLayoutLoadEvent = async () => {
@@ -2235,17 +2182,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     ? 'This version will become visible through published APIs.'
                                     : 'This version will no longer be returned as published content.'}
                             </p>
-                            <div className="solid-workflow-confirm-status-row">
-                                <div className="solid-workflow-confirm-status-item">
-                                    <span>Current</span>
-                                    <strong>{isPublishConfirm ? 'Draft' : 'Published'}</strong>
-                                </div>
-                                <span className="solid-workflow-confirm-status-arrow" aria-hidden="true">-&gt;</span>
-                                <div className="solid-workflow-confirm-status-item solid-workflow-confirm-status-item--after">
-                                    <span>After</span>
-                                    <strong>{isPublishConfirm ? 'Published' : 'Draft'}</strong>
-                                </div>
-                            </div>
                             {isPublishConfirm && (
                                 <p className="solid-workflow-confirm-note">
                                     Previously published versions will stay in version history.

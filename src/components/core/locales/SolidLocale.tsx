@@ -68,7 +68,7 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
     const shouldShowCreateInfoPlaceholder = createMode && isDraftPublishWorkflowEnabled && !isInternationalisationEnabled;
     const isPublished = isDraftPublishWorkflowEnabled && Boolean(data?.isPublished ?? published);
     const statusLabel = workflowStatusLabel || (isPublished ? 'Published' : 'Draft');
-    const publishedBy = isDraftPublishWorkflowEnabled && isPublished && data?.publishedAt ? data?.updatedBy : null;
+    const publishedBy = isDraftPublishWorkflowEnabled && data?.publishedAt ? data?.updatedBy : null;
     const documentId = data?.initialEntityVersionId || data?.id;
     const defaultLocaleMeta = applicableLocales?.find((locale: any) => locale.isDefault === 'yes');
     const defaultLocaleLabel = defaultLocaleMeta?.displayName || defautlLocale || '-';

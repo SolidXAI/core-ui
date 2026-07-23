@@ -1270,65 +1270,6 @@ textarea {
   line-height: 1.45;
 }
 
-.solid-workflow-confirm-status-row {
-  grid-column: 2;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 8px 10px;
-  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-  border-radius: 8px;
-  background: #f8fafc;
-}
-
-.solid-workflow-confirm-status-item {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 10px;
-  color: var(--muted-foreground);
-}
-
-.solid-workflow-confirm-status-item strong {
-  width: fit-content;
-  max-width: 100%;
-  padding: 2px 8px;
-  border: 1px solid #d97706;
-  border-radius: 999px;
-  color: #92400e;
-  background: #fffbeb;
-  font-size: 11px;
-  font-weight: 650;
-  line-height: 1.25;
-}
-
-.solid-workflow-confirm-dialog--publish .solid-workflow-confirm-status-item--after strong {
-  border-color: #16a34a;
-  color: #15803d;
-  background: #ecfdf3;
-}
-
-.solid-workflow-confirm-dialog--unpublish .solid-workflow-confirm-status-item strong {
-  border-color: #16a34a;
-  color: #15803d;
-  background: #ecfdf3;
-}
-
-.solid-workflow-confirm-dialog--unpublish .solid-workflow-confirm-status-item--after strong {
-  border-color: #d97706;
-  color: #92400e;
-  background: #fffbeb;
-}
-
-.solid-workflow-confirm-status-arrow {
-  color: var(--muted-foreground);
-  font-size: 13px;
-  line-height: 1;
-}
-
 .solid-workflow-confirm-note {
   grid-column: 2;
   margin: 2px 0 0;

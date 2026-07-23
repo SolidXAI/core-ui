@@ -12,33 +12,18 @@ type SolidVersionHistoryProps = {
     onRefresh?: () => void;
 };
 
-const getPublishedTime = (record: any) => {
-    if (!record?.isPublished || !record?.publishedAt) return null;
-    const time = new Date(record.publishedAt).getTime();
-    return Number.isNaN(time) ? null : time;
-};
-
-const hasNewerPublishedVersion = (record: any, versions: any[] = []) => {
-    const recordPublishedTime = getPublishedTime(record);
-    if (recordPublishedTime === null) return false;
-
-    const publishedTimes = versions
-        .map(getPublishedTime)
-        .filter((time): time is number => time !== null);
-
-    if (publishedTimes.length <= 1) return false;
-    return Math.max(...publishedTimes) > recordPublishedTime;
-};
-
-export const getWorkflowStatusLabel = (record: any, versions: any[] = []) => {
+export const getWorkflowStatusLabel = (record: any) => {
     if (record?.isPublished) {
-        return hasNewerPublishedVersion(record, versions) ? 'Archived' : 'Published';
+        return 'Published';
+    }
+    if (record?.publishedAt && record?.isLatest === false) {
+        return 'Archived';
     }
     return 'Draft';
 };
 
-const getVersionStatusClassName = (record: any, versions: any[] = []) => {
-    const status = getWorkflowStatusLabel(record, versions);
+const getVersionStatusClassName = (record: any) => {
+    const status = getWorkflowStatusLabel(record);
     if (status === 'Archived') return 'solid-version-status-pill--archived';
     if (status === 'Published') return 'solid-version-status-pill--published';
     return 'solid-version-status-pill--draft';
@@ -142,8 +127,8 @@ export const SolidVersionHistory = ({ params, currentRecord }: SolidVersionHisto
                             <tr key={record.id} className="border-t border-[var(--surface-border)]">
                                 <td className="p-2">#{record.id}{record.isLatest ? ' · Latest' : ''}</td>
                                 <td className="p-2">
-                                    <span className={`solid-version-status-pill ${getVersionStatusClassName(record, versionRecords)}`}>
-                                        {getWorkflowStatusLabel(record, versionRecords)}
+                                    <span className={`solid-version-status-pill ${getVersionStatusClassName(record)}`}>
+                                        {getWorkflowStatusLabel(record)}
                                     </span>
                                 </td>
                                 <td className="p-2">
@@ -151,7 +136,7 @@ export const SolidVersionHistory = ({ params, currentRecord }: SolidVersionHisto
                                     <div className="text-xs text-color-secondary">{getUserDisplay(record.createdBy)}</div>
                                 </td>
                                 <td className="p-2">{getUserDisplay(record.updatedBy)}</td>
-                                <td className="p-2">{record.isPublished ? formatVersionDate(record.publishedAt) : '-'}</td>
+                                <td className="p-2">{record.publishedAt ? formatVersionDate(record.publishedAt) : '-'}</td>
                                 <td className="p-2 text-right">
                                     <SolidButton
                                         type="button"
