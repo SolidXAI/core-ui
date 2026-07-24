@@ -41,6 +41,7 @@ import { SolidIconEditWidget } from "../components/core/form/fields/widgets/Soli
 import { SolidIconViewWidget } from "../components/core/form/fields/widgets/SolidIconViewWidget";
 import { SolidManyToManyRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
 import { SolidManyToOneRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
+import { PillWidget } from "../components/core/list/widgets/PillWidget";
 import { SolidUserBlockedStatusListWidget } from "../components/core/list/widgets/SolidUserBlockedStatusListWidget";
 import { SolidShortTextFieldAvatarWidget } from "../components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "../components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
@@ -61,6 +62,8 @@ import { SolidLovTypeChangeFormEditWidget } from "../components/core/extension/s
 import mqMessageOnFormLoadHandler from "../components/core/extension/solid-core/mqMessage/form/mqMessageOnFormLoadHandler";
 import { SolidMqMessageStageFormViewWIdget } from "../components/core/extension/solid-core/mqMessage/form/SolidMqMessageStageFormViewWIdget";
 import solidXGenAiCodeBuilderConfigWidget from "../components/core/extension/solid-core/settings/solidXGenAiCodeBuilderConfigWidget";
+import openWorkflowDefinitionEditorHeaderAction from "../components/core/extension/solid-core/workflowDefinition/list/openWorkflowDefinitionEditorHeaderAction";
+import openWorkflowDefinitionEditorRowAction from "../components/core/extension/solid-core/workflowDefinition/list/openWorkflowDefinitionEditorRowAction";
 import { DefaultDashboardKpiWidget } from "../components/core/dashboard/widgets/DefaultDashboardKpiWidget";
 import { DefaultDashboardLineChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardLineChartWidget";
 import { DefaultDashboardBarChartWidget } from "../components/core/dashboard/widgets/DefaultDashboardBarChartWidget";
@@ -173,6 +176,9 @@ registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelation
 
 // - users status
 registerExtensionComponent("SolidUserBlockedStatusListWidget", SolidUserBlockedStatusListWidget, ExtensionComponentTypes.listFieldWidget);
+
+// - generic selection/status pill
+registerExtensionComponent("PillWidget", PillWidget, ExtensionComponentTypes.listFieldWidget);
 
 // - relation.datetime
 registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, ExtensionComponentTypes.listFieldWidget);
@@ -404,6 +410,8 @@ registerExtensionComponent("QueueSlaHeatmapWidget", QueueSlaHeatmapWidget, Exten
 registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange, ExtensionFunctionTypes.onFieldChange);
 registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad, ExtensionFunctionTypes.onFormLayoutLoad);
 registerExtensionFunction("moduleMetadataListOnLoad", moduleMetadataListOnLoad, ExtensionFunctionTypes.onListLoad);
+registerExtensionFunction("openWorkflowDefinitionEditorHeaderAction", openWorkflowDefinitionEditorHeaderAction, ExtensionFunctionTypes.onListLoad);
+registerExtensionFunction("openWorkflowDefinitionEditorRowAction", openWorkflowDefinitionEditorRowAction, ExtensionFunctionTypes.onListLoad);
 
 // Model Sequence 
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"

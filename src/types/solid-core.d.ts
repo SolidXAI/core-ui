@@ -81,6 +81,13 @@ export type LayoutAttribute = {
     renderMode?: string;
     widget?: string;
     visible?: boolean;
+    columnClassName?: string;
+    cellClassName?: string;
+    headerClassName?: string;
+    style?: Record<string, any>;
+    columnStyle?: Record<string, any>;
+    cellStyle?: Record<string, any>;
+    headerStyle?: Record<string, any>;
     editWidget?: string;
     viewWidget?: string;
     cardWidget?: string;
@@ -89,6 +96,10 @@ export type LayoutAttribute = {
     inlineCreateLayout?: any;
     showDefaultAddButton?: boolean;
     showDefaultEditButton?: boolean;
+    showRowActionsInContextMenu?: boolean;
+    showRowActionsAsIconOnly?: boolean;
+    showRowEditAsIconOnly?: boolean;
+    showRowDeleteAsIconOnly?: boolean;
     showEditFormButton?: boolean;
     showAddFormButton?: boolean;
     showDeleteFormButton?: boolean;
