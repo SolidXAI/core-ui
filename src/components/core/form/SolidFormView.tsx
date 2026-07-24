@@ -280,6 +280,27 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
     return null;
 }
 
+const normalizeWorkflowFieldValueForFormData = (value: any, fieldMetadata: any) => {
+    if (fieldMetadata?.type === "relation" && fieldMetadata?.relationType === "many-to-one") {
+        if (value && typeof value === "object" && "solidManyToOneValue" in value) {
+            return value;
+        }
+        if (value && typeof value === "object" && "id" in value) {
+            return { solidManyToOneValue: value.id };
+        }
+        return { solidManyToOneValue: value };
+    }
+
+    if (fieldMetadata?.type === "selectionStatic" || fieldMetadata?.type === "selectionDynamic") {
+        if (value && typeof value === "object" && "value" in value) {
+            return value;
+        }
+        return { label: String(value ?? ""), value };
+    }
+
+    return value;
+}
+
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
 const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
     const fieldContext: SolidFieldProps = {
@@ -950,15 +971,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             });
 
-            let solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
-            if (params.id !== "new") {
-                if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
-                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
-                        formData.append(solidWorkflowField, solidWorkflowFieldValue);
-                    }
-                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
-                        formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
-                    }
+            const solidWorkflowField = solidView?.layout?.attrs?.workflowField;
+            const workflowFieldMetadata = solidFieldsMetadata?.[solidWorkflowField];
+            if (params.id !== "new" && solidWorkflowField && workflowFieldMetadata && solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                const workflowFieldContext: SolidFieldProps = {
+                    fieldMetadata: workflowFieldMetadata,
+                    field: layoutFieldsObj[solidWorkflowField] ?? { attrs: { name: solidWorkflowField } },
+                    data: initialEntityData,
+                    solidFormViewMetaData: solidFormViewMetaData,
+                    modelName: params.modelName
+                };
+                const workflowSolidField = fieldFactory(workflowFieldMetadata?.type, workflowFieldContext);
+                if (workflowSolidField) {
+                    formData.delete(solidWorkflowField);
+                    formData.delete(`${solidWorkflowField}Id`);
+                    workflowSolidField.updateFormData(
+                        normalizeWorkflowFieldValueForFormData(solidWorkflowFieldValue, workflowFieldMetadata),
+                        formData
+                    );
                 }
             }
             if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
