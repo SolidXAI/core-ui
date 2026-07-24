@@ -1,49 +1,32 @@
 
 import React, { useState } from 'react';
-import { Download, Volume2 } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 import { FileReaderExt } from '../../../../components/common/FileReaderExt';
-import { SolidButton, SolidDialog } from "../../../shad-cn-ui";
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle, SolidIcon } from "../../../shad-cn-ui";
 import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
-
-const getCleanUrl = (url: string) => url.split("?")[0];
-
-const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(getCleanUrl(url));
-
-const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(getCleanUrl(url));
-
-const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(getCleanUrl(url));
-
-const isDocumentType = (url: string) => {
-    const ext = getCleanUrl(url).split(".").pop()?.toLowerCase();
-    return ext ? downloadOnlyExt.includes(ext) : false;
-};
-
-const downloadOnlyExt = [
-    "txt", "zip", "rar",
-    "doc", "docx",
-    "xls", "xlsx",
-    "ppt", "pptx",
-    "pdf", "csv"
-];
-
-const downloadFile = (url: string, name: string = "") => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = name;
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-};
+import { getMediaPreviewKind, isLightboxMediaKind, type MediaPreviewKind } from '../../../../helpers/mediaType';
+import { openMediaInNewTab } from '../../../../helpers/mediaUrl';
+import { downloadMediaFile } from '../../../../helpers/downloadMediaFile';
+import styles from "../../form/fields/solidFields.module.css";
 
 
 
 // Thumbnail preview component
-const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.MouseEvent) => void }) => {
+const MediaPreview = ({
+    src,
+    fileName,
+    previewKind,
+    onClick
+}: {
+    src: string;
+    fileName?: string;
+    previewKind: MediaPreviewKind;
+    onClick: (event: React.MouseEvent) => void
+}) => {
     const [isBroken, setIsBroken] = useState(false);
 
     const handleClick = (event: React.MouseEvent) => {
@@ -51,7 +34,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
     };
 
     if (!isBroken) {
-        if (isImageFile(src)) {
+        if (previewKind === "image") {
             return (
                 <img
                     src={src}
@@ -66,7 +49,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
             );
         }
 
-        if (isVideoFile(src)) {
+        if (previewKind === "video") {
             return (
                 <video
                     src={src}
@@ -81,7 +64,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
             );
         }
 
-        if (isAudioFile(src)) {
+        if (previewKind === "audio") {
             return (
                 <div
                     className="flex items-center justify-center rounded bg-gray-100 shadow-md"
@@ -99,7 +82,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={handleClick}
         >
-            <SolidFileTypeIcon fileUrl={src} size={24} />
+            <SolidFileTypeIcon fileUrl={src} fileName={fileName} size={24} />
         </div>
     );
 };
@@ -149,13 +132,19 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
     const [isShowAllFiles, setShowAllFiles] = useState(false);
 
     if (!rowData?._media?.[fieldMetadata.name]) return null;
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
 
     const fullrecord = rowData._media[fieldMetadata.name]?.map((file: any) => ({
         name: file.originalFileName,
         type: file.mimeType,
         size: file.fileSize,
         id: file.id,
-        fileUrl: file._full_url
+        fileUrl: file?._full_url,
+        previewKind: getMediaPreviewKind({
+            url: file?._full_url,
+            fileName: file?.originalFileName,
+            mimeType: file?.mimeType,
+        })
     }));
 
 
@@ -164,49 +153,70 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
 
     const handleFileView = (file: any) => {
-        const fileUrl = file?.fileUrl || "";
-        // const cleanUrl = fileUrl.split("?")[0];
-        // const ext = cleanUrl.split(".").pop()?.toLowerCase();
+        if (isArchivedRecord) return;
 
-        if (isDocumentType(fileUrl)) {
-            downloadFile(file?.fileUrl, "")
-
-        } else {
-            setLightboxUrls?.([{ src: file.fileUrl, downloadUrl: file.fileUrl }]);
+        if (isLightboxMediaKind(file?.previewKind)) {
+            setLightboxUrls?.([{
+                src: file.fileUrl,
+                downloadUrl: file.fileUrl,
+                type: file.previewKind === "video" ? "video" : undefined
+            }]);
             setOpenLightbox?.(true);
+            return;
         }
+
+        openMediaInNewTab(file?.fileUrl);
     };
 
+    const renderMediaFileCard = (file: any, className = "") => (
+        <div className={`${styles.mediaAttachmentCard} ${className}`.trim()}>
+            <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                <FileReaderExt fileDetails={file} />
+                <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                    <div className="flex items-start justify-between gap-4">
+                        <button
+                            type="button"
+                            className={styles.mediaAttachmentName}
+                            onClick={() => handleFileView(file)}
+                            title={file.name}
+                        >
+                            {file.name}
+                        </button>
+                        <div className={`${styles.mediaAttachmentActions} flex items-center md:gap-2`}>
+                            <button
+                                type="button"
+                                className="solid-file-icon-btn"
+                                aria-label="Download file"
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    if (isArchivedRecord) return;
+                                    downloadMediaFile(file?.fileUrl, file?.name);
+                                }}
+                            >
+                                <SolidIcon name="si-download" aria-hidden />
+                            </button>
+                        </div>
+                    </div>
+                    <div className={styles.mediaAttachmentSize}>
+                        {formatFileSize(file.size)}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
 
     return fullrecord.length > 0 ? (
         <div className='flex items-end gap-2'>
 
-            {/* THUMBNAIL - FIXED BEHAVIOR */}
             <MediaPreview
                 src={fullrecord[0]?.fileUrl}
+                fileName={fullrecord[0]?.name}
+                previewKind={fullrecord[0]?.previewKind}
                 onClick={(event) => {
                     event.stopPropagation();
-
-                    // const cleanUrl = fullrecord[0]?.fileUrl.split("?")[0];
-                    // const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-                    if (isDocumentType(fullrecord[0]?.fileUrl) && fullrecord?.length > 1) {
-                        setShowAllFiles(true)
-                        return;
-                    }
-
-                    else if (isDocumentType(fullrecord[0]?.fileUrl)) {
-                        downloadFile(fullrecord[0]?.fileUrl, "")
-                        return;
-                    }
-                    // FIRST FILE IS MEDIA ⇒ OPEN LIGHTBOX
-                    const urlsWithType = fullrecord.map((file: any) => ({
-                        src: file.fileUrl,
-                        downloadUrl: file.fileUrl,
-                    }));
-                    setLightboxUrls(urlsWithType);
-                    setOpenLightbox(true);
+                    handleFileView(fullrecord[0]);
                 }}
             />
 
@@ -219,17 +229,8 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 }}
                 onClick={(event) => {
                     event.stopPropagation();
-
-                    if (isDocumentType(fullrecord[0]?.fileUrl)) {
-                        setShowAllFiles(true);
-                    } else {
-                        const urlsWithType = fullrecord.map((file: any) => ({
-                            src: file.fileUrl,
-                            downloadUrl: file.fileUrl
-                        }));
-                        setLightboxUrls(urlsWithType);
-                        setOpenLightbox(true);
-                    }
+                    if (isArchivedRecord) return;
+                    setShowAllFiles(true);
                 }}
             >
                 +{fullrecord.length - 1}
@@ -242,48 +243,22 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
             <SolidDialog
                 open={isShowAllFiles}
                 onOpenChange={setShowAllFiles}
-                header="Items Uploaded"
-                style={{ width: '32rem', maxWidth: '94vw' }}
+                style={{ minWidth: 450 }}
             >
-                {fullrecord?.map((file: any) => {
-                    const fileId = `${file.name}-${file.size}`;
-                    return (
-                        <div key={fileId} className="solid-file-upload-wrapper mb-3">
-                            <div className="flex items-center gap-2">
-
-                                <FileReaderExt fileDetails={file} />
-
-                                <div className="flex w-full flex-col gap-1">
-                                    <div className="flex items-center justify-between">
-
-                                        <p
-                                            className="m-0 w-11 font-normal text-[var(--primary-color)] solid-media-column-text-wrapper"
-                                            style={{ cursor: "pointer" }}
-                                            onClick={() => handleFileView(file)}
-                                        >
-                                            {file?.name}
-                                        </p>
-
-                                        <SolidButton
-                                            type="button"
-                                            size="small"
-                                            variant="ghost"
-                                            leftIcon={<Download size={14} />}
-                                            onClick={() => {
-                                                downloadFile(file?.fileUrl, "")
-                                            }}
-                                            style={{ height: 16, width: 16 }}
-                                        />
-                                    </div>
-
-                                    <div className="text-sm">{formatFileSize(file.size)}</div>
-                                </div>
-
+                <SolidDialogHeader>
+                    <SolidDialogTitle>Items Uploaded</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody>
+                    {fullrecord?.map((file: any, index: number) => {
+                        const fileId = `${file.name}-${file.size}`;
+                        return (
+                            <div key={fileId} className={index === fullrecord.length - 1 ? "" : "mb-3"}>
+                                {renderMediaFileCard(file)}
                             </div>
-                        </div>
-                    )
-                }
-                )}
+                        )
+                    })}
+                </SolidDialogBody>
             </SolidDialog>
         </div>
     ) : (

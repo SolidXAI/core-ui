@@ -12,6 +12,7 @@
 .modal {
   width: min(540px, calc(100vw - 20px));
   max-height: calc(100vh - 32px);
+  min-width: 0;
   display: flex;
   flex-direction: column;
   border-radius: 12px;
@@ -20,6 +21,7 @@
   color: var(--card-foreground);
   box-shadow: 0 20px 48px rgba(2, 6, 23, 0.35);
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .header {
@@ -30,6 +32,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.header > div {
+  min-width: 0;
 }
 
 .title {
@@ -96,6 +102,7 @@
 .formWrapper {
   flex: 1;
   min-height: 0;
+  min-width: 0;
   overflow: auto;
   padding: 12px;
   background: var(--card);
@@ -195,11 +202,17 @@
   padding: 0 14px 14px;
 }
 
+.tabsLine::-webkit-scrollbar {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .tabsLine {
     gap: 12px;
     overflow-x: auto;
     white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 }
 
@@ -527,6 +540,16 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.diagnosticsRefreshStatus {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  min-height: 18px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .diagnosticsSummary {
@@ -694,5 +717,81 @@
 
   .diagnosticsSpan2 {
     grid-column: span 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .backdrop {
+    padding: 8px;
+  }
+
+  .modal {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+    border-radius: 14px;
+  }
+
+  .header {
+    padding: 14px 12px 10px;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .tabsLine {
+    gap: 10px;
+    padding: 0 12px;
+    overscroll-behavior-x: contain;
+  }
+
+  .tabTrigger {
+    flex: 0 0 auto;
+    font-size: 12px;
+    padding: 11px 0 9px;
+  }
+
+  .formWrapper {
+    padding: 8px;
+  }
+
+  .accountScroll {
+    padding: 8px 8px 0;
+  }
+
+  .avatarRow,
+  .versionRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .versionTags {
+    flex-wrap: wrap;
+  }
+
+  .footerActions {
+    padding: 10px 8px 12px;
+  }
+
+  .confirmActions {
+    padding: 0 8px 12px;
+    flex-direction: column-reverse;
+  }
+
+  .footerActions :global(.solid-btn),
+  .confirmActions :global(.solid-btn),
+  .versionActions :global(.solid-btn) {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .versionActions {
+    width: 100%;
   }
 }

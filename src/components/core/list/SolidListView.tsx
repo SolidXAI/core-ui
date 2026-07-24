@@ -8,7 +8,7 @@ import { SolidCustomListViewColumn } from "./SolidCustomListViewColumn";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
-import { permissionExpression } from "../../../helpers/permissions";
+import { getCollectionViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
@@ -44,6 +44,7 @@ import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus"
 import {
   getFilterObjectFromLocalStorage,
   hasStoredFilterPredicates,
+  hasStoredSearchUiState,
   setFilterObjectToLocalStorage,
 } from "../common/globalSearchPersistence";
 import {
@@ -286,19 +287,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   useEffect(() => {
     const fetchPermissions = async () => {
       if (params.modelName) {
-        const permissionNames = [
-          permissionExpression(params.modelName, 'create'),
-          permissionExpression(params.modelName, 'delete'),
-          permissionExpression(params.modelName, 'update'),
-          permissionExpression(params.modelName, 'deleteMany'),
-          permissionExpression(params.modelName, 'findOne'),
-          permissionExpression(params.modelName, 'findMany'),
-          permissionExpression(params.modelName, 'insertMany'),
-          permissionExpression('importTransaction', 'create'),
-          permissionExpression('exportTransaction', 'create'),
-          permissionExpression('userViewMetadata', 'create'),
-          permissionExpression('savedFilters', 'create')
-        ];
+        const permissionNames = getCollectionViewPermissionNames(params.modelName);
         const queryData = {
           permissionNames: permissionNames,
         };
@@ -876,6 +865,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
       fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
       fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
+      fileterTobeStored.predefined_search_chip = latestFilterPredicatesRef.current.predefined_search_chip || null;
       setFilterObjectToLocalStorage(fileterTobeStored);
     }
     triggerGetSolidEntities(queryString);
@@ -1367,6 +1357,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
   const isEmbeddedList = params.embeded === true;
+  const shouldShowMobileSearchElement =
+    showGlobalSearchElement ||
+    hasStoredSearchUiState(filterPredicates) ||
+    hasStoredSearchUiState(getFilterObjectFromLocalStorage());
 
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
@@ -1524,7 +1518,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 </div>
               </div>
               {/* </div> */}
-              {showGlobalSearchElement && params.embeded === false && window.innerWidth < 991 && (
+              {shouldShowMobileSearchElement && params.embeded === false && (
                 <div className="flex lg:hidden">
                   <SolidGlobalSearchElement
                     viewType="list"

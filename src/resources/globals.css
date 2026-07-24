@@ -204,17 +204,22 @@ a {
   background: var(--card);
   color: var(--foreground);
   box-shadow: 0 18px 48px rgba(15, 23, 42, 0.16);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .solid-react-datepicker-calendar .react-datepicker__month-container {
   float: left;
   width: auto;
+  overflow: visible;
 }
 
 .solid-react-datepicker-calendar .react-datepicker__header {
   background: color-mix(in srgb, var(--card) 92%, white 8%);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  padding: 4px;
+  position: relative;
+  overflow: visible;
+  z-index: 2;
 }
 
 .solid-react-datepicker-calendar .react-datepicker__current-month,
@@ -223,8 +228,109 @@ a {
   color: var(--foreground);
 }
 
+.solid-react-datepicker-header {
+  display: grid;
+  grid-template-columns: 24px auto 24px;
+  align-items: center;
+  gap: 4px;
+}
+
+.solid-react-datepicker-selects {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.solid-react-datepicker-select-shell {
+  flex: 0 0 auto;
+}
+
+.solid-react-datepicker-select-shell--month {
+  width: 96px;
+}
+
+.solid-react-datepicker-select-shell--year {
+  width: 64px;
+}
+
+.solid-react-datepicker-select-wrap {
+  width: 100%;
+}
+
+.solid-react-datepicker-select-shell .solid-select-wrap {
+  width: 100%;
+}
+
+.solid-react-datepicker-select-shell .solid-select-trigger {
+  min-height: 32px;
+  height: 30px;
+  border-radius: 6px;
+  padding: 0 22px 0 6px;
+  font-size: 11px;
+  font-weight: 500;
+  border-color: color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.solid-react-datepicker-select-shell .solid-select-trigger:focus-visible,
+.solid-react-datepicker-select-shell .solid-select-trigger:focus {
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 60%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color, var(--primary)) 14%, transparent);
+}
+
+.solid-react-datepicker-select-shell .solid-select-trigger-label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.solid-react-datepicker-select-shell .solid-select-icon {
+  right: 6px;
+}
+
+.solid-react-datepicker-select-shell .solid-select-menu {
+  min-width: 100%;
+  z-index: calc(var(--z-overlay) + 5);
+}
+
+.solid-react-datepicker-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--foreground);
+  cursor: pointer;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.solid-react-datepicker-nav:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.solid-react-datepicker-nav:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .solid-react-datepicker-calendar .react-datepicker__day-name {
   color: color-mix(in srgb, var(--foreground) 64%, transparent);
+}
+
+.solid-react-datepicker-calendar .react-datepicker__day-names {
+  margin-bottom: -4px;
+}
+
+.solid-react-datepicker-calendar .react-datepicker__month {
+  margin: 0.25rem 0.3rem 0.35rem;
+}
+
+.solid-react-datepicker-calendar .react-datepicker__day-name,
+.solid-react-datepicker-calendar .react-datepicker__day {
+  margin: 0.12rem;
 }
 
 .solid-react-datepicker-calendar .react-datepicker__day,
@@ -530,6 +636,8 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__year-option,
 [data-theme="dark"] .solid-react-datepicker-calendar .react-datepicker__year-option,
 html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-option,
 [data-theme="dark"] .solid-react-datepicker-calendar .react-datepicker__month-year-option,
+html.dark .solid-react-datepicker-select,
+[data-theme="dark"] .solid-react-datepicker-select,
 html.dark .solid-react-datepicker-calendar .react-datepicker__navigation-icon::before,
 [data-theme="dark"] .solid-react-datepicker-calendar .react-datepicker__navigation-icon::before,
 html.dark .solid-react-datepicker-calendar .react-datepicker__month-read-view--down-arrow,
