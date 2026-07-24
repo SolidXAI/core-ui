@@ -169,6 +169,7 @@ export const SolidPersonalInfo = () => {
 
   const liveAvatarUrl = previewImage || userData?.data?._media?.profilePicture?.[0]?._full_url || null;
   const roleLabels = userData?.data?.roles?.map((role: any) => role.name) || [];
+  const isSaveDisabled = !formik.dirty || formik.isSubmitting;
 
   const handleFileChange = (file: File) => {
     const existing = userData?.data?._media?.profilePicture?.[0];
@@ -321,7 +322,7 @@ export const SolidPersonalInfo = () => {
         </div>
 
         <div className={styles.footerActions}>
-          <SolidButton type="submit" size="sm" loading={formik.isSubmitting}>
+          <SolidButton type="submit" size="sm" loading={formik.isSubmitting} disabled={isSaveDisabled}>
             Save
           </SolidButton>
         </div>

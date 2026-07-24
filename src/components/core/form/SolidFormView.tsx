@@ -1,5 +1,5 @@
 import { useSession } from '../../../hooks/useSession'
-import { permissionExpression } from "../../../helpers/permissions";
+import { getFormViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery, useLazyGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -46,6 +46,7 @@ import { getSettingsMap } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
+import { closePopup, openPopup, PopupEvent } from "../../../redux/features/popupSlice";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidConfirmDialog } from "../../shad-cn-ui";
 import {
@@ -278,6 +279,27 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
         return new SolidComputedField(fieldContext);
     }
     return null;
+}
+
+const normalizeWorkflowFieldValueForFormData = (value: any, fieldMetadata: any) => {
+    if (fieldMetadata?.type === "relation" && fieldMetadata?.relationType === "many-to-one") {
+        if (value && typeof value === "object" && "solidManyToOneValue" in value) {
+            return value;
+        }
+        if (value && typeof value === "object" && "id" in value) {
+            return { solidManyToOneValue: value.id };
+        }
+        return { solidManyToOneValue: value };
+    }
+
+    if (fieldMetadata?.type === "selectionStatic" || fieldMetadata?.type === "selectionDynamic") {
+        if (value && typeof value === "object" && "value" in value) {
+            return value;
+        }
+        return { label: String(value ?? ""), value };
+    }
+
+    return value;
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
@@ -751,15 +773,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     useEffect(() => {
         const fetchPermissions = async () => {
             if (params.modelName) {
-                const permissionNames = [
-                    permissionExpression(params.modelName, 'create'),
-                    permissionExpression(params.modelName, 'delete'),
-                    permissionExpression(params.modelName, 'update'),
-                    permissionExpression(params.modelName, 'findOne'),
-                    permissionExpression(params.modelName, 'publish'),
-                    permissionExpression(params.modelName, 'unpublish'),
-                    permissionExpression('chatterMessage', 'findMany')
-                ]
+                const permissionNames = getFormViewPermissionNames(params.modelName);
                 const queryData = {
                     permissionNames: permissionNames
                 };
@@ -958,15 +972,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             });
 
-            let solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
-            if (params.id !== "new") {
-                if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
-                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
-                        formData.append(solidWorkflowField, solidWorkflowFieldValue);
-                    }
-                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
-                        formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
-                    }
+            const solidWorkflowField = solidView?.layout?.attrs?.workflowField;
+            const workflowFieldMetadata = solidFieldsMetadata?.[solidWorkflowField];
+            if (params.id !== "new" && solidWorkflowField && workflowFieldMetadata && solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                const workflowFieldContext: SolidFieldProps = {
+                    fieldMetadata: workflowFieldMetadata,
+                    field: layoutFieldsObj[solidWorkflowField] ?? { attrs: { name: solidWorkflowField } },
+                    data: initialEntityData,
+                    solidFormViewMetaData: solidFormViewMetaData,
+                    modelName: params.modelName
+                };
+                const workflowSolidField = fieldFactory(workflowFieldMetadata?.type, workflowFieldContext);
+                if (workflowSolidField) {
+                    formData.delete(solidWorkflowField);
+                    formData.delete(`${solidWorkflowField}Id`);
+                    workflowSolidField.updateFormData(
+                        normalizeWorkflowFieldValueForFormData(solidWorkflowFieldValue, workflowFieldMetadata),
+                        formData
+                    );
                 }
             }
             if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
@@ -1502,6 +1525,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                 // Invoke the dynamic module...
                 if (dynamicChangeHandler) {
+                    const popupApi = {
+                        open: (popupEvent: PopupEvent) => dispatch(openPopup({
+                            closable: true,
+                            ...popupEvent,
+                        })),
+                        close: () => dispatch(closePopup()),
+                    };
+
                     const event: SolidUiEvent = {
                         fieldsMetadata: solidFieldsMetadata,
                         formData: formik.values,
@@ -1512,6 +1543,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         type: eventType,
                         viewMetadata: solidView,
                         formViewLayout: formViewLayout,
+                        popup: popupApi,
                         queryParams: {
                             actionName,
                             actionContext,

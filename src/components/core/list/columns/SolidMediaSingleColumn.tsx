@@ -6,48 +6,32 @@ import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
-
-const getCleanUrl = (url: string) => url.split("?")[0];
-
-// Helpers for file type detection
-const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(getCleanUrl(url));
-const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(getCleanUrl(url));
-const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(getCleanUrl(url));
-
-// Extensions that should be downloaded directly
-const downloadOnlyExt = [
-    "txt", "zip", "rar",
-    "doc", "docx",
-    "xls", "xlsx",
-    "ppt", "pptx",
-    "pdf"
-];
+import { getMediaPreviewKind, isLightboxMediaKind, type MediaPreviewKind } from '../../../../helpers/mediaType';
+import { openMediaInNewTab } from '../../../../helpers/mediaUrl';
 
 // Media component with fallback for broken links
-const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; onClick: (event: React.MouseEvent) => void }) => {
+const MediaWithFallback = ({
+    src,
+    alt,
+    fileName,
+    previewKind,
+    onClick
+}: {
+    src: string;
+    alt: string;
+    fileName?: string;
+    previewKind: MediaPreviewKind;
+    onClick: (event: React.MouseEvent) => void
+}) => {
     const [isBroken, setIsBroken] = useState(false);
 
     const handleClick = (event: React.MouseEvent) => {
         event.stopPropagation();
-        const cleanUrl = src.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            // Trigger download for docs/archives
-            const link = document.createElement("a");
-            link.href = src;
-            link.download = "";
-            link.target = "_blank";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else {
-            onClick(event);
-        }
+        onClick(event);
     };
 
     if (!isBroken) {
-        if (isImageFile(src)) {
+        if (previewKind === "image") {
             return (
                 <img
                     src={src}
@@ -62,7 +46,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
             );
         }
 
-        if (isVideoFile(src)) {
+        if (previewKind === "video") {
             return (
                 <video
                     src={src}
@@ -77,7 +61,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
             );
         }
 
-        if (isAudioFile(src)) {
+        if (previewKind === "audio") {
             return (
                 <div
                     className="flex items-center justify-center rounded bg-gray-100 shadow-md"
@@ -96,7 +80,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
             onClick={handleClick}
         >
-            <SolidFileTypeIcon fileUrl={src} size={24} />
+            <SolidFileTypeIcon fileUrl={src} fileName={fileName} size={24} />
         </div>
     );
 };
@@ -150,22 +134,45 @@ export const DefaultMediaSingleListWidget = ({
     setOpenLightbox
 }: SolidMediaListFieldWidgetProps) => {
     if (!rowData?._media?.[fieldMetadata.name]) return null;
-    const mediaUrls = rowData._media[fieldMetadata.name].map((i: any) => i._full_url);
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
+    const mediaFiles = rowData._media[fieldMetadata.name].map((file: any) => {
+        const fileUrl = file?._full_url;
+        const previewKind = getMediaPreviewKind({
+            url: fileUrl,
+            fileName: file?.originalFileName,
+            mimeType: file?.mimeType,
+        });
+        return {
+            fileUrl,
+            fileName: file?.originalFileName,
+            previewKind,
+            opensInLightbox: isLightboxMediaKind(previewKind),
+            lightboxType: previewKind === "video" ? "video" : undefined,
+        };
+    });
 
-    const firstUrl = mediaUrls[0];
-    if (!firstUrl) return <div style={{ height: 40, width: 40 }} />;
-    const cleanUrl = getCleanUrl(firstUrl);
+    const firstFile = mediaFiles[0];
+    if (!firstFile?.fileUrl) return <div style={{ height: 40, width: 40 }} />;
     return (
         <MediaWithFallback
-            src={firstUrl}
+            src={firstFile.fileUrl}
             alt="media"
+            fileName={firstFile.fileName}
+            previewKind={firstFile.previewKind}
             onClick={(event) => {
-                // Only open lightbox for image, video, or audio
-                event.stopPropagation()
-                if (isImageFile(cleanUrl) || isVideoFile(cleanUrl) || isAudioFile(cleanUrl)) {
-                    setLightboxUrls([{ src: firstUrl, downloadUrl: firstUrl }]);
+                event.stopPropagation();
+                if (isArchivedRecord) return;
+                if (firstFile.opensInLightbox) {
+                    setLightboxUrls([{
+                        src: firstFile.fileUrl,
+                        downloadUrl: firstFile.fileUrl,
+                        type: firstFile.lightboxType
+                    }]);
                     setOpenLightbox(true);
+                    return;
                 }
+
+                openMediaInNewTab(firstFile.fileUrl);
             }}
         />
     );

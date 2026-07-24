@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { env } from "../../../../adapters/env";
 import { hasAnyRole } from "../../../../helpers/rolesHelper";
 import { useSession } from "../../../../hooks/useSession";
@@ -28,13 +28,41 @@ export const SolidVersionInfo = () => {
   const { data: session } = useSession();
   const [trigger, { data, isLoading, isError }] = useLazyGetSolidVersionInfoQuery();
   const [showDiagnostics, setShowDiagnostics] = useState(false);
-  const [refreshTick, setRefreshTick] = useState(0);
   const [activeTab, setActiveTab] = useState<"pool" | "runtime">("pool");
-  const poolSnapshot = useMemo(() => getSolidEntityApiPoolSnapshot(), [refreshTick, showDiagnostics]);
+  const [poolSnapshot, setPoolSnapshot] = useState(() => getSolidEntityApiPoolSnapshot());
+  const [isRefreshingDiagnostics, setIsRefreshingDiagnostics] = useState(false);
+  const [lastDiagnosticsRefreshLabel, setLastDiagnosticsRefreshLabel] = useState<string | null>(null);
 
   useEffect(() => {
     trigger("");
   }, [trigger]);
+
+  const refreshDiagnosticsSnapshot = async () => {
+    setIsRefreshingDiagnostics(true);
+
+    try {
+      await new Promise<void>((resolve) => {
+        window.requestAnimationFrame(() => resolve());
+      });
+
+      const snapshot = getSolidEntityApiPoolSnapshot();
+      setPoolSnapshot(snapshot);
+      setLastDiagnosticsRefreshLabel(
+        `Refreshed at ${new Intl.DateTimeFormat(undefined, {
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+        }).format(new Date())}`
+      );
+    } finally {
+      setIsRefreshingDiagnostics(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!showDiagnostics) return;
+    void refreshDiagnosticsSnapshot();
+  }, [showDiagnostics]);
 
   if (isLoading) {
     return (
@@ -107,7 +135,14 @@ export const SolidVersionInfo = () => {
                 <p className={styles.versionCaption}>Current tab runtime entity API pool snapshot.</p>
               </div>
               <div className={styles.diagnosticsHeaderActions}>
-                <SolidButton type="button" size="sm" variant="outline" onClick={() => setRefreshTick((value) => value + 1)}>
+                <span className={styles.diagnosticsRefreshStatus} aria-live="polite">{lastDiagnosticsRefreshLabel}</span>
+                <SolidButton
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  loading={isRefreshingDiagnostics}
+                  onClick={() => void refreshDiagnosticsSnapshot()}
+                >
                   Refresh
                 </SolidButton>
                 <button

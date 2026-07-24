@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.13] - 2026-07-24
+
+### Added
+
+- implement SolidCustomListViewColumn component and integrate into SolidListView
+- add SolidCustomListColumn component and integrate into SolidListView
+
+### Other
+
+- add fallback
+- Revert "Fix against media"
+- changes
+- add download url support
+- Add  param conditionally
+- Fix merge issue
+- ui fixes
+- add fix in tree view
+- UI Fixes
+- Add missing import and export permission expressions for improved functionality
+- add fixes
+- remove absolute method
+- Refactor permission handling in SolidCardView, SolidCardViewConfigure, SolidFormView, SolidKanbanView, SolidKanbanViewConfigure, SolidEmptyListViewPlaceholder, SolidListView, SolidListViewConfigure, and SolidTreeView components to utilize new permission utility functions for improved clarity and maintainability.
+- rever t chnages
+- ui fixes
+- Remove unused .codex file
+- Add user mention functionality to SolidChatter components
+- Add Private Media  support
+- Ui Fixes....
+- add private media support
+- remove force redirect
+- Solidx session invalid changes
+- add security around chatter
+- Add ui fixes
+
 ## [0.1.12] - 2026-07-09
 
 ### Added

@@ -1,4 +1,4 @@
-import { permissionExpression } from "../../../helpers/permissions";
+import { canExportRecords, canImportRecords, permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
@@ -127,15 +127,9 @@ export const SolidCardViewConfigure = ({
     window.location.reload();
   };
 
-  const canImport =
-    Boolean(modelName) &&
-    actionsAllowed.includes(`${permissionExpression(modelName, "create")}`) &&
-    actionsAllowed.includes(`${permissionExpression("importTransaction", "create")}`);
+  const canImport = canImportRecords(actionsAllowed, modelName);
 
-  const canExport =
-    Boolean(modelName) &&
-    actionsAllowed.includes(`${permissionExpression(modelName, "findMany")}`) &&
-    actionsAllowed.includes(`${permissionExpression("exportTransaction", "create")}`);
+  const canExport = canExportRecords(actionsAllowed, modelName);
 
   const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
   const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
