@@ -1,4 +1,4 @@
-import { permissionExpression } from "../../../helpers/permissions";
+import { getCollectionViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -15,7 +15,7 @@ import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus"
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { SolidEmptyListViewPlaceholder } from "../list/SolidEmptyListViewPlaceholder";
-import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, setFilterObjectToLocalStorage } from "../common/globalSearchPersistence";
+import { getFilterObjectFromLocalStorage,hasMeaningfulPersistedFilter,hasStoredFilterPredicates,hasStoredSearchUiState, setFilterObjectToLocalStorage} from "../common/globalSearchPersistence";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { SolidCardViewConfigure } from "./SolidCardViewConfigure";
 import { CardGrid } from "./CardGrid";
@@ -109,6 +109,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
+  const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [viewModes, setViewModes] = useState<any[]>([]);
   const [filters, setFilters] = useState<any>({ $and: [] });
   const [cards, setCards] = useState<any[]>([]);
@@ -131,6 +132,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const [showArchived, setShowArchived] = useState(false);
   const [selectedCardForDelete, setSelectedCardForDelete] = useState<any>(null);
   const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const shouldShowMobileSearchElement = showGlobalSearchElement || hasStoredSearchUiState(filterPredicates) || hasStoredSearchUiState(getFilterObjectFromLocalStorage());
 
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
@@ -151,8 +153,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
   const entityApi = createSolidEntityApi(params.modelName);
   const { useDeleteSolidEntityMutation, useLazyGetSolidEntitiesQuery, useLazyRecoverSolidEntityByIdQuery } = entityApi;
-  const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
-  const [deleteSolidEntity] = useDeleteSolidEntityMutation();
+  const [triggerGetSolidEntities, { data: solidEntityCardViewData }] = useLazyGetSolidEntitiesQuery();
+  const [deleteSolidEntity, { isLoading: isDeletingRecord }] = useDeleteSolidEntityMutation();
   const [triggerRecoverSolidEntityById, { isLoading: recoverByIdIsLoading }] = useLazyRecoverSolidEntityByIdQuery();
 
   const menuItemId = searchParams.get("menuItemId");
@@ -175,7 +177,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     }
   );
 
-  const { data: solidCardViewMetaDataResponse } = useGetSolidViewLayoutQuery(cardViewMetaDataQs);
+  const {data: solidCardViewMetaDataResponse,isLoading: solidCardViewMetaDataIsLoading,} = useGetSolidViewLayoutQuery(cardViewMetaDataQs);
 
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   const rowsOptions = rowsPerPageOptions && rowsPerPageOptions.length > 0 ? rowsPerPageOptions : [12, 24, 48];
@@ -207,16 +209,11 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     const fetchPermissions = async () => {
       if (!params.modelName) return;
 
-      const permissionNames = [
-        permissionExpression(params.modelName, "create"),
-        permissionExpression(params.modelName, "delete"),
-        permissionExpression(params.modelName, "update"),
-        permissionExpression(params.modelName, "findMany"),
-        permissionExpression("importTransaction", "create"),
-        permissionExpression("exportTransaction", "create"),
-        permissionExpression("userViewMetadata", "create"),
-        permissionExpression("savedFilters", "create"),
-      ];
+      const permissionNames = getCollectionViewPermissionNames(params.modelName, {
+        includeDeleteMany: false,
+        includeFindOne: false,
+        includeInsertMany: false,
+      });
 
       const queryString = qs.stringify(
         { permissionNames },
@@ -317,6 +314,13 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   }, [filters, first, queryDataLoaded, rows, showArchived, solidCardViewMetaDataResponse, toPopulate, toPopulateMedia]);
 
   useEffect(() => {
+    if (!solidEntityCardViewData) return;
+
+    setCards(solidEntityCardViewData?.records || []);
+    setTotalRecords(solidEntityCardViewData?.meta?.totalRecords || 0);
+  }, [solidEntityCardViewData]);
+
+  useEffect(() => {
     if (!queryDataLoaded) return;
 
     const persistedFilterObject = typeof window !== "undefined" ? (getFilterObjectFromLocalStorage() || {}) : {};
@@ -353,6 +357,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     }
 
     setFirst(0);
+    setFilterPredicates(structuredClone(filterPredicates));
     setFilters(updatedFilter);
     setFilterObjectToLocalStorage({
       offset: 0,
@@ -366,13 +371,13 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     });
   };
 
-  const handleFetchUpdatedRecords = () => {
+  const handleFetchUpdatedRecords = async () => {
     if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
       solidGlobalSearchElementRef.current?.clearAppliedFilters?.();
       return;
     }
 
-    void loadCards(filters);
+    await loadCards(filters);
   };
 
   const handleRecoverRecord = async (record: any) => {
@@ -443,8 +448,19 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const canDeleteCards = actionsAllowed.includes(`${permissionExpression(params.modelName, "delete")}`) &&
     solidCardViewMetaDataResponse?.data?.solidView?.layout?.attrs?.delete !== false &&
     solidCardViewMetaDataResponse?.data?.solidView?.layout?.attrs?.showRowDeleteInContextMenu !== false;
-  const showEmptyState = !loading && cards.length === 0;
-  const headerRequestStatusLabel = recoverByIdIsLoading ? "Recovering..." : loading || !queryDataLoaded ? "Loading..." : null;
+  const isCardViewMetaDataReady = Boolean(solidCardViewMetaDataResponse?.data?.solidView);
+  const showCardBodyLoadingPlaceholder = solidCardViewMetaDataIsLoading || (isCardViewMetaDataReady && (!queryDataLoaded || (loading && cards.length === 0)));
+  const hasActiveFilters = hasMeaningfulPersistedFilter(filters);
+  const showEmptyState = !loading && cards.length === 0 && !hasActiveFilters;
+  const showFilteredEmptyState = !loading && cards.length === 0 && hasActiveFilters;
+  const filteredEmptyMessage = solidCardViewMetaDataResponse?.data?.solidView?.model?.description || "No Entities found";
+  const headerRequestStatusLabel = isDeletingRecord
+    ? "Deleting..."
+    : recoverByIdIsLoading
+      ? "Recovering..."
+      : loading || !queryDataLoaded
+        ? "Loading..."
+        : null;
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
@@ -467,6 +483,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                     ref={solidGlobalSearchElementRef}
                     viewData={solidCardViewMetaDataResponse}
                     handleApplyCustomFilter={handleApplyCustomFilter}
+                    filterPredicates={filterPredicates}
                   />
                 </div>
               </div>
@@ -519,7 +536,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
               </div>
             </div>
 
-            {showGlobalSearchElement && (
+            {shouldShowMobileSearchElement && (
               <div className="flex lg:hidden">
                 <SolidGlobalSearchElement
                   viewType="card"
@@ -528,14 +545,18 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   ref={solidGlobalSearchElementRef}
                   viewData={solidCardViewMetaDataResponse}
                   handleApplyCustomFilter={handleApplyCustomFilter}
+                  filterPredicates={filterPredicates}
                 />
               </div>
             )}
           </div>
 
           <div className="solid-card-view-content">
-            <div className="solid-card-view-body">
-              {showEmptyState ? (
+            {showCardBodyLoadingPlaceholder ? (
+              <div className="solid-view-loading-body-spacer flex-1 min-h-0" />
+            ) : (
+              <div className="solid-card-view-body">
+                {showEmptyState ? (
                 <SolidEmptyListViewPlaceholder
                   createButtonUrl={createButtonUrl}
                   createActionQueryParams={createActionQueryParams}
@@ -544,19 +565,24 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   solidListViewMetaData={solidCardViewMetaDataResponse}
                   handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                 />
-              ) : (
-                <CardGrid
-                  records={cards}
-                  solidCardViewMetaData={solidCardViewMetaDataResponse?.data}
-                  editButtonUrl={editBaseUrl}
-                  onDelete={canDeleteCards ? handleOpenDeleteDialog : undefined}
-                  onRecover={handleRecoverRecord}
-                  setLightboxUrls={setLightboxUrls}
-                  setOpenLightbox={setOpenLightbox}
-                  showArchived={showArchived}
-                />
-              )}
-            </div>
+                ) : showFilteredEmptyState ? (
+                  <div className="flex min-h-[240px] items-center justify-center rounded-md border border-border/60 bg-background px-6 py-10 text-center text-muted-foreground">
+                    {filteredEmptyMessage}
+                  </div>
+                ) : (
+                  <CardGrid
+                    records={cards}
+                    solidCardViewMetaData={solidCardViewMetaDataResponse?.data}
+                    editButtonUrl={editBaseUrl}
+                    onDelete={canDeleteCards ? handleOpenDeleteDialog : undefined}
+                    onRecover={handleRecoverRecord}
+                    setLightboxUrls={setLightboxUrls}
+                    setOpenLightbox={setOpenLightbox}
+                    showArchived={showArchived}
+                  />
+                )}
+              </div>
+            )}
 
             {totalRecords > 0 && (
               <div className="solid-card-view-pagination">
