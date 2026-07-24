@@ -956,6 +956,14 @@ function normalizeWorkflowTriggerDefinition(value: any) {
   };
 }
 
+function getWorkflowTriggerCronExpression(
+  trigger: ReturnType<typeof normalizeWorkflowTriggerDefinition>,
+) {
+  return String(
+    trigger.configuration.cronExpression ?? trigger.configuration.cron ?? "0 9 * * *",
+  );
+}
+
 function normalizeWorkflowDefinition(parsed: Record<string, any>): WorkflowDefinitionDsl {
   return {
     ...createEmptyWorkflowDefinition(),
@@ -4828,7 +4836,7 @@ export function WorkflowDefinitionEditorPage() {
         type: "schedule",
         disabled: false,
         configuration: {
-          cron: "0 9 * * *",
+          cronExpression: "0 9 * * *",
           timezone: "UTC",
         },
       },
@@ -4850,7 +4858,7 @@ export function WorkflowDefinitionEditorPage() {
       if (patch.type && patch.type !== currentTrigger.type) {
         nextTrigger.configuration =
           patch.type === "schedule"
-            ? { cron: "0 9 * * *", timezone: "UTC" }
+            ? { cronExpression: "0 9 * * *", timezone: "UTC" }
             : { method: "POST", path: `/${currentTrigger.id || "trigger"}` };
       }
 
@@ -4866,11 +4874,17 @@ export function WorkflowDefinitionEditorPage() {
     const currentTrigger = normalizeWorkflowTriggerDefinition(
       (definitionDraft.triggers ?? [])[index],
     );
+    const nextConfiguration = {
+      ...currentTrigger.configuration,
+      ...patch,
+    };
+
+    if (patch.cronExpression !== undefined) {
+      delete nextConfiguration.cron;
+    }
+
     updateWorkflowTrigger(index, {
-      configuration: {
-        ...currentTrigger.configuration,
-        ...patch,
-      },
+      configuration: nextConfiguration,
     });
   };
 
@@ -4884,13 +4898,13 @@ export function WorkflowDefinitionEditorPage() {
     trigger: ReturnType<typeof normalizeWorkflowTriggerDefinition>,
     index: number,
   ) => {
-    const cronExpression = trigger.configuration.cron ?? "0 9 * * *";
+    const cronExpression = getWorkflowTriggerCronExpression(trigger);
     const cronParts = splitCronExpression(cronExpression);
-    const timezone = "UTC";
+    const timezone = String(trigger.configuration.timezone ?? "UTC");
     const setCronPart = (key: keyof typeof cronParts, value: string) => {
       updateWorkflowTriggerConfiguration(index, {
         timezone: "UTC",
-        cron: joinCronExpression({
+        cronExpression: joinCronExpression({
           ...cronParts,
           [key]: value.trim() || "*",
         }),
@@ -4911,7 +4925,7 @@ export function WorkflowDefinitionEditorPage() {
             <span>Generated expression</span>
             <code>{cronExpression}</code>
             <span>Timezone</span>
-            <code>UTC</code>
+            <code>{timezone}</code>
           </div>
         </div>
         <div className="workflow-editor-cron-builder__grid">
@@ -4935,7 +4949,7 @@ export function WorkflowDefinitionEditorPage() {
               size="small"
               onClick={() =>
                 updateWorkflowTriggerConfiguration(index, {
-                  cron: example.value,
+                  cronExpression: example.value,
                   timezone: "UTC",
                 })
               }

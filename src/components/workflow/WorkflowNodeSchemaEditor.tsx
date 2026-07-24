@@ -660,6 +660,82 @@ function WorkflowYamlFieldEditor({
   );
 }
 
+function stringifyRecipientListValue(value: any) {
+  if (Array.isArray(value)) {
+    return value.join(", ");
+  }
+
+  if (value === undefined || value === null) {
+    return "";
+  }
+
+  return String(value);
+}
+
+function parseRecipientListValue(value: string) {
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return [];
+  }
+
+  if (/^\{\{[\s\S]*\}\}$/.test(trimmedValue)) {
+    return trimmedValue;
+  }
+
+  const recipients = trimmedValue
+    .split(",")
+    .map((recipient) => recipient.trim())
+    .filter(Boolean);
+
+  return recipients.length <= 1 ? trimmedValue : recipients;
+}
+
+function WorkflowRecipientListFieldEditor({
+  value,
+  readOnly,
+  placeholder,
+  expressionSuggestions,
+  onChange,
+}: {
+  value: any;
+  readOnly?: boolean;
+  placeholder?: string;
+  expressionSuggestions?: WorkflowExpressionSuggestion[];
+  onChange: (value: any) => void;
+}) {
+  const [textValue, setTextValue] = React.useState(() =>
+    stringifyRecipientListValue(value),
+  );
+  const lastValueSignatureRef = React.useRef(getYamlValueSignature(value));
+
+  React.useEffect(() => {
+    const nextSignature = getYamlValueSignature(value);
+    if (nextSignature === lastValueSignatureRef.current) {
+      return;
+    }
+
+    setTextValue(stringifyRecipientListValue(value));
+    lastValueSignatureRef.current = nextSignature;
+  }, [value]);
+
+  const emitChange = (nextValue: string) => {
+    setTextValue(nextValue);
+    const parsedValue = parseRecipientListValue(nextValue);
+    lastValueSignatureRef.current = getYamlValueSignature(parsedValue);
+    onChange(parsedValue);
+  };
+
+  return (
+    <WorkflowExpressionAutocompleteField
+      value={textValue}
+      readOnly={readOnly}
+      placeholder={placeholder ?? "{{ item.email }}"}
+      suggestions={expressionSuggestions}
+      onChange={emitChange}
+    />
+  );
+}
+
 function getExpressionSearchTerm(value: string, caretIndex: number) {
   const prefix = value.slice(0, caretIndex);
   const expressionStart = prefix.lastIndexOf("{{");
@@ -1099,6 +1175,18 @@ function WorkflowNodeFieldEditor({
         readOnly={readOnly}
         value={stringValue}
         onChange={(next) => onChange(next ?? "")}
+      />
+    );
+  }
+
+  if (field.widgetHint === "recipient-list") {
+    return (
+      <WorkflowRecipientListFieldEditor
+        value={normalizedValue}
+        readOnly={readOnly}
+        placeholder={field.uiSchema?.placeholder}
+        expressionSuggestions={expressionSuggestions}
+        onChange={onChange}
       />
     );
   }

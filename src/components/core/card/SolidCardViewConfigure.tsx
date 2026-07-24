@@ -182,10 +182,12 @@ export const SolidCardViewConfigure = ({
 
           {canShowArchivedRecords && (
             <SolidDropdownMenuCheckboxItem
+              className={showArchived ? "solid-archive-toggle-item-active" : undefined}
               checked={showArchived}
+              icon={<SolidIcon name="si-archive" className="solid-header-action-button-icon solid-archive-toggle-icon" aria-hidden />}
               onCheckedChange={() => setShowArchived(!showArchived)}
             >
-              Show Archived Records
+              Show Archived Rows
             </SolidDropdownMenuCheckboxItem>
           )}
 

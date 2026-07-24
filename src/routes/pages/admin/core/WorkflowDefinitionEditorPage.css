@@ -1149,6 +1149,49 @@
   text-align: center;
 }
 
+.workflow-editor-execution-logs__refreshing {
+  align-items: center;
+  color: rgba(15, 23, 42, 0.62);
+  display: inline-flex;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 0.45rem;
+}
+
+.workflow-editor-execution-pagination {
+  align-items: center;
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+}
+
+.workflow-editor-execution-pagination__meta,
+.workflow-editor-execution-pagination__actions {
+  align-items: center;
+  color: rgba(15, 23, 42, 0.62);
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+  font-weight: 700;
+  gap: 0.45rem;
+}
+
+.workflow-editor-execution-pagination__meta .solid-select-wrap {
+  min-width: 5rem;
+}
+
+.workflow-editor-execution-pagination__actions .solid-btn {
+  height: 1.85rem;
+  min-width: 1.85rem;
+  padding-inline: 0.35rem;
+}
+
 .workflow-editor-execution-log-list {
   border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: 0.8rem;

@@ -1,4 +1,4 @@
-import { ArrowLeft, Braces, ChevronRight, Layers3, Search, X } from "lucide-react";
+import { ArrowLeft, Braces, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Layers3, Search, X } from "lucide-react";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import qs from "qs";
@@ -12,7 +12,6 @@ import {
   SolidSpinner,
   SolidTag,
 } from "../../../../components/shad-cn-ui";
-import { SolidJsonEditor } from "../../../../components/core/json/SolidJsonEditor";
 import "./WorkflowDefinitionEditorPage.css";
 
 const WORKFLOW_LOG_LEVEL_OPTIONS = [
@@ -22,6 +21,28 @@ const WORKFLOW_LOG_LEVEL_OPTIONS = [
   { label: "Warn", value: "warn" },
   { label: "Error", value: "error" },
 ];
+
+const WORKFLOW_EXECUTION_SUMMARY_FIELDS = [
+  "id",
+  "executionIdentifier",
+  "workflowKey",
+  "workflowDisplayName",
+  "status",
+  "triggerType",
+  "startedAt",
+  "finishedAt",
+  "durationMs",
+  "definitionVersion",
+  "definitionChecksum",
+  "errorSummary",
+  "requestedByUserId",
+  "createdAt",
+];
+
+const WORKFLOW_EXECUTION_INPUT_FIELDS = ["id", "inputPayload"];
+const WORKFLOW_EXECUTION_ERROR_FIELDS = ["id", "errorDetails"];
+const WORKFLOW_EXECUTION_DEFINITION_FIELDS = ["id", "definitionSnapshot"];
+const WORKFLOW_PAGE_SIZE_OPTIONS = [25, 50, 100, 200];
 
 type WorkflowExecutionRecord = {
   id: number;
@@ -75,14 +96,18 @@ type WorkflowStepExecutionRecord = {
   startedAt?: string | null;
   finishedAt?: string | null;
   durationMs?: number | string | null;
+  outputPayload?: unknown;
   errorSummary?: string | null;
   createdAt?: string | null;
 };
 
-type WorkflowNodeRecord = Record<string, any> & {
-  id: string;
-  name?: string;
-  type?: string;
+type WorkflowPaginationMeta = {
+  totalRecords?: number;
+  currentPage?: number;
+  nextPage?: number | null;
+  prevPage?: number | null;
+  totalPages?: number;
+  perPage?: number;
 };
 
 type WorkflowExecutionOutputEntry = {
@@ -91,6 +116,11 @@ type WorkflowExecutionOutputEntry = {
   nodeId?: string;
   nodeType?: string;
   value: unknown;
+};
+
+type WorkflowPaginationState = {
+  offset: number;
+  limit: number;
 };
 
 function formatReadonlyJson(value: unknown, emptyValue = "{}") {
@@ -204,15 +234,35 @@ function workflowLogLevelTone(level?: string | null) {
   return undefined;
 }
 
+function buildWorkflowExecutionFieldsQueryString(fields: string[]) {
+  return qs.stringify({ fields }, { encodeValuesOnly: true });
+}
+
 function buildWorkflowExecutionLogQueryString(options: {
   workflowExecutionId: number;
   level?: string;
   search?: string;
+  offset: number;
+  limit: number;
 }) {
   const queryData: Record<string, any> = {
-    limit: 200,
-    offset: 0,
-    populate: ["workflowStepExecution"],
+    limit: options.limit,
+    offset: options.offset,
+    fields: [
+      "id",
+      "logKey",
+      "level",
+      "message",
+      "eventType",
+      "source",
+      "nodeId",
+      "nodeType",
+      "sequenceNumber",
+      "occurredAt",
+      "context",
+      "metadata",
+      "createdAt",
+    ],
     sort: ["sequenceNumber:asc", "occurredAt:asc", "id:asc"],
     filters: {
       workflowExecution: {
@@ -243,10 +293,34 @@ function buildWorkflowExecutionLogQueryString(options: {
   return qs.stringify(queryData, { encodeValuesOnly: true });
 }
 
-function buildWorkflowStepExecutionQueryString(options: { workflowExecutionId: number }) {
+function buildWorkflowStepExecutionQueryString(options: {
+  workflowExecutionId: number;
+  offset: number;
+  limit: number;
+  includeOutputPayload?: boolean;
+}) {
   const queryData: Record<string, any> = {
-    limit: 500,
-    offset: 0,
+    limit: options.limit,
+    offset: options.offset,
+    fields: [
+      "id",
+      "stepExecutionKey",
+      "nodeId",
+      "nodeName",
+      "nodeKind",
+      "nodeType",
+      "status",
+      "attemptNumber",
+      "parentNodeId",
+      "parentStepExecutionKey",
+      "sequenceNumber",
+      "startedAt",
+      "finishedAt",
+      "durationMs",
+      "errorSummary",
+      "createdAt",
+      ...(options.includeOutputPayload ? ["outputPayload"] : []),
+    ],
     sort: ["startedAt:asc", "sequenceNumber:asc", "id:asc"],
     filters: {
       workflowExecution: {
@@ -254,71 +328,31 @@ function buildWorkflowStepExecutionQueryString(options: { workflowExecutionId: n
           $eq: options.workflowExecutionId,
         },
       },
+      ...(options.includeOutputPayload
+        ? {
+            outputPayload: {
+              $notNull: true,
+            },
+          }
+        : {}),
     },
   };
 
   return qs.stringify(queryData, { encodeValuesOnly: true });
 }
 
-function flattenWorkflowNodes(nodes: WorkflowNodeRecord[]): WorkflowNodeRecord[] {
-  return nodes.flatMap((node) => [
-    node,
-    ...flattenWorkflowNodes(node.tasks ?? []),
-    ...flattenWorkflowNodes(node.then ?? []),
-    ...flattenWorkflowNodes(node.else ?? []),
-    ...flattenWorkflowNodes(node.defaults ?? []),
-    ...Object.values(node.cases ?? {}).flatMap((caseNodes: any) =>
-      flattenWorkflowNodes(caseNodes),
-    ),
-  ]);
-}
-
-function getExecutionDefinitionNodes(definitionSnapshot: unknown): WorkflowNodeRecord[] {
-  const normalized = normalizeJsonDisplayValue(definitionSnapshot);
-  let definition: any = normalized;
-
-  if (typeof definitionSnapshot === "string") {
-    try {
-      definition = YAML.parse(definitionSnapshot);
-    } catch {
-      definition = normalized;
-    }
-  }
-
-  return Array.isArray(definition?.nodes) ? definition.nodes : [];
-}
-
-function buildExecutionOutputEntries(
-  outputPayload: unknown,
-  nodes: WorkflowNodeRecord[],
+function buildExecutionOutputEntriesFromSteps(
+  steps: WorkflowStepExecutionRecord[],
 ): WorkflowExecutionOutputEntry[] {
-  const normalizedValue = normalizeJsonDisplayValue(outputPayload);
-  if (normalizedValue === null || normalizedValue === undefined) return [];
-
-  const nodeMap = new Map(
-    flattenWorkflowNodes(nodes).map((node) => [String(node.id), node]),
-  );
-
-  if (isPlainObjectValue(normalizedValue)) {
-    return Object.entries(normalizedValue).map(([key, value]) => {
-      const node = nodeMap.get(key);
-      return {
-        key,
-        label: node?.name ?? key,
-        nodeId: key,
-        nodeType: node?.type,
-        value,
-      };
-    });
-  }
-
-  return [
-    {
-      key: "execution-output",
-      label: "Execution Output",
-      value: normalizedValue,
-    },
-  ];
+  return steps
+    .filter((step) => normalizeJsonDisplayValue(step.outputPayload) !== null)
+    .map((step) => ({
+      key: String(step.id),
+      label: step.nodeName || step.nodeId || step.stepExecutionKey || `Step ${step.id}`,
+      nodeId: step.nodeId ?? undefined,
+      nodeType: step.nodeType ?? step.nodeKind ?? undefined,
+      value: step.outputPayload,
+    }));
 }
 
 function renderOutputPrimitive(value: unknown) {
@@ -446,6 +480,86 @@ function renderOutputVisual(value: unknown, options: { hideSummary?: boolean } =
   );
 }
 
+function WorkflowExecutionPagination({
+  meta,
+  pagination,
+  disabled,
+  onChange,
+}: {
+  meta?: WorkflowPaginationMeta;
+  pagination: WorkflowPaginationState;
+  disabled?: boolean;
+  onChange: (pagination: WorkflowPaginationState) => void;
+}) {
+  const totalRecords = meta?.totalRecords ?? 0;
+  const totalPages = meta?.totalPages ?? Math.max(1, Math.ceil(totalRecords / pagination.limit));
+  const currentPage = meta?.currentPage ?? Math.floor(pagination.offset / pagination.limit) + 1;
+  const firstRecord = totalRecords === 0 ? 0 : pagination.offset + 1;
+  const lastRecord = Math.min(pagination.offset + pagination.limit, totalRecords);
+  const canGoPrevious = currentPage > 1;
+  const canGoNext = currentPage < totalPages;
+
+  const goToPage = (page: number) => {
+    const safePage = Math.min(Math.max(page, 1), totalPages);
+    onChange({
+      offset: (safePage - 1) * pagination.limit,
+      limit: pagination.limit,
+    });
+  };
+
+  return (
+    <div className="workflow-editor-execution-pagination">
+      <div className="workflow-editor-execution-pagination__meta">
+        <span>Rows</span>
+        <SolidSelect
+          value={pagination.limit}
+          options={WORKFLOW_PAGE_SIZE_OPTIONS.map((option) => ({ label: String(option), value: option }))}
+          native={false}
+          menuPlacement="top"
+          disabled={disabled}
+          onChange={(event) => onChange({ offset: 0, limit: Number(event.value) })}
+        />
+        <span>{firstRecord} - {lastRecord} of {totalRecords}</span>
+      </div>
+      <div className="workflow-editor-execution-pagination__actions">
+        <SolidButton
+          size="small"
+          variant="ghost"
+          leftIcon={<ChevronFirst size={14} />}
+          aria-label="First page"
+          disabled={disabled || !canGoPrevious}
+          onClick={() => goToPage(1)}
+        />
+        <SolidButton
+          size="small"
+          variant="ghost"
+          leftIcon={<ChevronLeft size={14} />}
+          aria-label="Previous page"
+          disabled={disabled || !canGoPrevious}
+          onClick={() => goToPage(currentPage - 1)}
+        />
+        <span>Page {currentPage} of {totalPages}</span>
+        <SolidButton
+          size="small"
+          variant="ghost"
+          leftIcon={<ChevronRight size={14} />}
+          aria-label="Next page"
+          disabled={disabled || !canGoNext}
+          onClick={() => goToPage(currentPage + 1)}
+        />
+        <SolidButton
+          size="small"
+          variant="ghost"
+          leftIcon={<ChevronLast size={14} />}
+          aria-label="Last page"
+          disabled={disabled || !canGoNext}
+          onClick={() => goToPage(totalPages)}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function WorkflowExecutionDetailPage() {
   const params = useParams();
   const navigate = useNavigate();
@@ -463,7 +577,7 @@ export function WorkflowExecutionDetailPage() {
     () => createSolidEntityApi("workflowStepExecution"),
     [],
   );
-  const { useGetSolidEntityByIdQuery } = workflowExecutionApi;
+  const { useGetSolidEntityByIdQuery, useLazyGetSolidEntityByIdQuery } = workflowExecutionApi;
   const { useLazyGetSolidEntitiesQuery: useLazyGetWorkflowExecutionLogsQuery } =
     workflowExecutionLogApi;
   const { useLazyGetSolidEntitiesQuery: useLazyGetWorkflowStepExecutionsQuery } =
@@ -474,53 +588,138 @@ export function WorkflowExecutionDetailPage() {
     isLoading: isWorkflowExecutionLoading,
     isError: isWorkflowExecutionError,
   } = useGetSolidEntityByIdQuery(
-    { id: executionId, qs: "populate[0]=workflowDefinition" },
+    {
+      id: executionId,
+      qs: buildWorkflowExecutionFieldsQueryString(WORKFLOW_EXECUTION_SUMMARY_FIELDS),
+    },
     { skip: !executionId },
   );
+  const [triggerGetWorkflowExecutionDetail, workflowExecutionDetailQuery] =
+    useLazyGetSolidEntityByIdQuery();
   const [triggerGetWorkflowExecutionLogs, workflowExecutionLogsQuery] =
     useLazyGetWorkflowExecutionLogsQuery();
   const [triggerGetWorkflowStepExecutions, workflowStepExecutionsQuery] =
     useLazyGetWorkflowStepExecutionsQuery();
+  const [triggerGetWorkflowOutputStepExecutions, workflowOutputStepExecutionsQuery] =
+    useLazyGetWorkflowStepExecutionsQuery();
 
-  const execution = workflowExecutionResponse?.data as WorkflowExecutionRecord | undefined;
+  const executionSummary = workflowExecutionResponse?.data as WorkflowExecutionRecord | undefined;
+  const executionDetail = workflowExecutionDetailQuery.data?.data as WorkflowExecutionRecord | undefined;
+  const execution = executionSummary
+    ? {
+        ...executionSummary,
+        ...executionDetail,
+      }
+    : undefined;
   const [activeTab, setActiveTab] = React.useState("summary");
   const [outputMode, setOutputMode] = React.useState<"visual" | "json">("visual");
   const [expandedOutputKey, setExpandedOutputKey] = React.useState<string | null>(null);
   const [logLevelFilter, setLogLevelFilter] = React.useState("all");
   const [logSearch, setLogSearch] = React.useState("");
+  const [debouncedLogSearch, setDebouncedLogSearch] = React.useState("");
   const [expandedLogId, setExpandedLogId] = React.useState<number | null>(null);
   const [expandedTimelineStepId, setExpandedTimelineStepId] = React.useState<number | null>(null);
+  const [timelinePagination, setTimelinePagination] = React.useState<WorkflowPaginationState>({
+    offset: 0,
+    limit: 50,
+  });
+  const [logPagination, setLogPagination] = React.useState<WorkflowPaginationState>({
+    offset: 0,
+    limit: 100,
+  });
+  const [outputPagination, setOutputPagination] = React.useState<WorkflowPaginationState>({
+    offset: 0,
+    limit: 50,
+  });
 
   React.useEffect(() => {
-    if (!execution?.id) return;
+    const timer = window.setTimeout(() => {
+      setDebouncedLogSearch(logSearch);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [logSearch]);
+
+  React.useEffect(() => {
+    setLogPagination((current) => ({ ...current, offset: 0 }));
+  }, [logLevelFilter, debouncedLogSearch]);
+
+  React.useEffect(() => {
+    if (!execution?.id || activeTab !== "timeline") return;
     void triggerGetWorkflowStepExecutions(
-      buildWorkflowStepExecutionQueryString({ workflowExecutionId: execution.id }),
+      buildWorkflowStepExecutionQueryString({
+        workflowExecutionId: execution.id,
+        offset: timelinePagination.offset,
+        limit: timelinePagination.limit,
+      }),
     );
-  }, [execution?.id, triggerGetWorkflowStepExecutions]);
+  }, [activeTab, execution?.id, timelinePagination, triggerGetWorkflowStepExecutions]);
 
   React.useEffect(() => {
-    if (!execution?.id) return;
+    if (!execution?.id || activeTab !== "logs") return;
     void triggerGetWorkflowExecutionLogs(
       buildWorkflowExecutionLogQueryString({
         workflowExecutionId: execution.id,
         level: logLevelFilter,
-        search: logSearch,
+        search: debouncedLogSearch,
+        offset: logPagination.offset,
+        limit: logPagination.limit,
       }),
     );
-  }, [execution?.id, logLevelFilter, logSearch, triggerGetWorkflowExecutionLogs]);
+  }, [activeTab, debouncedLogSearch, execution?.id, logLevelFilter, logPagination, triggerGetWorkflowExecutionLogs]);
+
+  React.useEffect(() => {
+    if (!execution?.id || activeTab !== "output") return;
+    void triggerGetWorkflowOutputStepExecutions(
+      buildWorkflowStepExecutionQueryString({
+        workflowExecutionId: execution.id,
+        offset: outputPagination.offset,
+        limit: outputPagination.limit,
+        includeOutputPayload: true,
+      }),
+    );
+  }, [activeTab, execution?.id, outputPagination, triggerGetWorkflowOutputStepExecutions]);
+
+  React.useEffect(() => {
+    if (!executionId) return;
+
+    if (activeTab === "input") {
+      void triggerGetWorkflowExecutionDetail({
+        id: executionId,
+        qs: buildWorkflowExecutionFieldsQueryString(WORKFLOW_EXECUTION_INPUT_FIELDS),
+      });
+    }
+
+    if (activeTab === "error") {
+      void triggerGetWorkflowExecutionDetail({
+        id: executionId,
+        qs: buildWorkflowExecutionFieldsQueryString(WORKFLOW_EXECUTION_ERROR_FIELDS),
+      });
+    }
+
+    if (activeTab === "definition") {
+      void triggerGetWorkflowExecutionDetail({
+        id: executionId,
+        qs: buildWorkflowExecutionFieldsQueryString(WORKFLOW_EXECUTION_DEFINITION_FIELDS),
+      });
+    }
+  }, [activeTab, executionId, triggerGetWorkflowExecutionDetail]);
 
   const executionLogRecords = React.useMemo(
     () => ((workflowExecutionLogsQuery.data?.records ?? []) as WorkflowExecutionLogRecord[]),
     [workflowExecutionLogsQuery.data?.records],
   );
+  const executionLogMeta = workflowExecutionLogsQuery.data?.meta as WorkflowPaginationMeta | undefined;
   const executionStepRecords = React.useMemo(
     () => ((workflowStepExecutionsQuery.data?.records ?? []) as WorkflowStepExecutionRecord[]),
     [workflowStepExecutionsQuery.data?.records],
   );
-  const definitionNodes = React.useMemo(
-    () => getExecutionDefinitionNodes(execution?.definitionSnapshot),
-    [execution?.definitionSnapshot],
+  const executionStepMeta = workflowStepExecutionsQuery.data?.meta as WorkflowPaginationMeta | undefined;
+  const outputStepRecords = React.useMemo(
+    () => ((workflowOutputStepExecutionsQuery.data?.records ?? []) as WorkflowStepExecutionRecord[]),
+    [workflowOutputStepExecutionsQuery.data?.records],
   );
+  const outputStepMeta = workflowOutputStepExecutionsQuery.data?.meta as WorkflowPaginationMeta | undefined;
 
   const executionTimeline = React.useMemo(() => {
     if (!execution) {
@@ -605,8 +804,8 @@ export function WorkflowExecutionDetailPage() {
   }, [execution, executionStepRecords]);
 
   const outputEntries = React.useMemo(
-    () => buildExecutionOutputEntries(execution?.outputPayload, definitionNodes),
-    [definitionNodes, execution?.outputPayload],
+    () => buildExecutionOutputEntriesFromSteps(outputStepRecords),
+    [outputStepRecords],
   );
 
   const logLevelCounts = executionLogRecords.reduce<Record<string, number>>((counts, log) => {
@@ -733,7 +932,7 @@ export function WorkflowExecutionDetailPage() {
                     </div>
                     <div>
                       <span>Steps</span>
-                      <strong>{executionTimeline.rows.length}</strong>
+                      <strong>{executionStepMeta?.totalRecords ?? executionTimeline.rows.length}</strong>
                     </div>
                     <div>
                       <span>Slowest</span>
@@ -824,6 +1023,15 @@ export function WorkflowExecutionDetailPage() {
                         })}
                       </div>
                     </div>
+                    <WorkflowExecutionPagination
+                      meta={executionStepMeta}
+                      pagination={timelinePagination}
+                      disabled={workflowStepExecutionsQuery.isFetching}
+                      onChange={(nextPagination) => {
+                        setExpandedTimelineStepId(null);
+                        setTimelinePagination(nextPagination);
+                      }}
+                    />
                   </>
                 ) : (
                   <div className="workflow-editor-execution-timeline__empty">
@@ -842,7 +1050,11 @@ export function WorkflowExecutionDetailPage() {
                     <p>Runtime messages emitted while this execution was processed.</p>
                   </div>
                   <div className="workflow-editor-execution-logs__stats">
-                    <span>{workflowExecutionLogsQuery.isFetching ? "Loading" : `${executionLogRecords.length} logs`}</span>
+                    <span>
+                      {workflowExecutionLogsQuery.isFetching
+                        ? "Loading"
+                        : `${executionLogRecords.length} of ${executionLogMeta?.totalRecords ?? executionLogRecords.length} logs`}
+                    </span>
                     {Object.entries(logLevelCounts).map(([level, count]) => (
                       <SolidTag key={level} tone={workflowLogLevelTone(level) as any}>{level}: {count}</SolidTag>
                     ))}
@@ -869,6 +1081,12 @@ export function WorkflowExecutionDetailPage() {
                     }}
                   />
                 </div>
+                {workflowExecutionLogsQuery.isFetching && executionLogRecords.length ? (
+                  <div className="workflow-editor-execution-logs__refreshing">
+                    <SolidSpinner />
+                    <span>Refreshing logs...</span>
+                  </div>
+                ) : null}
                 {workflowExecutionLogsQuery.isFetching && !executionLogRecords.length ? (
                   <div className="workflow-editor-execution-logs__loading">
                     <SolidSpinner />
@@ -952,11 +1170,27 @@ export function WorkflowExecutionDetailPage() {
                     <p>This execution has no log entries matching the current filters.</p>
                   </div>
                 )}
+                <WorkflowExecutionPagination
+                  meta={executionLogMeta}
+                  pagination={logPagination}
+                  disabled={workflowExecutionLogsQuery.isFetching}
+                  onChange={(nextPagination) => {
+                    setExpandedLogId(null);
+                    setLogPagination(nextPagination);
+                  }}
+                />
               </div>
             ) : null}
 
             {activeTab === "input" ? (
-              <SolidCodeEditor language="json" height="calc(100vh - 260px)" fontSize={12} readOnly value={formatReadonlyJson(execution.inputPayload)} />
+              workflowExecutionDetailQuery.isFetching && execution.inputPayload === undefined ? (
+                <div className="workflow-editor-execution-logs__loading">
+                  <SolidSpinner />
+                  <span>Loading execution input...</span>
+                </div>
+              ) : (
+                <SolidCodeEditor language="json" height="calc(100vh - 260px)" fontSize={12} readOnly value={formatReadonlyJson(execution.inputPayload)} />
+              )
             ) : null}
 
             {activeTab === "output" ? (
@@ -975,9 +1209,31 @@ export function WorkflowExecutionDetailPage() {
                     </button>
                   </div>
                 </div>
-                {outputMode === "json" ? (
+                {workflowOutputStepExecutionsQuery.isFetching && !outputStepRecords.length ? (
+                  <div className="workflow-editor-execution-logs__loading">
+                    <SolidSpinner />
+                    <span>Loading step outputs...</span>
+                  </div>
+                ) : outputMode === "json" ? (
                   <div className="workflow-editor-output-json-editor">
-                    <SolidJsonEditor value={normalizeJsonDisplayValue(execution.outputPayload)} resetToken={`execution-output-${execution.id}-${outputMode}`} readOnly className="sdix-json-editor workflow-editor-output-json-host" />
+                    <SolidCodeEditor
+                      language="json"
+                      height="calc(100vh - 320px)"
+                      fontSize={12}
+                      readOnly
+                      value={formatReadonlyJson(
+                        outputStepRecords.map((step) => ({
+                          id: step.id,
+                          stepExecutionKey: step.stepExecutionKey,
+                          nodeId: step.nodeId,
+                          nodeName: step.nodeName,
+                          nodeType: step.nodeType,
+                          sequenceNumber: step.sequenceNumber,
+                          outputPayload: step.outputPayload,
+                        })),
+                        "[]",
+                      )}
+                    />
                   </div>
                 ) : outputEntries.length ? (
                   <div className="workflow-editor-output-node-list">
@@ -1015,10 +1271,19 @@ export function WorkflowExecutionDetailPage() {
                   </div>
                 ) : (
                   <div className="workflow-editor-output-empty">
-                    <h4>No output produced</h4>
-                    <p>This execution completed without returning an output payload.</p>
+                    <h4>No step outputs found</h4>
+                    <p>This page does not contain step output payloads.</p>
                   </div>
                 )}
+                <WorkflowExecutionPagination
+                  meta={outputStepMeta}
+                  pagination={outputPagination}
+                  disabled={workflowOutputStepExecutionsQuery.isFetching}
+                  onChange={(nextPagination) => {
+                    setExpandedOutputKey(null);
+                    setOutputPagination(nextPagination);
+                  }}
+                />
               </div>
             ) : null}
 
@@ -1028,12 +1293,26 @@ export function WorkflowExecutionDetailPage() {
                   <div className="workflow-editor-execution-detail-kv__label">Error Summary</div>
                   <div className="workflow-editor-execution-detail-kv__value">{execution.errorSummary ?? "-"}</div>
                 </div>
-                <SolidCodeEditor language="json" height="calc(100vh - 320px)" fontSize={12} readOnly value={formatReadonlyJson(execution.errorDetails)} />
+                {workflowExecutionDetailQuery.isFetching && execution.errorDetails === undefined ? (
+                  <div className="workflow-editor-execution-logs__loading">
+                    <SolidSpinner />
+                    <span>Loading error detail...</span>
+                  </div>
+                ) : (
+                  <SolidCodeEditor language="json" height="calc(100vh - 320px)" fontSize={12} readOnly value={formatReadonlyJson(execution.errorDetails)} />
+                )}
               </div>
             ) : null}
 
             {activeTab === "definition" ? (
-              <SolidCodeEditor language="yaml" height="calc(100vh - 260px)" fontSize={12} readOnly value={formatReadonlyYaml(execution.definitionSnapshot)} />
+              workflowExecutionDetailQuery.isFetching && execution.definitionSnapshot === undefined ? (
+                <div className="workflow-editor-execution-logs__loading">
+                  <SolidSpinner />
+                  <span>Loading definition snapshot...</span>
+                </div>
+              ) : (
+                <SolidCodeEditor language="yaml" height="calc(100vh - 260px)" fontSize={12} readOnly value={formatReadonlyYaml(execution.definitionSnapshot)} />
+              )
             ) : null}
           </div>
         </div>

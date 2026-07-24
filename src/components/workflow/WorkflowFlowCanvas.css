@@ -74,7 +74,8 @@
 }
 
 .workflow-flow-node-card {
-  width: 248px;
+  width: 300px;
+  min-height: 136px;
   padding: 0;
   border-radius: 0.95rem;
   border: 1px solid rgba(148, 163, 184, 0.22);
@@ -94,8 +95,15 @@
 }
 
 .workflow-flow-node-card--trigger {
+  width: 280px;
+  min-height: 108px;
   border-color: rgba(45, 212, 191, 0.28);
   background: rgba(28, 40, 44, 0.94);
+}
+
+.workflow-flow-node-card--trigger .workflow-flow-node-card__header {
+  align-items: flex-start;
+  flex-wrap: nowrap;
 }
 
 .workflow-flow-node-card__header,
@@ -193,6 +201,11 @@
   display: flex;
   align-items: center;
   gap: 0.62rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.workflow-flow-node-card__header-main > div:last-child {
   min-width: 0;
 }
 
@@ -214,11 +227,24 @@
   background: rgba(15, 23, 42, 0.62);
 }
 
-.workflow-flow-node-card__title,
+.workflow-flow-node-card__title {
+  font-weight: 700;
+  line-height: 1.2;
+  font-size: 0.98rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .workflow-flow-slot-node__title {
   font-weight: 700;
   line-height: 1.2;
   font-size: 0.98rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .workflow-flow-node-card__subtitle,

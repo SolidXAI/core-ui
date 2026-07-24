@@ -13,12 +13,12 @@ import {
   ReactFlow,
   ReactFlowProvider,
 } from "@xyflow/react";
-import { BookOpen, CircleHelp, Pencil, Plus, Trash2 } from "lucide-react";
+import { CircleHelp, Pencil, Plus, Trash2 } from "lucide-react";
 import type {
   WorkflowNodeChildSlotDefinition,
   WorkflowNodeMetadataResponse,
 } from "../../types/workflow-node";
-import { normalizeSolidIconName, SolidButton, SolidIcon, SolidTag } from "../shad-cn-ui";
+import { normalizeSolidIconName, SolidIcon } from "../shad-cn-ui";
 import "@xyflow/react/dist/style.css";
 import "./WorkflowFlowCanvas.css";
 
@@ -113,10 +113,11 @@ type WorkflowFlowCanvasProps = {
 };
 
 const DIMENSIONS = {
-  workflowWidth: 248,
-  workflowHeight: 118,
-  triggerWidth: 248,
+  workflowWidth: 300,
+  workflowHeight: 136,
+  triggerWidth: 280,
   triggerHeight: 108,
+  triggerGap: 34,
   insertWidth: 40,
   insertHeight: 40,
   junctionWidth: 8,
@@ -136,6 +137,12 @@ const DIMENSIONS = {
   controlBranchGap: 120,
   controlJoinGap: 92,
   groupExteriorEdgeGap: 44,
+};
+
+const DEFAULT_WORKFLOW_VIEWPORT = {
+  x: 360,
+  y: 56,
+  zoom: 0.82,
 };
 
 type WorkflowLayoutResult = {
@@ -622,13 +629,33 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
           }
         }}
       >
-        <div className="workflow-flow-node-card__header">
+        <div className="workflow-flow-node-card__typebar">
+          <span>{data.trigger.disabled ? "disabled trigger" : "trigger"}</span>
+          <span className="workflow-flow-node-card__quick-actions">
+            <button
+              type="button"
+              className="workflow-flow-icon-button nodrag nopan nowheel"
+              aria-label={`Open ${triggerTitle} documentation`}
+              title="Documentation"
+              onPointerDown={(event) => {
+                event.stopPropagation();
+              }}
+              onClick={(event) => {
+                event.stopPropagation();
+                data.onViewDocs(String(data.trigger.id));
+              }}
+            >
+              <CircleHelp size={12} />
+            </button>
+          </span>
+        </div>
+        <div className="workflow-flow-node-card__body">
           <div className="workflow-flow-node-card__header-main">
             <div className="workflow-flow-node-card__icon-shell">
               <SolidIcon name="si-calendar" size={16} aria-hidden />
             </div>
             <div>
-              <div className="workflow-flow-node-card__title">
+              <div className="workflow-flow-node-card__title" title={String(triggerTitle)}>
                 {triggerTitle}
               </div>
               <div className="workflow-flow-node-card__subtitle">
@@ -636,27 +663,12 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
               </div>
             </div>
           </div>
-          <div className="workflow-flow-node-card__tags">
-            {data.trigger.disabled ? <SolidTag tone="warn">disabled</SolidTag> : <SolidTag>trigger</SolidTag>}
-          </div>
         </div>
         {data.trigger.description ? (
           <div className="workflow-flow-node-card__description">
             {data.trigger.description}
           </div>
         ) : null}
-        <div className="workflow-flow-node-card__actions">
-          <SolidButton
-            size="small"
-            variant="ghost"
-            onClick={(event) => {
-              event.stopPropagation();
-              data.onViewDocs(String(data.trigger.id));
-            }}
-          >
-            <BookOpen size={14} />
-          </SolidButton>
-        </div>
         <Handle
           type="target"
           position={Position.Top}
@@ -750,7 +762,7 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
             <SolidIcon name={iconName} size={16} aria-hidden />
           </div>
           <div>
-            <div className="workflow-flow-node-card__title">
+            <div className="workflow-flow-node-card__title" title={String(nodeTitle)}>
               {nodeTitle}
             </div>
           </div>
@@ -1388,6 +1400,7 @@ function buildGraph(
   };
 
   const triggers = Array.isArray(definition.triggers) ? definition.triggers : [];
+  const rootLaneX = 80;
   let startY = 0;
   let previousTriggerId: string | null = null;
 
@@ -1396,21 +1409,33 @@ function buildGraph(
     let triggerY = 60;
     triggers.forEach((trigger) => {
       const triggerNodeId = `trigger-${String(trigger.id)}`;
-      pushTriggerNode(ctx, trigger, 32, triggerY);
+      pushTriggerNode(
+        ctx,
+        trigger,
+        rootLaneX - DIMENSIONS.triggerWidth / 2,
+        triggerY,
+      );
       if (previousTriggerId) {
         ctx.edges.push(createEdge(previousTriggerId, triggerNodeId));
       }
       previousTriggerId = triggerNodeId;
-      triggerY += 96;
+      triggerY += DIMENSIONS.triggerHeight + DIMENSIONS.triggerGap;
     });
-    pushGroupNode(ctx, "group-triggers", "Triggers", "trigger", ctx.nodes.slice(triggerStartIndex));
-    startY = triggerY + 2;
+    const triggerGroupBounds = pushGroupNode(
+      ctx,
+      "group-triggers",
+      "Triggers",
+      "trigger",
+      ctx.nodes.slice(triggerStartIndex),
+    );
+    startY =
+      (triggerGroupBounds?.bottom ?? triggerY) + DIMENSIONS.groupExteriorEdgeGap;
   }
 
   const layout = buildSequenceGraph(
     definition.nodes ?? [],
     ctx,
-    80,
+    rootLaneX,
     startY,
     { scope: "root" },
   );
@@ -1465,11 +1490,7 @@ function WorkflowFlowCanvasInner(props: WorkflowFlowCanvasProps) {
         edges={graph.edges}
         nodeTypes={canvasNodeTypes}
         edgeTypes={canvasEdgeTypes}
-        fitView
-        fitViewOptions={{
-          padding: 0.16,
-          maxZoom: 1.25,
-        }}
+        defaultViewport={DEFAULT_WORKFLOW_VIEWPORT}
         minZoom={0.25}
         maxZoom={1.6}
         proOptions={{ hideAttribution: true }}
