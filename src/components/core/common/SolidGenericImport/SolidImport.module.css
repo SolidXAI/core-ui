@@ -4,7 +4,8 @@
     border-radius: 14px;
     border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
     background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white 4%), var(--card));
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: visible;
 }
 
 .ImportTableHeader {
@@ -549,13 +550,16 @@
 :global(.solid-import-mapping-table) {
     border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
     background: var(--card);
+    position: relative;
 }
 
 :global(.solid-import-mapping-head) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(260px, 0.9fr);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
 }
 
 :global(.solid-import-mapping-head-cell) {
@@ -571,11 +575,18 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(260px, 0.9fr);
     border-top: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
+    position: relative;
+    z-index: 0;
+}
+
+:global(.solid-import-mapping-row:focus-within) {
+    z-index: 4;
 }
 
 :global(.solid-import-mapping-source),
 :global(.solid-import-mapping-target) {
     padding: 12px 14px;
+    min-width: 0;
 }
 
 :global(.solid-import-mapping-source-title) {
@@ -596,6 +607,25 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    min-width: 0;
+}
+
+:global(.solid-import-mapping-target-controls > .solid-select-wrap) {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+:global(.solid-import-mapping-select .solid-select-trigger) {
+    width: 100%;
+}
+
+:global(.solid-import-mapping-select .solid-select-menu) {
+    z-index: calc(var(--z-overlay) + 4);
+}
+
+:global(.solid-import-mapping-row:nth-child(-n + 1) .solid-import-mapping-select .solid-select-menu.solid-select-menu-top) {
+    top: calc(100% + 4px);
+    bottom: auto;
 }
 
 :global(.solid-import-mapping-remove) {

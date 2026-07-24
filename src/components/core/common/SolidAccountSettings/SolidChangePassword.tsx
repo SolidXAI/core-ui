@@ -183,6 +183,8 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
     return typeof error === "string" ? error : null;
   };
 
+  const isChangePasswordDisabled = !formik.dirty || !formik.isValid || formik.isSubmitting;
+
   return (
     <form onSubmit={formik.handleSubmit} className={styles.accountForm}>
       <ToastMessage toast={toast} onClose={() => setToast(null)} />
@@ -232,7 +234,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
       </div>
 
       <div className={styles.footerActions}>
-        <SolidButton type="submit" size="sm" loading={formik.isSubmitting}>
+        <SolidButton type="submit" size="sm" loading={formik.isSubmitting} disabled={isChangePasswordDisabled}>
           Change Password
         </SolidButton>
       </div>

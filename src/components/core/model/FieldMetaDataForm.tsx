@@ -3198,7 +3198,7 @@ const FieldMetaDataForm = ({
                       <div className="mt-1 flex flex-wrap -mx-2 -mt-2 md:mt-0">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="required"
                                 name="required"
@@ -3210,7 +3210,7 @@ const FieldMetaDataForm = ({
                                 checked={formik.values.required}
                                 disabled={formik.values.isPrimaryKey || formik.values.unique}
                               />
-                              <label htmlFor="required" className={classNames("form-field-label", styles.fieldLabel, "ml-2")}>
+                              <label htmlFor="required" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Required {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
                                 {!formik.values.isPrimaryKey && formik.values.unique && "(Auto-enabled for Unique)"}
                               </label>
@@ -3224,7 +3224,7 @@ const FieldMetaDataForm = ({
                         )}
                         {currentFields.includes("unique") && selectedTypeValue !== 'relation' && (
                           <div className="field flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="unique"
                                 name="unique"
@@ -3245,7 +3245,7 @@ const FieldMetaDataForm = ({
                                 checked={formik.values.unique}
                                 disabled={formik.values.isPrimaryKey}
                               />
-                              <label htmlFor="unique" className={classNames("form-field-label", styles.fieldLabel, "ml-2")}>
+                              <label htmlFor="unique" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Unique {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
                               </label>
                             </div>
@@ -3258,7 +3258,7 @@ const FieldMetaDataForm = ({
                         )}
                         {currentFields.includes("index") && selectedTypeValue !== 'relation' && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="index"
                                 name="index"
@@ -3267,7 +3267,7 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.index}
                               />
-                              <label htmlFor="index" className={classNames("form-field-label", styles.fieldLabel, "ml-2")}>
+                              <label htmlFor="index" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Index
                               </label>
                             </div>
@@ -3278,7 +3278,7 @@ const FieldMetaDataForm = ({
                         )}
                         {currentFields.includes("private") && selectedTypeValue !== 'relation' && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="private"
                                 name="private"
@@ -3287,7 +3287,7 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.private}
                               />
-                              <label htmlFor="private" className={classNames("form-field-label", styles.fieldLabel, "ml-2")}>
+                              <label htmlFor="private" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Private
                               </label>
                             </div>
@@ -3301,7 +3301,7 @@ const FieldMetaDataForm = ({
                         )}
                         {currentFields.includes("encrypt") && selectedTypeValue !== 'relation' && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center gap-2">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="encrypt"
                                 name="encrypt"
@@ -3322,7 +3322,7 @@ const FieldMetaDataForm = ({
                         )}
                         {currentFields.includes("isMultiSelect") && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="isMultiSelect"
                                 name="isMultiSelect"
@@ -3331,7 +3331,7 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.isMultiSelect}
                               />
-                              <label htmlFor="isMultiSelect" className={classNames("form-field-label", styles.fieldLabel, "ml-2")}>
+                              <label htmlFor="isMultiSelect" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Is MultiSelect
                               </label>
                             </div>
@@ -3342,7 +3342,7 @@ const FieldMetaDataForm = ({
                         )}
                         {currentFields.includes("enableAuditTracking") && formik.values.relationType !== "one-to-many" && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center gap-2">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="enableAuditTracking"
                                 name="enableAuditTracking"
@@ -3364,7 +3364,7 @@ const FieldMetaDataForm = ({
                         )}
                         {currentFields.includes("isUserKey") && formik.values.unique && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
-                            <div className="flex items-center gap-2">
+                            <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="isUserKey"
                                 name="isUserKey"

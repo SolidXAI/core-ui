@@ -10,8 +10,8 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
     const filterMatchModeOptions = [
         { label: 'Starts With', value: "$startsWithi" },
         { label: 'Contains', value: "$containsi" },
-        { label: 'Not Contains', value: "$notContains" },
-        { label: 'Ends With', value: "$endsWith" },
+        { label: 'Not Contains', value: "$notContainsi" },
+        { label: 'Ends With', value: "$endsWithi" },
         { label: 'Equals', value: "$eqi" },
         { label: 'Not Equals', value: "$nei" },
         { label: 'Is null', value: "$null" },
