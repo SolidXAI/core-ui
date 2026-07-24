@@ -46,6 +46,7 @@ import { getSettingsMap } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
+import { closePopup, openPopup, PopupEvent } from "../../../redux/features/popupSlice";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidConfirmDialog } from "../../shad-cn-ui";
 import {
@@ -1524,6 +1525,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                 // Invoke the dynamic module...
                 if (dynamicChangeHandler) {
+                    const popupApi = {
+                        open: (popupEvent: PopupEvent) => dispatch(openPopup({
+                            closable: true,
+                            ...popupEvent,
+                        })),
+                        close: () => dispatch(closePopup()),
+                    };
+
                     const event: SolidUiEvent = {
                         fieldsMetadata: solidFieldsMetadata,
                         formData: formik.values,
@@ -1534,6 +1543,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         type: eventType,
                         viewMetadata: solidView,
                         formViewLayout: formViewLayout,
+                        popup: popupApi,
                         queryParams: {
                             actionName,
                             actionContext,

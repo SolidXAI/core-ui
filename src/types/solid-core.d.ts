@@ -130,6 +130,27 @@ export type SolidUiEvent = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
     formViewLayout: LayoutNode;
+    popup?: {
+        open: (event: {
+            action?: string;
+            closable?: boolean;
+            title?: string;
+            body?: any;
+            message?: any;
+            buttons?: Array<{
+                label: string;
+                action?: string | ((event: any, close: () => void) => void | Promise<void>);
+                variant?: string;
+                className?: string;
+                icon?: string;
+                closeOnClick?: boolean;
+                [key: string]: any;
+            }>;
+            popupWidth?: string;
+            [key: string]: any;
+        }) => void;
+        close: () => void;
+    };
 };
 
 export type SolidUiEventResponse = {
