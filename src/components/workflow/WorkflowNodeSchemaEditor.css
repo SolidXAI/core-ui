@@ -691,11 +691,22 @@
   border: 1px solid #dbe4f0;
   border-radius: 8px;
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
-  overflow: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
   padding: 8px;
   position: fixed;
   z-index: 10000;
+}
+
+.workflow-expression-autocomplete-scroll-body {
+  overflow: hidden;
+  padding-right: 14px;
+  scrollbar-width: none;
+}
+
+.workflow-expression-autocomplete-scroll-body::-webkit-scrollbar {
+  height: 0;
+  width: 0;
 }
 
 .workflow-expression-autocomplete-help {

@@ -65,6 +65,7 @@ export interface WorkflowNodeOutputDefinition {
   valueType?: WorkflowNodeConfigurationValueType;
   path?: string;
   required?: boolean;
+  includeInRuntimeContext?: boolean;
   schema?: Record<string, any>;
 }
 

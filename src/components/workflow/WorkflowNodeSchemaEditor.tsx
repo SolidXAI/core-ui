@@ -19,6 +19,7 @@ import type {
   WorkflowNodeConfigurationFieldDefinition,
   WorkflowNodeMetadataResponse,
 } from "../../types/workflow-node";
+import { WorkflowNodeDocsPanel } from "./WorkflowNodeDocsPanel";
 import {
   SolidButton,
   SolidCodeEditor,
@@ -88,6 +89,7 @@ type WorkflowNodePaletteProps = {
 type WorkflowAddNodeDialogProps = {
   open: boolean;
   nodeTypes: WorkflowNodeMetadataResponse[];
+  expressionSuggestions?: WorkflowExpressionSuggestion[];
   onOpenChange: (open: boolean) => void;
   createNodeValue: (nodeType: WorkflowNodeMetadataResponse) => WorkflowNodeEditorValue;
   onSubmit: (nodeValue: WorkflowNodeEditorValue) => void;
@@ -593,6 +595,7 @@ function WorkflowYamlFieldEditor({
   emptyValue = {},
   format = "yaml",
   height = "220px",
+  expressionSuggestions,
 }: {
   value: any;
   readOnly?: boolean;
@@ -600,6 +603,7 @@ function WorkflowYamlFieldEditor({
   emptyValue?: any;
   format?: "json" | "yaml";
   height?: string;
+  expressionSuggestions?: WorkflowExpressionSuggestion[];
 }) {
   const stringifyValue = React.useCallback(
     (nextValue: any, nextEmptyValue: any) =>
@@ -645,14 +649,26 @@ function WorkflowYamlFieldEditor({
 
   return (
     <div className="workflow-node-yaml-field-editor">
-      <SolidCodeEditor
-        language={format}
-        height={height}
-        fontSize={12}
-        readOnly={readOnly}
-        value={textValue}
-        onChange={handleEditorChange}
-      />
+      {expressionSuggestions ? (
+        <WorkflowExpressionCodeEditor
+          language={format}
+          height={height}
+          fontSize={12}
+          readOnly={readOnly}
+          value={textValue}
+          suggestions={expressionSuggestions}
+          onChange={handleEditorChange}
+        />
+      ) : (
+        <SolidCodeEditor
+          language={format}
+          height={height}
+          fontSize={12}
+          readOnly={readOnly}
+          value={textValue}
+          onChange={handleEditorChange}
+        />
+      )}
       {parseError ? (
         <div className="workflow-node-yaml-field-error">{parseError}</div>
       ) : null}
@@ -743,14 +759,55 @@ function getExpressionSearchTerm(value: string, caretIndex: number) {
     return prefix.slice(expressionStart + 2).trim();
   }
 
-  const wordMatch = prefix.match(/[A-Za-z0-9_.-]*$/);
-  return wordMatch?.[0] ?? "";
+  return "";
+}
+
+type WorkflowExpressionAutocompleteSession = {
+  mode: "expression" | "insert";
+  queryStart: number;
+};
+
+function getAutocompleteSession(
+  value: string,
+  caretIndex: number,
+): WorkflowExpressionAutocompleteSession {
+  const prefix = value.slice(0, caretIndex);
+  const expressionStart = prefix.lastIndexOf("{{");
+
+  if (expressionStart >= 0 && prefix.lastIndexOf("}}") < expressionStart) {
+    return {
+      mode: "expression",
+      queryStart: expressionStart + 2,
+    };
+  }
+
+  return {
+    mode: "insert",
+    queryStart: caretIndex,
+  };
+}
+
+function getAutocompleteSessionQuery(
+  value: string,
+  caretIndex: number,
+  session: WorkflowExpressionAutocompleteSession | null,
+) {
+  if (!session) {
+    return getExpressionSearchTerm(value, caretIndex);
+  }
+
+  if (session.queryStart > caretIndex) {
+    return "";
+  }
+
+  return value.slice(session.queryStart, caretIndex).trim();
 }
 
 function insertExpressionAtCaret(
   value: string,
   caretIndex: number,
   insertText: string,
+  session?: WorkflowExpressionAutocompleteSession | null,
 ) {
   const prefix = value.slice(0, caretIndex);
   const suffix = value.slice(caretIndex);
@@ -768,8 +825,10 @@ function insertExpressionAtCaret(
     };
   }
 
-  const wordMatch = prefix.match(/[A-Za-z0-9_.-]*$/);
-  const replaceStart = wordMatch ? caretIndex - wordMatch[0].length : caretIndex;
+  const replaceStart =
+    session?.mode === "insert" && session.queryStart <= caretIndex
+      ? session.queryStart
+      : caretIndex;
   const spacerBefore =
     replaceStart > 0 && !/\s/.test(value.charAt(replaceStart - 1)) ? " " : "";
   const spacerAfter =
@@ -818,22 +877,79 @@ function getWorkflowAutocompletePortalPosition(
   };
 }
 
-export function WorkflowExpressionAutocompleteField({
+function getWorkflowCodeAutocompletePortalPosition(
+  editor: any,
+): WorkflowExpressionAutocompletePosition | null {
+  if (!editor || typeof window === "undefined") {
+    return null;
+  }
+
+  const domNode = editor.getDomNode?.();
+  const position = editor.getPosition?.();
+  const visiblePosition = position
+    ? editor.getScrolledVisiblePosition?.(position)
+    : null;
+
+  if (!domNode || !position || !visiblePosition) {
+    return getWorkflowAutocompletePortalPosition(domNode ?? null);
+  }
+
+  const rect = domNode.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  const gutter = 12;
+  const offset = 6;
+  const preferredWidth = Math.max(Math.min(rect.width, 520), 420);
+  const width = Math.min(preferredWidth, viewportWidth - gutter * 2);
+  const caretLeft = rect.left + visiblePosition.left;
+  const caretBottom = rect.top + visiblePosition.top + visiblePosition.height;
+  const left = Math.min(
+    Math.max(caretLeft, gutter),
+    Math.max(viewportWidth - width - gutter, gutter),
+  );
+  const spaceBelow = viewportHeight - caretBottom - gutter;
+  const spaceAbove = rect.top + visiblePosition.top - gutter;
+  const renderAbove = spaceBelow < 220 && spaceAbove > spaceBelow;
+  const availableHeight = Math.max(
+    160,
+    Math.min(320, renderAbove ? spaceAbove - offset : spaceBelow - offset),
+  );
+
+  return {
+    left,
+    top: renderAbove
+      ? Math.max(gutter, rect.top + visiblePosition.top - offset - availableHeight)
+      : Math.min(viewportHeight - gutter - availableHeight, caretBottom + offset),
+    width,
+    maxHeight: availableHeight,
+  };
+}
+
+function WorkflowExpressionCodeEditor({
   value,
   readOnly,
-  multiline,
-  placeholder,
+  language,
+  height,
+  fontSize = 12,
   suggestions = [],
   onChange,
 }: {
   value: string;
   readOnly?: boolean;
-  multiline?: boolean;
-  placeholder?: string;
+  language: string;
+  height?: string;
+  fontSize?: string | number;
   suggestions?: WorkflowExpressionSuggestion[];
-  onChange: (value: string) => void;
+  onChange: (value: string | undefined) => void;
 }) {
-  const inputRef = React.useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const editorRef = React.useRef<any>(null);
+  const disposablesRef = React.useRef<Array<{ dispose: () => void }>>([]);
+  const menuRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollBodyRef = React.useRef<HTMLDivElement | null>(null);
+  const optionRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const autocompleteSessionRef =
+    React.useRef<WorkflowExpressionAutocompleteSession | null>(null);
+  const isMenuInteractionRef = React.useRef(false);
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [activeIndex, setActiveIndex] = React.useState(0);
@@ -859,9 +975,649 @@ export function WorkflowExpressionAutocompleteField({
     );
   }, [query, suggestions]);
 
+  const filteredSuggestionsRef = React.useRef(filteredSuggestions);
+  const activeIndexRef = React.useRef(activeIndex);
+  const openRef = React.useRef(open);
+
+  React.useEffect(() => {
+    filteredSuggestionsRef.current = filteredSuggestions;
+  }, [filteredSuggestions]);
+
+  React.useEffect(() => {
+    activeIndexRef.current = activeIndex;
+  }, [activeIndex]);
+
+  React.useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
   React.useEffect(() => {
     setActiveIndex(0);
   }, [query]);
+
+  const getEditorState = React.useCallback(() => {
+    const editor = editorRef.current;
+    const model = editor?.getModel?.();
+    const position = editor?.getPosition?.();
+    if (!editor || !model || !position) {
+      return null;
+    }
+
+    return {
+      editor,
+      model,
+      position,
+      value: model.getValue(),
+      caretIndex: model.getOffsetAt(position),
+    };
+  }, []);
+
+  const closePicker = React.useCallback(() => {
+    setOpen(false);
+    setQuery("");
+    setActiveIndex(0);
+    setPortalPosition(null);
+    autocompleteSessionRef.current = null;
+    isMenuInteractionRef.current = false;
+  }, []);
+
+  const updatePortalPosition = React.useCallback(() => {
+    setPortalPosition(getWorkflowCodeAutocompletePortalPosition(editorRef.current));
+  }, []);
+
+  const openPicker = React.useCallback(() => {
+    const editorState = getEditorState();
+    if (!editorState || readOnly) {
+      return;
+    }
+
+    const session = getAutocompleteSession(
+      editorState.value,
+      editorState.caretIndex,
+    );
+    autocompleteSessionRef.current = session;
+    setQuery(
+      getAutocompleteSessionQuery(
+        editorState.value,
+        editorState.caretIndex,
+        session,
+      ),
+    );
+    setPortalPosition(getWorkflowCodeAutocompletePortalPosition(editorState.editor));
+    setOpen(true);
+  }, [getEditorState, readOnly]);
+
+  const scrollAutocompleteBy = React.useCallback((deltaY: number) => {
+    const scrollBody = scrollBodyRef.current;
+    if (!scrollBody) {
+      return false;
+    }
+
+    const previousScrollTop = scrollBody.scrollTop;
+    scrollBody.scrollTop += deltaY;
+
+    return scrollBody.scrollTop !== previousScrollTop;
+  }, []);
+
+  const selectSuggestion = React.useCallback(
+    (suggestion: WorkflowExpressionSuggestion) => {
+      const editorState = getEditorState();
+      if (!editorState) {
+        return;
+      }
+
+      const next = insertExpressionAtCaret(
+        editorState.value,
+        editorState.caretIndex,
+        suggestion.insertText,
+        autocompleteSessionRef.current,
+      );
+      const range = editorState.model.getFullModelRange();
+      editorState.editor.executeEdits("workflow-expression-autocomplete", [
+        {
+          range,
+          text: next.value,
+          forceMoveMarkers: true,
+        },
+      ]);
+      const nextPosition = editorState.model.getPositionAt(next.caretIndex);
+      editorState.editor.setPosition(nextPosition);
+      editorState.editor.focus();
+      onChange(next.value);
+      closePicker();
+    },
+    [closePicker, getEditorState, onChange],
+  );
+
+  React.useLayoutEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const scrollBody = scrollBodyRef.current;
+    const option = optionRefs.current[activeIndex];
+    if (!scrollBody || !option) {
+      return;
+    }
+
+    const optionTop = option.offsetTop;
+    const optionBottom = optionTop + option.offsetHeight;
+    const visibleTop = scrollBody.scrollTop;
+    const visibleBottom = visibleTop + scrollBody.clientHeight;
+
+    if (optionTop < visibleTop) {
+      scrollBody.scrollTop = optionTop;
+    } else if (optionBottom > visibleBottom) {
+      scrollBody.scrollTop = optionBottom - scrollBody.clientHeight;
+    }
+  }, [activeIndex, open]);
+
+  React.useLayoutEffect(() => {
+    if (!open) {
+      setPortalPosition(null);
+      return;
+    }
+
+    updatePortalPosition();
+  }, [filteredSuggestions.length, open, updatePortalPosition, value]);
+
+  React.useEffect(() => {
+    if (!open || typeof window === "undefined") {
+      return;
+    }
+
+    window.addEventListener("resize", updatePortalPosition);
+    window.addEventListener("scroll", updatePortalPosition, true);
+
+    return () => {
+      window.removeEventListener("resize", updatePortalPosition);
+      window.removeEventListener("scroll", updatePortalPosition, true);
+    };
+  }, [open, updatePortalPosition]);
+
+  React.useEffect(() => {
+    if (!open || typeof document === "undefined") {
+      return;
+    }
+
+    const handleNativeWheel = (event: WheelEvent) => {
+      const menu = menuRef.current;
+      const scrollBody = scrollBodyRef.current;
+      if (!menu || !scrollBody) {
+        return;
+      }
+
+      const target = event.target;
+      const targetInsideMenu =
+        target instanceof Node ? menu.contains(target) : false;
+      const rect = menu.getBoundingClientRect();
+      const pointerInsideMenu =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+
+      if (!targetInsideMenu && !pointerInsideMenu) {
+        return;
+      }
+
+      const normalizedDeltaY =
+        event.deltaMode === WheelEvent.DOM_DELTA_LINE
+          ? event.deltaY * 32
+          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+            ? event.deltaY * scrollBody.clientHeight
+            : event.deltaY || event.deltaX;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      scrollAutocompleteBy(normalizedDeltaY);
+    };
+
+    document.addEventListener("wheel", handleNativeWheel, {
+      capture: true,
+      passive: false,
+    });
+
+    return () => {
+      document.removeEventListener("wheel", handleNativeWheel, {
+        capture: true,
+      });
+    };
+  }, [open, scrollAutocompleteBy]);
+
+  React.useEffect(() => {
+    if (!open || typeof document === "undefined") {
+      return;
+    }
+
+    const getOptionIndexAtPoint = (clientX: number, clientY: number) => {
+      const menu = menuRef.current;
+      if (!menu) {
+        return -1;
+      }
+
+      const menuRect = menu.getBoundingClientRect();
+      const pointerInsideMenu =
+        clientX >= menuRect.left &&
+        clientX <= menuRect.right &&
+        clientY >= menuRect.top &&
+        clientY <= menuRect.bottom;
+
+      if (!pointerInsideMenu) {
+        return -1;
+      }
+
+      return optionRefs.current.findIndex((option) => {
+        if (!option) {
+          return false;
+        }
+
+        const rect = option.getBoundingClientRect();
+        return (
+          clientX >= rect.left &&
+          clientX <= rect.right &&
+          clientY >= rect.top &&
+          clientY <= rect.bottom
+        );
+      });
+    };
+
+    const handleNativePointerMove = (event: PointerEvent) => {
+      const optionIndex = getOptionIndexAtPoint(event.clientX, event.clientY);
+      if (optionIndex >= 0) {
+        setActiveIndex(optionIndex);
+      }
+    };
+
+    const handleNativePointerDown = (event: PointerEvent) => {
+      const optionIndex = getOptionIndexAtPoint(event.clientX, event.clientY);
+      const suggestion = filteredSuggestions[optionIndex];
+      if (!suggestion) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      isMenuInteractionRef.current = true;
+      setActiveIndex(optionIndex);
+      selectSuggestion(suggestion);
+    };
+
+    document.addEventListener("pointermove", handleNativePointerMove, {
+      capture: true,
+    });
+    document.addEventListener("pointerdown", handleNativePointerDown, {
+      capture: true,
+    });
+
+    return () => {
+      document.removeEventListener("pointermove", handleNativePointerMove, {
+        capture: true,
+      });
+      document.removeEventListener("pointerdown", handleNativePointerDown, {
+        capture: true,
+      });
+    };
+  }, [filteredSuggestions, open, selectSuggestion]);
+
+  React.useEffect(
+    () => () => {
+      disposablesRef.current.forEach((disposable) => disposable.dispose());
+      disposablesRef.current = [];
+    },
+    [],
+  );
+
+  const handleEditorMount = React.useCallback(
+    (editor: any) => {
+      disposablesRef.current.forEach((disposable) => disposable.dispose());
+      disposablesRef.current = [];
+      editorRef.current = editor;
+
+      const consumeKeyboardEvent = (browserEvent: KeyboardEvent) => {
+        const preventEditorHandling = () => {
+          browserEvent.preventDefault();
+          browserEvent.stopPropagation();
+          browserEvent.stopImmediatePropagation();
+        };
+
+        if (browserEvent.ctrlKey && browserEvent.code === "Space") {
+          preventEditorHandling();
+          openPicker();
+          return true;
+        }
+
+        if (!openRef.current) {
+          return false;
+        }
+
+        if (browserEvent.key === "Escape") {
+          preventEditorHandling();
+          closePicker();
+          return true;
+        }
+
+        if (browserEvent.key === "ArrowDown") {
+          preventEditorHandling();
+          setActiveIndex((current) =>
+            Math.min(
+              current + 1,
+              Math.max(filteredSuggestionsRef.current.length - 1, 0),
+            ),
+          );
+          return true;
+        }
+
+        if (browserEvent.key === "ArrowUp") {
+          preventEditorHandling();
+          setActiveIndex((current) => Math.max(current - 1, 0));
+          return true;
+        }
+
+        if (browserEvent.key === "Enter") {
+          const suggestion =
+            filteredSuggestionsRef.current[activeIndexRef.current];
+          if (suggestion) {
+            preventEditorHandling();
+            selectSuggestion(suggestion);
+            return true;
+          }
+        }
+
+        return false;
+      };
+
+      const domNode = editor.getDomNode?.();
+      if (domNode) {
+        const handleNativeKeyDown = (event: KeyboardEvent) => {
+          consumeKeyboardEvent(event);
+        };
+
+        domNode.addEventListener("keydown", handleNativeKeyDown, {
+          capture: true,
+        });
+        disposablesRef.current.push({
+          dispose: () => {
+            domNode.removeEventListener("keydown", handleNativeKeyDown, {
+              capture: true,
+            });
+          },
+        });
+      }
+
+      disposablesRef.current.push(
+        editor.onKeyDown((event: any) => {
+          const browserEvent = event.browserEvent;
+          if (!browserEvent) {
+            return;
+          }
+
+          if (consumeKeyboardEvent(browserEvent)) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        }),
+      );
+
+      disposablesRef.current.push(
+        editor.onDidChangeModelContent(() => {
+          if (!openRef.current) {
+            return;
+          }
+
+          const editorState = getEditorState();
+          if (!editorState) {
+            return;
+          }
+
+          setQuery(
+            getAutocompleteSessionQuery(
+              editorState.value,
+              editorState.caretIndex,
+              autocompleteSessionRef.current,
+            ),
+          );
+          updatePortalPosition();
+        }),
+      );
+
+      disposablesRef.current.push(
+        editor.onDidBlurEditorWidget(() => {
+          window.setTimeout(() => {
+            if (!isMenuInteractionRef.current) {
+              closePicker();
+            }
+          }, 120);
+        }),
+      );
+    },
+    [
+      closePicker,
+      getEditorState,
+      openPicker,
+      selectSuggestion,
+      updatePortalPosition,
+    ],
+  );
+
+  const groupedSuggestions = filteredSuggestions.reduce<Record<string, WorkflowExpressionSuggestion[]>>(
+    (acc, suggestion) => {
+      acc[suggestion.group] = acc[suggestion.group] ?? [];
+      acc[suggestion.group].push(suggestion);
+      return acc;
+    },
+    {},
+  );
+
+  const handleMenuWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    scrollAutocompleteBy(event.deltaY || event.deltaX);
+  };
+
+  const handleMenuPointerDown = () => {
+    isMenuInteractionRef.current = true;
+
+    window.setTimeout(() => {
+      const handlePointerUp = () => {
+        window.setTimeout(() => {
+          isMenuInteractionRef.current = false;
+        }, 0);
+        window.removeEventListener("pointerup", handlePointerUp);
+      };
+
+      window.addEventListener("pointerup", handlePointerUp);
+    }, 0);
+  };
+
+  const menu = open && portalPosition && typeof document !== "undefined" ? (
+    <div
+      ref={menuRef}
+      className="workflow-expression-autocomplete-menu"
+      data-solid-dialog-outside-safe="true"
+      style={{
+        left: portalPosition.left,
+        top: portalPosition.top,
+        width: portalPosition.width,
+        maxHeight: portalPosition.maxHeight,
+      }}
+      onPointerDownCapture={handleMenuPointerDown}
+      onWheelCapture={handleMenuWheel}
+    >
+      <div
+        ref={scrollBodyRef}
+        className="workflow-expression-autocomplete-scroll-body"
+        style={{ maxHeight: Math.max(portalPosition.maxHeight - 16, 120) }}
+      >
+        <div className="workflow-expression-autocomplete-help">
+          Start typing to choose from available variables, inputs, secrets, or outputs.
+        </div>
+        {filteredSuggestions.length ? (
+          Object.entries(groupedSuggestions).map(([group, groupSuggestions]) => (
+            <div key={group} className="workflow-expression-autocomplete-group">
+              <div className="workflow-expression-autocomplete-group-title">{group}</div>
+              {groupSuggestions.map((suggestion) => {
+                const absoluteIndex = filteredSuggestions.indexOf(suggestion);
+                const isActive = absoluteIndex === activeIndex;
+
+                return (
+                  <button
+                    ref={(element) => {
+                      optionRefs.current[absoluteIndex] = element;
+                    }}
+                    key={`${suggestion.group}-${suggestion.insertText}`}
+                    type="button"
+                    className={`workflow-expression-autocomplete-option ${isActive ? "is-active" : ""}`}
+                    onPointerEnter={() => {
+                      setActiveIndex(absoluteIndex);
+                    }}
+                    onMouseEnter={() => {
+                      setActiveIndex(absoluteIndex);
+                    }}
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      selectSuggestion(suggestion);
+                    }}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      selectSuggestion(suggestion);
+                    }}
+                  >
+                    <span className="workflow-expression-autocomplete-option-main">
+                      <span className="workflow-expression-autocomplete-option-label">
+                        {suggestion.label}
+                      </span>
+                      {suggestion.detail ? (
+                        <span className="workflow-expression-autocomplete-option-detail">
+                          {suggestion.detail}
+                        </span>
+                      ) : null}
+                    </span>
+                    {suggestion.description ? (
+                      <span className="workflow-expression-autocomplete-option-description">
+                        {suggestion.description}
+                      </span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          <div className="workflow-expression-autocomplete-empty">
+            No matching expression references.
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
+
+  return (
+    <>
+      <SolidCodeEditor
+        language={language}
+        height={height}
+        fontSize={fontSize}
+        readOnly={readOnly}
+        value={value}
+        onChange={onChange}
+        onMount={handleEditorMount}
+      />
+      {menu ? createPortal(menu, document.body) : null}
+    </>
+  );
+}
+
+export function WorkflowExpressionAutocompleteField({
+  value,
+  readOnly,
+  multiline,
+  placeholder,
+  suggestions = [],
+  onChange,
+}: {
+  value: string;
+  readOnly?: boolean;
+  multiline?: boolean;
+  placeholder?: string;
+  suggestions?: WorkflowExpressionSuggestion[];
+  onChange: (value: string) => void;
+}) {
+  const inputRef = React.useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const menuRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollBodyRef = React.useRef<HTMLDivElement | null>(null);
+  const optionRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [portalPosition, setPortalPosition] =
+    React.useState<WorkflowExpressionAutocompletePosition | null>(null);
+  const autocompleteSessionRef =
+    React.useRef<WorkflowExpressionAutocompleteSession | null>(null);
+  const isMenuInteractionRef = React.useRef(false);
+
+  const filteredSuggestions = React.useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) {
+      return suggestions;
+    }
+
+    return suggestions.filter((suggestion) =>
+      [
+        suggestion.group,
+        suggestion.label,
+        suggestion.insertText,
+        suggestion.detail,
+        suggestion.description,
+      ]
+        .filter(Boolean)
+        .some((entry) => String(entry).toLowerCase().includes(normalizedQuery)),
+    );
+  }, [query, suggestions]);
+
+  React.useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
+  const scrollAutocompleteBy = React.useCallback((deltaY: number) => {
+    const scrollBody = scrollBodyRef.current;
+    if (!scrollBody) {
+      return false;
+    }
+
+    const previousScrollTop = scrollBody.scrollTop;
+    scrollBody.scrollTop += deltaY;
+
+    return scrollBody.scrollTop !== previousScrollTop;
+  }, []);
+
+  React.useLayoutEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const scrollBody = scrollBodyRef.current;
+    const option = optionRefs.current[activeIndex];
+    if (!scrollBody || !option) {
+      return;
+    }
+
+    const optionTop = option.offsetTop;
+    const optionBottom = optionTop + option.offsetHeight;
+    const visibleTop = scrollBody.scrollTop;
+    const visibleBottom = visibleTop + scrollBody.clientHeight;
+
+    if (optionTop < visibleTop) {
+      scrollBody.scrollTop = optionTop;
+    } else if (optionBottom > visibleBottom) {
+      scrollBody.scrollTop = optionBottom - scrollBody.clientHeight;
+    }
+
+  }, [activeIndex, open]);
 
   const updatePortalPosition = React.useCallback(() => {
     setPortalPosition(getWorkflowAutocompletePortalPosition(inputRef.current));
@@ -890,10 +1646,63 @@ export function WorkflowExpressionAutocompleteField({
     };
   }, [open, updatePortalPosition]);
 
+  React.useEffect(() => {
+    if (!open || typeof document === "undefined") {
+      return;
+    }
+
+    const handleNativeWheel = (event: WheelEvent) => {
+      const menu = menuRef.current;
+      const scrollBody = scrollBodyRef.current;
+      if (!menu || !scrollBody) {
+        return;
+      }
+
+      const target = event.target;
+      const targetInsideMenu =
+        target instanceof Node ? menu.contains(target) : false;
+      const rect = menu.getBoundingClientRect();
+      const pointerInsideMenu =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+
+      if (!targetInsideMenu && !pointerInsideMenu) {
+        return;
+      }
+
+      const normalizedDeltaY =
+        event.deltaMode === WheelEvent.DOM_DELTA_LINE
+          ? event.deltaY * 32
+          : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+            ? event.deltaY * scrollBody.clientHeight
+            : event.deltaY || event.deltaX;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      scrollAutocompleteBy(normalizedDeltaY);
+    };
+
+    document.addEventListener("wheel", handleNativeWheel, {
+      capture: true,
+      passive: false,
+    });
+
+    return () => {
+      document.removeEventListener("wheel", handleNativeWheel, {
+        capture: true,
+      });
+    };
+  }, [open, scrollAutocompleteBy]);
+
   const openPicker = () => {
     const input = inputRef.current;
     const caretIndex = input?.selectionStart ?? value.length;
-    setQuery(getExpressionSearchTerm(value, caretIndex));
+    const session = getAutocompleteSession(value, caretIndex);
+    autocompleteSessionRef.current = session;
+    setQuery(getAutocompleteSessionQuery(value, caretIndex, session));
     setPortalPosition(getWorkflowAutocompletePortalPosition(input));
     setOpen(true);
   };
@@ -903,12 +1712,19 @@ export function WorkflowExpressionAutocompleteField({
     setQuery("");
     setActiveIndex(0);
     setPortalPosition(null);
+    autocompleteSessionRef.current = null;
+    isMenuInteractionRef.current = false;
   };
 
   const selectSuggestion = (suggestion: WorkflowExpressionSuggestion) => {
     const input = inputRef.current;
     const caretIndex = input?.selectionStart ?? value.length;
-    const next = insertExpressionAtCaret(value, caretIndex, suggestion.insertText);
+    const next = insertExpressionAtCaret(
+      value,
+      caretIndex,
+      suggestion.insertText,
+      autocompleteSessionRef.current,
+    );
     onChange(next.value);
     closePicker();
 
@@ -917,6 +1733,82 @@ export function WorkflowExpressionAutocompleteField({
       input?.setSelectionRange(next.caretIndex, next.caretIndex);
     });
   };
+
+  React.useEffect(() => {
+    if (!open || typeof document === "undefined") {
+      return;
+    }
+
+    const getOptionIndexAtPoint = (clientX: number, clientY: number) => {
+      const menu = menuRef.current;
+      if (!menu) {
+        return -1;
+      }
+
+      const menuRect = menu.getBoundingClientRect();
+      const pointerInsideMenu =
+        clientX >= menuRect.left &&
+        clientX <= menuRect.right &&
+        clientY >= menuRect.top &&
+        clientY <= menuRect.bottom;
+
+      if (!pointerInsideMenu) {
+        return -1;
+      }
+
+      return optionRefs.current.findIndex((option) => {
+        if (!option) {
+          return false;
+        }
+
+        const rect = option.getBoundingClientRect();
+        return (
+          clientX >= rect.left &&
+          clientX <= rect.right &&
+          clientY >= rect.top &&
+          clientY <= rect.bottom
+        );
+      });
+    };
+
+    const handleNativePointerMove = (event: PointerEvent) => {
+      const optionIndex = getOptionIndexAtPoint(event.clientX, event.clientY);
+      if (optionIndex >= 0) {
+        setActiveIndex(optionIndex);
+      }
+    };
+
+    const handleNativePointerDown = (event: PointerEvent) => {
+      const optionIndex = getOptionIndexAtPoint(event.clientX, event.clientY);
+      const suggestion = filteredSuggestions[optionIndex];
+      if (!suggestion) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      isMenuInteractionRef.current = true;
+      setActiveIndex(optionIndex);
+      selectSuggestion(suggestion);
+    };
+
+    document.addEventListener("pointermove", handleNativePointerMove, {
+      capture: true,
+    });
+    document.addEventListener("pointerdown", handleNativePointerDown, {
+      capture: true,
+    });
+
+    return () => {
+      document.removeEventListener("pointermove", handleNativePointerMove, {
+        capture: true,
+      });
+      document.removeEventListener("pointerdown", handleNativePointerDown, {
+        capture: true,
+      });
+    };
+  }, [filteredSuggestions, open]);
 
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -966,7 +1858,13 @@ export function WorkflowExpressionAutocompleteField({
     onChange(nextValue);
 
     if (open) {
-      setQuery(getExpressionSearchTerm(nextValue, event.target.selectionStart ?? nextValue.length));
+      setQuery(
+        getAutocompleteSessionQuery(
+          nextValue,
+          event.target.selectionStart ?? nextValue.length,
+          autocompleteSessionRef.current,
+        ),
+      );
     }
   };
 
@@ -986,36 +1884,38 @@ export function WorkflowExpressionAutocompleteField({
     placeholder,
     onChange: handleChange,
     onKeyDown: handleKeyDown,
-    onBlur: () => window.setTimeout(() => setOpen(false), 120),
+    onBlur: () =>
+      window.setTimeout(() => {
+        if (!isMenuInteractionRef.current) {
+          closePicker();
+        }
+      }, 120),
   };
 
   const handleMenuWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    const menuElement = event.currentTarget;
-    const canScrollVertically =
-      menuElement.scrollHeight > menuElement.clientHeight;
-    const canScrollHorizontally =
-      menuElement.scrollWidth > menuElement.clientWidth;
-
-    if (!canScrollVertically && !canScrollHorizontally) {
-      return;
-    }
-
     event.preventDefault();
     event.stopPropagation();
+    scrollAutocompleteBy(event.deltaY || event.deltaX);
+  };
 
-    if (canScrollVertically) {
-      menuElement.scrollTop += event.deltaY;
-    }
+  const handleMenuPointerDown = () => {
+    isMenuInteractionRef.current = true;
 
-    if (event.shiftKey && canScrollHorizontally) {
-      menuElement.scrollLeft += event.deltaY || event.deltaX;
-    } else if (canScrollHorizontally && Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
-      menuElement.scrollLeft += event.deltaX;
-    }
+    window.setTimeout(() => {
+      const handlePointerUp = () => {
+        window.setTimeout(() => {
+          isMenuInteractionRef.current = false;
+        }, 0);
+        window.removeEventListener("pointerup", handlePointerUp);
+      };
+
+      window.addEventListener("pointerup", handlePointerUp);
+    }, 0);
   };
 
   const menu = open && portalPosition && typeof document !== "undefined" ? (
     <div
+      ref={menuRef}
       className="workflow-expression-autocomplete-menu"
       data-solid-dialog-outside-safe="true"
       style={{
@@ -1024,55 +1924,76 @@ export function WorkflowExpressionAutocompleteField({
         width: portalPosition.width,
         maxHeight: portalPosition.maxHeight,
       }}
-      onMouseDown={(event) => event.preventDefault()}
+      onPointerDownCapture={handleMenuPointerDown}
       onWheelCapture={handleMenuWheel}
     >
-      <div className="workflow-expression-autocomplete-help">
-        Start typing to choose from available variables, inputs, secrets, or outputs.
-      </div>
-      {filteredSuggestions.length ? (
-        Object.entries(groupedSuggestions).map(([group, groupSuggestions]) => (
-          <div key={group} className="workflow-expression-autocomplete-group">
-            <div className="workflow-expression-autocomplete-group-title">{group}</div>
-            {groupSuggestions.map((suggestion) => {
-              const absoluteIndex = filteredSuggestions.indexOf(suggestion);
-              const isActive = absoluteIndex === activeIndex;
+      <div
+        ref={scrollBodyRef}
+        className="workflow-expression-autocomplete-scroll-body"
+        style={{ maxHeight: Math.max(portalPosition.maxHeight - 16, 120) }}
+      >
+        <div className="workflow-expression-autocomplete-help">
+          Start typing to choose from available variables, inputs, secrets, or outputs.
+        </div>
+        {filteredSuggestions.length ? (
+          Object.entries(groupedSuggestions).map(([group, groupSuggestions]) => (
+            <div key={group} className="workflow-expression-autocomplete-group">
+              <div className="workflow-expression-autocomplete-group-title">{group}</div>
+              {groupSuggestions.map((suggestion) => {
+                const absoluteIndex = filteredSuggestions.indexOf(suggestion);
+                const isActive = absoluteIndex === activeIndex;
 
-              return (
-                <button
-                  key={`${suggestion.group}-${suggestion.insertText}`}
-                  type="button"
-                  className={`workflow-expression-autocomplete-option ${isActive ? "is-active" : ""}`}
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    selectSuggestion(suggestion);
-                  }}
-                >
-                  <span className="workflow-expression-autocomplete-option-main">
-                    <span className="workflow-expression-autocomplete-option-label">
-                      {suggestion.label}
+                return (
+                  <button
+                    ref={(element) => {
+                      optionRefs.current[absoluteIndex] = element;
+                    }}
+                    key={`${suggestion.group}-${suggestion.insertText}`}
+                    type="button"
+                    className={`workflow-expression-autocomplete-option ${isActive ? "is-active" : ""}`}
+                    onPointerEnter={() => {
+                      setActiveIndex(absoluteIndex);
+                    }}
+                    onMouseEnter={() => {
+                      setActiveIndex(absoluteIndex);
+                    }}
+                    onPointerDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      selectSuggestion(suggestion);
+                    }}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      selectSuggestion(suggestion);
+                    }}
+                  >
+                    <span className="workflow-expression-autocomplete-option-main">
+                      <span className="workflow-expression-autocomplete-option-label">
+                        {suggestion.label}
+                      </span>
+                      {suggestion.detail ? (
+                        <span className="workflow-expression-autocomplete-option-detail">
+                          {suggestion.detail}
+                        </span>
+                      ) : null}
                     </span>
-                    {suggestion.detail ? (
-                      <span className="workflow-expression-autocomplete-option-detail">
-                        {suggestion.detail}
+                    {suggestion.description ? (
+                      <span className="workflow-expression-autocomplete-option-description">
+                        {suggestion.description}
                       </span>
                     ) : null}
-                  </span>
-                  {suggestion.description ? (
-                    <span className="workflow-expression-autocomplete-option-description">
-                      {suggestion.description}
-                    </span>
-                  ) : null}
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
+          ))
+        ) : (
+          <div className="workflow-expression-autocomplete-empty">
+            No matching expression references.
           </div>
-        ))
-      ) : (
-        <div className="workflow-expression-autocomplete-empty">
-          No matching expression references.
-        </div>
-      )}
+        )}
+      </div>
     </div>
   ) : null;
 
@@ -1167,6 +2088,20 @@ function WorkflowNodeFieldEditor({
           : JSON.stringify(normalizedValue, null, 2);
     const editorLanguage = field.uiSchema?.editor?.language ?? "json";
 
+    if (field.expressionAllowed) {
+      return (
+        <WorkflowExpressionCodeEditor
+          language={editorLanguage}
+          height={getConfigurationFieldEditorHeight(field)}
+          fontSize={12}
+          readOnly={readOnly}
+          value={stringValue}
+          suggestions={expressionSuggestions}
+          onChange={(next) => onChange(next ?? "")}
+        />
+      );
+    }
+
     return (
       <SolidCodeEditor
         language={editorLanguage}
@@ -1206,6 +2141,7 @@ function WorkflowNodeFieldEditor({
         emptyValue={field.valueType === "array" ? EMPTY_YAML_ARRAY : EMPTY_YAML_OBJECT}
         format={field.widgetHint === "yaml-editor" ? "yaml" : "json"}
         height={getConfigurationFieldEditorHeight(field)}
+        expressionSuggestions={field.expressionAllowed ? expressionSuggestions : undefined}
       />
     );
   }
@@ -1219,6 +2155,7 @@ function WorkflowNodeFieldEditor({
         emptyValue={null}
         format="yaml"
         height={getConfigurationFieldEditorHeight(field)}
+        expressionSuggestions={field.expressionAllowed ? expressionSuggestions : undefined}
       />
     );
   }
@@ -1826,6 +2763,16 @@ function WorkflowNodeFullEditor({
           content: <WorkflowNodeChildSlotsSummary nodeType={nodeType} draft={value} />,
         }
       : null,
+    {
+      value: "docs",
+      label: "Docs",
+      content: (
+        <WorkflowNodeDocsPanel
+          nodeType={nodeType}
+          className="workflow-node-editor-docs-panel"
+        />
+      ),
+    },
   ].filter(Boolean) as Array<{ value: string; label: string; content: React.ReactNode }>;
 
   React.useEffect(() => {
@@ -1973,6 +2920,7 @@ export function WorkflowNodeEditorDialog({
 export function WorkflowAddNodeDialog({
   open,
   nodeTypes,
+  expressionSuggestions,
   onOpenChange,
   createNodeValue,
   onSubmit,
@@ -2255,6 +3203,7 @@ export function WorkflowAddNodeDialog({
             nodeType={selectedNodeType}
             value={nodeDraft}
             onChange={setNodeDraft}
+            expressionSuggestions={expressionSuggestions}
           />
         ) : null}
       </SolidDialogBody>

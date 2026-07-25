@@ -17,7 +17,6 @@ import { SettingsPage } from "./pages/admin/core/SettingsPage";
 import { DashboardPage } from "./pages/admin/core/DashboardPage";
 import { DatasourcesPage } from "./pages/admin/core/DatasourcesPage";
 import { DatasourceIntrospectionPage } from "./pages/admin/core/DatasourceIntrospectionPage";
-import { WorkflowDefinitionListPage } from "./pages/admin/core/WorkflowDefinitionListPage";
 import { WorkflowDefinitionEditorPage } from "./pages/admin/core/WorkflowDefinitionEditorPage";
 import { WorkflowExecutionDetailPage } from "./pages/admin/core/WorkflowExecutionDetailPage";
 import { LoginPage } from "./pages/auth/LoginPage";
@@ -86,7 +85,6 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
   const adminChildren: RouteObject[] = [
     { path: "/admin", element: pick("admin", <AdminPage />), handle: { title: "Admin", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/home", element: pick("moduleHome", <ModuleHomePage />), handle: { title: "Module Home", manageDocumentMeta: true } },
-    { path: "/admin/core/solid-core/workflow-definition/list", element: <WorkflowDefinitionListPage />, handle: { title: "Workflow Definitions", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/workflow-execution/detail/:id", element: <WorkflowExecutionDetailPage />, handle: { title: "Workflow Execution Detail", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />), handle: { title: "List", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />), handle: { title: "Tree", manageDocumentMeta: true } },

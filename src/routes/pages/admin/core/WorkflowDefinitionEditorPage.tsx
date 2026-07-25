@@ -1723,16 +1723,18 @@ function getNodeOutputSuggestions(
   const outputDefinitions = nodeType?.authoring?.outputs ?? [];
   const prefix = options.prefix ?? `outputs.${nodeId}`;
   const labelPrefix = options.labelPrefix ?? nodeId;
-  const suggestions = outputDefinitions.map((output) => {
-    const outputPath = output.path ?? output.key;
-    return createExpressionSuggestion(
-      "Outputs",
-      `${labelPrefix}.${outputPath}`,
-      `${prefix}.${outputPath}`,
-      output.valueType,
-      output.description,
-    );
-  });
+  const suggestions = outputDefinitions
+    .filter((output) => output.includeInRuntimeContext !== false)
+    .map((output) => {
+      const outputPath = output.path ?? output.key;
+      return createExpressionSuggestion(
+        "Outputs",
+        `${labelPrefix}.${outputPath}`,
+        `${prefix}.${outputPath}`,
+        output.valueType,
+        output.description,
+      );
+    });
 
   if (node.type === "parallel" && options.includeParallelTaskOutputs) {
     (node.tasks ?? []).forEach((task, index) => {
@@ -1966,6 +1968,43 @@ function insertNodeIntoDefinition(
       };
     }),
   };
+}
+
+function getNodesForInsertTarget(
+  nodes: WorkflowNodeRecord[],
+  target: WorkflowInsertTarget | null,
+): WorkflowNodeRecord[] {
+  if (!target) {
+    return nodes;
+  }
+
+  if (target.scope === "root") {
+    return nodes;
+  }
+
+  const parentNode = findNodeById(nodes, target.parentNodeId);
+  if (!parentNode) {
+    return [];
+  }
+
+  if (target.scope === "case") {
+    const cases = parentNode.cases ?? {};
+    return Array.isArray(cases[target.caseKey]) ? cases[target.caseKey] : [];
+  }
+
+  return Array.isArray(parentNode[target.slotKey])
+    ? (parentNode[target.slotKey] as WorkflowNodeRecord[])
+    : [];
+}
+
+function getExpressionBoundaryNodeIdForInsertTarget(
+  nodes: WorkflowNodeRecord[],
+  target: WorkflowInsertTarget | null,
+) {
+  const sequence = getNodesForInsertTarget(nodes, target);
+  const nextNode = target ? sequence[target.index] : undefined;
+
+  return nextNode?.id ? String(nextNode.id) : "__workflow_pending_insert__";
 }
 
 function getFieldValue(value: Record<string, any>, pathOrKey: string) {
@@ -2392,6 +2431,22 @@ export function WorkflowDefinitionEditorPage() {
           )
         : [],
     [definitionDraft, nodeTypes, selectedNodeId, workflowSecretRecords],
+  );
+
+  const addNodeExpressionSuggestions = React.useMemo(
+    () =>
+      pendingInsertTarget
+        ? buildWorkflowExpressionSuggestions(
+            definitionDraft,
+            nodeTypes,
+            getExpressionBoundaryNodeIdForInsertTarget(
+              definitionDraft.nodes,
+              pendingInsertTarget,
+            ),
+            workflowSecretRecords,
+          )
+        : [],
+    [definitionDraft, nodeTypes, pendingInsertTarget, workflowSecretRecords],
   );
 
   const validateWorkflowIdentity = React.useCallback(() => {
@@ -6172,6 +6227,7 @@ export function WorkflowDefinitionEditorPage() {
       <WorkflowAddNodeDialog
         open={!!pendingInsertTarget}
         nodeTypes={nodeTypes}
+        expressionSuggestions={addNodeExpressionSuggestions}
         onOpenChange={(open) => {
           if (!open) {
             setPendingInsertTarget(null);
