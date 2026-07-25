@@ -2668,24 +2668,90 @@ function WorkflowNodeChildSlotsSummary({
   }
 
   return (
-    <section className="workflow-node-editor-section">
+    <section className="workflow-node-editor-section workflow-node-editor-topology-summary">
+      <div className="workflow-node-editor-topology-guide">
+        <div className="workflow-node-editor-topology-guide-icon">
+          <Workflow size={18} />
+        </div>
+        <div className="workflow-node-editor-topology-guide-copy">
+          <div className="workflow-node-editor-topology-guide-title">
+            Add child nodes on the topology canvas
+          </div>
+          <div className="workflow-node-editor-topology-guide-text">
+            Close this dialog, then use the{" "}
+            <span className="workflow-node-editor-canvas-plus">
+              <Plus size={12} />
+              insert points
+            </span>{" "}
+            inside this control node's child lanes.
+          </div>
+        </div>
+      </div>
+
+      <div className="workflow-node-editor-topology-steps" aria-label="How to add child nodes">
+        <div className="workflow-node-editor-topology-step">
+          <span className="workflow-node-editor-topology-step-number">1</span>
+          <span>Select the compound node on the canvas.</span>
+        </div>
+        <div className="workflow-node-editor-topology-step">
+          <span className="workflow-node-editor-topology-step-number">2</span>
+          <span>Close this editor when the node settings look right.</span>
+        </div>
+        <div className="workflow-node-editor-topology-step">
+          <span className="workflow-node-editor-topology-step-number">3</span>
+          <span>Use the lane insert points to add or reorder children.</span>
+        </div>
+      </div>
+
       <div className="workflow-node-editor-slot-list">
-        {childSlots.map((slot) => (
-          <div key={slot.key} className="workflow-node-editor-slot-row">
-            <div className="workflow-node-editor-slot-copy">
-              <div className="workflow-node-editor-slot-title">{slot.label ?? slot.key}</div>
-              <div className="workflow-node-editor-description">
-                {slot.description ??
-                  "Use the topology canvas to add, reorder, or remove child nodes."}
+        {childSlots.map((slot) => {
+          const count = getSlotCount(draft, slot);
+          const slotKindLabel =
+            slot.kind === "case-collection"
+              ? "Branch cases"
+              : slot.layout === "parallel"
+                ? "Parallel lane"
+                : "Sequential lane";
+          const limitLabel = slot.maxItems
+            ? `Up to ${slot.maxItems}`
+            : slot.minItems
+              ? `At least ${slot.minItems}`
+              : undefined;
+
+          return (
+            <div key={slot.key} className="workflow-node-editor-slot-card">
+              <div className="workflow-node-editor-slot-header">
+                <div className="workflow-node-editor-slot-main">
+                  <span className="workflow-node-editor-slot-icon">
+                    <GitBranch size={15} />
+                  </span>
+                  <div className="workflow-node-editor-slot-copy">
+                    <div className="workflow-node-editor-slot-title-row">
+                      <div className="workflow-node-editor-slot-title">
+                        {slot.label ?? slot.key}
+                      </div>
+                      <SolidTag>{slotKindLabel}</SolidTag>
+                      {slot.required ? <SolidTag>Required</SolidTag> : null}
+                      {limitLabel ? <SolidTag>{limitLabel}</SolidTag> : null}
+                    </div>
+                    <div className="workflow-node-editor-description">
+                      {slot.description ??
+                        "Use the topology canvas to add, reorder, or remove child nodes."}
+                    </div>
+                  </div>
+                </div>
+                <div className="workflow-node-editor-slot-count">
+                  <strong>{count}</strong>
+                  <span>{count === 1 ? "child" : "children"}</span>
+                </div>
+              </div>
+              <div className="workflow-node-editor-slot-canvas-hint">
+                <Plus size={13} />
+                Canvas insert points add nodes to this {slot.label ?? slot.key} lane.
               </div>
             </div>
-            <SolidTag>{getSlotCount(draft, slot)}</SolidTag>
-          </div>
-        ))}
-      </div>
-      <div className="workflow-node-editor-note">
-        Child node membership is edited from the topology canvas. This dialog edits the
-        control node itself.
+          );
+        })}
       </div>
     </section>
   );
