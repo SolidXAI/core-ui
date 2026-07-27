@@ -149,16 +149,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const hasActiveFilters = hasMeaningfulPersistedFilter(filters);
   const hasAnyActiveFilters = hasActiveFilters || hasFilterPredicatesApplied;
   const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
-  const shouldShowMobileSearchElement =
-    showGlobalSearchElement ||
-    hasFilterPredicatesApplied ||
-    hasStoredFilterState;
 
   useEffect(() => {
     if (params.embeded === false) {
-      setShowGlobalSearchElement(hasAnyActiveFilters);
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState);
     }
-  }, [hasAnyActiveFilters, params.embeded]);
+  }, [hasAnyActiveFilters, hasStoredFilterState, params.embeded]);
 
   const [swimlaneDefinitions, setSwimlaneDefinitions] = useState<KanbanSwimlaneDefinition[]>([]);
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
@@ -1102,7 +1098,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 */}
 
                 {/* <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p> */}
-                <div className={`${shouldShowMobileSearchElement ? "flex" : "hidden"} mt-3 lg:mt-0  w-full lg:flex lg:min-w-0`}>
+                <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0  w-full lg:flex lg:min-w-0`}>
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
                   <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
                 </div>

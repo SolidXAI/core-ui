@@ -1227,14 +1227,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasAppliedFilterValues = hasAppliedFilters(filters);
   const hasAnyActiveFilters = hasAppliedFilterValues || hasFilterPredicatesApplied;
+  const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
 
   useEffect(() => {
     if (params.embeded === false) {
-      setShowGlobalSearchElement(hasAnyActiveFilters);
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState);
     }
-  }, [hasAnyActiveFilters, params.embeded]);
-
-  const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
+  }, [hasAnyActiveFilters, hasStoredFilterState, params.embeded]);
 
   const isListViewEmptyWithoutFilters =
     !loading &&
@@ -1370,11 +1369,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowEditAsIconOnly === true;
   const showRowDeleteAsIconOnly =
     showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowDeleteAsIconOnly === true;
-  const shouldShowMobileSearchElement =
-    showGlobalSearchElement ||
-    hasFilterPredicatesApplied ||
-    hasStoredFilterState;
-
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
   //     dispatch(toggleNavbar());   // close both
@@ -1403,7 +1397,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </p>
                   </div> */}
                   {params.embeded === false && (
-                    <div className={`${shouldShowMobileSearchElement ? "flex" : "hidden"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
+                    <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
                       {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
                       <SolidGlobalSearchElement
                         key={params.modelName}

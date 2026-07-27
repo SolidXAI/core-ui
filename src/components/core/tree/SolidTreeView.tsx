@@ -1599,18 +1599,12 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const hasAnyActiveFilters = hasActiveFilters || hasFilterPredicatesApplied || hasGroupingRulesApplied;
   const hasStoredFilterState = hasStoredFilterPredicates(storedFilterObject);
   const hasStoredGroupingRules = Boolean(storedFilterObject?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null));
-  const shouldShowMobileSearchElement =
-    showGlobalSearchElement ||
-    hasFilterPredicatesApplied ||
-    hasStoredFilterState ||
-    hasGroupingRulesApplied ||
-    hasStoredGroupingRules;
 
   useEffect(() => {
     if (params.embeded === false) {
-      setShowGlobalSearchElement(hasAnyActiveFilters);
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState || hasStoredGroupingRules);
     }
-  }, [hasAnyActiveFilters, params.embeded]);
+  }, [hasAnyActiveFilters, hasStoredFilterState, hasStoredGroupingRules, params.embeded]);
 
   const visibleHeaderButtons = useMemo(
     () =>
@@ -1896,7 +1890,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 </div>
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className={`${shouldShowMobileSearchElement ? "flex" : "hidden"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
+                  <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
                     <SolidGlobalSearchElement
                       viewType="tree"
                       showSaveFilterPopup={showSaveFilterPopup}

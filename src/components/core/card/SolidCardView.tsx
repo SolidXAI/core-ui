@@ -453,7 +453,6 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const hasActiveFilters = hasMeaningfulPersistedFilter(filters);
   const hasAnyActiveFilters = hasActiveFilters || hasFilterPredicatesApplied;
   const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
-  const shouldShowMobileSearchElement = showGlobalSearchElement || hasFilterPredicatesApplied || hasStoredFilterState;
   const showEmptyState = !loading && cards.length === 0 && !hasActiveFilters;
   const showFilteredEmptyState = !loading && cards.length === 0 && hasActiveFilters;
   const filteredEmptyMessage = solidCardViewMetaDataResponse?.data?.solidView?.model?.description || "No Entities found";
@@ -467,9 +466,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
   useEffect(() => {
     if (params.embeded === false) {
-      setShowGlobalSearchElement(hasAnyActiveFilters);
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState);
     }
-  }, [hasAnyActiveFilters, params.embeded]);
+  }, [hasAnyActiveFilters, hasStoredFilterState, params.embeded]);
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
@@ -484,7 +483,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   </div>
                 )} */}
                 {/* <p className="m-0 view-title solid-text-wrapper">{cardViewTitle}</p> */}
-                <div className={`${shouldShowMobileSearchElement ? "flex" : "hidden"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
+                <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
                   <SolidGlobalSearchElement
                     viewType="card"
                     showSaveFilterPopup={showSaveFilterPopup}
