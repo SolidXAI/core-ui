@@ -1258,7 +1258,7 @@ textarea {
 .solid-workflow-confirm-title {
   margin: 0;
   color: var(--foreground);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 650;
   line-height: 1.35;
 }
@@ -1266,7 +1266,7 @@ textarea {
 .solid-workflow-confirm-copy {
   margin: 0;
   color: var(--muted-foreground);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
@@ -1275,7 +1275,7 @@ textarea {
   margin: 2px 0 0;
   padding-left: 1px;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.35;
 }
 

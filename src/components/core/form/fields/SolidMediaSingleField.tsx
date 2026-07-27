@@ -14,6 +14,7 @@ import {
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import { SolidProgressBar } from "../../../shad-cn-ui/SolidProgressBar";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -26,6 +27,7 @@ import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/me
 import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { showToast } from "../../../../redux/features/toastSlice";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { getPersistedMediaId } from "./mediaFieldUtils";
@@ -191,6 +193,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     };
 
     const [deleteMedia] = useDeleteMediaMutation();
+    const dispatch = useDispatch();
 
     const clearSelectedFile = () => {
         setFileDetails(null);
@@ -221,8 +224,14 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         try {
             await deletePersistedMediaIfNeeded(formik?.values[fieldLayoutInfo.attrs.name]);
             clearSelectedFile();
-        } catch (error) {
+        } catch (error: any) {
             console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
+            dispatch(showToast({
+                severity: "error",
+                summary: "Delete Failed",
+                detail: error?.data?.message || error?.message || ERROR_MESSAGES.ERROR_DELETING_FILE,
+                life: 4000,
+            }));
         }
         setDeleteImageDialogVisible(false);
     };
@@ -273,8 +282,14 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 uploadFile(newFileToUpload);
                 setNewFileToUpload(null);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
+            dispatch(showToast({
+                severity: "error",
+                summary: "Replace Failed",
+                detail: error?.data?.message || error?.message || ERROR_MESSAGES.ERROR_DELETING_FILE,
+                life: 4000,
+            }));
         }
         setReplaceImageDialogVisible(false);
     };
