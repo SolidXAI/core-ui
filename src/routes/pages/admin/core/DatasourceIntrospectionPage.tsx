@@ -187,16 +187,16 @@ function getBaseClassNameForLegacyType(value: "none" | "existing_id" | "generate
 
 function getSuperclassFieldNameForLegacyType(columnName: string, legacyTableType: "none" | "existing_id" | "generated_id") {
   const normalized = columnName.toLowerCase();
+  // LegacyCommonEntityWithExistingId doesn't declare the draft/publish versioning columns,
+  // so their ss_-prefixed column names must not appear here — otherwise a table that still
+  // physically has one of those columns would have it silently treated as superclass-handled
+  // and dropped from introspection instead of being surfaced as a real column.
   const legacyFieldMap: Record<string, string> = {
     ss_created_at: "createdAt",
     ss_updated_at: "updatedAt",
     ss_deleted_at: "deletedAt",
     ss_deleted_tracker: "deletedTracker",
     ss_published_at: "publishedAt",
-    ss_is_published: "isPublished",
-    ss_is_latest: "isLatest",
-    ss_initial_entity_version_id: "initialEntityVersionId",
-    ss_published_tracker: "publishedTracker",
     ss_locale_name: "localeName",
     ss_default_entity_locale_id: "defaultEntityLocaleId",
     ss_created_by_id: "createdBy",
