@@ -46,10 +46,10 @@ export const hasStoredFilterPredicates = (queryObject: any): boolean =>
   hasMeaningfulPersistedFilter(queryObject?.saved_filter_predicate) ||
   hasMeaningfulPersistedFilter(queryObject?.predefined_search_predicate);
 
-export const hasStoredSearchUiState = (queryObject: any): boolean =>
-  hasStoredFilterPredicates(queryObject) ||
-  Boolean(queryObject?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null)) ||
-  Boolean(queryObject?.aggregation_rules?.some?.((rule: any) => Boolean(rule?.fieldName)));
+// export const hasStoredSearchUiState = (queryObject: any): boolean =>
+//   hasStoredFilterPredicates(queryObject) ||
+//   Boolean(queryObject?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null)) ||
+//   Boolean(queryObject?.aggregation_rules?.some?.((rule: any) => Boolean(rule?.fieldName)));
 
 export const getFilterObjectFromLocalStorage = () => {
   const currentPageUrl = window.location.pathname;
