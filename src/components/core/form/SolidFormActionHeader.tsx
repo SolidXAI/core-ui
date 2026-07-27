@@ -31,9 +31,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const isPublished = publish && publish !== 'null';   // record is published if publish has value
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
-    // const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
-    const hasUserInteraction = Object.keys(formik?.touched || {}).length > 0;
-    const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty && hasUserInteraction;
+    const shouldShowSaveForExistingRecord = viewMode === "edit";
     const showEmbeddedRelationSaveAndNew = params.embeded === true && params.enableEmbeddedRelationSaveAndNew === true;
     
     useEffect(() => {
@@ -287,7 +285,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 {params.embeded !== true &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                     !formViewLayout.attrs.readonly &&
-                                    formik.dirty &&
                                     <div>
                                         <SolidButton
                                             label="Save"
@@ -323,7 +320,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 {params.embeded == true &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                     !formViewLayout.attrs.readonly &&
-                                    formik.dirty &&
                                     <>
                                         {showEmbeddedRelationSaveAndNew ? (
                                             <>
