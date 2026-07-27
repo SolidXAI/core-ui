@@ -1043,9 +1043,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (!params.embeded) {
                         const baseFormPath = normalizeSolidFormActionPath(pathname, "form");
                         const queryParams = new URLSearchParams(searchParams.toString());
-                        queryParams.set("viewMode", "view");
+                        const saveParentRelationField = formikRef.current?.status?.saveParentRelationField || window.sessionStorage.getItem("solidSaveParentRelationField");
+                        const nextViewMode = saveParentRelationField ? "edit" : "view";
+                        queryParams.set("viewMode", nextViewMode);
+                        if (saveParentRelationField) {
+                            queryParams.set("childEntity", saveParentRelationField);
+                        }
                         router.replace(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
-                        setViewMode("view")
+                        setViewMode(nextViewMode)
                     }
                     return result;
                 }
