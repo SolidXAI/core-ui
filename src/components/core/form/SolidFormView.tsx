@@ -45,6 +45,7 @@ import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../re
 import { getSettingsMap } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { SolidVersionHistory, getWorkflowStatusLabel } from "./SolidVersionHistory";
+import { appendVersionHistoryPage, SolidWorkflowStatusPill, SolidWorkflowConfirmDialog, useDraftPublishWorkflow } from "./SolidDraftPublishWorkflow";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch } from "react-redux";
@@ -458,88 +459,13 @@ const SolidNotebook = ({ children, activeTab, embeded, requestedTab, requestedTa
                         {child.props?.label}
                     </button>
                 ))}
-                {workflowStatusLabel && (
-                    <span className={`solid-notebook-status-pill solid-notebook-status-pill--${String(workflowStatusLabel).toLowerCase()}`}>
-                        {workflowStatusLabel}
-                    </span>
-                )}
+                <SolidWorkflowStatusPill label={workflowStatusLabel} />
             </div>
             <div className="solid-notebook-content" role="tabpanel">
                 {childrenArray[activeIndex]}
             </div>
         </div>
     );
-};
-
-const VERSION_HISTORY_PAGE = {
-    type: 'page',
-    attrs: {
-        name: 'versionHistory',
-        label: 'Version History',
-        key: 'versionHistory',
-    },
-    children: [
-        {
-            type: 'versionHistory',
-            attrs: {
-                key: 'versionHistoryList',
-            },
-        },
-    ],
-};
-
-const appendVersionHistoryPage = (layout: any): any => {
-    if (!layout) return layout;
-    let appended = false;
-
-    const visit = (node: any): any => {
-        if (!node || typeof node !== 'object') return node;
-        const children = Array.isArray(node.children) ? node.children : [];
-
-        if (node.type === 'notebook') {
-            const hasVersionHistory = children.some((child: any) => child?.attrs?.name === 'versionHistory' || child?.attrs?.key === 'versionHistory');
-            appended = true;
-            return {
-                ...node,
-                children: hasVersionHistory ? children.map(visit) : [...children.map(visit), VERSION_HISTORY_PAGE],
-            };
-        }
-
-        return children.length > 0
-            ? { ...node, children: children.map(visit) }
-            : { ...node };
-    };
-
-    const nextLayout = visit(layout);
-
-    if (appended || nextLayout?.type !== 'form') {
-        return nextLayout;
-    }
-
-    return {
-        ...nextLayout,
-        children: [
-            {
-                type: 'notebook',
-                attrs: {
-                    name: 'workflowNotebook',
-                    key: 'workflowNotebook',
-                },
-                children: [
-                    {
-                        type: 'page',
-                        attrs: {
-                            name: 'details',
-                            label: 'Details',
-                            key: 'details',
-                        },
-                        children: nextLayout.children || [],
-                    },
-                    VERSION_HISTORY_PAGE,
-                ],
-            },
-        ],
-    };
 };
 
 const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, solidFormViewData }: any) => {
@@ -652,15 +578,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const router = useRouter();
     const dispatch = useDispatch();
     const searchParams = useSearchParams();
-    const [confirmVisible, setConfirmVisible] = useState(false);
-    const [confirmWorkflowAction, setConfirmWorkflowAction] = useState<"publish" | "unpublish" | null>(null);
-    const confirmResolveRef = useRef<(value: boolean) => void>();
     const [redirectToList, setRedirectToList] = useState(false);
     const [selectedLocale, setSelectedLocale] = useState<string | null>('en');
     const [defaultEntityLocaleId, setDefaultEntityLocaleId] = useState<string | null>(null);
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
-    const [published, setPublished] = useState<string | null>(null);
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
     const [createMode, setCreateMode] = useState<boolean>(false);
@@ -856,8 +778,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         useGetSolidEntityByIdQuery,
         useUpdateSolidEntityMutation,
         usePatchUpdateSolidEntityMutation,
-        usePublishSolidEntityMutation,
-        useUnpublishSolidEntityMutation
     } = entityApi;
 
     const [
@@ -880,15 +800,22 @@ const SolidFormView = (params: SolidFormViewProps) => {
         { isSuccess: isEntityPatchSuceess, isError: isEntityPatchError, error: entityPatchError },
     ] = usePatchUpdateSolidEntityMutation();
 
-    const [
-        publishSolidEntity,
-        { isSuccess: isEntityPublishedSuccess, isError: isEntityPublishedError, error: entityPublishedError },
-    ] = usePublishSolidEntityMutation();
-
-    const [
-        unpublishSolidEntity,
-        { isSuccess: isEntityUnpublishedSuccess, isError: isEntityUnpublishedError, error: entityUnpublishedError },
-    ] = useUnpublishSolidEntityMutation();
+    const {
+        published,
+        setPublished,
+        confirmVisible,
+        workflowConfirmAction,
+        handleDraftPublishWorkFlow,
+        handleConfirmAccept,
+        handleConfirmReject,
+        isEntityPublishedSuccess,
+        isEntityUnpublishedSuccess,
+    } = useDraftPublishWorkflow({
+        entityApi,
+        id: params.id,
+        onWorkflowChange: () => refetchSolidFormViewData(),
+        onEmbeddedFormSave: params.onEmbeddedFormSave,
+    });
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
@@ -977,27 +904,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
             handleError(entityUpdateError);
         } else if (isEntityPatchError) {
             handleError(entityPatchError);
-        } else if (isEntityPublishedError) {
-            handleError(entityPublishedError);
-        } else if (isEntityUnpublishedError) {
-            handleError(entityUnpublishedError);
         }
     }, [
         isEntityCreateError,
         isEntityDeleteError,
         isEntityUpdateError,
         isEntityPatchError,
-        isEntityPublishedError,
-        isEntityUnpublishedError
     ]);
-
-    const confirmDialogWithPromise = (type: "publish" | "unpublish") => {
-        return new Promise<boolean>((resolve) => {
-            confirmResolveRef.current = resolve;
-            setConfirmWorkflowAction(type);
-            setConfirmVisible(true);
-        });
-    };
 
     const onFormikSubmit = async (values: any) => {
         const solidView = solidFormViewMetaData.data.solidView;
@@ -1936,50 +1849,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             router.push(`${updatedPath}?${queryParams.toString()}`);
         };
 
-        const handleConfirmAccept = () => {
-            confirmResolveRef.current?.(true);
-            setConfirmVisible(false);
-            setConfirmWorkflowAction(null);
-        };
-
-        const handleConfirmReject = () => {
-            confirmResolveRef.current?.(false);
-            setConfirmVisible(false);
-            setConfirmWorkflowAction(null);
-        };
-        const handleDraftPublishWorkFlow = async (type: "publish" | "unpublish") => {
-            const userChoice = await confirmDialogWithPromise(type);
-            if (!userChoice) return;
-
-            // const finalPublishedValue =
-            //     type === "publish" ? new Date().toISOString() : "";
-
-            //   setPublished(finalPublishedValue);
-
-            // const formdata = new FormData();
-            // formdata.append("publishedAt", finalPublishedValue);
-
-            let result;
-
-            if (type === "publish") {
-                result = await publishSolidEntity(params.id).unwrap();
-                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.SAVED, detail: ERROR_MESSAGES.MARK_PUBLISH }));
-            } else {
-                result = await unpublishSolidEntity(params.id).unwrap();
-                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.SAVED, detail: ERROR_MESSAGES.MARK_UNPUBLISH }));
-            }
-
-            console.log("publish/unpublish result", result);
-
-            // Set updated publish value from API response
-            setPublished(result?.data?.isPublished ? result?.data?.publishedAt : null);
-            refetchSolidFormViewData();
-            if (params.onEmbeddedFormSave) {
-                params.onEmbeddedFormSave();
-            }
-        };
-
-
         const lightboxSlides: SolidLightboxSlide[] = lightboxUrls
             .map((item: any) => {
                 const src = item?.src || item?.downloadUrl || "";
@@ -1994,10 +1863,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 return slide;
             })
             .filter((slide): slide is SolidLightboxSlide => !!slide);
-
-
-        const workflowConfirmAction = confirmWorkflowAction ?? (published !== null ? 'unpublish' : 'publish');
-        const isPublishConfirm = workflowConfirmAction === 'publish';
 
         return (
             <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
@@ -2158,37 +2023,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     />
                 )}
 
-                <SolidConfirmDialog
+                <SolidWorkflowConfirmDialog
                     open={confirmVisible}
-                    title={isPublishConfirm ? 'Publish this draft?' : 'Unpublish this version?'}
-                    confirmLabel={isPublishConfirm ? 'Publish' : 'Unpublish'}
-                    cancelLabel="Cancel"
+                    workflowConfirmAction={workflowConfirmAction}
                     onConfirm={handleConfirmAccept}
                     onCancel={handleConfirmReject}
-                    className={`solid-shadcn-confirm-dialog solid-workflow-confirm-dialog solid-workflow-confirm-dialog--${workflowConfirmAction}`}
-                    headerClassName="solid-shadcn-dialog-head solid-workflow-confirm-head"
-                    bodyClassName="solid-shadcn-dialog-body solid-workflow-confirm-body"
-                    footerClassName="solid-shadcn-dialog-actions solid-workflow-confirm-actions"
-                    message={
-                        <div className="solid-workflow-confirm-content">
-                            <span className="solid-workflow-confirm-mark" aria-hidden="true">
-                                {isPublishConfirm ? 'P' : 'U'}
-                            </span>
-                            <p className="solid-workflow-confirm-title">
-                                {isPublishConfirm ? 'Make this version live' : 'Remove this version from public view'}
-                            </p>
-                            <p className="solid-workflow-confirm-copy">
-                                {isPublishConfirm
-                                    ? 'This version will become visible through published APIs.'
-                                    : 'This version will no longer be returned as published content.'}
-                            </p>
-                            {isPublishConfirm && (
-                                <p className="solid-workflow-confirm-note">
-                                    Previously published versions will stay in version history.
-                                </p>
-                            )}
-                        </div>
-                    }
                 />
             </div>
         );

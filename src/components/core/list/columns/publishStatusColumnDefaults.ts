@@ -18,3 +18,9 @@ export const getDefaultPublishStatusListWidget = (solidListViewMetaData: any, fi
 
     return hasIsPublishedColumn ? null : 'PublishedStatusListViewWidget';
 };
+
+// Archived rows (superseded, non-latest versions of a draft/publish enabled model) are read-only
+// in the list view, so row-level edit/delete controls should stay hidden for them.
+export const isArchivedListRow = (isDraftPublishWorkflowEnabled: boolean, rowData: any) => {
+    return isDraftPublishWorkflowEnabled === true && rowData?.isLatest === false;
+};

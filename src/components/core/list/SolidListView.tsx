@@ -28,6 +28,7 @@ import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
+import { isArchivedListRow } from "./columns/publishStatusColumnDefaults";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
@@ -1699,7 +1700,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         <Column
                           header="Edit"
                           body={(rowData) => {
-                            const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isLatest === false;
+                            const shouldHideEditOrDeleteButton = isArchivedListRow(isDraftPublishWorkflowEnabled, rowData);
                             return (
                               <>
                                 {!shouldHideEditOrDeleteButton && (
@@ -1740,7 +1741,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         <Column
                           header="Delete"
                           body={(rowData) => {
-                            const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isLatest === false;
+                            const shouldHideEditOrDeleteButton = isArchivedListRow(isDraftPublishWorkflowEnabled, rowData);
                             return (
                               <>
                                 {(!shouldHideEditOrDeleteButton) && (
@@ -1786,7 +1787,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                           ) : (
                             <>
                               {solidListViewLayout?.attrs?.showRowContextMenu !== false &&
-                                !(isDraftPublishWorkflowEnabled && rowData?.isLatest === false) && (
+                                !isArchivedListRow(isDraftPublishWorkflowEnabled, rowData) && (
                                   <div className="flex justify-end" data-no-row-click="true">
                                     <SolidListViewRowActionsMenu
                                       rowData={rowData}
