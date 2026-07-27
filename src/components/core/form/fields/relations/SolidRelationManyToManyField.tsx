@@ -38,6 +38,7 @@ export type FormViewParams = {
     inlineCreateAutoSave: any;
     customCreateHandler?: any;
     handlePopupClose?: any;
+    enableEmbeddedRelationSaveAndNew?: boolean;
 };
 
 
@@ -537,6 +538,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     : {},
                 onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
                 inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+                enableEmbeddedRelationSaveAndNew: true,
             });
             setvisibleCreateRelationEntity(true);
         }
@@ -583,6 +585,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                 : {},
             onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+            enableEmbeddedRelationSaveAndNew: true,
         });
     }, [readOnlyPermission]);
 

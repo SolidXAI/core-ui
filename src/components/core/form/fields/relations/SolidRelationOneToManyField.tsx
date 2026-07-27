@@ -28,7 +28,8 @@ export type FormViewParams = {
     onEmbeddedFormSave: any;
     inlineCreateAutoSave: any;
     customCreateHandler?: any;
-    handlePopupClose?: any
+    handlePopupClose?: any;
+    enableEmbeddedRelationSaveAndNew?: boolean;
 }
 
 export class SolidRelationOneToManyField implements ISolidField {
@@ -510,7 +511,8 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
         parentFieldName: formViewParams.parentFieldName,
         parentData: formViewParams.parentData,
         onEmbeddedFormSave: formViewParams.onEmbeddedFormSave,
-        isCustomCreate: formViewParams.isCustomCreate
+        isCustomCreate: formViewParams.isCustomCreate,
+        enableEmbeddedRelationSaveAndNew: true,
     }
 
     return (

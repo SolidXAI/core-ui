@@ -72,7 +72,10 @@ export type SolidFormViewProps = {
     parentData?: any,
     redirectToPath?: string,
     onEmbeddedFormSave?: () => void,
+    enableEmbeddedRelationSaveAndNew?: boolean,
 };
+
+type EmbeddedRelationSubmitAction = "close" | "new";
 
 
 interface ErrorResponseData {
@@ -615,6 +618,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isMobileViewport, setIsMobileViewport] = useState(false);
     const solidFormWrapperRef = useRef<HTMLDivElement | null>(null);
+    const embeddedRelationSubmitActionRef = useRef<EmbeddedRelationSubmitAction>("close");
+    const formikRef = useRef<FormikObject | null>(null);
 
     const tabFieldsRef = useRef<Array<{ tabKey: string; fields: string[] }>>([]);
     const [requestedTab, setRequestedTab] = useState<string | null>(null);
@@ -861,6 +866,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (params.embeded == true && params.onEmbeddedFormSave) {
                 params.onEmbeddedFormSave();
             }
+
+            if (
+                params.embeded === true &&
+                params.enableEmbeddedRelationSaveAndNew === true &&
+                isEntityCreateSuccess === true &&
+                embeddedRelationSubmitActionRef.current === "new"
+            ) {
+                formikRef.current?.resetForm();
+                embeddedRelationSubmitActionRef.current = "close";
+                return;
+            }
+
             // Close The pop in case the form is used in embeded form
             if (params.embeded == true) {
                 params.handlePopupClose()
@@ -1430,6 +1447,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             enableReinitialize: true,
             onSubmit: onFormikSubmit,
         });
+        formikRef.current = formik;
 
         return (
             <div className={`solid-form-wrapper ${viewMode=="edit"?"solid-form-edit":"solid-form-view"}`} ref={solidFormWrapperRef}>
@@ -1497,6 +1515,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             enableReinitialize: true,
             onSubmit: onFormikSubmit,
         });
+        formikRef.current = formik;
 
         const formFieldOnXXX = async (event: ChangeEvent<HTMLInputElement>, eventType: string) => {
             // console.log("formFieldOnXXX", eventType, event);
@@ -1948,6 +1967,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
+                            setEmbeddedRelationSubmitAction={(action: EmbeddedRelationSubmitAction) => {
+                                embeddedRelationSubmitActionRef.current = action;
+                            }}
                             // headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
                             showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
                             onMobileOpenChatter={() => setShowChatter(true)}
