@@ -27,6 +27,8 @@ import { apiKeyApi } from "../api/apiKeyApi";
 import { dashboardRuntimeApi } from "../api/dashboardRuntimeApi";
 import { datasourceManagementApi } from "../api/datasourceManagementApi";
 import { datasourceIntrospectionApi } from "../api/datasourceIntrospectionApi";
+import { workflowDefinitionEditorApi } from "../api/workflowDefinitionEditorApi";
+import { workflowNodeApi } from "../api/workflowNodeApi";
 
 // 1. Export all APIs in one array
 export const solidApiSlices = [
@@ -51,6 +53,8 @@ export const solidApiSlices = [
     dashboardRuntimeApi,
     datasourceManagementApi,
     datasourceIntrospectionApi,
+    workflowDefinitionEditorApi,
+    workflowNodeApi,
 ];
 
 // 2. Export default reducers

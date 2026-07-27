@@ -5072,6 +5072,22 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   background: currentColor;
 }
 
+.solid-archive-toggle-item-active {
+  background: color-mix(in srgb, var(--primary) 9%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 24%, transparent);
+  color: var(--primary);
+}
+
+.solid-archive-toggle-icon {
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.solid-archive-toggle-item-active .solid-archive-toggle-icon {
+  color: var(--primary);
+  transform: scale(1.08);
+}
+
 .solid-dropdown-menu-checkbox-item,
 .solid-dropdown-menu-radio-item {
   padding-left: 4px;

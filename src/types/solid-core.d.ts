@@ -86,6 +86,13 @@ export type LayoutAttribute = {
     renderMode?: string;
     widget?: string;
     visible?: boolean;
+    columnClassName?: string;
+    cellClassName?: string;
+    headerClassName?: string;
+    style?: Record<string, any>;
+    columnStyle?: Record<string, any>;
+    cellStyle?: Record<string, any>;
+    headerStyle?: Record<string, any>;
     editWidget?: string;
     viewWidget?: string;
     cardWidget?: string;
@@ -94,6 +101,10 @@ export type LayoutAttribute = {
     inlineCreateLayout?: any;
     showDefaultAddButton?: boolean;
     showDefaultEditButton?: boolean;
+    showRowActionsInContextMenu?: boolean;
+    showRowActionsAsIconOnly?: boolean;
+    showRowEditAsIconOnly?: boolean;
+    showRowDeleteAsIconOnly?: boolean;
     showEditFormButton?: boolean;
     showAddFormButton?: boolean;
     showDeleteFormButton?: boolean;
@@ -135,6 +146,27 @@ export type SolidUiEvent = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
     formViewLayout: LayoutNode;
+    popup?: {
+        open: (event: {
+            action?: string;
+            closable?: boolean;
+            title?: string;
+            body?: any;
+            message?: any;
+            buttons?: Array<{
+                label: string;
+                action?: string | ((event: any, close: () => void) => void | Promise<void>);
+                variant?: string;
+                className?: string;
+                icon?: string;
+                closeOnClick?: boolean;
+                [key: string]: any;
+            }>;
+            popupWidth?: string;
+            [key: string]: any;
+        }) => void;
+        close: () => void;
+    };
 };
 
 export type SolidUiEventResponse = {
