@@ -44,7 +44,6 @@ import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus"
 import {
   getFilterObjectFromLocalStorage,
   hasStoredFilterPredicates,
-  hasStoredSearchUiState,
   setFilterObjectToLocalStorage,
 } from "../common/globalSearchPersistence";
 import {
@@ -1230,10 +1229,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const hasAnyActiveFilters = hasAppliedFilterValues || hasFilterPredicatesApplied;
 
   useEffect(() => {
-    if (params.embeded === false && hasAnyActiveFilters) {
-      setShowGlobalSearchElement(true);
+    if (params.embeded === false) {
+      setShowGlobalSearchElement(hasAnyActiveFilters);
     }
   }, [hasAnyActiveFilters, params.embeded]);
+
+  const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
 
   const isListViewEmptyWithoutFilters =
     !loading &&
@@ -1371,8 +1372,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowDeleteAsIconOnly === true;
   const shouldShowMobileSearchElement =
     showGlobalSearchElement ||
-    hasStoredSearchUiState(filterPredicates) ||
-    hasStoredSearchUiState(getFilterObjectFromLocalStorage());
+    hasFilterPredicatesApplied ||
+    hasStoredFilterState;
 
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
@@ -1388,8 +1389,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-col lg:flex-row">
               {/* <div> */}
-              <div className="flex justify-between w-full">
-                <div className="solid-list-toolbar-left flex w-full items-center gap-3">
+              <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
+                <div className="solid-list-toolbar-left flex w-full items-center gap-3 lg:min-w-0 lg:flex-1">
                   {/* Here only hide the Solid list view title, LayoutGrid already commented */}
                   {/* <div className='flex items-center gap-2'>
                     {params.embeded !== true &&
@@ -1402,7 +1403,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </p>
                   </div> */}
                   {params.embeded === false && (
-                    <div className="hidden lg:flex">
+                    <div className={`${shouldShowMobileSearchElement ? "flex" : "hidden"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
                       {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
                       <SolidGlobalSearchElement
                         key={params.modelName}
@@ -1419,7 +1420,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   )}
 
                 </div>
-                <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {params.embeded === false && (
                     <div className="flex lg:hidden">
@@ -1529,23 +1530,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     )}
                 </div>
               </div>
-              {/* </div> */}
-              {shouldShowMobileSearchElement && params.embeded === false && (
-                <div className="flex lg:hidden">
-                  <SolidGlobalSearchElement
-                    viewType="list"
-                    showSaveFilterPopup={showSaveFilterPopup}
-                    setShowSaveFilterPopup={setShowSaveFilterPopup}
-                    ref={solidGlobalSearchElementRef}
-                    viewData={solidListViewMetaData}
-                    handleApplyCustomFilter={handleApplyCustomFilter}
-                    filterPredicates={filterPredicates}
-                  >
-
-                  </SolidGlobalSearchElement>
-                </div>
-
-              )}
             </div>
           }
 
