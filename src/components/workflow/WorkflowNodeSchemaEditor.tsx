@@ -67,6 +67,7 @@ type WorkflowNodeEditorValue = {
   then?: WorkflowNodeEditorValue[];
   else?: WorkflowNodeEditorValue[];
   defaults?: WorkflowNodeEditorValue[];
+  errors?: WorkflowNodeEditorValue[];
   cases?: Record<string, WorkflowNodeEditorValue[]>;
 };
 
