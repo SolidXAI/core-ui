@@ -2,7 +2,7 @@ import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { getDefaultPublishStatusListWidget } from './publishStatusColumnDefaults';
+import { getDefaultPublishStatusListWidget } from './PublishStatusColumnDefaults';
 
 const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
 

@@ -3,7 +3,7 @@ import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { getDefaultPublishStatusListWidget } from './publishStatusColumnDefaults';
+import { getDefaultPublishStatusListWidget } from './PublishStatusColumnDefaults';
 
 const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const truncateAfter = column?.attrs?.truncateAfter ?? solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter

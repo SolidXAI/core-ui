@@ -4,7 +4,7 @@ import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
-import { getDefaultPublishStatusListWidget } from './publishStatusColumnDefaults';
+import { getDefaultPublishStatusListWidget } from './PublishStatusColumnDefaults';
 
 const SolidDateColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter

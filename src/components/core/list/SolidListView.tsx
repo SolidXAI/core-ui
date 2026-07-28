@@ -28,7 +28,7 @@ import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
-import { isArchivedListRow } from "./columns/publishStatusColumnDefaults";
+import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList, SolidDefinedFilter } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
