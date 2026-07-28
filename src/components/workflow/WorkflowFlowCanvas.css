@@ -142,6 +142,22 @@
   flex: 0 0 auto;
 }
 
+.workflow-flow-node-card__badge {
+  min-height: 1.18rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.42rem;
+  border-radius: 999px;
+  border: 1px solid rgba(45, 212, 191, 0.32);
+  background: rgba(20, 184, 166, 0.14);
+  color: rgba(204, 251, 241, 0.94);
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .workflow-flow-help-button,
 .workflow-flow-icon-button {
   width: 1rem;

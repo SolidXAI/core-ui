@@ -101,6 +101,7 @@ type WorkflowNodeRecord = {
   then?: WorkflowNodeRecord[];
   else?: WorkflowNodeRecord[];
   defaults?: WorkflowNodeRecord[];
+  errors?: WorkflowNodeRecord[];
   cases?: Record<string, WorkflowNodeRecord[]>;
 };
 
@@ -111,6 +112,8 @@ type WorkflowDefinitionDsl = {
   variables?: Record<string, any>;
   nodes: WorkflowNodeRecord[];
   triggers?: Array<Record<string, any>>;
+  errors?: WorkflowNodeRecord[];
+  finally?: WorkflowNodeRecord[];
   metadata?: Record<string, any>;
 };
 
@@ -256,6 +259,8 @@ const createEmptyWorkflowDefinition = (): WorkflowDefinitionDsl => ({
   variables: {},
   nodes: [],
   triggers: [],
+  errors: [],
+  finally: [],
   metadata: {},
 });
 
@@ -970,6 +975,8 @@ function normalizeWorkflowDefinition(parsed: Record<string, any>): WorkflowDefin
     ...(parsed ?? {}),
     nodes: parsed.nodes,
     triggers: parsed.triggers ?? [],
+    errors: parsed.errors ?? [],
+    finally: parsed.finally ?? [],
   };
 }
 
@@ -986,7 +993,7 @@ function validateWorkflowDefinitionSchema(
   const nodeTypeMap = new Map(nodeTypes.map((item) => [item.type, item]));
   const seenNodeIds = new Set<string>();
   const validNodeKinds = new Set(["task", "control", "subflow"]);
-  const canonicalChildKeys = ["tasks", "then", "else", "defaults"];
+  const canonicalChildKeys = ["tasks", "then", "else", "defaults", "errors"];
   const unsupportedChildKeys = ["children", "branches", "nodes"];
 
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -1030,7 +1037,7 @@ function validateWorkflowDefinitionSchema(
       unsupportedChildKeys.forEach((key) => {
         if (Object.prototype.hasOwnProperty.call(node, key)) {
           errors.push(
-            `${prefix} uses unsupported child key "${key}". Use "tasks", "then", "else", "defaults", or "cases" instead.`,
+            `${prefix} uses unsupported child key "${key}". Use "tasks", "then", "else", "defaults", "errors", or "cases" instead.`,
           );
         }
       });
@@ -1157,6 +1164,7 @@ function validateWorkflowDefinitionSchema(
       validateNodeSequence(node.then ?? [], `${node.id ?? prefix} then`);
       validateNodeSequence(node.else ?? [], `${node.id ?? prefix} else`);
       validateNodeSequence(node.defaults ?? [], `${node.id ?? prefix} defaults`);
+      validateNodeSequence(node.errors ?? [], `${node.id ?? prefix} errors`);
       Object.entries(node.cases ?? {}).forEach(([caseKey, caseNodes]) => {
         validateNodeSequence(caseNodes, `${node.id ?? prefix} case "${caseKey}"`);
       });
@@ -1166,6 +1174,8 @@ function validateWorkflowDefinitionSchema(
   if (Array.isArray(definition.nodes)) {
     validateNodeSequence(definition.nodes, "root");
   }
+  validateNodeSequence(definition.errors ?? [], "root errors");
+  validateNodeSequence(definition.finally ?? [], "root finally");
 
   if (Array.isArray(definition.triggers)) {
     const triggerIds = new Set<string>();
@@ -1268,6 +1278,7 @@ function flattenWorkflowNodeIds(nodes: WorkflowNodeRecord[]): string[] {
     ...flattenWorkflowNodeIds(node.then ?? []),
     ...flattenWorkflowNodeIds(node.else ?? []),
     ...flattenWorkflowNodeIds(node.defaults ?? []),
+    ...flattenWorkflowNodeIds(node.errors ?? []),
     ...Object.values(node.cases ?? {}).flatMap((caseNodes) =>
       flattenWorkflowNodeIds(caseNodes),
     ),
@@ -1281,6 +1292,7 @@ function flattenWorkflowNodes(nodes: WorkflowNodeRecord[]): WorkflowNodeRecord[]
     ...flattenWorkflowNodes(node.then ?? []),
     ...flattenWorkflowNodes(node.else ?? []),
     ...flattenWorkflowNodes(node.defaults ?? []),
+    ...flattenWorkflowNodes(node.errors ?? []),
     ...Object.values(node.cases ?? {}).flatMap((caseNodes) =>
       flattenWorkflowNodes(caseNodes),
     ),
@@ -1329,7 +1341,11 @@ function buildNodeId(type: string, definition: WorkflowDefinitionDsl) {
   const base = suffix.replace(/[^a-zA-Z0-9]+/g, "");
   let attempt = base.charAt(0).toLowerCase() + base.slice(1);
   let counter = 1;
-  const nodeIds = new Set(flattenWorkflowNodeIds(definition.nodes));
+  const nodeIds = new Set([
+    ...flattenWorkflowNodeIds(definition.nodes),
+    ...flattenWorkflowNodeIds(definition.errors ?? []),
+    ...flattenWorkflowNodeIds(definition.finally ?? []),
+  ]);
 
   while (nodeIds.has(attempt)) {
     counter += 1;
@@ -1348,6 +1364,7 @@ function countNodes(nodes: WorkflowNodeRecord[]): number {
       countNodes(node.then ?? []) +
       countNodes(node.else ?? []) +
       countNodes(node.defaults ?? []) +
+      countNodes(node.errors ?? []) +
       Object.values(node.cases ?? {}).reduce(
         (caseSum, caseNodes) => caseSum + countNodes(caseNodes),
         0,
@@ -1667,6 +1684,7 @@ function findNodeById(
       findNodeById(node.then ?? [], nodeId) ??
       findNodeById(node.else ?? [], nodeId) ??
       findNodeById(node.defaults ?? [], nodeId) ??
+      findNodeById(node.errors ?? [], nodeId) ??
       Object.values(node.cases ?? {})
         .map((caseNodes) => findNodeById(caseNodes, nodeId))
         .find(Boolean);
@@ -1870,6 +1888,21 @@ function getFirstNodeId(nodes: WorkflowNodeRecord[]): string {
   return nodes[0]?.id ?? "";
 }
 
+function getDefinitionNodes(definition: WorkflowDefinitionDsl): WorkflowNodeRecord[] {
+  return [
+    ...(definition.nodes ?? []),
+    ...(definition.errors ?? []),
+    ...(definition.finally ?? []),
+  ];
+}
+
+function findNodeInDefinition(
+  definition: WorkflowDefinitionDsl,
+  nodeId: string,
+): WorkflowNodeRecord | undefined {
+  return findNodeById(getDefinitionNodes(definition), nodeId);
+}
+
 function updateNodeById(
   nodes: WorkflowNodeRecord[],
   nodeId: string,
@@ -1888,6 +1921,9 @@ function updateNodeById(
       defaults: node.defaults
         ? updateNodeById(node.defaults, nodeId, updater)
         : node.defaults,
+      errors: node.errors
+        ? updateNodeById(node.errors, nodeId, updater)
+        : node.errors,
       cases: node.cases
         ? Object.fromEntries(
             Object.entries(node.cases).map(([caseKey, caseNodes]) => [
@@ -1914,6 +1950,9 @@ function removeNodeById(
       defaults: node.defaults
         ? removeNodeById(node.defaults, nodeId)
         : node.defaults,
+      errors: node.errors
+        ? removeNodeById(node.errors, nodeId)
+        : node.errors,
       cases: node.cases
         ? Object.fromEntries(
             Object.entries(node.cases).map(([caseKey, caseNodes]) => [
@@ -2379,10 +2418,10 @@ export function WorkflowDefinitionEditorPage() {
       return;
     }
 
-    if (!findNodeById(definitionDraft.nodes, selectedNodeId)) {
+    if (!findNodeInDefinition(definitionDraft, selectedNodeId)) {
       setSelectedNodeId(getFirstNodeId(definitionDraft.nodes));
     }
-  }, [definitionDraft.nodes, selectedNodeId]);
+  }, [definitionDraft, selectedNodeId]);
 
   React.useEffect(() => {
     if (!selectedTriggerId) {
@@ -2409,8 +2448,8 @@ export function WorkflowDefinitionEditorPage() {
   }, [topologySplitPercent]);
 
   const selectedNode = React.useMemo(
-    () => findNodeById(definitionDraft.nodes, selectedNodeId),
-    [definitionDraft.nodes, selectedNodeId],
+    () => findNodeInDefinition(definitionDraft, selectedNodeId),
+    [definitionDraft, selectedNodeId],
   );
 
   const selectedNodeType = React.useMemo(() => {
@@ -2594,7 +2633,7 @@ export function WorkflowDefinitionEditorPage() {
 
   const workflowStats = React.useMemo(
     () => ({
-      nodeCount: countNodes(definitionDraft.nodes),
+      nodeCount: countNodes(getDefinitionNodes(definitionDraft)),
       triggerCount: countTriggers(definitionDraft.triggers),
       inputCount:
         definitionDraft.inputs && typeof definitionDraft.inputs === "object"
@@ -3951,6 +3990,12 @@ export function WorkflowDefinitionEditorPage() {
     const nextDraft = {
       ...definitionDraft,
       nodes: updateNodeById(definitionDraft.nodes, selectedNode.id, () => nextNode),
+      errors: definitionDraft.errors
+        ? updateNodeById(definitionDraft.errors, selectedNode.id, () => nextNode)
+        : definitionDraft.errors,
+      finally: definitionDraft.finally
+        ? updateNodeById(definitionDraft.finally, selectedNode.id, () => nextNode)
+        : definitionDraft.finally,
     };
 
     syncDraftToCode(nextDraft);
@@ -3961,6 +4006,12 @@ export function WorkflowDefinitionEditorPage() {
     const nextDraft = {
       ...definitionDraft,
       nodes: removeNodeById(definitionDraft.nodes, nodeId),
+      errors: definitionDraft.errors
+        ? removeNodeById(definitionDraft.errors, nodeId)
+        : definitionDraft.errors,
+      finally: definitionDraft.finally
+        ? removeNodeById(definitionDraft.finally, nodeId)
+        : definitionDraft.finally,
     };
     syncDraftToCode(nextDraft);
     if (selectedNodeId === nodeId) {
@@ -5752,7 +5803,7 @@ export function WorkflowDefinitionEditorPage() {
           }}
           onDeleteNode={handleRemoveNode}
           onViewDocs={(nodeId) => {
-            const node = findNodeById(definitionDraft.nodes, nodeId);
+            const node = findNodeInDefinition(definitionDraft, nodeId);
             if (node?.type) {
               setSelectedNodeId(nodeId);
               setSelectedTriggerId("");

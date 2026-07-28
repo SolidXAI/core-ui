@@ -24,7 +24,7 @@ import "./WorkflowFlowCanvas.css";
 
 type WorkflowNodeRecord = Record<string, any>;
 type WorkflowTriggerRecord = Record<string, any>;
-type WorkflowSequenceSlotKey = "tasks" | "then" | "else" | "defaults";
+type WorkflowSequenceSlotKey = "tasks" | "then" | "else" | "defaults" | "errors";
 
 type WorkflowInsertScope =
   | { scope: "root" }
@@ -98,7 +98,12 @@ type WorkflowCanvasNodeData =
     };
 
 type WorkflowFlowCanvasProps = {
-  definition: { nodes: WorkflowNodeRecord[]; triggers?: WorkflowTriggerRecord[] };
+  definition: {
+    nodes: WorkflowNodeRecord[];
+    triggers?: WorkflowTriggerRecord[];
+    errors?: WorkflowNodeRecord[];
+    finally?: WorkflowNodeRecord[];
+  };
   nodeTypes: WorkflowNodeMetadataResponse[];
   selectedNodeId?: string;
   selectedTriggerId?: string;
@@ -173,12 +178,12 @@ function normalizeChildSlots(
   node: WorkflowNodeRecord,
   nodeType?: WorkflowNodeMetadataResponse,
 ): WorkflowNodeChildSlotDefinition[] {
-  if (nodeType?.authoring?.childSlots?.length) {
-    return nodeType.authoring.childSlots;
-  }
+  const metadataSlots = nodeType?.authoring?.childSlots ?? [];
+  const slots: WorkflowNodeChildSlotDefinition[] = metadataSlots.length
+    ? [...metadataSlots]
+    : [];
 
-  const slots: WorkflowNodeChildSlotDefinition[] = [];
-  if (node.cases && typeof node.cases === "object" && !Array.isArray(node.cases)) {
+  if (!metadataSlots.length && node.cases && typeof node.cases === "object" && !Array.isArray(node.cases)) {
     slots.push({ key: "cases", label: "Cases", kind: "case-collection" });
     if (Array.isArray(node.defaults)) {
       slots.push({ key: "defaults", label: "Default", kind: "sequence" });
@@ -188,6 +193,9 @@ function normalizeChildSlots(
     slots.push({ key: "else", label: "Else", kind: "sequence" });
   } else if (Array.isArray(node.tasks)) {
     slots.push({ key: "tasks", label: "Tasks", kind: "sequence" });
+  }
+  if (Array.isArray(node.errors) && !slots.some((slot) => slot.key === "errors")) {
+    slots.push({ key: "errors", label: "Errors", kind: "sequence" });
   }
 
   return slots;
@@ -213,6 +221,37 @@ function isLoopNode(
     tags.includes("loop") ||
     tags.includes("iteration")
   );
+}
+
+function getLoopConcurrencyBadge(
+  workflowNode: WorkflowNodeRecord,
+  nodeType?: WorkflowNodeMetadataResponse,
+) {
+  if (!isLoopNode(workflowNode, nodeType)) {
+    return undefined;
+  }
+
+  const value = workflowNode.configuration?.concurrencyLimit;
+  if (value === undefined || value === null || value === "" || Number(value) === 1) {
+    return undefined;
+  }
+
+  if (Number(value) === 0) {
+    return {
+      label: "unlimited",
+      title: "Loop iterations run with unlimited concurrency",
+    };
+  }
+
+  const limit = Number(value);
+  if (!Number.isFinite(limit) || limit < 0) {
+    return undefined;
+  }
+
+  return {
+    label: `x${Math.floor(limit)}`,
+    title: `Loop iterations run with concurrency limit ${Math.floor(limit)}`,
+  };
 }
 
 function getSequenceSlotNodes(
@@ -689,6 +728,7 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
   const iconName = resolveWorkflowNodeIcon(nodeType);
   const nodeTitle = workflowNode.name ?? workflowNode.id;
   const nodeTypeLabel = nodeType?.label ?? workflowNode.type ?? workflowNode.kind ?? "node";
+  const concurrencyBadge = getLoopConcurrencyBadge(workflowNode, nodeType);
 
   return (
     <div
@@ -706,6 +746,14 @@ function WorkflowCanvasNodeRenderer({ data }: { data: WorkflowCanvasNodeData }) 
       <div className="workflow-flow-node-card__typebar">
         <span>{nodeTypeLabel}</span>
         <span className="workflow-flow-node-card__quick-actions">
+          {concurrencyBadge ? (
+            <span
+              className="workflow-flow-node-card__badge workflow-flow-node-card__badge--concurrency"
+              title={concurrencyBadge.title}
+            >
+              {concurrencyBadge.label}
+            </span>
+          ) : null}
           <button
             type="button"
             className="workflow-flow-icon-button nodrag nopan nowheel"
@@ -1378,7 +1426,12 @@ function buildSequenceGraph(
 
 
 function buildGraph(
-  definition: { nodes: WorkflowNodeRecord[]; triggers?: WorkflowTriggerRecord[] },
+  definition: {
+    nodes: WorkflowNodeRecord[];
+    triggers?: WorkflowTriggerRecord[];
+    errors?: WorkflowNodeRecord[];
+    finally?: WorkflowNodeRecord[];
+  },
   nodeTypes: WorkflowNodeMetadataResponse[],
   props: Omit<WorkflowFlowCanvasProps, "definition" | "nodeTypes">,
 ) {
@@ -1443,6 +1496,71 @@ function buildGraph(
     const triggerSourceId = previousTriggerId;
     layout.entryIds.forEach((entryId) => {
       ctx.edges.push(createEdge(triggerSourceId, entryId));
+    });
+  }
+
+  const rootErrorNodes = Array.isArray(definition.errors) ? definition.errors : [];
+  const rootFinallyNodes = Array.isArray(definition.finally) ? definition.finally : [];
+  if (rootErrorNodes.length) {
+    const errorStartIndex = ctx.nodes.length;
+    const errorLaneX =
+      rootLaneX +
+      Math.max(layout.width, DIMENSIONS.workflowWidth) +
+      DIMENSIONS.controlBranchGap +
+      DIMENSIONS.workflowWidth;
+    const errorLayout = buildSequenceGraph(
+      rootErrorNodes,
+      ctx,
+      errorLaneX,
+      startY,
+      { scope: "root" },
+      {
+        idSuffix: "global-errors",
+        boundaryInserts: false,
+      },
+    );
+    pushGroupNode(
+      ctx,
+      "group-global-errors",
+      "Global Errors",
+      "control",
+      ctx.nodes.slice(errorStartIndex),
+    );
+    layout.entryIds.forEach((entryId) => {
+      errorLayout.entryIds.forEach((errorEntryId) => {
+        ctx.edges.push(createEdge(entryId, errorEntryId, { kind: "split" }));
+      });
+    });
+  }
+
+  if (rootFinallyNodes.length) {
+    const finallyStartIndex = ctx.nodes.length;
+    const finallyLaneX =
+      rootLaneX -
+      Math.max(DIMENSIONS.workflowWidth, DIMENSIONS.triggerWidth) -
+      DIMENSIONS.controlBranchGap;
+    const finallyLayout = buildSequenceGraph(
+      rootFinallyNodes,
+      ctx,
+      finallyLaneX,
+      startY,
+      { scope: "root" },
+      {
+        idSuffix: "finally",
+        boundaryInserts: false,
+      },
+    );
+    pushGroupNode(
+      ctx,
+      "group-finally",
+      "Finally",
+      "control",
+      ctx.nodes.slice(finallyStartIndex),
+    );
+    layout.exitIds.forEach((exitId) => {
+      finallyLayout.entryIds.forEach((finallyEntryId) => {
+        ctx.edges.push(createEdge(exitId, finallyEntryId, { kind: "split" }));
+      });
     });
   }
 
