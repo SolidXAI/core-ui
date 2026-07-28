@@ -4582,33 +4582,51 @@ li.header-li-px {
   align-items: flex-start;
 }
 
-.solid-defined-filter-option {
-  gap: 8px !important;
+.solid-defined-filter-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0 4px;
 }
 
-.solid-defined-filter-option-icon {
+.solid-defined-filter-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
+  gap: 5px;
   flex: 0 0 auto;
-  border-radius: 999px;
-  background: color-mix(in srgb, hsl(142 60% 38%) 16%, transparent);
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, hsl(142 60% 38%) 30%, transparent);
+  background: color-mix(in srgb, hsl(142 60% 38%) 8%, transparent);
   color: color-mix(in srgb, hsl(142 55% 30%) 88%, var(--foreground) 12%);
+  border-radius: 999px;
+  min-height: 24px;
+  padding: 0 10px 0 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
 }
 
-.solid-defined-filter-option:hover .solid-defined-filter-option-icon {
-  background: color-mix(in srgb, hsl(142 60% 38%) 26%, transparent);
+.solid-defined-filter-badge svg {
+  flex: 0 0 auto;
 }
 
-.solid-defined-filter-option-label {
-  flex: 1 1 auto;
-  min-width: 0;
+.solid-defined-filter-badge:hover {
+  background: color-mix(in srgb, hsl(142 60% 38%) 16%, transparent);
+  border-color: color-mix(in srgb, hsl(142 60% 38%) 44%, transparent);
+}
+
+.solid-defined-filter-badge:focus-visible {
+  outline: 2px solid color-mix(in srgb, hsl(142 60% 38%) 50%, transparent);
+  outline-offset: 1px;
+}
+
+.solid-defined-filter-badge-label {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: left;
+  max-width: 220px;
 }
 
 .solid-search-overlay-empty {

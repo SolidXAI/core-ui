@@ -2085,31 +2085,30 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <div className="solid-search-overlay-scroll">
                             {(definedFilters || []).some((f: any) => !f?.applied) && (
                                 <>
-                                    <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-1">
+                                    <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-2">
                                         <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
                                             <ListFilter size={13} />
                                             <span>Defined filters</span>
                                         </h6>
-                                        {(definedFilters || [])
-                                            .filter((f: any) => !f?.applied)
-                                            .map((definedFilter: any) => (
-                                                <SolidButton
-                                                    key={definedFilter.key}
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="flex items-center text-color solid-search-overlay-option solid-defined-filter-option"
-                                                    onMouseDown={(e) => {
-                                                        e.preventDefault();
-                                                        onApplyDefinedFilter?.(definedFilter.key);
-                                                        setShowOverlay(false);
-                                                    }}
-                                                >
-                                                    <span className="solid-defined-filter-option-icon">
+                                        <div className="solid-defined-filter-badge-row">
+                                            {(definedFilters || [])
+                                                .filter((f: any) => !f?.applied)
+                                                .map((definedFilter: any) => (
+                                                    <button
+                                                        key={definedFilter.key}
+                                                        type="button"
+                                                        className="solid-defined-filter-badge"
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            onApplyDefinedFilter?.(definedFilter.key);
+                                                            setShowOverlay(false);
+                                                        }}
+                                                    >
                                                         <Plus size={12} />
-                                                    </span>
-                                                    <span className="solid-defined-filter-option-label">{definedFilter.label}</span>
-                                                </SolidButton>
-                                            ))}
+                                                        <span className="solid-defined-filter-badge-label">{definedFilter.label}</span>
+                                                    </button>
+                                                ))}
+                                        </div>
                                     </div>
                                     <div className="solid-filter-dialog-sep" />
                                 </>
