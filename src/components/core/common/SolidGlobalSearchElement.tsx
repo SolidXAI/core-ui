@@ -1373,27 +1373,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setPredefinedSearchBaseFilter(null);
                 clearFilterObjectFromLocalStorage();
 
-                // Patch the cached savedFilters list in place too — otherwise the
-                // stale (pre-rename) entry it still holds wins the lookup inside
-                // syncFilterUiStateFromSharedSource the next time it re-derives
-                // currentSavedFilterData (e.g. from the filterPredicates prop
-                // echoing back), reverting the name until a real refetch lands.
-                setSavedFilters((prev: any) => (prev || []).map((f: any) =>
-                    String(f?.id) === String(formValues.id)
-                        ? { ...f, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) }
-                        : f
-                ));
-
-                // Keep the filter applied under its (renamed) saved-filter identity
-                // immediately, instead of dropping it until the redirect below
-                // round-trips through a savedFilters refetch.
-                setCurrentSavedFilterData((prev: any) => ({
-                    ...(prev || {}),
-                    id: formValues.id,
-                    name: formValues.name,
-                    isPrivate: formValues.isPrivate,
-                    filterQueryJson: JSON.stringify(filterJson, null, 2),
-                }));
+                // Apply the rename immediately, both to the active filter and to
+                // the cached list — otherwise the list still holds the pre-rename
+                // entry, which wins the id-based lookup the next time saved-filter
+                // state gets re-derived from it, reverting the name until a real
+                // refetch lands (e.g. only after removing and reapplying).
+                const savedFilterRecord = { id: formValues.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) };
+                setSavedFilters((prev) => prev.map((f: any) => String(f?.id) === String(formValues.id) ? { ...f, ...savedFilterRecord } : f));
+                setCurrentSavedFilterData(savedFilterRecord);
                 setCurrentSavedFilterQuery(filterJson);
                 setHasSearched(true);
                 setRefreshKey((prev) => prev + 1);
@@ -1421,22 +1408,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setPredefinedSearchBaseFilter(null);
                 clearFilterObjectFromLocalStorage();
 
-                // Seed the cached savedFilters list with the new record immediately
-                // so it doesn't rely purely on a refetch (see rename branch above).
-                setSavedFilters((prev: any) => [
-                    { id: result.data.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) },
-                    ...(prev || []),
-                ]);
-
-                // The custom filter just became this saved filter — apply it
-                // immediately so it doesn't disappear while the redirect below
-                // round-trips through a savedFilters refetch.
-                setCurrentSavedFilterData({
-                    id: result.data.id,
-                    name: formValues.name,
-                    isPrivate: formValues.isPrivate,
-                    filterQueryJson: JSON.stringify(filterJson, null, 2),
-                });
+                // The custom filter just became this saved filter — apply it, and
+                // seed the cached list with it, immediately (see rename branch above).
+                const savedFilterRecord = { id: result.data.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) };
+                setSavedFilters((prev) => [savedFilterRecord, ...prev]);
+                setCurrentSavedFilterData(savedFilterRecord);
                 setCurrentSavedFilterQuery(filterJson);
                 setHasSearched(true);
                 setRefreshKey((prev) => prev + 1);
