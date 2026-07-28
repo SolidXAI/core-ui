@@ -56,6 +56,7 @@ export { SolidRelationOneToManyField } from './components/core/form/fields/relat
 
 export { SolidImageViewer } from './components/core/common/SolidImageViewer';
 export type { SolidImageViewerProps } from './components/core/common/SolidImageViewer';
+export { default as PDFViewer } from './components/core/common/PDFViewer';
 
 export { SolidChatter } from './components/core/chatter/SolidChatter';
 
