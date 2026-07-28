@@ -1592,26 +1592,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     )}
                 </div>
               </div>
-              {/* </div> */}
-              {shouldShowMobileSearchElement && params.embeded === false && (
-                <div className="flex lg:hidden">
-                  <SolidGlobalSearchElement
-                    viewType="list"
-                    showSaveFilterPopup={showSaveFilterPopup}
-                    setShowSaveFilterPopup={setShowSaveFilterPopup}
-                    ref={solidGlobalSearchElementRef}
-                    viewData={solidListViewMetaData}
-                    handleApplyCustomFilter={handleApplyCustomFilter}
-                    filterPredicates={filterPredicates}
-                    definedFilters={definedFilters}
-                    onRemoveDefinedFilter={removeDefinedFilter}
-                    onApplyDefinedFilter={applyDefinedFilter}
-                  >
-
-                  </SolidGlobalSearchElement>
-                </div>
-
-              )}
             </div>
           }
 
