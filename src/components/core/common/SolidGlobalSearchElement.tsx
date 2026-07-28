@@ -701,7 +701,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const [predefinedSearchBaseFilter, setPredefinedSearchBaseFilter] = useState<any>(null);
 
-    const [savedFilters, setSavedFilters] = useState([]);
+    const [savedFilters, setSavedFilters] = useState<any[]>([]);
     const [savedFiltersLoaded, setSavedFiltersLoaded] = useState(false);
     const isDraftPublishWorkflowEnabled = viewData?.data?.solidView?.model?.draftPublishWorkflow === true;
     
@@ -1372,6 +1372,32 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setPredefinedSearchChip(null);
                 setPredefinedSearchBaseFilter(null);
                 clearFilterObjectFromLocalStorage();
+
+                // Patch the cached savedFilters list in place too — otherwise the
+                // stale (pre-rename) entry it still holds wins the lookup inside
+                // syncFilterUiStateFromSharedSource the next time it re-derives
+                // currentSavedFilterData (e.g. from the filterPredicates prop
+                // echoing back), reverting the name until a real refetch lands.
+                setSavedFilters((prev: any) => (prev || []).map((f: any) =>
+                    String(f?.id) === String(formValues.id)
+                        ? { ...f, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) }
+                        : f
+                ));
+
+                // Keep the filter applied under its (renamed) saved-filter identity
+                // immediately, instead of dropping it until the redirect below
+                // round-trips through a savedFilters refetch.
+                setCurrentSavedFilterData((prev: any) => ({
+                    ...(prev || {}),
+                    id: formValues.id,
+                    name: formValues.name,
+                    isPrivate: formValues.isPrivate,
+                    filterQueryJson: JSON.stringify(filterJson, null, 2),
+                }));
+                setCurrentSavedFilterQuery(filterJson);
+                setHasSearched(true);
+                setRefreshKey((prev) => prev + 1);
+
                 setTimeout(() => {
                     router.push(buildSavedFilterUrl(formValues.id));
                 }, 500)
@@ -1394,6 +1420,26 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setPredefinedSearchChip(null);
                 setPredefinedSearchBaseFilter(null);
                 clearFilterObjectFromLocalStorage();
+
+                // Seed the cached savedFilters list with the new record immediately
+                // so it doesn't rely purely on a refetch (see rename branch above).
+                setSavedFilters((prev: any) => [
+                    { id: result.data.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) },
+                    ...(prev || []),
+                ]);
+
+                // The custom filter just became this saved filter — apply it
+                // immediately so it doesn't disappear while the redirect below
+                // round-trips through a savedFilters refetch.
+                setCurrentSavedFilterData({
+                    id: result.data.id,
+                    name: formValues.name,
+                    isPrivate: formValues.isPrivate,
+                    filterQueryJson: JSON.stringify(filterJson, null, 2),
+                });
+                setCurrentSavedFilterQuery(filterJson);
+                setHasSearched(true);
+                setRefreshKey((prev) => prev + 1);
 
                 setTimeout(() => {
                     router.push(buildSavedFilterUrl(result.data.id));
