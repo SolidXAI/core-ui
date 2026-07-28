@@ -13,7 +13,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
-import { Bookmark, Check, Filter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
+import { Bookmark, Check, Filter, ListFilter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
 import {
@@ -550,7 +550,7 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates, definedFilters, onRemoveDefinedFilter, onApplyDefinedFilter }: any, ref) => {
     type OverlayOption =
         | { id: string; kind: "field"; field: any }
         | { id: string; kind: "predefined"; predefined: any }
@@ -559,7 +559,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         | { id: string; kind: "grouping" };
     type ManagedChipItem = {
         id: string;
-        type: "saved" | "search" | "predefined" | "custom" | "grouping";
+        type: "saved" | "search" | "predefined" | "custom" | "grouping" | "handler";
         label: string;
         onRemove: () => void;
         onOpen?: () => void;
@@ -1675,6 +1675,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             });
         });
 
+        (definedFilters || []).forEach((definedFilter: any) => {
+            if (!definedFilter?.applied) return;
+            items.push({
+                id: `handler:${definedFilter.key}`,
+                type: "handler",
+                label: definedFilter.label,
+                onRemove: () => onRemoveDefinedFilter?.(definedFilter.key),
+            });
+        });
+
         return items;
     }, [
         currentSavedFilterData,
@@ -1684,6 +1694,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         groupingRules,
         groupedSearchChips,
         searchableFields,
+        definedFilters,
+        onRemoveDefinedFilter,
     ]);
 
     const MAX_VISIBLE_CHIPS = 3;
@@ -2071,6 +2083,37 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 {showOverlay && (
                     <div ref={overlayRef} className="absolute w-full shadow-md solid-search-overlay-pannel">
                         <div className="solid-search-overlay-scroll">
+                            {(definedFilters || []).some((f: any) => !f?.applied) && (
+                                <>
+                                    <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-1">
+                                        <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
+                                            <ListFilter size={13} />
+                                            <span>Defined filters</span>
+                                        </h6>
+                                        {(definedFilters || [])
+                                            .filter((f: any) => !f?.applied)
+                                            .map((definedFilter: any) => (
+                                                <SolidButton
+                                                    key={definedFilter.key}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="flex items-center text-color solid-search-overlay-option solid-defined-filter-option"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        onApplyDefinedFilter?.(definedFilter.key);
+                                                        setShowOverlay(false);
+                                                    }}
+                                                >
+                                                    <span className="solid-defined-filter-option-icon">
+                                                        <Plus size={12} />
+                                                    </span>
+                                                    <span className="solid-defined-filter-option-label">{definedFilter.label}</span>
+                                                </SolidButton>
+                                            ))}
+                                    </div>
+                                    <div className="solid-filter-dialog-sep" />
+                                </>
+                            )}
                             {inputValue ? (
                                 <>
                                     <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-1">
