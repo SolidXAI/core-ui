@@ -130,7 +130,7 @@ export const useChatterMentions = ({ value, onChange, textareaRef }: UseChatterM
                     : 'limit=8';
                 const response = await getMentionableUsers(queryString).unwrap();
                 if (!isActive) return;
-                setMentionSuggestions(response || []);
+                setMentionSuggestions(response?.data || []);
                 setActiveMentionIndex(0);
             } catch (error) {
                 if (isActive) setMentionSuggestions([]);
