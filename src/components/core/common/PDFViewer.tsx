@@ -1,117 +1,113 @@
+import { useEffect, useRef, useState } from 'react';
+import { SolidButton } from '../../shad-cn-ui/SolidButton';
+import { SolidIcon } from '../../shad-cn-ui/SolidIcon';
 
+export interface PDFViewerProps {
+    url?: string | null;
+    /** Height of the viewport the PDF renders into. */
+    height?: string;
+}
 
-import { useEffect, useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
-
-// Local worker recommended (avoids CORS)
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
-export default function PDFViewer({ url }: any) {
-    const [numPages, setNumPages] = useState<any>(null);
-    const [pageNumber, setPageNumber] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<any>(null);
+/**
+ * Renders a PDF using the browser's built-in PDF viewer.
+ *
+ * The signed URL is fetched into a blob first, which both keeps any auth on the
+ * request and guarantees inline rendering regardless of the `Content-Disposition`
+ * the storage provider sends back. Everything else — zoom, rotation, page
+ * navigation, text search/selection, print, download — is handled natively by
+ * the browser, so there is no pdf.js worker to configure or version-match.
+ */
+export default function PDFViewer({ url, height = '70vh' }: PDFViewerProps) {
     const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [reloadToken, setReloadToken] = useState(0);
+    const blobUrlRef = useRef<string | null>(null);
 
-    // Convert signed URL → Blob → Object URL
     useEffect(() => {
         if (!url) return;
 
-        setLoading(true);
+        const controller = new AbortController();
         setError(null);
+        setBlobUrl(null);
 
-        fetch(url)
+        fetch(url, { signal: controller.signal })
             .then(async (res) => {
-                if (!res.ok) throw new Error("Failed to fetch PDF");
+                if (!res.ok) throw new Error(`Request failed with ${res.status}`);
+
+                const contentType = res.headers.get('content-type') ?? '';
+                if (contentType && !contentType.includes('pdf') && !contentType.includes('octet-stream')) {
+                    throw new Error(`Unexpected content type: ${contentType}`);
+                }
 
                 const blob = await res.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                setBlobUrl(blobUrl);
-                setLoading(false);
+                const nextBlobUrl = URL.createObjectURL(blob);
+
+                // Revoke the URL this one replaces so repeated previews don't leak.
+                if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+                blobUrlRef.current = nextBlobUrl;
+
+                setBlobUrl(nextBlobUrl);
             })
             .catch((err) => {
-                console.error("Blob fetch error:", err);
-                setError("Failed to load PDF");
-                setLoading(false);
+                if (controller.signal.aborted) return;
+                console.error('PDF load error:', err);
+                setError('Failed to load PDF');
             });
-    }, [url]);
 
-    function onDocumentLoadSuccess({ numPages }: any) {
-        setNumPages(numPages);
-        setError(null);
-    }
+        return () => controller.abort();
+    }, [url, reloadToken]);
 
-    function onDocumentLoadError(err: any) {
-        console.error("PDF load error:", err);
-        setError("Failed to render PDF");
-    }
-
-    const goToPrevPage = () => setPageNumber((p) => Math.max(p - 1, 1));
-    const goToNextPage = () => setPageNumber((p) => Math.min(p + 1, numPages));
+    useEffect(() => {
+        return () => {
+            if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+        };
+    }, []);
 
     if (!url) {
         return (
-            <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg">
-                <p className="text-gray-500">No PDF URL provided</p>
+            <div
+                className="flex items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
+                style={{ height }}
+            >
+                <p className="text-[var(--solid-text-muted)]">No PDF URL provided</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div
+                className="flex flex-col items-center justify-center gap-4 rounded-lg bg-[var(--solid-danger-soft)]"
+                style={{ height }}
+            >
+                <p className="text-[var(--solid-danger)]">{error}</p>
+                <SolidButton
+                    onClick={() => setReloadToken((t) => t + 1)}
+                    leftIcon={<SolidIcon name="si-refresh" size={16} aria-hidden />}
+                >
+                    Retry
+                </SolidButton>
+            </div>
+        );
+    }
+
+    if (!blobUrl) {
+        return (
+            <div
+                className="flex items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
+                style={{ height }}
+            >
+                <p className="text-[var(--solid-text-secondary)]">Loading PDF...</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col items-center space-y-4 p-4">
-            {loading && (
-                <div className="flex items-center justify-center h-96 bg-gray-100 rounded-lg w-full">
-                    <p className="text-gray-600">Loading PDF...</p>
-                </div>
-            )}
-
-            {error && (
-                <div className="flex items-center justify-center h-96 bg-red-50 rounded-lg w-full">
-                    <p className="text-red-600">{error}</p>
-                </div>
-            )}
-
-            {/* Render only after Blob URL is created */}
-            {blobUrl && !loading && !error && (
-                <Document
-                    file={blobUrl}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    onLoadError={onDocumentLoadError}
-                    className="border border-gray-300 rounded-lg shadow-lg"
-                >
-                    <Page
-                        pageNumber={pageNumber}
-                        renderTextLayer={true}
-                        renderAnnotationLayer={true}
-                    />
-                </Document>
-            )}
-
-            {numPages && (
-                <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
-                    <button
-                        onClick={goToPrevPage}
-                        disabled={pageNumber <= 1}
-                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
-                        Previous
-                    </button>
-
-                    <span className="text-gray-700 font-medium">
-                        Page {pageNumber} of {numPages}
-                    </span>
-
-                    <button
-                        onClick={goToNextPage}
-                        disabled={pageNumber >= numPages}
-                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
-                        Next
-                    </button>
-                </div>
-            )}
-        </div>
+        <iframe
+            src={blobUrl}
+            title="PDF preview"
+            className="w-full rounded-lg border border-[var(--solid-border-default)] bg-[var(--solid-surface-pane)]"
+            style={{ height }}
+        />
     );
 }
