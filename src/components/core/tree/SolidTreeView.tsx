@@ -1631,7 +1631,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     solidTreeViewLayout?.attrs?.edit !== false &&
     (!inContextMenu || solidTreeViewLayout?.attrs?.showDefaultEditButton !== false) &&
     (!inContextMenu || solidTreeViewLayout?.attrs?.showRowEditInContextMenu !== false) &&
-    !(isDraftPublishWorkflowEnabled && rowData?.publishedAt);
+    !(isDraftPublishWorkflowEnabled && rowData?.isLatest === false);
 
   const canDeleteRow = (rowData: any, inContextMenu = false) =>
     !rowData?.deletedAt &&
@@ -1642,7 +1642,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       (solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== undefined &&
         solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== true)
       : solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== false) &&
-    !(isDraftPublishWorkflowEnabled && rowData?.publishedAt);
+    !(isDraftPublishWorkflowEnabled && rowData?.isLatest === false);
 
   const getContextMenuButtons = (rowData: any) =>
     (solidTreeViewLayout?.attrs?.rowButtons || []).filter((rb: any) => {

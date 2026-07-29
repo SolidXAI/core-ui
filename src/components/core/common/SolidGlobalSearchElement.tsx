@@ -13,7 +13,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
-import { Bookmark, Check, Filter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
+import { Bookmark, Check, Filter, ListFilter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
 import {
@@ -421,7 +421,7 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
 }
 
 const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter }: any) => {
-    const isActive = Number(activeSavedFilter) == savedfilter.id;
+    const isActive = savedfilter?.systemKey ? activeSavedFilter === savedfilter.systemKey : Number(activeSavedFilter) == savedfilter.id;
 
     return (
         <div className="solid-saved-filter-item" onMouseEnter={onMouseEnter}>
@@ -440,7 +440,7 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
                 </SolidButton>
             </div>
             <div className="solid-saved-filter-actions">
-                {savedfilter.isSeeded !== true &&
+                {savedfilter.isSeeded !== true && !savedfilter.systemKey &&
                     <>
                         <SolidButton
                             variant="outline"
@@ -550,7 +550,7 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates, definedFilters, onRemoveDefinedFilter, onApplyDefinedFilter }: any, ref) => {
     type OverlayOption =
         | { id: string; kind: "field"; field: any }
         | { id: string; kind: "predefined"; predefined: any }
@@ -559,7 +559,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         | { id: string; kind: "grouping" };
     type ManagedChipItem = {
         id: string;
-        type: "saved" | "search" | "predefined" | "custom" | "grouping";
+        type: "saved" | "search" | "predefined" | "custom" | "grouping" | "handler";
         label: string;
         onRemove: () => void;
         onOpen?: () => void;
@@ -701,8 +701,31 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const [predefinedSearchBaseFilter, setPredefinedSearchBaseFilter] = useState<any>(null);
 
-    const [savedFilters, setSavedFilters] = useState([]);
+    const [savedFilters, setSavedFilters] = useState<any[]>([]);
     const [savedFiltersLoaded, setSavedFiltersLoaded] = useState(false);
+    const isDraftPublishWorkflowEnabled = viewData?.data?.solidView?.model?.draftPublishWorkflow === true;
+    
+    const workflowPublishedVersionsSavedFilter = useMemo(() => {
+        if (!isDraftPublishWorkflowEnabled) return null;
+        return {
+            id: "system-published-versions",
+            systemKey: "workflow-published-versions",
+            name: "Published Versions",
+            description: "Shows current published records, including records that are published but not latest.",
+            isSeeded: true,
+            filterQueryJson: JSON.stringify({
+                isPublished: { $eq: true },
+                isLatest: { $in: [true, false] },
+            }),
+        };
+    }, [isDraftPublishWorkflowEnabled]);
+
+    const availableSavedFilters = useMemo(
+        () => workflowPublishedVersionsSavedFilter
+            ? [workflowPublishedVersionsSavedFilter, ...(savedFilters || [])]
+            : (savedFilters || []),
+        [workflowPublishedVersionsSavedFilter, savedFilters]
+    );
 
     const entityApi = createSolidEntityApi("savedFilters");
     const {
@@ -806,11 +829,30 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 ? queryObject.custom_filter_predicate
                 : null;
         const nextPredefinedBaseFilter = queryObject?.predefined_search_predicate || null;
+        const nextSavedFilter = queryObject?.saved_filter_predicate || null;
+        const nextSavedFilterData = nextSavedFilter
+            ? availableSavedFilters.find((savedFilter: any) => {
+                if (queryObject?.saved_filter_system_key) {
+                    return savedFilter?.systemKey === queryObject.saved_filter_system_key;
+                }
+                if (queryObject?.saved_filter_id) {
+                    return String(savedFilter?.id) === String(queryObject.saved_filter_id);
+                }
+                return false;
+            }) || {
+                id: queryObject?.saved_filter_id,
+                systemKey: queryObject?.saved_filter_system_key,
+                name: queryObject?.saved_filter_name || 'Saved Filter',
+                filterQueryJson: JSON.stringify(nextSavedFilter),
+            }
+            : null;
 
         setSearchFilter((prev: any) => areFilterStateValuesEqual(prev, nextSearchFilter) ? prev : nextSearchFilter);
         setSearchChips((prev) => areFilterStateValuesEqual(prev, nextSearchChips) ? prev : nextSearchChips);
         setCustomFilter((prev: any) => areFilterStateValuesEqual(prev, nextCustomFilter) ? prev : nextCustomFilter);
         setPredefinedSearchBaseFilter((prev: any) => areFilterStateValuesEqual(prev, nextPredefinedBaseFilter) ? prev : nextPredefinedBaseFilter);
+        setCurrentSavedFilterData((prev: any) => areFilterStateValuesEqual(prev, nextSavedFilterData) ? prev : nextSavedFilterData);
+        setCurrentSavedFilterQuery((prev: any) => areFilterStateValuesEqual(prev, nextSavedFilter) ? prev : nextSavedFilter);
 
         if (nextCustomFilter && viewData?.data) {
             const rules: FilterRule = transformFiltersToRules(nextCustomFilter);
@@ -846,7 +888,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
         setGroupingRules((prev) => areFilterStateValuesEqual(prev, nextGroupingRules) ? prev : nextGroupingRules);
         setAggregationRules((prev) => areFilterStateValuesEqual(prev, nextAggregationRules) ? prev : nextAggregationRules);
-    }, [initialState, viewData]);
+    }, [availableSavedFilters, initialState, viewData]);
 
     const resetAppliedFilters = ({ preserveGrouping = false }: { preserveGrouping?: boolean } = {}) => {
         setSearchChips([]);
@@ -904,44 +946,34 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         const fn = async () => {
             if (savedFiltersLoaded) {
 
-                if (activeSavedFilter && savedFilters.length === 0) return;
+                if (activeSavedFilter && availableSavedFilters.length === 0) return;
 
                 const queryObject = getFilterObjectFromLocalStorage();
-                // const savedQuery = parsedSearchParams?.get("savedQuery");
+                let nextQueryObject = queryObject;
                 if (activeSavedFilter) {
                     const currentSavedFilterId = Number(activeSavedFilter);
-                    const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
-                    setCurrentSavedFilterData(currentSavedFilterData);
+                    const currentSavedFilterData: any = availableSavedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
                     if (currentSavedFilterData) {
                         const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
                         if (filterJson) {
-                            let finalSavedFilter = filterJson
-                            setCurrentSavedFilterQuery(finalSavedFilter)
+                            nextQueryObject = {
+                                ...(queryObject || {}),
+                                saved_filter_predicate: filterJson,
+                                saved_filter_id: currentSavedFilterData.id,
+                                saved_filter_system_key: currentSavedFilterData.systemKey,
+                                saved_filter_name: currentSavedFilterData.name,
+                            };
                         }
                     }
-                } else {
-                    setCurrentSavedFilterData(null)
-                    setCurrentSavedFilterQuery(null)
                 }
-                    // const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
-                    //     const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
-                    //     const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
-                    //     const chipdata = {
-                    //         columnName: chipKey,
-                    //         value: chipValue
-                    //     };
-                    //     return chipdata
-                    // }
-                    // );
-                    // setSearchChips(formattedChips);
-                await syncFilterUiStateFromSharedSource(queryObject);
+                await syncFilterUiStateFromSharedSource(nextQueryObject);
 
                 setRefreshKey((prev) => prev + 1)
                 setHasSearched(true);
             }
         }
         fn()
-    }, [activeSavedFilter, savedFilters, savedFiltersLoaded, syncFilterUiStateFromSharedSource, viewData?.data?.solidView?.id])
+    }, [activeSavedFilter, availableSavedFilters, savedFiltersLoaded, syncFilterUiStateFromSharedSource, viewData?.data?.solidView?.id])
 
     useEffect(() => {
         const fn = async () => {
@@ -1231,6 +1263,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
             const finalCustomFilter = customFilter
             const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter, groupingRules, aggregationRules)
+            if (currentSavedFilterData?.id) {
+                finalFilter.saved_filter_id = currentSavedFilterData.id;
+            }
+            if (currentSavedFilterData?.systemKey) {
+                finalFilter.saved_filter_system_key = currentSavedFilterData.systemKey;
+            }
+            if (currentSavedFilterData?.name) {
+                finalFilter.saved_filter_name = currentSavedFilterData.name;
+            }
             handleApplyCustomFilter(finalFilter, true);
             setHasSearched(false)
             // }
@@ -1273,7 +1314,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const savedfilterId = savedfilter.id;
             // router.push(`?savedQuery=${savedfilter.id}`);
             setShowOverlay(false);
-            const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === savedfilterId);
+            const currentSavedFilterData: any = availableSavedFilters.find((savedFilter: any) => savedFilter.id === savedfilterId);
             setCurrentSavedFilterData(currentSavedFilterData);
             if (currentSavedFilterData) {
                 const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
@@ -1331,6 +1372,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setPredefinedSearchChip(null);
                 setPredefinedSearchBaseFilter(null);
                 clearFilterObjectFromLocalStorage();
+
+                // Apply the rename immediately, both to the active filter and to
+                // the cached list — otherwise the list still holds the pre-rename
+                // entry, which wins the id-based lookup the next time saved-filter
+                // state gets re-derived from it, reverting the name until a real
+                // refetch lands (e.g. only after removing and reapplying).
+                const savedFilterRecord = { id: formValues.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) };
+                setSavedFilters((prev) => prev.map((f: any) => String(f?.id) === String(formValues.id) ? { ...f, ...savedFilterRecord } : f));
+                setCurrentSavedFilterData(savedFilterRecord);
+                setCurrentSavedFilterQuery(filterJson);
+                setHasSearched(true);
+                setRefreshKey((prev) => prev + 1);
+
                 setTimeout(() => {
                     router.push(buildSavedFilterUrl(formValues.id));
                 }, 500)
@@ -1353,6 +1407,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setPredefinedSearchChip(null);
                 setPredefinedSearchBaseFilter(null);
                 clearFilterObjectFromLocalStorage();
+
+                // The custom filter just became this saved filter — apply it, and
+                // seed the cached list with it, immediately (see rename branch above).
+                const savedFilterRecord = { id: result.data.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) };
+                setSavedFilters((prev) => [savedFilterRecord, ...prev]);
+                setCurrentSavedFilterData(savedFilterRecord);
+                setCurrentSavedFilterQuery(filterJson);
+                setHasSearched(true);
+                setRefreshKey((prev) => prev + 1);
 
                 setTimeout(() => {
                     router.push(buildSavedFilterUrl(result.data.id));
@@ -1442,6 +1505,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setPredefinedSearchChip(null);
         setPredefinedSearchBaseFilter(null);
         clearFilterObjectFromLocalStorage();
+        if (savedfilter?.systemKey) {
+            setCurrentSavedFilterData(savedfilter);
+            try {
+                const filterJson = JSON.parse(savedfilter.filterQueryJson);
+                if (filterJson) {
+                    setCurrentSavedFilterQuery(filterJson);
+                }
+            } catch {
+                console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
+            }
+            setShowOverlay(false);
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1);
+            return;
+        }
         // push the savedQuery=1 in url 
         if (savedfilter?.id) {
             router.push(buildSavedFilterUrl(savedfilter.id));
@@ -1453,10 +1531,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const removeSavedFilter = () => {
         setCurrentSavedFilterData(null);
-        setCurrentSavedFilterQuery(null)
+        setCurrentSavedFilterQuery(null);
+        setCurrentSavedFilterRules(null);
+        setShowSavedFilterComponent(false);
         if (searchParams.has("savedQuery")) {
-            router.push(buildSavedFilterUrl(null));
+            router.replace(buildSavedFilterUrl(null));
         }
+        setHasSearched(true);
+        setRefreshKey((prev) => prev + 1);
     }
 
     const SavedFiltersChip = () => {
@@ -1589,7 +1671,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 type: "custom",
                 label: `${customRuleCount} custom rules applied`,
                 onRemove: () => clearCustomFilter(),
-                onOpen:() => setShowGlobalSearchElement(true)
+                onOpen: () => setShowGlobalSearchElement(true)
             });
         }
 
@@ -1599,7 +1681,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 type: "grouping",
                 label: `${groupingRules.length} grouping rules applied`,
                 onRemove: () => removeGrouping(),
-                onOpen:() => setShowGroupFilterElement(true)
+                onOpen: () => setShowGroupFilterElement(true)
 
             });
         }
@@ -1615,6 +1697,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             });
         });
 
+        (definedFilters || []).forEach((definedFilter: any) => {
+            if (!definedFilter?.applied) return;
+            items.push({
+                id: `handler:${definedFilter.key}`,
+                type: "handler",
+                label: definedFilter.label,
+                onRemove: () => onRemoveDefinedFilter?.(definedFilter.key),
+            });
+        });
+
         return items;
     }, [
         currentSavedFilterData,
@@ -1624,6 +1716,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         groupingRules,
         groupedSearchChips,
         searchableFields,
+        definedFilters,
+        onRemoveDefinedFilter,
     ]);
 
     const MAX_VISIBLE_CHIPS = 3;
@@ -1665,7 +1759,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     predefined: p,
                 }))
                 : [];
-        const saved: OverlayOption[] = (savedFilters || []).map((s: any) => ({
+        const saved: OverlayOption[] = (availableSavedFilters || []).map((s: any) => ({
             id: `saved:${s.id}`,
             kind: "saved" as const,
             saved: s,
@@ -1683,7 +1777,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 : [];
 
         return [...fields, ...predefined, ...saved, ...custom, ...grouping];
-    }, [inputValue, searchableFields, predefinedSearches, savedFilters, viewType]);
+    }, [inputValue, searchableFields, predefinedSearches, availableSavedFilters, viewType]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const currentValue = inputValue?.trim() || "";
@@ -2011,6 +2105,36 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 {showOverlay && (
                     <div ref={overlayRef} className="absolute w-full shadow-md solid-search-overlay-pannel">
                         <div className="solid-search-overlay-scroll">
+                            {(definedFilters || []).some((f: any) => !f?.applied) && (
+                                <>
+                                    <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-2">
+                                        <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
+                                            <ListFilter size={13} />
+                                            <span>Defined filters</span>
+                                        </h6>
+                                        <div className="solid-defined-filter-badge-row">
+                                            {(definedFilters || [])
+                                                .filter((f: any) => !f?.applied)
+                                                .map((definedFilter: any) => (
+                                                    <button
+                                                        key={definedFilter.key}
+                                                        type="button"
+                                                        className="solid-defined-filter-badge"
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            onApplyDefinedFilter?.(definedFilter.key);
+                                                            setShowOverlay(false);
+                                                        }}
+                                                    >
+                                                        <Plus size={12} />
+                                                        <span className="solid-defined-filter-badge-label">{definedFilter.label}</span>
+                                                    </button>
+                                                ))}
+                                        </div>
+                                    </div>
+                                    <div className="solid-filter-dialog-sep" />
+                                </>
+                            )}
                             {inputValue ? (
                                 <>
                                     <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-1">
@@ -2047,7 +2171,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         }}
                                                         onMouseEnter={() => setFocusedIndex(index)}
                                                     >
-                                                        Search <strong style={{paddingLeft:"2px"}}>{toTitleCase(value.displayName.trim())}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
+                                                        Search <strong style={{ paddingLeft: "2px" }}>{toTitleCase(value.displayName.trim())}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
                                                     </SolidButton>
                                                 )
                                             })
@@ -2110,7 +2234,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     <div className="solid-filter-dialog-sep" />
                                 </>
                             }
-                            {savedFilters.length > 0 &&
+                            {availableSavedFilters.length > 0 &&
                                 <>
                                     <div className="p-3 solid-search-overlay-section">
                                         <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact">
@@ -2125,11 +2249,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                             </div>
                                         </div>
                                         <div className="flex flex-col solid-search-overlay-saved-list">
-                                            {savedFilters.map((savedfilter: any, index: number) => (
+                                            {availableSavedFilters.map((savedfilter: any, index: number) => (
                                                 <SavedFilterList
                                                     key={savedfilter.id}
                                                     savedfilter={savedfilter}
-                                                    activeSavedFilter={activeSavedFilter}
+                                                    activeSavedFilter={activeSavedFilter || currentSavedFilterData?.systemKey || currentSavedFilterData?.id}
                                                     applySavedFilter={applySavedFilter}
                                                     openSavedCustomFilter={openSavedCustomFilter}
                                                     setSavedFilterTobeDeleted={setSavedFilterTobeDeleted}
@@ -2151,7 +2275,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             <button
                                 type="button"
                                 className={`flex flex-col px-3 py-2 solid-search-overlay-footer-action ${overlayOptions[focusedIndex]?.id === "footer:custom" ? "solid-search-overlay-option-active" : ""}`}
-                                onClick={openCustomFilterDialog}
+                                onMouseDown={(event) => {
+                                    event.preventDefault();
+                                    openCustomFilterDialog();
+                                }}
                                 onMouseEnter={() => {
                                     const optIndex = overlayOptions.findIndex((o) => o.id === "footer:custom");
                                     if (optIndex !== -1) setFocusedIndex(optIndex);
@@ -2175,7 +2302,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 <button
                                     type="button"
                                     className={`flex flex-col px-3 py-2 solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary ${overlayOptions[focusedIndex]?.id === "footer:grouping" ? "solid-search-overlay-option-active" : ""}`}
-                                    onClick={openGroupingDialog}
+                                    onMouseDown={(event) => {
+                                        event.preventDefault();
+                                        openGroupingDialog();
+                                    }}
                                     onMouseEnter={() => {
                                         const optIndex = overlayOptions.findIndex((o) => o.id === "footer:grouping");
                                         if (optIndex !== -1) setFocusedIndex(optIndex);
