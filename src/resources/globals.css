@@ -5708,14 +5708,15 @@ li.header-li-px {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 920px;
+  max-width: 640px;
   padding: 1rem;
+  width: min(100%, 50rem);
 }
 
-.solid-media-upload-grid {
+.solid-media-upload-stack {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 }
 
 .solid-media-upload-field {
@@ -5730,19 +5731,87 @@ li.header-li-px {
   font-weight: 600;
 }
 
+.solid-media-upload-help {
+  color: color-mix(in srgb, var(--foreground) 54%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  margin-top: -0.125rem;
+}
+
 .solid-media-upload-dropzone {
   align-items: center;
   border: 1px dashed var(--border);
   border-radius: 0.5rem;
   color: color-mix(in srgb, var(--foreground) 70%, transparent);
   display: flex;
+  flex-direction: column;
   gap: 0.625rem;
-  min-height: 76px;
-  padding: 1rem;
+  justify-content: center;
+  min-height: 160px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
 }
 
-.solid-media-upload-dropzone input {
-  max-width: 320px;
+.solid-media-upload-dropzone:not(.is-disabled) {
+  cursor: pointer;
+}
+
+.solid-media-upload-dropzone.is-active {
+  background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.solid-media-upload-dropzone.is-disabled {
+  background: color-mix(in srgb, var(--muted) 35%, transparent);
+  opacity: 0.72;
+}
+
+.solid-media-upload-dropzone__input {
+  display: none;
+}
+
+.solid-media-upload-dropzone__content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.solid-media-upload-dropzone__title {
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+
+.solid-media-upload-dropzone__hint {
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+  font-size: 0.8125rem;
+}
+
+.solid-media-upload-dropzone__files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.solid-media-upload-dropzone__file {
+  align-items: center;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  display: inline-flex;
+  font-size: 0.8125rem;
+  gap: 0.375rem;
+  max-width: 100%;
+  min-height: 2rem;
+  overflow: hidden;
+  padding: 0.375rem 0.5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .solid-media-upload-summary {
@@ -5765,9 +5834,6 @@ li.header-li-px {
     flex-direction: column;
   }
 
-  .solid-media-upload-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .solid-mimetype-chip {
