@@ -74,7 +74,7 @@ export const SolidDropdownMenuRadioItem = React.forwardRef<
     >
       <span className="solid-dropdown-menu-indicator">
         <DropdownMenu.ItemIndicator>
-          <span className="solid-dropdown-menu-radio-dot" />
+          <SolidIcon name="si-check" aria-hidden />
         </DropdownMenu.ItemIndicator>
       </span>
       <span className="solid-dropdown-menu-item-text">{children}</span>

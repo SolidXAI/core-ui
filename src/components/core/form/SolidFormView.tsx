@@ -323,7 +323,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         readOnly: readOnly,
         viewMode: viewMode,
         onChange: onChange,
-        onBlur: onBlur
+        onBlur: onBlur,
+        setLightboxUrls: setLightboxUrls,
+        setOpenLightbox: setOpenLightbox
     }
     if (parentData) {
         fieldContext.parentData = parentData;
