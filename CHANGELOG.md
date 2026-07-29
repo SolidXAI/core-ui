@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.2] - 2026-07-29
+
+### Added
+
+- add MediaUploadPage for uploading media files and integrate with existing components
+- enhance PDFViewer with zoom and rotation controls, improve error handling
+- add error boundary for PDF rendering in PDFViewer component
+- replace default buttons with SolidButton in PDFViewer component
+- add pdfjs-dist dependency and update PDFViewer worker configuration
+
+### Fixed
+
+- adjust min-height for PDFViewer component to improve layout consistency
+
+### Changed
+
+- remove react-pdf dependency and implement native PDF rendering
+
 ## [0.1.13] - 2026-07-24
 
 ### Added
