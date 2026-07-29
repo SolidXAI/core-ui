@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
+import { SolidButton } from '../../shad-cn-ui/SolidButton';
 
 // Local worker (avoids CORS and CDN/version mismatches)
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -94,25 +95,17 @@ export default function PDFViewer({ url }: any) {
 
             {numPages && (
                 <div className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-md">
-                    <button
-                        onClick={goToPrevPage}
-                        disabled={pageNumber <= 1}
-                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
+                    <SolidButton onClick={goToPrevPage} disabled={pageNumber <= 1}>
                         Previous
-                    </button>
+                    </SolidButton>
 
                     <span className="text-gray-700 font-medium">
                         Page {pageNumber} of {numPages}
                     </span>
 
-                    <button
-                        onClick={goToNextPage}
-                        disabled={pageNumber >= numPages}
-                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
+                    <SolidButton onClick={goToNextPage} disabled={pageNumber >= numPages}>
                         Next
-                    </button>
+                    </SolidButton>
                 </div>
             )}
         </div>
