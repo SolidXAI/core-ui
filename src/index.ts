@@ -56,6 +56,7 @@ export { SolidRelationOneToManyField } from './components/core/form/fields/relat
 
 export { SolidImageViewer } from './components/core/common/SolidImageViewer';
 export type { SolidImageViewerProps } from './components/core/common/SolidImageViewer';
+export { default as PDFViewer } from './components/core/common/PDFViewer';
 
 export { SolidChatter } from './components/core/chatter/SolidChatter';
 
@@ -106,12 +107,38 @@ export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
 export { QueueSlaHeatmapWidget } from './components/core/dashboard/widgets/QueueSlaHeatmapWidget';
 export {
+    WorkflowFlowCanvas,
+    type WorkflowInsertTarget,
+} from './components/workflow/WorkflowFlowCanvas';
+export {
+    WorkflowNodeDocsPanel,
+} from './components/workflow/WorkflowNodeDocsPanel';
+export {
+    WorkflowNodeEditorDialog,
+    WorkflowNodePalette,
+    WorkflowNodeSchemaEditor,
+} from './components/workflow/WorkflowNodeSchemaEditor';
+export {
     ExtensionComponentTypes,
     ExtensionFunctionTypes,
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "./types/extension-registry";
 export type { DashboardWidgetComponentProps } from "./types/dashboard";
+export type {
+    WorkflowNodeAuthoringMetadata,
+    WorkflowNodeChildSlotDefinition,
+    WorkflowNodeConfigurationFieldDefinition,
+    WorkflowNodeConfigurationValueType,
+    WorkflowNodeDocumentationMetadata,
+    WorkflowNodeExampleDefinition,
+    WorkflowNodeMetadataResponse,
+    WorkflowNodeMetricDefinition,
+    WorkflowNodeOutputDefinition,
+    WorkflowNodeReferenceDefinition,
+    WorkflowNodeRuntimeMetadata,
+    WorkflowNodeUiMetadata,
+} from "./types/workflow-node";
 export {
     createSolidUiModuleRuntime,
     getSolidUiModules,
@@ -142,6 +169,17 @@ export {
 } from './redux/api/authApi';
 
 export { baseQueryWithAuth } from './redux/api/fetchBaseQuery';
+export {
+    workflowDefinitionEditorApi,
+    useExecuteWorkflowDefinitionMutation,
+    useValidateWorkflowDefinitionMutation,
+} from './redux/api/workflowDefinitionEditorApi';
+
+export {
+    workflowNodeApi,
+    useGetWorkflowNodeTypesQuery,
+    useLazyGetWorkflowNodeTypesQuery,
+} from './redux/api/workflowNodeApi';
 
 export {
     fieldsApi,

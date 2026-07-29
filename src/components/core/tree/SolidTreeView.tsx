@@ -27,7 +27,7 @@ import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, hasStoredSearchUiState, setFilterObjectToLocalStorage } from "../common/globalSearchPersistence";
+import { getFilterObjectFromLocalStorage, hasMeaningfulPersistedFilter, hasStoredFilterPredicates, setFilterObjectToLocalStorage } from "../common/globalSearchPersistence";
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
@@ -1378,7 +1378,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
   const handleFetchUpdatedRecords = () => {
-    if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
+    if (hasAnyActiveFilters) {
       solidGlobalSearchElementRef.current?.clearAppliedFilters?.({ preserveGrouping: true });
       return;
     }
@@ -1603,7 +1603,19 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
-  const shouldShowMobileSearchElement = showGlobalSearchElement || hasStoredSearchUiState(filterPredicates) || hasStoredSearchUiState(getFilterObjectFromLocalStorage());
+  const storedFilterObject = getFilterObjectFromLocalStorage();
+  const hasFilterPredicatesApplied = hasStoredFilterPredicates(filterPredicates);
+  const hasGroupingRulesApplied = Boolean(filterPredicates?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null));
+  const hasActiveFilters = hasMeaningfulPersistedFilter(filters);
+  const hasAnyActiveFilters = hasActiveFilters || hasFilterPredicatesApplied || hasGroupingRulesApplied;
+  const hasStoredFilterState = hasStoredFilterPredicates(storedFilterObject);
+  const hasStoredGroupingRules = Boolean(storedFilterObject?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null));
+
+  useEffect(() => {
+    if (params.embeded === false) {
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState || hasStoredGroupingRules);
+    }
+  }, [hasAnyActiveFilters, hasStoredFilterState, hasStoredGroupingRules, params.embeded]);
 
   const visibleHeaderButtons = useMemo(
     () =>
@@ -1877,8 +1889,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         <div className="solid-list-surface solid-tree-surface flex flex-col flex-1 min-h-0">
           {/* ── Header ── */}
           <div className="page-header solid-list-toolbar solid-tree-toolbar flex-col lg:flex-row">
-            <div className="flex justify-between w-full">
-              <div className="flex gap-4 items-center w-full solid-list-toolbar-left">
+            <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
+              <div className="flex lg:gap-4 items-center w-full solid-list-toolbar-left lg:min-w-0 lg:flex-1">
                 <div className="flex items-center gap-2">
                   {/* {params.embeded !== true && (
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
@@ -1889,7 +1901,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 </div>
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className="hidden lg:flex">
+                  <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
                     <SolidGlobalSearchElement
                       viewType="tree"
                       showSaveFilterPopup={showSaveFilterPopup}
@@ -1903,7 +1915,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 )}
               </div>
 
-              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
@@ -2002,21 +2014,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   )}
               </div>
             </div>
-
-            {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-              shouldShowMobileSearchElement && (
-                <div className="flex lg:hidden">
-                  <SolidGlobalSearchElement
-                    viewType="tree"
-                    showSaveFilterPopup={showSaveFilterPopup}
-                    setShowSaveFilterPopup={setShowSaveFilterPopup}
-                    ref={solidGlobalSearchElementRef}
-                    viewData={solidTreeViewMetaData}
-                    handleApplyCustomFilter={handleApplyCustomFilter}
-                    filterPredicates={filterPredicates}
-                  />
-                </div>
-              )}
           </div>
 
           {/* ── Tree table ── */}
