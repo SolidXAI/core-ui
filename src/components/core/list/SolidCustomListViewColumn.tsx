@@ -1,6 +1,7 @@
 import { Column } from "./SolidDataTable";
 import { getExtensionComponent } from "../../../helpers/registry";
 import type { SolidListFieldWidgetProps } from "../../../types/solid-core";
+import { applyListColumnLayoutAttrs } from "./SolidListViewColumn";
 
 type SolidCustomListViewColumnProps = {
     solidListViewMetaData: any;
@@ -20,7 +21,7 @@ export const SolidCustomListViewColumn = ({ solidListViewMetaData, column, embed
         type: column?.attrs?.fieldType ?? "shortText",
     };
 
-    return (
+    return applyListColumnLayoutAttrs(
         <Column
             key={fieldName}
             field={fieldName}
@@ -53,5 +54,7 @@ export const SolidCustomListViewColumn = ({ solidListViewMetaData, column, embed
                 return <DynamicWidget {...widgetProps} />;
             }}
         />
+        ,
+        column
     );
 };

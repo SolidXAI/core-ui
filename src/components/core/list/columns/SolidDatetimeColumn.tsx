@@ -5,7 +5,7 @@ import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 import { getExtensionComponent } from "../../../../helpers/registry";
 
 const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
-    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
+    const truncateAfter = column?.attrs?.truncateAfter ?? solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -41,4 +41,3 @@ const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: S
 };
 
 export default SolidDatetimeColumn;
-

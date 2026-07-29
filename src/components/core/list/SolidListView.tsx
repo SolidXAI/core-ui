@@ -44,7 +44,6 @@ import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus"
 import {
   getFilterObjectFromLocalStorage,
   hasStoredFilterPredicates,
-  hasStoredSearchUiState,
   setFilterObjectToLocalStorage,
 } from "../common/globalSearchPersistence";
 import {
@@ -59,7 +58,7 @@ import {
   SolidDialogTitle,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
-import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
+import { ArrowRight, LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -1228,12 +1227,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasAppliedFilterValues = hasAppliedFilters(filters);
   const hasAnyActiveFilters = hasAppliedFilterValues || hasFilterPredicatesApplied;
+  const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
 
   useEffect(() => {
-    if (params.embeded === false && hasAnyActiveFilters) {
-      setShowGlobalSearchElement(true);
+    if (params.embeded === false) {
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState);
     }
-  }, [hasAnyActiveFilters, params.embeded]);
+  }, [hasAnyActiveFilters, hasStoredFilterState, params.embeded]);
 
   const isListViewEmptyWithoutFilters =
     !loading &&
@@ -1338,15 +1338,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       .filter((slide): slide is SolidLightboxSlide => !!slide)
     : [];
 
+  const showRowEditInContextMenu =
+    solidListViewLayout?.attrs?.showRowEditInContextMenu ??
+    solidListViewLayout?.attrs?.showRowActionsInContextMenu;
+  const showRowDeleteInContextMenu =
+    solidListViewLayout?.attrs?.showRowDeleteInContextMenu ??
+    solidListViewLayout?.attrs?.showRowActionsInContextMenu;
+
   const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
     solidListViewLayout?.attrs?.edit !== false &&
     solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
-    solidListViewLayout?.attrs?.showRowEditInContextMenu !== false &&
+    showRowEditInContextMenu !== false &&
     !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
 
   const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
     solidListViewLayout?.attrs?.delete !== false &&
-    solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
+    showRowDeleteInContextMenu !== false &&
     !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
 
   const hasCustomContextMenuButtons =
@@ -1357,11 +1364,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const hasAnyContextMenuActions =
     hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
   const isEmbeddedList = params.embeded === true;
-  const shouldShowMobileSearchElement =
-    showGlobalSearchElement ||
-    hasStoredSearchUiState(filterPredicates) ||
-    hasStoredSearchUiState(getFilterObjectFromLocalStorage());
-
+  const showRowActionsAsIconOnly = solidListViewLayout?.attrs?.showRowActionsAsIconOnly === true;
+  const showRowEditAsIconOnly =
+    showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowEditAsIconOnly === true;
+  const showRowDeleteAsIconOnly =
+    showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowDeleteAsIconOnly === true;
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
   //     dispatch(toggleNavbar());   // close both
@@ -1376,8 +1383,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-col lg:flex-row">
               {/* <div> */}
-              <div className="flex justify-between w-full">
-                <div className="solid-list-toolbar-left flex w-full items-center gap-3">
+              <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
+                <div className="solid-list-toolbar-left flex w-full items-center gap-3 lg:min-w-0 lg:flex-1">
                   {/* Here only hide the Solid list view title, LayoutGrid already commented */}
                   {/* <div className='flex items-center gap-2'>
                     {params.embeded !== true &&
@@ -1390,7 +1397,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </p>
                   </div> */}
                   {params.embeded === false && (
-                    <div className="hidden lg:flex">
+                    <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
                       {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
                       <SolidGlobalSearchElement
                         key={params.modelName}
@@ -1407,7 +1414,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   )}
 
                 </div>
-                <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {params.embeded === false && (
                     <div className="flex lg:hidden">
@@ -1517,23 +1524,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     )}
                 </div>
               </div>
-              {/* </div> */}
-              {shouldShowMobileSearchElement && params.embeded === false && (
-                <div className="flex lg:hidden">
-                  <SolidGlobalSearchElement
-                    viewType="list"
-                    showSaveFilterPopup={showSaveFilterPopup}
-                    setShowSaveFilterPopup={setShowSaveFilterPopup}
-                    ref={solidGlobalSearchElementRef}
-                    viewData={solidListViewMetaData}
-                    handleApplyCustomFilter={handleApplyCustomFilter}
-                    filterPredicates={filterPredicates}
-                  >
-
-                  </SolidGlobalSearchElement>
-                </div>
-
-              )}
             </div>
           }
 
@@ -1694,10 +1684,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       `${permissionExpression(params.modelName, 'update')}`
                     ) &&
                       solidListViewLayout?.attrs?.edit !== false &&
-                      solidListViewLayout?.attrs?.showRowEditInContextMenu ===
-                      false && (
+                      showRowEditInContextMenu === false && (
                         <Column
-                          header="Edit"
+                          header={showRowEditAsIconOnly ? "" : "Edit"}
                           body={(rowData) => {
                             const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                             return (
@@ -1708,7 +1697,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     variant="ghost"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
                                     size="small"
-                                    leftIcon={<Pencil size={14} />}
+                                    leftIcon={showRowEditAsIconOnly ? <ArrowRight size={14} /> : <Pencil size={14} />}
+                                    tooltip={showRowEditAsIconOnly ? "Edit" : undefined}
+                                    aria-label="Edit"
                                     onClick={() => {
                                       if (params.embeded == true) {
                                         params.handleEditClickForEmbeddedView(rowData?.id);
@@ -1732,13 +1723,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     ) &&
                       solidListViewLayout?.attrs?.delete !== false &&
                       (params.embeded ||
-                        (solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== undefined &&
-                          solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== true)
+                        (showRowDeleteInContextMenu !== undefined &&
+                          showRowDeleteInContextMenu !== true)
                       )
                       &&
                       (
                         <Column
-                          header="Delete"
+                          header={showRowDeleteAsIconOnly ? "" : "Delete"}
                           body={(rowData) => {
                             const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                             return (
@@ -1750,6 +1741,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     size="small"
                                     variant="ghost"
                                     leftIcon={<Trash2 size={14} />}
+                                    tooltip={showRowDeleteAsIconOnly ? "Delete" : undefined}
+                                    aria-label="Delete"
                                     onClick={() => {
                                       if (params?.embededFieldRelationType === "many-to-many") {
                                         params?.handleDeleteClick(rowData.id);

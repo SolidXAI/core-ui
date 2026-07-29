@@ -13,7 +13,7 @@ import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImp
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { capitalize } from "lodash";
-import { Cog, Download, RefreshCw, Save, SlidersHorizontal, Table, Trash2, Upload } from "lucide-react";
+import { Archive, Cog, Download, RefreshCw, Save, SlidersHorizontal, Table, Trash2, Upload } from "lucide-react";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import {
     SolidDialog,
@@ -282,10 +282,12 @@ export const SolidListViewConfigure = (
                             </div>
                             {viewData?.data?.solidView?.model?.enableSoftDelete && (
                                 <SolidDropdownMenuCheckboxItem
+                                    className={showArchived ? "solid-archive-toggle-item-active" : undefined}
                                     checked={showArchived}
+                                    icon={<Archive size={14} className="solid-header-action-button-icon solid-archive-toggle-icon" />}
                                     onCheckedChange={() => setShowArchived(!showArchived)}
                                 >
-                                    Show Archived Records
+                                    Show Archived Rows
                                 </SolidDropdownMenuCheckboxItem>
                             )}
                             {showArchived && (

@@ -1,5 +1,5 @@
 import { type ChangeEvent, type KeyboardEvent, type MouseEvent, type RefObject, useEffect, useState } from 'react';
-import { useLazyGetusersQuery } from '../../../redux/api/userApi';
+import { useLazyGetMentionableUsersQuery } from '../../../redux/api/solidChatterMessageApi';
 import { ChatterMention, getMentionCandidate } from './chatterMentions';
 
 interface UseChatterMentionsProps {
@@ -14,7 +14,7 @@ export const useChatterMentions = ({ value, onChange, textareaRef }: UseChatterM
     const [mentionRange, setMentionRange] = useState<{ start: number; end: number } | null>(null);
     const [mentionSuggestions, setMentionSuggestions] = useState<any[]>([]);
     const [activeMentionIndex, setActiveMentionIndex] = useState(0);
-    const [getUsers, { isFetching: isFetchingMentionUsers }] = useLazyGetusersQuery();
+    const [getMentionableUsers, { isFetching: isFetchingMentionUsers }] = useLazyGetMentionableUsersQuery();
 
     const closeMentionMenu = () => {
         setMentionRange(null);
@@ -126,11 +126,11 @@ export const useChatterMentions = ({ value, onChange, textareaRef }: UseChatterM
             try {
                 const encodedQuery = encodeURIComponent(mentionQuery);
                 const queryString = mentionQuery
-                    ? `filters[username][$containsi]=${encodedQuery}&limit=8`
+                    ? `search=${encodedQuery}&limit=8`
                     : 'limit=8';
-                const response = await getUsers(queryString).unwrap();
+                const response = await getMentionableUsers(queryString).unwrap();
                 if (!isActive) return;
-                setMentionSuggestions(response?.data?.records || []);
+                setMentionSuggestions(response?.data || []);
                 setActiveMentionIndex(0);
             } catch (error) {
                 if (isActive) setMentionSuggestions([]);
@@ -141,7 +141,7 @@ export const useChatterMentions = ({ value, onChange, textareaRef }: UseChatterM
             isActive = false;
             window.clearTimeout(timeout);
         };
-    }, [mentionQuery, mentionRange, getUsers]);
+    }, [mentionQuery, mentionRange, getMentionableUsers]);
 
     return {
         mentions,
