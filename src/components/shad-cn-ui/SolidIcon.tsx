@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   AlertCircle,
   AlertTriangle,
+  Archive,
   ArrowDownWideNarrow,
   ArrowLeft,
   ArrowRight,
@@ -81,6 +82,7 @@ const ICON_MAP = {
   "si-angle-left": ChevronLeft,
   "si-angle-right": ChevronRight,
   "si-angle-up": ChevronUp,
+  "si-archive": Archive,
   "si-arrow-left": ArrowLeft,
   "si-arrow-right": ArrowRight,
   "si-bars": Menu,

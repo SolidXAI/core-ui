@@ -151,6 +151,7 @@ export function ensureSolidEntityApiRegistered(entityName: string, api: SolidEnt
 
   activeStore.reducerManager.add(api.reducerPath, api.reducer);
   activeStore.middlewareManager.add(api.reducerPath, api.middleware);
+  activeStore.replaceReducer(activeStore.reducerManager.reduce);
 
   log("Dynamically registered entity API reducer and middleware.", {
     entityName,

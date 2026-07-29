@@ -19,7 +19,8 @@ export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, 
     },
     inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
     handlePopupClose: () => setVisible(false),
-    modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
+    modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+    enableEmbeddedRelationSaveAndNew: true,
   };
 
   const dialogWidth = fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw";
