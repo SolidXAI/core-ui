@@ -42,6 +42,8 @@ type SolidCardViewParams = {
   embeded: boolean;
 };
 
+const DEFAULT_RECORD_SORT = ["id:desc"];
+
 const deriveCardViewConfig = (solidCardViewMetaData: any) => {
   const solidView = solidCardViewMetaData?.data?.solidView;
   const solidFieldsMetadata = solidCardViewMetaData?.data?.solidFieldsMetadata || {};
@@ -295,6 +297,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
     const queryData: any = {
       offset: first,
       limit: rows,
+      sort: DEFAULT_RECORD_SORT,
       populate: toPopulate,
       populateMedia: toPopulateMedia,
       filters: nextFilters,

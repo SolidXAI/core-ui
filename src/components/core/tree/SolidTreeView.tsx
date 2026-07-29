@@ -189,26 +189,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [viewModes, setViewModes] = useState<any>([]);
-  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
-    ? lightboxUrls
-      .map((item: any) => {
-        const src = item?.src || item?.downloadUrl || "";
-        if (!src) {
-          return null;
-        }
-
-        const mediaType = getMediaTypeFromUrl(src);
-        const slide: SolidLightboxSlide = { src };
-
-        if (mediaType !== "image") {
-          slide.type = mediaType;
-        }
-
-        return slide;
-      })
-      .filter((slide): slide is SolidLightboxSlide => !!slide)
-    : [];
-
   const headerRequestStatusLabel = treeLoading ? "Loading..." : null;
 
 
@@ -1625,6 +1605,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     [solidTreeViewLayout?.attrs?.headerButtons],
   );
 
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) return null;
+
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
+    : [];
+
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
   const entityDisplayName =  solidTreeViewMetaData?.data?.solidView?.model?.displayName || params?.modelName;
@@ -2248,6 +2244,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <SolidButton label="Yes" size="sm" severity="danger" onClick={recoverAll} />
         </SolidDialogFooter>
       </SolidDialog>
+      {openLightbox && (
+        <SolidLightbox
+          open={openLightbox}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
+        />
+      )}
 
       {openLightbox && (
         <SolidLightbox
