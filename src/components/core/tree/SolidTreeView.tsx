@@ -118,8 +118,6 @@ type PaginationEntry = {
 
 const DEFAULT_PAGE_SIZE = 25;
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
-const DEFAULT_RECORD_SORT_FIELD = "id";
-const DEFAULT_RECORD_SORT_ORDER: 1 | -1 = -1;
 const resolveDefaultPageSize = (options: number[]) => (
   options.includes(DEFAULT_PAGE_SIZE) ? DEFAULT_PAGE_SIZE : options[0]
 );
@@ -158,8 +156,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [expandedKeys, setExpandedKeys] = useState<any>({});
   const [treeLoading, setTreeLoading] = useState<boolean>(false);
 
-  const [sortField, setSortField] = useState<string>(DEFAULT_RECORD_SORT_FIELD);
-  const [sortOrder, setSortOrder] = useState<number>(DEFAULT_RECORD_SORT_ORDER);
+  const [sortField, setSortField] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<number>(0);
 
   const [pageSizeOptions, setPageSizeOptions] = useState<number[]>([10, 25, 50]);
   const [globalLimit, setGlobalLimit] = useState<number>(25);
@@ -409,8 +407,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     if (queryObject) {
       setToPopulate(queryObject.populate || []);
       setToPopulateMedia(queryObject.populateMedia || []);
-      setSortField(queryObject.sortField || DEFAULT_RECORD_SORT_FIELD);
-      setSortOrder(queryObject.sortOrder || DEFAULT_RECORD_SORT_ORDER);
+      setSortField(queryObject.sortField || "");
+      setSortOrder(queryObject.sortOrder || 0);
       setShowArchived(
         queryObject.showArchived === true ||
         queryObject.showArchived === "true" ||
@@ -449,8 +447,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
       setToPopulate(nextPopulate);
       setToPopulateMedia(nextPopulateMedia);
-      setSortField(DEFAULT_RECORD_SORT_FIELD);
-      setSortOrder(DEFAULT_RECORD_SORT_ORDER);
       setGlobalLimit(resolveDefaultPageSize(currentOptions));
       setShowArchived(false);
     }
