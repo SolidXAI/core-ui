@@ -27,6 +27,8 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { solidGet } from "../../../http/solidHttp";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
@@ -359,8 +361,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [rawKanbanGroupRecords, setRawKanbanGroupRecords] = useState<any[]>([]);
   const [serverSwimLaneCount, setServerSwimLaneCount] = useState<number>(0);
   const pathname = usePathname();
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = getSettingsMap(solidSettingsData);
   // @ts-ignore
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
+  const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
+    isSystemModule: solidKanbanViewMetaData?.data?.solidView?.module?.isSystem === true,
+  });
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
@@ -1177,7 +1184,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} showArchived={showArchived}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived}></KanbanBoard>
           }
         </div>
       </div>
