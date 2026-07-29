@@ -66,7 +66,7 @@ export default function PDFViewer({ url, height = '70vh' }: PDFViewerProps) {
     if (!url) {
         return (
             <div
-                className="flex items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
+                className="flex min-h-0 items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
                 style={{ height }}
             >
                 <p className="text-[var(--solid-text-muted)]">No PDF URL provided</p>
@@ -77,7 +77,7 @@ export default function PDFViewer({ url, height = '70vh' }: PDFViewerProps) {
     if (error) {
         return (
             <div
-                className="flex flex-col items-center justify-center gap-4 rounded-lg bg-[var(--solid-danger-soft)]"
+                className="flex min-h-0 flex-col items-center justify-center gap-4 rounded-lg bg-[var(--solid-danger-soft)]"
                 style={{ height }}
             >
                 <p className="text-[var(--solid-danger)]">{error}</p>
@@ -94,7 +94,7 @@ export default function PDFViewer({ url, height = '70vh' }: PDFViewerProps) {
     if (!blobUrl) {
         return (
             <div
-                className="flex items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
+                className="flex min-h-0 items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
                 style={{ height }}
             >
                 <p className="text-[var(--solid-text-secondary)]">Loading PDF...</p>
@@ -106,7 +106,7 @@ export default function PDFViewer({ url, height = '70vh' }: PDFViewerProps) {
         <iframe
             src={blobUrl}
             title="PDF preview"
-            className="w-full rounded-lg border border-[var(--solid-border-default)] bg-[var(--solid-surface-pane)]"
+            className="block min-h-0 w-full rounded-lg border border-[var(--solid-border-default)] bg-[var(--solid-surface-pane)]"
             style={{ height }}
         />
     );
