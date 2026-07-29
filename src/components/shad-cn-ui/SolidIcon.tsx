@@ -56,6 +56,7 @@ import {
   Plus,
   Power,
   RefreshCcw,
+  RotateCw,
   Save,
   Search,
   Send,
@@ -69,7 +70,9 @@ import {
   Users,
   Wifi,
   X,
-  XCircle
+  XCircle,
+  ZoomIn,
+  ZoomOut
 } from "lucide-react";
 
 type IconComponent = LucideIcon;
@@ -133,6 +136,7 @@ const ICON_MAP = {
   "si-plus": Plus,
   "si-power-off": Power,
   "si-refresh": RefreshCcw,
+  "si-rotate-right": RotateCw,
   "si-save": Save,
   "si-search": Search,
   "si-send": Send,
@@ -149,7 +153,9 @@ const ICON_MAP = {
   "si-upload": Upload,
   "si-user": User,
   "si-users": Users,
-  "si-wifi": Wifi
+  "si-wifi": Wifi,
+  "si-zoom-in": ZoomIn,
+  "si-zoom-out": ZoomOut
 } satisfies Record<string, IconComponent>;
 
 export type SolidIconName = keyof typeof ICON_MAP;
