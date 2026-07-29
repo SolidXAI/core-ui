@@ -1,6 +1,7 @@
 
 
-import { useEffect, useState } from 'react';
+import { Component, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
@@ -11,6 +12,27 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
     import.meta.url,
 ).toString();
+
+// react-pdf's Page component can throw synchronously out of a passive effect
+// (pdf.js worker transport torn down mid-load, e.g. under StrictMode's double
+// effect invocation) — that bypasses its own onLoadError callback, so it must
+// be caught here instead.
+class PdfRenderBoundary extends Component<{ onError: () => void; children: ReactNode }, { hasError: boolean }> {
+    state = { hasError: false };
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch(err: unknown) {
+        console.error("PDF render error:", err);
+        this.props.onError();
+    }
+
+    render() {
+        return this.state.hasError ? null : this.props.children;
+    }
+}
 
 export default function PDFViewer({ url }: any) {
     const [numPages, setNumPages] = useState<any>(null);
@@ -25,6 +47,8 @@ export default function PDFViewer({ url }: any) {
 
         setLoading(true);
         setError(null);
+        setNumPages(null);
+        setPageNumber(1);
 
         fetch(url)
             .then(async (res) => {
@@ -79,18 +103,20 @@ export default function PDFViewer({ url }: any) {
 
             {/* Render only after Blob URL is created */}
             {blobUrl && !loading && !error && (
-                <Document
-                    file={blobUrl}
-                    onLoadSuccess={onDocumentLoadSuccess}
-                    onLoadError={onDocumentLoadError}
-                    className="border border-gray-300 rounded-lg shadow-lg"
-                >
-                    <Page
-                        pageNumber={pageNumber}
-                        renderTextLayer={true}
-                        renderAnnotationLayer={true}
-                    />
-                </Document>
+                <PdfRenderBoundary key={blobUrl} onError={() => setError("Failed to render PDF")}>
+                    <Document
+                        file={blobUrl}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                        onLoadError={onDocumentLoadError}
+                        className="border border-gray-300 rounded-lg shadow-lg"
+                    >
+                        <Page
+                            pageNumber={pageNumber}
+                            renderTextLayer={true}
+                            renderAnnotationLayer={true}
+                        />
+                    </Document>
+                </PdfRenderBoundary>
             )}
 
             {numPages && (
