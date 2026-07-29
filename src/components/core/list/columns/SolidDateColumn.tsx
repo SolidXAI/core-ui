@@ -45,9 +45,12 @@ export default SolidDateColumn;
 
 
 
-export const DefaultDateListWidget = ({ rowData, solidListViewMetaData, fieldMetadata }: SolidListFieldWidgetProps) => {
+const resolveDateListFormat = (solidListViewMetaData: any, column: any): string | undefined =>
+    column?.attrs?.format ?? solidListViewMetaData?.data?.solidView?.layout?.attrs?.format;
+
+export const DefaultDateListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     let displayValue = rowData[fieldMetadata.name];
-    const format = solidListViewMetaData?.data?.solidView?.layout?.attrs?.format;
+    const format = resolveDateListFormat(solidListViewMetaData, column);
 
     return (
         <DateFieldViewComponent value={displayValue} format={format} fallback="-"></DateFieldViewComponent>
@@ -56,7 +59,7 @@ export const DefaultDateListWidget = ({ rowData, solidListViewMetaData, fieldMet
 
 export const DefaultDateTimeListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     let displayValue = rowData[fieldMetadata.name];
-    const format = solidListViewMetaData?.data?.solidView?.layout?.attrs?.format;
+    const format = resolveDateListFormat(solidListViewMetaData, column);
 
     return (
         <DateFieldViewComponent value={displayValue} format={format} fallback="-" showTime={true}></DateFieldViewComponent>

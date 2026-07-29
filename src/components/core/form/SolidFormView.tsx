@@ -46,6 +46,7 @@ import { getSettingsMap } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
+import { closePopup, openPopup, PopupEvent } from "../../../redux/features/popupSlice";
 import { useDispatch } from "react-redux";
 import { SolidButton, SolidConfirmDialog } from "../../shad-cn-ui";
 import {
@@ -71,7 +72,10 @@ export type SolidFormViewProps = {
     parentData?: any,
     redirectToPath?: string,
     onEmbeddedFormSave?: () => void,
+    enableEmbeddedRelationSaveAndNew?: boolean,
 };
+
+type EmbeddedRelationSubmitAction = "close" | "new";
 
 
 interface ErrorResponseData {
@@ -278,6 +282,27 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
         return new SolidComputedField(fieldContext);
     }
     return null;
+}
+
+const normalizeWorkflowFieldValueForFormData = (value: any, fieldMetadata: any) => {
+    if (fieldMetadata?.type === "relation" && fieldMetadata?.relationType === "many-to-one") {
+        if (value && typeof value === "object" && "solidManyToOneValue" in value) {
+            return value;
+        }
+        if (value && typeof value === "object" && "id" in value) {
+            return { solidManyToOneValue: value.id };
+        }
+        return { solidManyToOneValue: value };
+    }
+
+    if (fieldMetadata?.type === "selectionStatic" || fieldMetadata?.type === "selectionDynamic") {
+        if (value && typeof value === "object" && "value" in value) {
+            return value;
+        }
+        return { label: String(value ?? ""), value };
+    }
+
+    return value;
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
@@ -593,6 +618,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isMobileViewport, setIsMobileViewport] = useState(false);
     const solidFormWrapperRef = useRef<HTMLDivElement | null>(null);
+    const embeddedRelationSubmitActionRef = useRef<EmbeddedRelationSubmitAction>("close");
+    const formikRef = useRef<FormikObject | null>(null);
 
     const tabFieldsRef = useRef<Array<{ tabKey: string; fields: string[] }>>([]);
     const [requestedTab, setRequestedTab] = useState<string | null>(null);
@@ -839,6 +866,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (params.embeded == true && params.onEmbeddedFormSave) {
                 params.onEmbeddedFormSave();
             }
+
+            if (
+                params.embeded === true &&
+                params.enableEmbeddedRelationSaveAndNew === true &&
+                isEntityCreateSuccess === true &&
+                embeddedRelationSubmitActionRef.current === "new"
+            ) {
+                formikRef.current?.resetForm();
+                embeddedRelationSubmitActionRef.current = "close";
+                return;
+            }
+
             // Close The pop in case the form is used in embeded form
             if (params.embeded == true) {
                 params.handlePopupClose()
@@ -950,15 +989,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             });
 
-            let solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
-            if (params.id !== "new") {
-                if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
-                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
-                        formData.append(solidWorkflowField, solidWorkflowFieldValue);
-                    }
-                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
-                        formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
-                    }
+            const solidWorkflowField = solidView?.layout?.attrs?.workflowField;
+            const workflowFieldMetadata = solidFieldsMetadata?.[solidWorkflowField];
+            if (params.id !== "new" && solidWorkflowField && workflowFieldMetadata && solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                const workflowFieldContext: SolidFieldProps = {
+                    fieldMetadata: workflowFieldMetadata,
+                    field: layoutFieldsObj[solidWorkflowField] ?? { attrs: { name: solidWorkflowField } },
+                    data: initialEntityData,
+                    solidFormViewMetaData: solidFormViewMetaData,
+                    modelName: params.modelName
+                };
+                const workflowSolidField = fieldFactory(workflowFieldMetadata?.type, workflowFieldContext);
+                if (workflowSolidField) {
+                    formData.delete(solidWorkflowField);
+                    formData.delete(`${solidWorkflowField}Id`);
+                    workflowSolidField.updateFormData(
+                        normalizeWorkflowFieldValueForFormData(solidWorkflowFieldValue, workflowFieldMetadata),
+                        formData
+                    );
                 }
             }
             if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
@@ -995,9 +1043,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (!params.embeded) {
                         const baseFormPath = normalizeSolidFormActionPath(pathname, "form");
                         const queryParams = new URLSearchParams(searchParams.toString());
-                        queryParams.set("viewMode", "view");
+                        const saveParentRelationField = formikRef.current?.status?.saveParentRelationField || window.sessionStorage.getItem("solidSaveParentRelationField");
+                        const nextViewMode = saveParentRelationField ? "edit" : "view";
+                        queryParams.set("viewMode", nextViewMode);
+                        if (saveParentRelationField) {
+                            queryParams.set("childEntity", saveParentRelationField);
+                        }
                         router.replace(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
-                        setViewMode("view")
+                        setViewMode(nextViewMode)
                     }
                     return result;
                 }
@@ -1399,6 +1452,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             enableReinitialize: true,
             onSubmit: onFormikSubmit,
         });
+        formikRef.current = formik;
 
         return (
             <div className={`solid-form-wrapper ${viewMode=="edit"?"solid-form-edit":"solid-form-view"}`} ref={solidFormWrapperRef}>
@@ -1466,6 +1520,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             enableReinitialize: true,
             onSubmit: onFormikSubmit,
         });
+        formikRef.current = formik;
 
         const formFieldOnXXX = async (event: ChangeEvent<HTMLInputElement>, eventType: string) => {
             // console.log("formFieldOnXXX", eventType, event);
@@ -1494,6 +1549,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                 // Invoke the dynamic module...
                 if (dynamicChangeHandler) {
+                    const popupApi = {
+                        open: (popupEvent: PopupEvent) => dispatch(openPopup({
+                            closable: true,
+                            ...popupEvent,
+                        })),
+                        close: () => dispatch(closePopup()),
+                    };
+
                     const event: SolidUiEvent = {
                         fieldsMetadata: solidFieldsMetadata,
                         formData: formik.values,
@@ -1504,6 +1567,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         type: eventType,
                         viewMetadata: solidView,
                         formViewLayout: formViewLayout,
+                        popup: popupApi,
                         queryParams: {
                             actionName,
                             actionContext,
@@ -1908,6 +1972,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
+                            setEmbeddedRelationSubmitAction={(action: EmbeddedRelationSubmitAction) => {
+                                embeddedRelationSubmitActionRef.current = action;
+                            }}
                             // headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
                             showMobileOpenChatter={isMobileViewport && !isShowChatter && params.embeded !== true}
                             onMobileOpenChatter={() => setShowChatter(true)}

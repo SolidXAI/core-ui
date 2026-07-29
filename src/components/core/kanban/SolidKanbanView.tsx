@@ -17,7 +17,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
-import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage, hasStoredFilterPredicates, hasStoredSearchUiState } from "../common/globalSearchPersistence";
+import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage, hasMeaningfulPersistedFilter, hasStoredFilterPredicates } from "../common/globalSearchPersistence";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
@@ -145,10 +145,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
   const handleCustomButtonClick = useHandleListCustomButtonClick();
-  const shouldShowMobileSearchElement =
-    showGlobalSearchElement ||
-    hasStoredSearchUiState(filterPredicates) ||
-    hasStoredSearchUiState(getFilterObjectFromLocalStorage());
+  const hasFilterPredicatesApplied = hasStoredFilterPredicates(filterPredicates);
+  const hasActiveFilters = hasMeaningfulPersistedFilter(filters);
+  const hasAnyActiveFilters = hasActiveFilters || hasFilterPredicatesApplied;
+  const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
+
+  useEffect(() => {
+    if (params.embeded === false) {
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState);
+    }
+  }, [hasAnyActiveFilters, hasStoredFilterState, params.embeded]);
 
   const [swimlaneDefinitions, setSwimlaneDefinitions] = useState<KanbanSwimlaneDefinition[]>([]);
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
@@ -1058,7 +1064,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : isRecoveringRecord ? "Recovering..." : loading || !queryDataLoaded ? "Loading..." : null;
 
   const handleRefreshView = () => {
-    if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
+    if (hasAnyActiveFilters) {
       // @ts-ignore
       solidGlobalSearchElementRef.current?.clearAppliedFilters?.({ preserveGrouping: true });
       return;
@@ -1082,8 +1088,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       <div className="solid-list-content  flex flex-col flex-grow-1">
         <div className="solid-list-surface solid-kanban-surface flex flex-col flex-1 min-h-0">
           <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-col lg:flex-row">
-            <div className="flex justify-between w-full">
-              <div className="solid-list-toolbar-left flex w-full items-center gap-3">
+            <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
+              <div className="solid-list-toolbar-left flex w-full items-center gap-3 lg:min-w-0 lg:flex-1">
                 {/* {params.embeded !== true &&
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
@@ -1092,13 +1098,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 */}
 
                 {/* <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p> */}
-                <div className="hidden lg:flex">
+                <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0  w-full lg:flex lg:min-w-0`}>
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
                   <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
                 </div>
               </div>
 
-              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                 <div className="flex lg:hidden">
                   <SolidButton
@@ -1167,11 +1173,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 />
               </div>
             </div>
-            {shouldShowMobileSearchElement && (
-              <div className="flex lg:hidden">
-                <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
-              </div>
-            )}
           </div>
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>

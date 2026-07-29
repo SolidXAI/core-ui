@@ -35,10 +35,14 @@ export const SolidDropdownMenuItem = React.forwardRef<
   return <DropdownMenu.Item ref={ref} className={cx("solid-dropdown-menu-item", className)} {...props} />;
 });
 
+type SolidDropdownMenuCheckboxItemProps = React.ComponentPropsWithoutRef<typeof DropdownMenu.CheckboxItem> & {
+  icon?: React.ReactNode;
+};
+
 export const SolidDropdownMenuCheckboxItem = React.forwardRef<
   HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof DropdownMenu.CheckboxItem>
->(function SolidDropdownMenuCheckboxItem({ className, children, checked, ...props }, ref) {
+  SolidDropdownMenuCheckboxItemProps
+>(function SolidDropdownMenuCheckboxItem({ className, children, checked, icon, ...props }, ref) {
   return (
     <DropdownMenu.CheckboxItem
       ref={ref}
@@ -47,9 +51,11 @@ export const SolidDropdownMenuCheckboxItem = React.forwardRef<
       {...props}
     >
       <span className="solid-dropdown-menu-indicator">
-        <DropdownMenu.ItemIndicator>
-          <SolidIcon name="si-check" aria-hidden />
-        </DropdownMenu.ItemIndicator>
+        {icon ? icon : (
+          <DropdownMenu.ItemIndicator>
+            <SolidIcon name="si-check" aria-hidden />
+          </DropdownMenu.ItemIndicator>
+        )}
       </span>
       <span className="solid-dropdown-menu-item-text">{children}</span>
     </DropdownMenu.CheckboxItem>
@@ -68,7 +74,7 @@ export const SolidDropdownMenuRadioItem = React.forwardRef<
     >
       <span className="solid-dropdown-menu-indicator">
         <DropdownMenu.ItemIndicator>
-          <span className="solid-dropdown-menu-radio-dot" />
+          <SolidIcon name="si-check" aria-hidden />
         </DropdownMenu.ItemIndicator>
       </span>
       <span className="solid-dropdown-menu-item-text">{children}</span>
