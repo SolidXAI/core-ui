@@ -19,6 +19,7 @@ import { DatasourcesPage } from "./pages/admin/core/DatasourcesPage";
 import { DatasourceIntrospectionPage } from "./pages/admin/core/DatasourceIntrospectionPage";
 import { WorkflowDefinitionEditorPage } from "./pages/admin/core/WorkflowDefinitionEditorPage";
 import { WorkflowExecutionDetailPage } from "./pages/admin/core/WorkflowExecutionDetailPage";
+import { MediaUploadPage } from "./pages/admin/core/MediaUploadPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
@@ -92,6 +93,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/:modelName/card", element: pick("card", <CardPage />), handle: { title: "Card", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/dashboard/:dashboardName", element: pick("dashboard", <DashboardPage />), handle: { title: "Dashboard", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />), handle: { title: "Form", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/media/upload", element: <MediaUploadPage />, handle: { title: "Upload Media", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/workflow-definition/editor/:id", element: <WorkflowDefinitionEditorPage />, handle: { title: "Workflow Definition Editor", manageDocumentMeta: true } },
     { path: "/admin/core/settings", element: pick("settings", <SettingsPage />), handle: { title: "Settings", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/datasources", element: <DatasourcesPage />, handle: { title: "Datasources", manageDocumentMeta: true } },
