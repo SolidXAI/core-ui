@@ -76,7 +76,7 @@ export const SolidVersionInfo = () => {
     return <p className={styles.versionError}>Unable to load version information.</p>;
   }
 
-  const packages = ((data as any)?.data ?? data) as Record<string, PackageVersionInfo>;
+  const packages = ((data as any)?.data?.data ?? (data as any)?.data ?? data) as Record<string, PackageVersionInfo>;
   const envName = (env("VITE_SOLIDX_ENV") || "").toLowerCase();
   const isDevLikeEnvironment = ["dev", "development", "staging", "stage", "uat", "test", "local"].includes(envName);
   const canOpenDiagnostics = hasAnyRole(session?.user?.roles, ["Admin"]) && isDevLikeEnvironment;
@@ -84,6 +84,10 @@ export const SolidVersionInfo = () => {
   const backendApi = env("NEXT_PUBLIC_BACKEND_API_URL") || env("API_URL") || "(not set)";
   const roles = (session?.user?.roles || []).map((role: any) => role?.name || role).join(", ") || "(none)";
   const activeCount = poolSnapshot.filter((entry) => entry.active).length;
+
+  if (!packages || Object.keys(packages).length === 0) {
+    return <p className={styles.versionError}>Version information is currently unavailable.</p>;
+  }
 
   return (
     <div className={styles.versionPanel}>

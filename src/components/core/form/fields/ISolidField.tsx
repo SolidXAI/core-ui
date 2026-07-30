@@ -15,6 +15,8 @@ export type SolidFieldProps = {
     parentFieldName?: string,
     parentData?: any,
     onEmbeddedFormSave?: () => void,
+    setLightboxUrls?: any,
+    setOpenLightbox?: any,
 };
 
 export type FormikObject = {

@@ -44,6 +44,8 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { getSettingsMap } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
+import { SolidVersionHistory, getWorkflowStatusLabel } from "./SolidVersionHistory";
+import { appendVersionHistoryPage, SolidWorkflowStatusPill, SolidWorkflowConfirmDialog, useDraftPublishWorkflow } from "./SolidDraftPublishWorkflow";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
 import { closePopup, openPopup, PopupEvent } from "../../../redux/features/popupSlice";
@@ -73,6 +75,7 @@ export type SolidFormViewProps = {
     redirectToPath?: string,
     onEmbeddedFormSave?: () => void,
     enableEmbeddedRelationSaveAndNew?: boolean,
+    hideVersionHistory?: boolean,
 };
 
 type EmbeddedRelationSubmitAction = "close" | "new";
@@ -320,7 +323,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         readOnly: readOnly,
         viewMode: viewMode,
         onChange: onChange,
-        onBlur: onBlur
+        onBlur: onBlur,
+        setLightboxUrls: setLightboxUrls,
+        setOpenLightbox: setOpenLightbox
     }
     if (parentData) {
         fieldContext.parentData = parentData;
@@ -424,7 +429,7 @@ const SolidSheet = ({ children }: any) => (
 // Internal tab data carrier — SolidNotebook reads props from this
 const SolidPageTab = ({ children }: any) => <>{children}</>;
 
-const SolidNotebook = ({ children, activeTab, embeded, requestedTab, requestedTabVersion }: any) => {
+const SolidNotebook = ({ children, activeTab, embeded, requestedTab, requestedTabVersion, workflowStatusLabel }: any) => {
     const childrenArray = React.Children.toArray(children).filter(child => !!child) as any[];
 
     const router = useRouter();
@@ -481,6 +486,7 @@ const SolidNotebook = ({ children, activeTab, embeded, requestedTab, requestedTa
                         {child.props?.label}
                     </button>
                 ))}
+                <SolidWorkflowStatusPill label={workflowStatusLabel} />
             </div>
             <div className="solid-notebook-content" role="tabpanel">
                 {childrenArray[activeIndex]}
@@ -599,14 +605,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const router = useRouter();
     const dispatch = useDispatch();
     const searchParams = useSearchParams();
-    const [confirmVisible, setConfirmVisible] = useState(false);
-    const confirmResolveRef = useRef<(value: boolean) => void>();
     const [redirectToList, setRedirectToList] = useState(false);
     const [selectedLocale, setSelectedLocale] = useState<string | null>('en');
     const [defaultEntityLocaleId, setDefaultEntityLocaleId] = useState<string | null>(null);
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
-    const [published, setPublished] = useState<string | null>(null);
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
     const [createMode, setCreateMode] = useState<boolean>(false);
@@ -804,8 +807,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         useGetSolidEntityByIdQuery,
         useUpdateSolidEntityMutation,
         usePatchUpdateSolidEntityMutation,
-        usePublishSolidEntityMutation,
-        useUnpublishSolidEntityMutation
     } = entityApi;
 
     const [
@@ -828,15 +829,22 @@ const SolidFormView = (params: SolidFormViewProps) => {
         { isSuccess: isEntityPatchSuceess, isError: isEntityPatchError, error: entityPatchError },
     ] = usePatchUpdateSolidEntityMutation();
 
-    const [
-        publishSolidEntity,
-        { isSuccess: isEntityPublishedSuccess, isError: isEntityPublishedError, error: entityPublishedError },
-    ] = usePublishSolidEntityMutation();
-
-    const [
-        unpublishSolidEntity,
-        { isSuccess: isEntityUnpublishedSuccess, isError: isEntityUnpublishedError, error: entityUnpublishedError },
-    ] = useUnpublishSolidEntityMutation();
+    const {
+        published,
+        setPublished,
+        confirmVisible,
+        workflowConfirmAction,
+        handleDraftPublishWorkFlow,
+        handleConfirmAccept,
+        handleConfirmReject,
+        isEntityPublishedSuccess,
+        isEntityUnpublishedSuccess,
+    } = useDraftPublishWorkflow({
+        entityApi,
+        id: params.id,
+        onWorkflowChange: () => refetchSolidFormViewData(),
+        onEmbeddedFormSave: params.onEmbeddedFormSave,
+    });
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
@@ -937,26 +945,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
             handleError(entityUpdateError);
         } else if (isEntityPatchError) {
             handleError(entityPatchError);
-        } else if (isEntityPublishedError) {
-            handleError(entityPublishedError);
-        } else if (isEntityUnpublishedError) {
-            handleError(entityUnpublishedError);
         }
     }, [
         isEntityCreateError,
         isEntityDeleteError,
         isEntityUpdateError,
         isEntityPatchError,
-        isEntityPublishedError,
-        isEntityUnpublishedError
     ]);
-
-    const confirmDialogWithPromise = () => {
-        return new Promise<boolean>((resolve) => {
-            confirmResolveRef.current = resolve;
-            setConfirmVisible(true);
-        });
-    };
 
     const onFormikSubmit = async (values: any) => {
         const solidView = solidFormViewMetaData.data.solidView;
@@ -1017,11 +1012,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData.append('defaultEntityLocaleId', defaultEntityLocaleId.toString());
                 }
             }
-            if (solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow) {
-                if (published) {
-                    formData.append('publishedAt', published);
-                }
-            }
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
             } else {
@@ -1061,7 +1051,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (!params.embeded) {
                         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORM_UPDATE, detail: ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY }));
                         if (result?.statusCode === 200) {
-                            updateViewMode("view")
+                            const nextId = result?.data?.id;
+                            if (nextId && String(nextId) !== String(params.id)) {
+                                const queryParams = new URLSearchParams(searchParams.toString());
+                                queryParams.set("viewMode", "view");
+                                const updatedPath = pathname.replace(/\/form\/[^/]+/, `/form/${nextId}`);
+                                router.replace(`${updatedPath}?${queryParams.toString()}`);
+                                setViewMode("view");
+                            } else {
+                                updateViewMode("view")
+                            }
                         }
                     }
                     return result;
@@ -1148,10 +1147,15 @@ const SolidFormView = (params: SolidFormViewProps) => {
             } else {
                 setFormViewLayout(solidFormViewMetaData?.data?.solidView?.layout);
             }
-            setPublished(solidFormViewData?.data?.publishedAt);
+            setPublished(solidFormViewData?.data?.isPublished ? solidFormViewData?.data?.publishedAt : null);
             setFormViewMetaData(solidFormViewMetaData);
         }
-    }, [solidFormViewMetaData]);
+    }, [solidFormViewMetaData, solidFormViewData]);
+
+    const isDraftPublishWorkflowEnabled = solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow === true;
+    const currentWorkflowStatusLabel = isDraftPublishWorkflowEnabled && params.id !== 'new'
+        ? getWorkflowStatusLabel(solidFormViewData?.data)
+        : null;
 
     // useEffect(() => {
     //     const handleOnFormLayoutLoadEvent = async () => {
@@ -1692,6 +1696,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         const fieldMetadata = recursiveFVMD.data.solidFieldsMetadata[normalizedAttrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
                         const readOnlyPermission = !actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) && params.id !== "new";
+                        const readOnlyArchivedVersion = solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow === true
+                            && solidFormViewData?.data?.isLatest === false
+                            && params.id !== "new";
                         return <SolidField
                             key={normalizedAttrs.name}
                             field={normalizedElement}
@@ -1700,7 +1707,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
                             solidFormViewMetaData={recursiveFVMD}
                             modelName={params.modelName}
-                            readOnly={readOnlyPermission}
+                            readOnly={readOnlyPermission || readOnlyArchivedVersion}
                             viewMode={viewMode}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
@@ -1716,7 +1723,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "notebook":
                     if (visible === true) {
                         tabFieldsRef.current = [];
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded} requestedTab={requestedTab} requestedTabVersion={requestedTabVersion}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
+                        const workflowStatusLabel = recursiveFVMD?.data?.solidView?.model?.draftPublishWorkflow === true
+                            ? currentWorkflowStatusLabel
+                            : null;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded} requestedTab={requestedTab} requestedTabVersion={requestedTabVersion} workflowStatusLabel={workflowStatusLabel}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
                     }
                     break;
                 case "page":
@@ -1746,6 +1756,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         }
                     }
                     break;
+                case "versionHistory":
+                    if (visible === true) {
+                        return (
+                            <SolidVersionHistory
+                                key={key}
+                                params={params}
+                                currentRecord={solidFormViewData?.data}
+                                onRefresh={() => {
+                                    refetchSolidFormViewData();
+                                    setRefreshChatterMessage(true);
+                                }}
+                            />
+                        );
+                    }
+                    break;
 
                 default:
                     return null;
@@ -1764,7 +1789,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (!solidView || !solidFieldsMetadata) {
                 return;
             }
-            const updatedLayout = [formViewLayout];
+            const shouldShowVersionHistory = Boolean(
+                recursiveFVMD.data.solidView?.model?.draftPublishWorkflow
+                && params.id !== 'new'
+                && params.embeded !== true
+                && !params.hideVersionHistory
+            );
+            const layoutToRender = shouldShowVersionHistory ? appendVersionHistoryPage(formViewLayout) : formViewLayout;
+            const updatedLayout = [layoutToRender];
             const dynamicForm = updatedLayout.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `root-${index}`));
 
             return dynamicForm;
@@ -1883,44 +1915,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             router.push(`${updatedPath}?${queryParams.toString()}`);
         };
 
-        const handleConfirmAccept = () => {
-            confirmResolveRef.current?.(true);
-            setConfirmVisible(false);
-        };
-
-        const handleConfirmReject = () => {
-            confirmResolveRef.current?.(false);
-            setConfirmVisible(false);
-        };
-        const handleDraftPublishWorkFlow = async (type: "publish" | "unpublish") => {
-            const userChoice = await confirmDialogWithPromise();
-            if (!userChoice) return;
-
-            // const finalPublishedValue =
-            //     type === "publish" ? new Date().toISOString() : "";
-
-            //   setPublished(finalPublishedValue);
-
-            // const formdata = new FormData();
-            // formdata.append("publishedAt", finalPublishedValue);
-
-            let result;
-
-            if (type === "publish") {
-                result = await publishSolidEntity(params.id).unwrap();
-                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.SAVED, detail: ERROR_MESSAGES.MARK_PUBLISH }));
-            } else {
-                result = await unpublishSolidEntity(params.id).unwrap();
-                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.SAVED, detail: ERROR_MESSAGES.MARK_UNPUBLISH }));
-            }
-
-            console.log("publish/unpublish result", result);
-
-            // Set updated publish value from API response
-            setPublished(result?.data?.publishedAt);
-        };
-
-
         const lightboxSlides: SolidLightboxSlide[] = lightboxUrls
             .map((item: any) => {
                 const src = item?.src || item?.downloadUrl || "";
@@ -1935,8 +1929,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 return slide;
             })
             .filter((slide): slide is SolidLightboxSlide => !!slide);
-
-
 
         return (
             <div className="solid-form-wrapper" ref={solidFormWrapperRef}>
@@ -2055,6 +2047,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 handleLocaleChangeRedirect={handleLocaleChangeRedirect}
                                 solidFormViewData={solidFormViewData}
                                 published={published}
+                                workflowStatusLabel={currentWorkflowStatusLabel}
                                 actionsAllowed={actionsAllowed}
                                 mcpUrl={mcpUrl}
                             />
@@ -2099,20 +2092,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     />
                 )}
 
-                <SolidConfirmDialog
+                <SolidWorkflowConfirmDialog
                     open={confirmVisible}
-                    title="Confirmation"
-                    confirmLabel="Yes, confirm"
-                    cancelLabel="No, cancel"
+                    workflowConfirmAction={workflowConfirmAction}
                     onConfirm={handleConfirmAccept}
                     onCancel={handleConfirmReject}
-                    message={
-                        <div className="flex flex-col items-center justify-center text-center space-y-3">
-                            <p className="text-gray-800 text-base">
-                                Are you sure you want to {published !== null ? 'unpublish' : 'publish'}?
-                            </p>
-                        </div>
-                    }
                 />
             </div>
         );

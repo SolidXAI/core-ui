@@ -3,6 +3,7 @@ import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 import { getExtensionComponent } from "../../../../helpers/registry";
+import { getDefaultPublishStatusListWidget } from './PublishStatusColumnDefaults';
 
 const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const truncateAfter = column?.attrs?.truncateAfter ?? solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
@@ -19,7 +20,7 @@ const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: S
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultDateTimeListWidget';
+                    viewWidget = getDefaultPublishStatusListWidget(solidListViewMetaData, fieldMetadata.name) ?? 'DefaultDateTimeListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {

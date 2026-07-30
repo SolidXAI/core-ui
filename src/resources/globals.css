@@ -3399,6 +3399,12 @@ li.header-li-px {
   color: color-mix(in srgb, hsl(334 68% 38%) 82%, var(--foreground) 18%);
 }
 
+.solid-chip-tone-handler {
+  background: color-mix(in srgb, hsl(142 60% 38%) 12%, transparent);
+  border-color: color-mix(in srgb, hsl(142 60% 38%) 26%, transparent);
+  color: color-mix(in srgb, hsl(142 55% 30%) 82%, var(--foreground) 18%);
+}
+
 .solid-chip-pill-remove {
   border: 0;
   background: transparent;
@@ -3499,7 +3505,8 @@ li.header-li-px {
 .solid-chip-manager-item.solid-chip-tone-search .solid-chip-manager-item-label,
 .solid-chip-manager-item.solid-chip-tone-predefined .solid-chip-manager-item-label,
 .solid-chip-manager-item.solid-chip-tone-custom .solid-chip-manager-item-label,
-.solid-chip-manager-item.solid-chip-tone-grouping .solid-chip-manager-item-label {
+.solid-chip-manager-item.solid-chip-tone-grouping .solid-chip-manager-item-label,
+.solid-chip-manager-item.solid-chip-tone-handler .solid-chip-manager-item-label {
   color: inherit;
 }
 
@@ -4575,6 +4582,53 @@ li.header-li-px {
   align-items: flex-start;
 }
 
+.solid-defined-filter-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0 4px;
+}
+
+.solid-defined-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, hsl(142 60% 38%) 30%, transparent);
+  background: color-mix(in srgb, hsl(142 60% 38%) 8%, transparent);
+  color: color-mix(in srgb, hsl(142 55% 30%) 88%, var(--foreground) 12%);
+  border-radius: 999px;
+  min-height: 24px;
+  padding: 0 10px 0 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.solid-defined-filter-badge svg {
+  flex: 0 0 auto;
+}
+
+.solid-defined-filter-badge:hover {
+  background: color-mix(in srgb, hsl(142 60% 38%) 16%, transparent);
+  border-color: color-mix(in srgb, hsl(142 60% 38%) 44%, transparent);
+}
+
+.solid-defined-filter-badge:focus-visible {
+  outline: 2px solid color-mix(in srgb, hsl(142 60% 38%) 50%, transparent);
+  outline-offset: 1px;
+}
+
+.solid-defined-filter-badge-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
 .solid-search-overlay-empty {
   display: flex;
   flex-direction: column;
@@ -5647,6 +5701,193 @@ li.header-li-px {
   font-size: 0.74rem;
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-media-relative-uri-preview {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.solid-media-relative-uri-preview__label {
+  margin: 0;
+}
+
+.solid-media-relative-uri-preview__content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.solid-media-relative-uri-preview__button {
+  flex: 0 0 auto;
+  gap: 0.375rem;
+}
+
+.solid-media-relative-uri-preview__external {
+  flex: 0 0 auto;
+}
+
+.solid-media-upload-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.solid-media-upload-page__header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.solid-media-upload-page__title {
+  font-size: 1.25rem;
+  font-weight: 650;
+  margin: 0;
+}
+
+.solid-media-upload-page__subtitle {
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  font-size: 0.875rem;
+  margin: 0.25rem 0 0;
+}
+
+.solid-media-upload-form {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 640px;
+  padding: 1rem;
+  width: min(100%, 50rem);
+}
+
+.solid-media-upload-stack {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.solid-media-upload-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.solid-media-upload-field > span {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.solid-media-upload-help {
+  color: color-mix(in srgb, var(--foreground) 54%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  margin-top: -0.125rem;
+}
+
+.solid-media-upload-dropzone {
+  align-items: center;
+  border: 1px dashed var(--border);
+  border-radius: 0.5rem;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  justify-content: center;
+  min-height: 160px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.solid-media-upload-dropzone:not(.is-disabled) {
+  cursor: pointer;
+}
+
+.solid-media-upload-dropzone.is-active {
+  background: color-mix(in srgb, var(--primary-color) 7%, transparent);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.solid-media-upload-dropzone.is-disabled {
+  background: color-mix(in srgb, var(--muted) 35%, transparent);
+  opacity: 0.72;
+}
+
+.solid-media-upload-dropzone__input {
+  display: none;
+}
+
+.solid-media-upload-dropzone__content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.solid-media-upload-dropzone__title {
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  font-weight: 650;
+}
+
+.solid-media-upload-dropzone__hint {
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+  font-size: 0.8125rem;
+}
+
+.solid-media-upload-dropzone__files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.solid-media-upload-dropzone__file {
+  align-items: center;
+  background: color-mix(in srgb, var(--foreground) 5%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  display: inline-flex;
+  font-size: 0.8125rem;
+  gap: 0.375rem;
+  max-width: 100%;
+  min-height: 2rem;
+  overflow: hidden;
+  padding: 0.375rem 0.5rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.solid-media-upload-summary {
+  color: color-mix(in srgb, var(--foreground) 66%, transparent);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.8125rem;
+  gap: 0.75rem;
+}
+
+.solid-media-upload-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .solid-media-upload-page__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
 }
 
 .solid-mimetype-chip {
