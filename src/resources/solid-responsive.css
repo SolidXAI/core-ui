@@ -207,12 +207,6 @@
         max-width: calc(100vw - 20px) !important;
     }
 
-    /* =================  cog wheel ================== */
-    .customize-layout-panel {
-        top: 12% !important;
-        left: calc(100% - 420px) !important;
-    }
-
     .cogwheel-column-filter {
         max-height: 250px !important;
     }
@@ -471,12 +465,6 @@
     }
 
 
-
-    /* =================  cog wheel ================== */
-    .customize-layout-panel {
-        top: 16% !important;
-        left: calc(100% - 350px) !important;
-    }
 
     .cogwheel-column-filter {
         max-height: 220px !important;

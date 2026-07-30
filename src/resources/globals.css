@@ -4377,40 +4377,19 @@ li.header-li-px {
 }
 
 @media (min-width: 2151px) and (max-width: 2399px) {
-  .customize-layout-panel {
-    position: absolute;
-    left: 78.5% !important;
-    top: 13% !important;
-  }
 }
 
 @media (min-width: 1920px) and (max-width: 2150px) {
-  .customize-layout-panel {
-    position: absolute;
-    left: 76% !important;
-    top: 15% !important;
-  }
 }
 
 
 @media (min-width: 1700px) and (max-width: 1859px) {
-  .customize-layout-panel {
-    position: absolute;
-    left: 73% !important;
-    top: 15% !important;
-  }
 }
 
 
 @media (min-width: 1600px) and (max-width: 1699px) {
   html {
     font-size: 100% !important;
-  }
-
-  .customize-layout-panel {
-    position: absolute;
-    left: 71% !important;
-    top: 17% !important;
   }
 
   /* .chatter-section {
@@ -4422,12 +4401,6 @@ li.header-li-px {
 @media (min-width: 1500px) and (max-width: 1599px) {
   html {
     font-size: 97.5% !important;
-  }
-
-  .customize-layout-panel {
-    position: absolute;
-    left: 69% !important;
-    top: 17.3% !important;
   }
 
   /* 
@@ -4442,13 +4415,6 @@ li.header-li-px {
     font-size: 95% !important;
   }
 
-  .customize-layout-panel {
-    position: absolute;
-    left: 67% !important;
-    top: 17.5% !important;
-  }
-
-
   /* .chatter-section {
     width: 330px;
   } */
@@ -4460,12 +4426,6 @@ li.header-li-px {
     font-size: 92.5% !important;
   }
 
-  .customize-layout-panel {
-    position: absolute;
-    left: 63.5% !important;
-    top: 15% !important;
-  }
-
   /* .chatter-section {
     width: 310px;
   } */
@@ -4475,12 +4435,6 @@ li.header-li-px {
 @media (min-width: 1200px) and (max-width: 1299px) {
   html {
     font-size: 90% !important;
-  }
-
-  .customize-layout-panel {
-    position: absolute;
-    left: 61% !important;
-    top: 15% !important;
   }
 
   /* 
@@ -4495,11 +4449,6 @@ li.header-li-px {
     font-size: 87.5% !important;
   }
 
-  .customize-layout-panel {
-    position: absolute;
-    left: 59% !important;
-    top: 14% !important;
-  }
 }
 
 .kanban-ungrouped-column {
