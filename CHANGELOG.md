@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.4] - 2026-07-29
+
+### Added
+
+- streamline saved filter application and renaming process in SolidGlobalSearchElement
+- update savedFilters state management to handle renaming and immediate application of custom filters
+- add defined filters support in SolidGlobalSearchElement and SolidListView
+- update datasource introspection and core types
+- update solid-tailwind-generated.css and solid-core.d.ts
+
+### Fixed
+
+- correct import paths for PublishStatusColumnDefaults in multiple components
+- update CSS variables for consistent styling across components
+- prevent legacy draft/publish columns from being incorrectly treated as superclass-handled in introspection
+
+### Changed
+
+- remove mobile search element from SolidListView
+
+### Other
+
+- Refactor MediaCardWidget to use new MediaFileSizeWidget for file size formatting
+- update media upload styles and improve dropzone functionality
+- handle change password and version info
+- tree view sorting removed
+- update defined filter badge styles for improved layout and interaction
+- Implement draft/publish workflow with version history integration and confirmation dialog; refactor SolidFormView to utilize new workflow hooks
+- Enhance media field components with error handling and toast notifications for delete and replace actions; update font sizes in CSS for better readability
+- Refactor SolidFormView and SolidVersionHistory components to simplify workflow status handling and remove unused code
+- Prevent default behavior on mouse down for custom and grouping filter buttons
+- Remove SolidLocale status banner and associated styles
+- row click action renamed to record click action and take impact in Card, Kanban and tree
+- Enhance SolidLocale component with information card and placeholder
+- some changes
+- remove unnecessary code
+- some issues around some import in card and kanban and tree view lightbox added for media and sidebar menu search issue resolved
+
+## [0.1.14-beta.3] - 2026-07-29
+
+## [0.1.14-beta.2] - 2026-07-29
+
+### Added
+
+- add MediaUploadPage for uploading media files and integrate with existing components
+- enhance PDFViewer with zoom and rotation controls, improve error handling
+- add error boundary for PDF rendering in PDFViewer component
+- replace default buttons with SolidButton in PDFViewer component
+- add pdfjs-dist dependency and update PDFViewer worker configuration
+
+### Fixed
+
+- adjust min-height for PDFViewer component to improve layout consistency
+
+### Changed
+
+- remove react-pdf dependency and implement native PDF rendering
+
 ## [0.1.13] - 2026-07-24
 
 ### Added

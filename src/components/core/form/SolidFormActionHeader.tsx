@@ -29,7 +29,13 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const { data: session, status } = useSession();
     const user = session?.user;
 
-    const isPublished = publish && publish !== 'null';   // record is published if publish has value
+    const isPublished = formData?.isPublished ?? (publish && publish !== 'null');   // fallback keeps older API responses working
+    const isLatestVersion = formData?.isLatest !== false;
+    const showDraftPublishActions = Boolean(
+        draftEnabled &&
+        params.id !== 'new' &&
+        isLatestVersion
+    );
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
     const shouldShowSaveForExistingRecord = viewMode === "edit";
     const showEmbeddedRelationSaveAndNew = params.embeded === true && params.enableEmbeddedRelationSaveAndNew === true;
@@ -112,8 +118,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     );
 
     const FormActionDropdown = () => {
-        const canPublish = actionsAllowed.includes(permissionExpression(params.modelName, 'publish'));
-        const canUnpublish = actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish'));
         const closeMenu = () => setFormActionsMenuOpen(false);
 
         return (
@@ -169,32 +173,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 closeMenu();
                             }}
                         />
-                        {draftEnabled && params.id !== 'new' && (
-                            <>
-                                {!isPublished && canPublish && (
-                                    <FormActionMenuButton
-                                        label="Publish"
-                                        icon="si si-cloud-upload"
-                                        onClick={() => {
-                                            handleDraftPublishWorkFlow('publish');
-                                            closeMenu();
-                                        }}
-                                    />
-                                )}
-
-                                {isPublished && canUnpublish && (
-                                    <FormActionMenuButton
-                                        label="Unpublish"
-                                        icon="si si-cloud-download"
-                                        onClick={() => {
-                                            handleDraftPublishWorkFlow('unpublish');
-                                            closeMenu();
-                                        }}
-                                    />
-                                )}
-                            </>
-                        )}
-
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
                                 <SolidFormViewContextMenuHeaderButton
@@ -529,7 +507,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     formViewLayout.attrs?.showEditFormButton !== false &&
                                     params.embeded !== true &&
                                     viewMode === "view" &&
-                                    !isPublished &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     <>
                                         <div className="hidden lg:flex">
@@ -545,6 +523,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                                 {
                                     params.embeded !== true &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
                                     shouldShowSaveForExistingRecord &&
@@ -555,10 +534,33 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     </div>
                                 }
 
+                                {
+                                    params.embeded !== true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    !isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'publish')) &&
+                                    <div>
+                                        <SolidButton label="Publish" size="sm" type="button" onClick={() => handleDraftPublishWorkFlow('publish')} />
+                                    </div>
+                                }
+
+                                {
+                                    params.embeded !== true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish')) &&
+                                    <div>
+                                        <SolidButton label="Unpublish" size="sm" type="button" variant="destructive" onClick={() => handleDraftPublishWorkFlow('unpublish')} />
+                                    </div>
+                                }
+
                                 {/* Inline */}
 
                                 {
                                     params.embeded == true &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
                                     shouldShowSaveForExistingRecord &&
@@ -578,6 +580,26 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     !isPublished &&
                                     <div>
                                         <SolidButton size="sm" type="button" label="Delete" variant="destructive" onClick={() => setDeleteDialogVisible(true)} />
+                                    </div>
+                                }
+                                {
+                                    params.embeded == true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    !isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'publish')) &&
+                                    <div>
+                                        <SolidButton label="Publish" size="sm" type="button" onClick={() => handleDraftPublishWorkFlow('publish')} />
+                                    </div>
+                                }
+                                {
+                                    params.embeded == true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish')) &&
+                                    <div>
+                                        <SolidButton label="Unpublish" size="sm" type="button" variant="destructive" onClick={() => handleDraftPublishWorkFlow('unpublish')} />
                                     </div>
                                 }
                                 {

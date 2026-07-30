@@ -19,6 +19,7 @@ interface Props {
   defaultEntityLocaleId: string | null;
   solidFormViewData: any;
   published: string | null;
+  workflowStatusLabel?: string | null;
   actionsAllowed?: string[];
   mcpUrl?: string | null;
 }
@@ -45,6 +46,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   defaultEntityLocaleId,
   solidFormViewData,
   published,
+  workflowStatusLabel,
   actionsAllowed,
   mcpUrl,
 }) => {
@@ -90,6 +92,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
               applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
               solidFormViewData={solidFormViewData}
               published={published}
+              workflowStatusLabel={workflowStatusLabel}
             />
           </div>
         )
