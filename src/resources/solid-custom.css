@@ -4694,8 +4694,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   background: color-mix(in srgb, var(--foreground) 36%, transparent);
 }
 
-.solid-datatable-wrapper .greyed-out-row {
+.solid-datatable-wrapper .greyed-out-row > td {
   opacity: 0.55;
+}
+
+.solid-datatable-wrapper .greyed-out-row > td.solid-data-table-row-action-cell {
+  opacity: 1;
 }
 
 .solid-card-view-card.greyed-out-row,
@@ -6300,6 +6304,8 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
       var(--card));
   color: var(--foreground);
   box-shadow: 0 28px 60px rgba(15, 23, 42, 0.24);
+  min-width: 0px !important;
+
 }
 
 .solid-radix-dialog-header {

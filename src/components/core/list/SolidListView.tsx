@@ -1831,18 +1831,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       <Column
                         frozen
                         alignFrozen="right"
+                        className="solid-data-table-row-action-cell"
                         body={(rowData) =>
                           rowData?.deletedAt ? (
                             <div className="flex justify-content-center align-items-center" data-no-row-click="true">
-                              <a
+                              <button
+                                type="button"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   recoverById(rowData.id);
                                 }}
                                 className="retrieve-button solid-row-menu-trigger"
+                                aria-label="Recover record"
+                                title="Recover"
                               >
                                 <RotateCcw size={14} className={styles.retrieveIcon} />
-                              </a>
+                              </button>
                             </div>
                           ) : (
                             <>
