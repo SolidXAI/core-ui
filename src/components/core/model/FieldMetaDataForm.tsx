@@ -2552,7 +2552,7 @@ const FieldMetaDataForm = ({
                               <label htmlFor="relationCreateInverse" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Relation Create Inverse
                               </label>
-                              <div className="flex items-center">
+                              <div className="solid-field-checkbox-row">
                                 <SolidCheckbox
                                   id="relationCreateInverse"
                                   name="relationCreateInverse"
