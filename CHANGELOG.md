@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.6] - 2026-07-31
+
+### Other
+
+- ui fixes
+- tree view sorting removed
+- row click action renamed to record click action and take impact in Card, Kanban and tree
+- some changes
+- remove unnecessary code
+- some issues around some import in card and kanban and tree view lightbox added for media and sidebar menu search issue resolved
+
 ## [0.1.14-beta.5] - 2026-07-31
 
 ### Other
