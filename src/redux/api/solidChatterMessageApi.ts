@@ -10,10 +10,10 @@ export const solidChatterMessageApi = createApi({
                 return `/chatter-message/getChatterMessages/${entityId}/${entityName}?populateMedia[0]=messageAttachments&${qs}`
             },
         }),
-        createChatterMessage: builder.mutation({
+        postChatterMessage: builder.mutation({
             query: (data) => {
                 return {
-                    url: '/chatter-message',
+                    url: '/chatter-message/post',
                     method: 'POST',
                     body: data
                 }
@@ -36,8 +36,13 @@ export const solidChatterMessageApi = createApi({
                     body: data
                 }
             }
+        }),
+        getMentionableUsers: builder.query({
+            query: (qs) => {
+                return `/chatter-message/mentionable-users?${qs}`
+            },
         })
     })
 });
 
-export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, useCreateChatterMessageMutation, usePatchChatterMessageMutation, useUpdateChatterNoteMessageMutation } = solidChatterMessageApi;
+export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, usePostChatterMessageMutation, usePatchChatterMessageMutation, useUpdateChatterNoteMessageMutation, useLazyGetMentionableUsersQuery } = solidChatterMessageApi;

@@ -33,6 +33,7 @@ export type FormViewParams = {
     embeded: any;
     inlineCreateAutoSave: any;
     layout: any;
+    enableEmbeddedRelationSaveAndNew?: boolean;
 }
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -497,6 +498,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams }: any) => {
     const fieldLayoutInfo = fieldContext.field;
+    const viewMode: string = fieldContext.viewMode;
     const className = fieldLayoutInfo.attrs?.className || 'field w-1/2 px-2 pt-2';
     const parentModelName = fieldLayoutInfo?.attrs?.parentModelName;
     const childModelName = fieldLayoutInfo?.attrs?.childModelName;
@@ -521,7 +523,13 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
         handlePopupClose: (() => {
             setvisibleCreateRelationEntity(false);
         }),
+        enableEmbeddedRelationSaveAndNew: formViewParams.enableEmbeddedRelationSaveAndNew,
     }
+
+    if (viewMode === "view") {
+        return null;
+    }
+
     return (
         <div>
             <div>

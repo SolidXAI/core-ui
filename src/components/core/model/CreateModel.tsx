@@ -263,6 +263,8 @@ const CreateModel = ({ data, params }: any) => {
     explorerModuleName.toLowerCase() === "solid-core"
   );
   const shouldShowTabSave = !isCreateMode ? activeTab === "fields" && fieldDeleted : activeTab !== "explorer" && isDirty;
+  const shouldShowTopFieldSave = activeTab === "fields" && shouldShowTabSave;
+  const shouldHideFieldAdd = !isCreateMode && activeTab === "fields" && fieldDeleted;
 
   const modelTabContent = (
     <div className="solid-model-form-content is-tabbed">
@@ -291,6 +293,9 @@ const CreateModel = ({ data, params }: any) => {
         params={params}
         setIsDirty={setIsDirty}
         setFieldDeleted={setFieldDeleted}
+        showSaveButton={shouldShowTopFieldSave}
+        hideAddButton={shouldHideFieldAdd}
+        onSave={handleSubmit}
       />
     </div>
   );
@@ -341,7 +346,7 @@ const CreateModel = ({ data, params }: any) => {
             }}
           />
         </div>
-        {shouldShowTabSave && (
+        {shouldShowTabSave && activeTab !== "fields" && (
           <div className="solid-model-form-actions">
             <SolidButton type="button" onClick={handleSubmit}>
               Save

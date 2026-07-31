@@ -24,6 +24,7 @@ export const SolidFieldTooltip = ({ fieldContext }: any) => {
                     type="button"
                     className="solid-field-tooltip-icon"
                     aria-label="Field info"
+                    tabIndex={-1}
                 >
                     <SolidIcon name="si-info-circle" />
                 </button>

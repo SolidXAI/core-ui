@@ -2,7 +2,7 @@ import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { hideNavbar, toggleNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { useSession } from "../../hooks/useSession";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AdminHeaderActions } from "./AdminHeaderActions";
 import UserProfileMenu from "./user-profile-menu";
@@ -75,6 +75,13 @@ function isMenuPathActive(itemPath: string | undefined, currentPathname: string,
     return doesSearchParamsMatchSubset(itemSearchParams, currentSearchParams);
 }
 
+function cloneMenuItems(items: SolidMenuItem[] = []): SolidMenuItem[] {
+    return items.map((item) => ({
+        ...item,
+        children: item.children ? cloneMenuItems(item.children) : [],
+    }));
+}
+
 function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[] {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) return items;
@@ -83,6 +90,13 @@ function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[]
     items.forEach((item) => {
         const children = item.children ? filterMenuItems(item.children, normalizedQuery) : [];
         const matchesSelf = item.title.toLowerCase().includes(normalizedQuery);
+        const isPathlessParentMatch = matchesSelf && !item.path && item.children && item.children.length > 0;
+
+        if (isPathlessParentMatch) {
+            next.push({ ...item, children: cloneMenuItems(item.children) });
+            return;
+        }
+
         if (matchesSelf || children.length > 0) {
             next.push({ ...item, children });
         }
@@ -206,6 +220,7 @@ const AppSidebar = () => {
     const searchParams = useSearchParams();
     const visibleNavbar = useSelector((state: any) => state.navbarState.visibleNavbar);
     const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
+    const workspaceSwitcherRef = useRef<HTMLDivElement | null>(null);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [workspaceOpen, setWorkspaceOpen] = useState(false);
@@ -293,6 +308,24 @@ const AppSidebar = () => {
         return () => window.removeEventListener(SIDEBAR_TOGGLE_EVENT, onToggleRequest);
     }, [dispatch]);
 
+    useEffect(() => {
+        if (!workspaceOpen) return;
+
+        const handlePointerDown = (event: MouseEvent) => {
+            const switcher = workspaceSwitcherRef.current;
+            const target = event.target as Node;
+
+            if (!switcher || switcher.contains(target)) {
+                return;
+            }
+
+            setWorkspaceOpen(false);
+        };
+
+        document.addEventListener("pointerdown", handlePointerDown);
+        return () => document.removeEventListener("pointerdown", handlePointerDown);
+    }, [workspaceOpen]);
+
     const workspaces: SolidMenuItem[] = menu?.data || [];
     const selectedWorkspace = workspaces.find((m) => m.key === selectedWorkspaceKey) || workspaces[0];
     const selectedWorkspaceChildren = selectedWorkspace?.children || [];
@@ -322,7 +355,7 @@ const AppSidebar = () => {
 
             <aside className={shellClasses}>
                 <div className="solid-sidebar-header">
-                    <div className="solid-workspace-switcher">
+                    <div className="solid-workspace-switcher" ref={workspaceSwitcherRef}>
                         <button
                             type="button"
                             className="solid-workspace-trigger"

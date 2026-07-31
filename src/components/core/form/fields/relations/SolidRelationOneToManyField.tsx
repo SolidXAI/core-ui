@@ -28,7 +28,8 @@ export type FormViewParams = {
     onEmbeddedFormSave: any;
     inlineCreateAutoSave: any;
     customCreateHandler?: any;
-    handlePopupClose?: any
+    handlePopupClose?: any;
+    enableEmbeddedRelationSaveAndNew?: boolean;
 }
 
 export class SolidRelationOneToManyField implements ISolidField {
@@ -301,17 +302,20 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     const saveParentEntity = async () => {
-        const currentPath = window.location.pathname;
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('childEntity', fieldLayoutInfo.attrs.name);
-        currentUrl.searchParams.set('viewMode', 'edit');
-        const updatedPath = currentUrl.toString();
+        formik.setStatus({
+            ...(formik.status || {}),
+            saveParentRelationField: fieldLayoutInfo.attrs.name,
+        });
+        window.sessionStorage.setItem("solidSaveParentRelationField", fieldLayoutInfo.attrs.name);
         try {
-            console.log("updatedPath", updatedPath);
-            router.push(updatedPath);
-            await formik.handleSubmit();
+            await formik.submitForm();
         } catch {
-
+        } finally {
+            formik.setStatus({
+                ...(formik.status || {}),
+                saveParentRelationField: undefined,
+            });
+            window.sessionStorage.removeItem("solidSaveParentRelationField");
         }
         setShowSaveParentEntityConfirmationPopup(false);
     };
@@ -510,7 +514,8 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
         parentFieldName: formViewParams.parentFieldName,
         parentData: formViewParams.parentData,
         onEmbeddedFormSave: formViewParams.onEmbeddedFormSave,
-        isCustomCreate: formViewParams.isCustomCreate
+        isCustomCreate: formViewParams.isCustomCreate,
+        enableEmbeddedRelationSaveAndNew: true,
     }
 
     return (

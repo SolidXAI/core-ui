@@ -15,6 +15,11 @@ export type CommonEntity = {
     updatedAt: string;
     deletedAt: string | null;
     deletedTracker: string;
+    publishedAt?: string | null;
+    isPublished?: boolean;
+    isLatest?: boolean;
+    initialEntityVersionId?: number | null;
+    publishedTracker?: string;
 };
 
 // Model
@@ -81,6 +86,13 @@ export type LayoutAttribute = {
     renderMode?: string;
     widget?: string;
     visible?: boolean;
+    columnClassName?: string;
+    cellClassName?: string;
+    headerClassName?: string;
+    style?: Record<string, any>;
+    columnStyle?: Record<string, any>;
+    cellStyle?: Record<string, any>;
+    headerStyle?: Record<string, any>;
     editWidget?: string;
     viewWidget?: string;
     cardWidget?: string;
@@ -89,6 +101,10 @@ export type LayoutAttribute = {
     inlineCreateLayout?: any;
     showDefaultAddButton?: boolean;
     showDefaultEditButton?: boolean;
+    showRowActionsInContextMenu?: boolean;
+    showRowActionsAsIconOnly?: boolean;
+    showRowEditAsIconOnly?: boolean;
+    showRowDeleteAsIconOnly?: boolean;
     showEditFormButton?: boolean;
     showAddFormButton?: boolean;
     showDeleteFormButton?: boolean;
@@ -130,6 +146,27 @@ export type SolidUiEvent = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
     formViewLayout: LayoutNode;
+    popup?: {
+        open: (event: {
+            action?: string;
+            closable?: boolean;
+            title?: string;
+            body?: any;
+            message?: any;
+            buttons?: Array<{
+                label: string;
+                action?: string | ((event: any, close: () => void) => void | Promise<void>);
+                variant?: string;
+                className?: string;
+                icon?: string;
+                closeOnClick?: boolean;
+                [key: string]: any;
+            }>;
+            popupWidth?: string;
+            [key: string]: any;
+        }) => void;
+        close: () => void;
+    };
 };
 
 export type SolidUiEventResponse = {
@@ -213,6 +250,17 @@ export type SolidTreeLoad = {
     params?: SolidListViewParams
 }
 
+// A single toggleable filter offered by an onBeforeListDataLoad handler.
+// Unlike newFilter (baked directly into the outgoing query), each entry here
+// stays independently addressable so SolidGlobalSearchElement can render it
+// as a removable pill and SolidListView can drop it from the query on removal.
+export type SolidDefinedFilter = {
+    key: string;
+    label: string;
+    predicate: any;
+    applied: boolean;
+}
+
 export type SolidListUiEventResponse = {
     filterApplied?: Boolean;
     newFilter?: any;
@@ -220,6 +268,7 @@ export type SolidListUiEventResponse = {
     newListData?: any[];
     layoutChanged?: Boolean;
     newLayout?: LayoutNode;
+    definedFilters?: SolidDefinedFilter[];
 }
 
 export type SolidTreeUiEventResponse = {

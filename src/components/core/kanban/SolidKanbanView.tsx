@@ -1,4 +1,4 @@
-import { permissionExpression } from "../../../helpers/permissions";
+import { getCollectionViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
@@ -17,7 +17,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
-import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage, hasStoredFilterPredicates } from "../list/SolidListView";
+import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage, hasMeaningfulPersistedFilter, hasStoredFilterPredicates } from "../common/globalSearchPersistence";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
@@ -27,6 +27,11 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { solidGet } from "../../../http/solidHttp";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
+import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
+import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
 import {
   SolidButton,
   SolidConfirmDialog,
@@ -51,6 +56,8 @@ type KanbanSwimlaneDefinition = {
   value: string;
   label: string;
 };
+
+const DEFAULT_RECORD_SORT = ["id:desc"];
 
 const getKanbanSortParam = (sortValue?: string) => {
   if (!sortValue) {
@@ -122,6 +129,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const searchParams = useSearchParams();
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
   const [filters, setFilters] = useState<any>();
+  const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
@@ -140,6 +148,18 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
+  const handleCustomButtonClick = useHandleListCustomButtonClick();
+  const hasFilterPredicatesApplied = hasStoredFilterPredicates(filterPredicates);
+  const hasActiveFilters = hasMeaningfulPersistedFilter(filters);
+  const hasAnyActiveFilters = hasActiveFilters || hasFilterPredicatesApplied;
+  const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
+
+  useEffect(() => {
+    if (params.embeded === false) {
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState);
+    }
+  }, [hasAnyActiveFilters, hasStoredFilterState, params.embeded]);
+
   const [swimlaneDefinitions, setSwimlaneDefinitions] = useState<KanbanSwimlaneDefinition[]>([]);
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
@@ -174,16 +194,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   useEffect(() => {
     const fetchPermissions = async () => {
       if (params.modelName) {
-        const permissionNames = [
-          permissionExpression(params.modelName, 'create'),
-          permissionExpression(params.modelName, 'delete'),
-          permissionExpression(params.modelName, 'update'),
-          permissionExpression(params.modelName, 'findMany'),
-          permissionExpression('importTransaction', 'create'),
-          permissionExpression('exportTransaction', 'create'),
-          permissionExpression('userViewMetadata', 'create'),
-          permissionExpression('savedFilters', 'create')
-        ]
+        const permissionNames = getCollectionViewPermissionNames(params.modelName, {
+          includeDeleteMany: false,
+          includeFindOne: false,
+          includeInsertMany: false,
+        });
         const queryData = {
           permissionNames: permissionNames
         };
@@ -230,6 +245,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
 
   const { data: solidKanbanViewMetaData } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
+  const visibleHeaderButtons = (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons ?? [])
+    .filter((button: any) => isButtonVisibleInCurrentEnv(button?.attrs));
 
   const initialFilterMethod = () => {
 
@@ -346,8 +363,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [rawKanbanGroupRecords, setRawKanbanGroupRecords] = useState<any[]>([]);
   const [serverSwimLaneCount, setServerSwimLaneCount] = useState<number>(0);
   const pathname = usePathname();
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = getSettingsMap(solidSettingsData);
   // @ts-ignore
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
+  const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
+    isSystemModule: solidKanbanViewMetaData?.data?.solidView?.module?.isSystem === true,
+  });
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
@@ -518,12 +540,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             // @ts-ignore
             filters.$and.push(queryObject.search_predicate);
           }
-          // if (queryObject.saved_filter_predicate) {
-          //   filters.$and.push(queryObject.saved_filter_predicate);
-          // }
-          // if (queryObject.predefined_search_predicate) {
-          //   filters.$and.push(queryObject.predefined_search_predicate);
-          // }
+          if (queryObject.saved_filter_predicate) {
+            // @ts-ignore
+            filters.$and.push(queryObject.saved_filter_predicate);
+          }
+          if (queryObject.predefined_search_predicate) {
+            // @ts-ignore
+            filters.$and.push(queryObject.predefined_search_predicate);
+          }
 
           const queryData = {
             offset: 0,
@@ -537,6 +561,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               limit: Number(queryObject.groupFilter.limit) + Number(queryObject.groupFilter.offset) || kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane,
               offset: 0,
               filters: filters,
+              sort: DEFAULT_RECORD_SORT,
               // @ts-ignore
               populate: queryObject.groupFilter.populate || toPopulate,
               // @ts-ignore
@@ -572,6 +597,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane || 10,
               offset: 0,
               filters: defaultFilters,
+              sort: DEFAULT_RECORD_SORT,
               populate: toPopulate,
               populateMedia: toPopulateMedia
             }
@@ -615,6 +641,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: nextFilters,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia,
         },
@@ -728,7 +755,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             $in: [groupByField],
           },
           ...filters
-        }
+        },
+        sort: DEFAULT_RECORD_SORT,
       });
 
 
@@ -901,6 +929,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: filters,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia
 
@@ -958,6 +987,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
 
       // Then update state
+      setFilterPredicates(structuredClone(filterPredicates));
       setFilters(updatedFilter);
 
 
@@ -976,6 +1006,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: updatedFilter,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia
         }
@@ -997,6 +1028,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         urlData.custom_filter_predicate = customFilter.custom_filter_predicate || {};
         // @ts-ignore
         urlData.search_predicate = customFilter.search_predicate || {};
+        // @ts-ignore
+        urlData.saved_filter_predicate = customFilter.saved_filter_predicate || {};
+        // @ts-ignore
+        urlData.predefined_search_predicate = customFilter.predefined_search_predicate || {};
+        // @ts-ignore
+        urlData.predefined_search_chip = customFilter.predefined_search_chip || null;
         // @ts-ignore
         urlData.showArchived = showArchived;
         if (showArchived) {
@@ -1042,7 +1079,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : isRecoveringRecord ? "Recovering..." : loading || !queryDataLoaded ? "Loading..." : null;
 
   const handleRefreshView = () => {
-    if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
+    if (hasAnyActiveFilters) {
       // @ts-ignore
       solidGlobalSearchElementRef.current?.clearAppliedFilters?.({ preserveGrouping: true });
       return;
@@ -1066,8 +1103,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       <div className="solid-list-content  flex flex-col flex-grow-1">
         <div className="solid-list-surface solid-kanban-surface flex flex-col flex-1 min-h-0">
           <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-col lg:flex-row">
-            <div className="flex justify-between w-full">
-              <div className="solid-list-toolbar-left flex w-full items-center gap-3">
+            <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
+              <div className="solid-list-toolbar-left flex w-full items-center gap-3 lg:min-w-0 lg:flex-1">
                 {/* {params.embeded !== true &&
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
@@ -1075,14 +1112,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 } 
                 */}
 
-                <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
-                <div className="hidden lg:flex">
+                {/* <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p> */}
+                <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0  w-full lg:flex lg:min-w-0`}>
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
-                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
                 </div>
               </div>
 
-              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                 <div className="flex lg:hidden">
                   <SolidButton
@@ -1094,6 +1131,22 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                     aria-label="Toggle search"
                     leftIcon={<SolidIcon name="si-search" aria-hidden />}
                   />
+                </div>
+
+                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                  {visibleHeaderButtons
+                    ?.filter((button: any) => button?.attrs?.actionInContextMenu !== true)
+                    ?.map((button: any, index: number) => (
+                      <SolidListViewHeaderButton
+                        key={index}
+                        button={button}
+                        params={params}
+                        solidListViewMetaData={solidKanbanViewMetaData}
+                        handleCustomButtonClick={handleCustomButtonClick}
+                        selectedRecords={selectedRecords}
+                        filters={filters}
+                      />
+                    ))}
                 </div>
 
                 {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
@@ -1119,28 +1172,27 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 />
                 <SolidKanbanViewConfigure
                   solidKanbanViewMetaData={solidKanbanViewMetaData}
+                  params={params}
                   modelName={params.modelName}
                   actionsAllowed={actionsAllowed}
+                  headerButtons={visibleHeaderButtons}
+                  handleCustomButtonClick={handleCustomButtonClick}
+                  selectedRecords={selectedRecords}
+                  filters={filters}
                   viewModes={viewModes}
                   setShowArchived={setShowArchived}
                   showArchived={showArchived}
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
-                  filters={filters}
                   handleRefreshView={handleRefreshView}
                 />
               </div>
             </div>
-            {showGlobalSearchElement && (
-              <div className="flex lg:hidden">
-                <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
-              </div>
-            )}
           </div>
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} showArchived={showArchived}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived}></KanbanBoard>
           }
         </div>
       </div>

@@ -140,7 +140,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const legalFooter = shouldRenderFooter ? (
         <div className="solid-auth-legal-footer hidden md:flex">
             <div className="solid-auth-legal-footer-row">
-                {showLegalLinks ? (
+                {/* {showLegalLinks ? (
                     <p className="solid-auth-legal-copy">
                         <span>Made with</span>
                         <svg
@@ -159,7 +159,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         </svg>
                         <span>in Mumbai</span>
                     </p>
-                ) : null}
+                ) : null} */}
                 {(appTnc || appPrivacyPolicy) && (
                     <div className="solid-auth-legal-links">
                         {appTnc ? (

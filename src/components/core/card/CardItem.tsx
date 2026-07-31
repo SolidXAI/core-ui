@@ -14,8 +14,10 @@ interface CardItemProps {
   data: any;
   solidCardViewMetaData: any;
   editButtonUrl?: string;
+  recordClickAction?: "view" | "edit";
   cardNode?: any;
   DynamicCardWidget?: any;
+  onDelete?: (record: any) => void;
   onRecover?: (record: any) => void;
   setLightboxUrls?: any;
   setOpenLightbox?: any;
@@ -26,8 +28,10 @@ const CardItem: React.FC<CardItemProps> = ({
   data,
   solidCardViewMetaData,
   editButtonUrl,
+  recordClickAction = "edit",
   cardNode,
   DynamicCardWidget,
+  onDelete,
   onRecover,
   setLightboxUrls,
   setOpenLightbox,
@@ -39,7 +43,7 @@ const CardItem: React.FC<CardItemProps> = ({
   const openRecord = () => {
     if (isArchivedRecord) return;
     storeCurrentModelViewContext();
-    router.push(`${editButtonUrl}/${data?.id}`);
+    router.push(`${editButtonUrl}/${data?.id}?viewMode=${recordClickAction}`);
   };
 
   const openEdit = () => {
@@ -85,24 +89,35 @@ const CardItem: React.FC<CardItemProps> = ({
                   <span className="solid-header-action-button-label">Recover</span>
                 </SolidDropdownMenuItem>
               ) : null}
+              {onDelete && !isArchivedRecord ? (
+                <SolidDropdownMenuItem
+                  className="solid-header-dropdown-item solid-header-dropdown-item-danger"
+                  onSelect={() => onDelete(data)}
+                >
+                  <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
+                  <span className="solid-header-action-button-label">Delete</span>
+                </SolidDropdownMenuItem>
+              ) : null}
             </SolidDropdownMenuContent>
           </SolidDropdownMenu>
         </div>
         {DynamicCardWidget ? (
-          <DynamicCardWidget
-            rowData={data}
-            solidKanbanViewMetaData={solidCardViewMetaData}
-            solidView={solidCardViewMetaData?.solidView}
-            solidFieldsMetadata={solidCardViewMetaData?.solidFieldsMetadata}
-            card={cardNode}
-            layoutAttrs={solidCardViewMetaData?.solidView?.layout?.attrs || {}}
-            groupedView={false}
-            editButtonUrl={editButtonUrl}
-            setLightboxUrls={setLightboxUrls}
-            setOpenLightbox={setOpenLightbox}
-            openRecord={openRecord}
-            openEdit={openEdit}
-          />
+          <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
+            <DynamicCardWidget
+              rowData={data}
+              solidKanbanViewMetaData={solidCardViewMetaData}
+              solidView={solidCardViewMetaData?.solidView}
+              solidFieldsMetadata={solidCardViewMetaData?.solidFieldsMetadata}
+              card={cardNode}
+              layoutAttrs={solidCardViewMetaData?.solidView?.layout?.attrs || {}}
+              groupedView={false}
+              editButtonUrl={editButtonUrl}
+              setLightboxUrls={isArchivedRecord ? undefined : setLightboxUrls}
+              setOpenLightbox={isArchivedRecord ? undefined : setOpenLightbox}
+              openRecord={openRecord}
+              openEdit={openEdit}
+            />
+          </div>
         ) : null}
       </div>
     </div>

@@ -12,7 +12,8 @@ import ExportModulePackageRowAction from "../components/core/extension/solid-cor
 import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
-import { DefaultDateFormEditWidget, DefaultDateFormViewWidget, PublishedStatusListViewWidget } from "../components/core/form/fields/SolidDateField";
+import { DefaultDateFormEditWidget, DefaultDateFormViewWidget } from "../components/core/form/fields/SolidDateField";
+import { PublishedStatusListViewWidget } from "../components/core/list/widgets/PublishedStatusListViewWidget";
 import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "../components/core/form/fields/SolidDateTimeField";
 import { DefaultDecimalFormEditWidget, DefaultDecimalFormViewWidget } from "../components/core/form/fields/SolidDecimalField";
 import { DefaultEmailFormEditWidget } from "../components/core/form/fields/SolidEmailField";
@@ -41,6 +42,7 @@ import { SolidIconEditWidget } from "../components/core/form/fields/widgets/Soli
 import { SolidIconViewWidget } from "../components/core/form/fields/widgets/SolidIconViewWidget";
 import { SolidManyToManyRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
 import { SolidManyToOneRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
+import { PillWidget } from "../components/core/list/widgets/PillWidget";
 import { SolidUserBlockedStatusListWidget } from "../components/core/list/widgets/SolidUserBlockedStatusListWidget";
 import { SolidShortTextFieldAvatarWidget } from "../components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "../components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
@@ -53,6 +55,8 @@ import hanldeModelSequenceFormViewChange from "../components/core/extension/soli
 import { DefaultDateListWidget, DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
 import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanCardWidget";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
+import { MediaFileSizeFormViewWidget, MediaFileSizeListWidget } from "../components/core/extension/solid-core/media/fileSize/MediaFileSizeWidget";
+import { MediaRelativeUriFormViewWidget, MediaRelativeUriListWidget } from "../components/core/extension/solid-core/media/relativeUri/MediaRelativeUriPreview";
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
 import { SolidMqMessageStageListViewWidget } from "../components/core/extension/solid-core/mqMessage/list/SolidMqMessageStageListViewWidget";
 import { SolidMqMessagesSummarizeListHeaderAction } from "../components/core/extension/solid-core/mqMessage/list/SolidMqMessagesSummarizeListHeaderAction";
@@ -174,6 +178,9 @@ registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelation
 // - users status
 registerExtensionComponent("SolidUserBlockedStatusListWidget", SolidUserBlockedStatusListWidget, ExtensionComponentTypes.listFieldWidget);
 
+// - generic selection/status pill
+registerExtensionComponent("PillWidget", PillWidget, ExtensionComponentTypes.listFieldWidget);
+
 // - relation.datetime
 registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, ExtensionComponentTypes.listFieldWidget);
 // - date
@@ -183,6 +190,8 @@ registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, Exten
 
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", SolidChatterMessageCoModelEntityIdListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("MediaRelativeUriListWidget", MediaRelativeUriListWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("MediaFileSizeListWidget", MediaFileSizeListWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);
@@ -376,6 +385,8 @@ registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFiel
 registerExtensionComponent("SolidAiInteractionMetadataFieldFormWidget", SolidAiInteractionMetadataFieldFormWidget, ExtensionComponentTypes.formFieldViewWidget);
 registerExtensionComponent("SolidAiInteractionMessageFieldFormWidget", SolidAiInteractionMessageFieldFormWidget, ExtensionComponentTypes.formFieldViewWidget);
 registerExtensionComponent("SolidS3FileViewerWidget", SolidS3FileViewerWidget, ExtensionComponentTypes.formFieldViewWidget);
+registerExtensionComponent("MediaRelativeUriFormViewWidget", MediaRelativeUriFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
+registerExtensionComponent("MediaFileSizeFormViewWidget", MediaFileSizeFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
 
 // RoleMetadata
 registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ExtensionComponentTypes.formFieldEditWidget, ["inputSwitch"]);
