@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.5] - 2026-07-31
+
 ## [0.1.14-beta.4] - 2026-07-31
 
 ## [0.1.14-beta.3] - 2026-07-29
