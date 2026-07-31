@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { AlertTriangle, Filter, RefreshCw, Save } from "lucide-react";
 import { GridStack, type GridStackNode } from "gridstack";
 import "gridstack/dist/gridstack.min.css";
 import { getExtensionComponent } from "../../../../helpers/registry";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import {
   SolidAutocomplete,
   SolidButton,
@@ -22,6 +24,7 @@ import {
   useLazyGetDashboardVariableOptionsQuery,
   useSaveDashboardLayoutMutation,
 } from "../../../../redux/api/dashboardRuntimeApi";
+import { showToast } from "../../../../redux/features/toastSlice";
 import type { DashboardGridLayoutItem, DashboardWidgetComponentProps } from "../../../../types/dashboard";
 import styles from "./DashboardPage.module.css";
 
@@ -77,6 +80,11 @@ const toOptions = (options: any[]): Option[] =>
 const toIso = (value: Date | null | undefined): string | null => {
   if (!value || Number.isNaN(value.getTime())) return null;
   return value.toISOString();
+};
+
+const getErrorMessage = (error: any, fallback: string): string => {
+  const message = error?.data?.message ?? error?.data?.error ?? error?.message;
+  return Array.isArray(message) ? message.join(", ") : message || fallback;
 };
 
 const extractWidgetName = (widgetData: any): string =>
@@ -424,6 +432,7 @@ const isUnauthorizedWidgetRuntime = (runtime: any): boolean =>
   !!(runtime?.meta?.unauthorized || runtime?.uiHints?.state === "unauthorized");
 
 export function DashboardPage() {
+  const dispatch = useDispatch();
   const params = useParams();
   const moduleName = params.moduleName ?? "";
   const dashboardName = params.dashboardName ?? "";
@@ -748,17 +757,36 @@ export function DashboardPage() {
         ? draftLayoutItems
         : baseLayout;
 
-    await saveDashboardLayout({
-      moduleName,
-      dashboardName,
-      layout: {
-        engine: "gridstack",
-        columns: gridColumns,
-        items,
-      },
-    }).unwrap();
+    try {
+      await saveDashboardLayout({
+        moduleName,
+        dashboardName,
+        layout: {
+          engine: "gridstack",
+          columns: gridColumns,
+          items,
+        },
+      }).unwrap();
 
-    setDraftLayoutItems(null);
+      setDraftLayoutItems(null);
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: ERROR_MESSAGES.LAYOUT,
+          detail: ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_SUCCESSFULLY,
+          life: 3000,
+        })
+      );
+    } catch (error) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: ERROR_MESSAGES.UPDATE_FAILED,
+          detail: getErrorMessage(error, ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_FAILED),
+          life: 4000,
+        })
+      );
+    }
   }
 
   const renderVariable = (variable: any) => {
@@ -781,6 +809,7 @@ export function DashboardPage() {
             optionLabel="label"
             optionValue="value"
             placeholder={`Select ${label} preset`}
+            native={false}
             onChange={(event) => {
               const selectedPreset = `${event?.value ?? "custom"}`;
               if (selectedPreset === "custom") {
@@ -906,6 +935,7 @@ export function DashboardPage() {
           optionLabel="label"
           optionValue="value"
           placeholder={`Select ${label}`}
+          native={false}
           onChange={(event) => handleDraftVariableChange(variableName, event.value ? `${event.value}` : "")}
         />
       </div>

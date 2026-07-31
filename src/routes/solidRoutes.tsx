@@ -17,6 +17,9 @@ import { SettingsPage } from "./pages/admin/core/SettingsPage";
 import { DashboardPage } from "./pages/admin/core/DashboardPage";
 import { DatasourcesPage } from "./pages/admin/core/DatasourcesPage";
 import { DatasourceIntrospectionPage } from "./pages/admin/core/DatasourceIntrospectionPage";
+import { WorkflowDefinitionEditorPage } from "./pages/admin/core/WorkflowDefinitionEditorPage";
+import { WorkflowExecutionDetailPage } from "./pages/admin/core/WorkflowExecutionDetailPage";
+import { MediaUploadPage } from "./pages/admin/core/MediaUploadPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
@@ -83,12 +86,15 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
   const adminChildren: RouteObject[] = [
     { path: "/admin", element: pick("admin", <AdminPage />), handle: { title: "Admin", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/home", element: pick("moduleHome", <ModuleHomePage />), handle: { title: "Module Home", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/workflow-execution/detail/:id", element: <WorkflowExecutionDetailPage />, handle: { title: "Workflow Execution Detail", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />), handle: { title: "List", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />), handle: { title: "Tree", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />), handle: { title: "Kanban", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/card", element: pick("card", <CardPage />), handle: { title: "Card", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/dashboard/:dashboardName", element: pick("dashboard", <DashboardPage />), handle: { title: "Dashboard", manageDocumentMeta: true } },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />), handle: { title: "Form", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/media/upload", element: <MediaUploadPage />, handle: { title: "Upload Media", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/workflow-definition/editor/:id", element: <WorkflowDefinitionEditorPage />, handle: { title: "Workflow Definition Editor", manageDocumentMeta: true } },
     { path: "/admin/core/settings", element: pick("settings", <SettingsPage />), handle: { title: "Settings", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/datasources", element: <DatasourcesPage />, handle: { title: "Datasources", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/modules/:moduleId/datasource-introspection", element: <DatasourceIntrospectionPage />, handle: { title: "Datasource Introspection", manageDocumentMeta: true } },

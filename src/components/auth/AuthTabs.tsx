@@ -27,6 +27,7 @@ export const AuthTabs = ({ tabs, activeIndex, onChange }: AuthTabsProps) => {
           content: tab.content,
         }))}
         value={activeValue}
+        listClassName="solid-auth-tablist"
         onValueChange={(value) => {
           const nextIndex = tabs.findIndex((tab) => tab.key === value);
           if (nextIndex >= 0) onChange(nextIndex);

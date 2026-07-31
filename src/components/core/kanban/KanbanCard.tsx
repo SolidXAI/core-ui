@@ -27,6 +27,7 @@ interface KanbanCardProps {
   setLightboxUrls?: any;
   setOpenLightbox?: any;
   editButtonUrl?: string;
+  recordClickAction?: "view" | "edit";
   groupByFieldName?: string;
   group?: any;
   cardNode?: any;
@@ -36,7 +37,7 @@ interface KanbanCardProps {
   showArchived?: boolean;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived }) => {
   const router = useRouter()
   const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
 
@@ -47,7 +48,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   const openRecord = () => {
     if (isArchivedRecord) return;
     persistReturnView();
-    router.push(`${editButtonUrl}/${data?.id}`);
+    router.push(`${editButtonUrl}/${data?.id}?viewMode=${recordClickAction}`);
   };
 
   const openEdit = () => {
@@ -128,22 +129,24 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           >
             {renderKanbanAction(data)}
             {DynamicCardWidget ? (
-              <DynamicCardWidget
-                rowData={data}
-                solidKanbanViewMetaData={solidKanbanViewMetaData}
-                solidView={solidKanbanViewMetaData?.solidView}
-                solidFieldsMetadata={solidKanbanViewMetaData?.solidFieldsMetadata}
-                card={cardNode}
-                layoutAttrs={solidKanbanViewMetaData?.solidView?.layout?.attrs || {}}
-                groupedView={true}
-                groupByFieldName={groupByFieldName}
-                group={group}
-                editButtonUrl={editButtonUrl}
-                setLightboxUrls={setLightboxUrls}
-                setOpenLightbox={setOpenLightbox}
-                openRecord={openRecord}
-                openEdit={openEdit}
-              />
+              <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
+                <DynamicCardWidget
+                  rowData={data}
+                  solidKanbanViewMetaData={solidKanbanViewMetaData}
+                  solidView={solidKanbanViewMetaData?.solidView}
+                  solidFieldsMetadata={solidKanbanViewMetaData?.solidFieldsMetadata}
+                  card={cardNode}
+                  layoutAttrs={solidKanbanViewMetaData?.solidView?.layout?.attrs || {}}
+                  groupedView={true}
+                  groupByFieldName={groupByFieldName}
+                  group={group}
+                  editButtonUrl={editButtonUrl}
+                  setLightboxUrls={isArchivedRecord ? undefined : setLightboxUrls}
+                  setOpenLightbox={isArchivedRecord ? undefined : setOpenLightbox}
+                  openRecord={openRecord}
+                  openEdit={openEdit}
+                />
+              </div>
             ) : null}
           </div>
         </div>

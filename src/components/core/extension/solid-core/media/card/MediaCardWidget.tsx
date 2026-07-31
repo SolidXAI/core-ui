@@ -1,5 +1,6 @@
 import { getMediaTypeFromUrl } from "../../../../../../helpers/mediaType";
 import { SolidKanbanCardWidgetProps } from "../../../../../../types/solid-core";
+import { formatMediaFileSize } from "../fileSize/MediaFileSizeWidget";
 
 const renderText = (value: any, fallback = "--") => {
   if (value === null || value === undefined || value === "") {
@@ -7,15 +8,6 @@ const renderText = (value: any, fallback = "--") => {
   }
 
   return String(value);
-};
-
-const formatFileSize = (value: any) => {
-  const size = Number(value);
-  if (!Number.isFinite(size) || size <= 0) return "--";
-  if (size >= 1024 * 1024 * 1024) return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`;
-  if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-  if (size >= 1024) return `${(size / 1024).toFixed(1)} KB`;
-  return `${size} B`;
 };
 
 const toTitleCase = (value: any) => {
@@ -100,7 +92,7 @@ export default function MediaCardWidget({
           {mimeLabel}
         </span>
         <span className="solid-media-card-widget__size solid-media-card-widget__badge solid-media-card-widget__badge--size">
-          {formatFileSize(rowData?.fileSize)}
+          {formatMediaFileSize(rowData?.fileSize)}
         </span>
       </div>
 

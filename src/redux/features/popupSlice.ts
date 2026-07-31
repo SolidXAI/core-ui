@@ -1,10 +1,26 @@
 // store/popupSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ReactNode } from 'react';
 
-interface PopupEvent {
-  action: string;
+export type PopupButtonAction = string | ((event: PopupEvent, close: () => void) => void | Promise<void>);
+
+export interface PopupButton {
+  label: string;
+  action?: PopupButtonAction;
+  variant?: string;
+  className?: string;
+  icon?: string;
+  closeOnClick?: boolean;
+  [key: string]: any;
+}
+
+export interface PopupEvent {
+  action?: string;
   closable?: boolean;
+  title?: string;
+  body?: any;
+  message?: any;
+  buttons?: PopupButton[];
+  popupWidth?: string;
   [key: string]: any;
 }
 

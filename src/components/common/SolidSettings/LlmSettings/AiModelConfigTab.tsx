@@ -161,6 +161,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
                 className="w-full"
                 value={providerType}
                 options={typeOptions}
+                native={false}
                 onChange={(e) => {
                   setProviderType(e.value);
                   if (!isEdit) {
@@ -347,6 +348,7 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
               className="w-full"
               value={modelEntry.providerId}
               options={providerOptions}
+              native={false}
               onChange={(e) => onModelEntryChange({ ...modelEntry, providerId: e.value })}
               placeholder="Select Provider"
             />

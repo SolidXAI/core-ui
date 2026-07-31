@@ -18,7 +18,7 @@ import {
 } from "../../shad-cn-ui";
 
 
-const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params, showSaveButton = false, onSave }: any) => {
+const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params, showSaveButton = false, hideAddButton = false, onSave }: any) => {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const [visiblePopup, setVisiblePopup] = useState(false);
@@ -149,7 +149,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
                 Save
               </SolidButton>
             )}
-            {modelMetaData.isSystem !== true &&
+            {modelMetaData.isSystem !== true && !hideAddButton &&
               <SolidButton
                 size="sm"
                 leftIcon={<Plus size={14} />}

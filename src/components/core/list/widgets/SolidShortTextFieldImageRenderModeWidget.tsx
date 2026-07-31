@@ -1,6 +1,7 @@
 import { SolidMediaListFieldWidgetProps } from "../../../../types/solid-core";
 
 export const SolidShortTextFieldImageListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
 
     return (
         <img
@@ -12,6 +13,7 @@ export const SolidShortTextFieldImageListWidget = ({ rowData, solidListViewMetaD
             style={{ objectFit: "cover" }}
             onClick={(event) => {
                 event.stopPropagation();
+                if (isArchivedRecord) return;
                 setLightboxUrls([{ src: rowData[fieldMetadata.name], downloadUrl: rowData[fieldMetadata.name] }]);
                 setOpenLightbox(true);
             }}

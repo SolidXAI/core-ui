@@ -1,4 +1,4 @@
-import { permissionExpression } from "../../../helpers/permissions";
+import { canExportRecords, canImportRecords, permissionExpression } from "../../../helpers/permissions";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
@@ -6,6 +6,7 @@ import { useSearchParams } from "../../../hooks/useSearchParams";
 import { useEffect, useState } from "react";
 import { SolidExport } from "../../../components/common/SolidExport";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
+import { SolidListViewHeaderContextMenuButton } from "../list/SolidListViewHeaderContextMenuButton";
 import {
     SolidDropdownMenu,
     SolidDropdownMenuCheckboxItem,
@@ -55,8 +56,12 @@ const normalizeViewModes = (viewModes: any[] = []) => {
 
 export const SolidKanbanViewConfigure = ({
     solidKanbanViewMetaData,
+    params,
     modelName,
     actionsAllowed,
+    headerButtons,
+    handleCustomButtonClick,
+    selectedRecords,
     setLayoutDialogVisible,
     viewModes,
     setShowArchived,
@@ -127,19 +132,15 @@ export const SolidKanbanViewConfigure = ({
         window.location.reload();
     };
 
-    const canImport =
-        Boolean(modelName) &&
-        actionsAllowed.includes(`${permissionExpression(modelName, "create")}`) &&
-        actionsAllowed.includes(`${permissionExpression("importTransaction", "create")}`);
+    const canImport = canImportRecords(actionsAllowed, modelName);
 
-    const canExport =
-        Boolean(modelName) &&
-        actionsAllowed.includes(`${permissionExpression(modelName, "findMany")}`) &&
-        actionsAllowed.includes(`${permissionExpression("exportTransaction", "create")}`);
+    const canExport = canExportRecords(actionsAllowed, modelName);
 
     const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
     const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
     const canShowArchivedRecords = Boolean(solidKanbanViewMetaData?.data?.solidView?.model?.enableSoftDelete);
+    const contextMenuHeaderButtons = (headerButtons ?? []).filter((button: any) => button?.attrs?.actionInContextMenu === true);
+    const mobileOnlyHeaderButtons = (headerButtons ?? []).filter((button: any) => button?.attrs?.actionInContextMenu !== true);
 
     return (
         <div className="position-relative">
@@ -180,12 +181,42 @@ export const SolidKanbanViewConfigure = ({
                         </SolidDropdownMenuItem>
                     )}
 
+                    {contextMenuHeaderButtons.map((button: any, index: number) => (
+                        <SolidListViewHeaderContextMenuButton
+                            key={button?.attrs?.action ?? index}
+                            button={button}
+                            params={params}
+                            solidListViewMetaData={solidKanbanViewMetaData}
+                            handleCustomButtonClick={handleCustomButtonClick}
+                            selectedRecords={selectedRecords}
+                            filters={filters}
+                            onActionComplete={() => setIsCogMenuOpen(false)}
+                        />
+                    ))}
+
+                    <div className="lg:hidden flex flex-col gap-1">
+                        {mobileOnlyHeaderButtons.map((button: any, index: number) => (
+                            <SolidListViewHeaderContextMenuButton
+                                key={`mobile-${button?.attrs?.action ?? index}`}
+                                button={button}
+                                params={params}
+                                solidListViewMetaData={solidKanbanViewMetaData}
+                                handleCustomButtonClick={handleCustomButtonClick}
+                                selectedRecords={selectedRecords}
+                                filters={filters}
+                                onActionComplete={() => setIsCogMenuOpen(false)}
+                            />
+                        ))}
+                    </div>
+
                     {canShowArchivedRecords && (
                         <SolidDropdownMenuCheckboxItem
+                            className={showArchived ? "solid-archive-toggle-item-active" : undefined}
                             checked={showArchived}
+                            icon={<SolidIcon name="si-archive" className="solid-header-action-button-icon solid-archive-toggle-icon" aria-hidden />}
                             onCheckedChange={() => setShowArchived(!showArchived)}
                         >
-                            Show Archived Records
+                            Show Archived Rows
                         </SolidDropdownMenuCheckboxItem>
                     )}
 

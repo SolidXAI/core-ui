@@ -5,7 +5,7 @@ import { getExtensionComponent } from '../../../../helpers/registry';
 import { SolidListFieldWidgetProps } from '../../../../types/solid-core';
 
 const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
-    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
+    const truncateAfter = column?.attrs?.truncateAfter ?? solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (

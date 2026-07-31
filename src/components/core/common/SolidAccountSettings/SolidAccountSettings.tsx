@@ -3,22 +3,37 @@ import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidChangePassword } from "./SolidChangePassword";
 import { SolidVersionInfo } from "./SolidVersionInfo";
 import styles from "./SolidAccountSettings.module.css";
-import { useLazyGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
-import { toLegacySettingsShape } from "../../../../helpers/settingsPayload";
+import { useGetSolidVersionInfoQuery, useLazyGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
+import { getSettingsMap, toLegacySettingsShape } from "../../../../helpers/settingsPayload";
 
 export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfileSettingsDialog }: any) => {
   const [settingKey, setSettingKey] = useState("personal_info");
 
   const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+  const versionInfoQuery = useGetSolidVersionInfoQuery(undefined, {
+    skip: !showProfileSettingsDialog,
+  });
+
   useEffect(() => {
     trigger("");
   }, [trigger]);
 
+  const settingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
+  const versionInfoErrorStatus =
+    versionInfoQuery.error && typeof versionInfoQuery.error === "object" && "status" in versionInfoQuery.error
+      ? versionInfoQuery.error.status
+      : null;
+
   const settings = [
     { label: "Personal Info", key: "personal_info" },
-    { label: "Change Password", key: "change_password" },
-    { label: "About", key: "about" },
+    ...(settingsMap?.passwordBasedAuth ? [{ label: "Change Password", key: "change_password" }] : []),
+    ...(versionInfoErrorStatus === 403 ? [] : [{ label: "About", key: "about" }]),
   ];
+
+  useEffect(() => {
+    if (settings.some((option) => option.key === settingKey)) return;
+    setSettingKey(settings[0]?.key ?? "personal_info");
+  }, [settingKey, settings]);
 
   const renderSettingComponent = useMemo(() => {
     const legacySettings = toLegacySettingsShape(solidSettingsData);

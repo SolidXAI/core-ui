@@ -158,6 +158,7 @@ export function GenerateApiKeyModal({ open, onClose, onCreated, userId }: Genera
                   formik.setFieldValue("expiryOption", value);
                   if (value !== "custom") setCustomDate(null);
                 }}
+                native={false}
               />
               {formik.values.expiryOption === "custom" && (
                 <SolidDatePicker

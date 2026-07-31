@@ -6,10 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
-import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import { StatusIcon } from '../../../../components/core/extension/solid-core/CustomIcon/StatusIcon';
 import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
 import styles from "./solidFields.module.css";
 
@@ -192,14 +191,3 @@ export const DefaultDateFormViewWidget = ({ formik, fieldContext, }: SolidFormFi
     );
 };
 
-
-export const PublishedStatusListViewWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
-
-    const colVal = rowData[column.attrs.name]; // publishedAt value
-
-    const isPublished = !!colVal;
-
-    return (
-        <StatusIcon isPublished={isPublished} />
-    );
-};

@@ -51,6 +51,7 @@ export default SolidRelationManyToOneColumn;
 
 export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, embeded }: SolidListFieldWidgetProps) => {
     const manyToOneFieldData = rowData[column.attrs.name];
+    const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
     // This is the userkey that will be present within the rowData.
     if (manyToOneFieldData) {
         // Since this is a many-to-one field, we fetch the user key field of the associated model.
@@ -70,7 +71,7 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
             viewMode: "view",
         });
 
-        const isDisabled = column?.attrs?.disabled === true;
+        const isDisabled = column?.attrs?.disabled === true || isArchivedRecord;
 
         if (embeded === true || isDisabled || !relationRecordPath) {
             return (

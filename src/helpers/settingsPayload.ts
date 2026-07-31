@@ -102,6 +102,19 @@ export function getSettingsMap(payload: any): Record<string, any> {
   return Object.fromEntries(list.map((setting) => [setting.key, setting.value]));
 }
 
+export function resolveRecordClickAction(
+  settingsMap: Record<string, any> | undefined,
+  options: { isSystemModule?: boolean } = {}
+): "edit" | "view" {
+  if (options.isSystemModule === true) {
+    return "view";
+  }
+
+  const settingValue = settingsMap?.recordClickAction ?? settingsMap?.rowClickAction;
+  return settingValue === "view" ? "view" : "edit";
+}
+
+
 export function toLegacySettingsShape(payload: any) {
   return {
     ...payload,

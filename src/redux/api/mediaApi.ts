@@ -29,6 +29,13 @@ export const mediaApi = createApi({
                 body: Media
             }),
         }),
+        uploadMedia: builder.mutation({
+            query: (formData) => ({
+                url: '/media/upload',
+                method: 'POST',
+                body: formData
+            }),
+        }),
         updateMedia: builder.mutation({
             query: ({ id, data }) => ({
                 url: `/media/${id}`,
@@ -52,4 +59,4 @@ export const mediaApi = createApi({
     })
 })
 
-export const { useGetMediasQuery, useLazyGetMediaByIdQuery, useLazyGetMediasQuery, useGetMediaByIdQuery, useCreateMediaMutation, useUpdateMediaMutation, useDeleteMediaMutation, useDeleteMultipleMediasMutation } = mediaApi  
+export const { useGetMediasQuery, useLazyGetMediaByIdQuery, useLazyGetMediasQuery, useGetMediaByIdQuery, useCreateMediaMutation, useUploadMediaMutation, useUpdateMediaMutation, useDeleteMediaMutation, useDeleteMultipleMediasMutation } = mediaApi  

@@ -904,6 +904,15 @@ export function ModuleMetadataExplorer({
               </div>
             </div>
 
+            {/* {!scopedArrayPath && ( */}
+              <div className="solid-module-explorer-field-name-note" role="note">
+                <strong>Important:</strong>{" "}
+                Do not rename a field directly. To change a field name, delete the existing field, save the section,
+                validate the generated code, and then create a new field with the required name. Direct renaming can
+                cause serious metadata and code generation issues.
+              </div>
+            {/* )} */}
+
             <div className="solid-module-explorer-editor-wrap">
               <div className="solid-module-explorer-editor-shell">
                 {isDocumentLoading ? (

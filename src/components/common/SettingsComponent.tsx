@@ -444,6 +444,7 @@ export function SettingsComponent() {
                                 value={value}
                                 options={setting.options || []}
                                 placeholder={setting.placeholder || "Select"}
+                                native={false}
                                 onChange={(event) => updateValue(setting.key, event.value)}
                               />
                             ) : null}

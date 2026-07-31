@@ -9,7 +9,11 @@ export const ExtensionComponentTypes = {
     formWidget: "formWidget",
     kanbanCardWidget: "kanbanCardWidget",
     cardWidget: "cardWidget",
-    settingsWidgets: "settingsWidget"
+    settingsWidgets: "settingsWidget",
+    workflowNodeEditor: "workflowNodeEditor",
+    workflowNodeDocs: "workflowNodeDocs",
+    workflowNodeFieldEditor: "workflowNodeFieldEditor",
+    workflowNodePaletteCard: "workflowNodePaletteCard",
 } as const;
 
 export type ExtensionComponentType =

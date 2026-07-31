@@ -40,7 +40,8 @@ import {
     SolidBeforeListDataLoad,
     SolidBeforeTreeNodeLoad,
     SolidTreeUiEventResponse,
-    SolidTreeLoad
+    SolidTreeLoad,
+    SolidDefinedFilter
 } from './solid-core';
 
 type ChildContainerProps = {
@@ -83,5 +84,6 @@ export type {
     SolidBeforeListDataLoad,
     SolidBeforeTreeNodeLoad,
     SolidTreeUiEventResponse,
-    SolidTreeLoad
+    SolidTreeLoad,
+    SolidDefinedFilter
 };

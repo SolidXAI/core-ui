@@ -38,6 +38,7 @@ export type FormViewParams = {
     inlineCreateAutoSave: any;
     customCreateHandler?: any;
     handlePopupClose?: any;
+    enableEmbeddedRelationSaveAndNew?: boolean;
 };
 
 
@@ -537,6 +538,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     : {},
                 onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
                 inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+                enableEmbeddedRelationSaveAndNew: true,
             });
             setvisibleCreateRelationEntity(true);
         }
@@ -583,17 +585,26 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                 : {},
             onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+            enableEmbeddedRelationSaveAndNew: true,
         });
     }, [readOnlyPermission]);
 
     const saveParentEntity = async () => {
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('childEntity', fieldLayoutInfo.attrs.name);
-        currentUrl.searchParams.set('viewMode', 'edit');
+        formik.setStatus({
+            ...(formik.status || {}),
+            saveParentRelationField: fieldLayoutInfo.attrs.name,
+        });
+        window.sessionStorage.setItem("solidSaveParentRelationField", fieldLayoutInfo.attrs.name);
         try {
-            router.push(currentUrl.toString());
-            await formik.handleSubmit();
-        } catch { }
+            await formik.submitForm();
+        } catch {
+        } finally {
+            formik.setStatus({
+                ...(formik.status || {}),
+                saveParentRelationField: undefined,
+            });
+            window.sessionStorage.removeItem("solidSaveParentRelationField");
+        }
         setShowSaveParentEntityConfirmationPopup(false);
     };
 

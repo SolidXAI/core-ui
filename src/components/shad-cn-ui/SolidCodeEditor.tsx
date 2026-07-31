@@ -9,6 +9,7 @@ type SolidCodeEditorProps = {
   readOnly?: boolean;
   className?: string;
   language?: string;
+  onMount?: (editor: any, monaco: any) => void;
 };
 
 export function SolidCodeEditor({
@@ -19,6 +20,7 @@ export function SolidCodeEditor({
   readOnly = false,
   className,
   language = "javascript",
+  onMount,
 }: SolidCodeEditorProps) {
   const [editorTheme, setEditorTheme] = useState<"vs" | "vs-dark">("vs");
 
@@ -74,6 +76,7 @@ export function SolidCodeEditor({
         language={language}
         value={value}
         onChange={(val) => onChange?.(val ?? "")}
+        onMount={onMount}
         options={{
           readOnly,
           minimap: { enabled: false },

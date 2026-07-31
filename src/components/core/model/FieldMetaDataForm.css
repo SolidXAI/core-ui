@@ -56,6 +56,16 @@
   padding-top: 0.85rem;
 }
 
+.solid-field-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.solid-field-checkbox-row .form-field-label {
+  margin: 0;
+}
+
 .solid-field-form-actions {
   display: flex;
   align-items: center;

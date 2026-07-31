@@ -2,6 +2,7 @@ import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 import { getExtensionComponent } from "../../../../helpers/registry";
+import { getDefaultPublishStatusListWidget } from './PublishStatusColumnDefaults';
 
 const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
 
@@ -19,7 +20,7 @@ const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: So
                 (rowData) => {
                     let viewWidget = column.attrs.viewWidget;
                     if (!viewWidget) {
-                        viewWidget = 'DefaultBooleanListWidget';
+                        viewWidget = getDefaultPublishStatusListWidget(solidListViewMetaData, fieldMetadata.name) ?? 'DefaultBooleanListWidget';
                     }
                     let DynamicWidget = getExtensionComponent(viewWidget);
                     const widgetProps: SolidListFieldWidgetProps = {

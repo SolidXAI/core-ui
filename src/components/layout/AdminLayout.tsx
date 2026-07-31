@@ -7,7 +7,7 @@ import { showToast } from '../../redux/features/toastSlice';
 import { Layout } from "./Layout";
 import SolidChangeForcePassword from "../auth/SolidChangeForcePassword";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { SolidDialog, SolidDivider } from "../shad-cn-ui";
+import { SolidDialog, SolidDialogBody, SolidDialogSeparator } from "../shad-cn-ui";
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     // const theme = useSelector((state: any) => state.theme.mode);
@@ -36,11 +36,12 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
                     header="Change Default Password"
                     className="solid-change-dialog"
                     visible={isForcePasswordChange}
-                    style={{ width: "25vw" }}
                     onHide={() => setIsForcePasswordChange(false)}
                 >
-                    <SolidDivider className="mt-0" />
-                    <SolidChangeForcePassword />
+                    <SolidDialogSeparator />
+                    <SolidDialogBody>
+                        <SolidChangeForcePassword />
+                    </SolidDialogBody>
                 </SolidDialog>
             )}
         </>

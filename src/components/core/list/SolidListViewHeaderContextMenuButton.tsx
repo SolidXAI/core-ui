@@ -5,7 +5,7 @@ import { useSession } from "../../../hooks/useSession";
 import { SolidDropdownMenuItem } from "../../shad-cn-ui";
 import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
-export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
+export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, selectedRecords, filters, onActionComplete }: any) => {
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -32,6 +32,8 @@ export const SolidListViewHeaderContextMenuButton = ({ button, params, solidList
                 const event = {
                     params,
                     solidListViewMetaData: solidListViewMetaData.data,
+                    selectedRecords,
+                    filters,
                 };
                 handleCustomButtonClick(button.attrs, event);
                 onActionComplete?.();
