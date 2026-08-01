@@ -26,7 +26,11 @@
   padding: 18px;
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
   border-radius: 18px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 98%, white 2%), var(--card));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card) 97%, var(--background) 3%),
+    color-mix(in srgb, var(--card) 90%, var(--background) 10%)
+  );
 }
 
 .solid-module-package-panel--wizard {
@@ -146,7 +150,11 @@
   padding: 18px 14px 10px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
   border-radius: 22px;
-  background: color-mix(in srgb, var(--background) 72%, white 28%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--background) 82%, var(--card) 18%),
+    color-mix(in srgb, var(--background) 70%, var(--card) 30%)
+  );
 }
 
 .solid-module-package-stepper__item {
@@ -182,7 +190,7 @@
   width: 48px;
   height: 48px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--background) 90%, white 10%);
+  background: color-mix(in srgb, var(--background) 86%, var(--card) 14%);
   border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
   color: color-mix(in srgb, var(--foreground) 78%, transparent);
   font-size: 18px;
@@ -192,15 +200,15 @@
 
 .solid-module-package-stepper__item.is-done .solid-module-package-stepper__node,
 .solid-module-package-stepper__item.is-current .solid-module-package-stepper__node {
-  background: #05060a;
-  color: white;
-  border-color: #05060a;
+  background: color-mix(in srgb, var(--foreground) 18%, var(--background) 82%);
+  color: var(--card-foreground, white);
+  border-color: color-mix(in srgb, var(--foreground) 22%, var(--border) 78%);
 }
 
 .solid-module-package-stepper__item.is-warning .solid-module-package-stepper__node {
-  background: color-mix(in srgb, #f59e0b 18%, white 82%);
-  color: color-mix(in srgb, #92400e 92%, transparent);
-  border-color: color-mix(in srgb, #f59e0b 36%, transparent);
+  background: color-mix(in srgb, #f59e0b 18%, var(--background) 82%);
+  color: color-mix(in srgb, #fbbf24 74%, var(--foreground) 26%);
+  border-color: color-mix(in srgb, #f59e0b 36%, var(--border) 64%);
 }
 
 .solid-module-package-stepper__button {
@@ -255,7 +263,11 @@
   border-radius: 22px;
   background:
     radial-gradient(circle at top left, color-mix(in srgb, #14b8a6 7%, transparent), transparent 44%),
-    linear-gradient(180deg, color-mix(in srgb, var(--background) 60%, white 40%), white);
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--card) 94%, var(--background) 6%),
+      color-mix(in srgb, var(--background) 78%, var(--card) 22%)
+    );
 }
 
 .solid-module-package-stage__meta {
@@ -449,8 +461,9 @@
   max-height: 320px;
   overflow: auto;
   border-radius: 16px;
-  background: color-mix(in srgb, #0f172a 96%, transparent);
-  color: #e2e8f0;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+  background: color-mix(in srgb, var(--surface-ground, #0f172a) 86%, var(--background) 14%);
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
   font-family: var(--font-mono, "SFMono-Regular", Consolas, monospace);
   font-size: 11px;
   line-height: 1.6;
@@ -504,6 +517,98 @@
   margin: 0;
   font-size: 11.5px;
   line-height: 1.55;
+}
+
+html.dark .solid-module-package-panel,
+[data-theme="dark"] .solid-module-package-panel {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card) 96%, #172554 4%),
+    color-mix(in srgb, var(--card) 88%, #020617 12%)
+  );
+  box-shadow:
+    0 18px 40px rgba(2, 6, 23, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+html.dark .solid-module-package-dropzone,
+[data-theme="dark"] .solid-module-package-dropzone {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, #14b8a6 14%, transparent), transparent 48%),
+    linear-gradient(180deg, color-mix(in srgb, var(--background) 76%, #0b1220 24%), color-mix(in srgb, var(--card) 86%, #020617 14%));
+}
+
+html.dark .solid-module-package-file-card,
+html.dark .solid-module-package-metric,
+html.dark .solid-module-package-checklist__section,
+html.dark .solid-module-package-notice,
+html.dark .solid-module-package-tree,
+html.dark .solid-module-package-empty,
+[data-theme="dark"] .solid-module-package-file-card,
+[data-theme="dark"] .solid-module-package-metric,
+[data-theme="dark"] .solid-module-package-checklist__section,
+[data-theme="dark"] .solid-module-package-notice,
+[data-theme="dark"] .solid-module-package-tree,
+[data-theme="dark"] .solid-module-package-empty {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background: color-mix(in srgb, var(--background) 72%, var(--card) 28%);
+}
+
+html.dark .solid-module-package-stepper,
+[data-theme="dark"] .solid-module-package-stepper {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--background) 88%, #0b1220 12%),
+    color-mix(in srgb, var(--card) 82%, #020617 18%)
+  );
+}
+
+html.dark .solid-module-package-stepper__node,
+[data-theme="dark"] .solid-module-package-stepper__node {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background: color-mix(in srgb, var(--background) 76%, var(--card) 24%);
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+  box-shadow:
+    0 10px 24px rgba(2, 6, 23, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html.dark .solid-module-package-stepper__item.is-done .solid-module-package-stepper__node,
+html.dark .solid-module-package-stepper__item.is-current .solid-module-package-stepper__node,
+[data-theme="dark"] .solid-module-package-stepper__item.is-done .solid-module-package-stepper__node,
+[data-theme="dark"] .solid-module-package-stepper__item.is-current .solid-module-package-stepper__node {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 64%, #1e293b 36%),
+    color-mix(in srgb, var(--primary) 46%, #0f172a 54%)
+  );
+  color: var(--primary-foreground, #fff);
+  border-color: color-mix(in srgb, var(--primary) 56%, var(--border) 44%);
+}
+
+html.dark .solid-module-package-stage,
+[data-theme="dark"] .solid-module-package-stage {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, #14b8a6 10%, transparent), transparent 42%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--card) 94%, #172554 6%),
+      color-mix(in srgb, var(--background) 90%, #020617 10%)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 20px 44px rgba(2, 6, 23, 0.28);
+}
+
+html.dark .solid-module-package-step__output,
+[data-theme="dark"] .solid-module-package-step__output {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background: color-mix(in srgb, var(--surface-ground, #111827) 92%, #020617 8%);
+  color: color-mix(in srgb, var(--foreground) 90%, #ffffff 10%);
 }
 
 @media (max-width: 1024px) {
