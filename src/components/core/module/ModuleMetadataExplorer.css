@@ -665,6 +665,70 @@
   opacity: 0.45;
 }
 
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_gutter,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_scroller,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_content {
+  background: color-mix(in srgb, #0f172a 92%, var(--surface-card, #111827) 8%) !important;
+  color: #e5edf8 !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_gutter {
+  color: #94a3b8 !important;
+  border-right: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_gutter-active-line,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_active-line,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_marker-layer .ace_active-line {
+  background: rgba(148, 163, 184, 0.12) !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_marker-layer .ace_selection {
+  background: rgba(96, 165, 250, 0.22) !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_marker-layer .ace_bracket {
+  border: 1px solid rgba(148, 163, 184, 0.55) !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_cursor {
+  border-left-color: #f8fafc !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_print-margin {
+  background: rgba(148, 163, 184, 0.12) !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_constant,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_constant.ace_numeric,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_constant.ace_language {
+  color: #f59e0b !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_string {
+  color: #86efac !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_keyword,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_meta {
+  color: #93c5fd !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_variable,
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_variable.ace_parameter {
+  color: #fda4af !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_comment {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .solid-module-explorer-jsoneditor .ace-jsoneditor .ace_invalid {
+  color: #fecaca !important;
+  background: rgba(220, 38, 38, 0.28) !important;
+}
+
 @media (max-width: 1200px) {
   .solid-module-explorer-workspace {
     grid-template-columns: 1fr !important;

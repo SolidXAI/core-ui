@@ -247,7 +247,7 @@
 .groupCard {
   border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
   border-radius: 1rem;
-  overflow: hidden;
+  overflow: visible;
   background: color-mix(in srgb, var(--surface-card, var(--card)) 96%, var(--card) 4%);
 }
 
