@@ -207,31 +207,18 @@
         max-width: calc(100vw - 20px) !important;
     }
 
-    /* =================  cog wheel ================== */
-    .customize-layout-panel.p-overlaypanel {
-        top: 12% !important;
-        left: calc(100% - 420px) !important;
-    }
-
     .cogwheel-column-filter {
         max-height: 250px !important;
     }
 
 
     /* ================== Button =================== */
-    .only-icon-lg .p-button-label {
-        display: none !important;
-    }
 
     /* =============================== Search ================================ */
     /* .page-header {
         padding: 10px 16px 16px 20px !important;
         gap: 16px;
     } */
-
-    .solid-custom-filter-wrapper .p-inputtext {
-        width: 100% !important;
-    }
 
     .solid-global-search-element {
         min-height: 36px;
@@ -273,13 +260,7 @@
         flex-grow: 1;
     }
 
-    .solid-datatable-wrapper .p-datatable-wrapper {
-        height: calc(100% - 60px);
-
-    }
-
-    .solid-list-page-wrapper-embedded .solid-datatable-wrapper,
-    .solid-list-page-wrapper-embedded .solid-datatable-wrapper .p-datatable-wrapper {
+    .solid-list-page-wrapper-embedded .solid-datatable-wrapper {
         height: auto !important;
         min-height: 0;
     }
@@ -446,12 +427,6 @@
         left: 274px !important;
     }
 
-
-    .p-avatar.p-avatar-lg {
-        width: 2.5rem;
-        height: 2.5rem;
-    }
-
     /* ===================== Solid Dialog  ===================== */
 
     .solid-confirm-dialog {
@@ -470,24 +445,11 @@
         max-width: 90%;
     }
 
-    .p-dialog .p-dialog-header {
-        padding: 1rem 1.5rem;
-    }
-
     .solid-icon-dialog {
         height: 90vh !important;
     }
 
     /* ======================= Solid Import  ================================ */
-
-    /* .solid-import-dialog {
-        overflow-x: auto !important;
-    }
-
-    .solid-import-dialog .p-dialog-content,
-    .solid-import-dialog-header {
-        width: 44rem !important;
-    } */
 
     .solid-import-dialog {
         width: calc(100vw - 12px) !important;
@@ -504,33 +466,12 @@
 
 
 
-    /* =================  cog wheel ================== */
-    .customize-layout-panel.p-overlaypanel {
-        top: 16% !important;
-        left: calc(100% - 350px) !important;
-    }
-
     .cogwheel-column-filter {
         max-height: 220px !important;
     }
 
 
     /*  ======================= Button ================================== */
-    .p-splitbutton.p-button-sm>.p-button {
-        padding: 0.5rem 0.9rem;
-    }
-
-
-    .p-splitbutton.p-button-lg>.p-button {
-        font-size: 1.25rem;
-        padding: 0.7rem 1.1rem;
-    }
-
-    .p-button.p-button-icon-only.solid-icon-button {
-        padding: 0.4rem 0.6rem;
-        width: 2.2rem;
-        height: 2rem !important;
-    }
 
     /*  ======================= Search ================================== */
     /* default */
@@ -564,17 +505,6 @@
 
     .solid-layout-accordion {
         max-width: 250px;
-    }
-
-
-    .p-panel .p-panel-content {
-        padding: 0.8rem !important;
-    }
-
-    .solid-tab-view .p-tabview-panels {
-        padding-top: 10px;
-        padding-left: 0;
-        padding-right: 0;
     }
 
     .solid-logo.in_form_view {
@@ -773,10 +703,6 @@
         font-weight: 500 !important;
     }
 
-    .p-component {
-        font-size: 0.9rem !important;
-    }
-
     .solid-inline-relation-dialog {
         width: calc(100vw - 12px) !important;
         max-width: calc(100vw - 12px) !important;
@@ -815,10 +741,6 @@
 
     .solid-logo.in_form_view {
         margin-bottom: 10px;
-    }
-
-    .p-toast {
-        width: 90% !important;
     }
 
     .solid-module-mobile-text-wrapper {
@@ -895,27 +817,9 @@
 
 
     /* ====================== SOlid Pannel =========================== */
-    .p-panel .p-panel-header {
-        padding: 0.75rem;
-    }
-
-    .solid-column-panel.p-panel .p-panel-content {
-        padding: 1px 0.75rem 0.75rem 0.75rem;
-    }
 
 
     /* ===================== Pagination ============================  */
-    .p-paginator .p-paginator-next {
-        min-width: 2.5rem !important;
-    }
-
-    .solid-paginator div.p-dropdown::before {
-        content: "" !important;
-    }
-
-    .solid-paginator div.p-dropdown {
-        margin-left: 0px !important;
-    }
 
 
 
@@ -965,15 +869,6 @@
 
 
 /* For tablets (between 481px and 768px) */
-@media (min-width: 481px) and (max-width: 768px) {
-    .p-panel .p-panel-header {
-        padding: 1rem;
-    }
-
-    .solid-column-panel.p-panel .p-panel-content {
-        padding: 1px 1rem 1rem 1rem;
-    }
-}
 
 
 @media(max-width:400px) {

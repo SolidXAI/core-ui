@@ -193,7 +193,7 @@ export const SolidCardViewConfigure = ({
                 <SolidIcon name="si-sliders-h" className="solid-header-action-button-icon" aria-hidden />
                 <span className="solid-header-action-button-label">Layout</span>
               </SolidDropdownMenuSubTrigger>
-              <SolidDropdownMenuSubContent className="customize-layout-panel">
+              <SolidDropdownMenuSubContent className="customize-layout-panel" side="left">
                 {showSwitchType && (
                   <>
                     <SolidDropdownMenuLabel>Switch Type</SolidDropdownMenuLabel>

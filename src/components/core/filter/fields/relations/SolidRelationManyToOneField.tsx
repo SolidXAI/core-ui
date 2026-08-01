@@ -61,7 +61,7 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
                 optionLabel='label'
                 optionValue='value'
                 placeholder="Select Operator"
-                className="p-inputtext-sm w-full"
+                className="w-full solid-filter-compact-control"
             />
             </div>
 
