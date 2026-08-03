@@ -2696,6 +2696,7 @@ li.header-li-px {
 .overlay-step-button:disabled {
   cursor: unset;
   opacity: 0.6;
+  pointer-events: none !important;
 }
 
 .arrow-step-button:disabled:hover:not(.arrow-step-active):not(.arrow-step-completed),
