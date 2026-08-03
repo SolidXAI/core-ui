@@ -2691,6 +2691,20 @@ li.header-li-px {
   background: color-mix(in srgb, var(--primary) 18%, var(--card) 82%);
 }
 
+.arrow-step-button:disabled,
+.overflow-button:disabled,
+.overlay-step-button:disabled {
+  cursor: unset;
+  opacity: 0.6;
+}
+
+.arrow-step-button:disabled:hover:not(.arrow-step-active):not(.arrow-step-completed),
+.overflow-button:disabled:hover,
+.overlay-step-button:disabled:hover {
+  background: inherit;
+  color: inherit;
+}
+
 .overflow-button {
   padding: 0.56rem 0.5rem;
   min-width: 2.25rem;
