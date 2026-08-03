@@ -34,6 +34,7 @@ export const SolidFormStepper = (props: Props) => {
     const activeStep = solidFormViewWorkflowData?.[0]?.value;
     const [solidWorkflowFieldKey, setSolidWorkflowFieldKey] = useState<string>("");
     const [visibleStepsCount, setVisibleStepsCount] = useState<number>(1);
+    const isStepperDisabled = solidWorkflowFieldEnabled === false || id === "new" || viewMode === "view";
 
     // Dynamic responsive logic
     useEffect(() => {
@@ -159,7 +160,7 @@ export const SolidFormStepper = (props: Props) => {
     }
 
     const handleButtonClick = (stepValue: any) => {
-        if (solidWorkflowFieldEnabled === false || id === "new" || viewMode === "view") {
+        if (isStepperDisabled) {
             return
         } else {
             formik.setFieldValue(solidWorkflowFieldKey, stepValue);
@@ -218,6 +219,7 @@ export const SolidFormStepper = (props: Props) => {
                             <button
                                 type='button'
                                 className="overflow-button overflow-left-button"
+                                disabled={isStepperDisabled}
                             >
                                 <SolidIcon name="si-ellipsis-h" />
                             </button>
@@ -235,6 +237,7 @@ export const SolidFormStepper = (props: Props) => {
                                             type='button'
                                             className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
                                             onClick={() => handleButtonClick(step.value)}
+                                            disabled={isStepperDisabled}
                                         >
                                             {step.label}
                                         </button>
@@ -267,6 +270,7 @@ export const SolidFormStepper = (props: Props) => {
                                 }`}
                             onClick={() => handleButtonClick(step.value)}
                             title={step.label}
+                            disabled={isStepperDisabled}
                         >
                             <span className="step-text">{step.label}</span>
                         </button>
@@ -279,6 +283,7 @@ export const SolidFormStepper = (props: Props) => {
                             <button
                                 type='button'
                                 className="overflow-button overflow-right-button"
+                                disabled={isStepperDisabled}
                             >
                                 <SolidIcon name="si-ellipsis-h" />
                             </button>
@@ -302,6 +307,7 @@ export const SolidFormStepper = (props: Props) => {
                                                 type='button'
                                                 className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
                                                 onClick={() => handleButtonClick(step.value)}
+                                                disabled={isStepperDisabled}
                                             >
                                                 {step.label}
                                             </button>
