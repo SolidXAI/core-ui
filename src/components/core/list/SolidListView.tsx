@@ -1485,7 +1485,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {params.embeded === false && (
-                    <div className="flex lg:hidden">
+                    <div className="solid-list-search-toggle">
                       <SolidButton
                         type="button"
                         size="small"
