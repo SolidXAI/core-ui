@@ -85,6 +85,9 @@ interface ErrorResponseData {
     message: string;
     statusCode: number;
     error: string;
+    data?: {
+        message?: string | string[];
+    };
 }
 
 const LAYOUT_CLASSNAME_MAPPER: Record<string, string> = {
@@ -919,7 +922,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [params.modelName, solidFormViewMetaData])
 
     function isFetchBaseQueryErrorWithErrorResponse(error: any): error is FetchBaseQueryError & { data: ErrorResponseData } {
-        return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
+        return error && typeof error === 'object' && error.data && typeof error.data === 'object';
     }
 
     useEffect(() => {
@@ -927,7 +930,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
 
             if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
-                errorMessage = errorToast.data.message;
+                // Validation errors are returned in `data.data.message`, while
+                // `data.message` only contains the generic exception message.
+                errorMessage = errorToast.data.data?.message || errorToast.data.message;
             } else {
                 errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
             }
