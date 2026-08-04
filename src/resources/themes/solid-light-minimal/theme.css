@@ -1,0 +1,56 @@
+@import url("/themes/solid-light-minimal/theme-variables.css");
+
+.solid-admin-header {
+    background: var(--sidebar-background) !important;
+}
+
+.solid-sidebar-tree-parent,
+.solid-sidebar-tree-row:not(.is-active),
+.solid-tree-plusminus {
+    color: #fff !important;
+}
+
+.solid-sidebar-tree-row:not(.is-active):hover,
+.solid-sidebar-tree-row:not(.is-active):hover .solid-sidebar-tree-parent,
+.solid-sidebar-tree-row:not(.is-active):hover .solid-tree-plusminus {
+    color: var(--primary) !important;
+}
+
+.solid-sidebar-tree-row.is-active {
+    color: var(--primary) !important;
+}
+
+.solid-admin-crumb {
+    color: #FFF !important;
+}
+
+.solid-admin-header-sep {
+    background-color: var(--sidebar-border) !important;
+}
+
+.solid-admin-sidebar-trigger {
+    background-color: #FAFAFA !important;
+}
+
+.arrow-step-button.arrow-step-active {
+    background: var(--sidebar-background) !important;
+}
+
+.arrow-step-button.arrow-step-completed {
+    background: #B9B9BB !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sidebar-background) 22%, transparent) !important;
+    color: #0D0E15 !important;
+}
+
+.solid-admin-theme-toggle{
+    color: #FFF !important;
+}
+
+/* .solid-list-table-area>.solid-data-table-root{
+    margin-top: 16px ;
+}
+
+.solid-table-density-cozy .solid-data-table-th{
+    background-color: var(--sidebar-background) !important;
+    color: #FFF !important;
+} */

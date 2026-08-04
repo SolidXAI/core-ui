@@ -1,0 +1,28 @@
+:root {
+  --solid-surface-2: #131b25;
+  --solid-interactive-bg: #6ea8fe;
+  --solid-focus-ring: rgba(110, 168, 254, 0.22);
+  --accent: #192433;
+  --accent-foreground: #e8f0fb;
+  --primary: #6ea8fe;
+  --primary-foreground: #08111d;
+  --ring: rgba(110, 168, 254, 0.22);
+  --sidebar-primary: #0f1722;
+  --sidebar-primary-foreground: #f1f6fd;
+  --primary-color: var(--primary);
+  --primary-color-text: var(--primary-foreground);
+  --focus-ring: 0 0 0 0.2rem var(--ring, rgba(110, 168, 254, 0.22));
+  --primary-light-color: rgba(110, 168, 254, 0.16);
+  --highlight-bg: rgba(110, 168, 254, 0.14);
+  --solid-dashboard-welcome-bg: #0f1722;
+  --solid-admin-card-color-1: #6ea8fe;
+  --solid-admin-card-color-2: #4f87da;
+  --solid-admin-card-color-3: #9ac2ff;
+  --sidebar-background: #0f1823;
+  --sidebar-foreground: #e2ebf6;
+  --sidebar-border: #203043;
+  --sidebar-accent: #152130;
+  --sidebar-accent-foreground: #f1f6fd;
+  --sidebar-primary: #6ea8fe;
+  --sidebar-primary-foreground: #08111d;
+}
