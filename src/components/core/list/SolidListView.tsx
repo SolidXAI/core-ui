@@ -887,7 +887,17 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             // recomputed fresh each time.
             const mergedFilters = queryData.filters ? structuredClone(queryData.filters) : {};
             mergedFilters.$and = Array.isArray(mergedFilters.$and) ? mergedFilters.$and : [];
-            mergedFilters.$and.push(...activeDefinedFilterPredicates);
+
+            // All active definedFilters predicates are OR'd together as one
+            // group (ANDing them would always yield zero rows when two
+            // filters target the same field, e.g. two ticketStatus values).
+            // What each predicate actually constrains is up to the handler.
+            mergedFilters.$and.push(
+              activeDefinedFilterPredicates.length > 1
+                ? { $or: activeDefinedFilterPredicates }
+                : activeDefinedFilterPredicates[0]
+            );
+
             queryData.filters = mergedFilters;
           }
         } catch (err) {
