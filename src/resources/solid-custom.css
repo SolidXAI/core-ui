@@ -3812,6 +3812,16 @@ html.dark .solid-header-cog-trigger:hover,
   justify-content: center;
 }
 
+.solid-list-search-toggle {
+  display: flex;
+}
+
+@media (min-width: 992px) {
+  .solid-list-search-toggle {
+    display: none !important;
+  }
+}
+
 .solid-list-toolbar .solid-header-cog-trigger,
 .solid-header-cog-trigger {
   display: inline-flex;

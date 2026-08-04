@@ -1915,7 +1915,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className="flex lg:hidden">
+                  <div className="solid-list-search-toggle">
                     <SolidButton
                       type="button"
                       size="sm"

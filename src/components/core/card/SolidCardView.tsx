@@ -508,7 +508,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
               <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                <div className="flex lg:hidden">
+                 <div className="solid-list-search-toggle">
                   <SolidButton
                     type="button"
                     variant="outline"
