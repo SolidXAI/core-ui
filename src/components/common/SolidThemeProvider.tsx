@@ -3,7 +3,7 @@ import { LayoutContext } from "../layout/context/layoutcontext";
 import { solidGet } from "../../http/solidHttp";
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 import { SOLID_SETTINGS_UPDATED_EVENT } from "./SolidFaviconProvider";
-import { getDefaultThemeKey, isRegisteredThemeKey, type ThemeMode } from "../../theme/themeRegistry";
+import { getDefaultThemeKey, isRegisteredThemeKey, type ThemeMode } from "../../theme/theme-registry";
 
 const THEME_MODE_STORAGE_KEY = "solidx.theme.mode";
 const LIGHT_THEME_STORAGE_KEY = "solidx.theme.light";
