@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.8] - 2026-08-05
+
+### Other
+
+- resolved on form header
+- visibility on kanban, card and tree view
+- visibility issues resolved
+
 ## [0.1.14-beta.7] - 2026-08-05
 
 ### Fixed
