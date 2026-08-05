@@ -27,6 +27,8 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { solidGet } from "../../../http/solidHttp";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
@@ -54,6 +56,8 @@ type KanbanSwimlaneDefinition = {
   value: string;
   label: string;
 };
+
+const DEFAULT_RECORD_SORT = ["id:desc"];
 
 const getKanbanSortParam = (sortValue?: string) => {
   if (!sortValue) {
@@ -359,8 +363,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [rawKanbanGroupRecords, setRawKanbanGroupRecords] = useState<any[]>([]);
   const [serverSwimLaneCount, setServerSwimLaneCount] = useState<number>(0);
   const pathname = usePathname();
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = getSettingsMap(solidSettingsData);
   // @ts-ignore
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
+  const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
+    isSystemModule: solidKanbanViewMetaData?.data?.solidView?.module?.isSystem === true,
+  });
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
@@ -552,6 +561,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               limit: Number(queryObject.groupFilter.limit) + Number(queryObject.groupFilter.offset) || kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane,
               offset: 0,
               filters: filters,
+              sort: DEFAULT_RECORD_SORT,
               // @ts-ignore
               populate: queryObject.groupFilter.populate || toPopulate,
               // @ts-ignore
@@ -587,6 +597,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane || 10,
               offset: 0,
               filters: defaultFilters,
+              sort: DEFAULT_RECORD_SORT,
               populate: toPopulate,
               populateMedia: toPopulateMedia
             }
@@ -630,6 +641,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: nextFilters,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia,
         },
@@ -743,7 +755,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             $in: [groupByField],
           },
           ...filters
-        }
+        },
+        sort: DEFAULT_RECORD_SORT,
       });
 
 
@@ -916,6 +929,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: filters,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia
 
@@ -992,6 +1006,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           limit: recordsInSwimlane,
           offset: 0,
           filters: updatedFilter,
+          sort: DEFAULT_RECORD_SORT,
           populate: toPopulate,
           populateMedia: toPopulateMedia
         }
@@ -1106,7 +1121,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
               <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                <div className="flex lg:hidden">
+                 <div className="solid-list-search-toggle">
                   <SolidButton
                     type="button"
                     variant="outline"
@@ -1177,7 +1192,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} showArchived={showArchived}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived}></KanbanBoard>
           }
         </div>
       </div>

@@ -21,7 +21,7 @@ export default function PDFViewer({ url, height = '70vh' }: PDFViewerProps) {
     if (!url) {
         return (
             <div
-                className="flex items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
+                className="flex min-h-0 items-center justify-center rounded-lg bg-[var(--solid-surface-pane)]"
                 style={{ height }}
             >
                 <p className="text-[var(--solid-text-muted)]">No PDF URL provided</p>
