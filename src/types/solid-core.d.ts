@@ -250,17 +250,6 @@ export type SolidTreeLoad = {
     params?: SolidListViewParams
 }
 
-// A single toggleable filter offered by an onBeforeListDataLoad handler.
-// Unlike newFilter (baked directly into the outgoing query), each entry here
-// stays independently addressable so SolidGlobalSearchElement can render it
-// as a removable pill and SolidListView can drop it from the query on removal.
-export type SolidDefinedFilter = {
-    key: string;
-    label: string;
-    predicate: any;
-    applied: boolean;
-}
-
 export type SolidListUiEventResponse = {
     filterApplied?: Boolean;
     newFilter?: any;
@@ -268,7 +257,6 @@ export type SolidListUiEventResponse = {
     newListData?: any[];
     layoutChanged?: Boolean;
     newLayout?: LayoutNode;
-    definedFilters?: SolidDefinedFilter[];
 }
 
 export type SolidTreeUiEventResponse = {
