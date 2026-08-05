@@ -32,6 +32,7 @@ import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList, SolidDefinedFilter } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
+import { resolveActiveUserId } from "../../../helpers/resolveActiveUserId";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
@@ -106,6 +107,17 @@ export type SolidListViewHandle = {
     saved_filter_predicate?: any;
     predefined_search_predicate?: any;
   }) => void;
+  /**
+   * Returns the saved filters currently available in the list view, including
+   * any seeded/system filters supplied by the view.
+   */
+  getSavedFilters: () => any[];
+  /**
+   * Applies the currently available saved filter with the given name using the
+   * same selection path as clicking that filter in the search UI.
+   * Returns false when no saved filter with that name is available.
+   */
+  applySavedFilter: (name: string, variables?: Record<string, any>) => boolean;
   /**
    * Updates pagination state directly.
    * Use this when a caller needs to jump to a specific page window
@@ -908,6 +920,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
       fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      fileterTobeStored.saved_filter_variables = latestFilterPredicatesRef.current.saved_filter_variables || {};
       fileterTobeStored.saved_filter_id = latestFilterPredicatesRef.current.saved_filter_id || null;
       fileterTobeStored.saved_filter_system_key = latestFilterPredicatesRef.current.saved_filter_system_key || null;
       fileterTobeStored.saved_filter_name = latestFilterPredicatesRef.current.saved_filter_name || null;
@@ -930,7 +943,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       queryfilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
-      queryfilter.$and.push(filterPredicates.saved_filter_predicate);
+      queryfilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
+        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
     }
     if (filterPredicates.predefined_search_predicate) {
       queryfilter.$and.push(filterPredicates.predefined_search_predicate);
@@ -1069,6 +1083,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     applyFilter: (filter) => {
       handleApplyCustomFilter(filter);
     },
+    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+    applySavedFilter: (name, variables) => solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
     setPagination: (nextFirst, nextRows) => {
       setFirst(nextFirst);
       setRows(nextRows);

@@ -5,6 +5,8 @@ import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi"
 import { DropResult } from "@hello-pangea/dnd";
 import qs from "qs";
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "../../../hooks/useSession";
+import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import KanbanBoard from "./KanbanBoard";
@@ -120,6 +122,8 @@ const mergeKanbanGroupsWithDefinitions = (
 
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
+  const session = useSession();
+  const user = session?.data?.user;
 
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const dispatch = useDispatch()
@@ -542,7 +546,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           }
           if (queryObject.saved_filter_predicate) {
             // @ts-ignore
-            filters.$and.push(queryObject.saved_filter_predicate);
+            filters.$and.push(resolveSavedFilterVariables(
+              queryObject.saved_filter_predicate,
+              user?.id,
+              queryObject.saved_filter_variables || {}
+            ).value);
           }
           if (queryObject.predefined_search_predicate) {
             // @ts-ignore
@@ -976,7 +984,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       }
       if (filterPredicates.saved_filter_predicate) {
         // @ts-ignore
-        queryfilter.$and.push(filterPredicates.saved_filter_predicate);
+        queryfilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
+          resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
       }
       if (filterPredicates.predefined_search_predicate) {
         // @ts-ignore
@@ -1030,6 +1039,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         urlData.search_predicate = customFilter.search_predicate || {};
         // @ts-ignore
         urlData.saved_filter_predicate = customFilter.saved_filter_predicate || {};
+        // @ts-ignore
+        urlData.saved_filter_variables = customFilter.saved_filter_variables || {};
         // @ts-ignore
         urlData.predefined_search_predicate = customFilter.predefined_search_predicate || {};
         // @ts-ignore

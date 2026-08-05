@@ -35,23 +35,13 @@ export function ListPage() {
 
   useEffect(() => {
     const currentUrl = search ? `${pathname}?${search}` : pathname;
-    const hasSavedQuery = searchParams.has("savedQuery");
-
-    if (!hasSavedQuery) {
-      const retainedUrl = resolveRetainedModelViewRoute(currentUrl);
-      if (retainedUrl !== currentUrl) {
-        router.replace(retainedUrl);
-        return;
-      }
+    const retainedUrl = resolveRetainedModelViewRoute(currentUrl);
+    if (retainedUrl !== currentUrl) {
+      router.replace(retainedUrl);
+      return;
     }
 
-    // savedQuery strip karke store karo
-    const params = new URLSearchParams(search);
-    params.delete("savedQuery");
-    const cleanSearch = params.toString();
-    const urlToStore = cleanSearch ? `${pathname}?${cleanSearch}` : pathname;
-
-    storeCurrentModelViewContext(urlToStore);
+    storeCurrentModelViewContext(currentUrl);
   }, [pathname, search]);
 
   return <SolidListView ref={setListRef} key={listId} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;

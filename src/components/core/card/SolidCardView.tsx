@@ -4,6 +4,8 @@ import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import qs from "qs";
 import { useEffect, useRef, useState } from "react";
+import { useSession } from "../../../hooks/useSession";
+import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
 import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
@@ -105,6 +107,8 @@ const deriveCardViewConfig = (solidCardViewMetaData: any) => {
 };
 
 export const SolidCardView = (params: SolidCardViewParams) => {
+  const session = useSession();
+  const user = session?.data?.user;
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const dispatch = useDispatch();
   const pathname = usePathname();
@@ -250,7 +254,11 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       restoredFilter.$and.push(persistedFilterObject.search_predicate);
     }
     if (persistedFilterObject?.saved_filter_predicate) {
-      restoredFilter.$and.push(persistedFilterObject.saved_filter_predicate);
+      restoredFilter.$and.push(resolveSavedFilterVariables(
+        persistedFilterObject.saved_filter_predicate,
+        user?.id,
+        persistedFilterObject.saved_filter_variables || {}
+      ).value);
     }
     if (persistedFilterObject?.predefined_search_predicate) {
       restoredFilter.$and.push(persistedFilterObject.predefined_search_predicate);
@@ -359,7 +367,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       updatedFilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
-      updatedFilter.$and.push(filterPredicates.saved_filter_predicate);
+      updatedFilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
+        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
     }
     if (filterPredicates.predefined_search_predicate) {
       updatedFilter.$and.push(filterPredicates.predefined_search_predicate);
@@ -376,7 +385,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       custom_filter_predicate: filterPredicates.custom_filter_predicate || {},
       search_predicate: filterPredicates.search_predicate || {},
       saved_filter_predicate: filterPredicates.saved_filter_predicate || {},
+      saved_filter_variables: filterPredicates.saved_filter_variables || {},
       predefined_search_predicate: filterPredicates.predefined_search_predicate || {},
+      predefined_search_chip: filterPredicates.predefined_search_chip || null,
     });
   };
 
