@@ -493,7 +493,18 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   </div>
                 )} */}
                 {/* <p className="m-0 view-title solid-text-wrapper">{cardViewTitle}</p> */}
-                <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
+                <div className="max-[576px]:hidden sm:hidden lg:flex w-full mt-3 lg:mt-0 lg:min-w-0">
+                  <SolidGlobalSearchElement
+                    viewType="card"
+                    showSaveFilterPopup={showSaveFilterPopup}
+                    setShowSaveFilterPopup={setShowSaveFilterPopup}
+                    ref={solidGlobalSearchElementRef}
+                    viewData={solidCardViewMetaDataResponse}
+                    handleApplyCustomFilter={handleApplyCustomFilter}
+                    filterPredicates={filterPredicates}
+                  />
+                </div>
+                <div className={`${showGlobalSearchElement ? "lg:flex" : "hidden"} lg:hidden mt-3 lg:mt-0 w-full lg:min-w-0`}>
                   <SolidGlobalSearchElement
                     viewType="card"
                     showSaveFilterPopup={showSaveFilterPopup}
@@ -508,7 +519,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
               <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                <div className="flex lg:hidden">
+                 <div className="solid-list-search-toggle">
                   <SolidButton
                     type="button"
                     variant="outline"

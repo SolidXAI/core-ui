@@ -1398,27 +1398,53 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </p>
                   </div> */}
                   {params.embeded === false && (
-                    <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
-                      {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
-                      <SolidGlobalSearchElement
-                        key={params.modelName}
-                        viewType="list"
-                        showSaveFilterPopup={showSaveFilterPopup}
-                        setShowSaveFilterPopup={setShowSaveFilterPopup}
-                        ref={solidGlobalSearchElementRef}
-                        viewData={solidListViewMetaData}
-                        handleApplyCustomFilter={handleApplyCustomFilter}
-                        filterPredicates={filterPredicates}
-                      >
-                      </SolidGlobalSearchElement>
-                    </div>
+                    <>
+
+                      {/* Desktop Version of global searcj element */}
+                      <div className={`max-[576px]:hidden sm:hidden lg:flex w-full mt-3 lg:mt-0  lg:min-w-0`}>
+                        {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
+                        <SolidGlobalSearchElement
+                          key={params.modelName}
+                          viewType="list"
+                          showSaveFilterPopup={showSaveFilterPopup}
+                          setShowSaveFilterPopup={setShowSaveFilterPopup}
+                          ref={solidGlobalSearchElementRef}
+                          viewData={solidListViewMetaData}
+                          handleApplyCustomFilter={handleApplyCustomFilter}
+                          filterPredicates={filterPredicates}
+                          definedFilters={definedFilters}
+                          onRemoveDefinedFilter={removeDefinedFilter}
+                          onApplyDefinedFilter={applyDefinedFilter}
+                        >
+                        </SolidGlobalSearchElement>
+                      </div>
+
+                      {/* Mobile Version of global search element */}
+                      <div className={`${showGlobalSearchElement ? "lg:flex" : "hidden"} lg:hidden mt-3 lg:mt-0 w-full lg:min-w-0`}>
+                        {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
+                        <SolidGlobalSearchElement
+                          key={params.modelName}
+                          viewType="list"
+                          showSaveFilterPopup={showSaveFilterPopup}
+                          setShowSaveFilterPopup={setShowSaveFilterPopup}
+                          ref={solidGlobalSearchElementRef}
+                          viewData={solidListViewMetaData}
+                          handleApplyCustomFilter={handleApplyCustomFilter}
+                          filterPredicates={filterPredicates}
+                          definedFilters={definedFilters}
+                          onRemoveDefinedFilter={removeDefinedFilter}
+                          onApplyDefinedFilter={applyDefinedFilter}
+                        >
+                        </SolidGlobalSearchElement>
+                      </div>
+                    </>
                   )}
 
                 </div>
                 <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {params.embeded === false && (
-                    <div className="flex lg:hidden">
+                    <div className="solid-list-search-toggle">
                       <SolidButton
                         type="button"
                         size="small"
@@ -1649,30 +1675,30 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     const presentation = resolveButtonPresentation(button?.attrs);
                                     if (!presentation.showIcon && !presentation.showLabel) return null;
                                     return (
-                                  <SolidButton
-                                    type="button"
-                                    icon={presentation.icon}
-                                    iconPos={presentation.iconPos}
-                                    label={presentation.label}
-                                    tooltip={presentation.tooltip}
-                                    aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
-                                    className={[
-                                      "solid-inline-row-button w-full text-left gap-2",
-                                      presentation.isIconOnly ? "solid-icon-button" : "",
-                                      presentation.buttonClassName ? presentation.buttonClassName : ""
-                                    ].filter(Boolean).join(" ")}
-                                    size="small"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      const event = {
-                                        params,
-                                        rowData: rowData,
-                                        solidListViewMetaData:
-                                          solidListViewMetaData?.data,
-                                      };
-                                      handleCustomButtonClick(button.attrs, event);
-                                    }}
-                                  />
+                                      <SolidButton
+                                        type="button"
+                                        icon={presentation.icon}
+                                        iconPos={presentation.iconPos}
+                                        label={presentation.label}
+                                        tooltip={presentation.tooltip}
+                                        aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
+                                        className={[
+                                          "solid-inline-row-button w-full text-left gap-2",
+                                          presentation.isIconOnly ? "solid-icon-button" : "",
+                                          presentation.buttonClassName ? presentation.buttonClassName : ""
+                                        ].filter(Boolean).join(" ")}
+                                        size="small"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          const event = {
+                                            params,
+                                            rowData: rowData,
+                                            solidListViewMetaData:
+                                              solidListViewMetaData?.data,
+                                          };
+                                          handleCustomButtonClick(button.attrs, event);
+                                        }}
+                                      />
                                     );
                                   })()
                                 );

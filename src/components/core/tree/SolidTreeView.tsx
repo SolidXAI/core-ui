@@ -1897,17 +1897,30 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 </div>
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
-                    <SolidGlobalSearchElement
-                      viewType="tree"
-                      showSaveFilterPopup={showSaveFilterPopup}
-                      setShowSaveFilterPopup={setShowSaveFilterPopup}
-                      ref={solidGlobalSearchElementRef}
-                      viewData={solidTreeViewMetaData}
-                      handleApplyCustomFilter={handleApplyCustomFilter}
-                      filterPredicates={filterPredicates}
-                    />
-                  </div>
+                  <>
+                    <div className="max-[576px]:hidden sm:hidden lg:flex w-full mt-3 lg:mt-0 lg:min-w-0">
+                      <SolidGlobalSearchElement
+                        viewType="tree"
+                        showSaveFilterPopup={showSaveFilterPopup}
+                        setShowSaveFilterPopup={setShowSaveFilterPopup}
+                        ref={solidGlobalSearchElementRef}
+                        viewData={solidTreeViewMetaData}
+                        handleApplyCustomFilter={handleApplyCustomFilter}
+                        filterPredicates={filterPredicates}
+                      />
+                    </div>
+                    <div className={`${showGlobalSearchElement ? "lg:flex" : "hidden"} lg:hidden mt-3 lg:mt-0 w-full lg:min-w-0`}>
+                      <SolidGlobalSearchElement
+                        viewType="tree"
+                        showSaveFilterPopup={showSaveFilterPopup}
+                        setShowSaveFilterPopup={setShowSaveFilterPopup}
+                        ref={solidGlobalSearchElementRef}
+                        viewData={solidTreeViewMetaData}
+                        handleApplyCustomFilter={handleApplyCustomFilter}
+                        filterPredicates={filterPredicates}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -1915,7 +1928,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className="flex lg:hidden">
+                  <div className="solid-list-search-toggle">
                     <SolidButton
                       type="button"
                       size="sm"
