@@ -1113,7 +1113,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                 */}
 
                 {/* <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p> */}
-                <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0  w-full lg:flex lg:min-w-0`}>
+                <div className="max-[576px]:hidden sm:hidden lg:flex w-full mt-3 lg:mt-0 lg:min-w-0">
+                  {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
+                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
+                </div>
+                <div className={`${showGlobalSearchElement ? "lg:flex" : "hidden"} lg:hidden mt-3 lg:mt-0 w-full lg:min-w-0`}>
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
                   <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
                 </div>
