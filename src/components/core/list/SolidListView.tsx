@@ -1412,9 +1412,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                           viewData={solidListViewMetaData}
                           handleApplyCustomFilter={handleApplyCustomFilter}
                           filterPredicates={filterPredicates}
-                          definedFilters={definedFilters}
-                          onRemoveDefinedFilter={removeDefinedFilter}
-                          onApplyDefinedFilter={applyDefinedFilter}
                         >
                         </SolidGlobalSearchElement>
                       </div>
@@ -1431,9 +1428,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                           viewData={solidListViewMetaData}
                           handleApplyCustomFilter={handleApplyCustomFilter}
                           filterPredicates={filterPredicates}
-                          definedFilters={definedFilters}
-                          onRemoveDefinedFilter={removeDefinedFilter}
-                          onApplyDefinedFilter={applyDefinedFilter}
                         >
                         </SolidGlobalSearchElement>
                       </div>
