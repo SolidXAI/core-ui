@@ -37,6 +37,9 @@ import {
   SolidSelect,
 } from "../../shad-cn-ui";
 import { showToast } from "../../../redux/features/toastSlice";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
+import { useHandleListCustomButtonClick } from "../../common/useHandleListCustomButtonClick";
+import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
 
 type SolidCardViewParams = {
   moduleName: string;
@@ -142,6 +145,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const [showArchived, setShowArchived] = useState(false);
   const [selectedCardForDelete, setSelectedCardForDelete] = useState<any>(null);
   const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const handleCustomButtonClick = useHandleListCustomButtonClick();
 
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
@@ -187,6 +191,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   );
 
   const {data: solidCardViewMetaDataResponse,isLoading: solidCardViewMetaDataIsLoading,} = useGetSolidViewLayoutQuery(cardViewMetaDataQs);
+  const visibleHeaderButtons = (solidCardViewMetaDataResponse?.data?.solidView?.layout?.attrs?.headerButtons ?? [])
+    .filter((button: any) => isButtonVisibleInCurrentEnv(button?.attrs));
 
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
@@ -530,7 +536,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
               <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                 <div className="solid-list-search-toggle">
+                <div className="solid-list-search-toggle">
                   <SolidButton
                     type="button"
                     variant="outline"
@@ -540,6 +546,22 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                     aria-label="Toggle search"
                     leftIcon={<SolidIcon name="si-search" aria-hidden />}
                   />
+                </div>
+
+                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                  {visibleHeaderButtons
+                    .filter((button: any) => button?.attrs?.actionInContextMenu !== true)
+                    .map((button: any, index: number) => (
+                      <SolidListViewHeaderButton
+                        key={button?.attrs?.action ?? index}
+                        button={button}
+                        params={params}
+                        solidListViewMetaData={solidCardViewMetaDataResponse}
+                        handleCustomButtonClick={handleCustomButtonClick}
+                        selectedRecords={[]}
+                        filters={filters}
+                      />
+                    ))}
                 </div>
 
                 {actionsAllowed.includes(`${permissionExpression(params.modelName, "create")}`) &&
@@ -572,6 +594,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
                   filters={filters}
                   handleRefreshView={handleFetchUpdatedRecords}
+                  params={params}
+                  headerButtons={visibleHeaderButtons}
+                  handleCustomButtonClick={handleCustomButtonClick}
                 />
               </div>
             </div>
@@ -606,6 +631,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                     setLightboxUrls={setLightboxUrls}
                     setOpenLightbox={setOpenLightbox}
                     showArchived={showArchived}
+                    params={params}
+                    handleCustomButtonClick={handleCustomButtonClick}
                   />
                 )}
               </div>

@@ -9,6 +9,7 @@ import {
   SolidDropdownMenuTrigger,
   SolidIcon,
 } from "../../shad-cn-ui";
+import { SolidCollectionRowActionMenuItems } from "../common/SolidCollectionRowActionMenuItems";
 
 interface CardItemProps {
   data: any;
@@ -22,6 +23,8 @@ interface CardItemProps {
   setLightboxUrls?: any;
   setOpenLightbox?: any;
   showArchived?: boolean;
+  params?: any;
+  handleCustomButtonClick?: (buttonAttrs: any, event: any) => void;
 }
 
 const CardItem: React.FC<CardItemProps> = ({
@@ -36,6 +39,8 @@ const CardItem: React.FC<CardItemProps> = ({
   setLightboxUrls,
   setOpenLightbox,
   showArchived,
+  params,
+  handleCustomButtonClick,
 }) => {
   const router = useRouter();
   const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
@@ -97,6 +102,16 @@ const CardItem: React.FC<CardItemProps> = ({
                   <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
                   <span className="solid-header-action-button-label">Delete</span>
                 </SolidDropdownMenuItem>
+              ) : null}
+              {!isArchivedRecord && handleCustomButtonClick ? (
+                <SolidCollectionRowActionMenuItems
+                  buttons={solidCardViewMetaData?.solidView?.layout?.attrs?.rowButtons}
+                  params={params}
+                  rowData={data}
+                  solidViewMetaData={solidCardViewMetaData}
+                  handleCustomButtonClick={handleCustomButtonClick}
+                  showSeparator={true}
+                />
               ) : null}
             </SolidDropdownMenuContent>
           </SolidDropdownMenu>
