@@ -1968,7 +1968,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     return (
         <>
-            <div className="relative flex justify-center solid-custom-filter-wrapper" style={{ background:"red" }}>
+            <div className="relative flex justify-center solid-custom-filter-wrapper">
                 <div className="solid-global-search-element">
                     <ul className="solid-global-search-chip-list">
                         {visibleChipItems.map((chip) => (
