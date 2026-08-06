@@ -4566,36 +4566,51 @@ li.header-li-px {
   --solid-search-overlay-tone-ink: var(--solid-search-tone-handler-ink);
 }
 
-.solid-search-overlay-section--saved,
-.solid-search-overlay-section--search,
-.solid-search-overlay-section--predefined,
-.solid-search-overlay-section--handler {
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--solid-search-overlay-tone) 42%, transparent);
+.solid-global-search-element .solid-search-overlay-section--saved,
+.solid-global-search-element .solid-search-overlay-section--search,
+.solid-global-search-element .solid-search-overlay-section--predefined,
+.solid-global-search-element .solid-search-overlay-section--handler {
+  background-color: color-mix(in srgb, var(--solid-search-overlay-tone) 9%, var(--card, #ffffff)) !important;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--solid-search-overlay-tone) 52%, transparent);
 }
 
-.solid-search-overlay-section--saved .solid-search-overlay-heading-with-icon svg,
-.solid-search-overlay-section--saved .solid-search-overlay-panel-callout-icon,
-.solid-search-overlay-section--search .solid-search-overlay-heading-with-icon svg,
-.solid-search-overlay-section--predefined .solid-search-overlay-heading-with-icon svg,
-.solid-search-overlay-section--handler .solid-search-overlay-heading-with-icon svg {
-  color: var(--solid-search-overlay-tone-ink);
+.solid-search-overlay-section-separator {
+  height: 1px;
+  margin: 2px 12px 0;
+  border: 0;
+  background: color-mix(in srgb, var(--border, #d9dee8) 86%, transparent);
 }
 
-.solid-search-overlay-section--saved .solid-search-overlay-panel-callout-icon {
+.solid-global-search-element .solid-search-overlay-section--saved .solid-search-overlay-heading-with-icon svg,
+.solid-global-search-element .solid-search-overlay-section--saved .solid-search-overlay-panel-callout-icon,
+.solid-global-search-element .solid-search-overlay-section--search .solid-search-overlay-heading-with-icon svg,
+.solid-global-search-element .solid-search-overlay-section--predefined .solid-search-overlay-heading-with-icon svg,
+.solid-global-search-element .solid-search-overlay-section--handler .solid-search-overlay-heading-with-icon svg {
+  color: var(--solid-search-overlay-tone-ink) !important;
+}
+
+.solid-global-search-element .solid-search-overlay-section--saved .solid-search-overlay-section-title,
+.solid-global-search-element .solid-search-overlay-section--search .solid-search-overlay-section-title,
+.solid-global-search-element .solid-search-overlay-section--predefined .solid-search-overlay-section-title,
+.solid-global-search-element .solid-search-overlay-section--handler .solid-search-overlay-section-title {
+  color: var(--solid-search-overlay-tone-ink) !important;
+}
+
+.solid-global-search-element .solid-search-overlay-section--saved .solid-search-overlay-panel-callout-icon {
   width: 26px;
   min-width: 26px;
   height: 26px;
   margin-top: 0;
   border-radius: 7px;
-  background: color-mix(in srgb, var(--solid-search-overlay-tone) 12%, transparent);
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 14%, transparent) !important;
 }
 
-.solid-search-overlay-section--saved .solid-search-overlay-section-count,
-.solid-search-overlay-section--search .solid-search-overlay-section-count,
-.solid-search-overlay-section--predefined .solid-search-overlay-section-count,
-.solid-search-overlay-section--handler .solid-search-overlay-section-count {
-  background: color-mix(in srgb, var(--solid-search-overlay-tone) 14%, transparent);
-  color: var(--solid-search-overlay-tone-ink);
+.solid-global-search-element .solid-search-overlay-section--saved .solid-search-overlay-section-count,
+.solid-global-search-element .solid-search-overlay-section--search .solid-search-overlay-section-count,
+.solid-global-search-element .solid-search-overlay-section--predefined .solid-search-overlay-section-count,
+.solid-global-search-element .solid-search-overlay-section--handler .solid-search-overlay-section-count {
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 18%, transparent) !important;
+  color: var(--solid-search-overlay-tone-ink) !important;
 }
 
 .solid-search-overlay-heading {
@@ -4706,11 +4721,11 @@ li.header-li-px {
   color: color-mix(in srgb, var(--foreground) 68%, transparent);
 }
 
-.solid-search-overlay-section--saved .solid-search-overlay-option-icon,
-.solid-search-overlay-section--search .solid-search-overlay-option-icon,
-.solid-search-overlay-section--predefined .solid-search-overlay-option-icon {
-  background: color-mix(in srgb, var(--solid-search-overlay-tone) 13%, transparent);
-  color: var(--solid-search-overlay-tone-ink);
+.solid-global-search-element .solid-search-overlay-section--saved .solid-search-overlay-option-icon,
+.solid-global-search-element .solid-search-overlay-section--search .solid-search-overlay-option-icon,
+.solid-global-search-element .solid-search-overlay-section--predefined .solid-search-overlay-option-icon {
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 24%, transparent) !important;
+  color: var(--solid-search-overlay-tone-ink) !important;
 }
 
 .solid-search-overlay-option-copy {
@@ -4902,19 +4917,19 @@ li.header-li-px {
   transition: background-color 120ms ease;
 }
 
-.solid-search-overlay-footer-action--custom {
+.solid-global-search-element .solid-search-overlay-footer-action--custom {
   --solid-search-overlay-tone: var(--solid-search-tone-custom);
   --solid-search-overlay-tone-ink: var(--solid-search-tone-custom-ink);
 }
 
-.solid-search-overlay-footer-action--custom .solid-search-overlay-panel-callout-icon {
+.solid-global-search-element .solid-search-overlay-footer-action--custom .solid-search-overlay-panel-callout-icon {
   width: 26px;
   min-width: 26px;
   height: 26px;
   margin-top: 0;
   border-radius: 7px;
-  background: color-mix(in srgb, var(--solid-search-overlay-tone) 13%, transparent);
-  color: var(--solid-search-overlay-tone-ink);
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 16%, transparent) !important;
+  color: var(--solid-search-overlay-tone-ink) !important;
 }
 
 .solid-search-overlay-footer-action:hover {

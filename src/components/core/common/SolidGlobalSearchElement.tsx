@@ -2280,6 +2280,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             }
                             {selectableSavedFilters.length > 0 &&
                                 <>
+                                    <hr className="solid-search-overlay-section-separator" />
                                     <div className="solid-search-overlay-section solid-search-overlay-section--saved">
                                         <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact">
                                             <div className="solid-search-overlay-panel-callout-icon">
