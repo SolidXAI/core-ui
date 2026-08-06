@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.8] - 2026-08-06
+
+### Other
+
+- Refactor SolidCardView and SolidKanbanView to support imperative handles and enhance filter management; add registry for card and kanban views
+- Enhance Kanban and Card components with custom button handling and context menu integration
+- Refactor SolidTreeView to resolve saved filter variables and add new helper functions
+- resolved on form header
+- visibility on kanban, card and tree view
+- visibility issues resolved
+
 ## [0.1.14-beta.8] - 2026-08-05
 
 ### Other
