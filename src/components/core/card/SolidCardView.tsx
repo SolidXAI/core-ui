@@ -420,6 +420,9 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
       search_predicate: filterPredicates.search_predicate || {},
       saved_filter_predicate: filterPredicates.saved_filter_predicate || {},
       saved_filter_variables: filterPredicates.saved_filter_variables || {},
+      saved_filter_id: filterPredicates.saved_filter_id || null,
+      saved_filter_system_key: filterPredicates.saved_filter_system_key || null,
+      saved_filter_name: filterPredicates.saved_filter_name || null,
       predefined_search_predicate: filterPredicates.predefined_search_predicate || {},
       predefined_search_chip: filterPredicates.predefined_search_chip || null,
     });

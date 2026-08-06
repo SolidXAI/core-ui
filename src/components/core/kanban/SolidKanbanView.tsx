@@ -1067,6 +1067,12 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         // @ts-ignore
         urlData.saved_filter_variables = customFilter.saved_filter_variables || {};
         // @ts-ignore
+        urlData.saved_filter_id = customFilter.saved_filter_id || null;
+        // @ts-ignore
+        urlData.saved_filter_system_key = customFilter.saved_filter_system_key || null;
+        // @ts-ignore
+        urlData.saved_filter_name = customFilter.saved_filter_name || null;
+        // @ts-ignore
         urlData.predefined_search_predicate = customFilter.predefined_search_predicate || {};
         // @ts-ignore
         urlData.predefined_search_chip = customFilter.predefined_search_chip || null;
