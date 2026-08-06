@@ -112,7 +112,7 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
   }
 
   return (
-    <div className={`solid-admin-header-actions hidden md:flex ${className}`.trim()}>
+    <div className={`solid-admin-header-actions max-md:hidden lg:flex ${className}`.trim()}>
       <BackendReconnectIndicator />
       {actions.map((action) => {
         if (action.key === "studio") {
