@@ -4,7 +4,7 @@ import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { DropResult } from "@hello-pangea/dnd";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useSession } from "../../../hooks/useSession";
 import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { SolidCreateButton } from "../common/SolidCreateButton";
@@ -52,6 +52,31 @@ type SolidKanbanViewParams = {
   moduleName: string;
   modelName: string;
   embeded: boolean;
+  customFilter?: any;
+};
+
+type SolidKanbanFilterInput = {
+  custom_filter_predicate?: any;
+  search_predicate?: any;
+  saved_filter_predicate?: any;
+  predefined_search_predicate?: any;
+};
+
+export type SolidKanbanViewHandle = {
+  refresh: () => void;
+  clearFilters: () => void;
+  applyFilter: (filter: SolidKanbanFilterInput) => void;
+  getSavedFilters: () => any[];
+  applySavedFilter: (name: string, variables?: Record<string, any>) => boolean;
+  setShowArchived: (value: boolean) => void;
+  getState: () => {
+    groupByFieldName: string;
+    showArchived: boolean;
+    filters: any;
+    filterPredicates: any;
+    kanbanData: any[];
+    loading: boolean;
+  };
 };
 
 type KanbanSwimlaneDefinition = {
@@ -121,14 +146,14 @@ const mergeKanbanGroupsWithDefinitions = (
 };
 
 
-export const SolidKanbanView = (params: SolidKanbanViewParams) => {
+export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanViewParams>((params, ref) => {
   const session = useSession();
   const user = session?.data?.user;
 
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const dispatch = useDispatch()
 
-  const solidGlobalSearchElementRef = useRef();
+  const solidGlobalSearchElementRef = useRef<any>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
@@ -1099,6 +1124,39 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
      loadKanbanBoard(filters);
   };
 
+  const cloneKanbanData = () => {
+    if (typeof structuredClone === "function") return structuredClone(kanbanViewData);
+    return JSON.parse(JSON.stringify(kanbanViewData));
+  };
+
+  useImperativeHandle(ref, () => ({
+    refresh: () => {
+      void loadKanbanBoard(filters);
+    },
+    clearFilters: () => {
+      setFilters(params.customFilter || { $and: [] });
+      setFilterPredicates(null);
+      solidGlobalSearchElementRef.current?.clearFilter?.();
+    },
+    applyFilter: (filter) => {
+      void handleApplyCustomFilter(filter);
+    },
+    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+    applySavedFilter: (name, variables) =>
+      solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
+    setShowArchived: (value) => {
+      setShowArchived(value);
+    },
+    getState: () => ({
+      groupByFieldName,
+      showArchived,
+      filters,
+      filterPredicates,
+      kanbanData: cloneKanbanData(),
+      loading,
+    }),
+  }), [groupByFieldName, showArchived, filters, filterPredicates, kanbanViewData, loading]);
+
   const toggleBothSidebars = () => {
     if (visibleNavbar) {
       dispatch(toggleNavbar());   // close both
@@ -1257,4 +1315,4 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       </SolidDialog>
     </div>
   );
-};
+});

@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useSession } from "../../../hooks/useSession";
 import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
@@ -45,6 +45,34 @@ type SolidCardViewParams = {
   moduleName: string;
   modelName: string;
   embeded: boolean;
+  customFilter?: any;
+};
+
+type SolidCardFilterInput = {
+  custom_filter_predicate?: any;
+  search_predicate?: any;
+  saved_filter_predicate?: any;
+  predefined_search_predicate?: any;
+};
+
+export type SolidCardViewHandle = {
+  refresh: () => void;
+  clearFilters: () => void;
+  applyFilter: (filter: SolidCardFilterInput) => void;
+  getSavedFilters: () => any[];
+  applySavedFilter: (name: string, variables?: Record<string, any>) => boolean;
+  setPagination: (nextFirst: number, nextRows: number) => void;
+  setShowArchived: (value: boolean) => void;
+  getState: () => {
+    first: number;
+    rows: number;
+    showArchived: boolean;
+    filters: any;
+    filterPredicates: any;
+    cards: any[];
+    totalRecords: number;
+    loading: boolean;
+  };
 };
 
 const DEFAULT_RECORD_SORT = ["id:desc"];
@@ -109,7 +137,7 @@ const deriveCardViewConfig = (solidCardViewMetaData: any) => {
   };
 };
 
-export const SolidCardView = (params: SolidCardViewParams) => {
+export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams>((params, ref) => {
   const session = useSession();
   const user = session?.data?.user;
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
@@ -405,6 +433,46 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
     await loadCards(filters);
   };
+
+  const cloneCards = () => {
+    if (typeof structuredClone === "function") return structuredClone(cards);
+    return JSON.parse(JSON.stringify(cards));
+  };
+
+  useImperativeHandle(ref, () => ({
+    refresh: () => {
+      void loadCards(filters);
+    },
+    clearFilters: () => {
+      setFirst(0);
+      setFilters(params.customFilter || { $and: [] });
+      setFilterPredicates(null);
+      solidGlobalSearchElementRef.current?.clearFilter?.();
+    },
+    applyFilter: (filter) => {
+      void handleApplyCustomFilter(filter);
+    },
+    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+    applySavedFilter: (name, variables) =>
+      solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
+    setPagination: (nextFirst, nextRows) => {
+      setFirst(nextFirst);
+      setRows(nextRows);
+    },
+    setShowArchived: (value) => {
+      setShowArchived(value);
+    },
+    getState: () => ({
+      first,
+      rows,
+      showArchived,
+      filters,
+      filterPredicates,
+      cards: cloneCards(),
+      totalRecords,
+      loading,
+    }),
+  }), [first, rows, showArchived, filters, filterPredicates, cards, totalRecords, loading]);
 
   const handleRecoverRecord = async (record: any) => {
     if (!record?.id) return;
@@ -722,4 +790,4 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       </SolidDialog>
     </div>
   );
-};
+});
