@@ -3332,6 +3332,19 @@ li.header-li-px {
   scrollbar-width: thin;
 }
 
+.solid-global-search-element {
+  --solid-search-tone-saved: hsl(262 83% 58%);
+  --solid-search-tone-saved-ink: hsl(262 74% 44%);
+  --solid-search-tone-search: hsl(212 92% 45%);
+  --solid-search-tone-search-ink: hsl(212 82% 38%);
+  --solid-search-tone-predefined: hsl(174 70% 35%);
+  --solid-search-tone-predefined-ink: hsl(174 65% 30%);
+  --solid-search-tone-custom: hsl(35 88% 46%);
+  --solid-search-tone-custom-ink: hsl(30 84% 34%);
+  --solid-search-tone-handler: hsl(142 60% 38%);
+  --solid-search-tone-handler-ink: hsl(142 55% 30%);
+}
+
 .custom-filter-chip-type {
   display: flex;
   align-items: center;
@@ -3385,27 +3398,27 @@ li.header-li-px {
 }
 
 .solid-chip-tone-saved {
-  background: color-mix(in srgb, hsl(262 83% 58%) 12%, transparent);
-  border-color: color-mix(in srgb, hsl(262 83% 58%) 26%, transparent);
-  color: color-mix(in srgb, hsl(262 74% 44%) 82%, var(--foreground) 18%);
+  background: color-mix(in srgb, var(--solid-search-tone-saved) 12%, transparent);
+  border-color: color-mix(in srgb, var(--solid-search-tone-saved) 26%, transparent);
+  color: color-mix(in srgb, var(--solid-search-tone-saved-ink) 82%, var(--foreground) 18%);
 }
 
 .solid-chip-tone-search {
-  background: color-mix(in srgb, hsl(212 92% 45%) 10%, transparent);
-  border-color: color-mix(in srgb, hsl(212 92% 45%) 24%, transparent);
-  color: color-mix(in srgb, hsl(212 82% 38%) 80%, var(--foreground) 20%);
+  background: color-mix(in srgb, var(--solid-search-tone-search) 10%, transparent);
+  border-color: color-mix(in srgb, var(--solid-search-tone-search) 24%, transparent);
+  color: color-mix(in srgb, var(--solid-search-tone-search-ink) 80%, var(--foreground) 20%);
 }
 
 .solid-chip-tone-predefined {
-  background: color-mix(in srgb, hsl(174 70% 35%) 12%, transparent);
-  border-color: color-mix(in srgb, hsl(174 70% 35%) 24%, transparent);
-  color: color-mix(in srgb, hsl(174 65% 30%) 82%, var(--foreground) 18%);
+  background: color-mix(in srgb, var(--solid-search-tone-predefined) 12%, transparent);
+  border-color: color-mix(in srgb, var(--solid-search-tone-predefined) 24%, transparent);
+  color: color-mix(in srgb, var(--solid-search-tone-predefined-ink) 82%, var(--foreground) 18%);
 }
 
 .solid-chip-tone-custom {
-  background: color-mix(in srgb, hsl(35 88% 46%) 12%, transparent);
-  border-color: color-mix(in srgb, hsl(35 88% 46%) 28%, transparent);
-  color: color-mix(in srgb, hsl(30 84% 34%) 84%, var(--foreground) 16%);
+  background: color-mix(in srgb, var(--solid-search-tone-custom) 12%, transparent);
+  border-color: color-mix(in srgb, var(--solid-search-tone-custom) 28%, transparent);
+  color: color-mix(in srgb, var(--solid-search-tone-custom-ink) 84%, var(--foreground) 16%);
 }
 
 .solid-chip-tone-grouping {
@@ -3415,9 +3428,9 @@ li.header-li-px {
 }
 
 .solid-chip-tone-handler {
-  background: color-mix(in srgb, hsl(142 60% 38%) 12%, transparent);
-  border-color: color-mix(in srgb, hsl(142 60% 38%) 26%, transparent);
-  color: color-mix(in srgb, hsl(142 55% 30%) 82%, var(--foreground) 18%);
+  background: color-mix(in srgb, var(--solid-search-tone-handler) 12%, transparent);
+  border-color: color-mix(in srgb, var(--solid-search-tone-handler) 26%, transparent);
+  color: color-mix(in srgb, var(--solid-search-tone-handler-ink) 82%, var(--foreground) 18%);
 }
 
 .solid-chip-pill-remove {
@@ -4501,13 +4514,17 @@ li.header-li-px {
   text-transform: lowercase;
 }
 
-.solid-search-overlay-pannel {
+.solid-search-overlay-panel {
+  position: absolute;
   top: calc(100% + 4px) !important;
+  left: 0 !important;
   /* Keep above datatable sticky headers/columns and other elevated surfaces. */
   z-index: 1004 !important;
   background: var(--card);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
   border-radius: 10px;
+  width: min(560px, calc(100vw - 24px)) !important;
+  min-width: min(100%, 420px);
   overflow: hidden;
   box-shadow: 0 14px 30px color-mix(in srgb, hsl(222 47% 11%) 16%, transparent);
   max-height: min(72vh, 520px);
@@ -4524,11 +4541,62 @@ li.header-li-px {
 }
 
 .solid-search-overlay-section {
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px 12px;
 }
 
-.custom-filter-search-options.solid-search-overlay-section {
-  gap: 2px;
+.solid-search-overlay-section--saved {
+  --solid-search-overlay-tone: var(--solid-search-tone-saved);
+  --solid-search-overlay-tone-ink: var(--solid-search-tone-saved-ink);
+}
+
+.solid-search-overlay-section--search {
+  --solid-search-overlay-tone: var(--solid-search-tone-search);
+  --solid-search-overlay-tone-ink: var(--solid-search-tone-search-ink);
+}
+
+.solid-search-overlay-section--predefined {
+  --solid-search-overlay-tone: var(--solid-search-tone-predefined);
+  --solid-search-overlay-tone-ink: var(--solid-search-tone-predefined-ink);
+}
+
+.solid-search-overlay-section--handler {
+  --solid-search-overlay-tone: var(--solid-search-tone-handler);
+  --solid-search-overlay-tone-ink: var(--solid-search-tone-handler-ink);
+}
+
+.solid-search-overlay-section--saved,
+.solid-search-overlay-section--search,
+.solid-search-overlay-section--predefined,
+.solid-search-overlay-section--handler {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--solid-search-overlay-tone) 42%, transparent);
+}
+
+.solid-search-overlay-section--saved .solid-search-overlay-heading-with-icon svg,
+.solid-search-overlay-section--saved .solid-search-overlay-panel-callout-icon,
+.solid-search-overlay-section--search .solid-search-overlay-heading-with-icon svg,
+.solid-search-overlay-section--predefined .solid-search-overlay-heading-with-icon svg,
+.solid-search-overlay-section--handler .solid-search-overlay-heading-with-icon svg {
+  color: var(--solid-search-overlay-tone-ink);
+}
+
+.solid-search-overlay-section--saved .solid-search-overlay-panel-callout-icon {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  margin-top: 0;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 12%, transparent);
+}
+
+.solid-search-overlay-section--saved .solid-search-overlay-section-count,
+.solid-search-overlay-section--search .solid-search-overlay-section-count,
+.solid-search-overlay-section--predefined .solid-search-overlay-section-count,
+.solid-search-overlay-section--handler .solid-search-overlay-section-count {
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 14%, transparent);
+  color: var(--solid-search-overlay-tone-ink);
 }
 
 .solid-search-overlay-heading {
@@ -4552,20 +4620,39 @@ li.header-li-px {
 }
 
 .solid-search-overlay-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
 }
 
+.solid-search-overlay-section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 78%, transparent);
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+}
+
 .solid-search-overlay-option {
   justify-content: flex-start;
   text-align: left;
-  border-radius: 6px;
-  min-height: 20px;
-  padding: 2px 8px !important;
-  font-size: 11px;
-  line-height: 1.2;
+  width: 100%;
+  border-radius: 8px;
+  min-height: 40px;
+  padding: 6px 8px !important;
+  font-size: 13px;
+  line-height: 1.3;
   color: color-mix(in srgb, var(--foreground) 90%, transparent);
   background: transparent !important;
   border: 1px solid transparent !important;
@@ -4573,7 +4660,7 @@ li.header-li-px {
 }
 
 .solid-search-overlay-option:hover {
-  background: color-mix(in srgb, var(--accent) 60%, transparent);
+  background: color-mix(in srgb, var(--accent) 62%, transparent) !important;
 }
 
 .solid-search-overlay-option:focus {
@@ -4581,20 +4668,93 @@ li.header-li-px {
 }
 
 .solid-search-overlay-option-active {
-  background: color-mix(in srgb, var(--accent) 85%, transparent) !important;
-  border: 1px solid var(--primary-color) !important;
-  box-shadow: 0 0 0 1px var(--primary-color) !important;
+  background: color-mix(in srgb, var(--accent) 76%, transparent) !important;
+  border-color: transparent !important;
+  outline: 2px solid color-mix(in srgb, var(--primary-color, var(--primary)) 72%, transparent);
+  outline-offset: -2px;
+  box-shadow: none !important;
 }
 
-.solid-search-overlay-option-active .solid-btn-label,
-.solid-search-overlay-option-active .p-button-label,
 .solid-search-overlay-option-active {
   color: var(--accent-foreground, var(--foreground)) !important;
   font-weight: 600 !important;
 }
 
-.solid-search-overlay-option-stacked {
-  align-items: flex-start;
+.solid-search-overlay-option .solid-btn-label,
+.solid-saved-filter-main .solid-btn-label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.solid-search-overlay-option-content {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-width: 0;
+}
+
+.solid-search-overlay-option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--muted) 66%, transparent);
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+}
+
+.solid-search-overlay-section--saved .solid-search-overlay-option-icon,
+.solid-search-overlay-section--search .solid-search-overlay-option-icon,
+.solid-search-overlay-section--predefined .solid-search-overlay-option-icon {
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 13%, transparent);
+  color: var(--solid-search-overlay-tone-ink);
+}
+
+.solid-search-overlay-option-copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  text-align: left;
+}
+
+.solid-search-overlay-option-title {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--foreground) 94%, transparent);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.solid-search-overlay-option-description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.solid-search-overlay-option-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 12%, transparent);
+  color: var(--primary-color, var(--primary));
 }
 
 .solid-defined-filter-badge-row {
@@ -4648,6 +4808,7 @@ li.header-li-px {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  padding: 12px;
   color: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
 
@@ -4693,14 +4854,9 @@ li.header-li-px {
   color: color-mix(in srgb, var(--foreground) 66%, transparent);
 }
 
-.solid-search-overlay-saved-list .p-button {
-  min-height: 20px;
-  padding: 0 8px;
-  font-size: 11px;
-  border-radius: 8px;
-}
-
 .solid-search-overlay-saved-list {
+  display: flex;
+  flex-direction: column;
   max-height: none;
   overflow-y: visible;
   padding-right: 2px;
@@ -4717,33 +4873,24 @@ li.header-li-px {
   min-width: 0;
 }
 
-.solid-saved-filter-main.p-button {
+.solid-saved-filter-main {
   justify-content: flex-start;
   text-align: left;
   border: 1px solid transparent;
   background: transparent;
   color: color-mix(in srgb, var(--foreground) 90%, transparent);
   border-radius: 8px;
-  min-height: 20px;
-  padding: 0 8px;
-  font-size: 11px;
+  min-height: 40px;
+  padding: 6px 8px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
-.solid-saved-filter-main .solid-btn-label {
-  display: block;
-  width: 100%;
-  text-align: left;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.solid-saved-filter-main.p-button:hover {
+.solid-saved-filter-main:hover {
   background: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-.solid-saved-filter-main.p-button.is-active {
+.solid-saved-filter-main.is-active {
   background: color-mix(in srgb, var(--accent) 72%, transparent);
   border-color: color-mix(in srgb, var(--ring) 52%, transparent);
   color: color-mix(in srgb, var(--foreground) 96%, transparent);
@@ -4754,25 +4901,29 @@ li.header-li-px {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  opacity: 0;
+  transition: opacity 120ms ease;
 }
 
-.solid-saved-filter-icon-btn.p-button {
+.solid-saved-filter-item:hover .solid-saved-filter-actions,
+.solid-saved-filter-item:focus-within .solid-saved-filter-actions {
+  opacity: 1;
+}
+
+.solid-saved-filter-icon-btn {
   width: 24px;
   min-width: 24px;
   height: 24px;
+  min-height: 24px;
   border-radius: 6px;
   padding: 0;
 }
 
-.solid-saved-filter-icon-btn.p-button .p-button-icon {
-  font-size: 10px;
-}
-
-.solid-saved-filter-icon-btn.p-button:hover {
+.solid-saved-filter-icon-btn:hover {
   background: color-mix(in srgb, var(--accent) 60%, transparent);
 }
 
-.solid-saved-filter-icon-btn.p-button.is-danger {
+.solid-saved-filter-icon-btn.is-danger {
   color: hsl(0 72% 45%);
 }
 
@@ -4794,11 +4945,33 @@ li.header-li-px {
   flex-direction: column;
   cursor: pointer;
   border-radius: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
   transition: background-color 120ms ease;
+}
+
+.solid-search-overlay-footer-action--custom {
+  --solid-search-overlay-tone: var(--solid-search-tone-custom);
+  --solid-search-overlay-tone-ink: var(--solid-search-tone-custom-ink);
+}
+
+.solid-search-overlay-footer-action--custom .solid-search-overlay-panel-callout-icon {
+  width: 26px;
+  min-width: 26px;
+  height: 26px;
+  margin-top: 0;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--solid-search-overlay-tone) 13%, transparent);
+  color: var(--solid-search-overlay-tone-ink);
 }
 
 .solid-search-overlay-footer-action:hover {
   background: color-mix(in srgb, var(--accent) 72%, transparent);
+}
+
+.solid-search-overlay-footer-action:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary-color, var(--primary)) 72%, transparent);
+  outline-offset: -2px;
 }
 
 .solid-search-overlay-footer-action-main {
@@ -4830,21 +5003,6 @@ li.header-li-px {
   margin-bottom: 2px;
 }
 
-.solid-search-overlay-footer-btn.p-button {
-  min-height: 22px;
-  border-radius: 8px;
-  font-size: 11px;
-  justify-content: flex-start;
-  padding: 0 8px !important;
-}
-
-.solid-search-overlay-footer-actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
 .solid-search-overlay-no-fields {
   min-height: 42px;
   display: flex;
@@ -4873,6 +5031,31 @@ li.header-li-px {
   font-weight: 500;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
   text-align: center;
+}
+
+@media (max-width: 640px) {
+  .solid-search-overlay-panel {
+    width: calc(100vw - 24px) !important;
+    min-width: 0;
+    max-height: min(76vh, 560px);
+  }
+
+  .solid-search-overlay-scroll {
+    max-height: calc(76vh - 64px);
+  }
+
+  .solid-search-overlay-option,
+  .solid-saved-filter-main {
+    min-height: 44px;
+  }
+
+  .solid-saved-filter-actions {
+    opacity: 1;
+  }
+
+  .solid-search-overlay-option-description {
+    -webkit-line-clamp: 2;
+  }
 }
 
 .solid-standard-autocomplete .p-inputtext {

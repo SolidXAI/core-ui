@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from "react";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { toTitleCase } from "../../../helpers/helpers";
 import {clearFilterObjectFromLocalStorage,getFilterObjectFromLocalStorage,setFilterObjectToLocalStorage,
@@ -11,7 +11,7 @@ import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import { getUnboundSavedFilterVariableNames, parseSavedFilterQueryJson, resolveSavedFilterVariables } from '../../../helpers/resolveActiveUserId';
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
-import { Bookmark, Check, Filter, ListFilter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
+import { Bookmark, Check, Filter, ListFilter, Pencil, Plus, Search, SearchX, Sparkles, Trash2, X } from "lucide-react";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
 import {
@@ -418,7 +418,7 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
     return filters;
 }
 
-const SavedFilterList = ({ savedfilter, activeSavedFilterReference, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter }: any) => {
+const SavedFilterList = ({ savedfilter, activeSavedFilterReference, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter, optionId }: any) => {
     const isActive = savedfilter?.systemKey
         ? activeSavedFilterReference === savedfilter.systemKey
         : String(activeSavedFilterReference) === String(savedfilter.id);
@@ -430,13 +430,32 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, applySavedFi
                     variant="ghost"
                     size="sm"
                     className={`solid-saved-filter-main w-full ${isActive ? "is-active" : ""} ${isFocused ? "solid-search-overlay-option-active" : ""}`}
+                    id={optionId}
+                    role="option"
+                    aria-selected={isFocused}
+                    aria-label={`${savedfilter.name}${isActive ? ", applied" : ""}`}
                     onMouseDown={(e) => {
                         e.preventDefault();
                         applySavedFilter(savedfilter);
                     }}
                     title={savedfilter?.description}
                 >
-                    {savedfilter.name}
+                    <span className="solid-search-overlay-option-content">
+                        <span className="solid-search-overlay-option-icon" aria-hidden="true">
+                            <Bookmark size={15} />
+                        </span>
+                        <span className="solid-search-overlay-option-copy">
+                            <span className="solid-search-overlay-option-title">{savedfilter.name}</span>
+                            {savedfilter?.description && (
+                                <span className="solid-search-overlay-option-description">{savedfilter.description}</span>
+                            )}
+                        </span>
+                        {isActive && (
+                            <span className="solid-search-overlay-option-check" aria-hidden="true">
+                                <Check size={14} />
+                            </span>
+                        )}
+                    </span>
                 </SolidButton>
             </div>
             <div className="solid-saved-filter-actions">
@@ -450,6 +469,7 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, applySavedFi
                                 e.preventDefault();
                                 openSavedCustomFilter(savedfilter);
                             }}
+                            aria-label={`Edit ${savedfilter.name}`}
                         >
                             <Pencil size={14} />
                         </SolidButton>
@@ -462,6 +482,7 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, applySavedFi
                                 setSavedFilterTobeDeleted(savedfilter.id),
                                     setIsDeleteSQDialogVisible(true);
                             }}
+                            aria-label={`Delete ${savedfilter.name}`}
                         >
                             <Trash2 size={14} />
                         </SolidButton>
@@ -557,6 +578,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         | { id: string; kind: "saved"; saved: any }
         | { id: string; kind: "custom" }
         | { id: string; kind: "grouping" };
+    const overlayInstanceId = useId();
+    const overlayListboxId = `${overlayInstanceId}-search-options`;
+    const getOverlayOptionId = (index: number) => `${overlayInstanceId}-search-option-${index}`;
     type ManagedChipItem = {
         id: string;
         type: "saved" | "search" | "predefined" | "custom" | "grouping" | "handler";
@@ -678,7 +702,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     useEffect(() => {
         if (focusedIndex >= 0 && showOverlay) {
-            const activeElement = document.querySelector(`.solid-search-overlay-option-active`);
+            const activeElement = overlayRef.current?.querySelector(`.solid-search-overlay-option-active`);
             if (activeElement) {
                 activeElement.scrollIntoView({
                     block: 'nearest',
@@ -1784,7 +1808,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 }]
                 : [];
 
-        return [...fields, ...predefined, ...saved, ...custom, ...grouping];
+        return [...predefined, ...fields, ...saved, ...custom, ...grouping];
     }, [inputValue, searchableFields, predefinedSearches, selectableSavedFilters, viewType]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1808,6 +1832,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             setShowOverlay(false);
         };
 
+        if (e.key === "Escape") {
+            e.preventDefault();
+            setShowOverlay(false);
+            return;
+        }
+
         if ((e.key === "ArrowDown" || e.key === "ArrowUp") && overlayOptions.length > 0) {
             e.preventDefault();
             setShowOverlay(true);
@@ -1816,6 +1846,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     ? (focusedIndex + 1) % overlayOptions.length
                     : (focusedIndex <= 0 ? overlayOptions.length - 1 : focusedIndex - 1);
             setFocusedIndex(nextIndex);
+            return;
+        }
+
+        if ((e.key === "Home" || e.key === "End") && showOverlay && overlayOptions.length > 0) {
+            e.preventDefault();
+            setFocusedIndex(e.key === "Home" ? 0 : overlayOptions.length - 1);
             return;
         }
 
@@ -2036,7 +2072,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     ref={searchInputRef}
                                     className="solid-global-search-input"
                                     value={inputValue || ""}
-                                    placeholder="Search."
+                                    placeholder="Search…"
+                                    role="combobox"
+                                    aria-label="Search and filter"
+                                    aria-autocomplete="list"
+                                    aria-expanded={showOverlay}
+                                    aria-controls={showOverlay ? overlayListboxId : undefined}
+                                    aria-activedescendant={showOverlay && focusedIndex >= 0 ? getOverlayOptionId(focusedIndex) : undefined}
                                     onChange={(e) => {
                                         setInputValue(e.target.value);
                                         setShowChipManager(false);
@@ -2067,6 +2109,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                         focusSearchInput();
                                     }}
                                     className="custom-filter-button solid-global-search-trigger"
+                                    aria-label="Open search options"
                                 >
                                     <Search size={14} />
                                 </SolidButton>
@@ -2111,11 +2154,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 )} */}
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full shadow-md solid-search-overlay-pannel">
+                    <div
+                        ref={overlayRef}
+                        id={overlayListboxId}
+                        role="listbox"
+                        aria-label="Search and filter options"
+                        className="solid-search-overlay-panel"
+                    >
                         <div className="solid-search-overlay-scroll">
                             {(definedFilters || []).some((f: any) => !f?.applied) && (
                                 <>
-                                    <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-2">
+                                    <div className="solid-search-overlay-section solid-search-overlay-section--handler">
                                         <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
                                             <ListFilter size={13} />
                                             <span>Defined filters</span>
@@ -2145,19 +2194,67 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             )}
                             {inputValue ? (
                                 <>
-                                    <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-1">
+                                    {predefinedSearches && predefinedSearches.length > 0 && (
+                                        <>
+                                            <div className="solid-search-overlay-section solid-search-overlay-section--predefined">
+                                                <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
+                                                    <Sparkles size={14} />
+                                                    <span>Suggested searches</span>
+                                                    <span className="solid-search-overlay-section-count">{predefinedSearches.length}</span>
+                                                </h6>
+                                                {predefinedSearches.map((predefinedSearch: any, index: number) => {
+                                                    const optionIndex = overlayOptions.findIndex((option) => option.id === `predefined:${predefinedSearch.name || index}`);
+                                                    return (
+                                                        <SolidButton
+                                                            key={index}
+                                                            id={getOverlayOptionId(optionIndex)}
+                                                            role="option"
+                                                            aria-selected={focusedIndex === optionIndex}
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className={`text-color solid-search-overlay-option ${focusedIndex === optionIndex ? "solid-search-overlay-option-active" : ""}`}
+                                                            onMouseDown={(e) => {
+                                                                e.preventDefault();
+                                                                handlePredefinedSearch(predefinedSearch);
+                                                            }}
+                                                            onMouseEnter={() => setFocusedIndex(optionIndex)}
+                                                        >
+                                                            <span className="solid-search-overlay-option-content">
+                                                                <span className="solid-search-overlay-option-icon" aria-hidden="true">
+                                                                    <Sparkles size={15} />
+                                                                </span>
+                                                                <span className="solid-search-overlay-option-copy">
+                                                                    <span className="solid-search-overlay-option-title">{predefinedSearch.name}</span>
+                                                                    <span className="solid-search-overlay-option-description">
+                                                                        Search for “{inputValue}”{predefinedSearch.description ? ` — ${predefinedSearch.description}` : ""}
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                        </SolidButton>
+                                                    );
+                                                })}
+                                            </div>
+                                            <div className="solid-filter-dialog-sep" />
+                                        </>
+                                    )}
+                                    <div className="solid-search-overlay-section solid-search-overlay-section--search">
                                         <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
                                             <Search size={13} />
-                                            <span>Search by fields</span>
+                                            <span>Search individual fields</span>
+                                            <span className="solid-search-overlay-section-count">{searchableFields.length}</span>
                                         </h6>
                                         {searchableFields.length > 0 ? (
                                             searchableFields.map((value: any, index: number) => {
+                                                const optionIndex = overlayOptions.findIndex((option) => option.id === `field:${value.fieldName}`);
                                                 return (
                                                     <SolidButton
                                                         key={index}
+                                                        id={getOverlayOptionId(optionIndex)}
+                                                        role="option"
+                                                        aria-selected={focusedIndex === optionIndex}
                                                         variant="ghost"
                                                         size="sm"
-                                                        className={`flex justify-start gap-1 text-color solid-search-overlay-option ${focusedIndex === index ? "solid-search-overlay-option-active" : ""}`}
+                                                        className={`text-color solid-search-overlay-option ${focusedIndex === optionIndex ? "solid-search-overlay-option-active" : ""}`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             const currentValue = inputValue?.trim();
@@ -2177,9 +2274,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                                 setShowOverlay(false);
                                                             }
                                                         }}
-                                                        onMouseEnter={() => setFocusedIndex(index)}
+                                                        onMouseEnter={() => setFocusedIndex(optionIndex)}
                                                     >
-                                                        Search <strong style={{ paddingLeft: "2px" }}>{toTitleCase(value.displayName.trim())}</strong>&nbsp;for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
+                                                        <span className="solid-search-overlay-option-content">
+                                                            <span className="solid-search-overlay-option-icon" aria-hidden="true">
+                                                                <Search size={15} />
+                                                            </span>
+                                                            <span className="solid-search-overlay-option-copy">
+                                                                <span className="solid-search-overlay-option-title">{toTitleCase(value.displayName.trim())}</span>
+                                                                <span className="solid-search-overlay-option-description">Search for “{inputValue}”</span>
+                                                            </span>
+                                                        </span>
                                                     </SolidButton>
                                                 )
                                             })
@@ -2194,37 +2299,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                             </div>
                                         )}
                                     </div>
-                                    {predefinedSearches && predefinedSearches.length > 0 && (
-                                        <>
-                                            <div className="solid-filter-dialog-sep" />
-                                            <div className="custom-filter-search-options solid-search-overlay-section flex flex-col px-3 py-1">
-                                                <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title">Predefined searches</h6>
-                                                {predefinedSearches.map((predefinedSearch: any, index: number) => (
-                                                    <SolidButton
-                                                        key={index}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className={`flex flex-col items-start gap-1 text-color solid-search-overlay-option solid-search-overlay-option-stacked ${focusedIndex === searchableFields.length + index ? "solid-search-overlay-option-active" : ""}`}
-                                                        onMouseDown={(e) => {
-                                                            e.preventDefault();
-                                                            handlePredefinedSearch(predefinedSearch);
-                                                        }}
-                                                        onMouseEnter={() => setFocusedIndex(searchableFields.length + index)}
-                                                    >
-                                                        <div className="flex items-center gap-1">
-                                                            <strong>{predefinedSearch.name}:</strong>
-                                                            <span className="font-bold text-color pr-1">{inputValue} </span>
-                                                        </div>
-                                                        <div className="text-xs">{predefinedSearch.description}</div>
-                                                    </SolidButton>
-                                                ))}
-                                            </div>
-                                        </>
-                                    )}
                                 </>
                             ) :
                                 <>
-                                    <div className="p-3 solid-search-overlay-empty">
+                                    <div className="solid-search-overlay-empty">
                                         <div className="solid-search-overlay-panel-callout">
                                             <div className="solid-search-overlay-panel-callout-icon">
                                                 <Search size={13} />
@@ -2234,7 +2312,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                     Start typing to search
                                                 </div>
                                                 <div className="solid-search-overlay-empty-subtitle">
-                                                    Start typing in search input to see all fields on which you can search {searchableEntityLabel} by.
+                                                    Enter a value to see suggested searches and searchable {searchableEntityLabel} fields.
                                                 </div>
                                             </div>
                                         </div>
@@ -2244,19 +2322,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             }
                             {selectableSavedFilters.length > 0 &&
                                 <>
-                                    <div className="p-3 solid-search-overlay-section">
+                                    <div className="solid-search-overlay-section solid-search-overlay-section--saved">
                                         <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact">
                                             <div className="solid-search-overlay-panel-callout-icon">
                                                 <Bookmark size={13} />
                                             </div>
                                             <div className="solid-search-overlay-panel-callout-copy">
-                                                <p className="solid-search-overlay-heading solid-search-overlay-section-title">Saved filters</p>
-                                                <div className="solid-search-overlay-empty-subtitle">
-                                                    Reusable filter sets available for this view.
-                                                </div>
+                                                <p className="solid-search-overlay-heading solid-search-overlay-section-title">
+                                                    <span>Saved filters</span>
+                                                    <span className="solid-search-overlay-section-count">{selectableSavedFilters.length}</span>
+                                                </p>
                                             </div>
                                         </div>
-                                        <div className="flex flex-col solid-search-overlay-saved-list">
+                                        <div className="solid-search-overlay-saved-list">
                                             {selectableSavedFilters.map((savedfilter: any, index: number) => (
                                                 <SavedFilterList
                                                     key={savedfilter.id}
@@ -2271,6 +2349,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         const optIndex = overlayOptions.findIndex(o => o.id === `saved:${savedfilter.id}`);
                                                         if (optIndex !== -1) setFocusedIndex(optIndex);
                                                     }}
+                                                    optionId={getOverlayOptionId(overlayOptions.findIndex(o => o.id === `saved:${savedfilter.id}`))}
                                                 />
                                             ))}
                                         </div>
@@ -2282,7 +2361,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <div className="solid-search-overlay-footer">
                             <button
                                 type="button"
-                                className={`flex flex-col px-3 py-2 solid-search-overlay-footer-action ${overlayOptions[focusedIndex]?.id === "footer:custom" ? "solid-search-overlay-option-active" : ""}`}
+                                id={getOverlayOptionId(overlayOptions.findIndex((option) => option.id === "footer:custom"))}
+                                role="option"
+                                aria-selected={overlayOptions[focusedIndex]?.id === "footer:custom"}
+                                className={`solid-search-overlay-footer-action solid-search-overlay-footer-action--custom ${overlayOptions[focusedIndex]?.id === "footer:custom" ? "solid-search-overlay-option-active" : ""}`}
                                 onMouseDown={(event) => {
                                     event.preventDefault();
                                     openCustomFilterDialog();
@@ -2298,10 +2380,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     </div>
                                     <div className="solid-search-overlay-panel-callout-copy">
                                         <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
-                                            Click here to apply custom filters
+                                            Advanced filters
                                         </div>
                                         <div className="solid-search-overlay-footer-subtitle">
-                                            Use custom filters to apply conditions on any field using any operator.
+                                            Combine fields, operators and values.
                                         </div>
                                     </div>
                                 </div>
@@ -2309,7 +2391,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             {viewType === "tree" && (
                                 <button
                                     type="button"
-                                    className={`flex flex-col px-3 py-2 solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary ${overlayOptions[focusedIndex]?.id === "footer:grouping" ? "solid-search-overlay-option-active" : ""}`}
+                                    id={getOverlayOptionId(overlayOptions.findIndex((option) => option.id === "footer:grouping"))}
+                                    role="option"
+                                    aria-selected={overlayOptions[focusedIndex]?.id === "footer:grouping"}
+                                    className={`solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary ${overlayOptions[focusedIndex]?.id === "footer:grouping" ? "solid-search-overlay-option-active" : ""}`}
                                     onMouseDown={(event) => {
                                         event.preventDefault();
                                         openGroupingDialog();
@@ -2325,10 +2410,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                         </div>
                                         <div className="solid-search-overlay-panel-callout-copy">
                                             <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
-                                                Click here to do custom grouping
+                                                Group and aggregate
                                             </div>
                                             <div className="solid-search-overlay-footer-subtitle">
-                                                Configure grouping rules and aggregations for the tree view.
+                                                Organise records and calculate aggregate values.
                                             </div>
                                         </div>
                                     </div>
