@@ -3414,12 +3414,6 @@ li.header-li-px {
   color: color-mix(in srgb, hsl(334 68% 38%) 82%, var(--foreground) 18%);
 }
 
-.solid-chip-tone-handler {
-  background: color-mix(in srgb, hsl(142 60% 38%) 12%, transparent);
-  border-color: color-mix(in srgb, hsl(142 60% 38%) 26%, transparent);
-  color: color-mix(in srgb, hsl(142 55% 30%) 82%, var(--foreground) 18%);
-}
-
 .solid-chip-pill-remove {
   border: 0;
   background: transparent;
@@ -3520,8 +3514,7 @@ li.header-li-px {
 .solid-chip-manager-item.solid-chip-tone-search .solid-chip-manager-item-label,
 .solid-chip-manager-item.solid-chip-tone-predefined .solid-chip-manager-item-label,
 .solid-chip-manager-item.solid-chip-tone-custom .solid-chip-manager-item-label,
-.solid-chip-manager-item.solid-chip-tone-grouping .solid-chip-manager-item-label,
-.solid-chip-manager-item.solid-chip-tone-handler .solid-chip-manager-item-label {
+.solid-chip-manager-item.solid-chip-tone-grouping .solid-chip-manager-item-label {
   color: inherit;
 }
 
@@ -4595,53 +4588,6 @@ li.header-li-px {
 
 .solid-search-overlay-option-stacked {
   align-items: flex-start;
-}
-
-.solid-defined-filter-badge-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 2px 0 4px;
-}
-
-.solid-defined-filter-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  flex: 0 0 auto;
-  max-width: 100%;
-  border: 1px solid color-mix(in srgb, hsl(142 60% 38%) 30%, transparent);
-  background: color-mix(in srgb, hsl(142 60% 38%) 8%, transparent);
-  color: color-mix(in srgb, hsl(142 55% 30%) 88%, var(--foreground) 12%);
-  border-radius: 999px;
-  min-height: 24px;
-  padding: 0 10px 0 6px;
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease;
-}
-
-.solid-defined-filter-badge svg {
-  flex: 0 0 auto;
-}
-
-.solid-defined-filter-badge:hover {
-  background: color-mix(in srgb, hsl(142 60% 38%) 16%, transparent);
-  border-color: color-mix(in srgb, hsl(142 60% 38%) 44%, transparent);
-}
-
-.solid-defined-filter-badge:focus-visible {
-  outline: 2px solid color-mix(in srgb, hsl(142 60% 38%) 50%, transparent);
-  outline-offset: 1px;
-}
-
-.solid-defined-filter-badge-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
 }
 
 .solid-search-overlay-empty {
