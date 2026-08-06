@@ -1553,6 +1553,25 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             return false;
         }
 
+        // Applying the already-active filter must be a no-op. This is important
+        // for lifecycle extensions: applying a filter causes a new list load,
+        // which invokes onBeforeListDataLoad/onListLoad again.
+        const sameSavedFilterReference =
+            (currentSavedFilterData?.id != null &&
+                savedfilter?.id != null &&
+                areFilterStateValuesEqual(currentSavedFilterData.id, savedfilter.id)) ||
+            (currentSavedFilterData?.systemKey != null &&
+                savedfilter?.systemKey != null &&
+                areFilterStateValuesEqual(currentSavedFilterData.systemKey, savedfilter.systemKey));
+        const sameSavedFilter =
+            sameSavedFilterReference &&
+            areFilterStateValuesEqual(currentSavedFilterQuery, filterJson) &&
+            areFilterStateValuesEqual(currentSavedFilterVariables, variables);
+
+        if (sameSavedFilter) {
+            return true;
+        }
+
         setSearchChips([]);
         setSearchFilter(null);
         setFilterRules(initialState);

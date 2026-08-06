@@ -209,6 +209,7 @@ export type SolidListUiEvent = {
 
 export type SolidLoadList = {
     type: SolidUiEvents;
+    isInitialLoad?: boolean;
     listData: any[];
     fieldsMetadata: FieldsMetadata;
     totalRecords: number;
@@ -222,6 +223,7 @@ export type SolidLoadList = {
 
 export type SolidBeforeListDataLoad = {
     type: SolidUiEvents;
+    isInitialLoad?: boolean;
     fieldsMetadata: FieldsMetadata;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;

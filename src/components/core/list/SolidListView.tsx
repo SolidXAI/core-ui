@@ -671,6 +671,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           listData: listViewData,
           totalRecords: totalRecords,
           type: "onListLoad",
+          isInitialLoad: !hasFiredInitialOnListLoadRef.current,
           viewMetadata: solidListViewMetaData?.data?.solidView,
           listViewLayout: listLayout,
           queryParams: {
@@ -683,6 +684,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           session: session.data,
           params: params
         };
+        hasFiredInitialOnListLoadRef.current = true;
 
         if (dynamicHeader) {
           dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
@@ -715,6 +717,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const latestFilterPredicatesRef = useRef<any>(filterPredicates);
   const latestSortFieldRef = useRef<string>(sortField);
   const latestSortOrderRef = useRef<1 | -1 | 0>(sortOrder);
+  const hasFiredInitialOnBeforeListDataLoadRef = useRef(false);
+  const hasFiredInitialOnListLoadRef = useRef(false);
 
   useEffect(() => {
     latestSortFieldRef.current = sortField;
@@ -836,8 +840,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
     const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
     let dynamicExtensionFunction = null;
+    const isInitialLoad = !hasFiredInitialOnBeforeListDataLoadRef.current;
+    hasFiredInitialOnBeforeListDataLoadRef.current = true;
     const event: SolidBeforeListDataLoad = {
       type: "onBeforeListDataLoad",
+      isInitialLoad,
       fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
       viewMetadata: solidListViewMetaData?.data?.solidView,
       listViewLayout: solidListViewMetaData?.data.solidView.layout,
