@@ -1907,18 +1907,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
                   <>
-                    <div className="max-[576px]:hidden sm:hidden lg:flex w-full mt-3 lg:mt-0 lg:min-w-0">
-                      <SolidGlobalSearchElement
-                        viewType="tree"
-                        showSaveFilterPopup={showSaveFilterPopup}
-                        setShowSaveFilterPopup={setShowSaveFilterPopup}
-                        ref={solidGlobalSearchElementRef}
-                        viewData={solidTreeViewMetaData}
-                        handleApplyCustomFilter={handleApplyCustomFilter}
-                        filterPredicates={filterPredicates}
-                      />
-                    </div>
-                    <div className={`${showGlobalSearchElement ? "lg:flex" : "hidden"} lg:hidden mt-3 lg:mt-0 w-full lg:min-w-0`}>
+                    {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
+                        library's generated CSS, so the app's base `.hidden` would override our media-scoped
+                        `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
+                    <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
                       <SolidGlobalSearchElement
                         viewType="tree"
                         showSaveFilterPopup={showSaveFilterPopup}

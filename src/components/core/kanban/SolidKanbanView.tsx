@@ -1182,11 +1182,10 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                 */}
 
                 {/* <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p> */}
-                <div className="max-[576px]:hidden sm:hidden lg:flex w-full mt-3 lg:mt-0 lg:min-w-0">
-                  {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
-                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
-                </div>
-                <div className={`${showGlobalSearchElement ? "lg:flex" : "hidden"} lg:hidden mt-3 lg:mt-0 w-full lg:min-w-0`}>
+                {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
+                    library's generated CSS, so the app's base `.hidden` would override our media-scoped
+                    `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
+                <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
                   <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
                 </div>

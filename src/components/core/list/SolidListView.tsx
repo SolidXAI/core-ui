@@ -1480,27 +1480,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   {params.embeded === false && (
                     <>
 
-                      {/* Desktop Version of global searcj element */}
-                      <div className={`max-[576px]:hidden sm:hidden lg:flex w-full mt-3 lg:mt-0  lg:min-w-0`}>
-                        {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
-                        <SolidGlobalSearchElement
-                          key={params.modelName}
-                          viewType="list"
-                          showSaveFilterPopup={showSaveFilterPopup}
-                          setShowSaveFilterPopup={setShowSaveFilterPopup}
-                          ref={solidGlobalSearchElementRef}
-                          viewData={solidListViewMetaData}
-                          handleApplyCustomFilter={handleApplyCustomFilter}
-                          filterPredicates={filterPredicates}
-                          definedFilters={definedFilters}
-                          onRemoveDefinedFilter={removeDefinedFilter}
-                          onApplyDefinedFilter={applyDefinedFilter}
-                        >
-                        </SolidGlobalSearchElement>
-                      </div>
-
-                      {/* Mobile Version of global search element */}
-                      <div className={`${showGlobalSearchElement ? "lg:flex" : "hidden"} lg:hidden mt-3 lg:mt-0 w-full lg:min-w-0`}>
+                      {/* Global search element: always visible on desktop (lg+), toggled via search button below lg */}
+                      {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
+                          library's generated CSS, so the app's base `.hidden` would override our media-scoped
+                          `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
+                      <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
                         {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
                         <SolidGlobalSearchElement
                           key={params.modelName}
