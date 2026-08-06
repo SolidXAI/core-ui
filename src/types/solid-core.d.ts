@@ -108,7 +108,15 @@ export type LayoutAttribute = {
     showEditFormButton?: boolean;
     showAddFormButton?: boolean;
     showDeleteFormButton?: boolean;
+    action?: string;
+    actionInContextMenu?: boolean;
+    openInPopup?: boolean;
+    popupWidth?: string;
+    closable?: boolean;
+    roles?: string[];
+    env?: string[] | string;
     formButtons?: any;
+    headerButtons?: any;
     rowButtons?: any;
     whereClause?: string;
     disabled?: boolean;

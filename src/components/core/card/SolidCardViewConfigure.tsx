@@ -28,6 +28,7 @@ import {
   SolidDropdownMenuTrigger,
   SolidIcon,
 } from "../../shad-cn-ui";
+import { SolidListViewHeaderContextMenuButton } from "../list/SolidListViewHeaderContextMenuButton";
 
 const normalizeViewModes = (viewModes: any[] = []) => {
   return viewModes
@@ -64,6 +65,9 @@ export const SolidCardViewConfigure = ({
   setShowSaveFilterPopup,
   filters,
   handleRefreshView,
+  params,
+  headerButtons = [],
+  handleCustomButtonClick,
 }: any) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -134,6 +138,8 @@ export const SolidCardViewConfigure = ({
   const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
   const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
   const canShowArchivedRecords = Boolean(solidCardViewMetaData?.data?.solidView?.model?.enableSoftDelete);
+  const contextMenuHeaderButtons = headerButtons.filter((button: any) => button?.attrs?.actionInContextMenu === true);
+  const mobileOnlyHeaderButtons = headerButtons.filter((button: any) => button?.attrs?.actionInContextMenu !== true);
 
   return (
     <div className="position-relative">
@@ -173,6 +179,34 @@ export const SolidCardViewConfigure = ({
               <span className="solid-header-action-button-label">Export</span>
             </SolidDropdownMenuItem>
           )}
+
+          {contextMenuHeaderButtons.map((button: any, index: number) => (
+            <SolidListViewHeaderContextMenuButton
+              key={button?.attrs?.action ?? index}
+              button={button}
+              params={params}
+              solidListViewMetaData={solidCardViewMetaData}
+              handleCustomButtonClick={handleCustomButtonClick}
+              selectedRecords={[]}
+              filters={filters}
+              onActionComplete={() => setIsCogMenuOpen(false)}
+            />
+          ))}
+
+          <div className="lg:hidden flex flex-col gap-1">
+            {mobileOnlyHeaderButtons.map((button: any, index: number) => (
+              <SolidListViewHeaderContextMenuButton
+                key={`mobile-${button?.attrs?.action ?? index}`}
+                button={button}
+                params={params}
+                solidListViewMetaData={solidCardViewMetaData}
+                handleCustomButtonClick={handleCustomButtonClick}
+                selectedRecords={[]}
+                filters={filters}
+                onActionComplete={() => setIsCogMenuOpen(false)}
+              />
+            ))}
+          </div>
 
           {canShowArchivedRecords && (
             <SolidDropdownMenuCheckboxItem

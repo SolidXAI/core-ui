@@ -32,6 +32,7 @@ import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList, SolidDefinedFilter } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
+import { resolveActiveUserId } from "../../../helpers/resolveActiveUserId";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
@@ -106,6 +107,17 @@ export type SolidListViewHandle = {
     saved_filter_predicate?: any;
     predefined_search_predicate?: any;
   }) => void;
+  /**
+   * Returns the saved filters currently available in the list view, including
+   * any seeded/system filters supplied by the view.
+   */
+  getSavedFilters: () => any[];
+  /**
+   * Applies the currently available saved filter with the given name using the
+   * same selection path as clicking that filter in the search UI.
+   * Returns false when no saved filter with that name is available.
+   */
+  applySavedFilter: (name: string, variables?: Record<string, any>) => boolean;
   /**
    * Updates pagination state directly.
    * Use this when a caller needs to jump to a specific page window
@@ -908,6 +920,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
       fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      fileterTobeStored.saved_filter_variables = latestFilterPredicatesRef.current.saved_filter_variables || {};
       fileterTobeStored.saved_filter_id = latestFilterPredicatesRef.current.saved_filter_id || null;
       fileterTobeStored.saved_filter_system_key = latestFilterPredicatesRef.current.saved_filter_system_key || null;
       fileterTobeStored.saved_filter_name = latestFilterPredicatesRef.current.saved_filter_name || null;
@@ -930,7 +943,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       queryfilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
-      queryfilter.$and.push(filterPredicates.saved_filter_predicate);
+      queryfilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
+        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
     }
     if (filterPredicates.predefined_search_predicate) {
       queryfilter.$and.push(filterPredicates.predefined_search_predicate);
@@ -1069,6 +1083,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     applyFilter: (filter) => {
       handleApplyCustomFilter(filter);
     },
+    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+    applySavedFilter: (name, variables) => solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
     setPagination: (nextFirst, nextRows) => {
       setFirst(nextFirst);
       setRows(nextRows);
@@ -1462,30 +1478,37 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </p>
                   </div> */}
                   {params.embeded === false && (
-                    <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
-                      {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
-                      <SolidGlobalSearchElement
-                        key={params.modelName}
-                        viewType="list"
-                        showSaveFilterPopup={showSaveFilterPopup}
-                        setShowSaveFilterPopup={setShowSaveFilterPopup}
-                        ref={solidGlobalSearchElementRef}
-                        viewData={solidListViewMetaData}
-                        handleApplyCustomFilter={handleApplyCustomFilter}
-                        filterPredicates={filterPredicates}
-                        definedFilters={definedFilters}
-                        onRemoveDefinedFilter={removeDefinedFilter}
-                        onApplyDefinedFilter={applyDefinedFilter}
-                      >
-                      </SolidGlobalSearchElement>
-                    </div>
+                    <>
+
+                      {/* Global search element: always visible on desktop (lg+), toggled via search button below lg */}
+                      {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
+                          library's generated CSS, so the app's base `.hidden` would override our media-scoped
+                          `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
+                      <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
+                        {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
+                        <SolidGlobalSearchElement
+                          key={params.modelName}
+                          viewType="list"
+                          showSaveFilterPopup={showSaveFilterPopup}
+                          setShowSaveFilterPopup={setShowSaveFilterPopup}
+                          ref={solidGlobalSearchElementRef}
+                          viewData={solidListViewMetaData}
+                          handleApplyCustomFilter={handleApplyCustomFilter}
+                          filterPredicates={filterPredicates}
+                          definedFilters={definedFilters}
+                          onRemoveDefinedFilter={removeDefinedFilter}
+                          onApplyDefinedFilter={applyDefinedFilter}
+                        >
+                        </SolidGlobalSearchElement>
+                      </div>
+                    </>
                   )}
 
                 </div>
                 <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {params.embeded === false && (
-                    <div className="flex lg:hidden">
+                    <div className="solid-list-search-toggle">
                       <SolidButton
                         type="button"
                         size="small"
@@ -1716,30 +1739,30 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     const presentation = resolveButtonPresentation(button?.attrs);
                                     if (!presentation.showIcon && !presentation.showLabel) return null;
                                     return (
-                                  <SolidButton
-                                    type="button"
-                                    icon={presentation.icon}
-                                    iconPos={presentation.iconPos}
-                                    label={presentation.label}
-                                    tooltip={presentation.tooltip}
-                                    aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
-                                    className={[
-                                      "solid-inline-row-button w-full text-left gap-2",
-                                      presentation.isIconOnly ? "solid-icon-button" : "",
-                                      presentation.buttonClassName ? presentation.buttonClassName : ""
-                                    ].filter(Boolean).join(" ")}
-                                    size="small"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      const event = {
-                                        params,
-                                        rowData: rowData,
-                                        solidListViewMetaData:
-                                          solidListViewMetaData?.data,
-                                      };
-                                      handleCustomButtonClick(button.attrs, event);
-                                    }}
-                                  />
+                                      <SolidButton
+                                        type="button"
+                                        icon={presentation.icon}
+                                        iconPos={presentation.iconPos}
+                                        label={presentation.label}
+                                        tooltip={presentation.tooltip}
+                                        aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
+                                        className={[
+                                          "solid-inline-row-button w-full text-left gap-2",
+                                          presentation.isIconOnly ? "solid-icon-button" : "",
+                                          presentation.buttonClassName ? presentation.buttonClassName : ""
+                                        ].filter(Boolean).join(" ")}
+                                        size="small"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          const event = {
+                                            params,
+                                            rowData: rowData,
+                                            solidListViewMetaData:
+                                              solidListViewMetaData?.data,
+                                          };
+                                          handleCustomButtonClick(button.attrs, event);
+                                        }}
+                                      />
                                     );
                                   })()
                                 );

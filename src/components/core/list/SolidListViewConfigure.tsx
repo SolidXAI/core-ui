@@ -345,7 +345,7 @@ export const SolidListViewConfigure = (
                                             }}
                                         >
                                             <Table size={14} className="solid-header-action-button-icon" />
-                                            <span className="solid-header-action-button-label">Column Selector</span>
+                                            <span className="solid-header-action-button-label">Columns</span>
                                         </SolidDropdownMenuItem>
                                     </SolidDropdownMenuSubContent>
                                 </SolidDropdownMenuSub>

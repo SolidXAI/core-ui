@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from "react";
+import { ReactNode, useContext, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
@@ -8,6 +8,8 @@ import { hasAnyRole } from "../../helpers/rolesHelper";
 import { enterStudioMode } from "../../redux/features/solidStudioSlice";
 import { LayoutContext } from "./context/layoutcontext";
 import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
+import { useGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { getSettingsMap } from "../../helpers/settingsPayload";
 
 type AdminHeaderActionsProps = {
   variant: "header" | "sidebar";
@@ -45,10 +47,13 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
   const dispatch = useDispatch();
   const { data: session } = useSession();
   const { toggleThemeMode, themeMode } = useContext(LayoutContext);
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
   const user = session?.user;
   const isAdmin = hasAnyRole(user?.roles, ["Admin"]);
   const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
   const isDev = env("VITE_SOLIDX_ENV") === "dev";
+  const settingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
+  const showThemeToggle = settingsMap?.showThemeToggle === true || settingsMap?.showThemeToggle === "true";
   // const showBack = /\/admin\/core\/[^/]+\/[^/]+\/form\/[^/]+/.test(pathname);
 
   const actions: AdminAction[] = [
@@ -64,13 +69,15 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
         icon: <StudioSparkleIcon />,
       }]
       : []),
-    {
-      key: "theme",
-      label: themeMode === "dark" ? "Light Mode" : "Dark Mode",
-      onClick: toggleThemeMode,
-      title: "Toggle theme",
-      icon: <ThemeToggleIcon />,
-    },
+    ...(showThemeToggle
+      ? [{
+        key: "theme",
+        label: themeMode === "dark" ? "Light Mode" : "Dark Mode",
+        onClick: toggleThemeMode,
+        title: "Toggle theme",
+        icon: <ThemeToggleIcon />,
+      }]
+      : []),
     // ...(showBack
     //   ? [{
     //     key: "back",

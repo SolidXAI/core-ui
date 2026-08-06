@@ -1,0 +1,28 @@
+:root {
+  --solid-surface-2: #eef3f8;
+  --solid-interactive-bg: #2f6fed;
+  --solid-focus-ring: rgba(47, 111, 237, 0.22);
+  --accent: #edf4ff;
+  --accent-foreground: #224a8d;
+  --primary: #2f6fed;
+  --primary-foreground: #f8fbff;
+  --ring: rgba(47, 111, 237, 0.22);
+  --sidebar-primary: #203654;
+  --primary-color: var(--primary);
+  --primary-color-text: var(--primary-foreground);
+  --focus-ring: 0 0 0 0.2rem var(--ring, rgba(47, 111, 237, 0.22));
+  --primary-light-color: #d9e6ff;
+  --highlight-text-color: color-mix(in srgb, var(--primary-color, var(--primary)) 74%, #11243d);
+  --highlight-bg: rgba(47, 111, 237, 0.1);
+  --solid-dashboard-welcome-bg: #f4f8fc;
+  --solid-admin-card-color-1: #2f6fed;
+  --solid-admin-card-color-2: #1d4fae;
+  --solid-admin-card-color-3: #5b92ff;
+  --sidebar-background: #eef3f9;
+  --sidebar-foreground: #2c425b;
+  --sidebar-border: #cfdbe8;
+  --sidebar-accent: #e2ebf5;
+  --sidebar-accent-foreground: #1f3652;
+  --sidebar-primary: #2f6fed;
+  --sidebar-primary-foreground: #f8fbff;
+}

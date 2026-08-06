@@ -11,6 +11,7 @@ import {
   SolidDropdownMenuTrigger,
   SolidIcon,
 } from "../../shad-cn-ui";
+import { SolidCollectionRowActionMenuItems } from "../common/SolidCollectionRowActionMenuItems";
 
 // Define the types for the data and props
 interface Data {
@@ -35,9 +36,11 @@ interface KanbanCardProps {
   onDelete?: (record: Data) => void;
   onRecover?: (record: Data) => void;
   showArchived?: boolean;
+  params?: any;
+  handleCustomButtonClick?: (buttonAttrs: any, event: any) => void;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived, params, handleCustomButtonClick }) => {
   const router = useRouter()
   const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
 
@@ -97,6 +100,16 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
                 <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
                 <span className="solid-header-action-button-label">Delete</span>
               </SolidDropdownMenuItem>
+            ) : null}
+            {!isArchivedRecord && handleCustomButtonClick ? (
+              <SolidCollectionRowActionMenuItems
+                buttons={solidKanbanViewMetaData?.solidView?.layout?.attrs?.rowButtons}
+                params={params}
+                rowData={data}
+                solidViewMetaData={solidKanbanViewMetaData}
+                handleCustomButtonClick={handleCustomButtonClick}
+                showSeparator={true}
+              />
             ) : null}
           </SolidDropdownMenuContent>
         </SolidDropdownMenu>

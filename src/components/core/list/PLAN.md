@@ -57,7 +57,7 @@
   Keep existing predicate/rule state shape and `transformFilterRules(...)` contract unchanged.
 - [ ] Replace remaining Prime icon class usage in filter flow with non-Prime icons.
 - [ ] Audit `SolidFilterFields` and list filter input widgets for hidden Prime event-shape coupling.
-- [ ] Preserve saved filter URL behavior (`savedQuery`) and local cache behavior.
+- [ ] Preserve local-storage saved-filter application and rehydration behavior without URL state.
 - [ ] Confirm relation filter hydration still works.
 - [ ] Preserve `clearFilter()` and imperative `SolidListViewHandle.applyFilter(...)` behavior unchanged.
 

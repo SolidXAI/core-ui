@@ -4,6 +4,85 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.9] - 2026-08-06
+
+## [0.1.14-beta.8] - 2026-08-06
+
+### Other
+
+- Refactor SolidCardView and SolidKanbanView to support imperative handles and enhance filter management; add registry for card and kanban views
+- Enhance Kanban and Card components with custom button handling and context menu integration
+- Refactor SolidTreeView to resolve saved filter variables and add new helper functions
+- resolved on form header
+- visibility on kanban, card and tree view
+- visibility issues resolved
+
+## [0.1.14-beta.8] - 2026-08-05
+
+### Other
+
+- resolved on form header
+- visibility on kanban, card and tree view
+- visibility issues resolved
+
+## [0.1.14-beta.7] - 2026-08-05
+
+### Fixed
+
+- update error handling and improve UI label for column selector
+
+### Changed
+
+- simplify PDFViewer by removing blob URL handling and using direct iframe rendering
+
+### Other
+
+- show theme toggle
+- toggle issue in all views resolved
+- search toggle issue
+- remove minimal theme
+- theme registry name
+- light minimal
+- disable pointer events also
+- taking disabled impact if workflowFieldUpdateEnabled is false and change ui-ux
+- some ui bug
+- ui fixes
+- added modern theme
+- setting result tab inline row
+- some spacing issue'
+- enterprise theme added
+- dark theme issues
+- solid theme provider changes
+
+## [0.1.14-beta.7] - 2026-08-05
+
+### Fixed
+
+- update error handling and improve UI label for column selector
+
+### Changed
+
+- simplify PDFViewer by removing blob URL handling and using direct iframe rendering
+
+### Other
+
+- show theme toggle
+- toggle issue in all views resolved
+- search toggle issue
+- remove minimal theme
+- theme registry name
+- light minimal
+- disable pointer events also
+- taking disabled impact if workflowFieldUpdateEnabled is false and change ui-ux
+- some ui bug
+- ui fixes
+- added modern theme
+- setting result tab inline row
+- some spacing issue'
+- enterprise theme added
+- dark theme issues
+- solid theme provider changes
+
 ## [0.1.14-beta.6] - 2026-07-31
 
 ### Other

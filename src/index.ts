@@ -64,6 +64,11 @@ export { SolidChatter } from './components/core/chatter/SolidChatter';
 // export * from './components/core/kanban/KanbanCard';
 // export * from './components/core/kanban/KanbanColumn';
 export { SolidKanbanView } from './components/core/kanban/SolidKanbanView';
+export type { SolidKanbanViewHandle } from './components/core/kanban/SolidKanbanView';
+export * from './components/core/kanban/kanbanViewRegistry';
+export { SolidCardView } from './components/core/card/SolidCardView';
+export type { SolidCardViewHandle } from './components/core/card/SolidCardView';
+export * from './components/core/card/cardViewRegistry';
 
 export { SolidModuleHome } from './components/common/SolidModuleHome';
 export { SolidListView } from './components/core/list/SolidListView';

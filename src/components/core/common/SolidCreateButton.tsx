@@ -31,7 +31,27 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
     return (
         <div>
             <Link href={createPath} onClick={storeCurrentViewContext}>
-                {responsiveIconOnly ? (
+                {/* Desktop Version */}
+                <SolidButton
+                    type="button"
+                    icon={icon}
+                    leftIcon={!icon ? defaultIcon : undefined}
+                    className={`${className} max-[576px]:hidden sm:hidden lg:flex`}
+                    size='sm'
+                >
+                    {label}
+                </SolidButton>
+
+                {/* Mobile Version */}
+                <SolidButton
+                    type="button"
+                    icon={icon}
+                    leftIcon={!icon ? defaultIcon : undefined}
+                    className={`${className} lg:hidden solid-icon-button `}
+                    size='sm'
+                />
+
+                {/* {responsiveIconOnly ? (
                     <>
                         <SolidButton
                             type="button"
@@ -61,7 +81,7 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                     >
                         {label}
                     </SolidButton>
-                )}
+                )} */}
 
             </Link>
         </div>
