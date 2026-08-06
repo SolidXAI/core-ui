@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.10] - 2026-08-06
+
+### Other
+
+- clean up in global search element
+- changes around global search element css
+
 ## [0.1.14-beta.9] - 2026-08-06
 
 ## [0.1.14-beta.8] - 2026-08-06
