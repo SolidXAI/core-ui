@@ -1,4 +1,3 @@
-
 import * as Yup from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -12,290 +11,314 @@ import { SolidNumberInput } from "../../../shad-cn-ui";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 export class SolidIntegerField implements ISolidField {
+  private fieldContext: SolidFieldProps;
 
-    private fieldContext: SolidFieldProps;
+  constructor(fieldContext: SolidFieldProps) {
+    this.fieldContext = fieldContext;
+  }
 
-    constructor(fieldContext: SolidFieldProps) {
-        this.fieldContext = fieldContext;
+  updateFormData(value: any, formData: FormData): any {
+    const fieldLayoutInfo = this.fieldContext.field;
+    if (value !== undefined && value !== null) {
+      formData.append(fieldLayoutInfo.attrs.name, value);
+    }
+  }
+
+  initialValue(): any {
+    const fieldName = this.fieldContext.field.attrs.name;
+    const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
+    if (
+      this.fieldContext.parentData &&
+      this.fieldContext.parentData[fieldName]
+    ) {
+      const parentDataForKey = this.fieldContext.parentData[fieldName];
+      if (parentDataForKey && typeof parentDataForKey !== "object") {
+        return this.fieldContext.parentData[fieldName];
+      }
     }
 
-    updateFormData(value: any, formData: FormData): any {
-        const fieldLayoutInfo = this.fieldContext.field;
-        if (value !== undefined && value !== null) {
-            formData.append(fieldLayoutInfo.attrs.name, value);
-        }
+    const existingValue = this.fieldContext.data[fieldName];
+
+    return existingValue !== undefined && existingValue !== null
+      ? existingValue
+      : fieldDefaultValue || "";
+  }
+
+  validationSchema(): Yup.Schema {
+    let schema: Yup.NumberSchema<number | null | undefined> = Yup.number();
+
+    const fieldMetadata = this.fieldContext.fieldMetadata;
+    const fieldLayoutInfo = this.fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    // 1. required
+    if (fieldMetadata.required) {
+      schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
+    } else {
+      schema = schema.nullable(); // Allow null when not required
     }
-
-    initialValue(): any {
-        const fieldName = this.fieldContext.field.attrs.name;
-        const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
-        if (this.fieldContext.parentData && this.fieldContext.parentData[fieldName]) {
-            const parentDataForKey = this.fieldContext.parentData[fieldName];
-            if (parentDataForKey && typeof parentDataForKey !== 'object') {
-                return this.fieldContext.parentData[fieldName]
-            }
-        }
-
-        const existingValue = this.fieldContext.data[fieldName];
-
-        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+    // 2. length (min/max)
+    if (fieldMetadata.min && fieldMetadata.min > 0) {
+      schema = schema.min(
+        fieldMetadata.min,
+        ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min),
+      );
     }
-
-    validationSchema(): Yup.Schema {
-        let schema: Yup.NumberSchema<number | null | undefined> = Yup.number();
-
-
-        const fieldMetadata = this.fieldContext.fieldMetadata;
-        const fieldLayoutInfo = this.fieldContext.field;
-        const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
-        // 1. required 
-        if (fieldMetadata.required) {
-            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
-        } else {
-            schema = schema.nullable(); // Allow null when not required
-        }
-        // 2. length (min/max)
-        if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
-        }
-        if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
-        }
-        return schema;
+    if (fieldMetadata.max && fieldMetadata.max > 0) {
+      schema = schema.max(
+        fieldMetadata.max,
+        ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max),
+      );
     }
+    return schema;
+  }
 
-    render(formik: FormikObject) {
-        const fieldLayoutInfo = this.fieldContext.field;
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
+  render(formik: FormikObject) {
+    const fieldLayoutInfo = this.fieldContext.field;
+    const isFormFieldValid = (formik: any, fieldName: string) =>
+      formik.touched[fieldName] && formik.errors[fieldName];
+    const className =
+      fieldLayoutInfo.attrs?.className || "field w-full px-2 pt-2";
 
-        let viewWidget = fieldLayoutInfo.attrs.viewWidget;
-        let editWidget = fieldLayoutInfo.attrs.editWidget;
-        if (!editWidget) {
-            editWidget = 'DefaultIntegerFormEditWidget';
-        }
-        if (!viewWidget) {
-            viewWidget = 'DefaultIntegerFormViewWidget';
-        }
-        const viewMode: string = this.fieldContext.viewMode;
-        return (
+    let viewWidget = fieldLayoutInfo.attrs.viewWidget;
+    let editWidget = fieldLayoutInfo.attrs.editWidget;
+    if (!editWidget) {
+      editWidget = "DefaultIntegerFormEditWidget";
+    }
+    if (!viewWidget) {
+      viewWidget = "DefaultIntegerFormViewWidget";
+    }
+    const viewMode: string = this.fieldContext.viewMode;
+    return (
+      <>
+        <div className={className}>
+          {viewMode === "view" &&
+            this.renderExtensionRenderMode(viewWidget, formik)}
+          {viewMode === "edit" && (
             <>
-                <div className={className}>
-                    {viewMode === "view" &&
-                        this.renderExtensionRenderMode(viewWidget, formik)
-                    }
-                    {viewMode === "edit" && (
-                        <>
-                            {editWidget &&
-                                this.renderExtensionRenderMode(editWidget, formik)
-                            }
-                        </>
-                    )
-                    }
-                </div>
+              {editWidget && this.renderExtensionRenderMode(editWidget, formik)}
             </>
-        );
-    }
-
-    renderExtensionRenderMode(widget: string, formik: FormikObject) {
-        let DynamicWidget = getExtensionComponent(widget);
-        const widgetProps: SolidFormFieldWidgetProps = {
-            formik: formik,
-            fieldContext: this.fieldContext,
-        }
-        return (
-            <>
-                {DynamicWidget && <DynamicWidget {...widgetProps} />}
-            </>
-        )
-    }
-}
-
-
-export const DefaultIntegerFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
-
-    const fieldMetadata = fieldContext.fieldMetadata;
-    const fieldLayoutInfo = fieldContext.field;
-    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const value = formik.values[fieldLayoutInfo.attrs.name];
-    return (
-        <div className={styles.fieldViewWrapper}>
-            {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
-            )}
-            <p className={styles.fieldViewValue}>{value != null && typeof value !== "object" ? value : ''}</p>
+          )}
         </div>
+      </>
     );
+  }
+
+  renderExtensionRenderMode(widget: string, formik: FormikObject) {
+    let DynamicWidget = getExtensionComponent(widget);
+    const widgetProps: SolidFormFieldWidgetProps = {
+      formik: formik,
+      fieldContext: this.fieldContext,
+    };
+    return <>{DynamicWidget && <DynamicWidget {...widgetProps} />}</>;
+  }
 }
 
+export const DefaultIntegerFormViewWidget = ({
+  formik,
+  fieldContext,
+}: SolidFormFieldWidgetProps) => {
+  const fieldMetadata = fieldContext.fieldMetadata;
+  const fieldLayoutInfo = fieldContext.field;
+  const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+  const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+  const value = formik.values[fieldLayoutInfo.attrs.name];
+  return (
+    <div className={styles.fieldViewWrapper}>
+      {showFieldLabel !== false && (
+        <p className={`${styles.fieldViewLabel} form-field-label`}>
+          {fieldLabel}
+        </p>
+      )}
+      <p className={styles.fieldViewValue}>
+        {value != null && typeof value !== "object" ? value : ""}
+      </p>
+    </div>
+  );
+};
 
+export const DefaultIntegerFormEditWidget = ({
+  formik,
+  fieldContext,
+}: SolidFormFieldWidgetProps) => {
+  const fieldMetadata = fieldContext.fieldMetadata;
+  const fieldLayoutInfo = fieldContext.field;
+  const className =
+    fieldLayoutInfo.attrs?.className || "field w-full px-2 pt-2";
+  const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+  const fieldDescription =
+    fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
+  const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
+  const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+  const readOnlyPermission = fieldContext.readOnly;
 
-export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+  const isFormFieldValid = (formik: any, fieldName: string) =>
+    formik.touched[fieldName] && formik.errors[fieldName];
 
-    const fieldMetadata = fieldContext.fieldMetadata;
-    const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
-    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
-    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
-    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly;
+  const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+  const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+  const autoComplete = fieldLayoutInfo?.attrs?.autoComplete || "on";
 
-    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+  const formDisabled =
+    solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+  const formReadonly =
+    solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
-    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
-    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
-    const autoComplete = fieldLayoutInfo?.attrs?.autoComplete || 'on';
+  return (
+    <div className={styles.fieldWrapper}>
+      {showFieldLabel != false && (
+        <label
+          htmlFor={fieldLayoutInfo.attrs.name}
+          className={`${styles.fieldLabel} form-field-label`}
+        >
+          {fieldLabel}
+          {fieldMetadata.required && <span className="text-red-500">*</span>}
+          <SolidFieldTooltip fieldContext={fieldContext} />
+        </label>
+      )}
+      <SolidNumberInput
+        className={styles.fieldInput}
+        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+        disabled={formDisabled || fieldDisabled}
+        id={fieldLayoutInfo.attrs.name}
+        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+        onChange={(e: any) => {
+          const nextVal = typeof e.value === "number" ? e.value : null;
+          fieldContext.onChange(
+            {
+              target: {
+                name: fieldLayoutInfo.attrs.name,
+                value: nextVal,
+                type: "number",
+              },
+            } as any,
+            "onFieldChange",
+          );
+        }}
+        value={formik.values[fieldLayoutInfo.attrs.name] || ""}
+        autoComplete={autoComplete}
+      />
+      {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+        <p className={styles.fieldError}>
+          {formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+        </p>
+      )}
+    </div>
+  );
+};
 
-    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
-    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+export const SolidIntegerSliderStyleFormEditWidget = ({
+  formik,
+  fieldContext,
+}: SolidFormFieldWidgetProps) => {
+  const fieldMetadata = fieldContext.fieldMetadata;
+  const fieldLayoutInfo = fieldContext.field;
+  const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+  const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+  const readOnlyPermission = fieldContext.readOnly;
+  const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+  const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+  const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
+  const formDisabled =
+    solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+  const formReadonly =
+    solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+  const min = fieldMetadata.min || 0;
+  const max = fieldMetadata.max || 5;
+  const isFormFieldValid = (formik: any, fieldName: string) =>
+    formik.touched[fieldName] && formik.errors[fieldName];
+  const fieldName = fieldLayoutInfo.attrs.name;
+  const currentValue = Number(formik.values[fieldName] ?? min);
 
-    return (
-        <div className={styles.fieldWrapper}>
-            {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
-                    {fieldLabel}
-                    {fieldMetadata.required && <span className="text-red-500">*</span>}
-                    <SolidFieldTooltip fieldContext={fieldContext} />
-                </label>
-            }
-            <div className={styles.fieldNumberWrapper}>
-                <SolidNumberInput
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    id={fieldLayoutInfo.attrs.name}
-                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    onChange={(e: any) => {
-                        const nextVal = typeof e.value === "number" ? e.value : null;
-                        fieldContext.onChange(
-                            {
-                                target: {
-                                    name: fieldLayoutInfo.attrs.name,
-                                    value: nextVal,
-                                    type: "number",
-                                },
-                            } as any,
-                            "onFieldChange"
-                        );
-                    }}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    autoComplete={autoComplete}
+  return (
+    <div className="w-full" style={{ height: "60px" }}>
+      {showFieldLabel != false && (
+        <div className="font-medium mb-2">
+          {fieldLabel}
+          {fieldMetadata.required && <span className="text-red-500"> *</span>}
+        </div>
+      )}
+      <div className="relative h-12">
+        <Range
+          step={1}
+          min={min}
+          max={max}
+          values={[currentValue]}
+          onChange={(values) => {
+            fieldContext.onChange(
+              {
+                target: {
+                  name: fieldName,
+                  value: values[0],
+                  type: "number",
+                },
+              } as any,
+              "onFieldChange",
+            );
+          }}
+          renderTrack={({ props, children }) => {
+            const percent = ((currentValue - min) / (max - min)) * 100;
+            return (
+              <div
+                {...props}
+                style={{
+                  ...props.style,
+                  height: "10px",
+                  width: "100%",
+                  borderRadius: "8px",
+                  backgroundColor: "var(--primary-light-color)",
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    height: "100%",
+                    width: `${percent}%`,
+                    backgroundColor: "var(--primary-color)",
+                    borderRadius: "5px",
+                    top: 0,
+                    left: 0,
+                  }}
                 />
-            </div>
-            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
-            )}
+                {children}
+              </div>
+            );
+          }}
+          renderThumb={({ props }) => (
+            <div
+              {...props}
+              key={props.key}
+              style={{
+                ...props.style,
+                height: "18px",
+                width: "18px",
+                border: "4px solid var(--surface-0)",
+                borderRadius: "50%",
+                backgroundColor: "var(--primary-color)",
+              }}
+            />
+          )}
+        />
+        <div className="flex items-center justify-between mt-2">
+          {Array.from({ length: max - min + 1 }, (_, i) => {
+            const num = i + min;
+            return (
+              <span key={num} className="text-sm">
+                {num === 0 ? "" : num}
+              </span>
+            );
+          })}
         </div>
-    );
-}
-
-export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
-    const fieldMetadata = fieldContext.fieldMetadata;
-    const fieldLayoutInfo = fieldContext.field;
-    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly;
-    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
-    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
-    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
-    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
-    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-    const min = fieldMetadata.min || 0;
-    const max = fieldMetadata.max || 5;
-    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-    const fieldName = fieldLayoutInfo.attrs.name;
-    const currentValue = Number(formik.values[fieldName] ?? min);
-
-    return (
-        <div className="w-full" style={{ height: '60px' }}>
-            {showFieldLabel != false && (
-                <div className="font-medium mb-2">{fieldLabel}
-                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                </div>
-            )}
-            <div className="relative h-12">
-                <Range
-                    step={1}
-                    min={min}
-                    max={max}
-                    values={[currentValue]}
-                    onChange={(values) => {
-                        fieldContext.onChange(
-                            {
-                                target: {
-                                    name: fieldName,
-                                    value: values[0],
-                                    type: "number",
-                                },
-                            } as any,
-                            "onFieldChange"
-                        );
-                    }}
-                    renderTrack={({ props, children }) => {
-                        const percent = ((currentValue - min) / (max - min)) * 100;
-                        return (
-                            <div
-                                {...props}
-                                style={{
-                                    ...props.style,
-                                    height: "10px",
-                                    width: "100%",
-                                    borderRadius: "8px",
-                                    backgroundColor: "var(--primary-light-color)",
-                                    position: "relative",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        height: "100%",
-                                        width: `${percent}%`,
-                                        backgroundColor: "var(--primary-color)",
-                                        borderRadius: "5px",
-                                        top: 0,
-                                        left: 0,
-                                    }}
-                                />
-                                {children}
-                            </div>
-                        )
-                    }}
-                    renderThumb={({ props }) => (
-                        <div
-                            {...props}
-                            key={props.key}
-                            style={{
-                                ...props.style,
-                                height: "18px",
-                                width: "18px",
-                                border: "4px solid var(--surface-0)",
-                                borderRadius: '50%',
-                                backgroundColor: "var(--primary-color)",
-                            }}
-                        />
-                    )}
-                />
-                <div className="flex items-center justify-between mt-2">
-                    {Array.from({ length: max - min + 1 }, (_, i) => {
-                        const num = i + min;
-                        return (
-                            <span
-                                key={num}
-                                className="text-sm"
-                            >
-                                {num === 0 ? '' : num}
-                            </span>
-                        );
-                    })}
-                </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-2">
-                        <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+        {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+          <div className="absolute mt-2">
+            <SolidMessage
+              severity="error"
+              text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
