@@ -247,7 +247,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   const {
     useDeleteMultipleSolidEntitiesMutation,
     useLazyGetSolidEntitiesQuery,
-    useLazyRecoverSolidEntityByIdQuery,
+    useRecoverSolidEntityByIdMutation,
     usePatchUpdateSolidEntityMutation
   } = entityApi;
 
@@ -378,6 +378,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   const [kanbanLoadMoreData, setKanbanLoadMoreData] = useState<any>({});
   const [recordsInSwimlane, setRecordsInSwimlane] = useState(10);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [recoveredRecordIds, setRecoveredRecordIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
@@ -402,7 +403,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
-  const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useLazyRecoverSolidEntityByIdQuery();
+  const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useRecoverSolidEntityByIdMutation();
 
   // Delete mutation 
   const [
@@ -429,12 +430,39 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     return queryData;
   };
 
-  useEffect(() => {
-    const mergedKanbanGroupData = mergeKanbanGroupsWithDefinitions(
-      rawKanbanGroupRecords,
+  const buildMergedKanbanGroupData = (groupRecords: any[]) =>
+    mergeKanbanGroupsWithDefinitions(
+      groupRecords,
       swimlaneDefinitions,
       recordsInSwimlane
     );
+
+  const markKanbanRecordRecovered = (recordId: any) => {
+    const recoveredRecordId = String(recordId);
+    const updateGroups = (groups: any[]) =>
+      (groups || []).map((group: any) => ({
+        ...group,
+        groupData: {
+          ...group.groupData,
+          records: (group.groupData?.records || []).map((record: any) =>
+            String(record?.id) === recoveredRecordId
+              ? { ...record, deletedAt: null, deletedTracker: null }
+              : record
+          ),
+        },
+      }));
+
+    setRecoveredRecordIds((previousIds) =>
+      previousIds.includes(recoveredRecordId)
+        ? previousIds
+        : [...previousIds, recoveredRecordId]
+    );
+    setRawKanbanGroupRecords((previousGroups) => updateGroups(previousGroups));
+    setKanbanViewData((previousGroups: any[]) => updateGroups(previousGroups));
+  };
+
+  useEffect(() => {
+    const mergedKanbanGroupData = buildMergedKanbanGroupData(rawKanbanGroupRecords);
     setKanbanViewData(mergedKanbanGroupData);
     setMaxSwimLanesCount(swimlaneDefinitions.length > 0 ? swimlaneDefinitions.length : serverSwimLaneCount);
 
@@ -686,8 +714,11 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         })
       ).unwrap();
 
+      const nextRawGroupRecords = response?.groupRecords || [];
+      const nextKanbanGroupData = buildMergedKanbanGroupData(nextRawGroupRecords);
       setServerSwimLaneCount(response?.meta?.totalRecords || 0);
-      setRawKanbanGroupRecords(response?.groupRecords || []);
+      setRawKanbanGroupRecords(nextRawGroupRecords);
+      setKanbanViewData(nextKanbanGroupData);
       setSelectedRecords([]);
     } catch (error: any) {
       dispatch(showToast({
@@ -734,6 +765,8 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     selectedRecords.forEach((element: any) => {
       deleteList.push(element.id);
     });
+    const deletedIds = new Set(deleteList.map((id: any) => String(id)));
+    setRecoveredRecordIds((previousIds) => previousIds.filter((id) => !deletedIds.has(id)));
     deleteManySolidEntities(deleteList);
     setDialogVisible(false);
   };
@@ -760,6 +793,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         detail: response?.data?.message || "Record recovered successfully.",
         life: 3000,
       }));
+      markKanbanRecordRecovered(record.id);
       await loadKanbanBoard(filters);
     } catch (error: any) {
       dispatch(showToast({
@@ -1270,7 +1304,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived} recoveredRecordIds={recoveredRecordIds} params={params} handleCustomButtonClick={handleCustomButtonClick}></KanbanBoard>
           }
         </div>
       </div>

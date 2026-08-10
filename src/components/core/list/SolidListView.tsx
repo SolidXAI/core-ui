@@ -1,5 +1,16 @@
-import { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
-import { SolidDataTable as DataTable, DataTableStateEvent, Column } from "./SolidDataTable";
+import {
+  forwardRef,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useImperativeHandle,
+} from "react";
+import {
+  SolidDataTable as DataTable,
+  DataTableStateEvent,
+  Column,
+} from "./SolidDataTable";
 import qs from "qs";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
@@ -8,15 +19,18 @@ import { SolidCustomListViewColumn } from "./SolidCustomListViewColumn";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
-import { getCollectionViewPermissionNames, permissionExpression } from "../../../helpers/permissions";
+import {
+  getCollectionViewPermissionNames,
+  permissionExpression,
+} from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import { showToast } from "../../../redux/features/toastSlice";
-import CompactImage from '../../../resources/images/layout/images/compact.png';
-import CozyImage from '../../../resources/images/layout/images/cozy.png';
-import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
+import CompactImage from "../../../resources/images/layout/images/compact.png";
+import CozyImage from "../../../resources/images/layout/images/cozy.png";
+import ComfortableImage from "../../../resources/images/layout/images/comfortable.png";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
 import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
@@ -29,12 +43,19 @@ import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
-import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
+import {
+  SolidBeforeListDataLoad,
+  SolidListUiEventResponse,
+  SolidLoadList,
+} from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
 import { resolveActiveUserId } from "../../../helpers/resolveActiveUserId";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
+import {
+  getSettingsMap,
+  resolveRecordClickAction,
+} from "../../../helpers/settingsPayload";
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -60,7 +81,16 @@ import {
   SolidDialogTitle,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
-import { ArrowRight, LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  LayoutGrid,
+  Pencil,
+  Plus,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  Trash2,
+} from "lucide-react";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -152,11 +182,16 @@ export type SolidListViewHandle = {
   };
 };
 
-export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams>((params, ref) => {
+export const SolidListView = forwardRef<
+  SolidListViewHandle,
+  SolidListViewParams
+>((params, ref) => {
   const session = useSession();
   const user = session?.data?.user;
   const dispatch = useDispatch();
-  const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
+  const visibleNavbar = useSelector(
+    (state: any) => state.navbarState?.visibleNavbar,
+  );
 
   const pathname = usePathname();
   const solidGlobalSearchElementRef = useRef<any>();
@@ -165,30 +200,40 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
   const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
-  const solidSettingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
+  const solidSettingsMap = useMemo(
+    () => getSettingsMap(solidSettingsData),
+    [solidSettingsData],
+  );
   const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
   const [solidListViewLayout, setSolidListViewLayout] = useState<any>(null);
-  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
-  const internationalisationEnabled = Boolean(solidListViewMetaData?.data?.solidView?.model?.internationalisation);
+  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] =
+    useState(false);
+  const internationalisationEnabled = Boolean(
+    solidListViewMetaData?.data?.solidView?.model?.internationalisation,
+  );
 
   // Filter query realted states
   const [filters, setFilters] = useState<any>(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
+  const [rows, setRows] = useState(
+    solidListViewLayout?.attrs?.defaultPageSize
+      ? solidListViewLayout?.attrs?.defaultPageSize
+      : 10,
+  );
   const [sortField, setSortField] = useState<string>("id");
   const [sortOrder, setSortOrder] = useState<1 | -1 | 0>(-1);
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
 
-
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
-
 
   // All list view state.
   const [listViewData, setListViewData] = useState<any[]>([]);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
-  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
+  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>(
+    [],
+  );
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -198,35 +243,43 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
 
-  const [createActionQueryParams, setCreateActionQueryParams] = useState<Record<string, string>>({});
-  const [editActionQueryParams, setEditActionQueryParams] = useState<Record<string, string>>({});
+  const [createActionQueryParams, setCreateActionQueryParams] = useState<
+    Record<string, string>
+  >({});
+  const [editActionQueryParams, setEditActionQueryParams] = useState<
+    Record<string, string>
+  >({});
 
   const [showArchived, setShowArchived] = useState(false);
 
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [filterPredicates, setFilterPredicates] = useState<any>(null);
-  const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
+  const [showSaveFilterPopup, setShowSaveFilterPopup] =
+    useState<boolean>(false);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
   const suppressNextFilterPaginationResetRef = useRef(false);
 
-  const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
+  const [triggerCheckIfPermissionExists] =
+    useLazyCheckIfPermissionExistsQuery();
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
 
   const visibleHeaderButtons = useMemo(
     () =>
-      (solidListViewLayout?.attrs?.headerButtons ?? []).filter(
-        (button: any) => isButtonVisibleInCurrentEnv(button?.attrs),
+      (solidListViewLayout?.attrs?.headerButtons ?? []).filter((button: any) =>
+        isButtonVisibleInCurrentEnv(button?.attrs),
       ),
     [solidListViewLayout?.attrs?.headerButtons],
   );
 
   const editBaseUrl = useMemo(
-    () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
-    [editButtonUrl, pathname]
+    () =>
+      normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
+    [editButtonUrl, pathname],
   );
   const rowClickFormMode = useMemo(() => {
-    const isSystemModule = solidListViewMetaData?.data?.solidView?.module?.isSystem === true;
+    const isSystemModule =
+      solidListViewMetaData?.data?.solidView?.module?.isSystem === true;
 
     if (isSystemModule) {
       return "view";
@@ -277,7 +330,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     return null;
   };
 
-  const getResolvedListLocale = () => resolveLocaleFromFilter(latestFiltersRef.current) || localeName || null;
+  const getResolvedListLocale = () =>
+    resolveLocaleFromFilter(latestFiltersRef.current) || localeName || null;
 
   const buildEditNavigationQueryString = (rowData: any) => {
     const queryParams = new URLSearchParams(editActionQueryParams);
@@ -287,8 +341,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         queryParams.set("locale", resolvedLocale);
       }
 
-      const defaultEntityLocaleId = rowData?.defaultEntityLocaleId ?? rowData?.id;
-      if (defaultEntityLocaleId !== undefined && defaultEntityLocaleId !== null && defaultEntityLocaleId !== "") {
+      const defaultEntityLocaleId =
+        rowData?.defaultEntityLocaleId ?? rowData?.id;
+      if (
+        defaultEntityLocaleId !== undefined &&
+        defaultEntityLocaleId !== null &&
+        defaultEntityLocaleId !== ""
+      ) {
         queryParams.set("defaultEntityLocaleId", String(defaultEntityLocaleId));
       }
     }
@@ -299,7 +358,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   useEffect(() => {
     const fetchPermissions = async () => {
       if (params.modelName) {
-        const permissionNames = getCollectionViewPermissionNames(params.modelName);
+        const permissionNames = getCollectionViewPermissionNames(
+          params.modelName,
+        );
         const queryData = {
           permissionNames: permissionNames,
         };
@@ -327,8 +388,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
     useUpdateSolidEntityMutation,
-    useRecoverSolidEntityByIdQuery,
-    useLazyRecoverSolidEntityByIdQuery,
+    useRecoverSolidEntityByIdMutation,
     useRecoverSolidEntityMutation,
   } = entityApi;
 
@@ -349,7 +409,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     },
     {
       encodeValuesOnly: true,
-    }
+    },
   );
 
   const {
@@ -368,7 +428,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const initialFilters: any = {};
     const toPopulate: string[] = [];
     const toPopulateMedia: string[] = [];
-    const currentLayout = params.customLayout ? params.customLayout : solidView?.layout;
+    const currentLayout = params.customLayout
+      ? params.customLayout
+      : solidView?.layout;
     for (let i = 0; i < currentLayout?.children.length; i++) {
       const column = currentLayout?.children[i];
       if (column?.type === "custom") {
@@ -376,7 +438,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       }
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
-        showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
+        showFieldError(
+          ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label),
+        );
         // return;
       }
       if (fieldMetadata) {
@@ -399,7 +463,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           };
         } else if (
           ["relation", "selectionStatic", "selectionDynamic"].includes(
-            fieldMetadata?.type
+            fieldMetadata?.type,
           )
         ) {
           initialFilters[column.attrs.name] = {
@@ -422,7 +486,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         }
 
         // Form the "toPopulate" array.
-        if (fieldMetadata.type === "relation" && fieldMetadata?.relationType === 'many-to-one') {
+        if (
+          fieldMetadata.type === "relation" &&
+          fieldMetadata?.relationType === "many-to-one"
+        ) {
           if (!toPopulate.includes(fieldMetadata.name)) {
             toPopulate.push(fieldMetadata.name);
           }
@@ -445,8 +512,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     return { sortField, sortOrder, rows, populate, populateMedia };
   };
 
-
-
   // Set the initial filter state based on the metadata.
   useEffect(() => {
     // refetch();
@@ -454,20 +519,32 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       if (params.customLayout) {
         setSolidListViewLayout(params.customLayout);
       } else {
-        setSolidListViewLayout(solidListViewInitialMetaData?.data.solidView.layout);
+        setSolidListViewLayout(
+          solidListViewInitialMetaData?.data.solidView.layout,
+        );
       }
       setSolidListViewMetaData(solidListViewInitialMetaData);
-      setIsDraftPublishWorkflowEnabled(solidListViewInitialMetaData?.data?.solidView?.model?.draftPublishWorkflow === true);
+      setIsDraftPublishWorkflowEnabled(
+        solidListViewInitialMetaData?.data?.solidView?.model
+          ?.draftPublishWorkflow === true,
+      );
     }
   }, [solidListViewInitialMetaData]);
-
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
     if (solidListViewLayout) {
       const listLayoutAttrs = solidListViewLayout.attrs;
-      const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
-      const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
+      const createActionUrl =
+        listLayoutAttrs?.createAction &&
+        listLayoutAttrs?.createAction?.type === "custom"
+          ? listLayoutAttrs?.createAction?.customComponent
+          : "form/new";
+      const editActionUrl =
+        listLayoutAttrs?.editAction &&
+        listLayoutAttrs?.editAction?.type === "custom"
+          ? listLayoutAttrs?.editAction?.customComponent
+          : "form";
       const resolvedListLocale = getResolvedListLocale();
 
       if (listLayoutAttrs?.createAction) {
@@ -475,7 +552,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           actionName: listLayoutAttrs.createAction.name,
           actionType: listLayoutAttrs.createAction.type,
           actionContext: listLayoutAttrs.createAction.context,
-          ...(internationalisationEnabled && resolvedListLocale ? { locale: resolvedListLocale } : {}),
+          ...(internationalisationEnabled && resolvedListLocale
+            ? { locale: resolvedListLocale }
+            : {}),
         });
       }
       if (listLayoutAttrs?.editAction) {
@@ -483,7 +562,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           actionName: listLayoutAttrs.editAction.name,
           actionType: listLayoutAttrs.editAction.type,
           actionContext: listLayoutAttrs.editAction.context,
-          ...(internationalisationEnabled && resolvedListLocale ? { locale: resolvedListLocale } : {}),
+          ...(internationalisationEnabled && resolvedListLocale
+            ? { locale: resolvedListLocale }
+            : {}),
         });
       }
 
@@ -497,8 +578,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       }
     }
   }, [solidListViewLayout]);
-
-
 
   const sizeOptions = [
     { label: "Compact", value: "small", image: CompactImage },
@@ -515,59 +594,54 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [viewModes, setViewModes] = useState<any>([]);
 
   // Custom Row Action
-  const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
+  const [listViewRowActionPopupState, setListViewRowActionPopupState] =
+    useState(false);
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
   // Get the list view data.
-  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading,isFetching: isListViewFetching, error }] = useLazyGetSolidEntitiesQuery();
-
   const [
-    triggerRecoverSolidEntitiesById,
+    triggerGetSolidEntities,
     {
-      data: recoverByIdData,
-      isLoading: recoverByIdIsLoading,
-      error: recoverByIdError,
-      isError: recoverByIdIsError,
-      isSuccess: recoverByIdIsSuccess,
+      data: solidEntityListViewData,
+      isLoading,
+      isFetching: isListViewFetching,
+      error,
     },
-  ] = useLazyRecoverSolidEntityByIdQuery();
+  ] = useLazyGetSolidEntitiesQuery();
 
-  const [
-    triggerRecoverSolidEntities,
-    {
-      data: recoverByData,
-      isLoading: recoverByIsLoading,
-      error: recoverError,
-      isError: recoverIsError,
-      isSuccess: recoverByIsSuccess,
-    },
-  ] = useRecoverSolidEntityMutation();
+  const [triggerRecoverSolidEntitiesById, { isLoading: recoverByIdIsLoading }] =
+    useRecoverSolidEntityByIdMutation();
+
+  const [triggerRecoverSolidEntities, { isLoading: recoverByIsLoading }] =
+    useRecoverSolidEntityMutation();
 
   // After data is fetched populate the list view state so as to be able to render the data.
   useEffect(() => {
     if (solidEntityListViewData) {
       setLoading(true);
-      const cleanedRecords = solidEntityListViewData.records.map((record: any) => {
-        const newRecord = { ...record };
+      const cleanedRecords = solidEntityListViewData.records.map(
+        (record: any) => {
+          const newRecord = { ...record };
 
-        Object.entries(newRecord).forEach(([key, value]) => {
-          if (typeof value === "string") {
-            try {
-              const parsed = JSON.parse(value);
-              if (Array.isArray(parsed)) {
-                newRecord[key] = parsed.join(", ");
-              }
-            } catch {
-              // If not valid JSON array, optionally strip brackets/quotes
-              if (/^\[.*\]$/.test(value)) {
-                newRecord[key] = value.replace(/[\[\]"]+/g, "");
+          Object.entries(newRecord).forEach(([key, value]) => {
+            if (typeof value === "string") {
+              try {
+                const parsed = JSON.parse(value);
+                if (Array.isArray(parsed)) {
+                  newRecord[key] = parsed.join(", ");
+                }
+              } catch {
+                // If not valid JSON array, optionally strip brackets/quotes
+                if (/^\[.*\]$/.test(value)) {
+                  newRecord[key] = value.replace(/[\[\]"]+/g, "");
+                }
               }
             }
-          }
-        });
+          });
 
-        return newRecord;
-      });
+          return newRecord;
+        },
+      );
       setListViewData(cleanedRecords);
       // setListViewData(solidEntityListViewData?.records);
       setTotalRecords(solidEntityListViewData?.meta.totalRecords);
@@ -575,26 +649,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   }, [solidEntityListViewData]);
 
-  const [
-    deleteSolidSingleEntiry,
-    { isSuccess: isDeleteSolidSingleEntitySuccess },
-  ] = useDeleteSolidEntityMutation();
+  const [deleteSolidSingleEntity] = useDeleteSolidEntityMutation();
 
   // Delete mutation
-  const [
-    deleteManySolidEntities,
-    {
-      isLoading: isSolidEntitiesDeleted,
-      isSuccess: isDeleteSolidEntitiesSucess,
-      isError: isSolidEntitiesDeleteError,
-      error: SolidEntitiesDeleteError,
-      data: DeletedSolidEntities,
-    },
-  ] = useDeleteMultipleSolidEntitiesMutation();
+  const [deleteManySolidEntities, { isLoading: isSolidEntitiesDeleted }] =
+    useDeleteMultipleSolidEntitiesMutation();
 
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
-    setQueryDataLoaded(false)
+    setQueryDataLoaded(false);
     if (solidListViewMetaData && solidListViewLayout) {
       const queryObject = getFilterObjectFromLocalStorage();
 
@@ -619,16 +682,24 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           restoredSortOrder = order === "asc" ? 1 : -1;
         } else if (queryObject.sortField) {
           restoredSortField = String(queryObject.sortField);
-          restoredSortOrder = queryObject.sortOrder === 1 || queryObject.sortOrder === -1 ? queryObject.sortOrder : -1;
+          restoredSortOrder =
+            queryObject.sortOrder === 1 || queryObject.sortOrder === -1
+              ? queryObject.sortOrder
+              : -1;
         }
         setSortField(restoredSortField);
         setSortOrder(restoredSortOrder);
-        setShowArchived(queryObject.showArchived === true || queryObject.showArchived === "true" || queryObject.showSoftDeleted === "inclusive");
+        setShowArchived(
+          queryObject.showArchived === true ||
+            queryObject.showArchived === "true" ||
+            queryObject.showSoftDeleted === "inclusive",
+        );
         const { populate, populateMedia } = initialFilterMethod();
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
       } else {
-        const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+        const { sortField, sortOrder, rows, populate, populateMedia } =
+          initialFilterMethod();
         setRows(rows);
         setSortField(sortField);
         setSortOrder(sortOrder);
@@ -637,9 +708,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         setFirst(0);
         setShowArchived(false);
       }
-      //below line was added to handle state stale issue when we converted boilerplate to vite 
+      //below line was added to handle state stale issue when we converted boilerplate to vite
       //since now we dont need it becuase our component is remounted on every router change
-      if (params.embeded === true || solidListViewLayout?.attrs?.enableGlobalSearch === false) {
+      if (
+        params.embeded === true ||
+        solidListViewLayout?.attrs?.enableGlobalSearch === false
+      ) {
         setFilters(params.customFilter || { $and: [] });
         setFilterPredicates(null);
       }
@@ -647,19 +721,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       setSelectedRecoverRecords([]);
       setQueryDataLoaded(true);
     }
-  }, [
-    isDeleteSolidEntitiesSucess,
-    isDeleteSolidSingleEntitySuccess,
-    recoverByIdIsSuccess,
-    recoverByIsSuccess,
-    solidListViewMetaData,
-    solidListViewLayout
-  ]);
+  }, [solidListViewMetaData, solidListViewLayout]);
 
   useEffect(() => {
     if (solidListViewMetaData && solidListViewMetaData?.data && !loading) {
       const handleDynamicFunction = async () => {
-        const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
+        const dynamicHeader =
+          solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
         let dynamicExtensionFunction = null;
         let listViewRecords = listViewData;
         let listLayout = solidListViewMetaData?.data?.solidView?.layout;
@@ -682,19 +750,28 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           },
           user: user,
           session: session.data,
-          params: params
+          params: params,
         };
         hasFiredInitialOnListLoadRef.current = true;
 
         if (dynamicHeader) {
           dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
           if (dynamicExtensionFunction) {
-            const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
+            const updatedListData: SolidListUiEventResponse =
+              await dynamicExtensionFunction(event);
 
-            if (updatedListData && updatedListData?.dataChanged && updatedListData?.newListData) {
+            if (
+              updatedListData &&
+              updatedListData?.dataChanged &&
+              updatedListData?.newListData
+            ) {
               listViewRecords = updatedListData.newListData;
             }
-            if (updatedListData && updatedListData?.layoutChanged && updatedListData?.newLayout) {
+            if (
+              updatedListData &&
+              updatedListData?.layoutChanged &&
+              updatedListData?.newLayout
+            ) {
               listLayout = updatedListData.newLayout;
             }
           }
@@ -709,8 +786,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       handleDynamicFunction();
     }
   }, [solidListViewMetaData, loading]);
-
-
 
   // Create a ref that always has the latest filters
   const latestFiltersRef = useRef<any>(filters);
@@ -737,9 +812,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     latestFilterPredicatesRef.current = filterPredicates;
   }, [filterPredicates]);
 
-
   useEffect(() => {
-    if (queryDataLoaded && filters && (filterPredicates || params.embeded == true)) {
+    if (
+      queryDataLoaded &&
+      filters &&
+      (filterPredicates || params.embeded == true)
+    ) {
       setQueryString();
     }
   }, [
@@ -752,7 +830,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     toPopulateMedia,
     queryDataLoaded,
     filters,
-    filterPredicates
+    filterPredicates,
   ]);
 
   // Handle pagination event.
@@ -773,7 +851,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const onSort = (event: DataTableStateEvent) => {
     const nextSortField = event.sortField ? String(event.sortField) : "";
-    const nextSortOrder = event.sortOrder === 1 || event.sortOrder === -1 ? event.sortOrder : 0;
+    const nextSortOrder =
+      event.sortOrder === 1 || event.sortOrder === -1 ? event.sortOrder : 0;
     setSortField(nextSortField);
     setSortOrder(nextSortOrder);
     setFirst(0);
@@ -783,17 +862,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const onSelectionChange = (event: any) => {
     const value = event.value;
     const activeRecords = value.filter(
-      (record: any) => record.deletedAt === null
+      (record: any) => record.deletedAt === null,
     );
     const deletedRecords = value.filter(
-      (record: any) => record.deletedAt !== null
+      (record: any) => record.deletedAt !== null,
     );
 
     setSelectedRecords(activeRecords);
     setSelectedRecoverRecords(deletedRecords);
   };
-
-
 
   const setQueryString = async () => {
     const solidFieldsMetadata =
@@ -813,11 +890,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       queryData.locale = resolvedLocale;
     }
 
-
-
     const currentSortField = latestSortFieldRef.current;
     const currentSortOrder = latestSortOrderRef.current;
-    if (currentSortField && (currentSortOrder === 1 || currentSortOrder === -1)) {
+    if (
+      currentSortField &&
+      (currentSortOrder === 1 || currentSortOrder === -1)
+    ) {
       const meta = solidFieldsMetadata?.[currentSortField];
       if (!isFieldSortable(meta)) {
         queryData.sort = [`id:desc`];
@@ -826,19 +904,21 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         if (meta?.type === "relation" && meta?.relationType === "many-to-one") {
           resolvedField = `${currentSortField}.${meta?.relationModel?.userKeyField?.name}`;
         }
-        queryData.sort = [`${resolvedField}:${currentSortOrder === 1 ? "asc" : "desc"}`];
+        queryData.sort = [
+          `${resolvedField}:${currentSortOrder === 1 ? "asc" : "desc"}`,
+        ];
       }
     } else {
       queryData.sort = [`id:desc`];
     }
 
-
     if (showArchived) {
       queryData.showSoftDeleted = "inclusive";
     }
 
-    //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
-    const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
+    //  SolidBeforeListDataLoad Event that allows filter modification just before api call
+    const dynamicHeader =
+      solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
     let dynamicExtensionFunction = null;
     const isInitialLoad = !hasFiredInitialOnBeforeListDataLoadRef.current;
     hasFiredInitialOnBeforeListDataLoadRef.current = true;
@@ -857,15 +937,20 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       },
       user: user,
       session: session.data,
-      params: params
+      params: params,
     };
 
     if (dynamicHeader) {
       dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
       if (dynamicExtensionFunction) {
         try {
-          const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
-          if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
+          const updatedListData: SolidListUiEventResponse =
+            await dynamicExtensionFunction(event);
+          if (
+            updatedListData &&
+            updatedListData?.filterApplied &&
+            updatedListData?.newFilter
+          ) {
             queryData = updatedListData?.newFilter;
           }
         } catch (err) {
@@ -880,24 +965,36 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       const fileterTobeStored = structuredClone(queryData);
       fileterTobeStored.finalFullFilter = fileterTobeStored.filters;
       delete fileterTobeStored.filters;
-      fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
-      fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
-      fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
-      fileterTobeStored.saved_filter_variables = latestFilterPredicatesRef.current.saved_filter_variables || {};
-      fileterTobeStored.saved_filter_id = latestFilterPredicatesRef.current.saved_filter_id || null;
-      fileterTobeStored.saved_filter_system_key = latestFilterPredicatesRef.current.saved_filter_system_key || null;
-      fileterTobeStored.saved_filter_name = latestFilterPredicatesRef.current.saved_filter_name || null;
-      fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
-      fileterTobeStored.predefined_search_chip = latestFilterPredicatesRef.current.predefined_search_chip || null;
+      fileterTobeStored.custom_filter_predicate =
+        latestFilterPredicatesRef.current.custom_filter_predicate || null;
+      fileterTobeStored.search_predicate =
+        latestFilterPredicatesRef.current.search_predicate || null;
+      fileterTobeStored.saved_filter_predicate =
+        latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      fileterTobeStored.saved_filter_variables =
+        latestFilterPredicatesRef.current.saved_filter_variables || {};
+      fileterTobeStored.saved_filter_id =
+        latestFilterPredicatesRef.current.saved_filter_id || null;
+      fileterTobeStored.saved_filter_system_key =
+        latestFilterPredicatesRef.current.saved_filter_system_key || null;
+      fileterTobeStored.saved_filter_name =
+        latestFilterPredicatesRef.current.saved_filter_name || null;
+      fileterTobeStored.predefined_search_predicate =
+        latestFilterPredicatesRef.current.predefined_search_predicate || null;
+      fileterTobeStored.predefined_search_chip =
+        latestFilterPredicatesRef.current.predefined_search_chip || null;
       setFilterObjectToLocalStorage(fileterTobeStored);
     }
     triggerGetSolidEntities(queryString);
   };
 
   // handle filter...
-  const handleApplyCustomFilter = (filterPredicates: any, persistFilter: boolean = false) => {
+  const handleApplyCustomFilter = (
+    filterPredicates: any,
+    persistFilter: boolean = false,
+  ) => {
     // we assume that the customfilter will always have $and array
-    const queryfilter = structuredClone(params.customFilter) || { $and: [] }
+    const queryfilter = structuredClone(params.customFilter) || { $and: [] };
 
     if (filterPredicates.custom_filter_predicate) {
       queryfilter.$and.push(filterPredicates.custom_filter_predicate);
@@ -906,8 +1003,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       queryfilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
-      queryfilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
-        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
+      queryfilter.$and.push(
+        filterPredicates.resolved_saved_filter_predicate ||
+          resolveActiveUserId(
+            filterPredicates.saved_filter_predicate,
+            user?.id,
+          ),
+      );
     }
     if (filterPredicates.predefined_search_predicate) {
       queryfilter.$and.push(filterPredicates.predefined_search_predicate);
@@ -916,19 +1018,25 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
     const previousPredicates = latestFilterPredicatesRef.current;
     const nextPredicatesComparable = {
-      custom_filter_predicate: filterPredicates?.custom_filter_predicate || null,
+      custom_filter_predicate:
+        filterPredicates?.custom_filter_predicate || null,
       search_predicate: filterPredicates?.search_predicate || null,
       saved_filter_predicate: filterPredicates?.saved_filter_predicate || null,
-      predefined_search_predicate: filterPredicates?.predefined_search_predicate || null,
+      predefined_search_predicate:
+        filterPredicates?.predefined_search_predicate || null,
     };
     const previousPredicatesComparable = {
-      custom_filter_predicate: previousPredicates?.custom_filter_predicate || null,
+      custom_filter_predicate:
+        previousPredicates?.custom_filter_predicate || null,
       search_predicate: previousPredicates?.search_predicate || null,
-      saved_filter_predicate: previousPredicates?.saved_filter_predicate || null,
-      predefined_search_predicate: previousPredicates?.predefined_search_predicate || null,
+      saved_filter_predicate:
+        previousPredicates?.saved_filter_predicate || null,
+      predefined_search_predicate:
+        previousPredicates?.predefined_search_predicate || null,
     };
     const hasPredicateChanged =
-      JSON.stringify(previousPredicatesComparable) !== JSON.stringify(nextPredicatesComparable);
+      JSON.stringify(previousPredicatesComparable) !==
+      JSON.stringify(nextPredicatesComparable);
 
     // Update refs IMMEDIATELY (synchronously)
     latestFiltersRef.current = updatedFilter;
@@ -943,7 +1051,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       if (value === null || value === undefined) return false;
       if (typeof value === "string") return value.trim().length > 0;
       if (typeof value === "number" || typeof value === "boolean") return true;
-      if (Array.isArray(value)) return value.some((item) => hasMeaningfulFilterValueLocal(item));
+      if (Array.isArray(value))
+        return value.some((item) => hasMeaningfulFilterValueLocal(item));
       if (typeof value === "object") return hasAppliedFiltersLocal(value);
       return false;
     };
@@ -952,14 +1061,21 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       if (!filterObject || typeof filterObject !== "object") return false;
 
       if (Array.isArray(filterObject)) {
-        return filterObject.some((item) => hasAppliedFiltersLocal(item) || hasMeaningfulFilterValueLocal(item));
+        return filterObject.some(
+          (item) =>
+            hasAppliedFiltersLocal(item) || hasMeaningfulFilterValueLocal(item),
+        );
       }
 
       return Object.entries(filterObject).some(([key, val]) => {
         if (key === "matchMode" || key === "operator") return false;
         if (key === "value") return hasMeaningfulFilterValueLocal(val);
         if ((key === "$and" || key === "$or") && Array.isArray(val)) {
-          return val.some((item) => hasAppliedFiltersLocal(item) || hasMeaningfulFilterValueLocal(item));
+          return val.some(
+            (item) =>
+              hasAppliedFiltersLocal(item) ||
+              hasMeaningfulFilterValueLocal(item),
+          );
         }
         if (typeof val === "object") return hasAppliedFiltersLocal(val);
         return hasMeaningfulFilterValueLocal(val);
@@ -967,10 +1083,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     };
 
     const hasCurrentMeaningfulPredicates =
-      hasAppliedFiltersLocal(updatedFilterPredicates?.custom_filter_predicate) ||
+      hasAppliedFiltersLocal(
+        updatedFilterPredicates?.custom_filter_predicate,
+      ) ||
       hasAppliedFiltersLocal(updatedFilterPredicates?.search_predicate) ||
       hasAppliedFiltersLocal(updatedFilterPredicates?.saved_filter_predicate) ||
-      hasAppliedFiltersLocal(updatedFilterPredicates?.predefined_search_predicate);
+      hasAppliedFiltersLocal(
+        updatedFilterPredicates?.predefined_search_predicate,
+      );
 
     const hasPreviousMeaningfulPredicates =
       hasAppliedFiltersLocal(previousPredicates?.custom_filter_predicate) ||
@@ -979,7 +1099,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       hasAppliedFiltersLocal(previousPredicates?.predefined_search_predicate);
 
     const shouldResetPagination =
-      hasPredicateChanged && (hasCurrentMeaningfulPredicates || hasPreviousMeaningfulPredicates);
+      hasPredicateChanged &&
+      (hasCurrentMeaningfulPredicates || hasPreviousMeaningfulPredicates);
 
     if (suppressNextFilterPaginationResetRef.current) {
       suppressNextFilterPaginationResetRef.current = false;
@@ -992,7 +1113,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // clear Filter
   const clearFilter = () => {
     if (solidListViewMetaData) {
-      const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+      const { sortField, sortOrder, rows, populate, populateMedia } =
+        initialFilterMethod();
       setRows(rows);
       setSortField(sortField);
       setSortOrder(sortOrder);
@@ -1001,11 +1123,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
     setFirst(0);
     latestFiltersRef.current = {
-      $and: []
+      $and: [],
     };
 
-
-    setFilters(params.customFilter || { $and: [] })
+    setFilters(params.customFilter || { $and: [] });
     solidGlobalSearchElementRef?.current.clearFilter();
   };
 
@@ -1016,31 +1137,51 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     return JSON.parse(JSON.stringify(listViewData));
   };
 
-  useImperativeHandle(ref, () => ({
-    refresh: () => {
-      void setQueryString();
-    },
-    clearFilters: () => {
-      clearFilter();
-    },
-    applyFilter: (filter) => {
-      handleApplyCustomFilter(filter);
-    },
-    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
-    applySavedFilter: (name, variables) => solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
-    setPagination: (nextFirst, nextRows) => {
-      setFirst(nextFirst);
-      setRows(nextRows);
-    },
-    setSort: (nextSortField, nextSortOrder) => {
-      setSortField(nextSortField);
-      setSortOrder(nextSortOrder);
-      setFirst(0);
-    },
-    setShowArchived: (value) => {
-      setShowArchived(value);
-    },
-    getState: () => ({
+  useImperativeHandle(
+    ref,
+    () => ({
+      refresh: () => {
+        void setQueryString();
+      },
+      clearFilters: () => {
+        clearFilter();
+      },
+      applyFilter: (filter) => {
+        handleApplyCustomFilter(filter);
+      },
+      getSavedFilters: () =>
+        solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+      applySavedFilter: (name, variables) =>
+        solidGlobalSearchElementRef.current?.applySavedFilterByName?.(
+          name,
+          variables,
+        ) ?? false,
+      setPagination: (nextFirst, nextRows) => {
+        setFirst(nextFirst);
+        setRows(nextRows);
+      },
+      setSort: (nextSortField, nextSortOrder) => {
+        setSortField(nextSortField);
+        setSortOrder(nextSortOrder);
+        setFirst(0);
+      },
+      setShowArchived: (value) => {
+        setShowArchived(value);
+      },
+      getState: () => ({
+        first,
+        rows,
+        sortField,
+        sortOrder,
+        showArchived,
+        filters,
+        filterPredicates,
+        listData: cloneListData(),
+        totalRecords,
+        loading,
+      }),
+    }),
+    [
       first,
       rows,
       sortField,
@@ -1048,54 +1189,64 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       showArchived,
       filters,
       filterPredicates,
-      listData: cloneListData(),
       totalRecords,
       loading,
-    }),
-  }), [
-    first,
-    rows,
-    sortField,
-    sortOrder,
-    showArchived,
-    filters,
-    filterPredicates,
-    totalRecords,
-    loading,
-    listViewData,
-  ]);
+      listViewData,
+    ],
+  );
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
 
   // Recover functions
-  const recoverById = (id: any) => {
-    triggerRecoverSolidEntitiesById(id);
+  const recoverById = async (id: any) => {
+    try {
+      const response: any = await triggerRecoverSolidEntitiesById(id).unwrap();
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Success",
+          detail: response?.data?.message || "Record recovered successfully.",
+          life: 3000,
+        }),
+      );
+      setSelectedRecoverRecords((currentRows) =>
+        currentRows.filter((row: any) => String(row?.id) !== String(id)),
+      );
+      void setQueryString();
+    } catch (error) {
+      showError(error);
+    }
   };
 
-  const recoverAll = () => {
-    let recoverList: any = [];
-    selectedRecoverRecords.forEach((element: any) => {
-      recoverList.push(element.id);
-    });
-    triggerRecoverSolidEntities(recoverList);
-    setRecoverDialogVisible(false);
+  const recoverAll = async () => {
+    const recoverList = selectedRecoverRecords.map(
+      (element: any) => element.id,
+    );
+    if (recoverList.length === 0) {
+      setRecoverDialogVisible(false);
+      return;
+    }
+
+    try {
+      const response: any =
+        await triggerRecoverSolidEntities(recoverList).unwrap();
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Success",
+          detail: response?.data?.message || "Records recovered successfully.",
+          life: 3000,
+        }),
+      );
+      setSelectedRecoverRecords([]);
+      void setQueryString();
+    } catch (error) {
+      showError(error);
+    } finally {
+      setRecoverDialogVisible(false);
+    }
   };
-
-  useEffect(() => {
-    if (recoverByIdIsSuccess && recoverByIdData) {
-      dispatch(showToast({ severity: "success", summary: "Success", detail: recoverByIdData.data.message, life: 3000 }));
-      return;
-    }
-    if (recoverByIdIsError && recoverByIdError) {
-      showError(recoverByIdError);
-      return;
-    }
-
-    if (recoverIsError && recoverError) {
-      showError(recoverError);
-    }
-  }, [recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
 
   const showError = async (error: any) => {
     const errorMessages = error?.data?.message;
@@ -1105,31 +1256,55 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         ? [errorMessages]
         : [];
     if (messages.length > 0) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: messages.join(', ') }));
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: ERROR_MESSAGES.SEND_REPORT,
+          detail: messages.join(", "),
+        }),
+      );
     }
   };
 
   const showFieldError = async (error: any) => {
     if (error) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: String(error), life: 3000 }));
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: ERROR_MESSAGES.SEND_REPORT,
+          detail: String(error),
+          life: 3000,
+        }),
+      );
     }
   };
 
   // handle bulk deletion
-  const deleteBulk = () => {
-    let deleteList: any = [];
-    selectedRecords.forEach((element: any) => {
-      deleteList.push(element.id);
-    });
-    deleteManySolidEntities(deleteList)
-      .unwrap()
-      .then(() => {
-        dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
-        setDialogVisible(false);
-      })
-      .catch((error) => {
-        dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
-      });
+  const deleteBulk = async () => {
+    const deleteList = selectedRecords.map((element: any) => element.id);
+    try {
+      await deleteManySolidEntities(deleteList).unwrap();
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Deleted",
+          detail: ERROR_MESSAGES.RECORD_DELETE,
+          life: 3000,
+        }),
+      );
+      setDialogVisible(false);
+      setSelectedRecords([]);
+      void setQueryString();
+    } catch (error: any) {
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: "Delete Failed",
+          detail: error?.data?.message,
+          life: 4000,
+        }),
+      );
+    }
   };
 
   // handle closing of the delete dialog...
@@ -1140,13 +1315,17 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   const entityDisplayName =
-    solidListViewMetaData?.data?.solidView?.model?.displayName || params?.modelName;
+    solidListViewMetaData?.data?.solidView?.model?.displayName ||
+    params?.modelName;
 
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
 
   // Render columns dynamically based on metadata
-  const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
+  const renderColumnsDynamically = (
+    solidListViewMetaData: any,
+    solidListViewLayout: any,
+  ) => {
     if (!solidListViewMetaData) {
       return;
     }
@@ -1165,7 +1344,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         return SolidCustomListViewColumn({
           solidListViewMetaData,
           column,
-          embeded: params.embeded
+          embeded: params.embeded,
         });
       }
 
@@ -1183,7 +1362,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             column,
             setLightboxUrls,
             setOpenLightbox,
-            embeded: params.embeded
+            embeded: params.embeded,
           });
         } else {
           return null;
@@ -1195,7 +1374,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           column,
           setLightboxUrls,
           setOpenLightbox,
-          embeded: params.embeded
+          embeded: params.embeded,
         });
       }
     });
@@ -1222,7 +1401,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     if (value === null || value === undefined) return false;
     if (typeof value === "string") return value.trim().length > 0;
     if (typeof value === "number" || typeof value === "boolean") return true;
-    if (Array.isArray(value)) return value.some((item) => hasMeaningfulFilterValue(item));
+    if (Array.isArray(value))
+      return value.some((item) => hasMeaningfulFilterValue(item));
     if (typeof value === "object") return hasAppliedFilters(value);
     return false;
   };
@@ -1231,14 +1411,18 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     if (!filterObject || typeof filterObject !== "object") return false;
 
     if (Array.isArray(filterObject)) {
-      return filterObject.some((item) => hasAppliedFilters(item) || hasMeaningfulFilterValue(item));
+      return filterObject.some(
+        (item) => hasAppliedFilters(item) || hasMeaningfulFilterValue(item),
+      );
     }
 
     return Object.entries(filterObject).some(([key, val]) => {
       if (key === "matchMode" || key === "operator") return false;
       if (key === "value") return hasMeaningfulFilterValue(val);
       if ((key === "$and" || key === "$or") && Array.isArray(val)) {
-        return val.some((item) => hasAppliedFilters(item) || hasMeaningfulFilterValue(item));
+        return val.some(
+          (item) => hasAppliedFilters(item) || hasMeaningfulFilterValue(item),
+        );
       }
       if (typeof val === "object") return hasAppliedFilters(val);
       return hasMeaningfulFilterValue(val);
@@ -1252,8 +1436,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     hasAppliedFilters(filterPredicates?.predefined_search_predicate);
 
   const hasAppliedFilterValues = hasAppliedFilters(filters);
-  const hasAnyActiveFilters = hasAppliedFilterValues || hasFilterPredicatesApplied;
-  const hasStoredFilterState = hasStoredFilterPredicates(getFilterObjectFromLocalStorage());
+  const hasAnyActiveFilters =
+    hasAppliedFilterValues || hasFilterPredicatesApplied;
+  const hasStoredFilterState = hasStoredFilterPredicates(
+    getFilterObjectFromLocalStorage(),
+  );
 
   useEffect(() => {
     if (params.embeded === false) {
@@ -1269,17 +1456,24 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     !hasAppliedFilterValues &&
     !hasFilterPredicatesApplied;
 
-  const headerRequestStatusLabel =
-    isSolidEntitiesDeleted
-      ? "Deleting..."
-      : recoverByIdIsLoading || recoverByIsLoading
-        ? "Recovering..."
-        : loading || isLoading || isListViewFetching || solidListViewMetaDataIsLoading || !queryDataLoaded
-          ? "Loading..."
-          : null;
+  const headerRequestStatusLabel = isSolidEntitiesDeleted
+    ? "Deleting..."
+    : recoverByIdIsLoading || recoverByIsLoading
+      ? "Recovering..."
+      : loading ||
+          isLoading ||
+          isListViewFetching ||
+          solidListViewMetaDataIsLoading ||
+          !queryDataLoaded
+        ? "Loading..."
+        : null;
 
   const showListBodyLoadingPlaceholder =
-    (loading || isLoading || isListViewFetching || solidListViewMetaDataIsLoading || !queryDataLoaded) &&
+    (loading ||
+      isLoading ||
+      isListViewFetching ||
+      solidListViewMetaDataIsLoading ||
+      !queryDataLoaded) &&
     listViewData.length === 0 &&
     params.embeded === false &&
     viewMode !== "view";
@@ -1334,34 +1528,57 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         throw new Error(ERROR_MESSAGES.NO_ENTITY_SELECTED);
       }
 
-      const response: any = await deleteSolidSingleEntiry(selectedSolidViewData.id);
+      const response: any = await deleteSolidSingleEntity(
+        selectedSolidViewData.id,
+      ).unwrap();
 
-      if (response?.data?.statusCode === 200) {
+      if (response?.data?.statusCode === 200 || response?.statusCode === 200) {
         setDeleteEntity(false);
-        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.ENTITY_DELETE, life: 3000 }));
+        dispatch(
+          showToast({
+            severity: "success",
+            summary: ERROR_MESSAGES.DELETED,
+            detail: ERROR_MESSAGES.ENTITY_DELETE,
+            life: 3000,
+          }),
+        );
+        setSelectedRecords([]);
+        void setQueryString();
       } else {
-        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: response?.error?.data?.error }));
+        dispatch(
+          showToast({
+            severity: "error",
+            summary: ERROR_MESSAGES.DELETE_FAIELD,
+            detail: response?.error?.data?.error || response?.data?.message,
+          }),
+        );
       }
     } catch (error: any) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: ERROR_MESSAGES.SOMETHING_WRONG }));
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: ERROR_MESSAGES.DELETE_FAIELD,
+          detail: ERROR_MESSAGES.SOMETHING_WRONG,
+        }),
+      );
     }
   };
 
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
-      .map((item: any) => {
-        const src = item?.src || item?.downloadUrl || "";
-        if (!src) {
-          return null;
-        }
-        const mediaType = getMediaTypeFromUrl(src);
-        const slide: SolidLightboxSlide = { src };
-        if (mediaType !== "image") {
-          slide.type = mediaType;
-        }
-        return slide;
-      })
-      .filter((slide): slide is SolidLightboxSlide => !!slide)
+        .map((item: any) => {
+          const src = item?.src || item?.downloadUrl || "";
+          if (!src) {
+            return null;
+          }
+          const mediaType = getMediaTypeFromUrl(src);
+          const slide: SolidLightboxSlide = { src };
+          if (mediaType !== "image") {
+            slide.type = mediaType;
+          }
+          return slide;
+        })
+        .filter((slide): slide is SolidLightboxSlide => !!slide)
     : [];
 
   const showRowEditInContextMenu =
@@ -1371,28 +1588,41 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     solidListViewLayout?.attrs?.showRowDeleteInContextMenu ??
     solidListViewLayout?.attrs?.showRowActionsInContextMenu;
 
-  const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+  const hasEditInContextMenu =
+    actionsAllowed.includes(
+      `${permissionExpression(params.modelName, "update")}`,
+    ) &&
     solidListViewLayout?.attrs?.edit !== false &&
     solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
     showRowEditInContextMenu !== false;
 
-  const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+  const hasDeleteInContextMenu =
+    actionsAllowed.includes(
+      `${permissionExpression(params.modelName, "delete")}`,
+    ) &&
     solidListViewLayout?.attrs?.delete !== false &&
     showRowDeleteInContextMenu !== false;
 
   const hasCustomContextMenuButtons =
     solidListViewLayout?.attrs?.rowButtons?.some(
-      (rb: any) => rb?.attrs?.actionInContextMenu === true && isButtonVisibleInCurrentEnv(rb?.attrs)
+      (rb: any) =>
+        rb?.attrs?.actionInContextMenu === true &&
+        isButtonVisibleInCurrentEnv(rb?.attrs),
     );
 
   const hasAnyContextMenuActions =
-    hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
+    hasEditInContextMenu ||
+    hasDeleteInContextMenu ||
+    hasCustomContextMenuButtons;
   const isEmbeddedList = params.embeded === true;
-  const showRowActionsAsIconOnly = solidListViewLayout?.attrs?.showRowActionsAsIconOnly === true;
+  const showRowActionsAsIconOnly =
+    solidListViewLayout?.attrs?.showRowActionsAsIconOnly === true;
   const showRowEditAsIconOnly =
-    showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowEditAsIconOnly === true;
+    showRowActionsAsIconOnly ||
+    solidListViewLayout?.attrs?.showRowEditAsIconOnly === true;
   const showRowDeleteAsIconOnly =
-    showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowDeleteAsIconOnly === true;
+    showRowActionsAsIconOnly ||
+    solidListViewLayout?.attrs?.showRowDeleteAsIconOnly === true;
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
   //     dispatch(toggleNavbar());   // close both
@@ -1401,10 +1631,16 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   //   }
   // };
   return (
-    <div className={`page-parent-wrapper ${isEmbeddedList ? "solid-list-page-wrapper-embedded" : "solid-list-page-wrapper"} flex ${isEmbeddedList ? "min-h-0 overflow-visible" : "h-full min-h-0 overflow-hidden"}`}>
-      <div className={`solid-list-content flex flex-col ${isEmbeddedList ? "min-h-0" : "flex-grow-1"} ${styles.ListContentWrapper}`}>
-        <div className={`solid-list-surface flex flex-col min-h-0 ${isEmbeddedList ? "" : "flex-1"}`}>
-          {solidListViewInitialMetaData &&
+    <div
+      className={`page-parent-wrapper ${isEmbeddedList ? "solid-list-page-wrapper-embedded" : "solid-list-page-wrapper"} flex ${isEmbeddedList ? "min-h-0 overflow-visible" : "h-full min-h-0 overflow-hidden"}`}
+    >
+      <div
+        className={`solid-list-content flex flex-col ${isEmbeddedList ? "min-h-0" : "flex-grow-1"} ${styles.ListContentWrapper}`}
+      >
+        <div
+          className={`solid-list-surface flex flex-col min-h-0 ${isEmbeddedList ? "" : "flex-1"}`}
+        >
+          {solidListViewInitialMetaData && (
             <div className="page-header solid-list-toolbar flex-col lg:flex-row">
               {/* <div> */}
               <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
@@ -1422,12 +1658,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   </div> */}
                   {params.embeded === false && (
                     <>
-
                       {/* Global search element: always visible on desktop (lg+), toggled via search button below lg */}
                       {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
                           library's generated CSS, so the app's base `.hidden` would override our media-scoped
                           `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
-                      <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
+                      <div
+                        className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}
+                      >
                         {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
                         <SolidGlobalSearchElement
                           key={params.modelName}
@@ -1438,12 +1675,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                           viewData={solidListViewMetaData}
                           handleApplyCustomFilter={handleApplyCustomFilter}
                           filterPredicates={filterPredicates}
-                        >
-                        </SolidGlobalSearchElement>
+                        ></SolidGlobalSearchElement>
                       </div>
                     </>
                   )}
-
                 </div>
                 <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
@@ -1454,7 +1689,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         size="small"
                         variant="outline"
                         className="solid-icon-button"
-                        onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                        onClick={() =>
+                          setShowGlobalSearchElement(!showGlobalSearchElement)
+                        }
                         leftIcon={<Search size={14} />}
                       />
                     </div>
@@ -1462,7 +1699,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
                   <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
                     {visibleHeaderButtons
-                      ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
+                      ?.filter(
+                        (rb: any) => rb.attrs.actionInContextMenu != true,
+                      )
                       ?.map((button: any, index: number) => (
                         <SolidListViewHeaderButton
                           key={index}
@@ -1476,7 +1715,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       ))}
                   </div>
 
-                  {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                  {actionsAllowed.includes(
+                    `${permissionExpression(params.modelName, "create")}`,
+                  ) &&
                     solidListViewLayout?.attrs?.create !== false &&
                     params.embeded !== true &&
                     solidListViewMetaData?.data?.solidView?.layout?.attrs
@@ -1488,21 +1729,30 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         responsiveIconOnly={true}
                       />
                     )}
-                  {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                  {actionsAllowed.includes(
+                    `${permissionExpression(params.modelName, "create")}`,
+                  ) &&
                     solidListViewLayout?.attrs?.create !== false &&
                     params.embeded == true &&
                     params.inlineCreate == true &&
                     searchParams.get("viewMode") !== "view" && (
-
                       <SolidButton
                         type="button"
                         icon={solidListViewLayout?.attrs?.addButtonIcon}
-                        leftIcon={!solidListViewLayout?.attrs?.addButtonIcon ? <Plus size={14} /> : undefined}
+                        leftIcon={
+                          !solidListViewLayout?.attrs?.addButtonIcon ? (
+                            <Plus size={14} />
+                          ) : undefined
+                        }
                         className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
                         size="small"
-                        onClick={() => params.handleAddClickForEmbeddedView("new")}
+                        onClick={() =>
+                          params.handleAddClickForEmbeddedView("new")
+                        }
                       >
-                        {solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"}
+                        {solidListViewLayout?.attrs?.addButtonTitle
+                          ? solidListViewLayout?.attrs?.addButtonTitle
+                          : "Add"}
                       </SolidButton>
                     )}
                   {/* Button For Manual Refresh */}
@@ -1556,7 +1806,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 </div>
               </div>
             </div>
-          }
+          )}
 
           {showListBodyLoadingPlaceholder ? (
             <div className="solid-view-loading-body-spacer flex-1 min-h-0" />
@@ -1571,7 +1821,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   solidListViewMetaData={solidListViewMetaData}
                   handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                 />
-
               ) : (
                 <div
                   className={`solid-datatable-wrapper solid-list-table-area min-h-0 ${isEmbeddedList ? "overflow-visible" : "flex-1 overflow-hidden"} ${styles.listTableArea}`}
@@ -1591,11 +1840,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     columnResizeMode="expand"
                     paginator={true}
                     rows={rows}
-                    rowsPerPageOptions={solidListViewLayout?.attrs?.pageSizeOptions}
+                    rowsPerPageOptions={
+                      solidListViewLayout?.attrs?.pageSizeOptions
+                    }
                     dataKey="id"
                     emptyMessage={
-                      solidListViewMetaData?.data?.solidView?.model?.description ||
-                      "No Entities found"
+                      solidListViewMetaData?.data?.solidView?.model
+                        ?.description || "No Entities found"
                     }
                     filterDisplay="menu"
                     totalRecords={totalRecords}
@@ -1615,22 +1866,26 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       params.embeded === true ? undefined : onSelectionChange
                     }
                     selectionMode={params.embeded === true ? null : "checkbox"}
-                    removableSort={solidListViewLayout?.attrs?.removableSort ?? true}
+                    removableSort={
+                      solidListViewLayout?.attrs?.removableSort ?? true
+                    }
                     sortMode="single"
                     paginatorTemplate="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
                     currentPageReportTemplate="{first} - {last} of {totalRecords}"
                     onRowClick={(e) => {
                       const rowData = e.data;
 
-                      if (solidListViewLayout?.attrs?.disableRowClick === true) return;
+                      if (solidListViewLayout?.attrs?.disableRowClick === true)
+                        return;
                       if (rowData?.deletedAt) return;
 
                       const hasFindPermission = actionsAllowed.includes(
-                        permissionExpression(params.modelName, 'findOne')
+                        permissionExpression(params.modelName, "findOne"),
                       );
                       const hasUpdatePermission =
-                        actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
-                        solidListViewLayout?.attrs?.edit !== false;
+                        actionsAllowed.includes(
+                          permissionExpression(params.modelName, "update"),
+                        ) && solidListViewLayout?.attrs?.edit !== false;
 
                       if (!(hasFindPermission || hasUpdatePermission)) return;
 
@@ -1638,10 +1893,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
                         storeCurrentModelViewContext();
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
+                        router.push(
+                          `${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${buildEditNavigationQueryString(rowData)}`,
+                        );
                       }
-                    }
-                    }
+                    }}
                   >
                     {params.embeded === true ? null : (
                       <Column
@@ -1649,7 +1905,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         headerStyle={{ width: "3em" }}
                       />
                     )}
-                    {solidListViewMetaData && solidListViewLayout && renderColumnsDynamically(solidListViewMetaData, solidListViewLayout)}
+                    {solidListViewMetaData &&
+                      solidListViewLayout &&
+                      renderColumnsDynamically(
+                        solidListViewMetaData,
+                        solidListViewLayout,
+                      )}
                     {solidListViewLayout?.attrs?.rowButtons &&
                       solidListViewLayout?.attrs?.rowButtons
                         .filter((rb: any) => {
@@ -1663,63 +1924,90 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             hasAnyRole(user?.roles, roles);
 
                           const isVisible = rb?.attrs?.visible !== false;
-                          const isVisibleInCurrentEnv = isButtonVisibleInCurrentEnv(rb?.attrs);
+                          const isVisibleInCurrentEnv =
+                            isButtonVisibleInCurrentEnv(rb?.attrs);
 
-                          return !isInContextMenu && isAllowed && isVisible && isVisibleInCurrentEnv;
+                          return (
+                            !isInContextMenu &&
+                            isAllowed &&
+                            isVisible &&
+                            isVisibleInCurrentEnv
+                          );
                         })
                         .map((button: any, index: number) => {
-
                           return (
                             <Column
                               key={index}
                               header={button.attrs.label}
                               body={(rowData) => {
-                                return (
-                                  (() => {
-                                    const presentation = resolveButtonPresentation(button?.attrs);
-                                    if (!presentation.showIcon && !presentation.showLabel) return null;
-                                    return (
-                                      <SolidButton
-                                        type="button"
-                                        icon={presentation.icon}
-                                        iconPos={presentation.iconPos}
-                                        label={presentation.label}
-                                        tooltip={presentation.tooltip}
-                                        aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
-                                        className={[
-                                          "solid-inline-row-button w-full text-left gap-2",
-                                          presentation.isIconOnly ? "solid-icon-button" : "",
-                                          presentation.buttonClassName ? presentation.buttonClassName : ""
-                                        ].filter(Boolean).join(" ")}
-                                        size="small"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          const event = {
-                                            params,
-                                            rowData: rowData,
-                                            solidListViewMetaData:
-                                              solidListViewMetaData?.data,
-                                          };
-                                          handleCustomButtonClick(button.attrs, event);
-                                        }}
-                                      />
-                                    );
-                                  })()
-                                );
+                                return (() => {
+                                  const presentation =
+                                    resolveButtonPresentation(button?.attrs);
+                                  if (
+                                    !presentation.showIcon &&
+                                    !presentation.showLabel
+                                  )
+                                    return null;
+                                  return (
+                                    <SolidButton
+                                      type="button"
+                                      icon={presentation.icon}
+                                      iconPos={presentation.iconPos}
+                                      label={presentation.label}
+                                      tooltip={presentation.tooltip}
+                                      aria-label={
+                                        presentation.isIconOnly
+                                          ? (presentation.tooltip ??
+                                            button?.attrs?.action ??
+                                            "Action")
+                                          : undefined
+                                      }
+                                      className={[
+                                        "solid-inline-row-button w-full text-left gap-2",
+                                        presentation.isIconOnly
+                                          ? "solid-icon-button"
+                                          : "",
+                                        presentation.buttonClassName
+                                          ? presentation.buttonClassName
+                                          : "",
+                                      ]
+                                        .filter(Boolean)
+                                        .join(" ")}
+                                      size="small"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        const event = {
+                                          params,
+                                          rowData: rowData,
+                                          solidListViewMetaData:
+                                            solidListViewMetaData?.data,
+                                        };
+                                        handleCustomButtonClick(
+                                          button.attrs,
+                                          event,
+                                        );
+                                      }}
+                                    />
+                                  );
+                                })();
                               }}
                             />
                           );
                         })}
 
                     {actionsAllowed.includes(
-                      `${permissionExpression(params.modelName, 'update')}`
+                      `${permissionExpression(params.modelName, "update")}`,
                     ) &&
                       solidListViewLayout?.attrs?.edit !== false &&
                       showRowEditInContextMenu === false && (
                         <Column
                           header={showRowEditAsIconOnly ? "" : "Edit"}
                           body={(rowData) => {
-                            const shouldHideEditOrDeleteButton = isArchivedListRow(isDraftPublishWorkflowEnabled, rowData);
+                            const shouldHideEditOrDeleteButton =
+                              isArchivedListRow(
+                                isDraftPublishWorkflowEnabled,
+                                rowData,
+                              );
                             return (
                               <>
                                 {!shouldHideEditOrDeleteButton && (
@@ -1728,16 +2016,26 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     variant="ghost"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
                                     size="small"
-                                    leftIcon={showRowEditAsIconOnly ? <ArrowRight size={14} /> : <Pencil size={14} />}
-                                    tooltip={showRowEditAsIconOnly ? "Edit" : undefined}
+                                    leftIcon={
+                                      showRowEditAsIconOnly ? (
+                                        <ArrowRight size={14} />
+                                      ) : (
+                                        <Pencil size={14} />
+                                      )
+                                    }
+                                    tooltip={
+                                      showRowEditAsIconOnly ? "Edit" : undefined
+                                    }
                                     aria-label="Edit"
                                     onClick={() => {
                                       if (params.embeded == true) {
-                                        params.handleEditClickForEmbeddedView(rowData?.id);
+                                        params.handleEditClickForEmbeddedView(
+                                          rowData?.id,
+                                        );
                                       } else {
                                         storeCurrentModelViewContext();
                                         router.push(
-                                          `${editBaseUrl}/${rowData?.id}?viewMode=edit&${buildEditNavigationQueryString(rowData)}`
+                                          `${editBaseUrl}/${rowData?.id}?viewMode=edit&${buildEditNavigationQueryString(rowData)}`,
                                         );
                                       }
                                     }}
@@ -1750,32 +2048,40 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       )}
 
                     {actionsAllowed.includes(
-                      `${permissionExpression(params.modelName, 'delete')}`
+                      `${permissionExpression(params.modelName, "delete")}`,
                     ) &&
                       solidListViewLayout?.attrs?.delete !== false &&
                       (params.embeded ||
                         (showRowDeleteInContextMenu !== undefined &&
-                          showRowDeleteInContextMenu !== true)
-                      )
-                      &&
-                      (
+                          showRowDeleteInContextMenu !== true)) && (
                         <Column
                           header={showRowDeleteAsIconOnly ? "" : "Delete"}
                           body={(rowData) => {
-                            const shouldHideEditOrDeleteButton = isArchivedListRow(isDraftPublishWorkflowEnabled, rowData);
+                            const shouldHideEditOrDeleteButton =
+                              isArchivedListRow(
+                                isDraftPublishWorkflowEnabled,
+                                rowData,
+                              );
                             return (
                               <>
-                                {(!shouldHideEditOrDeleteButton) && (
+                                {!shouldHideEditOrDeleteButton && (
                                   <SolidButton
                                     type="button"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
                                     size="small"
                                     variant="ghost"
                                     leftIcon={<Trash2 size={14} />}
-                                    tooltip={showRowDeleteAsIconOnly ? "Delete" : undefined}
+                                    tooltip={
+                                      showRowDeleteAsIconOnly
+                                        ? "Delete"
+                                        : undefined
+                                    }
                                     aria-label="Delete"
                                     onClick={() => {
-                                      if (params?.embededFieldRelationType === "many-to-many") {
+                                      if (
+                                        params?.embededFieldRelationType ===
+                                        "many-to-many"
+                                      ) {
                                         params?.handleDeleteClick(rowData.id);
                                       } else {
                                         setSelectedSolidViewData(rowData);
@@ -1797,7 +2103,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         className="solid-data-table-row-action-cell"
                         body={(rowData) =>
                           rowData?.deletedAt ? (
-                            <div className="flex justify-content-center align-items-center" data-no-row-click="true">
+                            <div
+                              className="flex justify-content-center align-items-center"
+                              data-no-row-click="true"
+                            >
                               <button
                                 type="button"
                                 onClick={(event) => {
@@ -1808,34 +2117,58 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                 aria-label="Recover record"
                                 title="Recover"
                               >
-                                <RotateCcw size={14} className={styles.retrieveIcon} />
+                                <RotateCcw
+                                  size={14}
+                                  className={styles.retrieveIcon}
+                                />
                               </button>
                             </div>
                           ) : (
                             <>
-                              {solidListViewLayout?.attrs?.showRowContextMenu !== false &&
-                                !isArchivedListRow(isDraftPublishWorkflowEnabled, rowData) && (
-                                  <div className="flex justify-end" data-no-row-click="true">
+                              {solidListViewLayout?.attrs
+                                ?.showRowContextMenu !== false &&
+                                !isArchivedListRow(
+                                  isDraftPublishWorkflowEnabled,
+                                  rowData,
+                                ) && (
+                                  <div
+                                    className="flex justify-end"
+                                    data-no-row-click="true"
+                                  >
                                     <SolidListViewRowActionsMenu
                                       rowData={rowData}
-                                      hasEditInContextMenu={hasEditInContextMenu}
-                                      hasDeleteInContextMenu={hasDeleteInContextMenu}
-                                      hasCustomContextMenuButtons={hasCustomContextMenuButtons}
+                                      hasEditInContextMenu={
+                                        hasEditInContextMenu
+                                      }
+                                      hasDeleteInContextMenu={
+                                        hasDeleteInContextMenu
+                                      }
+                                      hasCustomContextMenuButtons={
+                                        hasCustomContextMenuButtons
+                                      }
                                       solidListViewLayout={solidListViewLayout}
-                                      solidListViewMetaData={solidListViewMetaData}
+                                      solidListViewMetaData={
+                                        solidListViewMetaData
+                                      }
                                       params={params}
-                                      handleCustomButtonClick={handleCustomButtonClick}
-                                      contentClassName={styles.rowActionsOverlay}
+                                      handleCustomButtonClick={
+                                        handleCustomButtonClick
+                                      }
+                                      contentClassName={
+                                        styles.rowActionsOverlay
+                                      }
                                       onSelectRow={(selectedRow: any) => {
                                         setSelectedSolidViewData(selectedRow);
                                       }}
                                       onEdit={(selectedRow: any) => {
                                         if (params.embeded == true) {
-                                          params.handleEditClickForEmbeddedView(selectedRow?.id);
+                                          params.handleEditClickForEmbeddedView(
+                                            selectedRow?.id,
+                                          );
                                         } else {
                                           storeCurrentModelViewContext();
                                           router.push(
-                                            `${editBaseUrl}/${selectedRow?.id}?viewMode=edit&${buildEditNavigationQueryString(selectedRow)}`
+                                            `${editBaseUrl}/${selectedRow?.id}?viewMode=edit&${buildEditNavigationQueryString(selectedRow)}`,
                                           );
                                         }
                                       }}
@@ -1869,7 +2202,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         separatorClassName="solid-shadcn-dialog-sep"
         showSeparator
         title="Delete Records"
-        message={<p className="solid-shadcn-dialog-text">Are you sure you want to delete the selected records?</p>}
+        message={
+          <p className="solid-shadcn-dialog-text">
+            Are you sure you want to delete the selected records?
+          </p>
+        }
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />
@@ -1888,41 +2225,52 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         </SolidDialogHeader>
         <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
         <SolidDialogBody className="solid-shadcn-dialog-body">
-          <p className="solid-shadcn-dialog-text">Are you sure you want to recover all records?</p>
+          <p className="solid-shadcn-dialog-text">
+            Are you sure you want to recover all records?
+          </p>
         </SolidDialogBody>
         <SolidDialogFooter className="solid-shadcn-dialog-actions">
-          <SolidButton variant="destructive" size="sm" autoFocus onClick={recoverAll}>
+          <SolidButton
+            variant="destructive"
+            size="sm"
+            autoFocus
+            onClick={recoverAll}
+          >
             Yes
           </SolidButton>
-          <SolidButton variant="outline" size="sm" onClick={() => setRecoverDialogVisible(false)}>
+          <SolidButton
+            variant="outline"
+            size="sm"
+            onClick={() => setRecoverDialogVisible(false)}
+          >
             No
           </SolidButton>
         </SolidDialogFooter>
       </SolidDialog>
 
-      {
-        listViewRowActionData && (
-          <SolidDialog
-            open={listViewRowActionPopupState}
-            onOpenChange={(open) => {
-              if (!open) {
-                closeListViewRowActionPopup();
-              }
-            }}
-          >
-            <SolidDialogHeader>
-              <SolidDialogTitle>{listViewRowActionData?.rowAction?.label || "Action"}</SolidDialogTitle>
-              <SolidDialogClose />
-            </SolidDialogHeader>
-            <SolidDialogSeparator />
-            <SolidDialogBody>
-              <ListViewRowActionPopup
-                context={listViewRowActionData}
-              ></ListViewRowActionPopup>
-            </SolidDialogBody>
-          </SolidDialog>
-        )
-      }
+      {listViewRowActionData && (
+        <SolidDialog
+          open={listViewRowActionPopupState}
+          onOpenChange={(open) => {
+            if (!open) {
+              closeListViewRowActionPopup();
+            }
+          }}
+        >
+          <SolidDialogHeader>
+            <SolidDialogTitle>
+              {listViewRowActionData?.rowAction?.label || "Action"}
+            </SolidDialogTitle>
+            <SolidDialogClose />
+          </SolidDialogHeader>
+          <SolidDialogSeparator />
+          <SolidDialogBody>
+            <ListViewRowActionPopup
+              context={listViewRowActionData}
+            ></ListViewRowActionPopup>
+          </SolidDialogBody>
+        </SolidDialog>
+      )}
       <SolidConfirmDialog
         open={deleteEntity}
         onCancel={() => setDeleteEntity(false)}
@@ -1934,7 +2282,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         separatorClassName="solid-shadcn-dialog-sep"
         showSeparator
         title={`Delete ${entityDisplayName}`}
-        message={<p className="solid-shadcn-dialog-text">{`Are you sure you want to delete this ${entityDisplayName}?`}</p>}
+        message={
+          <p className="solid-shadcn-dialog-text">{`Are you sure you want to delete this ${entityDisplayName}?`}</p>
+        }
         confirmLabel="Delete"
         cancelLabel="Cancel"
       />
@@ -1945,7 +2295,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           onClose={() => setOpenLightbox(false)}
         />
       )}
-    </div >
+    </div>
   );
 });
 
