@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.11] - 2026-08-11
+
+### Added
+
+- add responsive basis utilities to Tailwind safelist for dynamic layouts
+- add isInitialLoad flag to SolidLoadList and SolidBeforeListDataLoad types; enhance filter handling in SolidGlobalSearchElement and SolidListView
+- add saved filter properties to SolidCardView and SolidKanbanView
+
+### Fixed
+
+- correct class name for search overlay panel and remove unnecessary styles
+
+### Changed
+
+- remove unused defined filter logic and related styles from global search and list view components
+
+### Maintenance
+
+- widen reusable utility safelist in current config
+
+### Other
+
+- admin header actions visibilityu issues
+- update styles for search overlay sections and add separator
+
 ## [0.1.14-beta.10] - 2026-08-06
 
 ### Other
