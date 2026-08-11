@@ -93,18 +93,20 @@ interface ErrorResponseData {
 const LAYOUT_CLASSNAME_MAPPER: Record<string, string> = {
     grid: "flex flex-wrap",
     formgrid: "flex-wrap",
-    "col-12": "w-full",
-    "col-11": "w-[91.666667%]",
-    "col-10": "w-[83.333333%]",
-    "col-9": "w-3/4",
-    "col-8": "w-[66.666667%]",
-    "col-7": "w-[58.333333%]",
-    "col-6": "w-1/2",
-    "col-5": "w-[41.666667%]",
-    "col-4": "w-1/3",
-    "col-3": "w-1/4",
-    "col-2": "w-[16.666667%]",
-    "col-1": "w-[8.333333%]",
+    // Form-view columns render as flex items inside SolidRow, so basis preserves
+    // the old PrimeFlex column sizing without depending on width utilities.
+    "col-12": "basis-full",
+    "col-11": "basis-[91.666667%]",
+    "col-10": "basis-[83.333333%]",
+    "col-9": "basis-3/4",
+    "col-8": "basis-[66.666667%]",
+    "col-7": "basis-[58.333333%]",
+    "col-6": "basis-1/2",
+    "col-5": "basis-[41.666667%]",
+    "col-4": "basis-1/3",
+    "col-3": "basis-1/4",
+    "col-2": "basis-[16.666667%]",
+    "col-1": "basis-[8.333333%]",
     "flex-column": "flex-col",
     "flex-row": "flex-row",
     "flex-wrap": "flex-wrap",
@@ -177,7 +179,15 @@ const normalizeLayoutClassName = (className?: string) => {
             const responsivePrefix = parts.length > 1 ? `${parts.slice(0, -1).join(":")}:` : "";
             const mappedToken = mapLayoutToken(baseToken);
 
-            return mappedToken ? `${responsivePrefix}${mappedToken}` : token;
+            if (!mappedToken) return token;
+
+            // A single metadata token like `md:col-6` can expand to multiple classes,
+            // so re-apply the responsive prefix to every emitted utility.
+            return mappedToken
+                .split(/\s+/)
+                .filter(Boolean)
+                .map((mappedClass) => `${responsivePrefix}${mappedClass}`)
+                .join(" ");
         })
         .join(" ");
 };
