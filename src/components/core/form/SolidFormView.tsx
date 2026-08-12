@@ -42,7 +42,7 @@ import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
-import { getSettingsMap } from "../../../helpers/settingsPayload";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { SolidVersionHistory, getWorkflowStatusLabel } from "./SolidVersionHistory";
 import { appendVersionHistoryPage, SolidWorkflowStatusPill, SolidWorkflowConfirmDialog, useDraftPublishWorkflow } from "./SolidDraftPublishWorkflow";
@@ -870,6 +870,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
+    const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
+        isSystemModule: solidFormViewMetaData?.data?.solidView?.module?.isSystem === true,
+    });
     const [triggerGetSolidViewLayout] = useLazyGetSolidViewLayoutQuery();
     const entityDisplayName =
         solidFormViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
@@ -1067,14 +1070,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORM_UPDATE, detail: ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY }));
                         if (result?.statusCode === 200) {
                             const nextId = result?.data?.id;
+                            const nextViewMode = recordClickAction === "edit" ? "edit" : "view";
+                            formikRef.current?.resetForm({ values });
                             if (nextId && String(nextId) !== String(params.id)) {
                                 const queryParams = new URLSearchParams(searchParams.toString());
-                                queryParams.set("viewMode", "view");
+                                queryParams.set("viewMode", nextViewMode);
                                 const updatedPath = pathname.replace(/\/form\/[^/]+/, `/form/${nextId}`);
                                 router.replace(`${updatedPath}?${queryParams.toString()}`);
-                                setViewMode("view");
+                                setViewMode(nextViewMode);
                             } else {
-                                updateViewMode("view")
+                                if (nextViewMode === "view") updateViewMode("view");
+                                else setViewMode("edit");
                             }
                         }
                     }
