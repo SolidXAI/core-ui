@@ -1,5 +1,3 @@
-
-
 import { SolidButton } from "../shad-cn-ui";
 interface DropzonePlaceholderProps {
     mediaTypes?: string[];
@@ -7,12 +5,27 @@ interface DropzonePlaceholderProps {
 }
 
 export const DropzonePlaceholder = ({ mediaTypes, mediaMaxSizeKb }: DropzonePlaceholderProps) => {
-    const supportedFormats = mediaTypes?.length
-        ? mediaTypes.map(type => type.toUpperCase()).join(", ")
-        : "PDF, JPEG | File";
+    const allowedTypesLabel = !Array.isArray(mediaTypes) || mediaTypes.length === 0
+        ? "Any file"
+        : mediaTypes.includes("file")
+            ? "Any file"
+            : mediaTypes
+                .map((type) => {
+                    const normalizedType = type.toLowerCase();
+                    if (normalizedType === "image") return "Images";
+                    if (normalizedType === "audio") return "Audio";
+                    if (normalizedType === "video") return "Video";
+                    if (normalizedType === "pdf") return "PDF";
+                    if (normalizedType === "file") return "Any file";
+                    return type.toUpperCase();
+                })
+                .join(", ");
 
-    // Convert max size from KB to MB and ensure it's at least 1MB
-    const maxSizeMB = mediaMaxSizeKb ? (mediaMaxSizeKb / 1024).toFixed(1) : "10";
+    const maxSizeLabel = !mediaMaxSizeKb || mediaMaxSizeKb <= 0
+        ? "No limit"
+        : mediaMaxSizeKb >= 1024
+            ? `${(mediaMaxSizeKb / 1024).toFixed(1)} MB`
+            : `${mediaMaxSizeKb} KB`;
 
     return (
         <div className='solid-dropzone'>
@@ -22,7 +35,8 @@ export const DropzonePlaceholder = ({ mediaTypes, mediaMaxSizeKb }: DropzonePlac
             <div className='solid-dropzone-title'>
                 Drag and Drop or <span className='solid-dropzone-title-accent'>choose files</span> to upload
             </div>
-            <p className="solid-dropzone-meta">Supported format: {supportedFormats} | Max size: {maxSizeMB} MB</p>
+            <p className="solid-dropzone-meta m-0">Allowed file types: {allowedTypesLabel}</p>
+            <p className="solid-dropzone-meta">Max file size: {maxSizeLabel}</p>
             <div>
                 <SolidButton variant="outline" size='sm' type="button">
                     Click to Browse

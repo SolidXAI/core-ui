@@ -1326,7 +1326,8 @@ const FieldMetaDataForm = ({
     { label: 'Image (Supports JPEG, PNG, WEBP, etc.)', value: 'image' },
     { label: 'Audio (Supports MP3, WAV, AAC, etc.)', value: 'audio' },
     { label: 'Video (Supports MP4, AVI, MKV, etc.)', value: 'video' },
-    { label: 'File (Supports PDF, DOCX, TXT, etc.)', value: 'file' }
+    { label: 'File (Supports DOCX, TXT, XLSX, ZIP, etc.)', value: 'file' },
+    { label: 'PDF (Supports .pdf files)', value: 'pdf' }
   ];
 
   const resolvedMediaTypeOptions = useMemo(
@@ -1849,7 +1850,7 @@ const FieldMetaDataForm = ({
                     >
                       <div className="flex flex-wrap -mx-2 -mt-2">
                         {currentFields.includes("displayName") && (
-                          <div className="field mt-2 w-full px-2 pt-2 md:w-1/2">
+                          <div className="field mt-2 px-2 pt-2 md:w-1/2">
                             <label htmlFor="displayName" className={classNames("form-field-label", styles.fieldLabel)}>
                               Display Name
                             </label>
@@ -1878,7 +1879,7 @@ const FieldMetaDataForm = ({
                         )}
 
                         {currentFields.includes("name") && (
-                          <div className="field mt-1 w-full px-2 pt-2 md:mt-0 md:w-1/2">
+                          <div className="field mt-2 px-2 pt-2 md:mt-0 md:w-1/2">
                             <label htmlFor="name" className={classNames("form-field-label", styles.fieldLabel)}>
                               Name
                             </label>
@@ -1899,7 +1900,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("description") && (
-                          <div className="field mt-1 w-full px-2 pt-2 md:mt-2 md:w-1/2">
+                          <div className="field mt-2 w-full px-2 pt-2 md:mt-2 md:w-1/2">
                             <label htmlFor="description" className={classNames("form-field-label", styles.fieldLabel)}>
                               Description
                             </label>
@@ -2305,7 +2306,7 @@ const FieldMetaDataForm = ({
                             </div>
                           )}
                           {currentFields.includes("relationType") && (formik.values.relationType === "many-to-one" || formik.values.relationType === "one-to-many") && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationCascade"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2338,7 +2339,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("relationModelModuleName") && (
-                            <div className="field mt-1 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationModelModuleName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2396,7 +2397,7 @@ const FieldMetaDataForm = ({
                           {currentFields.includes(
                             "relationCoModelSingularName"
                           ) && (
-                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                 <label
                                   htmlFor="relationCoModelSingularName"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2436,7 +2437,7 @@ const FieldMetaDataForm = ({
                               </div>
                             )}
                           {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationCoModelColumnName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2465,7 +2466,7 @@ const FieldMetaDataForm = ({
                             </div>
                           )}
                           {askForUserKeyField && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="userKey"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2502,7 +2503,7 @@ const FieldMetaDataForm = ({
                           {currentFields.includes(
                             "relationFieldFixedFilter"
                           ) && (
-                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2">
+                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2  md:w-1/2">
                                 <label
                                   htmlFor="relationFieldFixedFilter"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2548,7 +2549,7 @@ const FieldMetaDataForm = ({
                             )}
 
                           {currentFields.includes("relationCreateInverse") && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label htmlFor="relationCreateInverse" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Relation Create Inverse
                               </label>
@@ -2569,12 +2570,12 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && !formik.values.relationCoModelSingularName && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <SolidMessage text="Please select Co-model" />
                             </div>
                           )}
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && formik.values.relationCoModelSingularName && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationCoModelFieldName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2644,7 +2645,7 @@ const FieldMetaDataForm = ({
 
 
                           {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="relationJoinTableName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2673,7 +2674,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("selectionDynamicProvider") && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="selectionDynamicProvider"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2729,7 +2730,7 @@ const FieldMetaDataForm = ({
                             </div>
                           )}
                           {currentFields.includes("selectionValueType") && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="selectionValueType"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2765,7 +2766,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("selectionStaticValues") && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="selectionStaticValues"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2809,7 +2810,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("computedFieldValueType") && (
-                            <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="computedFieldValueType"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2856,7 +2857,7 @@ const FieldMetaDataForm = ({
                           {currentFields.includes(
                             "computedFieldValueProvider"
                           ) && (
-                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                 <label
                                   htmlFor="computedFieldValueProvider"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2890,7 +2891,7 @@ const FieldMetaDataForm = ({
                           {currentFields.includes(
                             "computedFieldTriggerConfig"
                           ) && (
-                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2">
+                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2">
                                 {fieldMetaData?.computedFieldTriggerConfig === null
                                   &&
                                   <div className="mb-3">
@@ -2939,7 +2940,7 @@ const FieldMetaDataForm = ({
                             )}
 
                           {currentFields.includes("selectionDynamicProviderCtxt") && (
-                            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2">
+                            <div className="field mt-4 flex flex-col gap-2 px-2 pt-2">
                               <label htmlFor="selectionDynamicProviderCtxt" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Selection Dynamic Provider Context
                               </label>
@@ -2963,7 +2964,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("computedFieldValueProviderCtxt") && (
-                            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2">
+                            <div className="field mt-4 flex flex-col gap-2 px-2 pt-2">
                               <label htmlFor="computedFieldValueProviderCtxt" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Computed Field Value Provider Context
                               </label>
@@ -2995,7 +2996,7 @@ const FieldMetaDataForm = ({
                           <div className="flex flex-wrap -mx-2 -mt-2">
                             {(showRegexFields && selectedTypeValue === "password") &&
                               <>
-                                <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                   <label
                                     htmlFor="regexPattern"
                                     className={classNames("form-field-label", styles.fieldLabel)}
@@ -3022,7 +3023,7 @@ const FieldMetaDataForm = ({
                             }
                             {showRegexFields && (
                               <>
-                                <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                   <label
                                     htmlFor="regexPattern"
                                     className={classNames("form-field-label", styles.fieldLabel)}
@@ -3047,7 +3048,7 @@ const FieldMetaDataForm = ({
                                   )}
                                 </div>
                                 {showRegexFields && (
-                                  <div className="field mt-2 mb-3 flex w-full flex-col gap-2 px-2 pt-2 md:mb-3 md:w-1/2">
+                                  <div className="field mt-2 mb-3 flex flex-col gap-2 px-2 pt-2 md:mb-3 md:w-1/2">
                                     <label
                                       htmlFor="regexPatternNotMatchingErrorMsg"
                                       className={classNames("form-field-label", styles.fieldLabel)}
@@ -3078,7 +3079,7 @@ const FieldMetaDataForm = ({
                             {(showMinFields || showMaxFields) &&
                               <>
                                 {showMinFields && (
-                                  <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                  <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                     <label htmlFor="min" className={classNames("form-field-label", styles.fieldLabel)}>
                                       Min {(selectedTypeValue !== "int" && selectedTypeValue !== "decimal") && `(Characters Allowed)`}
 
@@ -3117,7 +3118,7 @@ const FieldMetaDataForm = ({
                                   </div>
                                 )}
                                 {showMaxFields && (
-                                  <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                  <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                     <label htmlFor="max" className={classNames("form-field-label", styles.fieldLabel)}>
                                       Max {(selectedTypeValue !== "int" &&
                                         selectedTypeValue !== "decimal") && `(Characters allowed)`}
@@ -3159,7 +3160,7 @@ const FieldMetaDataForm = ({
                               </>
                             }
                             {showOrmOptions && (
-                              <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                 <label htmlFor="ormType" className={classNames("form-field-label", styles.fieldLabel)}>
                                   Type
                                 </label>
@@ -3195,7 +3196,7 @@ const FieldMetaDataForm = ({
                       )}
 
                       {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading">Settings</p>}
-                      <div className="mt-1 flex flex-wrap -mx-2 -mt-2 md:mt-0">
+                      <div className="flex flex-wrap -mx-2 mt-2 md:mt-0">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
                           <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
                             <div className="solid-field-checkbox-row">
@@ -3416,7 +3417,7 @@ const FieldMetaDataForm = ({
 
 
                       {formik.values.encrypt === true && (
-                        <div className="mt-2 flex flex-wrap -mx-2 -mt-2">
+                        <div className="mt-2 flex flex-wrap -mx-2">
                           <div className="w-full px-2 pt-2 md:w-1/2">
                             <div className="field flex w-full flex-col gap-2">
                               <label
@@ -3461,7 +3462,7 @@ const FieldMetaDataForm = ({
                               )}
                             </div>
                           </div>
-                          <div className="w-full px-2 pt-2 md:w-1/2">
+                          <div className="px-2 pt-2 md:w-1/2">
                             <div className="field flex w-full flex-col gap-2">
                               <label htmlFor="decryptWhen" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Decrypt When
