@@ -11,7 +11,6 @@ import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
 import { getMediaPreviewKind, isLightboxMediaKind, type MediaPreviewKind } from '../../../../helpers/mediaType';
 import { openMediaInNewTab } from '../../../../helpers/mediaUrl';
 import { downloadMediaFile } from '../../../../helpers/downloadMediaFile';
-import styles from "../../form/fields/solidFields.module.css";
 
 
 
@@ -169,20 +168,20 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
     };
 
     const renderMediaFileCard = (file: any, className = "") => (
-        <div className={`${styles.mediaAttachmentCard} ${className}`.trim()}>
-            <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+        <div className={`solid-media-attachment-card ${className}`.trim()}>
+            <div className={`solid-media-attachment-row flex items-center md:gap-2`}>
                 <FileReaderExt fileDetails={file} />
-                <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                <div className={`solid-media-attachment-meta w-full`}>
                     <div className="flex items-start justify-between gap-4">
                         <button
                             type="button"
-                            className={styles.mediaAttachmentName}
+                            className="solid-media-attachment-name"
                             onClick={() => handleFileView(file)}
                             title={file.name}
                         >
                             {file.name}
                         </button>
-                        <div className={`${styles.mediaAttachmentActions} flex items-center md:gap-2`}>
+                        <div className={`solid-media-attachment-actions flex items-center md:gap-2`}>
                             <button
                                 type="button"
                                 className="solid-file-icon-btn"
@@ -198,7 +197,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                             </button>
                         </div>
                     </div>
-                    <div className={styles.mediaAttachmentSize}>
+                    <div className="solid-media-attachment-size">
                         {formatFileSize(file.size)}
                     </div>
                 </div>

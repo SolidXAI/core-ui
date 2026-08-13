@@ -14,7 +14,6 @@ import { showToast } from "../../../redux/features/toastSlice";
 import { useDropzone } from "react-dropzone";
 import * as Yup from "yup";
 import { env } from "../../../adapters/env";
-import styles from "../form/fields/solidFields.module.css";
 import {
   SolidAutocomplete,
   SolidButton,
@@ -313,8 +312,8 @@ const CreateModule = ({ params, data }: any) => {
           <SolidPanel header={"Basic Info"} className="solid-column-panel">
             <div className="mt-3 flex flex-wrap -mx-2 ">
               <div className="field w-full px-2 pt-2 pb-3 lg:w-1/2 lg:pb-0">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="displayName" className={`${styles.fieldLabel} form-field-label`}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="displayName" className={`solid-field-label form-field-label`}>
                     Display Name <span className="text-red-500">*</span>
                   </label>
                   <SolidInput
@@ -330,16 +329,16 @@ const CreateModule = ({ params, data }: any) => {
                       }
                     }}
                     value={formik.values.displayName}
-                    className={styles.fieldInput}
+                    className="solid-field-input"
                   />
                   {isFormFieldValid(formik, "displayName") && (
-                    <p className={styles.fieldError}>{formik?.errors?.displayName?.toString()}</p>
+                    <p className="solid-field-error">{formik?.errors?.displayName?.toString()}</p>
                   )}
                 </div>
               </div>
               <div className="field w-full px-2 pt-2 lg:w-1/2">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="name" className={`${styles.fieldLabel} form-field-label`}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="name" className={`solid-field-label form-field-label`}>
                     Name <span className="text-red-500">*</span>
                   </label>
                   <SolidInput
@@ -349,18 +348,18 @@ const CreateModule = ({ params, data }: any) => {
                     name="name"
                     onChange={formik.handleChange}
                     value={formik.values.name}
-                    className={styles.fieldInput}
+                    className="solid-field-input"
                   />
                   {isFormFieldValid(formik, "name") && (
-                    <p className={styles.fieldError}>{formik?.errors?.name?.toString()}</p>
+                    <p className="solid-field-error">{formik?.errors?.name?.toString()}</p>
                   )}
                 </div>
               </div>
             </div>
             <div className="mt-4 flex flex-wrap -mx-2 -mt-2">
               <div className="field w-full px-2 pt-2 pb-3 lg:w-1/2 lg:pb-0">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="menuSequenceNumber" className={`${styles.fieldLabel} form-field-label`}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="menuSequenceNumber" className={`solid-field-label form-field-label`}>
                     Menu Sequence Number
                   </label>
                   <SolidInput
@@ -369,16 +368,16 @@ const CreateModule = ({ params, data }: any) => {
                     onChange={formik.handleChange}
                     min={0}
                     value={formik.values.menuSequenceNumber}
-                    className={styles.fieldInput}
+                    className="solid-field-input"
                   />
                   {isFormFieldValid(formik, "menuSequenceNumber") && (
-                    <p className={styles.fieldError}>{formik?.errors?.menuSequenceNumber?.toString()}</p>
+                    <p className="solid-field-error">{formik?.errors?.menuSequenceNumber?.toString()}</p>
                   )}
                 </div>
               </div>
               <div className="field w-full px-2 pt-2 lg:w-1/2">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="description" className={`${styles.fieldLabel} form-field-label`}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="description" className={`solid-field-label form-field-label`}>
                     Description <span className="text-red-500">*</span>
                   </label>
                   <SolidTextarea
@@ -386,20 +385,20 @@ const CreateModule = ({ params, data }: any) => {
                     name="description"
                     onChange={formik.handleChange}
                     value={formik.values.description}
-                    className={styles.fieldTextarea}
+                    className="solid-field-textarea"
                     rows={5}
                     cols={30}
                   />
                   {isFormFieldValid(formik, "description") && (
-                    <p className={styles.fieldError}>{formik?.errors?.description?.toString()}</p>
+                    <p className="solid-field-error">{formik?.errors?.description?.toString()}</p>
                   )}
                 </div>
               </div>
             </div>
             <div className="mt-4 flex flex-wrap -mx-2 -mt-2">
               <div className="field w-full px-2 pt-2">
-                <div className={`${styles.fieldWrapper} relative`}>
-                  <label htmlFor="menuIconUrl" className={`${styles.fieldLabel} form-field-label`}>
+                <div className={`solid-field-wrapper relative`}>
+                  <label htmlFor="menuIconUrl" className={`solid-field-label form-field-label`}>
                     Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
                   </label>
                   <div {...getRootPropsmenuIcon()} className="solid-dropzone-wrapper">
@@ -466,8 +465,8 @@ const CreateModule = ({ params, data }: any) => {
           <SolidPanel header={"Datasource Configuration"} className="solid-column-panel mt-4">
             <div className="mt-3 flex flex-wrap -mx-2 -mt-2">
               <div className="field w-full px-2 pt-2">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="defaultDataSource" className={`${styles.fieldLabel} form-field-label`}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="defaultDataSource" className={`solid-field-label form-field-label`}>
                     Default Data Source
                   </label>
                   <div className="solid-standard-autocomplete w-full">
@@ -484,7 +483,7 @@ const CreateModule = ({ params, data }: any) => {
                     />
                   </div>
                   {isFormFieldValid(formik, "defaultDataSource") && (
-                    <p className={styles.fieldError}>{formik?.errors?.defaultDataSource?.toString()}</p>
+                    <p className="solid-field-error">{formik?.errors?.defaultDataSource?.toString()}</p>
                   )}
                 </div>
               </div>

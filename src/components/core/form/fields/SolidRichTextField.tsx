@@ -9,7 +9,6 @@ import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import styles from "./solidFields.module.css";
 
 const normalizeQuillRichTextHtml = (html: string): string => {
     if (!html || typeof document === "undefined") {
@@ -194,9 +193,9 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
 
 
     return (
-        <div className={`${styles.fieldWrapper} relative`}>
+        <div className={`solid-field-wrapper relative`}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`solid-field-label form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -222,7 +221,7 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 style={{ minHeight: 180 }}
             />
             {isFormFieldValid(formik, fieldName) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldName]?.toString()}</p>
+                <p className="solid-field-error">{formik?.errors[fieldName]?.toString()}</p>
             )}
         </div>
     );
@@ -234,9 +233,9 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className="solid-field-view-wrapper">
             {showFieldLabel != false &&
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`solid-field-view-label form-field-label`}>{fieldLabel}</p>
             }
             <div
                 className="solid-custom-editor solid-custom-editor-view"

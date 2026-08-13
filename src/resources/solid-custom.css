@@ -1494,7 +1494,7 @@ textarea {
 
 .solid-select {
   width: 100%;
-  min-height: 32px;
+  height: 32px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -1511,6 +1511,7 @@ textarea {
   justify-content: flex-start;
   text-align: left;
   cursor: pointer;
+  height: 32px;
 }
 
 .solid-select-trigger:disabled {
@@ -1615,6 +1616,268 @@ textarea {
 .solid-input:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.solid-textarea {
+  height: auto;
+  min-height: 32px;
+}
+
+.solid-field-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.solid-field-label {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.solid-field-input {
+  width: 100% !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
+  color: var(--foreground) !important;
+  padding: 0 11px !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.solid-field-input:focus,
+.solid-field-input:focus-visible {
+  outline: none !important;
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
+}
+
+.solid-field-input:disabled {
+  opacity: 0.75 !important;
+  cursor: not-allowed !important;
+  background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
+}
+
+.solid-field-textarea {
+  width: 100% !important;
+  min-height: 32px !important;
+  height: auto !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
+  color: var(--foreground) !important;
+  padding: 8px 11px !important;
+  font-size: 13px !important;
+  resize: vertical !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  line-height: 1.5 !important;
+}
+
+.solid-field-textarea:focus,
+.solid-field-textarea:focus-visible {
+  outline: none !important;
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
+}
+
+.solid-field-textarea:disabled {
+  opacity: 0.75 !important;
+  cursor: not-allowed !important;
+  background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
+}
+
+.solid-field-number-wrapper {
+  width: 100%;
+}
+
+.solid-field-number-wrapper .solid-input {
+  width: 100% !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border) !important;
+  background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
+  color: var(--foreground) !important;
+  padding: 0 11px !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.solid-field-number-wrapper .solid-input:focus,
+.solid-field-number-wrapper .solid-input:focus-visible {
+  outline: none !important;
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
+}
+
+.solid-field-number-wrapper .solid-input:disabled {
+  opacity: 0.75 !important;
+  cursor: not-allowed !important;
+  background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
+}
+
+.solid-field-error {
+  margin: 2px 0 0;
+  color: #ef4444;
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+.solid-field-invalid .solid-autocomplete-control {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #fecaca inset !important;
+}
+
+.solid-field-invalid-control .solid-autocomplete-control,
+.solid-field-invalid-control.solid-autocomplete-control {
+  border-color: #ef4444 !important;
+}
+
+.solid-field-error-badge {
+  display: inline-flex;
+  align-items: center;
+  color: #ef4444;
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.solid-file-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 32px;
+  border-radius: 8px;
+  border: 1px solid #d6dae5;
+  background: #ffffff;
+  color: #1f2937;
+  transition: all 0.12s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.solid-file-icon-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  border-color: #cfd4e3;
+  color: #111827;
+}
+
+.solid-file-icon-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.solid-file-icon-btn.is-danger {
+  color: #b91c1c;
+  border-color: #f1c1c1;
+  background: #fff5f5;
+}
+
+.solid-file-icon-btn.is-danger:hover:not(:disabled) {
+  color: #7f1d1d;
+  border-color: #f59fa0;
+  background: #ffe9e9;
+}
+
+.solid-field-view-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.solid-field-view-label {
+  margin: 0;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.solid-field-view-value {
+  margin: 0;
+  font-size: 13px;
+  color: var(--foreground);
+  min-height: 18px;
+  line-height: 1.4;
+}
+
+.solid-media-attachment-card {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 97%, var(--background) 3%);
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.solid-media-attachment-card-view {
+  margin-top: 10px;
+}
+
+.solid-media-attachment-row {
+  width: 100%;
+}
+
+.solid-media-attachment-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.solid-media-attachment-name {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  color: var(--foreground);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+  cursor: pointer;
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease;
+}
+
+.solid-media-attachment-name:hover {
+  color: var(--primary-color, var(--primary));
+}
+
+.solid-media-attachment-name:focus-visible {
+  outline: none;
+  color: var(--primary-color, var(--primary));
+}
+
+.solid-media-attachment-size {
+  font-size: 11.5px;
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  letter-spacing: 0.01em;
+}
+
+.solid-media-attachment-actions {
+  flex-shrink: 0;
 }
 
 .solid-autocomplete {
@@ -6979,7 +7242,10 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-segmented {
   display: inline-flex;
+  align-self: flex-start;
   align-items: stretch;
+  width: fit-content;
+  max-width: 100%;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface-card) 85%, #ffffff 15%);

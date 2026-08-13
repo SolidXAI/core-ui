@@ -1,6 +1,5 @@
 
 import * as Yup from 'yup';
-import styles from './solidFields.module.css';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { useEffect, useRef, useState } from "react";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -133,9 +132,9 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className="solid-field-wrapper">
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="solid-field-label">
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -149,10 +148,10 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => fieldContext.onChange(e, 'onFieldChange')}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                 rows={5}
-                className={styles.fieldTextarea}
+                className="solid-field-textarea"
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <p className="solid-field-error">{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );
@@ -204,7 +203,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
         }
         if (meta.type === "longText") {
             return (
-                <SolidTextarea value={value} rows={10} cols={100} readOnly className={styles.fieldTextarea} />
+                <SolidTextarea value={value} rows={10} cols={100} readOnly className="solid-field-textarea" />
             );
         }
         if (meta.type === "date" || meta.type === "datetime") {
@@ -236,7 +235,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
+                <label className={`solid-field-label form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -369,7 +368,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     value={value}
                     rows={10}
                     cols={100}
-                    className={styles.fieldTextarea}
+                    className="solid-field-textarea"
                 />
             );
         }
@@ -404,7 +403,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
+                <label className={`solid-field-label form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -484,7 +483,7 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
+                <label className={`solid-field-label form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />

@@ -1,6 +1,5 @@
 
 import * as Yup from "yup";
-import styles from "./solidFields.module.css";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
@@ -112,11 +111,11 @@ export const DefaultDecimalFormViewWidget = ({ formik, fieldContext }: SolidForm
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const value = formik.values[fieldLayoutInfo.attrs.name];
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className="solid-field-view-wrapper">
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`solid-field-view-label form-field-label`}>{fieldLabel}</p>
             )}
-            <p className={styles.fieldViewValue}>{value != null && typeof value !== "object" ? value : ''}</p>
+            <p className="solid-field-view-value">{value != null && typeof value !== "object" ? value : ''}</p>
         </div>
     );
 }
@@ -139,15 +138,15 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className="solid-field-wrapper">
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`solid-field-label form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
-            <div className={styles.fieldNumberWrapper}>
+            <div className="solid-field-number-wrapper">
                 <SolidNumberInput
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
@@ -170,7 +169,7 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <p className="solid-field-error">{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );

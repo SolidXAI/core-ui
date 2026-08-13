@@ -13,7 +13,6 @@ import { showToast } from "../../../redux/features/toastSlice";
 import * as Yup from "yup";
 import { SolidAutocomplete, SolidCheckbox, SolidInput, SolidPanel, SolidTextarea } from "../../shad-cn-ui";
 import { useSolidAutocompleteField } from "../../../hooks/useSolidAutocompleteField";
-import styles from "../form/fields/solidFields.module.css";
 
 const cx = (...parts: Array<string | false | null | undefined | Record<string, boolean>>) => {
   const classes: string[] = [];
@@ -161,7 +160,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     }
 
     const errorText = Array.isArray(message) ? message.join(", ") : String(message);
-    return <p className={styles.fieldError}>{errorText}</p>;
+    return <p className="solid-field-error">{errorText}</p>;
   };
 
   const formik = useFormik({
@@ -397,14 +396,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           <div className="flex flex-wrap -mx-2 -mt-2">
             <div className="field w-full px-2 pt-2 lg:w-1/2 lg:pr-4">
               <SolidPanel header={"Basic Info"} className="solid-column-panel">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="moduleId" className={styles.fieldLabel}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="moduleId" className="solid-field-label">
                     Module
                   </label>
                   <div
                     className={cx(
                       "solid-standard-autocomplete w-full",
-                      fieldHasError("module", "moduleId") && styles.fieldInvalidControl
+                      fieldHasError("module", "moduleId") && "solid-field-invalid-control"
                     )}
                   >
                     <SolidAutocomplete
@@ -421,14 +420,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {renderFieldError("module", "moduleId")}
                 </div>
 
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="dataSource" className={styles.fieldLabel}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="dataSource" className="solid-field-label">
                     Data Source
                   </label>
                   <div
                     className={cx(
                       "solid-standard-autocomplete w-full",
-                      fieldHasError("dataSource") && styles.fieldInvalidControl
+                      fieldHasError("dataSource") && "solid-field-invalid-control"
                     )}
                   >
                     <SolidAutocomplete
@@ -489,14 +488,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                 </div>
 
                 {showParentModel && (
-                  <div className={styles.fieldWrapper}>
-                    <label htmlFor="parentModelId" className={styles.fieldLabel}>
+                  <div className="solid-field-wrapper">
+                    <label htmlFor="parentModelId" className="solid-field-label">
                       Parent Model
                     </label>
                     <div
                       className={cx(
                         "solid-standard-autocomplete w-full",
-                        fieldHasError("parentModel", "parentModelId") && styles.fieldInvalidControl
+                        fieldHasError("parentModel", "parentModelId") && "solid-field-invalid-control"
                       )}
                     >
                       <SolidAutocomplete
@@ -589,15 +588,15 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             </div>
             <div className="field w-full px-2 pt-2 lg:w-1/2 lg:pl-4">
               <SolidPanel header={"Basic Settings"} className="solid-column-panel">
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="displayName" className={styles.fieldLabel}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="displayName" className="solid-field-label">
                     Display Name
                   </label>
                   <SolidInput
                     type="text"
                     id="displayName"
                     name="displayName"
-                    className={styles.fieldInput}
+                    className="solid-field-input"
                     value={formik.values.displayName}
                     disabled={params.id !== "new"}
                     onChange={(e) => {
@@ -613,15 +612,15 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {renderFieldError("displayName")}
                 </div>
 
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="singularName" className={styles.fieldLabel}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="singularName" className="solid-field-label">
                     Singular Name
                   </label>
                   <SolidInput
                     type="text"
                     id="singularName"
                     name="singularName"
-                    className={styles.fieldInput}
+                    className="solid-field-input"
                     value={formik.values.singularName}
                     disabled
                     onChange={formik.handleChange}
@@ -629,15 +628,15 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {renderFieldError("singularName")}
                 </div>
 
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="pluralName" className={styles.fieldLabel}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="pluralName" className="solid-field-label">
                     Plural Name
                   </label>
                   <SolidInput
                     type="text"
                     id="pluralName"
                     name="pluralName"
-                    className={styles.fieldInput}
+                    className="solid-field-input"
                     value={formik.values.pluralName}
                     disabled
                     onChange={formik.handleChange}
@@ -645,15 +644,15 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {renderFieldError("pluralName")}
                 </div>
 
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="tableName" className={styles.fieldLabel}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="tableName" className="solid-field-label">
                     Table Name
                   </label>
                   <SolidInput
                     type="text"
                     id="tableName"
                     name="tableName"
-                    className={styles.fieldInput}
+                    className="solid-field-input"
                     value={formik.values.tableName}
                     disabled={params.id !== "new"}
                     onChange={formik.handleChange}
@@ -661,14 +660,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {renderFieldError("tableName")}
                 </div>
 
-                <div className={styles.fieldWrapper}>
-                  <label htmlFor="description" className={styles.fieldLabel}>
+                <div className="solid-field-wrapper">
+                  <label htmlFor="description" className="solid-field-label">
                     Description
                   </label>
                   <SolidTextarea
                     id="description"
                     name="description"
-                    className={styles.fieldTextarea}
+                    className="solid-field-textarea"
                     value={formik.values.description}
                     rows={5}
                     disabled={params.id !== "new"}

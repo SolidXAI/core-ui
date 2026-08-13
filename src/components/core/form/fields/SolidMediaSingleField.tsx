@@ -28,7 +28,6 @@ import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { showToast } from "../../../../redux/features/toastSlice";
-import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { getPersistedMediaId } from "./mediaFieldUtils";
 
@@ -384,9 +383,9 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
     return (
         <div style={(isFieldDisabled === true || isFieldReadonly === true) ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
-            <div className={`${styles.fieldWrapper} relative`}>
+            <div className={`solid-field-wrapper relative`}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`solid-field-label form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -414,20 +413,20 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     <SolidMessage severity="error" text={fileSizeError?.toString()} />
                 }
                 {fileDetails && (
-                    <div className={`${styles.mediaAttachmentCard} mt-4`}>
-                        <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                    <div className={`solid-media-attachment-card mt-4`}>
+                        <div className={`solid-media-attachment-row flex items-center md:gap-2`}>
                             <FileReaderExt fileDetails={fileDetails} />
-                            <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                            <div className={`solid-media-attachment-meta w-full`}>
                                 <div className="flex items-start justify-between gap-4">
                                     <button
                                         type="button"
-                                        className={styles.mediaAttachmentName}
+                                        className="solid-media-attachment-name"
                                         onClick={() => handleFileView(fileDetails)}
                                         title={fileDetails.name}
                                     >
                                         {fileDetails.name}
                                     </button>
-                                    <div className={`${styles.mediaAttachmentActions} flex items-center gap-2`}>
+                                    <div className={`solid-media-attachment-actions flex items-center gap-2`}>
                                         <button
                                             type="button"
                                             className="solid-file-icon-btn"
@@ -452,7 +451,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                         </button>
                                     </div>
                                 </div>
-                                <div className={styles.mediaAttachmentSize}>
+                                <div className="solid-media-attachment-size">
                                     {fileDetails && formatFileSize(fileDetails.fileSize)}
                                 </div>
                             </div>
@@ -581,28 +580,28 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
     }
 
     return (
-        <div className={`${styles.fieldViewWrapper} relative`}>
+        <div className={`solid-field-view-wrapper relative`}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`solid-field-view-label form-field-label`}>{fieldLabel}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
 
             {fileDetails && (
-                <div className={`${styles.mediaAttachmentCard} ${styles.mediaAttachmentCardView} mt-4`}>
-                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                <div className={`solid-media-attachment-card solid-media-attachment-card-view mt-4`}>
+                    <div className={`solid-media-attachment-row flex items-center md:gap-2`}>
                         <FileReaderExt fileDetails={fileDetails} />
-                        <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                        <div className={`solid-media-attachment-meta w-full`}>
                             <div className="flex items-start justify-between gap-4">
                                 <button
                                     type="button"
-                                    className={styles.mediaAttachmentName}
+                                    className="solid-media-attachment-name"
                                     onClick={() => handleFileView(fileDetails)}
                                     title={fileDetails.name}
                                 >
                                     {fileDetails.name}
                                 </button>
-                                <div className={`${styles.mediaAttachmentActions} flex items-center md:gap-2`}>
+                                <div className={`solid-media-attachment-actions flex items-center md:gap-2`}>
                                     <button
                                         type="button"
                                         className="solid-file-icon-btn"
@@ -617,7 +616,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                     </button>
                                 </div>
                             </div>
-                            <div className={styles.mediaAttachmentSize}>
+                            <div className="solid-media-attachment-size">
                                 {fileDetails && formatFileSize(fileDetails.fileSize)}
                             </div>
                         </div>

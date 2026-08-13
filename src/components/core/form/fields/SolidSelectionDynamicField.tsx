@@ -11,7 +11,6 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { formikValuestoQueryString } from "../../../../helpers/helpers";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import styles from "./solidFields.module.css";
 
 type AutoCompleteCompleteEvent = { query: string };
 
@@ -260,9 +259,9 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
 
 
     return (
-        <div className={`${styles.fieldWrapper} ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalid : ""}`}>
+        <div className={`solid-field-wrapper ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? "solid-field-invalid" : ""}`}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`solid-field-label form-field-label`}>
                     {fieldLabel}
                     {isRequired && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -271,7 +270,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
             <SolidAutocomplete
                 multiple={isMultiSelect}
                 field="label"
-                className={`solid-standard-autocomplete ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalidControl : ""}`}
+                className={`solid-standard-autocomplete ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? "solid-field-invalid-control" : ""}`}
                 value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
                 dropdown
                 suggestions={selectionDynamicItems}
@@ -290,7 +289,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>
+                <p className="solid-field-error">
                     {typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
                         ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
                         : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()}
@@ -334,11 +333,11 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     }
 
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className="solid-field-view-wrapper">
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`solid-field-view-label form-field-label`}>{fieldLabel}</p>
             )}
-            <p className={styles.fieldViewValue}>
+            <p className="solid-field-view-value">
                 {isMultiSelect
                     ? (values.length > 0 ? values.join(', ') : 'No selection')
                     : (() => {

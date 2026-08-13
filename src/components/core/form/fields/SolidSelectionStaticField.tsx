@@ -3,7 +3,6 @@ import { SolidAutocomplete } from "../../../shad-cn-ui/SolidAutocomplete";
 import { SolidRadioGroup } from "../../../shad-cn-ui/SolidRadioGroup";
 import { SolidSegmentedControl } from "../../../shad-cn-ui/SolidSegmentedControl";
 import { buildSyntheticChangeEvent } from "./fieldEventUtils";
-import styles from './solidFields.module.css';
 import { useMemo, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -216,9 +215,9 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     return (
-        <div className={`${styles.fieldWrapper} ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalid : ""}`}>
+        <div className={`solid-field-wrapper ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? "solid-field-invalid" : ""}`}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`solid-field-label form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -228,7 +227,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                 multiple={isMultiSelect}
                 dropdown
                 field="label"
-                className={`solid-standard-autocomplete ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalidControl : ""}`}
+                className={`solid-standard-autocomplete ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? "solid-field-invalid-control" : ""}`}
                 value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
                 suggestions={selectionStaticItems}
                 completeMethod={(e) => selectionStaticSearch(e)}
@@ -243,7 +242,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                 // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>
+                <p className="solid-field-error">
                     {typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
                         ? (formik.errors[fieldLayoutInfo?.attrs?.name] as any)?.value?.toString()
                         : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()}
@@ -278,14 +277,14 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
 
     if (isMultiSelect) {
         return (
-            <p className={styles.fieldError}>This render mode is not supported for multi select.</p>
+            <p className="solid-field-error">This render mode is not supported for multi select.</p>
         );
     }
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className="solid-field-wrapper">
             {showFieldLabel !== false && (
-                <label htmlFor={fieldName} className={styles.fieldLabel}>
+                <label htmlFor={fieldName} className="solid-field-label">
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -306,7 +305,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
                 }}
             />
             {isFormFieldValid(formik, fieldName) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldName]?.toString()}</p>
+                <p className="solid-field-error">{formik?.errors[fieldName]?.toString()}</p>
             )}
         </div>
     );
@@ -332,7 +331,7 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
 
     if (isMultiSelect) {
         return (
-            <p className={styles.fieldError}>This render mode is not supported for multi select.</p>
+            <p className="solid-field-error">This render mode is not supported for multi select.</p>
         );
     }
 
@@ -346,9 +345,9 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
         typeof currentValue === "object" ? currentValue.value : currentValue || null;
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className="solid-field-wrapper">
             {showFieldLabel !== false && (
-                <label htmlFor={fieldName} className={styles.fieldLabel}>
+                <label htmlFor={fieldName} className="solid-field-label">
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                 </label>
@@ -367,7 +366,7 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
                 }}
             />
             {isFormFieldValid(formik, fieldName) && (
-                <p className={styles.fieldError}>{formik.errors[fieldName]?.toString()}</p>
+                <p className="solid-field-error">{formik.errors[fieldName]?.toString()}</p>
             )}
         </div>
     );
@@ -383,11 +382,11 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     const isMultiSelect = fieldLayoutInfo.attrs.multiSelect ?? fieldMetadata?.isMultiSelect;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className="solid-field-view-wrapper">
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`solid-field-view-label form-field-label`}>{fieldLabel}</p>
             )}
-            <p className={styles.fieldViewValue}>
+            <p className="solid-field-view-value">
                 {isMultiSelect
                     ? Array.isArray(value)
                         ? value.map((v: any) => v?.label).filter(Boolean).join(', ')
