@@ -1062,6 +1062,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 else {
                     // updateEntity({ id: +params.id, data: formData });
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    // Keep the current screen in sync with the normalized payload returned by the API
+                    // so toggling view/edit after save does not continue showing stale pre-save values.
+                    if (result?.data) {
+                        setInitialEntityData(result.data);
+                        formikRef.current?.resetForm({ values: result.data });
+                    }
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
                         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORM_UPDATE, detail: ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY }));
