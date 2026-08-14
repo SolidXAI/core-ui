@@ -2513,7 +2513,7 @@ li.header-li-px {
   color: var(--foreground, var(--text-color));
   font-size: 14px;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.35;
   letter-spacing: -0.01em;
 }
 
@@ -2522,11 +2522,11 @@ li.header-li-px {
 }
 
 .solid-dropzone-meta {
-  margin: 0 0 0.2rem;
+  /* margin: 0 0 0.2rem; */
   text-align: center;
   color: var(--muted-foreground, var(--text-color-secondary)) !important;
   font-size: 11px !important;
-  line-height: 1.45;
+  line-height: 1;
   letter-spacing: 0.01em;
 }
 

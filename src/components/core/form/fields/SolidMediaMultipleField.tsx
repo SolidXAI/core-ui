@@ -334,7 +334,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 setFileSizeError(rejection.errors[0]?.message || ERROR_MESSAGES.FILE_NOT_ACCEPT);
             }
         },
-        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
+        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes, fieldMetadata.mediaAllowedExtensions),
         maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
     });
 
@@ -390,6 +390,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         <input {...getInputProps()} />
                         <DropzonePlaceholder
                             mediaTypes={fieldMetadata.mediaTypes}
+                            mediaAllowedExtensions={fieldMetadata.mediaAllowedExtensions}
                             mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
                         />
                     </div>

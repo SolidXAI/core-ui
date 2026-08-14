@@ -345,7 +345,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 setFileSizeError(rejection.errors[0]?.message || ERROR_MESSAGES.FILE_NOT_ACCEPT);
             }
         },
-        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
+        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes, fieldMetadata.mediaAllowedExtensions),
         maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
         disabled: isFieldDisabled || isFieldReadonly
     });
@@ -400,6 +400,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                         <input {...getInputProps()} />
                         <DropzonePlaceholder
                             mediaTypes={fieldMetadata.mediaTypes}
+                            mediaAllowedExtensions={fieldMetadata.mediaAllowedExtensions}
                             mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
                         />
                     </div>
