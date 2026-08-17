@@ -119,9 +119,15 @@ const createSolidEntityApiInternal = (entityName: string) => {
                     { type: entityName, id: 'LIST' },
                 ],
             }),
-            recoverSolidEntityById: builder.query({
-                query: (id) => `/${kebabEntityName}/recover/${id}`,
-                providesTags: (_result, _error, id) => [{ type: entityName, id }],
+            recoverSolidEntityById: builder.mutation({
+                query: (id) => ({
+                    url: `/${kebabEntityName}/recover/${id}`,
+                    method: 'GET',
+                }),
+                invalidatesTags: (_result, _error, id) => [
+                    { type: entityName, id },
+                    { type: entityName, id: 'LIST' },
+                ],
             }),
             recoverSolidEntity: builder.mutation({
                 query: (data) => ({

@@ -36,13 +36,15 @@ interface KanbanCardProps {
   onDelete?: (record: Data) => void;
   onRecover?: (record: Data) => void;
   showArchived?: boolean;
+  recoveredRecordIds?: string[];
   params?: any;
   handleCustomButtonClick?: (buttonAttrs: any, event: any) => void;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived, params, handleCustomButtonClick }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived, recoveredRecordIds = [], params, handleCustomButtonClick }) => {
   const router = useRouter()
-  const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
+  const isRecoveredRecord = recoveredRecordIds.some((id) => String(id) === String(data?.id));
+  const isArchivedRecord = !isRecoveredRecord && data?.deletedAt !== null && data?.deletedAt !== undefined;
 
   const persistReturnView = () => {
     storeCurrentModelViewContext();

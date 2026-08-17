@@ -38,6 +38,7 @@ interface KanbanColumnProps {
   onDelete?: (record: GroupData) => void;
   onRecover?: (record: GroupData) => void;
   showArchived?: boolean;
+  recoveredRecordIds?: string[];
   setLightboxUrls: any,
   setOpenLightbox: any
   recordClickAction?: "view" | "edit";
@@ -46,7 +47,9 @@ interface KanbanColumnProps {
 }
 
 // @ts-ignore
-const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction, showArchived, params, handleCustomButtonClick }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction, showArchived, recoveredRecordIds = [], params, handleCustomButtonClick }: KanbanColumnProps) => {
+  const recoveredRecordIdSet = new Set(recoveredRecordIds.map((id) => String(id)));
+
   return (
     <div className={group.folded ? "kanban-column kanban-column-folded" : "kanban-column"}>
       <div className="kaban-heading-area">
@@ -98,10 +101,13 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
               {...provided.droppableProps}
               style={{ minHeight: "100px" }}
             >
-              {groupData.map((data, index) => (
-                // @ts-ignore
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled || Boolean(data?.deletedAt)} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} recordClickAction={recordClickAction} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} onDelete={onDelete} onRecover={onRecover} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick} />
-              ))}
+              {groupData.map((data, index) => {
+                const isRecoveredRecord = recoveredRecordIdSet.has(String(data?.id));
+                return (
+                  // @ts-ignore
+                  <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled || (Boolean(data?.deletedAt) && !isRecoveredRecord)} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} recordClickAction={recordClickAction} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} onDelete={onDelete} onRecover={onRecover} showArchived={showArchived} recoveredRecordIds={recoveredRecordIds} params={params} handleCustomButtonClick={handleCustomButtonClick} />
+                );
+              })}
               {asCompatibleReactNode(provided.placeholder)}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&
                 <SolidButton
