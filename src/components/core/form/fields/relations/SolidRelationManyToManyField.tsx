@@ -251,12 +251,14 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         </>
                     )}
                 </div>
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <SolidMessage
+                        severity="error"
+                        text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                        className="solid-field-error"
+                    />
+                )}
             </div>
-            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
-            )}
         </div>
     );
 };

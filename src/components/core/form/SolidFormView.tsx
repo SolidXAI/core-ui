@@ -529,6 +529,30 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, 
     )
 };
 
+const isCustomHtmlFieldHelper = (fieldElement: any, customElement: any) => {
+    if (fieldElement?.type !== "field" || customElement?.type !== "custom") {
+        return false;
+    }
+
+    const customAttrs = customElement.attrs ?? {};
+    const fieldName = fieldElement.attrs?.name;
+    const customName = customAttrs.name;
+
+    if (customAttrs.widget !== "CustomHtml") {
+        return false;
+    }
+
+    if (customAttrs.helperFor) {
+        return customAttrs.helperFor === fieldName;
+    }
+
+    if (customAttrs.placement === "helper" || customAttrs.renderAs === "helper") {
+        return true;
+    }
+
+    return Boolean(fieldName && customName && customName.includes(`${fieldName}-custom`));
+};
+
 
 const FormikSubmitWatcher = ({ formik, tabFieldsRef, embeded, searchParams, setRequestedTab, setRequestedTabVersion }: any) => {
     const lastHandledRef = useRef(0);
@@ -1643,6 +1667,32 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
 
         // Now render the form dynamically...
+        const renderLayoutChildren = (layoutChildren: any[] = [], recursiveFVMD: any, path: string) => {
+            const renderedChildren = [];
+
+            for (let index = 0; index < layoutChildren.length; index += 1) {
+                const element = layoutChildren[index];
+                const nextElement = layoutChildren[index + 1];
+
+                if (isCustomHtmlFieldHelper(element, nextElement) && nextElement?.attrs?.visible !== false) {
+                    renderedChildren.push(
+                        <div key={`field-helper-${path}.${index}`} className="solid-field-helper-composite">
+                            {renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`)}
+                            <div className="solid-field-custom-helper">
+                                {renderFormElementDynamically(nextElement, recursiveFVMD, `${path}.${index + 1}`)}
+                            </div>
+                        </div>
+                    );
+                    index += 1;
+                    continue;
+                }
+
+                renderedChildren.push(renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`));
+            }
+
+            return renderedChildren;
+        };
+
         const renderFormElementDynamically: any = (element: any, recursiveFVMD: any, path = "root") => {
             let { type, attrs, body, children } = element;
             const normalizedAttrs = normalizeLayoutAttrs(attrs);
@@ -1668,11 +1718,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "form":
                     if (!children)
                         children = [];
-                    return <div key={key}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>;
+                    return <div key={key}>{renderLayoutChildren(children, recursiveFVMD, path)}</div>;
                 case "div":
                     if (!children)
                         children = [];
-                    return <div key={key} {...normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>
+                    return <div key={key} {...normalizedAttrs}>{renderLayoutChildren(children, recursiveFVMD, path)}</div>
                 case "span":
                     return <span key={key} {...normalizedAttrs}>{body}</span>
                 case "p":
@@ -1684,24 +1734,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "ul":
                     if (!children)
                         children = [];
-                    return <ul key={key} {...normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</ul>
+                    return <ul key={key} {...normalizedAttrs}>{renderLayoutChildren(children, recursiveFVMD, path)}</ul>
                 case "li":
                     return <li key={key} {...normalizedAttrs}>{body}</li>
                 case "sheet":
-                    return <SolidSheet key={key}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidSheet>;
+                    return <SolidSheet key={key}>{renderLayoutChildren(children, recursiveFVMD, path)}</SolidSheet>;
                 case "group":
                     if (visible === true) {
-                        return <SolidGroup key={key} attrs={normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidGroup>;
+                        return <SolidGroup key={key} attrs={normalizedAttrs}>{renderLayoutChildren(children, recursiveFVMD, path)}</SolidGroup>;
                     }
                     break;
                 case "row":
                     if (visible === true) {
-                        return <SolidRow key={key} attrs={normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidRow>;
+                        return <SolidRow key={key} attrs={normalizedAttrs}>{renderLayoutChildren(children, recursiveFVMD, path)}</SolidRow>;
                     }
                     break;
                 case "column":
                     if (visible === true) {
-                        return <SolidColumn key={key} attrs={normalizedAttrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidColumn>;
+                        return <SolidColumn key={key} attrs={normalizedAttrs}>{renderLayoutChildren(children, recursiveFVMD, path)}</SolidColumn>;
                     }
                     break;
                 case "field":
@@ -1741,14 +1791,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         const workflowStatusLabel = recursiveFVMD?.data?.solidView?.model?.draftPublishWorkflow === true
                             ? currentWorkflowStatusLabel
                             : null;
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded} requestedTab={requestedTab} requestedTabVersion={requestedTabVersion} workflowStatusLabel={workflowStatusLabel}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded} requestedTab={requestedTab} requestedTabVersion={requestedTabVersion} workflowStatusLabel={workflowStatusLabel}>{renderLayoutChildren(children, recursiveFVMD, path)}</SolidNotebook>;
                     }
                     break;
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
                         tabFieldsRef.current.push({ tabKey: key, fields: fields.map((f: any) => f.attrs.name) });
-                        const pageChildren = children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`));
+                        const pageChildren = renderLayoutChildren(children, recursiveFVMD, path);
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
                     break;

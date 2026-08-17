@@ -365,7 +365,7 @@
   .solid-form-content .p-multiselect,
   .solid-form-content .p-inputnumber-input,
   .solid-form-content .p-calendar .p-inputtext {
-    min-height: 2.9rem;
+    min-height: 34px;
   }
 
   .form-field-label {

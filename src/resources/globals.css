@@ -5046,12 +5046,37 @@ li.header-li-px {
 .solid-form-content .solid-standard-autocomplete .p-autocomplete-dropdown.p-button,
 .solid-form-content .react-datepicker-wrapper input,
 .solid-form-content .solid-input,
-.solid-form-content .solid-select,
-.solid-form-content .solid-autocomplete-control {
+.solid-form-content .solid-select {
+  min-height: 34px !important;
+  height: 34px !important;
   background: var(--solid-form-control-bg);
   border-color: color-mix(in srgb, var(--border) 92%, transparent);
   color: var(--foreground);
   box-shadow: none;
+}
+
+.solid-form-content .solid-autocomplete-control {
+  min-height: 34px !important;
+  background: var(--solid-form-control-bg);
+  border-color: color-mix(in srgb, var(--border) 92%, transparent);
+  color: var(--foreground);
+  box-shadow: none;
+}
+
+.solid-form-content .solid-autocomplete-control:not(.solid-autocomplete-chip-control) {
+  height: 34px !important;
+}
+
+.solid-form-content .solid-autocomplete-inline-input {
+  min-height: 24px !important;
+  height: 24px !important;
+}
+
+.solid-form-content textarea.p-inputtext,
+.solid-form-content textarea.solid-input,
+.solid-form-content .solid-field-textarea {
+  min-height: 34px !important;
+  height: auto !important;
 }
 
 .solid-form-content .p-inputtext:hover,

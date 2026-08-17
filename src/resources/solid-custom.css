@@ -1494,7 +1494,8 @@ textarea {
 
 .solid-select {
   width: 100%;
-  height: 32px;
+  height: 34px;
+  min-height: 34px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -1511,7 +1512,8 @@ textarea {
   justify-content: flex-start;
   text-align: left;
   cursor: pointer;
-  height: 32px;
+  height: 34px;
+  min-height: 34px;
 }
 
 .solid-select-trigger:disabled {
@@ -1593,7 +1595,8 @@ textarea {
 
 .solid-input {
   width: 100%;
-  min-height: 32px;
+  height: 34px;
+  min-height: 34px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -1620,7 +1623,7 @@ textarea {
 
 .solid-textarea {
   height: auto;
-  min-height: 32px;
+  min-height: 34px;
 }
 
 .solid-field-wrapper {
@@ -1628,6 +1631,43 @@ textarea {
   flex-direction: column;
   gap: 4px;
   margin-top: 10px;
+}
+
+.solid-field-wrapper::after {
+    content: "";
+    display: block;
+    min-height: 15px;
+}
+
+.solid-field-wrapper:has(.solid-field-error)::after {
+    display: none;
+}
+
+.solid-field-helper-composite {
+  width: 100%;
+  min-width: 0;
+}
+
+.solid-field-helper-composite > .solid-field-wrapper::after {
+  display: none;
+}
+
+.solid-field-custom-helper {
+  min-height: 15px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.solid-field-custom-helper .solid-tab-view {
+  width: 100%;
+}
+
+.solid-field-custom-helper .solid-tab-view > div {
+  margin: 0;
+}
+
+.solid-field-helper-composite:has(.solid-field-error) .solid-field-custom-helper {
+  display: none;
 }
 
 .solid-field-label {
@@ -1644,7 +1684,8 @@ textarea {
 
 .solid-field-input {
   width: 100% !important;
-  height: 32px !important;
+  height: 34px !important;
+  min-height: 34px !important;
   border-radius: 8px !important;
   border: 1px solid var(--border) !important;
   background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
@@ -1669,7 +1710,7 @@ textarea {
 
 .solid-field-textarea {
   width: 100% !important;
-  min-height: 32px !important;
+  min-height: 34px !important;
   height: auto !important;
   border-radius: 8px !important;
   border: 1px solid var(--border) !important;
@@ -1701,7 +1742,8 @@ textarea {
 
 .solid-field-number-wrapper .solid-input {
   width: 100% !important;
-  height: 32px !important;
+  height: 34px !important;
+  min-height: 34px !important;
   border-radius: 8px !important;
   border: 1px solid var(--border) !important;
   background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
@@ -1725,10 +1767,11 @@ textarea {
 }
 
 .solid-field-error {
-  margin: 2px 0 0;
+  margin: 0;
   color: #ef4444;
   font-size: 11.5px;
   line-height: 1.3;
+  min-height: 15px;
 }
 
 .solid-field-invalid .solid-autocomplete-control {
@@ -1891,11 +1934,14 @@ textarea {
   display: flex;
   align-items: center;
   width: 100%;
+  box-sizing: border-box;
+  min-height: 34px;
   min-width: 0;
 }
 
 .solid-autocomplete-chip-control {
-  min-height: 32px;
+  box-sizing: border-box;
+  min-height: 34px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--card);
@@ -7172,6 +7218,19 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 .solid-message-error {
   background: transparent;
   color: #ef4444;
+}
+
+.solid-message.solid-field-error {
+  display: flex;
+  width: 100%;
+  min-height: 15px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #ef4444;
+  font-size: 11.5px;
+  line-height: 1.3;
 }
 
 .solid-tag {

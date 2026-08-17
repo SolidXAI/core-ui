@@ -91,6 +91,7 @@ export function SolidDatePicker({
   renderCustomHeader,
   showMonthDropdown,
   showYearDropdown,
+  portalId,
   ...props
 }: SolidDatePickerProps) {
   const resolvedShowTime = timeOnly ? true : showTimeSelect;
@@ -109,6 +110,7 @@ export function SolidDatePicker({
       selected={selected}
       minDate={minDate}
       maxDate={maxDate}
+      portalId={portalId ?? "solid-datepicker-portal"}
       showTimeSelect={resolvedShowTime}
       showTimeSelectOnly={timeOnly}
       showMonthDropdown={enableMonthDropdown}

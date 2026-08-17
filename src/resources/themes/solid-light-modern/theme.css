@@ -401,7 +401,7 @@
   .p-calendar .p-inputtext,
   .p-treeselect,
   .p-cascadeselect {
-    min-height: 46px;
+    min-height: 34px;
     border-radius: 12px !important;
     border: 1px solid var(--solid-border-default) !important;
     background: #f3ebdd !important;
@@ -526,7 +526,7 @@
   .solid-form-content .solid-input,
   .solid-form-content .solid-select,
   .solid-form-content .solid-autocomplete-control {
-    min-height: 46px;
+    min-height: 34px;
     background: #f3ebdd !important;
     border-color: var(--solid-border-default) !important;
   }
