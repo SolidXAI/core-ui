@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.12] - 2026-08-17
+
+### Added
+
+- sync form state with API response after save to prevent stale values
+
+### Other
+
+- fixed formatting
+- - form viewmode behaviour after save - kanban and card view edit row action
+- added form viewmode widget
+
 ## [0.1.14-beta.11] - 2026-08-11
 
 ### Added
