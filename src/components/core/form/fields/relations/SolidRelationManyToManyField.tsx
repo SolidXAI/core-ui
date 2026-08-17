@@ -82,7 +82,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
         if (!editWidget) editWidget = 'DefaultRelationManyToManyAutoCompleteFormEditWidget';
-        if (!viewWidget) viewWidget = 'DefaultRelationManyToManyListFormEditWidget';
+        if (!viewWidget) viewWidget = 'DefaultRelationManyToManyFormViewWidget';
 
         const viewMode: string = this.fieldContext.viewMode;
         return (
@@ -724,6 +724,33 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     />
                 </div>
             </SolidDialog>
+        </div>
+    );
+};
+
+export const DefaultRelationManyToManyFormViewWidget = ({ fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const { currentValues, fetchCurrentValues } = useRelationEntityHandler({ fieldContext });
+
+    useEffect(() => {
+        fetchCurrentValues();
+    }, [fieldContext.data?.id]);
+
+    const displayValues = currentValues.map((item) => item.label).filter(Boolean);
+    const maxVisible = fieldLayoutInfo?.attrs?.maxVisibleRelationLabels ?? 2;
+    const visibleValues = displayValues.slice(0, maxVisible);
+    const hiddenCount = displayValues.length - visibleValues.length;
+    const displayValue = `${visibleValues.join(", ")}${hiddenCount > 0 ? ` +${hiddenCount} more` : ""}`;
+
+    return (
+        <div className={styles.fieldViewWrapper}>
+            {showFieldLabel !== false && (
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+            )}
+            <p className={styles.fieldViewValue}>{displayValue}</p>
         </div>
     );
 };
