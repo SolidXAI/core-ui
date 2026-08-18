@@ -8,7 +8,7 @@ interface DropzonePlaceholderProps {
 
 export const DropzonePlaceholder = ({ mediaTypes, mediaAllowedExtensions, mediaMaxSizeKb }: DropzonePlaceholderProps) => {
     const allowedTypesLabel = getAllowedMediaTypesLabel(mediaTypes);
-    const allowedExtensionsLabel = getAllowedMediaExtensionsLabel(mediaTypes, mediaAllowedExtensions);
+    const allowedExtensionsLabel = getAllowedMediaExtensionsLabel(mediaAllowedExtensions);
 
     const maxSizeLabel = !mediaMaxSizeKb || mediaMaxSizeKb <= 0
         ? "No limit"
