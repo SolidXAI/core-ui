@@ -243,10 +243,6 @@
         max-width: 100% !important;
     }
 
-    .solid-search-overlay-pannel {
-        top: calc(100% + 4px) !important;
-    }
-
     .custom-filter-button {
         border: none;
     }

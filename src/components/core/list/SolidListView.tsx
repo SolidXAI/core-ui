@@ -29,9 +29,10 @@ import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
-import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList, SolidDefinedFilter } from "../../../types/solid-core";
+import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
+import { resolveActiveUserId } from "../../../helpers/resolveActiveUserId";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
@@ -106,6 +107,17 @@ export type SolidListViewHandle = {
     saved_filter_predicate?: any;
     predefined_search_predicate?: any;
   }) => void;
+  /**
+   * Returns the saved filters currently available in the list view, including
+   * any seeded/system filters supplied by the view.
+   */
+  getSavedFilters: () => any[];
+  /**
+   * Applies the currently available saved filter with the given name using the
+   * same selection path as clicking that filter in the search UI.
+   * Returns false when no saved filter with that name is available.
+   */
+  applySavedFilter: (name: string, variables?: Record<string, any>) => boolean;
   /**
    * Updates pagination state directly.
    * Use this when a caller needs to jump to a specific page window
@@ -196,12 +208,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
   const suppressNextFilterPaginationResetRef = useRef(false);
-
-  // Filters offered by an onBeforeListDataLoad handler (event.definedFilters).
-  // Each stays independently removable via the search bar's pill UI rather
-  // than being baked directly into the outgoing query filter.
-  const [definedFilters, setDefinedFilters] = useState<SolidDefinedFilter[]>([]);
-  const definedFilterOverridesRef = useRef<Record<string, boolean>>({});
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
@@ -665,6 +671,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           listData: listViewData,
           totalRecords: totalRecords,
           type: "onListLoad",
+          isInitialLoad: !hasFiredInitialOnListLoadRef.current,
           viewMetadata: solidListViewMetaData?.data?.solidView,
           listViewLayout: listLayout,
           queryParams: {
@@ -677,6 +684,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           session: session.data,
           params: params
         };
+        hasFiredInitialOnListLoadRef.current = true;
 
         if (dynamicHeader) {
           dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
@@ -709,6 +717,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const latestFilterPredicatesRef = useRef<any>(filterPredicates);
   const latestSortFieldRef = useRef<string>(sortField);
   const latestSortOrderRef = useRef<1 | -1 | 0>(sortOrder);
+  const hasFiredInitialOnBeforeListDataLoadRef = useRef(false);
+  const hasFiredInitialOnListLoadRef = useRef(false);
 
   useEffect(() => {
     latestSortFieldRef.current = sortField;
@@ -830,8 +840,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
     const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
     let dynamicExtensionFunction = null;
+    const isInitialLoad = !hasFiredInitialOnBeforeListDataLoadRef.current;
+    hasFiredInitialOnBeforeListDataLoadRef.current = true;
     const event: SolidBeforeListDataLoad = {
       type: "onBeforeListDataLoad",
+      isInitialLoad,
       fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
       viewMetadata: solidListViewMetaData?.data?.solidView,
       listViewLayout: solidListViewMetaData?.data.solidView.layout,
@@ -855,48 +868,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
             queryData = updatedListData?.newFilter;
           }
-
-          // Reconcile handler-offered filters against any user removals from
-          // this mount (definedFilterOverridesRef), then merge the ones still
-          // applied into the outgoing query. Stale keys (no longer offered by
-          // the handler) are dropped from the override map.
-          const nextDefinedFilters = updatedListData?.definedFilters ?? [];
-          const reconciledDefinedFilters: SolidDefinedFilter[] = nextDefinedFilters.map((def) => {
-            const hasOverride = Object.prototype.hasOwnProperty.call(definedFilterOverridesRef.current, def.key);
-            const applied = hasOverride ? definedFilterOverridesRef.current[def.key] : def.applied;
-            definedFilterOverridesRef.current[def.key] = applied;
-            return { ...def, applied };
-          });
-          Object.keys(definedFilterOverridesRef.current).forEach((key) => {
-            if (!reconciledDefinedFilters.some((def) => def.key === key)) {
-              delete definedFilterOverridesRef.current[key];
-            }
-          });
-          setDefinedFilters(reconciledDefinedFilters);
-
-          const activeDefinedFilterPredicates = reconciledDefinedFilters
-            .filter((def) => def.applied)
-            .map((def) => def.predicate);
-          if (activeDefinedFilterPredicates.length > 0) {
-            // queryData.filters may be the same object reference as
-            // latestFiltersRef.current (see assignment above) when the
-            // handler didn't return a newFilter. Clone before mutating so we
-            // never permanently bake handler predicates into that ref -
-            // otherwise they'd accumulate/duplicate on every subsequent
-            // fetch (pagination, sort, removal, ...) instead of being
-            // recomputed fresh each time.
-            const mergedFilters = queryData.filters ? structuredClone(queryData.filters) : {};
-            mergedFilters.$and = Array.isArray(mergedFilters.$and) ? mergedFilters.$and : [];
-            mergedFilters.$and.push(...activeDefinedFilterPredicates);
-            queryData.filters = mergedFilters;
-          }
         } catch (err) {
           console.error("Error executing onBeforeListDataLoad extension:", err);
         }
       }
-    } else if (Object.keys(definedFilterOverridesRef.current).length > 0) {
-      definedFilterOverridesRef.current = {};
-      setDefinedFilters([]);
     }
 
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
@@ -908,6 +883,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
       fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
       fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      fileterTobeStored.saved_filter_variables = latestFilterPredicatesRef.current.saved_filter_variables || {};
       fileterTobeStored.saved_filter_id = latestFilterPredicatesRef.current.saved_filter_id || null;
       fileterTobeStored.saved_filter_system_key = latestFilterPredicatesRef.current.saved_filter_system_key || null;
       fileterTobeStored.saved_filter_name = latestFilterPredicatesRef.current.saved_filter_name || null;
@@ -930,7 +906,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       queryfilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
-      queryfilter.$and.push(filterPredicates.saved_filter_predicate);
+      queryfilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
+        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
     }
     if (filterPredicates.predefined_search_predicate) {
       queryfilter.$and.push(filterPredicates.predefined_search_predicate);
@@ -1012,26 +989,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     // Force synchronous state updates
   };
 
-  // Removes a single handler-offered filter pill. The override persists for
-  // the rest of this mount (setQueryString reconciliation keeps it applied:false
-  // on subsequent fetches) but is not persisted beyond it.
-  const removeDefinedFilter = (key: string) => {
-    definedFilterOverridesRef.current[key] = false;
-    setDefinedFilters((prev) => prev.map((def) => (def.key === key ? { ...def, applied: false } : def)));
-    setFirst(0);
-    void setQueryString();
-  };
-
-  // Applies a handler-offered filter the user picked from the "defined
-  // filters" list (one the handler returned with applied:false by default).
-  // Mirrors removeDefinedFilter in the other direction.
-  const applyDefinedFilter = (key: string) => {
-    definedFilterOverridesRef.current[key] = true;
-    setDefinedFilters((prev) => prev.map((def) => (def.key === key ? { ...def, applied: true } : def)));
-    setFirst(0);
-    void setQueryString();
-  };
-
   // clear Filter
   const clearFilter = () => {
     if (solidListViewMetaData) {
@@ -1069,6 +1026,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     applyFilter: (filter) => {
       handleApplyCustomFilter(filter);
     },
+    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+    applySavedFilter: (name, variables) => solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
     setPagination: (nextFirst, nextRows) => {
       setFirst(nextFirst);
       setRows(nextRows);
@@ -1462,30 +1421,34 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </p>
                   </div> */}
                   {params.embeded === false && (
-                    <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
-                      {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
-                      <SolidGlobalSearchElement
-                        key={params.modelName}
-                        viewType="list"
-                        showSaveFilterPopup={showSaveFilterPopup}
-                        setShowSaveFilterPopup={setShowSaveFilterPopup}
-                        ref={solidGlobalSearchElementRef}
-                        viewData={solidListViewMetaData}
-                        handleApplyCustomFilter={handleApplyCustomFilter}
-                        filterPredicates={filterPredicates}
-                        definedFilters={definedFilters}
-                        onRemoveDefinedFilter={removeDefinedFilter}
-                        onApplyDefinedFilter={applyDefinedFilter}
-                      >
-                      </SolidGlobalSearchElement>
-                    </div>
+                    <>
+
+                      {/* Global search element: always visible on desktop (lg+), toggled via search button below lg */}
+                      {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
+                          library's generated CSS, so the app's base `.hidden` would override our media-scoped
+                          `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
+                      <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
+                        {/* Keep global search mounted for now because list bootstrap/filter hydration still flows through this element. */}
+                        <SolidGlobalSearchElement
+                          key={params.modelName}
+                          viewType="list"
+                          showSaveFilterPopup={showSaveFilterPopup}
+                          setShowSaveFilterPopup={setShowSaveFilterPopup}
+                          ref={solidGlobalSearchElementRef}
+                          viewData={solidListViewMetaData}
+                          handleApplyCustomFilter={handleApplyCustomFilter}
+                          filterPredicates={filterPredicates}
+                        >
+                        </SolidGlobalSearchElement>
+                      </div>
+                    </>
                   )}
 
                 </div>
                 <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                   <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {params.embeded === false && (
-                    <div className="flex lg:hidden">
+                    <div className="solid-list-search-toggle">
                       <SolidButton
                         type="button"
                         size="small"
@@ -1716,30 +1679,30 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     const presentation = resolveButtonPresentation(button?.attrs);
                                     if (!presentation.showIcon && !presentation.showLabel) return null;
                                     return (
-                                  <SolidButton
-                                    type="button"
-                                    icon={presentation.icon}
-                                    iconPos={presentation.iconPos}
-                                    label={presentation.label}
-                                    tooltip={presentation.tooltip}
-                                    aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
-                                    className={[
-                                      "solid-inline-row-button w-full text-left gap-2",
-                                      presentation.isIconOnly ? "solid-icon-button" : "",
-                                      presentation.buttonClassName ? presentation.buttonClassName : ""
-                                    ].filter(Boolean).join(" ")}
-                                    size="small"
-                                    variant="ghost"
-                                    onClick={() => {
-                                      const event = {
-                                        params,
-                                        rowData: rowData,
-                                        solidListViewMetaData:
-                                          solidListViewMetaData?.data,
-                                      };
-                                      handleCustomButtonClick(button.attrs, event);
-                                    }}
-                                  />
+                                      <SolidButton
+                                        type="button"
+                                        icon={presentation.icon}
+                                        iconPos={presentation.iconPos}
+                                        label={presentation.label}
+                                        tooltip={presentation.tooltip}
+                                        aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
+                                        className={[
+                                          "solid-inline-row-button w-full text-left gap-2",
+                                          presentation.isIconOnly ? "solid-icon-button" : "",
+                                          presentation.buttonClassName ? presentation.buttonClassName : ""
+                                        ].filter(Boolean).join(" ")}
+                                        size="small"
+                                        variant="ghost"
+                                        onClick={() => {
+                                          const event = {
+                                            params,
+                                            rowData: rowData,
+                                            solidListViewMetaData:
+                                              solidListViewMetaData?.data,
+                                          };
+                                          handleCustomButtonClick(button.attrs, event);
+                                        }}
+                                      />
                                     );
                                   })()
                                 );
@@ -1831,18 +1794,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       <Column
                         frozen
                         alignFrozen="right"
+                        className="solid-data-table-row-action-cell"
                         body={(rowData) =>
                           rowData?.deletedAt ? (
                             <div className="flex justify-content-center align-items-center" data-no-row-click="true">
-                              <a
+                              <button
+                                type="button"
                                 onClick={(event) => {
                                   event.stopPropagation();
                                   recoverById(rowData.id);
                                 }}
                                 className="retrieve-button solid-row-menu-trigger"
+                                aria-label="Recover record"
+                                title="Recover"
                               >
                                 <RotateCcw size={14} className={styles.retrieveIcon} />
-                              </a>
+                              </button>
                             </div>
                           ) : (
                             <>

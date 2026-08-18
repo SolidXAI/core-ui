@@ -42,7 +42,7 @@ import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
-import { getSettingsMap } from "../../../helpers/settingsPayload";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { SolidVersionHistory, getWorkflowStatusLabel } from "./SolidVersionHistory";
 import { appendVersionHistoryPage, SolidWorkflowStatusPill, SolidWorkflowConfirmDialog, useDraftPublishWorkflow } from "./SolidDraftPublishWorkflow";
@@ -85,23 +85,28 @@ interface ErrorResponseData {
     message: string;
     statusCode: number;
     error: string;
+    data?: {
+        message?: string | string[];
+    };
 }
 
 const LAYOUT_CLASSNAME_MAPPER: Record<string, string> = {
     grid: "flex flex-wrap",
     formgrid: "flex-wrap",
-    "col-12": "w-full",
-    "col-11": "w-[91.666667%]",
-    "col-10": "w-[83.333333%]",
-    "col-9": "w-3/4",
-    "col-8": "w-[66.666667%]",
-    "col-7": "w-[58.333333%]",
-    "col-6": "w-1/2",
-    "col-5": "w-[41.666667%]",
-    "col-4": "w-1/3",
-    "col-3": "w-1/4",
-    "col-2": "w-[16.666667%]",
-    "col-1": "w-[8.333333%]",
+    // Form-view columns render as flex items inside SolidRow, so basis preserves
+    // the old PrimeFlex column sizing without depending on width utilities.
+    "col-12": "basis-full",
+    "col-11": "basis-[91.666667%]",
+    "col-10": "basis-[83.333333%]",
+    "col-9": "basis-3/4",
+    "col-8": "basis-[66.666667%]",
+    "col-7": "basis-[58.333333%]",
+    "col-6": "basis-1/2",
+    "col-5": "basis-[41.666667%]",
+    "col-4": "basis-1/3",
+    "col-3": "basis-1/4",
+    "col-2": "basis-[16.666667%]",
+    "col-1": "basis-[8.333333%]",
     "flex-column": "flex-col",
     "flex-row": "flex-row",
     "flex-wrap": "flex-wrap",
@@ -174,7 +179,15 @@ const normalizeLayoutClassName = (className?: string) => {
             const responsivePrefix = parts.length > 1 ? `${parts.slice(0, -1).join(":")}:` : "";
             const mappedToken = mapLayoutToken(baseToken);
 
-            return mappedToken ? `${responsivePrefix}${mappedToken}` : token;
+            if (!mappedToken) return token;
+
+            // A single metadata token like `md:col-6` can expand to multiple classes,
+            // so re-apply the responsive prefix to every emitted utility.
+            return mappedToken
+                .split(/\s+/)
+                .filter(Boolean)
+                .map((mappedClass) => `${responsivePrefix}${mappedClass}`)
+                .join(" ");
         })
         .join(" ");
 };
@@ -857,6 +870,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
+    const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
+        isSystemModule: solidFormViewMetaData?.data?.solidView?.module?.isSystem === true,
+    });
     const [triggerGetSolidViewLayout] = useLazyGetSolidViewLayoutQuery();
     const entityDisplayName =
         solidFormViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
@@ -919,7 +935,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [params.modelName, solidFormViewMetaData])
 
     function isFetchBaseQueryErrorWithErrorResponse(error: any): error is FetchBaseQueryError & { data: ErrorResponseData } {
-        return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
+        return error && typeof error === 'object' && error.data && typeof error.data === 'object';
     }
 
     useEffect(() => {
@@ -927,7 +943,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
 
             if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
-                errorMessage = errorToast.data.message;
+                // Validation errors are returned in `data.data.message`, while
+                // `data.message` only contains the generic exception message.
+                errorMessage = errorToast.data.data?.message || errorToast.data.message;
             } else {
                 errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
             }
@@ -1047,19 +1065,28 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 else {
                     // updateEntity({ id: +params.id, data: formData });
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    // Keep the current screen in sync with the normalized payload returned by the API
+                    // so toggling view/edit after save does not continue showing stale pre-save values.
+                    if (result?.data) {
+                        setInitialEntityData(result.data);
+                        formikRef.current?.resetForm({ values: result.data });
+                    }
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
                         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORM_UPDATE, detail: ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY }));
                         if (result?.statusCode === 200) {
                             const nextId = result?.data?.id;
+                            const nextViewMode = recordClickAction === "edit" ? "edit" : "view";
+                            formikRef.current?.resetForm({ values });
                             if (nextId && String(nextId) !== String(params.id)) {
                                 const queryParams = new URLSearchParams(searchParams.toString());
-                                queryParams.set("viewMode", "view");
+                                queryParams.set("viewMode", nextViewMode);
                                 const updatedPath = pathname.replace(/\/form\/[^/]+/, `/form/${nextId}`);
                                 router.replace(`${updatedPath}?${queryParams.toString()}`);
-                                setViewMode("view");
+                                setViewMode(nextViewMode);
                             } else {
-                                updateViewMode("view")
+                                if (nextViewMode === "view") updateViewMode("view");
+                                else setViewMode("edit");
                             }
                         }
                     }

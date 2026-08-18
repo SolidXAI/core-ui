@@ -129,7 +129,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             type="button"
                             icon={'si si-cog'}
                             size="sm"
-                            className="solid-icon-button hidden bg-[var(--surface-card)] md:flex"
+                            className="solid-icon-button bg-[var(--surface-card)] max-[576px]:hidden sm:hidden lg:flex"
                         />
                     </SolidPopoverTrigger>
                     <SolidPopoverTrigger asChild>
@@ -138,7 +138,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             type="button"
                             icon={'si si-cog'}
                             size="sm"
-                            className="solid-icon-button bg-[var(--surface-card)] md:hidden"
+                            className="solid-icon-button bg-[var(--surface-card)] lg:hidden"
                         />
                     </SolidPopoverTrigger>
                 </div>
@@ -243,7 +243,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             </div>
                             <div className="flex items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
                                 <SolidHeaderRequestStatus label={activeHeaderRequestStatusLabel} />
-                                <div className="hidden lg:flex solid-header-buttons-wrapper">
+                                <div className="max-[576px]:hidden sm:hidden lg:flex solid-header-buttons-wrapper">
                                     {normalHeaderButtons.map((button: any, index: number) => {
                                         return (
                                             <SolidFormViewNormalHeaderButton
@@ -264,14 +264,15 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                     !formViewLayout.attrs.readonly &&
                                     <div>
-                                        <SolidButton
-                                            label="Save"
-                                            size="sm"
-                                            type="submit"
-                                            className="hidden lg:flex"
-                                            loading={isSubmitting}
-                                            disabled={isSubmitting}
-                                        />
+                                        <div className="max-[576px]:hidden sm:hidden lg:flex">
+                                            <SolidButton
+                                                label="Save"
+                                                size="sm"
+                                                type="submit"
+                                                loading={isSubmitting}
+                                                disabled={isSubmitting}
+                                            />
+                                        </div>
                                         <SolidButton
                                             size="sm"
                                             type="submit"
@@ -282,7 +283,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         />
                                     </div>
                                 }
-                                <div className="hidden lg:flex">
+                                <div className="max-[576px]:hidden sm:hidden lg:flex">
                                     {params.embeded !== true && params.draftEnabled &&
                                         !formViewLayout.attrs.readonly && params.publish !== 'null' &&
                                         formik.dirty &&
@@ -302,18 +303,19 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         {showEmbeddedRelationSaveAndNew ? (
                                             <>
                                                 <div>
-                                                    <SolidButton
-                                                        label="Save & Close"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                            setEmbeddedRelationSubmitAction?.("close");
-                                                            setRedirectToList(params.redirectToPath ? true : false);
-                                                        }}
-                                                        type="submit"
-                                                        className="hidden lg:flex"
-                                                        loading={isSubmitting}
-                                                        disabled={isSubmitting}
-                                                    />
+                                                    <div className="max-[576px]:hidden sm:hidden lg:flex">
+                                                        <SolidButton
+                                                            label="Save & Close"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                setEmbeddedRelationSubmitAction?.("close");
+                                                                setRedirectToList(params.redirectToPath ? true : false);
+                                                            }}
+                                                            type="submit"
+                                                            loading={isSubmitting}
+                                                            disabled={isSubmitting}
+                                                        />
+                                                    </div>
                                                     <SolidButton
                                                         size="sm"
                                                         onClick={() => {
@@ -329,19 +331,21 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                                     />
                                                 </div>
                                                 <div>
-                                                    <SolidButton
-                                                        label="Save & New"
-                                                        size="sm"
-                                                        variant="outline"
-                                                        onClick={() => {
-                                                            setEmbeddedRelationSubmitAction?.("new");
-                                                            setRedirectToList(false);
-                                                        }}
-                                                        type="submit"
-                                                        className="hidden lg:flex bg-[var(--primary-color-text)]"
-                                                        loading={isSubmitting}
-                                                        disabled={isSubmitting}
-                                                    />
+                                                    <div className="max-[576px]:hidden sm:hidden lg:flex">
+                                                        <SolidButton
+                                                            label="Save & New"
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() => {
+                                                                setEmbeddedRelationSubmitAction?.("new");
+                                                                setRedirectToList(false);
+                                                            }}
+                                                            type="submit"
+                                                            className="bg-[var(--primary-color-text)]"
+                                                            loading={isSubmitting}
+                                                            disabled={isSubmitting}
+                                                        />
+                                                    </div>
                                                     <SolidButton
                                                         size="sm"
                                                         variant="outline"
@@ -360,17 +364,18 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                             </>
                                         ) : (
                                             <div>
-                                                <SolidButton
-                                                    label="Save"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setRedirectToList(params.redirectToPath ? true : false);
-                                                    }}
-                                                    type="submit"
-                                                    className="hidden lg:flex"
-                                                    loading={isSubmitting}
-                                                    disabled={isSubmitting}
-                                                />
+                                                <div className="max-[576px]:hidden sm:hidden lg:flex">
+                                                    <SolidButton
+                                                        label="Save"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setRedirectToList(params.redirectToPath ? true : false);
+                                                        }}
+                                                        type="submit"
+                                                        loading={isSubmitting}
+                                                        disabled={isSubmitting}
+                                                    />
+                                                </div>
                                                 <SolidButton
                                                     size="sm"
                                                     onClick={() => {
@@ -388,7 +393,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 }
                                 {params.embeded == true &&
                                     <>
-                                        <div className="hidden lg:flex">
+                                        <div className="max-[576px]:hidden sm:hidden lg:flex">
                                             <div>
                                                 <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-[var(--primary-color-text)]' style={{ minWidth: 66 }} />
                                             </div>
@@ -444,7 +449,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                             <div className="flex items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
                                 <SolidHeaderRequestStatus label={activeHeaderRequestStatusLabel} />
-                                <div className="hidden lg:flex solid-header-buttons-wrapper">
+                                <div className="hidden items-center lg:flex solid-header-buttons-wrapper">
                                     {normalHeaderButtons.map((button: any, index: number) => {
                                         return (
                                             // <SolidButton
@@ -486,7 +491,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     viewMode === "view" &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                     <>
-                                        <div className="hidden lg:flex">
+                                        <div className="max-[576px]:hidden sm:hidden lg:flex">
                                             <div>
                                                 <SolidButton type="button" label="Add" size='sm' onClick={() => {
                                                     setIsNavigating(true);
@@ -510,7 +515,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     <>
-                                        <div className="hidden lg:flex">
+                                        <div className="max-[576px]:hidden sm:hidden lg:flex">
                                             <div>
                                                 <SolidButton label="Edit" size="sm" onClick={() => updateViewMode("edit")} type="button" />
                                             </div>
@@ -529,7 +534,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     shouldShowSaveForExistingRecord &&
 
                                     <div>
-                                        <SolidButton label="Save" size="sm" type="submit" className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting} />
+                                        <div className="max-[576px]:hidden sm:hidden lg:flex">
+                                            <SolidButton label="Save" size="sm" type="submit" loading={isSubmitting} disabled={isSubmitting} />
+                                        </div>
                                         <SolidButton size="sm" type="submit" className="lg:hidden solid-icon-button" icon="si si-check" loading={isSubmitting} disabled={isSubmitting} />
                                     </div>
                                 }
@@ -566,7 +573,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     shouldShowSaveForExistingRecord &&
 
                                     <div>
-                                        <SolidButton label="Save" size="sm" type="submit" className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting} />
+                                        <div className="max-[576px]:hidden sm:hidden lg:flex">
+                                            <SolidButton label="Save" size="sm" type="submit" loading={isSubmitting} disabled={isSubmitting} />
+                                        </div>
                                         <SolidButton size="sm" type="submit" className="lg:hidden solid-icon-button" icon="si si-check" loading={isSubmitting} disabled={isSubmitting} />
 
                                     </div>
@@ -605,7 +614,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 {
                                     params.embeded == true &&
                                     <>
-                                        <div className="hidden lg:flex">
+                                        <div className="max-[576px]:hidden sm:hidden lg:flex">
                                             <div>
                                                 <SolidButton variant="outline" size="sm" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-[var(--primary-color-text)]' style={{ minWidth: 66 }} />
                                             </div>

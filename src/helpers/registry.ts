@@ -28,7 +28,7 @@ import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStati
 import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget, MaskedShortTextFormViewWidget, MaskedShortTextFormEditWidget, MaskedShortTextListViewWidget } from "../components/core/form/fields/SolidShortTextField";
 import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget, PseudoRelationManyToOneFormWidget } from "../components/core/form/fields/relations/SolidRelationManyToOneField";
 import { DefaultRelationOneToManyFormEditWidget, DefaultRelationOneToManyFormViewWidget, PseudoRelationOneToManyFormWidget } from "../components/core/form/fields/relations/SolidRelationOneToManyField";
-import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget, DefaultRelationManyToManyListFormEditWidget } from "../components/core/form/fields/relations/SolidRelationManyToManyField";
+import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget, DefaultRelationManyToManyFormViewWidget, DefaultRelationManyToManyListFormEditWidget } from "../components/core/form/fields/relations/SolidRelationManyToManyField";
 import { DefaultBooleanListWidget } from "../components/core/list/columns/SolidBooleanColumn";
 import { DefaultTextListWidget } from "../components/core/list/columns/SolidShortTextColumn";
 import { DefaultMediaSingleListWidget } from "../components/core/list/columns/SolidMediaSingleColumn";
@@ -355,6 +355,8 @@ registerExtensionComponent("DefaultMediaMultipleFormViewWidget", DefaultMediaMul
 registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRelationManyToOneFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
 
 // - relation.many2many
+registerExtensionComponent("DefaultRelationManyToManyFormViewWidget", DefaultRelationManyToManyFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
+
 // - relation.one2many
 registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRelationOneToManyFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
 

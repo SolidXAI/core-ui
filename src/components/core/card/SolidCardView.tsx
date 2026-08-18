@@ -3,7 +3,9 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { useSession } from "../../../hooks/useSession";
+import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
 import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
@@ -35,11 +37,42 @@ import {
   SolidSelect,
 } from "../../shad-cn-ui";
 import { showToast } from "../../../redux/features/toastSlice";
+import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment";
+import { useHandleListCustomButtonClick } from "../../common/useHandleListCustomButtonClick";
+import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
 
 type SolidCardViewParams = {
   moduleName: string;
   modelName: string;
   embeded: boolean;
+  customFilter?: any;
+};
+
+type SolidCardFilterInput = {
+  custom_filter_predicate?: any;
+  search_predicate?: any;
+  saved_filter_predicate?: any;
+  predefined_search_predicate?: any;
+};
+
+export type SolidCardViewHandle = {
+  refresh: () => void;
+  clearFilters: () => void;
+  applyFilter: (filter: SolidCardFilterInput) => void;
+  getSavedFilters: () => any[];
+  applySavedFilter: (name: string, variables?: Record<string, any>) => boolean;
+  setPagination: (nextFirst: number, nextRows: number) => void;
+  setShowArchived: (value: boolean) => void;
+  getState: () => {
+    first: number;
+    rows: number;
+    showArchived: boolean;
+    filters: any;
+    filterPredicates: any;
+    cards: any[];
+    totalRecords: number;
+    loading: boolean;
+  };
 };
 
 const DEFAULT_RECORD_SORT = ["id:desc"];
@@ -104,7 +137,9 @@ const deriveCardViewConfig = (solidCardViewMetaData: any) => {
   };
 };
 
-export const SolidCardView = (params: SolidCardViewParams) => {
+export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams>((params, ref) => {
+  const session = useSession();
+  const user = session?.data?.user;
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const dispatch = useDispatch();
   const pathname = usePathname();
@@ -138,6 +173,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const [showArchived, setShowArchived] = useState(false);
   const [selectedCardForDelete, setSelectedCardForDelete] = useState<any>(null);
   const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const handleCustomButtonClick = useHandleListCustomButtonClick();
 
   const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
     ? lightboxUrls
@@ -183,6 +219,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   );
 
   const {data: solidCardViewMetaDataResponse,isLoading: solidCardViewMetaDataIsLoading,} = useGetSolidViewLayoutQuery(cardViewMetaDataQs);
+  const visibleHeaderButtons = (solidCardViewMetaDataResponse?.data?.solidView?.layout?.attrs?.headerButtons ?? [])
+    .filter((button: any) => isButtonVisibleInCurrentEnv(button?.attrs));
 
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
@@ -250,7 +288,11 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       restoredFilter.$and.push(persistedFilterObject.search_predicate);
     }
     if (persistedFilterObject?.saved_filter_predicate) {
-      restoredFilter.$and.push(persistedFilterObject.saved_filter_predicate);
+      restoredFilter.$and.push(resolveSavedFilterVariables(
+        persistedFilterObject.saved_filter_predicate,
+        user?.id,
+        persistedFilterObject.saved_filter_variables || {}
+      ).value);
     }
     if (persistedFilterObject?.predefined_search_predicate) {
       restoredFilter.$and.push(persistedFilterObject.predefined_search_predicate);
@@ -359,7 +401,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       updatedFilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
-      updatedFilter.$and.push(filterPredicates.saved_filter_predicate);
+      updatedFilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
+        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
     }
     if (filterPredicates.predefined_search_predicate) {
       updatedFilter.$and.push(filterPredicates.predefined_search_predicate);
@@ -376,7 +419,12 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       custom_filter_predicate: filterPredicates.custom_filter_predicate || {},
       search_predicate: filterPredicates.search_predicate || {},
       saved_filter_predicate: filterPredicates.saved_filter_predicate || {},
+      saved_filter_variables: filterPredicates.saved_filter_variables || {},
+      saved_filter_id: filterPredicates.saved_filter_id || null,
+      saved_filter_system_key: filterPredicates.saved_filter_system_key || null,
+      saved_filter_name: filterPredicates.saved_filter_name || null,
       predefined_search_predicate: filterPredicates.predefined_search_predicate || {},
+      predefined_search_chip: filterPredicates.predefined_search_chip || null,
     });
   };
 
@@ -388,6 +436,46 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
     await loadCards(filters);
   };
+
+  const cloneCards = () => {
+    if (typeof structuredClone === "function") return structuredClone(cards);
+    return JSON.parse(JSON.stringify(cards));
+  };
+
+  useImperativeHandle(ref, () => ({
+    refresh: () => {
+      void loadCards(filters);
+    },
+    clearFilters: () => {
+      setFirst(0);
+      setFilters(params.customFilter || { $and: [] });
+      setFilterPredicates(null);
+      solidGlobalSearchElementRef.current?.clearFilter?.();
+    },
+    applyFilter: (filter) => {
+      void handleApplyCustomFilter(filter);
+    },
+    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+    applySavedFilter: (name, variables) =>
+      solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
+    setPagination: (nextFirst, nextRows) => {
+      setFirst(nextFirst);
+      setRows(nextRows);
+    },
+    setShowArchived: (value) => {
+      setShowArchived(value);
+    },
+    getState: () => ({
+      first,
+      rows,
+      showArchived,
+      filters,
+      filterPredicates,
+      cards: cloneCards(),
+      totalRecords,
+      loading,
+    }),
+  }), [first, rows, showArchived, filters, filterPredicates, cards, totalRecords, loading]);
 
   const handleRecoverRecord = async (record: any) => {
     if (!record?.id) return;
@@ -493,7 +581,10 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   </div>
                 )} */}
                 {/* <p className="m-0 view-title solid-text-wrapper">{cardViewTitle}</p> */}
-                <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
+                {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
+                    library's generated CSS, so the app's base `.hidden` would override our media-scoped
+                    `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
+                <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
                   <SolidGlobalSearchElement
                     viewType="card"
                     showSaveFilterPopup={showSaveFilterPopup}
@@ -508,7 +599,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
               <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
-                <div className="flex lg:hidden">
+                <div className="solid-list-search-toggle">
                   <SolidButton
                     type="button"
                     variant="outline"
@@ -518,6 +609,22 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                     aria-label="Toggle search"
                     leftIcon={<SolidIcon name="si-search" aria-hidden />}
                   />
+                </div>
+
+                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                  {visibleHeaderButtons
+                    .filter((button: any) => button?.attrs?.actionInContextMenu !== true)
+                    .map((button: any, index: number) => (
+                      <SolidListViewHeaderButton
+                        key={button?.attrs?.action ?? index}
+                        button={button}
+                        params={params}
+                        solidListViewMetaData={solidCardViewMetaDataResponse}
+                        handleCustomButtonClick={handleCustomButtonClick}
+                        selectedRecords={[]}
+                        filters={filters}
+                      />
+                    ))}
                 </div>
 
                 {actionsAllowed.includes(`${permissionExpression(params.modelName, "create")}`) &&
@@ -550,6 +657,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
                   filters={filters}
                   handleRefreshView={handleFetchUpdatedRecords}
+                  params={params}
+                  headerButtons={visibleHeaderButtons}
+                  handleCustomButtonClick={handleCustomButtonClick}
                 />
               </div>
             </div>
@@ -584,6 +694,8 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                     setLightboxUrls={setLightboxUrls}
                     setOpenLightbox={setOpenLightbox}
                     showArchived={showArchived}
+                    params={params}
+                    handleCustomButtonClick={handleCustomButtonClick}
                   />
                 )}
               </div>
@@ -673,4 +785,4 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       </SolidDialog>
     </div>
   );
-};
+});
