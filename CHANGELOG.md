@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.13] - 2026-08-19
+
+### Added
+
+- enhance media file type handling with dynamic configuration support
+
+### Fixed
+
+- many-to-one link in listview now follows viewmode set in settings
+- adjust line height for header list items in globals.css
+
+### Changed
+
+- remove unused mimeType property from MediaConfig type
+- streamline media extension handling in DropzonePlaceholder and helpers
+
+### Other
+
+- taking impact of mediaAllowedExtensions in core-ui
+
 ## [0.1.14-beta.12] - 2026-08-17
 
 ### Added
