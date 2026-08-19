@@ -602,8 +602,7 @@ export type {
     SolidBeforeListDataLoad,
     SolidBeforeTreeNodeLoad,
     SolidTreeUiEventResponse,
-    SolidTreeLoad,
-    SolidDefinedFilter
+    SolidTreeLoad
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';

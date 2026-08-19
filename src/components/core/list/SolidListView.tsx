@@ -29,7 +29,7 @@ import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
-import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList, SolidDefinedFilter } from "../../../types/solid-core";
+import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
 import { resolveActiveUserId } from "../../../helpers/resolveActiveUserId";
@@ -209,12 +209,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
   const suppressNextFilterPaginationResetRef = useRef(false);
 
-  // Filters offered by an onBeforeListDataLoad handler (event.definedFilters).
-  // Each stays independently removable via the search bar's pill UI rather
-  // than being baked directly into the outgoing query filter.
-  const [definedFilters, setDefinedFilters] = useState<SolidDefinedFilter[]>([]);
-  const definedFilterOverridesRef = useRef<Record<string, boolean>>({});
-
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
@@ -231,7 +225,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
-  const rowClickFormMode = useMemo(() => {
+  const recordClickFormMode = useMemo(() => {
     const isSystemModule = solidListViewMetaData?.data?.solidView?.module?.isSystem === true;
 
     if (isSystemModule) {
@@ -677,6 +671,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           listData: listViewData,
           totalRecords: totalRecords,
           type: "onListLoad",
+          isInitialLoad: !hasFiredInitialOnListLoadRef.current,
           viewMetadata: solidListViewMetaData?.data?.solidView,
           listViewLayout: listLayout,
           queryParams: {
@@ -689,6 +684,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           session: session.data,
           params: params
         };
+        hasFiredInitialOnListLoadRef.current = true;
 
         if (dynamicHeader) {
           dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
@@ -721,6 +717,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const latestFilterPredicatesRef = useRef<any>(filterPredicates);
   const latestSortFieldRef = useRef<string>(sortField);
   const latestSortOrderRef = useRef<1 | -1 | 0>(sortOrder);
+  const hasFiredInitialOnBeforeListDataLoadRef = useRef(false);
+  const hasFiredInitialOnListLoadRef = useRef(false);
 
   useEffect(() => {
     latestSortFieldRef.current = sortField;
@@ -842,8 +840,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
     const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
     let dynamicExtensionFunction = null;
+    const isInitialLoad = !hasFiredInitialOnBeforeListDataLoadRef.current;
+    hasFiredInitialOnBeforeListDataLoadRef.current = true;
     const event: SolidBeforeListDataLoad = {
       type: "onBeforeListDataLoad",
+      isInitialLoad,
       fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
       viewMetadata: solidListViewMetaData?.data?.solidView,
       listViewLayout: solidListViewMetaData?.data.solidView.layout,
@@ -867,48 +868,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
             queryData = updatedListData?.newFilter;
           }
-
-          // Reconcile handler-offered filters against any user removals from
-          // this mount (definedFilterOverridesRef), then merge the ones still
-          // applied into the outgoing query. Stale keys (no longer offered by
-          // the handler) are dropped from the override map.
-          const nextDefinedFilters = updatedListData?.definedFilters ?? [];
-          const reconciledDefinedFilters: SolidDefinedFilter[] = nextDefinedFilters.map((def) => {
-            const hasOverride = Object.prototype.hasOwnProperty.call(definedFilterOverridesRef.current, def.key);
-            const applied = hasOverride ? definedFilterOverridesRef.current[def.key] : def.applied;
-            definedFilterOverridesRef.current[def.key] = applied;
-            return { ...def, applied };
-          });
-          Object.keys(definedFilterOverridesRef.current).forEach((key) => {
-            if (!reconciledDefinedFilters.some((def) => def.key === key)) {
-              delete definedFilterOverridesRef.current[key];
-            }
-          });
-          setDefinedFilters(reconciledDefinedFilters);
-
-          const activeDefinedFilterPredicates = reconciledDefinedFilters
-            .filter((def) => def.applied)
-            .map((def) => def.predicate);
-          if (activeDefinedFilterPredicates.length > 0) {
-            // queryData.filters may be the same object reference as
-            // latestFiltersRef.current (see assignment above) when the
-            // handler didn't return a newFilter. Clone before mutating so we
-            // never permanently bake handler predicates into that ref -
-            // otherwise they'd accumulate/duplicate on every subsequent
-            // fetch (pagination, sort, removal, ...) instead of being
-            // recomputed fresh each time.
-            const mergedFilters = queryData.filters ? structuredClone(queryData.filters) : {};
-            mergedFilters.$and = Array.isArray(mergedFilters.$and) ? mergedFilters.$and : [];
-            mergedFilters.$and.push(...activeDefinedFilterPredicates);
-            queryData.filters = mergedFilters;
-          }
         } catch (err) {
           console.error("Error executing onBeforeListDataLoad extension:", err);
         }
       }
-    } else if (Object.keys(definedFilterOverridesRef.current).length > 0) {
-      definedFilterOverridesRef.current = {};
-      setDefinedFilters([]);
     }
 
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
@@ -1024,26 +987,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       setFirst(0);
     }
     // Force synchronous state updates
-  };
-
-  // Removes a single handler-offered filter pill. The override persists for
-  // the rest of this mount (setQueryString reconciliation keeps it applied:false
-  // on subsequent fetches) but is not persisted beyond it.
-  const removeDefinedFilter = (key: string) => {
-    definedFilterOverridesRef.current[key] = false;
-    setDefinedFilters((prev) => prev.map((def) => (def.key === key ? { ...def, applied: false } : def)));
-    setFirst(0);
-    void setQueryString();
-  };
-
-  // Applies a handler-offered filter the user picked from the "defined
-  // filters" list (one the handler returned with applied:false by default).
-  // Mirrors removeDefinedFilter in the other direction.
-  const applyDefinedFilter = (key: string) => {
-    definedFilterOverridesRef.current[key] = true;
-    setDefinedFilters((prev) => prev.map((def) => (def.key === key ? { ...def, applied: true } : def)));
-    setFirst(0);
-    void setQueryString();
   };
 
   // clear Filter
@@ -1240,7 +1183,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             column,
             setLightboxUrls,
             setOpenLightbox,
-            embeded: params.embeded
+            embeded: params.embeded,
+            recordClickAction: recordClickFormMode
           });
         } else {
           return null;
@@ -1252,7 +1196,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           column,
           setLightboxUrls,
           setOpenLightbox,
-          embeded: params.embeded
+          embeded: params.embeded,
+          recordClickAction: recordClickFormMode
         });
       }
     });
@@ -1495,9 +1440,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                           viewData={solidListViewMetaData}
                           handleApplyCustomFilter={handleApplyCustomFilter}
                           filterPredicates={filterPredicates}
-                          definedFilters={definedFilters}
-                          onRemoveDefinedFilter={removeDefinedFilter}
-                          onApplyDefinedFilter={applyDefinedFilter}
                         >
                         </SolidGlobalSearchElement>
                       </div>
@@ -1698,7 +1640,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
                         storeCurrentModelViewContext();
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
+                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${recordClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
                       }
                     }
                     }

@@ -278,7 +278,7 @@
     color: #8d7c6e;
   }
 
-  .solid-search-overlay-pannel,
+  .solid-search-overlay-panel,
   .solid-search-overlay-scroll,
   .solid-search-overlay-section,
   .solid-search-overlay-empty,
@@ -286,13 +286,12 @@
   .solid-search-overlay-footer-action,
   .solid-search-overlay-footer-action-secondary,
   .solid-search-overlay-panel-callout,
-  .solid-search-overlay-panel-callout-compact,
-  .custom-filter-search-options {
+  .solid-search-overlay-panel-callout-compact {
     background: #f6efe2 !important;
     background-color: #f6efe2 !important;
   }
 
-  .solid-search-overlay-pannel {
+  .solid-search-overlay-panel {
     border: 1px solid var(--solid-border-default) !important;
     border-radius: 14px !important;
     box-shadow: 0 16px 32px rgba(92, 75, 62, 0.12) !important;

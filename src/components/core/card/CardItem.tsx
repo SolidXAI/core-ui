@@ -54,7 +54,7 @@ const CardItem: React.FC<CardItemProps> = ({
   const openEdit = () => {
     if (isArchivedRecord) return;
     storeCurrentModelViewContext();
-    router.push(`${editButtonUrl}/${data?.id}`);
+    router.push(`${editButtonUrl}/${data?.id}?viewMode=edit`);
   };
 
   return (

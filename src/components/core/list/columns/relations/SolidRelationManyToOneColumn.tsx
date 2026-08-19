@@ -7,7 +7,7 @@ import { buildAdminRecordFormPath } from '../../../../../helpers/routePaths';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { ExternalLink } from "lucide-react";
 
-const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded }: SolidListViewColumnParams) => {
+const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column, embeded, recordClickAction }: SolidListViewColumnParams) => {
 
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
@@ -29,7 +29,8 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
                     solidListViewMetaData,
                     fieldMetadata,
                     column,
-                    embeded
+                    embeded,
+                    recordClickAction
                 }
                 return (
                     <>
@@ -49,7 +50,7 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
 export default SolidRelationManyToOneColumn;
 
 
-export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, embeded }: SolidListFieldWidgetProps) => {
+export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, embeded, recordClickAction }: SolidListFieldWidgetProps) => {
     const manyToOneFieldData = rowData[column.attrs.name];
     const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
     // This is the userkey that will be present within the rowData.
@@ -68,7 +69,7 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
             moduleName: relatedModuleName,
             modelName: relatedModelName,
             recordId: manyToOneFieldData?.id,
-            viewMode: "view",
+            viewMode: recordClickAction,
         });
 
         const isDisabled = column?.attrs?.disabled === true || isArchivedRecord;

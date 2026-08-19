@@ -25,7 +25,8 @@ export type SolidListViewColumnParams = {
     column: any,
     setLightboxUrls?: any,
     setOpenLightbox?: any,
-    embeded?: boolean;    
+    embeded?: boolean,
+    recordClickAction?: 'view' | 'edit';    
 };
 
 export const isFieldSortable = (fieldMetadata: any): boolean => {
@@ -125,7 +126,7 @@ export const applyListColumnLayoutAttrs = (columnElement: React.ReactNode, colum
 //     }
 // };
 
-export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox, embeded }: SolidListViewColumnParams) => {
+export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox, embeded, recordClickAction }: SolidListViewColumnParams) => {
 
     if (!isFieldSortable(fieldMetadata) && column?.attrs?.sortable) {
         column = { ...column, attrs: { ...column.attrs, sortable: false } };
@@ -174,7 +175,7 @@ export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, colu
         renderedColumn = SolidTimeColumn({ solidListViewMetaData, fieldMetadata, column });
     }
     else if (fieldMetadata.type === 'relation') {
-        renderedColumn = SolidRelationColumn({ solidListViewMetaData, fieldMetadata, column, embeded });
+        renderedColumn = SolidRelationColumn({ solidListViewMetaData, fieldMetadata, column, embeded, recordClickAction });
     }
     else if (fieldMetadata.type === 'mediaSingle') {
         renderedColumn = SolidMediaSingleColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
