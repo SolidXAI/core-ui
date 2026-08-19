@@ -186,6 +186,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     const [fileDetails, setFileDetails] = useState<MediaFileDetail[]>([]);
     const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
     const [fileSizeError, setFileSizeError] = useState<string | null>(null);
+    const mediaConfig = solidFormViewMetaData?.data;
 
     const formatFileSize = (size: number) => {
         return size >= 1024 * 1024
@@ -334,7 +335,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 setFileSizeError(rejection.errors[0]?.message || ERROR_MESSAGES.FILE_NOT_ACCEPT);
             }
         },
-        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes, fieldMetadata.mediaAllowedExtensions),
+        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes, fieldMetadata.mediaAllowedExtensions, mediaConfig),
         maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
     });
 

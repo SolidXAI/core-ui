@@ -185,6 +185,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     const [isReplaceImageDialogVisible, setReplaceImageDialogVisible] = useState(false);
     const [newFileToUpload, setNewFileToUpload] = useState<any>(null);
     const [fileSizeError, setFileSizeError] = useState<string | null>(null);
+    const mediaConfig = solidFormViewMetaData?.data;
 
     const formatFileSize = (size: number) => {
         return size >= 1024 * 1024
@@ -345,7 +346,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 setFileSizeError(rejection.errors[0]?.message || ERROR_MESSAGES.FILE_NOT_ACCEPT);
             }
         },
-        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes, fieldMetadata.mediaAllowedExtensions),
+        accept: getAcceptedFileTypes(fieldMetadata.mediaTypes, fieldMetadata.mediaAllowedExtensions, mediaConfig),
         maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
         disabled: isFieldDisabled || isFieldReadonly
     });

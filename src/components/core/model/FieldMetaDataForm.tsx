@@ -1532,7 +1532,7 @@ const FieldMetaDataForm = ({
   }, [formik.values.mediaTypes, resolvedMediaTypeOptions]);
 
   const mediaExtensionOptions = useMemo(
-    () => getAvailableMediaExtensionOptions(formik.values.mediaTypes, fieldDefaultMetaData?.data?.mediaTypeExtensions),
+    () => getAvailableMediaExtensionOptions(formik.values.mediaTypes, fieldDefaultMetaData?.data?.mediaFileTypeDefinitions),
     [formik.values.mediaTypes, fieldDefaultMetaData?.data]
   );
 
