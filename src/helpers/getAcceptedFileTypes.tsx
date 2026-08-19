@@ -1,7 +1,6 @@
 export type MediaConfig = {
     mediaFileTypeDefinitions?: Array<{
         mediaType: string;
-        mimeType: string;
         extension: string;
     }>;
 };
