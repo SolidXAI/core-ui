@@ -347,7 +347,8 @@ export type SolidListFieldWidgetProps = {
     solidListViewMetaData: any
     fieldMetadata: FieldMetadata;
     column: any;
-    embeded?: boolean;
+    embeded?: boolean,
+    recordClickAction?: 'view' | 'edit';
 }
 
 export type SolidMediaListFieldWidgetProps = SolidListFieldWidgetProps & {

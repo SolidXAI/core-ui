@@ -57,7 +57,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   const openEdit = () => {
     if (isArchivedRecord) return;
     persistReturnView();
-    router.push(`${editButtonUrl}/${data?.id}`);
+    router.push(`${editButtonUrl}/${data?.id}?viewMode=edit`);
   };
 
   const renderKanbanAction = (data) => {

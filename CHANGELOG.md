@@ -4,6 +4,63 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14-beta.13] - 2026-08-19
+
+### Added
+
+- enhance media file type handling with dynamic configuration support
+
+### Fixed
+
+- many-to-one link in listview now follows viewmode set in settings
+- adjust line height for header list items in globals.css
+
+### Changed
+
+- remove unused mimeType property from MediaConfig type
+- streamline media extension handling in DropzonePlaceholder and helpers
+
+### Other
+
+- taking impact of mediaAllowedExtensions in core-ui
+
+## [0.1.14-beta.12] - 2026-08-17
+
+### Added
+
+- sync form state with API response after save to prevent stale values
+
+### Other
+
+- fixed formatting
+- - form viewmode behaviour after save - kanban and card view edit row action
+- added form viewmode widget
+
+## [0.1.14-beta.11] - 2026-08-11
+
+### Added
+
+- add responsive basis utilities to Tailwind safelist for dynamic layouts
+- add isInitialLoad flag to SolidLoadList and SolidBeforeListDataLoad types; enhance filter handling in SolidGlobalSearchElement and SolidListView
+- add saved filter properties to SolidCardView and SolidKanbanView
+
+### Fixed
+
+- correct class name for search overlay panel and remove unnecessary styles
+
+### Changed
+
+- remove unused defined filter logic and related styles from global search and list view components
+
+### Maintenance
+
+- widen reusable utility safelist in current config
+
+### Other
+
+- admin header actions visibilityu issues
+- update styles for search overlay sections and add separator
+
 ## [0.1.14-beta.10] - 2026-08-06
 
 ### Other
