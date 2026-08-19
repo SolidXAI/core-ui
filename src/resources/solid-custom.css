@@ -1494,7 +1494,8 @@ textarea {
 
 .solid-select {
   width: 100%;
-  min-height: 32px;
+  height: 34px;
+  box-sizing: border-box;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -1511,6 +1512,8 @@ textarea {
   justify-content: flex-start;
   text-align: left;
   cursor: pointer;
+  height: 34px;
+  box-sizing: border-box;
 }
 
 .solid-select-trigger:disabled {
@@ -1592,7 +1595,8 @@ textarea {
 
 .solid-input {
   width: 100%;
-  min-height: 32px;
+  height: 34px;
+  box-sizing: border-box;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--card);
@@ -1617,6 +1621,11 @@ textarea {
   cursor: not-allowed;
 }
 
+.solid-textarea {
+  height: auto;
+  min-height: 34px;
+}
+
 .solid-autocomplete {
   position: relative;
   width: 100%;
@@ -1628,11 +1637,17 @@ textarea {
   display: flex;
   align-items: center;
   width: 100%;
+  box-sizing: border-box;
   min-width: 0;
 }
 
+.solid-autocomplete-control:not(.solid-autocomplete-chip-control) {
+  height: 34px;
+}
+
 .solid-autocomplete-chip-control {
-  min-height: 32px;
+  box-sizing: border-box;
+  min-height: 34px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--card);
@@ -6980,6 +6995,9 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 .solid-segmented {
   display: inline-flex;
   align-items: stretch;
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface-card) 85%, #ffffff 15%);
