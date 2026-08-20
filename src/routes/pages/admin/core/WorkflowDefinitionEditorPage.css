@@ -3192,3 +3192,296 @@
     min-width: 100%;
   }
 }
+
+/* Match the flat dark surfaces used by the rest of the admin editor. */
+html.dark .workflow-editor-page,
+[data-theme="dark"] .workflow-editor-page {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html.dark .workflow-editor-header,
+html.dark .workflow-editor-detail-tabs,
+html.dark .workflow-editor-shell,
+html.dark .workflow-editor-topology-code,
+[data-theme="dark"] .workflow-editor-header,
+[data-theme="dark"] .workflow-editor-detail-tabs,
+[data-theme="dark"] .workflow-editor-shell,
+[data-theme="dark"] .workflow-editor-topology-code {
+  background: var(--card);
+}
+
+html.dark .workflow-editor-overview,
+html.dark .workflow-editor-executions,
+html.dark .workflow-editor-surface-header,
+[data-theme="dark"] .workflow-editor-overview,
+[data-theme="dark"] .workflow-editor-executions,
+[data-theme="dark"] .workflow-editor-surface-header {
+  background: var(--card);
+}
+
+html.dark .workflow-editor-subtitle,
+html.dark .workflow-editor-detail-tabs__list .solid-tabs-trigger,
+html.dark .workflow-editor-topology-code__header,
+[data-theme="dark"] .workflow-editor-subtitle,
+[data-theme="dark"] .workflow-editor-detail-tabs__list .solid-tabs-trigger,
+[data-theme="dark"] .workflow-editor-topology-code__header {
+  color: var(--muted-foreground);
+}
+
+html.dark .workflow-editor-tag-input,
+[data-theme="dark"] .workflow-editor-tag-input {
+  background: var(--card);
+  border: 3px solid var(--foreground);
+  border-radius: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.18rem 0.3rem;
+}
+
+html.dark .workflow-editor-tag-input .solid-input,
+[data-theme="dark"] .workflow-editor-tag-input .solid-input {
+  background: transparent;
+  color: var(--card-foreground);
+}
+
+html.dark .workflow-editor-tag-input .solid-input::placeholder,
+[data-theme="dark"] .workflow-editor-tag-input .solid-input::placeholder {
+  color: var(--card-foreground);
+  opacity: 0.92;
+}
+
+html.dark .workflow-editor-tag-pill,
+[data-theme="dark"] .workflow-editor-tag-pill {
+  background: color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 58%, transparent);
+  color: var(--primary);
+}
+
+/* Apply the same dark surfaces to every detail tab and its nested widgets. */
+html.dark .workflow-editor-authoring-tab,
+html.dark .workflow-editor-topology-tab,
+html.dark .workflow-editor-optional-state,
+[data-theme="dark"] .workflow-editor-authoring-tab,
+[data-theme="dark"] .workflow-editor-topology-tab,
+[data-theme="dark"] .workflow-editor-optional-state {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html.dark .workflow-editor-input-table,
+html.dark .workflow-editor-trigger-guide-mode,
+html.dark .workflow-editor-trigger-guide-card,
+html.dark .workflow-editor-cron-builder,
+[data-theme="dark"] .workflow-editor-input-table,
+[data-theme="dark"] .workflow-editor-trigger-guide-mode,
+[data-theme="dark"] .workflow-editor-trigger-guide-card,
+[data-theme="dark"] .workflow-editor-cron-builder {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+html.dark .workflow-editor-input-table__header,
+[data-theme="dark"] .workflow-editor-input-table__header {
+  background: var(--sidebar-accent);
+  border-bottom-color: var(--border);
+  color: var(--muted-foreground);
+}
+
+html.dark .workflow-editor-input-table__row,
+[data-theme="dark"] .workflow-editor-input-table__row {
+  border-bottom-color: var(--border);
+}
+
+html.dark .workflow-editor-input-table__label-cell span,
+html.dark .workflow-editor-input-table__label-cell strong,
+html.dark .workflow-editor-input-table__default-summary,
+html.dark .workflow-editor-input-table__default-summary.is-empty,
+html.dark .workflow-editor-authoring-header p,
+html.dark .workflow-editor-trigger-guide-card p,
+html.dark .workflow-editor-cron-builder__header p,
+html.dark .workflow-editor-cron-builder__header-meta span,
+html.dark .workflow-editor-cron-builder__part span,
+[data-theme="dark"] .workflow-editor-input-table__label-cell span,
+[data-theme="dark"] .workflow-editor-input-table__label-cell strong,
+[data-theme="dark"] .workflow-editor-input-table__default-summary,
+[data-theme="dark"] .workflow-editor-input-table__default-summary.is-empty,
+[data-theme="dark"] .workflow-editor-authoring-header p,
+[data-theme="dark"] .workflow-editor-trigger-guide-card p,
+[data-theme="dark"] .workflow-editor-cron-builder__header p,
+[data-theme="dark"] .workflow-editor-cron-builder__header-meta span,
+[data-theme="dark"] .workflow-editor-cron-builder__part span {
+  color: var(--muted-foreground);
+}
+
+html.dark .workflow-editor-trigger-guide-mode__button,
+[data-theme="dark"] .workflow-editor-trigger-guide-mode__button {
+  color: var(--foreground);
+}
+
+html.dark .workflow-editor-trigger-guide-mode__button:hover,
+[data-theme="dark"] .workflow-editor-trigger-guide-mode__button:hover {
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+html.dark .workflow-editor-trigger-guide-mode__button.is-active,
+[data-theme="dark"] .workflow-editor-trigger-guide-mode__button.is-active {
+  background: color-mix(in srgb, var(--primary) 16%, var(--card));
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border));
+  box-shadow: none;
+  color: var(--foreground);
+}
+
+html.dark .workflow-editor-trigger-guide-mode__button small,
+html.dark .workflow-editor-trigger-guide-card code:not(pre code),
+html.dark .workflow-editor-cron-builder__part label,
+[data-theme="dark"] .workflow-editor-trigger-guide-mode__button small,
+[data-theme="dark"] .workflow-editor-trigger-guide-card code:not(pre code),
+[data-theme="dark"] .workflow-editor-cron-builder__part label {
+  color: var(--muted-foreground);
+}
+
+html.dark .workflow-editor-trigger-guide-card code:not(pre code),
+html.dark .workflow-editor-cron-builder__header-meta code,
+[data-theme="dark"] .workflow-editor-trigger-guide-card code:not(pre code),
+[data-theme="dark"] .workflow-editor-cron-builder__header-meta code {
+  background: var(--surface-ground);
+  border-color: var(--border);
+  color: var(--primary);
+}
+
+html.dark .workflow-editor-cron-builder__header label,
+[data-theme="dark"] .workflow-editor-cron-builder__header label {
+  color: var(--foreground);
+}
+
+html.dark .workflow-editor-topology-actionbar .workflow-editor-view-toggle,
+[data-theme="dark"] .workflow-editor-topology-actionbar .workflow-editor-view-toggle {
+  background: var(--card);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+html.dark .workflow-editor-view-toggle__button,
+[data-theme="dark"] .workflow-editor-view-toggle__button {
+  color: var(--muted-foreground);
+}
+
+html.dark .workflow-editor-view-toggle__button:hover,
+html.dark .workflow-editor-view-toggle__button.is-active,
+[data-theme="dark"] .workflow-editor-view-toggle__button:hover,
+[data-theme="dark"] .workflow-editor-view-toggle__button.is-active {
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+  color: var(--primary);
+}
+
+html.dark .workflow-editor-overview-list-item,
+html.dark .workflow-editor-overview-stat,
+html.dark .workflow-editor-execution-gantt-row,
+html.dark .workflow-editor-execution-log-row,
+html.dark .workflow-editor-execution-timeline__stats div,
+html.dark .workflow-editor-execution-step-inspector__meta div,
+html.dark .workflow-editor-execution-log-inspector__meta div,
+html.dark .workflow-editor-execution-log-inspector__empty,
+[data-theme="dark"] .workflow-editor-overview-list-item,
+[data-theme="dark"] .workflow-editor-overview-stat,
+[data-theme="dark"] .workflow-editor-execution-gantt-row,
+[data-theme="dark"] .workflow-editor-execution-log-row,
+[data-theme="dark"] .workflow-editor-execution-timeline__stats div,
+[data-theme="dark"] .workflow-editor-execution-step-inspector__meta div,
+[data-theme="dark"] .workflow-editor-execution-log-inspector__meta div,
+[data-theme="dark"] .workflow-editor-execution-log-inspector__empty {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+html.dark .workflow-editor-execution-table__row:hover,
+html.dark .workflow-editor-execution-gantt-row__main:hover,
+html.dark .workflow-editor-execution-log-row__main:hover,
+[data-theme="dark"] .workflow-editor-execution-table__row:hover,
+[data-theme="dark"] .workflow-editor-execution-gantt-row__main:hover,
+[data-theme="dark"] .workflow-editor-execution-log-row__main:hover {
+  background: var(--surface-hover);
+}
+
+html.dark .workflow-editor-execution-gantt__ruler,
+html.dark .workflow-editor-execution-log-row__event,
+html.dark .workflow-editor-execution-table-wrap,
+html.dark .workflow-editor-execution-logs__search,
+html.dark .workflow-editor-execution-pagination,
+[data-theme="dark"] .workflow-editor-execution-gantt__ruler,
+[data-theme="dark"] .workflow-editor-execution-log-row__event,
+[data-theme="dark"] .workflow-editor-execution-table-wrap,
+[data-theme="dark"] .workflow-editor-execution-logs__search,
+[data-theme="dark"] .workflow-editor-execution-pagination {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+html.dark .workflow-editor-execution-modal,
+[data-theme="dark"] .workflow-editor-execution-modal {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+html.dark .workflow-editor-execution-detail-summary,
+html.dark .workflow-editor-execution-detail-error,
+html.dark .workflow-editor-execution-step-inspector,
+html.dark .workflow-editor-execution-log-inspector,
+html.dark .workflow-editor-execution-log-row__details,
+html.dark .workflow-editor-execution-gantt-row__details,
+[data-theme="dark"] .workflow-editor-execution-detail-summary,
+[data-theme="dark"] .workflow-editor-execution-detail-error,
+[data-theme="dark"] .workflow-editor-execution-step-inspector,
+[data-theme="dark"] .workflow-editor-execution-log-inspector,
+[data-theme="dark"] .workflow-editor-execution-log-row__details,
+[data-theme="dark"] .workflow-editor-execution-gantt-row__details {
+  background: var(--surface-ground);
+  border-color: var(--border);
+}
+
+html.dark .workflow-editor-execution-timeline__hero,
+html.dark .workflow-editor-execution-logs__hero,
+[data-theme="dark"] .workflow-editor-execution-timeline__hero,
+[data-theme="dark"] .workflow-editor-execution-logs__hero {
+  background: var(--sidebar-accent);
+  border-color: var(--border);
+}
+
+html.dark .workflow-editor-page h1,
+html.dark .workflow-editor-page h2,
+html.dark .workflow-editor-page h3,
+html.dark .workflow-editor-page h4,
+html.dark .workflow-editor-page h5,
+html.dark .workflow-editor-surface-title,
+html.dark .workflow-editor-authoring-header h3,
+html.dark .workflow-editor-trigger-guide-card h4,
+html.dark .workflow-editor-execution-timeline__hero h4,
+html.dark .workflow-editor-execution-logs__hero h4,
+[data-theme="dark"] .workflow-editor-page h1,
+[data-theme="dark"] .workflow-editor-page h2,
+[data-theme="dark"] .workflow-editor-page h3,
+[data-theme="dark"] .workflow-editor-page h4,
+[data-theme="dark"] .workflow-editor-page h5,
+[data-theme="dark"] .workflow-editor-surface-title,
+[data-theme="dark"] .workflow-editor-authoring-header h3,
+[data-theme="dark"] .workflow-editor-trigger-guide-card h4,
+[data-theme="dark"] .workflow-editor-execution-timeline__hero h4,
+[data-theme="dark"] .workflow-editor-execution-logs__hero h4 {
+  color: var(--foreground);
+}
+
+html.dark .workflow-editor-page .workflow-editor-authoring-header p,
+html.dark .workflow-editor-page .workflow-editor-overview-cta__copy p,
+html.dark .workflow-editor-page .workflow-editor-trigger-guide-card p,
+html.dark .workflow-editor-page .workflow-editor-optional-state__copy p,
+html.dark .workflow-editor-page .workflow-editor-placeholder__copy p,
+[data-theme="dark"] .workflow-editor-page .workflow-editor-authoring-header p,
+[data-theme="dark"] .workflow-editor-page .workflow-editor-overview-cta__copy p,
+[data-theme="dark"] .workflow-editor-page .workflow-editor-trigger-guide-card p,
+[data-theme="dark"] .workflow-editor-page .workflow-editor-optional-state__copy p,
+[data-theme="dark"] .workflow-editor-page .workflow-editor-placeholder__copy p {
+  color: var(--muted-foreground);
+}
