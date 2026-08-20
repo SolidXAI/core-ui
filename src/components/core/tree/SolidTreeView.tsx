@@ -21,6 +21,7 @@ import { AggregationRule, GroupingRule } from "../common/GroupingComponent";
 import { SolidListViewColumn } from "../list/SolidListViewColumn";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from "../../../hooks/useSession";
+import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { SolidListViewConfigure } from "../list/SolidListViewConfigure";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
@@ -1067,6 +1068,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           custom_filter_predicate: latestFilterPredicatesRef.current.custom_filter_predicate || null,
           search_predicate: latestFilterPredicatesRef.current.search_predicate || null,
           saved_filter_predicate: latestFilterPredicatesRef.current.saved_filter_predicate || null,
+          saved_filter_variables: latestFilterPredicatesRef.current.saved_filter_variables || {},
           predefined_search_predicate: latestFilterPredicatesRef.current.predefined_search_predicate || null,
           grouping_rules: latestFilterPredicatesRef.current.grouping_rules || null,
           aggregation_rules: latestFilterPredicatesRef.current.aggregation_rules || null,
@@ -1275,7 +1277,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
     if (nextFilterPredicates?.custom_filter_predicate) queryfilter.$and.push(nextFilterPredicates.custom_filter_predicate);
     if (nextFilterPredicates?.search_predicate) queryfilter.$and.push(nextFilterPredicates.search_predicate);
-    if (nextFilterPredicates?.saved_filter_predicate) queryfilter.$and.push(nextFilterPredicates.saved_filter_predicate);
+    if (nextFilterPredicates?.saved_filter_predicate) queryfilter.$and.push(
+      nextFilterPredicates.resolved_saved_filter_predicate ||
+      resolveSavedFilterVariables(
+        nextFilterPredicates.saved_filter_predicate,
+        user?.id,
+        nextFilterPredicates.saved_filter_variables || {}
+      ).value
+    );
     if (nextFilterPredicates?.predefined_search_predicate) queryfilter.$and.push(nextFilterPredicates.predefined_search_predicate);
 
     latestFiltersRef.current = queryfilter;
@@ -1897,17 +1906,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 </div>
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
-                    <SolidGlobalSearchElement
-                      viewType="tree"
-                      showSaveFilterPopup={showSaveFilterPopup}
-                      setShowSaveFilterPopup={setShowSaveFilterPopup}
-                      ref={solidGlobalSearchElementRef}
-                      viewData={solidTreeViewMetaData}
-                      handleApplyCustomFilter={handleApplyCustomFilter}
-                      filterPredicates={filterPredicates}
-                    />
-                  </div>
+                  <>
+                    {/* Base `hidden` must be avoided here: the consuming app's Tailwind CSS loads after this
+                        library's generated CSS, so the app's base `.hidden` would override our media-scoped
+                        `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
+                    <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
+                      <SolidGlobalSearchElement
+                        viewType="tree"
+                        showSaveFilterPopup={showSaveFilterPopup}
+                        setShowSaveFilterPopup={setShowSaveFilterPopup}
+                        ref={solidGlobalSearchElementRef}
+                        viewData={solidTreeViewMetaData}
+                        handleApplyCustomFilter={handleApplyCustomFilter}
+                        filterPredicates={filterPredicates}
+                      />
+                    </div>
+                  </>
                 )}
               </div>
 
@@ -1915,7 +1929,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className="flex lg:hidden">
+                  <div className="solid-list-search-toggle">
                     <SolidButton
                       type="button"
                       size="sm"

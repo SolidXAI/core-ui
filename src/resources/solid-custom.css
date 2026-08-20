@@ -3812,6 +3812,16 @@ html.dark .solid-header-cog-trigger:hover,
   justify-content: center;
 }
 
+.solid-list-search-toggle {
+  display: flex;
+}
+
+@media (min-width: 992px) {
+  .solid-list-search-toggle {
+    display: none !important;
+  }
+}
+
 .solid-list-toolbar .solid-header-cog-trigger,
 .solid-header-cog-trigger {
   display: inline-flex;
@@ -6959,6 +6969,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 .solid-accordion-header {
   font-size: 14px;
   font-weight: 600;
+  margin-bottom: 0.5rem !important;
 }
 
 .solid-accordion-content {

@@ -108,7 +108,15 @@ export type LayoutAttribute = {
     showEditFormButton?: boolean;
     showAddFormButton?: boolean;
     showDeleteFormButton?: boolean;
+    action?: string;
+    actionInContextMenu?: boolean;
+    openInPopup?: boolean;
+    popupWidth?: string;
+    closable?: boolean;
+    roles?: string[];
+    env?: string[] | string;
     formButtons?: any;
+    headerButtons?: any;
     rowButtons?: any;
     whereClause?: string;
     disabled?: boolean;
@@ -201,6 +209,7 @@ export type SolidListUiEvent = {
 
 export type SolidLoadList = {
     type: SolidUiEvents;
+    isInitialLoad?: boolean;
     listData: any[];
     fieldsMetadata: FieldsMetadata;
     totalRecords: number;
@@ -214,6 +223,7 @@ export type SolidLoadList = {
 
 export type SolidBeforeListDataLoad = {
     type: SolidUiEvents;
+    isInitialLoad?: boolean;
     fieldsMetadata: FieldsMetadata;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
@@ -250,17 +260,6 @@ export type SolidTreeLoad = {
     params?: SolidListViewParams
 }
 
-// A single toggleable filter offered by an onBeforeListDataLoad handler.
-// Unlike newFilter (baked directly into the outgoing query), each entry here
-// stays independently addressable so SolidGlobalSearchElement can render it
-// as a removable pill and SolidListView can drop it from the query on removal.
-export type SolidDefinedFilter = {
-    key: string;
-    label: string;
-    predicate: any;
-    applied: boolean;
-}
-
 export type SolidListUiEventResponse = {
     filterApplied?: Boolean;
     newFilter?: any;
@@ -268,7 +267,6 @@ export type SolidListUiEventResponse = {
     newListData?: any[];
     layoutChanged?: Boolean;
     newLayout?: LayoutNode;
-    definedFilters?: SolidDefinedFilter[];
 }
 
 export type SolidTreeUiEventResponse = {
@@ -349,7 +347,8 @@ export type SolidListFieldWidgetProps = {
     solidListViewMetaData: any
     fieldMetadata: FieldMetadata;
     column: any;
-    embeded?: boolean;
+    embeded?: boolean,
+    recordClickAction?: 'view' | 'edit';
 }
 
 export type SolidMediaListFieldWidgetProps = SolidListFieldWidgetProps & {
