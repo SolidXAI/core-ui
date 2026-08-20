@@ -20,7 +20,7 @@ import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { FileReaderExt } from "../../../../components/common/FileReaderExt";
-import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
+import getAcceptedFileTypes, { getAllowedMediaExtensionsErrorMessage } from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { openMediaInNewTab } from "../../../../helpers/mediaUrl";
@@ -330,9 +330,13 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             const sizeError = rejection.errors.find(err => err.code === 'file-too-large');
             if (sizeError) {
                 setFileSizeError(ERROR_MESSAGES.FILE_TOO_LAREG(fieldMetadata.mediaMaxSizeKb));
-                ERROR_MESSAGES.FILE_TOO_LAREG(fieldMetadata.mediaMaxSizeKb)
             } else {
-                setFileSizeError(rejection.errors[0]?.message || ERROR_MESSAGES.FILE_NOT_ACCEPT);
+                const invalidTypeError = rejection.errors.find((error) => error.code === "file-invalid-type");
+                setFileSizeError(
+                    (invalidTypeError && getAllowedMediaExtensionsErrorMessage(fieldMetadata.mediaAllowedExtensions))
+                    || rejection.errors[0]?.message
+                    || ERROR_MESSAGES.FILE_NOT_ACCEPT
+                );
             }
         },
         accept: getAcceptedFileTypes(fieldMetadata.mediaTypes, fieldMetadata.mediaAllowedExtensions, mediaConfig),
