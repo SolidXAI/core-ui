@@ -4,6 +4,76 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.14] - 2026-08-20
+
+### Added
+
+- add MediaUploadPage for uploading media files and integrate with existing components
+- enhance PDFViewer with zoom and rotation controls, improve error handling
+- add error boundary for PDF rendering in PDFViewer component
+- replace default buttons with SolidButton in PDFViewer component
+- add pdfjs-dist dependency and update PDFViewer worker configuration
+- streamline saved filter application and renaming process in SolidGlobalSearchElement
+- update savedFilters state management to handle renaming and immediate application of custom filters
+- update mentionable users query and refactor related hooks
+- add defined filters support in SolidGlobalSearchElement and SolidListView
+- implement saveParentRelationField handling for improved embedded relation management
+- add support for embedded relation save and new functionality across form components
+- add support for error and finally nodes in workflow definitions and editors
+- enhance workflow node editor with topology summary and improved slot display
+- enhance workflow definition editor and list functionality
+- enhance popup functionality with dynamic buttons and event handling
+- add workflow field normalization for form data handling
+- enhance archived records handling and pagination in workflow execution
+- enhance workflow expression suggestions to include secrets
+- add Workflow Execution Detail page and related routes
+- update datasource introspection and core types
+- add WorkflowAddNodeDialog for node insertion in workflow editor
+- enhance workflow node editor with improved layout and new child slot handling
+- add workflow definition list and editor pages
+- update solid-tailwind-generated.css and solid-core.d.ts
+
+### Fixed
+
+- adjust min-height for PDFViewer component to improve layout consistency
+- correct import paths for PublishStatusColumnDefaults in multiple components
+- update mention suggestions handling to use response data
+- update CSS variables for consistent styling across components
+- prevent legacy draft/publish columns from being incorrectly treated as superclass-handled in introspection
+- update container class to enforce width and max-width with important flag
+
+### Changed
+
+- remove react-pdf dependency and implement native PDF rendering
+- replace radio dot with icon in SolidDropdownMenu and clean up CSS
+- remove mobile search element from SolidListView
+- simplify save condition for existing records in SolidFormActionHeader
+- extract date format resolution into a separate function for better readability
+- update WorkflowNodeChildSlotDefinition to use 'case-collection' and add layout option
+
+### Other
+
+- ui fixes
+- Refactor MediaCardWidget to use new MediaFileSizeWidget for file size formatting
+- update media upload styles and improve dropzone functionality
+- handle change password and version info
+- tree view sorting removed
+- update defined filter badge styles for improved layout and interaction
+- use single state and make it hidden only for the mobile
+- cleanup global search mobile view
+- Implement draft/publish workflow with version history integration and confirmation dialog; refactor SolidFormView to utilize new workflow hooks
+- Enhance media field components with error handling and toast notifications for delete and replace actions; update font sizes in CSS for better readability
+- changes
+- Refactor SolidFormView and SolidVersionHistory components to simplify workflow status handling and remove unused code
+- Prevent default behavior on mouse down for custom and grouping filter buttons
+- Remove SolidLocale status banner and associated styles
+- update WorkflowDefinitionListPage styles for improved layout and readability
+- row click action renamed to record click action and take impact in Card, Kanban and tree
+- Enhance SolidLocale component with information card and placeholder
+- some changes
+- remove unnecessary code
+- some issues around some import in card and kanban and tree view lightbox added for media and sidebar menu search issue resolved
+
 ## [0.1.14-beta.6] - 2026-07-31
 
 ### Other
