@@ -33,6 +33,7 @@ export type FormViewParams = {
     embeded: any;
     inlineCreateAutoSave: any;
     layout: any;
+    enableEmbeddedRelationSaveAndNew?: boolean;
 }
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -522,6 +523,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
         handlePopupClose: (() => {
             setvisibleCreateRelationEntity(false);
         }),
+        enableEmbeddedRelationSaveAndNew: formViewParams.enableEmbeddedRelationSaveAndNew,
     }
 
     if (viewMode === "view") {

@@ -14,7 +14,7 @@ import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 import { SolidButton, SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui";
 import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting, headerRequestStatusLabel, showMobileOpenChatter, onMobileOpenChatter }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting, setEmbeddedRelationSubmitAction, headerRequestStatusLabel, showMobileOpenChatter, onMobileOpenChatter }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -29,11 +29,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const { data: session, status } = useSession();
     const user = session?.user;
 
-    const isPublished = publish && publish !== 'null';   // record is published if publish has value
+    const isPublished = formData?.isPublished ?? (publish && publish !== 'null');   // fallback keeps older API responses working
+    const isLatestVersion = formData?.isLatest !== false;
+    const showDraftPublishActions = Boolean(
+        draftEnabled &&
+        params.id !== 'new' &&
+        isLatestVersion
+    );
     const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
-    // const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty;
-    const hasUserInteraction = Object.keys(formik?.touched || {}).length > 0;
-    const shouldShowSaveForExistingRecord = viewMode === "edit" && formik.dirty && hasUserInteraction;
+    const shouldShowSaveForExistingRecord = viewMode === "edit";
+    const showEmbeddedRelationSaveAndNew = params.embeded === true && params.enableEmbeddedRelationSaveAndNew === true;
     
     useEffect(() => {
         if (solidView) {
@@ -113,8 +118,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     );
 
     const FormActionDropdown = () => {
-        const canPublish = actionsAllowed.includes(permissionExpression(params.modelName, 'publish'));
-        const canUnpublish = actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish'));
         const closeMenu = () => setFormActionsMenuOpen(false);
 
         return (
@@ -170,32 +173,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 closeMenu();
                             }}
                         />
-                        {draftEnabled && params.id !== 'new' && (
-                            <>
-                                {!isPublished && canPublish && (
-                                    <FormActionMenuButton
-                                        label="Publish"
-                                        icon="si si-cloud-upload"
-                                        onClick={() => {
-                                            handleDraftPublishWorkFlow('publish');
-                                            closeMenu();
-                                        }}
-                                    />
-                                )}
-
-                                {isPublished && canUnpublish && (
-                                    <FormActionMenuButton
-                                        label="Unpublish"
-                                        icon="si si-cloud-download"
-                                        onClick={() => {
-                                            handleDraftPublishWorkFlow('unpublish');
-                                            closeMenu();
-                                        }}
-                                    />
-                                )}
-                            </>
-                        )}
-
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
                                 <SolidFormViewContextMenuHeaderButton
@@ -286,7 +263,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 {params.embeded !== true &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                     !formViewLayout.attrs.readonly &&
-                                    formik.dirty &&
                                     <div>
                                         <SolidButton
                                             label="Save"
@@ -322,31 +298,93 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 {params.embeded == true &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                     !formViewLayout.attrs.readonly &&
-                                    formik.dirty &&
-                                    <div>
-                                        <SolidButton
-                                            label="Save"
-                                            size="sm"
-                                            onClick={() => {
-                                                setRedirectToList(params.redirectToPath ? true : false);
-                                            }}
-                                            type="submit"
-                                            className="hidden lg:flex"
-                                            loading={isSubmitting}
-                                            disabled={isSubmitting}
-                                        />
-                                        <SolidButton
-                                            size="sm"
-                                            onClick={() => {
-                                                setRedirectToList(params.redirectToPath ? true : false);
-                                            }}
-                                            type="submit"
-                                            className="lg:hidden solid-icon-button"
-                                            icon="si si-check"
-                                            loading={isSubmitting}
-                                            disabled={isSubmitting}
-                                        />
-                                    </div>
+                                    <>
+                                        {showEmbeddedRelationSaveAndNew ? (
+                                            <>
+                                                <div>
+                                                    <SolidButton
+                                                        label="Save & Close"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setEmbeddedRelationSubmitAction?.("close");
+                                                            setRedirectToList(params.redirectToPath ? true : false);
+                                                        }}
+                                                        type="submit"
+                                                        className="hidden lg:flex"
+                                                        loading={isSubmitting}
+                                                        disabled={isSubmitting}
+                                                    />
+                                                    <SolidButton
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setEmbeddedRelationSubmitAction?.("close");
+                                                            setRedirectToList(params.redirectToPath ? true : false);
+                                                        }}
+                                                        type="submit"
+                                                        className="lg:hidden solid-icon-button"
+                                                        icon="si si-check"
+                                                        loading={isSubmitting}
+                                                        disabled={isSubmitting}
+                                                        aria-label="Save & Close"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <SolidButton
+                                                        label="Save & New"
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            setEmbeddedRelationSubmitAction?.("new");
+                                                            setRedirectToList(false);
+                                                        }}
+                                                        type="submit"
+                                                        className="hidden lg:flex bg-[var(--primary-color-text)]"
+                                                        loading={isSubmitting}
+                                                        disabled={isSubmitting}
+                                                    />
+                                                    <SolidButton
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            setEmbeddedRelationSubmitAction?.("new");
+                                                            setRedirectToList(false);
+                                                        }}
+                                                        type="submit"
+                                                        className="lg:hidden solid-icon-button bg-[var(--primary-color-text)]"
+                                                        icon="si si-plus"
+                                                        loading={isSubmitting}
+                                                        disabled={isSubmitting}
+                                                        aria-label="Save & New"
+                                                    />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div>
+                                                <SolidButton
+                                                    label="Save"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setRedirectToList(params.redirectToPath ? true : false);
+                                                    }}
+                                                    type="submit"
+                                                    className="hidden lg:flex"
+                                                    loading={isSubmitting}
+                                                    disabled={isSubmitting}
+                                                />
+                                                <SolidButton
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setRedirectToList(params.redirectToPath ? true : false);
+                                                    }}
+                                                    type="submit"
+                                                    className="lg:hidden solid-icon-button"
+                                                    icon="si si-check"
+                                                    loading={isSubmitting}
+                                                    disabled={isSubmitting}
+                                                />
+                                            </div>
+                                        )}
+                                    </>
                                 }
                                 {params.embeded == true &&
                                     <>
@@ -469,7 +507,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     formViewLayout.attrs?.showEditFormButton !== false &&
                                     params.embeded !== true &&
                                     viewMode === "view" &&
-                                    !isPublished &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     <>
                                         <div className="hidden lg:flex">
@@ -485,6 +523,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                                 {
                                     params.embeded !== true &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
                                     shouldShowSaveForExistingRecord &&
@@ -495,10 +534,33 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     </div>
                                 }
 
+                                {
+                                    params.embeded !== true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    !isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'publish')) &&
+                                    <div>
+                                        <SolidButton label="Publish" size="sm" type="button" onClick={() => handleDraftPublishWorkFlow('publish')} />
+                                    </div>
+                                }
+
+                                {
+                                    params.embeded !== true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish')) &&
+                                    <div>
+                                        <SolidButton label="Unpublish" size="sm" type="button" variant="destructive" onClick={() => handleDraftPublishWorkFlow('unpublish')} />
+                                    </div>
+                                }
+
                                 {/* Inline */}
 
                                 {
                                     params.embeded == true &&
+                                    isLatestVersion &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                     !formViewLayout.attrs.readonly &&
                                     shouldShowSaveForExistingRecord &&
@@ -518,6 +580,26 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     !isPublished &&
                                     <div>
                                         <SolidButton size="sm" type="button" label="Delete" variant="destructive" onClick={() => setDeleteDialogVisible(true)} />
+                                    </div>
+                                }
+                                {
+                                    params.embeded == true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    !isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'publish')) &&
+                                    <div>
+                                        <SolidButton label="Publish" size="sm" type="button" onClick={() => handleDraftPublishWorkFlow('publish')} />
+                                    </div>
+                                }
+                                {
+                                    params.embeded == true &&
+                                    showDraftPublishActions &&
+                                    !formViewLayout.attrs.readonly &&
+                                    isPublished &&
+                                    actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish')) &&
+                                    <div>
+                                        <SolidButton label="Unpublish" size="sm" type="button" variant="destructive" onClick={() => handleDraftPublishWorkFlow('unpublish')} />
                                     </div>
                                 }
                                 {

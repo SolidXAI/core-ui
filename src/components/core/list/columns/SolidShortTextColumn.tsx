@@ -8,7 +8,7 @@ import { SolidListFieldWidgetProps, SolidMediaListFieldWidgetProps } from '../..
 
 const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
 
-    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
+    const truncateAfter = column?.attrs?.truncateAfter ?? solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -53,7 +53,7 @@ export default SolidShortTextColumn;
 
 
 export const DefaultTextListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
-    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
+    const truncateAfter = column?.attrs?.truncateAfter ?? solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
     const rawValue = rowData[fieldMetadata.name];
     let displayValue = rawValue;
 

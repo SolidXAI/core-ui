@@ -16,7 +16,7 @@ const SolidTableRowCell = ({ value, truncateAfter }: { value: string; truncateAf
             <div
                 className="solid-table-row"
                 style={truncateAfter ? { maxWidth: `${truncateAfter}ch` } : {}}
-            // title={truncateAfter ? displayValue : undefined}
+                title={truncateAfter && displayValue.length > truncateAfter ? displayValue : undefined}
             >
                 {displayValue}
             </div>

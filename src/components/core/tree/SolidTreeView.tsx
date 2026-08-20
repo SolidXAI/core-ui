@@ -27,7 +27,7 @@ import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { getFilterObjectFromLocalStorage, hasStoredFilterPredicates, hasStoredSearchUiState, setFilterObjectToLocalStorage } from "../common/globalSearchPersistence";
+import { getFilterObjectFromLocalStorage, hasMeaningfulPersistedFilter, hasStoredFilterPredicates, setFilterObjectToLocalStorage } from "../common/globalSearchPersistence";
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
@@ -45,6 +45,8 @@ import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersiste
 import { getRelationDisplayText } from "../../../helpers/relationDisplay";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
 import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
+import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
+import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -134,6 +136,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const user = session?.data?.user;
 
   const pathname = usePathname();
+  const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
+  const solidSettingsMap = getSettingsMap(solidSettingsData);
   const solidGlobalSearchElementRef = useRef<any>(null);
 
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
@@ -185,26 +189,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [viewModes, setViewModes] = useState<any>([]);
-  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
-    ? lightboxUrls
-      .map((item: any) => {
-        const src = item?.src || item?.downloadUrl || "";
-        if (!src) {
-          return null;
-        }
-
-        const mediaType = getMediaTypeFromUrl(src);
-        const slide: SolidLightboxSlide = { src };
-
-        if (mediaType !== "image") {
-          slide.type = mediaType;
-        }
-
-        return slide;
-      })
-      .filter((slide): slide is SolidLightboxSlide => !!slide)
-    : [];
-
   const headerRequestStatusLabel = treeLoading ? "Loading..." : null;
 
 
@@ -362,6 +346,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const editBaseUrl = useMemo(
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
+  );
+  const rowClickFormMode = useMemo(
+    () =>
+      resolveRecordClickAction(solidSettingsMap, {
+        isSystemModule: solidTreeViewMetaData?.data?.solidView?.module?.isSystem === true,
+      }),
+    [solidSettingsMap, solidTreeViewMetaData],
   );
 
   const [
@@ -1367,7 +1358,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
   const handleFetchUpdatedRecords = () => {
-    if (hasStoredFilterPredicates(getFilterObjectFromLocalStorage())) {
+    if (hasAnyActiveFilters) {
       solidGlobalSearchElementRef.current?.clearAppliedFilters?.({ preserveGrouping: true });
       return;
     }
@@ -1592,7 +1583,19 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
-  const shouldShowMobileSearchElement = showGlobalSearchElement || hasStoredSearchUiState(filterPredicates) || hasStoredSearchUiState(getFilterObjectFromLocalStorage());
+  const storedFilterObject = getFilterObjectFromLocalStorage();
+  const hasFilterPredicatesApplied = hasStoredFilterPredicates(filterPredicates);
+  const hasGroupingRulesApplied = Boolean(filterPredicates?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null));
+  const hasActiveFilters = hasMeaningfulPersistedFilter(filters);
+  const hasAnyActiveFilters = hasActiveFilters || hasFilterPredicatesApplied || hasGroupingRulesApplied;
+  const hasStoredFilterState = hasStoredFilterPredicates(storedFilterObject);
+  const hasStoredGroupingRules = Boolean(storedFilterObject?.grouping_rules?.some?.((rule: any) => rule?.fieldName !== null));
+
+  useEffect(() => {
+    if (params.embeded === false) {
+      setShowGlobalSearchElement(hasAnyActiveFilters || hasStoredFilterState || hasStoredGroupingRules);
+    }
+  }, [hasAnyActiveFilters, hasStoredFilterState, hasStoredGroupingRules, params.embeded]);
 
   const visibleHeaderButtons = useMemo(
     () =>
@@ -1601,6 +1604,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       ),
     [solidTreeViewLayout?.attrs?.headerButtons],
   );
+
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) return null;
+
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
+    : [];
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
@@ -1619,7 +1638,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     solidTreeViewLayout?.attrs?.edit !== false &&
     (!inContextMenu || solidTreeViewLayout?.attrs?.showDefaultEditButton !== false) &&
     (!inContextMenu || solidTreeViewLayout?.attrs?.showRowEditInContextMenu !== false) &&
-    !(isDraftPublishWorkflowEnabled && rowData?.publishedAt);
+    !(isDraftPublishWorkflowEnabled && rowData?.isLatest === false);
 
   const canDeleteRow = (rowData: any, inContextMenu = false) =>
     !rowData?.deletedAt &&
@@ -1630,7 +1649,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       (solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== undefined &&
         solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== true)
       : solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== false) &&
-    !(isDraftPublishWorkflowEnabled && rowData?.publishedAt);
+    !(isDraftPublishWorkflowEnabled && rowData?.isLatest === false);
 
   const getContextMenuButtons = (rowData: any) =>
     (solidTreeViewLayout?.attrs?.rowButtons || []).filter((rb: any) => {
@@ -1866,8 +1885,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         <div className="solid-list-surface solid-tree-surface flex flex-col flex-1 min-h-0">
           {/* ── Header ── */}
           <div className="page-header solid-list-toolbar solid-tree-toolbar flex-col lg:flex-row">
-            <div className="flex justify-between w-full">
-              <div className="flex gap-4 items-center w-full solid-list-toolbar-left">
+            <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
+              <div className="flex lg:gap-4 items-center w-full solid-list-toolbar-left lg:min-w-0 lg:flex-1">
                 <div className="flex items-center gap-2">
                   {/* {params.embeded !== true && (
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
@@ -1878,7 +1897,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 </div>
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-                  <div className="hidden lg:flex">
+                  <div className={`${showGlobalSearchElement ? "flex" : "hidden lg:flex"} mt-3 lg:mt-0 w-full lg:flex lg:min-w-0`}>
                     <SolidGlobalSearchElement
                       viewType="tree"
                       showSaveFilterPopup={showSaveFilterPopup}
@@ -1892,7 +1911,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 )}
               </div>
 
-              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+              <div className="flex items-center solid-header-buttons-wrapper solid-list-toolbar-actions lg:ml-auto">
                 {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
@@ -1991,21 +2010,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   )}
               </div>
             </div>
-
-            {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-              shouldShowMobileSearchElement && (
-                <div className="flex lg:hidden">
-                  <SolidGlobalSearchElement
-                    viewType="tree"
-                    showSaveFilterPopup={showSaveFilterPopup}
-                    setShowSaveFilterPopup={setShowSaveFilterPopup}
-                    ref={solidGlobalSearchElementRef}
-                    viewData={solidTreeViewMetaData}
-                    handleApplyCustomFilter={handleApplyCustomFilter}
-                    filterPredicates={filterPredicates}
-                  />
-                </div>
-              )}
           </div>
 
           {/* ── Tree table ── */}
@@ -2081,7 +2085,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   // params.handleEditClickForEmbeddedView(rowData?.id);
                   // } else {
                   storeCurrentModelViewContext();
-                  router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+                  router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${new URLSearchParams(editActionQueryParams).toString()}`);
                   // }
                 }
                 }
@@ -2240,6 +2244,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <SolidButton label="Yes" size="sm" severity="danger" onClick={recoverAll} />
         </SolidDialogFooter>
       </SolidDialog>
+      {openLightbox && (
+        <SolidLightbox
+          open={openLightbox}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
+        />
+      )}
 
       {openLightbox && (
         <SolidLightbox

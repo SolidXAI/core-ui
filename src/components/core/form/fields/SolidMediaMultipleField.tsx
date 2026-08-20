@@ -15,6 +15,7 @@ import {
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import { SolidProgressBar } from "../../../shad-cn-ui/SolidProgressBar";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -27,6 +28,7 @@ import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/me
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { showToast } from "../../../../redux/features/toastSlice";
 import styles from "./solidFields.module.css";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { buildMediaFieldKey, getPersistedMediaId } from "./mediaFieldUtils";
@@ -191,6 +193,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             : `${(size / 1024).toFixed(1)} KB`;
     };
     const [deleteMedia] = useDeleteMediaMutation();
+    const dispatch = useDispatch();
     useEffect(() => {
         const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
         if (!Array.isArray(fieldValue) || fieldValue.length === 0) {
@@ -300,8 +303,14 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 "onFieldChange"
             );
             setFileDetails((prev) => prev.filter((file) => file.fileKey !== selectedFileId));
-        } catch (error) {
+        } catch (error: any) {
             console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
+            dispatch(showToast({
+                severity: "error",
+                summary: "Delete Failed",
+                detail: error?.data?.message || error?.message || ERROR_MESSAGES.ERROR_DELETING_FILE,
+                life: 4000,
+            }));
         }
 
         setDeleteImageDialogVisible(false);
