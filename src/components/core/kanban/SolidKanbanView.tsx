@@ -1262,6 +1262,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                   showArchived={showArchived}
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
+                  hasAnyActiveFilters={hasAnyActiveFilters}
                   handleRefreshView={handleRefreshView}
                 />
               </div>

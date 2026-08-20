@@ -68,6 +68,7 @@ export const SolidKanbanViewConfigure = ({
     showArchived,
     setShowSaveFilterPopup,
     filters,
+    hasAnyActiveFilters,
     handleRefreshView,
 }: any) => {
     const pathname = usePathname();
@@ -220,7 +221,7 @@ export const SolidKanbanViewConfigure = ({
                         </SolidDropdownMenuCheckboxItem>
                     )}
 
-                    {(canCustomizeLayout || canSaveCustomFilter || canShowArchivedRecords) && <SolidDropdownMenuSeparator />}
+                    {(canCustomizeLayout || hasAnyActiveFilters && canSaveCustomFilter || canShowArchivedRecords) && <SolidDropdownMenuSeparator />}
 
                     {canCustomizeLayout && (
                         <SolidDropdownMenuSub>
@@ -255,7 +256,7 @@ export const SolidKanbanViewConfigure = ({
                         </SolidDropdownMenuSub>
                     )}
 
-                    {canSaveCustomFilter && (
+                    {hasAnyActiveFilters && canSaveCustomFilter && (
                         <SolidDropdownMenuItem
                             className="solid-header-dropdown-item"
                             onSelect={() => {

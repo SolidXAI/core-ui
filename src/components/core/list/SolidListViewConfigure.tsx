@@ -61,6 +61,7 @@ export const SolidListViewConfigure = (
         setDialogVisible,
         setShowSaveFilterPopup,
         filters,
+        hasAnyActiveFilters,
         handleFetchUpdatedRecords,
         setRecoverDialogVisible,
 
@@ -305,8 +306,7 @@ export const SolidListViewConfigure = (
 
                             {(
                                 isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
-                                isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
-                                true
+                                hasAnyActiveFilters && isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`)
                             ) && <SolidDropdownMenuSeparator />}
 
                             {isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) && (
@@ -350,7 +350,7 @@ export const SolidListViewConfigure = (
                                     </SolidDropdownMenuSubContent>
                                 </SolidDropdownMenuSub>
                             )}
-                            {isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) && (
+                            {hasAnyActiveFilters && isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) && (
                                 <SolidDropdownMenuItem
                                     className="solid-header-dropdown-item"
                                     onSelect={() => {

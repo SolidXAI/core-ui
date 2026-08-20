@@ -2018,6 +2018,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                       setDialogVisible={setDeleteRecordsDialogVisible}
                       setShowSaveFilterPopup={setShowSaveFilterPopup}
                       filters={filters}
+                      hasAnyActiveFilters={hasAnyActiveFilters}
                       handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                       setRecoverDialogVisible={setRecoverDialogVisible}
                     />
