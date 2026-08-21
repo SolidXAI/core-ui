@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.16-beta.0] - 2026-08-21
+
+### Added
+
+- implement dark theme styles for workflow editor components
+- add hasAnyActiveFilters prop to various components for filter management
+- add error message for unsupported media extensions and enhance media type handling
+
+### Fixed
+
+- adjust font weights in global search filter overlay for consistency
+- update global search filter overlay UI for improved styling and structure
+
+### Changed
+
+- streamline filter handling in SolidChatterHeader and update active filter styles
+
+### Other
+
+- reverted tailwind generated file
+- cogwheel layout panel position issue
+- primereact css and icons dependancies removed
+
 ## [0.1.15] - 2026-08-20
 
 ### Added
