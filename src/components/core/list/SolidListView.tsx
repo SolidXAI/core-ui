@@ -1551,6 +1551,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         setDialogVisible={setDialogVisible}
                         setShowSaveFilterPopup={setShowSaveFilterPopup}
                         filters={filters}
+                        hasAnyActiveFilters={hasAnyActiveFilters}
                         handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                         setRecoverDialogVisible={setRecoverDialogVisible}
                       />
