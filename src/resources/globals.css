@@ -4616,7 +4616,7 @@ li.header-li-px {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
 }
@@ -4718,10 +4718,14 @@ li.header-li-px {
   overflow: hidden;
   color: color-mix(in srgb, var(--foreground) 94%, transparent);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.solid-saved-filter-main .solid-search-overlay-option-title {
+  font-weight: 500;
 }
 
 .solid-search-overlay-option-description {
