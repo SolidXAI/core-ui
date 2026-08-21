@@ -1,3 +1,84 @@
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 100;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Thin.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 200;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Ultralight.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 300;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Light.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Regular.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Medium";
+  src: url("./fonts/SF-Pro-Display-Medium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 600;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Semibold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 800;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Heavy.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "SF Pro Display";
+  font-weight: 900;
+  font-display: swap;
+  font-style: normal;
+  font-named-instance: "Regular";
+  src: url("./fonts/SF-Pro-Display-Black.otf") format("opentype");
+}
+
 html,
 body {
   background: var(--background);
@@ -232,19 +313,6 @@ input,
 select,
 textarea {
   font: inherit;
-  font-family: inherit;
-}
-
-.p-button,
-.p-button .p-button-label,
-.p-dropdown,
-.p-dropdown .p-dropdown-label,
-.p-dropdown-panel .p-dropdown-item,
-.p-multiselect,
-.p-multiselect .p-multiselect-label,
-.p-multiselect-panel .p-multiselect-item,
-.p-tabview .p-tabview-nav-link,
-.p-tabview .p-tabview-title {
   font-family: inherit;
 }
 
@@ -2176,22 +2244,6 @@ textarea {
   box-shadow: 0 0 0 2px rgba(244, 244, 245, 0.08);
 }
 
-.solid-shadcn-toast.p-toast-message {
-  border: 1px solid #27272a;
-  border-radius: 10px;
-  background: #111113;
-  color: #fafafa;
-  box-shadow: 0 12px 30px rgba(2, 6, 23, 0.35);
-}
-
-.solid-shadcn-toast .p-toast-message-content {
-  padding: 10px 12px;
-}
-
-.solid-shadcn-toast .p-toast-message-icon,
-.solid-shadcn-toast .p-toast-icon-close {
-  color: #a1a1aa;
-}
 
 .solid-shadcn-toast-content {
   display: flex;
@@ -3548,7 +3600,6 @@ textarea {
   justify-content: center;
 }
 
-.solid-list-toolbar .p-button,
 .solid-list-toolbar .solid-btn {
   height: 32px;
   border-radius: 8px;
@@ -3556,8 +3607,6 @@ textarea {
   font-weight: 500;
 }
 
-.solid-list-toolbar .p-button.p-button-secondary,
-.solid-list-toolbar .p-button.p-button-outlined,
 .solid-list-toolbar .solid-btn--secondary,
 .solid-list-toolbar .solid-btn--outline,
 .solid-list-toolbar .solid-icon-button,
@@ -3635,16 +3684,12 @@ html.dark .solid-kanban-toolbar .solid-global-search-element input::placeholder,
   color: color-mix(in srgb, var(--muted-foreground) 64%, transparent);
 }
 
-html.dark .solid-list-toolbar .p-button.p-button-secondary,
-html.dark .solid-list-toolbar .p-button.p-button-outlined,
 html.dark .solid-list-toolbar .solid-btn--secondary,
 html.dark .solid-list-toolbar .solid-btn--outline,
 html.dark .solid-list-toolbar .solid-icon-button,
 html.dark .solid-icon-button,
 html.dark .solid-list-toolbar .solid-header-cog-trigger,
 html.dark .solid-header-cog-trigger,
-[data-theme="dark"] .solid-list-toolbar .p-button.p-button-secondary,
-[data-theme="dark"] .solid-list-toolbar .p-button.p-button-outlined,
 [data-theme="dark"] .solid-list-toolbar .solid-btn--secondary,
 [data-theme="dark"] .solid-list-toolbar .solid-btn--outline,
 [data-theme="dark"] .solid-list-toolbar .solid-icon-button,
@@ -4766,7 +4811,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   border-width: 1px !important;
 }
 
-.solid-row-menu-trigger.p-button,
 .solid-row-menu-trigger {
   width: 28px;
   height: 28px;
@@ -4784,14 +4828,9 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
     color 120ms ease;
 }
 
-.solid-row-menu-trigger.p-button:hover,
 .solid-row-menu-trigger:hover {
   background: var(--accent);
   color: var(--accent-foreground);
-}
-
-.solid-row-menu-trigger .p-button-label {
-  display: none;
 }
 
 .solid-popover-root {
@@ -4910,14 +4949,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   top: auto;
 }
 
-.solid-custom-overlay .p-overlaypanel-content {
-  padding: 3px;
-  border-radius: 8px;
-  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  background: var(--card);
-  box-shadow: 0 10px 24px color-mix(in srgb, hsl(222 47% 11%) 18%, transparent);
-}
-
 .solid-row-actions-menu {
   min-width: 152px;
 }
@@ -4938,9 +4969,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   font-weight: 500;
   line-height: 1.1;
   cursor: pointer;
-}
-.p-button-danger{
-  color: var(--destructive) !important;
 }
 
 .solid-row-action-button-label {
@@ -5416,7 +5444,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   }
 }
 
-.solid-inline-row-button.p-button,
 .solid-inline-row-button.solid-btn {
   min-height: 28px;
   border-radius: 8px;
@@ -5429,13 +5456,11 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   gap: 0.35rem;
 }
 
-.solid-inline-row-button.p-button:hover,
 .solid-inline-row-button.solid-btn:hover {
   background: var(--accent);
   border-color: color-mix(in srgb, var(--border) 78%, transparent);
 }
 
-.solid-inline-row-button.solid-inline-row-button-icon.p-button,
 .solid-inline-row-button.solid-inline-row-button-icon.solid-btn {
   width: 28px;
   min-width: 28px;

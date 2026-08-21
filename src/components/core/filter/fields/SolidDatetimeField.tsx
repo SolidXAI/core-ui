@@ -31,7 +31,7 @@ const SolidDatetimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilte
                     optionLabel='label'
                     optionValue='value'
                     placeholder="Select Operator"
-                    className="p-inputtext-sm w-full "
+                    className="w-full solid-filter-compact-control"
                 />
             </div>
 

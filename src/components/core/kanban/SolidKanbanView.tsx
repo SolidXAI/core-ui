@@ -1268,8 +1268,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
               </div>
             </div>
           </div>
-
-          <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
             <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick}></KanbanBoard>
           }

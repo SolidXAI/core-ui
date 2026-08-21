@@ -1923,7 +1923,7 @@ const FieldMetaDataForm = ({
                               }}
                               value={formik.values.displayName}
                               className={classNames(styles.fieldInput, {
-                                "p-invalid": isFormFieldValid(formik, "displayName"),
+                                "is-invalid": isFormFieldValid(formik, "displayName"),
                               })}
                             />
                             {isFormFieldValid(formik, "displayName") && (
@@ -1945,7 +1945,7 @@ const FieldMetaDataForm = ({
                               onChange={formik.handleChange}
                               value={formik.values.name}
                               className={classNames(styles.fieldInput, {
-                                "p-invalid": isFormFieldValid(formik, "name"),
+                                "is-invalid": isFormFieldValid(formik, "name"),
                               })}
                             />
                             {isFormFieldValid(formik, "name") && (
@@ -1966,7 +1966,7 @@ const FieldMetaDataForm = ({
                               value={formik.values.description}
                               rows={5}
                               className={classNames(styles.fieldTextarea, {
-                                "p-invalid": isFormFieldValid(formik, "description"),
+                                "is-invalid": isFormFieldValid(formik, "description"),
                               })}
                             />
                             {isFormFieldValid(formik, "description") && (
@@ -2011,7 +2011,7 @@ const FieldMetaDataForm = ({
                                   onChange={formik.handleChange}
                                   value={formik.values.columnName}
                                   className={classNames(styles.fieldInput, {
-                                    "p-invalid": isFormFieldValid(formik, "columnName"),
+                                    "is-invalid": isFormFieldValid(formik, "columnName"),
                                   })}
                                 />
                                 {isFormFieldValid(formik, "columnName") && (
@@ -2046,7 +2046,7 @@ const FieldMetaDataForm = ({
                                   value={formik.values.length}
                                   onChange={(event) => formik.setFieldValue("length", event.value)}
                                   className={classNames({
-                                    "p-invalid": isFormFieldValid(
+                                    "is-invalid": isFormFieldValid(
                                       formik,
                                       "length"
                                     ),
@@ -2074,7 +2074,7 @@ const FieldMetaDataForm = ({
                                 onChange={(value) => formik.setFieldValue("defaultValue", value)}
                                 options={booleanSegmentedOptions}
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                  "is-invalid": isFormFieldValid(formik, "defaultValue"),
                                 })}
                               />
                             </div>
@@ -2099,7 +2099,7 @@ const FieldMetaDataForm = ({
                                   onChange={formik.handleChange}
                                   value={formik.values.defaultValue}
                                   className={classNames(styles.fieldInput, {
-                                    "p-invalid": isFormFieldValid(
+                                    "is-invalid": isFormFieldValid(
                                       formik,
                                       "defaultValue"
                                     ),
@@ -2115,7 +2115,7 @@ const FieldMetaDataForm = ({
                                     value={formik.values.defaultValue}
                                     onChange={(event) => formik.setFieldValue("defaultValue", event.value)}
                                     className={classNames({
-                                      "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                      "is-invalid": isFormFieldValid(formik, "defaultValue"),
                                     })}
                                   />
                                 </div>
@@ -2129,7 +2129,7 @@ const FieldMetaDataForm = ({
                                     value={formik.values.defaultValue}
                                     onChange={(event) => formik.setFieldValue("defaultValue", event.value)}
                                     className={classNames({
-                                      "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                      "is-invalid": isFormFieldValid(formik, "defaultValue"),
                                     })}
                                   />
                                 </div>
@@ -2155,7 +2155,7 @@ const FieldMetaDataForm = ({
                                     dateFormat={dateFormat}
                                     timeFormat={timeFormat}
                                     inputClassName={classNames({
-                                      "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                      "is-invalid": isFormFieldValid(formik, "defaultValue"),
                                     })}
                                   />
                                 );
@@ -2224,7 +2224,7 @@ const FieldMetaDataForm = ({
                                   value={formik.values.mediaMaxSizeKb}
                                   onChange={(event) => formik.setFieldValue("mediaMaxSizeKb", event.value)}
                                   className={classNames({
-                                    "p-invalid": isFormFieldValid(
+                                    "is-invalid": isFormFieldValid(
                                       formik,
                                       "mediaMaxSizeKb"
                                     ),
@@ -2321,7 +2321,7 @@ const FieldMetaDataForm = ({
                                 onChange={formik.handleChange}
                                 value={formik.values.mediaEmbedded}
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "mediaEmbedded"
                                   ),
@@ -2334,7 +2334,7 @@ const FieldMetaDataForm = ({
                                 }}
                                 options={booleanSegmentedOptions}
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "mediaEmbedded"
                                   ),
@@ -2363,7 +2363,7 @@ const FieldMetaDataForm = ({
                                   }
                                   placeholder="Select a Data Source"
                                   className={classNames("", {
-                                    "p-invalid": isFormFieldValid(
+                                    "is-invalid": isFormFieldValid(
                                       formik,
                                       "relationType"
                                     ),
@@ -2387,7 +2387,7 @@ const FieldMetaDataForm = ({
                                   }
                                 }}
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(formik, "relationType"),
+                                  "is-invalid": isFormFieldValid(formik, "relationType"),
                                 })}
                               />
 
@@ -2417,7 +2417,7 @@ const FieldMetaDataForm = ({
                                 }
                                 placeholder="Cascade"
                                 className={classNames("w-full", {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "relationCascade"
                                   ),
@@ -2543,7 +2543,7 @@ const FieldMetaDataForm = ({
                                 disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationCoModelColumnName}
                                 className={classNames(styles.fieldInput, {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "relationCoModelColumnName"
                                   ),
@@ -2610,7 +2610,7 @@ const FieldMetaDataForm = ({
                                   value={formik.values.relationFieldFixedFilter}
                                   rows={5}
                                   className={classNames(styles.fieldTextarea, {
-                                    "p-invalid": isFormFieldValid(
+                                    "is-invalid": isFormFieldValid(
                                       formik,
                                       "relationFieldFixedFilter"
                                     ),
@@ -2625,7 +2625,7 @@ const FieldMetaDataForm = ({
                                   disabled={fieldMetaData?.id}
                                   value={formik.values.relationFieldFixedFilter}
                                   className={classNames("", {
-                                    "p-invalid": isFormFieldValid(
+                                    "is-invalid": isFormFieldValid(
                                       formik,
                                       "relationFieldFixedFilter"
                                     ),
@@ -2681,7 +2681,7 @@ const FieldMetaDataForm = ({
                                 disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationCoModelFieldName}
                                 className={classNames(styles.fieldInput, {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "relationCoModelFieldName"
                                   ),
@@ -2717,7 +2717,7 @@ const FieldMetaDataForm = ({
                                 onChange={formik.handleChange}
                                 value={formik.values.joinColumnName}
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "joinColumnName"
                                   ),
@@ -2751,7 +2751,7 @@ const FieldMetaDataForm = ({
                                 disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationJoinTableName}
                                 className={classNames(styles.fieldInput, {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "relationJoinTableName"
                                   ),
@@ -2841,7 +2841,7 @@ const FieldMetaDataForm = ({
                                 }
                                 placeholder="Select Value Type"
                                 className={classNames("w-full", {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "selectionValueType"
                                   ),
@@ -2933,7 +2933,7 @@ const FieldMetaDataForm = ({
                                 }
                                 placeholder="Select a Data Source"
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
+                                  "is-invalid": isFormFieldValid(
                                     formik,
                                     "mediaTypes"
                                   ),
@@ -3128,7 +3128,7 @@ const FieldMetaDataForm = ({
                                     onChange={formik.handleChange}
                                     value={formik.values.regexPattern}
                                     className={classNames(styles.fieldInput, {
-                                      "p-invalid": isFormFieldValid(
+                                      "is-invalid": isFormFieldValid(
                                         formik,
                                         "regexPattern"
                                       ),
@@ -3153,7 +3153,7 @@ const FieldMetaDataForm = ({
                                       onChange={formik.handleChange}
                                       value={formik.values.regexPatternNotMatchingErrorMsg}
                                       className={classNames(styles.fieldInput, {
-                                        "p-invalid": isFormFieldValid(
+                                        "is-invalid": isFormFieldValid(
                                           formik,
                                           "regexPatternNotMatchingErrorMsg"
                                         ),
@@ -3182,7 +3182,7 @@ const FieldMetaDataForm = ({
                                 onChange={formik.handleChange}
                                 value={formik.values.min}
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(formik, "min"),
+                                  "is-invalid": isFormFieldValid(formik, "min"),
                                 })}
                               /> */}
                                     {/* <RenderMinValueInput></RenderMinValueInput> */}
@@ -3195,7 +3195,7 @@ const FieldMetaDataForm = ({
                                         value={formik.values.min}
                                         onChange={(event) => formik.setFieldValue("min", event.value)}
                                         className={classNames({
-                                          "p-invalid": isFormFieldValid(
+                                          "is-invalid": isFormFieldValid(
                                             formik,
                                             "min"
                                           ),
@@ -3221,7 +3221,7 @@ const FieldMetaDataForm = ({
                                 onChange={formik.handleChange}
                                 value={formik.values.max}
                                 className={classNames("", {
-                                  "p-invalid": isFormFieldValid(formik, "max"),
+                                  "is-invalid": isFormFieldValid(formik, "max"),
                                 })}
                               /> */}
 
@@ -3233,7 +3233,7 @@ const FieldMetaDataForm = ({
                                         value={formik.values.max}
                                         onChange={(event) => formik.setFieldValue("max", event.value)}
                                         className={classNames({
-                                          "p-invalid": isFormFieldValid(
+                                          "is-invalid": isFormFieldValid(
                                             formik,
                                             "max"
                                           ),

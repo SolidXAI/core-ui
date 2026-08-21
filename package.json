@@ -65,8 +65,6 @@
     "mongoose": "^7.5.0",
     "nodemailer": "^7.0.7",
     "pluralize": "^8.0.0",
-    "primeicons": "^7.0.0",
-    "primereact": "^10.8.5",
     "qs": "^6.13.0",
     "quill": "^2.0.3",
     "react-grid-layout": "^2.2.2",
