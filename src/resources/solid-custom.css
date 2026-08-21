@@ -3573,6 +3573,13 @@ textarea {
   padding: 0 !important;
 }
 
+.solid-list-toolbar .solid-icon-button.is-filter-active,
+.solid-icon-button.is-filter-active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
 html.dark .solid-list-page-wrapper,
 [data-theme="dark"] .solid-list-page-wrapper {
   background:
