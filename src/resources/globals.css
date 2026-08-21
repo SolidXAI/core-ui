@@ -2246,11 +2246,11 @@ li.header-li-px {
 }
 
 .solid-dropzone-meta {
-  margin: 0 0 0.2rem;
+  /* margin: 0 0 0.2rem; */
   text-align: center;
   color: var(--muted-foreground, var(--text-color-secondary)) !important;
   font-size: 11px !important;
-  line-height: 1.45;
+  line-height: 1;
   letter-spacing: 0.01em;
 }
 

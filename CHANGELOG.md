@@ -4,6 +4,159 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.15] - 2026-08-20
+
+### Added
+
+- enhance media file type handling with dynamic configuration support
+- sync form state with API response after save to prevent stale values
+- add responsive basis utilities to Tailwind safelist for dynamic layouts
+- add isInitialLoad flag to SolidLoadList and SolidBeforeListDataLoad types; enhance filter handling in SolidGlobalSearchElement and SolidListView
+- add saved filter properties to SolidCardView and SolidKanbanView
+
+### Fixed
+
+- many-to-one link in listview now follows viewmode set in settings
+- adjust line height for header list items in globals.css
+- correct class name for search overlay panel and remove unnecessary styles
+- update error handling and improve UI label for column selector
+
+### Changed
+
+- remove unused mimeType property from MediaConfig type
+- streamline media extension handling in DropzonePlaceholder and helpers
+- remove unused defined filter logic and related styles from global search and list view components
+- simplify PDFViewer by removing blob URL handling and using direct iframe rendering
+
+### Maintenance
+
+- widen reusable utility safelist in current config
+
+### Other
+
+- fixed formatting
+- taking impact of mediaAllowedExtensions in core-ui
+- - form viewmode behaviour after save - kanban and card view edit row action
+- added form viewmode widget
+- admin header actions visibilityu issues
+- update styles for search overlay sections and add separator
+- clean up in global search element
+- changes around global search element css
+- Refactor SolidCardView and SolidKanbanView to support imperative handles and enhance filter management; add registry for card and kanban views
+- Enhance Kanban and Card components with custom button handling and context menu integration
+- Refactor SolidTreeView to resolve saved filter variables and add new helper functions
+- resolved on form header
+- visibility on kanban, card and tree view
+- visibility issues resolved
+- show theme toggle
+- toggle issue in all views resolved
+- search toggle issue
+- remove minimal theme
+- theme registry name
+- light minimal
+- disable pointer events also
+- taking disabled impact if workflowFieldUpdateEnabled is false and change ui-ux
+- some ui bug
+- ui fixes
+- added modern theme
+- setting result tab inline row
+- some spacing issue'
+- enterprise theme added
+- dark theme issues
+- solid theme provider changes
+
+## [0.1.15-beta.0] - 2026-08-20
+
+## [0.1.14] - 2026-08-20
+
+### Added
+
+- add MediaUploadPage for uploading media files and integrate with existing components
+- enhance PDFViewer with zoom and rotation controls, improve error handling
+- add error boundary for PDF rendering in PDFViewer component
+- replace default buttons with SolidButton in PDFViewer component
+- add pdfjs-dist dependency and update PDFViewer worker configuration
+- streamline saved filter application and renaming process in SolidGlobalSearchElement
+- update savedFilters state management to handle renaming and immediate application of custom filters
+- update mentionable users query and refactor related hooks
+- add defined filters support in SolidGlobalSearchElement and SolidListView
+- implement saveParentRelationField handling for improved embedded relation management
+- add support for embedded relation save and new functionality across form components
+- add support for error and finally nodes in workflow definitions and editors
+- enhance workflow node editor with topology summary and improved slot display
+- enhance workflow definition editor and list functionality
+- enhance popup functionality with dynamic buttons and event handling
+- add workflow field normalization for form data handling
+- enhance archived records handling and pagination in workflow execution
+- enhance workflow expression suggestions to include secrets
+- add Workflow Execution Detail page and related routes
+- update datasource introspection and core types
+- add WorkflowAddNodeDialog for node insertion in workflow editor
+- enhance workflow node editor with improved layout and new child slot handling
+- add workflow definition list and editor pages
+- update solid-tailwind-generated.css and solid-core.d.ts
+
+### Fixed
+
+- adjust min-height for PDFViewer component to improve layout consistency
+- correct import paths for PublishStatusColumnDefaults in multiple components
+- update mention suggestions handling to use response data
+- update CSS variables for consistent styling across components
+- prevent legacy draft/publish columns from being incorrectly treated as superclass-handled in introspection
+- update container class to enforce width and max-width with important flag
+
+### Changed
+
+- remove react-pdf dependency and implement native PDF rendering
+- replace radio dot with icon in SolidDropdownMenu and clean up CSS
+- remove mobile search element from SolidListView
+- simplify save condition for existing records in SolidFormActionHeader
+- extract date format resolution into a separate function for better readability
+- update WorkflowNodeChildSlotDefinition to use 'case-collection' and add layout option
+
+### Other
+
+- ui fixes
+- Refactor MediaCardWidget to use new MediaFileSizeWidget for file size formatting
+- update media upload styles and improve dropzone functionality
+- handle change password and version info
+- tree view sorting removed
+- update defined filter badge styles for improved layout and interaction
+- use single state and make it hidden only for the mobile
+- cleanup global search mobile view
+- Implement draft/publish workflow with version history integration and confirmation dialog; refactor SolidFormView to utilize new workflow hooks
+- Enhance media field components with error handling and toast notifications for delete and replace actions; update font sizes in CSS for better readability
+- changes
+- Refactor SolidFormView and SolidVersionHistory components to simplify workflow status handling and remove unused code
+- Prevent default behavior on mouse down for custom and grouping filter buttons
+- Remove SolidLocale status banner and associated styles
+- update WorkflowDefinitionListPage styles for improved layout and readability
+- row click action renamed to record click action and take impact in Card, Kanban and tree
+- Enhance SolidLocale component with information card and placeholder
+- some changes
+- remove unnecessary code
+- some issues around some import in card and kanban and tree view lightbox added for media and sidebar menu search issue resolved
+
+## [0.1.14-beta.13] - 2026-08-19
+
+### Added
+
+- enhance media file type handling with dynamic configuration support
+
+### Fixed
+
+- many-to-one link in listview now follows viewmode set in settings
+- adjust line height for header list items in globals.css
+
+### Changed
+
+- remove unused mimeType property from MediaConfig type
+- streamline media extension handling in DropzonePlaceholder and helpers
+
+### Other
+
+- taking impact of mediaAllowedExtensions in core-ui
+
 ## [0.1.14-beta.12] - 2026-08-17
 
 ### Added

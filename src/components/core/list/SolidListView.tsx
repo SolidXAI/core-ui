@@ -225,7 +225,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
-  const rowClickFormMode = useMemo(() => {
+  const recordClickFormMode = useMemo(() => {
     const isSystemModule = solidListViewMetaData?.data?.solidView?.module?.isSystem === true;
 
     if (isSystemModule) {
@@ -1183,7 +1183,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             column,
             setLightboxUrls,
             setOpenLightbox,
-            embeded: params.embeded
+            embeded: params.embeded,
+            recordClickAction: recordClickFormMode
           });
         } else {
           return null;
@@ -1195,7 +1196,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           column,
           setLightboxUrls,
           setOpenLightbox,
-          embeded: params.embeded
+          embeded: params.embeded,
+          recordClickAction: recordClickFormMode
         });
       }
     });
@@ -1638,7 +1640,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
                         storeCurrentModelViewContext();
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${rowClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
+                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${recordClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
                       }
                     }
                     }

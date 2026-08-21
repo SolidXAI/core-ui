@@ -1,18 +1,20 @@
-
-
 import { SolidButton } from "../shad-cn-ui";
+import { getAllowedMediaExtensionsLabel, getAllowedMediaTypesLabel } from "../../helpers/getAcceptedFileTypes";
 interface DropzonePlaceholderProps {
     mediaTypes?: string[];
+    mediaAllowedExtensions?: string[];
     mediaMaxSizeKb?: number;
 }
 
-export const DropzonePlaceholder = ({ mediaTypes, mediaMaxSizeKb }: DropzonePlaceholderProps) => {
-    const supportedFormats = mediaTypes?.length
-        ? mediaTypes.map(type => type.toUpperCase()).join(", ")
-        : "PDF, JPEG | File";
+export const DropzonePlaceholder = ({ mediaTypes, mediaAllowedExtensions, mediaMaxSizeKb }: DropzonePlaceholderProps) => {
+    const allowedTypesLabel = getAllowedMediaTypesLabel(mediaTypes);
+    const allowedExtensionsLabel = getAllowedMediaExtensionsLabel(mediaAllowedExtensions);
 
-    // Convert max size from KB to MB and ensure it's at least 1MB
-    const maxSizeMB = mediaMaxSizeKb ? (mediaMaxSizeKb / 1024).toFixed(1) : "10";
+    const maxSizeLabel = !mediaMaxSizeKb || mediaMaxSizeKb <= 0
+        ? "No limit"
+        : mediaMaxSizeKb >= 1024
+            ? `${(mediaMaxSizeKb / 1024).toFixed(1)} MB`
+            : `${mediaMaxSizeKb} KB`;
 
     return (
         <div className='solid-dropzone'>
@@ -22,7 +24,10 @@ export const DropzonePlaceholder = ({ mediaTypes, mediaMaxSizeKb }: DropzonePlac
             <div className='solid-dropzone-title'>
                 Drag and Drop or <span className='solid-dropzone-title-accent'>choose files</span> to upload
             </div>
-            <p className="solid-dropzone-meta">Supported format: {supportedFormats} | Max size: {maxSizeMB} MB</p>
+            <p className="solid-dropzone-meta m-0">Allowed file types: {allowedTypesLabel} | Max file size: {maxSizeLabel}</p>
+            {allowedExtensionsLabel && (
+                <p className="solid-dropzone-meta m-0">Allowed extensions: {allowedExtensionsLabel}</p>
+            )}
             <div>
                 <SolidButton variant="outline" size='sm' type="button">
                     Click to Browse
