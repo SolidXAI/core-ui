@@ -96,6 +96,25 @@
   margin: 0;
 }
 
+.solid-field-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: stretch;
+}
+
+.solid-field-settings-item {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.solid-field-settings-item .fieldSubTitle,
+.solid-field-settings-item .text-xs {
+  margin-top: 0;
+}
+
 .solid-field-form-actions {
   display: flex;
   align-items: center;
@@ -207,5 +226,11 @@ html.dark .solid-field-form-shell .solid-file-icon-btn.is-danger:hover:not(:disa
 
   .solid-field-form-actions .solid-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .solid-field-settings-grid {
+    grid-template-columns: 1fr;
   }
 }
