@@ -62,6 +62,12 @@
   color: var(--muted-foreground);
 }
 
+/* The shared heading fallback is dark in themes that do not define
+   --solid-form-title. Keep this field editor readable in every theme. */
+.solid-field-form-frame .form-wrapper-heading {
+  color: var(--foreground) !important;
+}
+
 .solid-field-form-shell .creat-field-form {
   width: 100%;
   padding: 0;
