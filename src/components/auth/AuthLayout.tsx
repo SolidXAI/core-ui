@@ -12,7 +12,6 @@ import { AuthSettingsContext } from "./AuthSettingsContext";
 import { normalizeAssetUrl, toCssBackgroundImage } from "../../helpers/assetUrl";
 import { toLegacySettingsShape } from "../../helpers/settingsPayload";
 import { SolidToastProvider } from "../common/SolidToastProvider";
-import { SolidSpinner } from "../shad-cn-ui";
 import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
@@ -59,16 +58,13 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         }
     }, [solidSettingsData, pathname]);
 
-    const authLoadingContent = (
-        <div className="flex items-center justify-center min-h-[240px]" aria-busy="true" aria-live="polite">
-            <SolidSpinner size={32} />
-        </div>
-    );
-    const authChildren = isLoadingAuthSettings
-        ? authLoadingContent
-        : pathname !== "/auth/register" || allowRegistration !== false
-            ? children
-            : null;
+    // Auth pages own their auth-settings loading state. A parent full-page
+    // spinner mounts once during logout navigation and again after the hard
+    // redirect, which creates the duplicate spinner around StoreProvider's
+    // workspace loader.
+    const authChildren = pathname !== "/auth/register" || allowRegistration !== false
+        ? children
+        : null;
     const handleRegistration = () => {
         router.push("/auth/login");
         setIsRestricted(false);
