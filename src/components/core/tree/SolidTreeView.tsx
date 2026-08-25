@@ -1396,6 +1396,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         column,
         setLightboxUrls,
         setOpenLightbox,
+        recordClickAction: rowClickFormMode
       });
 
       if (!React.isValidElement(listColumn)) return null;
