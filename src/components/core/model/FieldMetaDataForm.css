@@ -127,6 +127,24 @@
   line-height: 1.15;
 }
 
+.solid-field-selection-static-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.solid-field-selection-static-row .solid-standard-input {
+  min-width: 0;
+}
+
+.solid-field-selection-static-row .solid-btn {
+  width: 2.125rem;
+  min-width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+}
+
 .solid-field-form-actions {
   display: flex;
   align-items: center;

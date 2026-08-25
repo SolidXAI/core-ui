@@ -199,7 +199,7 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
   };
 
   return (
-    <div className="mt-2 flex items-center gap-2">
+    <div className="solid-field-selection-static-row">
 
       {/* Input field for Value */}
       <SolidInput
@@ -2783,7 +2783,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("selectionDynamicProvider") && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="selectionDynamicProvider"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2839,7 +2839,7 @@ const FieldMetaDataForm = ({
                             </div>
                           )}
                           {currentFields.includes("selectionValueType") && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="selectionValueType"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2851,6 +2851,7 @@ const FieldMetaDataForm = ({
                                 options={selctionValueTypes}
                                 optionLabel="label"
                                 optionValue="value"
+                                native={false}
                                 onChange={({ value }) =>
                                   formik.setFieldValue(
                                     "selectionValueType",
@@ -2875,7 +2876,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("selectionStaticValues") && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="selectionStaticValues"
                                 className={classNames("form-field-label", styles.fieldLabel)}
