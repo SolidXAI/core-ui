@@ -115,6 +115,18 @@
   margin-top: 0;
 }
 
+.solid-field-relation-type-control {
+  align-self: stretch;
+}
+
+.solid-field-relation-type-control .solid-segmented-item {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: 0.75rem;
+  white-space: normal;
+  line-height: 1.15;
+}
+
 .solid-field-form-actions {
   display: flex;
   align-items: center;
@@ -232,5 +244,10 @@ html.dark .solid-field-form-shell .solid-file-icon-btn.is-danger:hover:not(:disa
 @media (max-width: 380px) {
   .solid-field-settings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .solid-field-relation-type-control .solid-segmented-item {
+    padding-inline: 0.5rem;
+    font-size: 0.75rem;
   }
 }

@@ -171,7 +171,7 @@ function TabView({ children, panelContainerClassName }: LocalTabViewProps) {
     label: panel.props.header,
     hasError: panel.props.className?.includes("tab-error-heading"),
     content: (
-      <div className={panel.props.className}>
+      <div>
         {panel.props.children}
       </div>
     ),
@@ -1514,6 +1514,15 @@ const FieldMetaDataForm = ({
     ? `Edit ${formik?.values?.displayName || fieldTypeLabel} Field`
     : `Add ${fieldTypeLabel} Field`;
 
+  const basicInfoFieldNames = ["displayName", "name", "description", "columnName"];
+  const formikTouchedFields = formik.touched as Record<string, unknown>;
+  const formikErrorFields = formik.errors as Record<string, unknown>;
+  const fieldHasTouchedError = (fieldName: string) => Boolean(formikTouchedFields[fieldName] && formikErrorFields[fieldName]);
+  const basicInfoHasError = basicInfoFieldNames.some(fieldHasTouchedError);
+  const advancedConfigHasError = Object.keys(formikErrorFields).some(
+    (fieldName) => !basicInfoFieldNames.includes(fieldName) && fieldHasTouchedError(fieldName)
+  );
+
   const mediaTypeSelectedItems = useMemo(() => {
     if (!Array.isArray(formik.values.mediaTypes)) return [];
     return formik.values.mediaTypes.map((entry: any) => {
@@ -1584,6 +1593,13 @@ const FieldMetaDataForm = ({
   ]);
 
   const showError = async () => {
+    formik.setTouched(
+      currentFields.reduce((touchedFields: Record<string, boolean>, fieldName: string) => {
+        touchedFields[fieldName] = true;
+        return touchedFields;
+      }, {}),
+      false
+    );
     const errors = await formik.validateForm(); // Trigger validation and get the updated errors
     const collectMessages = (value: any): string[] => {
       if (!value) return [];
@@ -1899,12 +1915,12 @@ const FieldMetaDataForm = ({
                     <TabView panelContainerClassName="px-0">
                     <TabPanel
                       header="Basic Info"
-                      className={(formik.touched.hasOwnProperty("name") && formik.errors.hasOwnProperty("name")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("displayName")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("ormType")) ? "tab-error-heading" : ""}
+                      className={basicInfoHasError ? "tab-error-heading" : ""}
                     // rightIcon="si si-info-circle ml-2"
                     >
                       <div className="flex flex-wrap -mx-2 -mt-2">
                         {currentFields.includes("displayName") && (
-                          <div className="field mt-2 px-2 pt-2 md:w-1/2">
+                          <div className="field mt-2 min-w-0 basis-full px-2 pt-2 md:basis-1/2">
                             <label htmlFor="displayName" className={classNames("form-field-label", styles.fieldLabel)}>
                               Display Name
                             </label>
@@ -1933,7 +1949,7 @@ const FieldMetaDataForm = ({
                         )}
 
                         {currentFields.includes("name") && (
-                          <div className="field mt-2 px-2 pt-2 md:mt-0 md:w-1/2">
+                          <div className="field mt-2 min-w-0 basis-full px-2 pt-2 md:mt-0 md:basis-1/2">
                             <label htmlFor="name" className={classNames("form-field-label", styles.fieldLabel)}>
                               Name
                             </label>
@@ -1954,7 +1970,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("description") && (
-                          <div className="field mt-2 w-full px-2 pt-2 md:mt-2 md:w-1/2">
+                          <div className="field mt-2 min-w-0 basis-full px-2 pt-2 md:mt-2 md:basis-1/2">
                             <label htmlFor="description" className={classNames("form-field-label", styles.fieldLabel)}>
                               Description
                             </label>
@@ -1976,7 +1992,7 @@ const FieldMetaDataForm = ({
                         )}
 
                         {currentFields.includes("columnName") && (
-                          <div className="field mt-2 w-full px-2 pt-2 md:w-1/2">
+                          <div className="field mt-2 min-w-0 basis-full px-2 pt-2 md:basis-1/2">
                             <div className="flex items-center gap-2">
                               <SolidCheckbox
                                 onChange={(event) => {
@@ -2028,7 +2044,9 @@ const FieldMetaDataForm = ({
 
                     </TabPanel>
 
-                    <TabPanel header="Advanced Config"
+                    <TabPanel
+                      header="Advanced Config"
+                      className={advancedConfigHasError ? "tab-error-heading" : ""}
 
                     //  rightIcon="si si-cog ml-2"
                     >
@@ -2346,7 +2364,7 @@ const FieldMetaDataForm = ({
                             </div>
                           )}
                           {currentFields.includes("relationType") && (
-                            <div className="field mt-1 flex w-full items-center gap-2 px-2 pt-2">
+                            <div className="field mt-1 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:flex-row md:items-center">
                               {/* <label
                                   htmlFor="relationType"
                                   className="form-field-label"
@@ -2373,7 +2391,7 @@ const FieldMetaDataForm = ({
                               <label
                                 style={{ marginBottom: "0px" }}
                                 htmlFor="relationType"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label md:shrink-0", styles.fieldLabel)}
                               >
                                 Relation Type
                               </label>
@@ -2386,7 +2404,7 @@ const FieldMetaDataForm = ({
                                     formik.setFieldValue("relationCreateInverse", true);
                                   }
                                 }}
-                                className={classNames("", {
+                                className={classNames("solid-field-relation-type-control w-full min-w-0", {
                                   "is-invalid": isFormFieldValid(formik, "relationType"),
                                 })}
                               />
@@ -2397,7 +2415,7 @@ const FieldMetaDataForm = ({
                             </div>
                           )}
                           {currentFields.includes("relationType") && (formik.values.relationType === "many-to-one" || formik.values.relationType === "one-to-many") && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationCascade"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2430,7 +2448,7 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("relationModelModuleName") && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationModelModuleName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2488,7 +2506,7 @@ const FieldMetaDataForm = ({
                           {currentFields.includes(
                             "relationCoModelSingularName"
                           ) && (
-                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                              <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                 <label
                                   htmlFor="relationCoModelSingularName"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2528,7 +2546,7 @@ const FieldMetaDataForm = ({
                               </div>
                             )}
                           {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationCoModelColumnName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2557,7 +2575,7 @@ const FieldMetaDataForm = ({
                             </div>
                           )}
                           {askForUserKeyField && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="userKey"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2594,7 +2612,7 @@ const FieldMetaDataForm = ({
                           {currentFields.includes(
                             "relationFieldFixedFilter"
                           ) && (
-                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2  md:w-1/2">
+                              <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                 <label
                                   htmlFor="relationFieldFixedFilter"
                                   className={classNames("form-field-label", styles.fieldLabel)}
@@ -2640,7 +2658,7 @@ const FieldMetaDataForm = ({
                             )}
 
                           {currentFields.includes("relationCreateInverse") && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label htmlFor="relationCreateInverse" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Relation Create Inverse
                               </label>
@@ -2661,12 +2679,12 @@ const FieldMetaDataForm = ({
                           )}
 
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && !formik.values.relationCoModelSingularName && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <SolidMessage text="Please select Co-model" />
                             </div>
                           )}
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && formik.values.relationCoModelSingularName && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationCoModelFieldName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -2736,7 +2754,7 @@ const FieldMetaDataForm = ({
 
 
                           {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
-                            <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                            <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationJoinTableName"
                                 className={classNames("form-field-label", styles.fieldLabel)}
@@ -3087,7 +3105,7 @@ const FieldMetaDataForm = ({
                           <div className="flex flex-wrap -mx-2 -mt-2">
                             {(showRegexFields && selectedTypeValue === "password") &&
                               <>
-                                <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                   <label
                                     htmlFor="regexPattern"
                                     className={classNames("form-field-label", styles.fieldLabel)}
@@ -3114,7 +3132,7 @@ const FieldMetaDataForm = ({
                             }
                             {showRegexFields && (
                               <>
-                                <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                   <label
                                     htmlFor="regexPattern"
                                     className={classNames("form-field-label", styles.fieldLabel)}
@@ -3139,7 +3157,7 @@ const FieldMetaDataForm = ({
                                   )}
                                 </div>
                                 {showRegexFields && (
-                                  <div className="field mt-2 mb-3 flex flex-col gap-2 px-2 pt-2 md:mb-3 md:w-1/2">
+                                  <div className="field mt-2 mb-3 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:mb-3 md:basis-1/2">
                                     <label
                                       htmlFor="regexPatternNotMatchingErrorMsg"
                                       className={classNames("form-field-label", styles.fieldLabel)}
@@ -3170,7 +3188,7 @@ const FieldMetaDataForm = ({
                             {(showMinFields || showMaxFields) &&
                               <>
                                 {showMinFields && (
-                                  <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                  <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                     <label htmlFor="min" className={classNames("form-field-label", styles.fieldLabel)}>
                                       Min {(selectedTypeValue !== "int" && selectedTypeValue !== "decimal") && `(Characters Allowed)`}
 
@@ -3209,7 +3227,7 @@ const FieldMetaDataForm = ({
                                   </div>
                                 )}
                                 {showMaxFields && (
-                                  <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                                  <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                     <label htmlFor="max" className={classNames("form-field-label", styles.fieldLabel)}>
                                       Max {(selectedTypeValue !== "int" &&
                                         selectedTypeValue !== "decimal") && `(Characters allowed)`}
@@ -3251,7 +3269,7 @@ const FieldMetaDataForm = ({
                               </>
                             }
                             {showOrmOptions && (
-                              <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
+                              <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                 <label htmlFor="ormType" className={classNames("form-field-label", styles.fieldLabel)}>
                                   Type
                                 </label>
