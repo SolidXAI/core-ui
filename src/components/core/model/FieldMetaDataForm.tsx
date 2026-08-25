@@ -3287,9 +3287,9 @@ const FieldMetaDataForm = ({
                       )}
 
                       {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading">Settings</p>}
-                      <div className="flex flex-wrap -mx-2 mt-2 md:mt-0">
+                      <div className="solid-field-settings-grid mt-2 md:mt-0">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="required"
@@ -3315,7 +3315,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("unique") && selectedTypeValue !== 'relation' && (
-                          <div className="field flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="unique"
@@ -3349,7 +3349,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("index") && selectedTypeValue !== 'relation' && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="index"
@@ -3369,7 +3369,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("private") && selectedTypeValue !== 'relation' && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="private"
@@ -3392,7 +3392,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("encrypt") && selectedTypeValue !== 'relation' && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="encrypt"
@@ -3413,7 +3413,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("isMultiSelect") && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="isMultiSelect"
@@ -3433,7 +3433,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("enableAuditTracking") && formik.values.relationType !== "one-to-many" && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="enableAuditTracking"
@@ -3455,7 +3455,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("isUserKey") && formik.values.unique && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="solid-field-checkbox-row">
                               <SolidCheckbox
                                 id="isUserKey"
@@ -3477,7 +3477,7 @@ const FieldMetaDataForm = ({
                           </div>
                         )}
                         {currentFields.includes("isPrimaryKey") && modelMetaData?.isLegacyTable && (
-                          <div className="field mt-2 flex w-1/2 flex-col gap-2 px-2 pt-2">
+                          <div className="field solid-field-settings-item">
                             <div className="flex items-center gap-2">
                               <SolidCheckbox
                                 id="isPrimaryKey"
