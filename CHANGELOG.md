@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.16-beta.1] - 2026-08-25
+
+### Fixed
+
+- prevent duplicate session cleared event emission on logout
+- apply stored theme before rendering in SolidLoadingState component
+- show direct recover action on archived cards
+
+### Changed
+
+- optimize signOut function and remove unnecessary loading spinner in AuthLayout
+
+### Other
+
+- adjust CSS for better responsiveness and readability in various components
+- tree-view many-to-one column click action now follows recordClickAction viewmode
+
 ## [0.1.16-beta.0] - 2026-08-21
 
 ### Added
