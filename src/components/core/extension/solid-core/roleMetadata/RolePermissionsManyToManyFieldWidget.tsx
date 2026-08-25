@@ -101,7 +101,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                         {groupedEntities[controllerName].map((entity: any, i: number) => (
                             <div
                                 key={entity.value}
-                                className={`field flex w-full gap-2 px-2 pt-2 lg:w-1/2 ${i >= 2 ? 'lg:mt-4' : ''}`}
+                                className={`field flex gap-2 px-2 pt-2 lg:w-1/2 ${i >= 2 ? 'lg:mt-4' : ''}`}
                             >
                                 <SolidCheckbox
                                     readOnly={readOnlyPermission || isUnsaved}
