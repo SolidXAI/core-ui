@@ -39,7 +39,7 @@ const SolidDateField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
                     optionLabel='label'
                     optionValue='value'
                     placeholder="Select Operator"
-                    className="p-inputtext-sm w-full "
+                    className="w-full solid-filter-compact-control"
                 />
             </div>
             <div className='flex flex-col gap-2 w-full md:w-1/2 px-0 md:pl-0 md:pr-0 p-0'>

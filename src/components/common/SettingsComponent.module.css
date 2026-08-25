@@ -385,6 +385,13 @@
   max-width: none;
 }
 
+/* Keep nested horizontal widget tabs sized to their labels. The outer settings
+   tabs intentionally use full-width vertical triggers. */
+.customControlStack :global(.solid-tabs:not(.solid-tabs--vertical) .solid-notebook-tab-trigger) {
+  flex: 0 0 auto !important;
+  width: auto !important;
+}
+
 .mediaField {
   display: flex;
   flex-direction: column;

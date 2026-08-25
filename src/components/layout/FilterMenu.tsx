@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { SolidButton, SolidDialog, SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../shad-cn-ui";
+import { Cog, Copy, Filter, Star } from "lucide-react";
+import { SolidButton, SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../shad-cn-ui";
 
 const FilterMenu = () => {
     const [visible, setVisible] = useState(false);
@@ -57,7 +58,7 @@ const FilterMenu = () => {
             <SolidPopover open={menuOpen} onOpenChange={setMenuOpen} autoCloseGroup="filter-menu">
                 <SolidPopoverTrigger asChild>
                     <SolidButton
-                        icon="pi pi-cog"
+                        leftIcon={<Cog size={16} aria-hidden />}
                         className="transparent-background"
                         variant="ghost"
                         size="sm"
@@ -69,7 +70,7 @@ const FilterMenu = () => {
                     <div className="flex flex-wrap -mx-2 -mt-2 m-0">
                     {/* Column 1: Filters */}
                     <div className="w-full md:w-1/3 px-2 pt-2">
-                        <h3><span className=" pi pi-filter"></span> Filters</h3>
+                        <h3><Filter size={16} aria-hidden="true" /> Filters</h3>
                         <ul className="custom-list">
                             {filters.map((item, index) => (
                                 <a onClick={item.onClick}>
@@ -81,7 +82,7 @@ const FilterMenu = () => {
 
                     {/* Column 2: Group By */}
                     <div className="w-full md:w-1/3 px-2 pt-2">
-                        <h3><span className=" pi pi-clone"></span> Group by</h3>
+                        <h3><Copy size={16} aria-hidden="true" /> Group by</h3>
                         <ul className="custom-list">
                             {groupBy.map((item, index) => (
                                 <a onClick={item.onClick}>
@@ -93,7 +94,7 @@ const FilterMenu = () => {
 
                     {/* Column 3: Favourites */}
                     <div className="w-full md:w-1/3 px-2 pt-2">
-                        <h3> <span className=" pi pi-star"></span> Favourites</h3>
+                        <h3><Star size={16} aria-hidden="true" /> Favourites</h3>
                         <ul className="custom-list">
                             {favourites.map((item, index) => (
                                 <a onClick={item.onClick}>

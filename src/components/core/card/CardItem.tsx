@@ -2,6 +2,7 @@
 import React from "react";
 import { useRouter } from "../../../hooks/useRouter";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
+import { RotateCcw } from "lucide-react";
 import {
   SolidDropdownMenu,
   SolidDropdownMenuContent,
@@ -57,6 +58,24 @@ const CardItem: React.FC<CardItemProps> = ({
     router.push(`${editButtonUrl}/${data?.id}?viewMode=edit`);
   };
 
+  const renderRecoverAction = () => {
+    if (!showArchived || !isArchivedRecord || !onRecover) return null;
+
+    return (
+      <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className="retrieve-button solid-row-menu-trigger"
+          onClick={() => onRecover(data)}
+          aria-label="Recover record"
+          title="Recover"
+        >
+          <RotateCcw size={14} aria-hidden />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="solid-card-view-item">
       <div
@@ -64,19 +83,19 @@ const CardItem: React.FC<CardItemProps> = ({
         onClick={openRecord}
         style={{ cursor: isArchivedRecord ? "default" : "pointer" }}
       >
-        <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
-          <SolidDropdownMenu>
-            <SolidDropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="solid-header-cog-trigger solid-kanban-action-trigger"
-                aria-label="Open card actions"
-              >
-                <SolidIcon name="si-ellipsis-v" aria-hidden />
-              </button>
-            </SolidDropdownMenuTrigger>
-            <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
-              {!isArchivedRecord ? (
+        {isArchivedRecord ? renderRecoverAction() : (
+          <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
+            <SolidDropdownMenu>
+              <SolidDropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="solid-header-cog-trigger solid-kanban-action-trigger"
+                  aria-label="Open card actions"
+                >
+                  <SolidIcon name="si-ellipsis-v" aria-hidden />
+                </button>
+              </SolidDropdownMenuTrigger>
+              <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
                 <SolidDropdownMenuItem
                   className="solid-header-dropdown-item"
                   onSelect={openEdit}
@@ -84,38 +103,29 @@ const CardItem: React.FC<CardItemProps> = ({
                   <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
                   <span className="solid-header-action-button-label">Edit</span>
                 </SolidDropdownMenuItem>
-              ) : null}
-              {showArchived && data?.deletedAt !== null && data?.deletedAt !== undefined && onRecover ? (
-                <SolidDropdownMenuItem
-                  className="solid-header-dropdown-item"
-                  onSelect={() => onRecover(data)}
-                >
-                  <SolidIcon name="si-refresh" className="solid-header-action-button-icon" aria-hidden />
-                  <span className="solid-header-action-button-label">Recover</span>
-                </SolidDropdownMenuItem>
-              ) : null}
-              {onDelete && !isArchivedRecord ? (
-                <SolidDropdownMenuItem
-                  className="solid-header-dropdown-item solid-header-dropdown-item-danger"
-                  onSelect={() => onDelete(data)}
-                >
-                  <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
-                  <span className="solid-header-action-button-label">Delete</span>
-                </SolidDropdownMenuItem>
-              ) : null}
-              {!isArchivedRecord && handleCustomButtonClick ? (
-                <SolidCollectionRowActionMenuItems
-                  buttons={solidCardViewMetaData?.solidView?.layout?.attrs?.rowButtons}
-                  params={params}
-                  rowData={data}
-                  solidViewMetaData={solidCardViewMetaData}
-                  handleCustomButtonClick={handleCustomButtonClick}
-                  showSeparator={true}
-                />
-              ) : null}
-            </SolidDropdownMenuContent>
-          </SolidDropdownMenu>
-        </div>
+                {onDelete ? (
+                  <SolidDropdownMenuItem
+                    className="solid-header-dropdown-item solid-header-dropdown-item-danger"
+                    onSelect={() => onDelete(data)}
+                  >
+                    <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
+                    <span className="solid-header-action-button-label">Delete</span>
+                  </SolidDropdownMenuItem>
+                ) : null}
+                {handleCustomButtonClick ? (
+                  <SolidCollectionRowActionMenuItems
+                    buttons={solidCardViewMetaData?.solidView?.layout?.attrs?.rowButtons}
+                    params={params}
+                    rowData={data}
+                    solidViewMetaData={solidCardViewMetaData}
+                    handleCustomButtonClick={handleCustomButtonClick}
+                    showSeparator={true}
+                  />
+                ) : null}
+              </SolidDropdownMenuContent>
+            </SolidDropdownMenu>
+          </div>
+        )}
         {DynamicCardWidget ? (
           <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
             <DynamicCardWidget

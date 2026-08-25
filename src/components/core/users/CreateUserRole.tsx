@@ -153,7 +153,7 @@ const CreateUserRole = ({ data }: any) => {
                       name="username"
                       onChange={formik.handleChange}
                       value={formik.values.username}
-                      className="p-inputtext-sm w-full small-input"
+                      className="w-full small-input"
                       aria-invalid={!!isFormFieldValid(formik, "username")}
                     />
                     {isFormFieldValid(formik, "username") && (

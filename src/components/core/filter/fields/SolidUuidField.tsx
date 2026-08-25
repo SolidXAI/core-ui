@@ -28,7 +28,7 @@ const SolidUuidField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
                     optionLabel='label'
                     optionValue='value'
                     placeholder="Select Operator"
-                    className="w-full p-inputtext-sm"
+                    className="w-full solid-filter-compact-control"
                 />
             </div>
 

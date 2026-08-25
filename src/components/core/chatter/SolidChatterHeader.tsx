@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidMessageComposer } from './SolidMessageComposer'
 import { useLazyGetusersQuery } from '../../../redux/api/userApi'
@@ -43,15 +43,16 @@ export const SolidChatterHeader = (props: Props) => {
         startDate: null,
         endDate: null
     });
-    const [hasActiveFilters, setHasActiveFilters] = useState(false);
+    const [appliedFilters, setAppliedFilters] = useState<FilterState>({
+        name: '',
+        startDate: null,
+        endDate: null
+    });
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [selectedUser, setSelectedUser] = useState<any | null>(null);
     const [getUsers] = useLazyGetusersQuery();
 
-    useEffect(() => {
-        const isActive = filters.name !== '' || filters.startDate !== null || filters.endDate !== null;
-        setHasActiveFilters(isActive);
-    }, [filters]);
+    const hasActiveFilters = appliedFilters.name !== '' || appliedFilters.startDate !== null || appliedFilters.endDate !== null;
 
     const handleFilterClick = () => {
         setSelectedUser(filters.name ? { fullName: filters.name } : null);
@@ -59,6 +60,7 @@ export const SolidChatterHeader = (props: Props) => {
     };
 
     const handleApplyFilters = () => {
+        setAppliedFilters(filters);
         if (onFilterChange) {
             onFilterChange(filters);
         }
@@ -74,6 +76,7 @@ export const SolidChatterHeader = (props: Props) => {
         setSelectedUser(null);
         setSuggestions([]);
         setFilters(clearedFilters);
+        setAppliedFilters(clearedFilters);
         if (onFilterChange) {
             onFilterChange(clearedFilters);
         }
@@ -154,7 +157,7 @@ export const SolidChatterHeader = (props: Props) => {
                         size="sm"
                         type="button"
                         aria-label="Log Note"
-                        variant={hasActiveFilters ? 'primary' : 'outline'}
+                        variant="outline"
                         className="solid-icon-button"
                         style={{ gap: 0 }}
                         leftIcon={<Edit size={14} />}
@@ -164,8 +167,8 @@ export const SolidChatterHeader = (props: Props) => {
                         size="sm"
                         type="button"
                         aria-label="Filter"
-                        variant={hasActiveFilters ? 'primary' : 'outline'}
-                        className="solid-icon-button"
+                        variant="outline"
+                        className={`solid-icon-button ${hasActiveFilters ? 'is-filter-active' : ''}`}
                         style={{ gap: 0 }}
                         leftIcon={<Filter size={14} />}
                         onClick={handleFilterClick}

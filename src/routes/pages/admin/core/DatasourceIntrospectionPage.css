@@ -1068,11 +1068,6 @@
   width: 100%;
 }
 
-.sdix-field-config-dialog .p-tabview-panels,
-.sdix-field-config-dialog .p-tabview-panel {
-  padding-inline: 0;
-}
-
 .sdix-column-placeholder {
   color: #8a93a8;
   font-size: 0.86rem;

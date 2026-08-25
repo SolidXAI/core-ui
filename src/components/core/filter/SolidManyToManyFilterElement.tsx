@@ -59,7 +59,7 @@ export const SolidManyToManyFilterElement = ({
             }}
             placeholder={`Select ${fieldMetadata.displayName}`}
             className="w-full"
-            inputClassName="w-full p-inputtext-sm solid-filter-compact-control"
+            inputClassName="w-full solid-filter-compact-control"
         />
     );
 };

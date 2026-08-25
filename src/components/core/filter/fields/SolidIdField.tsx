@@ -32,7 +32,7 @@ const SolidIdField = ({ fieldMetadata, onChange, index, rule }: SolidFilterField
                 optionLabel='label'
                 optionValue='value'
                 placeholder="Select Operator"
-                className="w-full p-inputtext-sm"
+                className="w-full solid-filter-compact-control"
             />
             <div className='flex flex-col gap-2 w-full'>
                 <SolidVarInputsFilterElement

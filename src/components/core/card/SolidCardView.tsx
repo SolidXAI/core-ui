@@ -656,6 +656,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
                   filters={filters}
+                  hasAnyActiveFilters={hasAnyActiveFilters}
                   handleRefreshView={handleFetchUpdatedRecords}
                   params={params}
                   headerButtons={visibleHeaderButtons}
