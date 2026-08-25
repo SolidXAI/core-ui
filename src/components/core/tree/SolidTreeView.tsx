@@ -1943,7 +1943,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   </div>
                 )}
 
-                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                <div className="solid-header-buttons-wrapper max-lg:hidden items-center lg:flex">
                   {visibleHeaderButtons
                     ?.filter((button: any) => button?.attrs?.actionInContextMenu !== true)
                     ?.map((button: any, index: number) => (
