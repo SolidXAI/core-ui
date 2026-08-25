@@ -747,7 +747,40 @@
 
 
 @media (max-width: 640px) {
-  .solid-module-explorer-main-actions{
-    gap: 0;
+  .solid-module-explorer-main-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding: 0.75rem;
+  }
+
+  .solid-module-explorer-main-title {
+    width: 100%;
+  }
+
+  .solid-module-explorer-main-heading-row {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.2rem 0.5rem;
+  }
+
+  .solid-module-explorer-main-title h4 {
+    white-space: normal;
+  }
+
+  .solid-module-explorer-inline-validation {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .solid-module-explorer-main-actions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .solid-module-explorer-main-meta {
+    flex: 1 0 100%;
+    min-width: 0;
   }
 }
