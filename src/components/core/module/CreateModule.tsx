@@ -226,7 +226,7 @@ const CreateModule = ({ params, data }: any) => {
 
   const showCustomeError = async (error: string[]) => {
     if (error.length > 0) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: error.join(', '), life: 3000 }));
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR_OCCURED, detail: error.join(', '), life: 3000 }));
     }
   };
 

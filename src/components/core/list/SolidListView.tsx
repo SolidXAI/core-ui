@@ -1105,13 +1105,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         ? [errorMessages]
         : [];
     if (messages.length > 0) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: messages.join(', ') }));
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR_OCCURED, detail: messages.join(', ') }));
     }
   };
 
   const showFieldError = async (error: any) => {
     if (error) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: String(error), life: 3000 }));
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR_OCCURED, detail: String(error), life: 3000 }));
     }
   };
 
