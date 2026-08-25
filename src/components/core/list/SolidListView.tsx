@@ -1462,7 +1462,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </div>
                   )}
 
-                  <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                  <div className="solid-header-buttons-wrapper max-lg:hidden items-center lg:flex">
                     {visibleHeaderButtons
                       ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                       ?.map((button: any, index: number) => (
