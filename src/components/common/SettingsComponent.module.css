@@ -466,6 +466,75 @@
   color: var(--muted-foreground);
 }
 
+/* Keep the settings workspace within the mobile viewport. The desktop layout
+   intentionally uses a fixed vertical module rail, but that rail leaves too
+   little room for nested AI settings tabs and their provider table on phones. */
+@media (max-width: 767px) {
+  .page {
+    height: auto;
+    min-height: calc(100dvh - 46px);
+    overflow-x: hidden;
+  }
+
+  .pageHeader {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .headerSearch,
+  .searchIcon {
+    width: 100%;
+    max-width: none;
+  }
+
+  .toolbarActions {
+    justify-content: space-between;
+  }
+
+  .tabGroup {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .tabList {
+    flex: 0 0 auto;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  }
+
+  .tabPanel {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    padding: 0.75rem 0.65rem 1rem;
+  }
+
+  .settingRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .customControlStack,
+  .customControlStack :global(.solid-notebook),
+  .customControlStack :global(.solid-notebook-content) {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .customControlStack :global(.solid-notebook-tablist) {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .customControlStack :global(.solid-ai-model-config-card) {
+    width: 100% !important;
+  }
+}
+
 .pageHeader :global(.form-wrapper-title) {
   color: var(--foreground) !important;
 }
