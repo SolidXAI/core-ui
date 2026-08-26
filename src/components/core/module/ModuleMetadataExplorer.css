@@ -754,6 +754,35 @@
 
 
 @media (max-width: 640px) {
+  .solid-module-explorer-panel {
+    overflow-y: auto;
+  }
+
+  .solid-module-explorer-workspace {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+
+  .solid-module-explorer-sidebar {
+    max-height: 16rem;
+    flex: 0 0 auto;
+  }
+
+  .solid-module-explorer-main {
+    height: auto;
+    overflow: visible;
+  }
+
+  .solid-module-explorer-jsoneditor .jsoneditor-menu a.jsoneditor-poweredBy {
+    display: none;
+  }
+
+  .solid-module-explorer-jsoneditor div.jsoneditor-outer.has-main-menu-bar {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
   .solid-module-explorer-main-header {
     flex-direction: column;
     align-items: stretch;
