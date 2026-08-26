@@ -53,7 +53,8 @@ export const AdminTopHeader = () => {
       const viewName = segments[4];
       const next = [
         moduleName ? toLabel(moduleName) : null,
-        modelFromApi ? decodeURIComponent(modelFromApi) : modelName ? toLabel(modelName) : null,
+        // After browser Back, the previous action response may still be cached; use it only when it belongs to this URL.
+        hasMatchingActionData && modelFromApi ? decodeURIComponent(modelFromApi) : modelName ? toLabel(modelName) : null,
         viewName ? toLabel(viewName) : null,
       ].filter(Boolean) as string[];
       return next.length ? next : ["Admin"];
