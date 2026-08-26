@@ -1727,7 +1727,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={(event) => event.stopPropagation()}>
           <button
             type="button"
-            className="solid-tree-row-menu-trigger"
+            className="retrieve-button solid-row-menu-trigger"
             aria-label="Recover row"
             data-no-row-click="true"
             onClick={() => {
