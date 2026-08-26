@@ -418,10 +418,12 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
     return filters;
 }
 
-const SavedFilterList = ({ savedfilter, activeSavedFilterReference, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter, optionId }: any) => {
-    const isActive = savedfilter?.systemKey
-        ? activeSavedFilterReference === savedfilter.systemKey
-        : String(activeSavedFilterReference) === String(savedfilter.id);
+const SavedFilterList = ({ savedfilter, activeSavedFilterReference, activeSavedFilterReferences, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter, optionId }: any) => {
+    const isActive = activeSavedFilterReferences
+        ? activeSavedFilterReferences.includes(savedfilter?.systemKey ? `system:${savedfilter.systemKey}` : `id:${savedfilter.id}`)
+        : savedfilter?.systemKey
+            ? activeSavedFilterReference === savedfilter.systemKey
+            : String(activeSavedFilterReference) === String(savedfilter.id);
 
     return (
         <div className="solid-saved-filter-item" onMouseEnter={onMouseEnter}>
@@ -436,6 +438,10 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, applySavedFi
                     aria-label={`${savedfilter.name}${isActive ? ", applied" : ""}`}
                     onMouseDown={(e) => {
                         e.preventDefault();
+                        e.stopPropagation();
+                    }}
+                    onClick={(e) => {
+                        e.stopPropagation();
                         applySavedFilter(savedfilter);
                     }}
                     title={savedfilter?.description}
@@ -571,7 +577,7 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates, allowMultipleSavedFilters = false }: any, ref) => {
     type OverlayOption =
         | { id: string; kind: "field"; field: any }
         | { id: string; kind: "predefined"; predefined: any }
@@ -681,6 +687,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [currentSavedFilterQuery, setCurrentSavedFilterQuery] = useState<any>();
     const [currentSavedFilterVariables, setCurrentSavedFilterVariables] = useState<Record<string, any>>({});
     const [currentSavedFilterRules, setCurrentSavedFilterRules] = useState<any>();
+    const [activeSavedFilters, setActiveSavedFilters] = useState<any[]>([]);
+    const [editingSavedFilterKey, setEditingSavedFilterKey] = useState<string | null>(null);
     const [showSavedFilterComponent, setShowSavedFilterComponent] = useState<boolean>(false);
 
 
@@ -834,6 +842,27 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         viewData?.data?.solidView?.model?.id,
         user?.id
     ])
+
+    const getSavedFilterKey = (savedFilter: any) =>
+        savedFilter?.systemKey ? `system:${savedFilter.systemKey}` : `id:${savedFilter?.id}`;
+
+    const getPersistedSavedFilterItems = (queryObject: any): any[] => {
+        if (!allowMultipleSavedFilters) return [];
+        if (Array.isArray(queryObject?.saved_filter_items)) {
+            return queryObject.saved_filter_items;
+        }
+        if (queryObject?.saved_filter_predicate) {
+            return [{
+                id: queryObject.saved_filter_id,
+                systemKey: queryObject.saved_filter_system_key,
+                name: queryObject.saved_filter_name || "Saved Filter",
+                predicate: queryObject.saved_filter_predicate,
+                variables: queryObject.saved_filter_variables || {},
+            }];
+        }
+        return [];
+    };
+
 // Updates search, custom filter, grouping, aggregation, and UI state from a single shared filter source.
     const syncFilterUiStateFromSharedSource = useCallback(async (queryObject: any | null) => {
         const nextSearchFilter = queryObject?.search_predicate || null;
@@ -847,9 +876,33 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             nextPredefinedBaseFilter && queryObject?.predefined_search_chip
                 ? queryObject.predefined_search_chip
                 : null;
-        const nextSavedFilter = queryObject?.saved_filter_predicate || null;
+        const persistedSavedFilterItems = getPersistedSavedFilterItems(queryObject);
+        const nextSavedFilterItems = allowMultipleSavedFilters
+            ? persistedSavedFilterItems.map((item: any) => {
+                const savedFilter = availableSavedFilters.find((candidate: any) =>
+                    item?.systemKey
+                        ? candidate?.systemKey === item.systemKey
+                        : String(candidate?.id) === String(item?.id)
+                );
+                return {
+                    data: savedFilter || {
+                        id: item?.id,
+                        systemKey: item?.systemKey,
+                        name: item?.name || "Saved Filter",
+                        filterQueryJson: JSON.stringify(item?.predicate || {}),
+                    },
+                    query: item?.predicate || {},
+                    variables: item?.variables || {},
+                };
+            })
+            : [];
+        const nextSavedFilter = allowMultipleSavedFilters
+            ? (nextSavedFilterItems.length > 0 ? { $or: nextSavedFilterItems.map((item: any) => item.query) } : null)
+            : queryObject?.saved_filter_predicate || null;
         const nextSavedFilterVariables = queryObject?.saved_filter_variables ?? {};
-        const nextSavedFilterData = nextSavedFilter
+        const nextSavedFilterData = allowMultipleSavedFilters
+            ? (nextSavedFilterItems.length > 0 ? nextSavedFilterItems[nextSavedFilterItems.length - 1].data : null)
+            : nextSavedFilter
             ? availableSavedFilters.find((savedFilter: any) => {
                 if (queryObject?.saved_filter_system_key) {
                     return savedFilter?.systemKey === queryObject.saved_filter_system_key;
@@ -874,6 +927,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setCurrentSavedFilterData((prev: any) => areFilterStateValuesEqual(prev, nextSavedFilterData) ? prev : nextSavedFilterData);
         setCurrentSavedFilterQuery((prev: any) => areFilterStateValuesEqual(prev, nextSavedFilter) ? prev : nextSavedFilter);
         setCurrentSavedFilterVariables((prev) => areFilterStateValuesEqual(prev, nextSavedFilterVariables) ? prev : nextSavedFilterVariables);
+        setActiveSavedFilters((prev) => areFilterStateValuesEqual(prev, nextSavedFilterItems) ? prev : nextSavedFilterItems);
 
         if (nextCustomFilter && viewData?.data) {
             const rules: FilterRule = transformFiltersToRules(nextCustomFilter);
@@ -909,7 +963,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
         setGroupingRules((prev) => areFilterStateValuesEqual(prev, nextGroupingRules) ? prev : nextGroupingRules);
         setAggregationRules((prev) => areFilterStateValuesEqual(prev, nextAggregationRules) ? prev : nextAggregationRules);
-    }, [availableSavedFilters, initialState, viewData]);
+    }, [allowMultipleSavedFilters, availableSavedFilters, initialState, viewData]);
 
     const resetAppliedFilters = ({ preserveGrouping = false }: { preserveGrouping?: boolean } = {}) => {
         setSearchChips([]);
@@ -922,6 +976,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setCurrentSavedFilterQuery(null);
         setCurrentSavedFilterVariables({});
         setCurrentSavedFilterRules(null);
+        setActiveSavedFilters([]);
+        setEditingSavedFilterKey(null);
         if (!preserveGrouping) {
             setGroupingRules(defaultGroupingRules);
             setAggregationRules(defaultAggregationRules);
@@ -1221,6 +1277,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         //     };
         // }
         setCurrentSavedFilterQuery(finalCustomFilter);
+        if (allowMultipleSavedFilters && editingSavedFilterKey) {
+            const nextItems = activeSavedFilters.map((item: any) =>
+                getSavedFilterKey(item.data) === editingSavedFilterKey
+                    ? { ...item, query: finalCustomFilter }
+                    : item
+            );
+            setActiveSavedFilters(nextItems);
+            persistActiveSavedFilters(nextItems);
+        }
         setShowSavedFilterComponent(false);
         setHasSearched(true)
         setRefreshKey((prev) => prev + 1)
@@ -1262,7 +1327,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const finalSearchFilter = tranformSearchToFilters(formattedChips);
             setSearchFilter(finalSearchFilter);
 
-            let finalSavedFilter: any = currentSavedFilterQuery
+            const finalSavedFilter: any = allowMultipleSavedFilters
+                ? (activeSavedFilters.length > 0 ? { $or: activeSavedFilters.map((item: any) => item.query) } : null)
+                : currentSavedFilterQuery;
             const finalPredefinedFilter = predefinedSearchBaseFilter
 
             const finalCustomFilter = customFilter
@@ -1271,19 +1338,31 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 finalPredefinedFilter && predefinedSearchChip
                     ? predefinedSearchChip
                     : null;
-            if (finalSavedFilter && Object.keys(finalSavedFilter).length > 0) {
+            if (allowMultipleSavedFilters && activeSavedFilters.length > 0) {
+                const resolvedItems = activeSavedFilters.map((item: any) => resolveSavedFilterVariables(item.query, user?.id, item.variables || {}));
+                if (resolvedItems.some((item: any) => item.missingVariables.length > 0)) return;
+                finalFilter.resolved_saved_filter_predicate = { $or: resolvedItems.map((item: any) => item.value) };
+                finalFilter.saved_filter_variables = {};
+                finalFilter.saved_filter_items = activeSavedFilters.map((item: any) => ({
+                    id: item.data?.id ?? null,
+                    systemKey: item.data?.systemKey ?? null,
+                    name: item.data?.name ?? null,
+                    predicate: item.query,
+                    variables: item.variables || {},
+                }));
+            } else if (finalSavedFilter && Object.keys(finalSavedFilter).length > 0) {
                 const resolved = resolveSavedFilterVariables(finalSavedFilter, user?.id, currentSavedFilterVariables);
                 if (resolved.missingVariables.length > 0) return;
                 finalFilter.resolved_saved_filter_predicate = resolved.value;
                 finalFilter.saved_filter_variables = currentSavedFilterVariables;
             }
-            if (currentSavedFilterData?.id) {
+            if (!allowMultipleSavedFilters && currentSavedFilterData?.id) {
                 finalFilter.saved_filter_id = currentSavedFilterData.id;
             }
-            if (currentSavedFilterData?.systemKey) {
+            if (!allowMultipleSavedFilters && currentSavedFilterData?.systemKey) {
                 finalFilter.saved_filter_system_key = currentSavedFilterData.systemKey;
             }
-            if (currentSavedFilterData?.name) {
+            if (!allowMultipleSavedFilters && currentSavedFilterData?.name) {
                 finalFilter.saved_filter_name = currentSavedFilterData.name;
             }
             handleApplyCustomFilter(finalFilter, true);
@@ -1315,16 +1394,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         // }
 
 
-        setSearchChips([]);
-        setSearchFilter(null);
-        setFilterRules(initialState);
-        setCustomFilter(null)
-        setPredefinedSearchChip(null);
-        setPredefinedSearchBaseFilter(null);
+        if (!allowMultipleSavedFilters) {
+            setSearchChips([]);
+            setSearchFilter(null);
+            setFilterRules(initialState);
+            setCustomFilter(null)
+            setPredefinedSearchChip(null);
+            setPredefinedSearchBaseFilter(null);
+        }
 
         if (savedfilter?.id) {
             const savedfilterId = savedfilter.id;
             setShowOverlay(false);
+            setEditingSavedFilterKey(getSavedFilterKey(savedfilter));
             const currentSavedFilterData: any = availableSavedFilters.find((savedFilter: any) => savedFilter.id === savedfilterId);
             setCurrentSavedFilterData(currentSavedFilterData);
             if (currentSavedFilterData) {
@@ -1346,7 +1428,32 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         }
     }
 
+    const persistActiveSavedFilters = (items: any[]) => {
+        const first = items[0];
+        const persistedFilter = {
+            ...(getFilterObjectFromLocalStorage() || {}),
+            saved_filter_items: items.map((item) => ({
+                id: item.data?.id ?? null,
+                systemKey: item.data?.systemKey ?? null,
+                name: item.data?.name ?? null,
+                predicate: item.query,
+                variables: item.variables || {},
+            })),
+            saved_filter_predicate: items.length > 0 ? (items.length === 1 ? first.query : { $or: items.map((item) => item.query) }) : null,
+            saved_filter_variables: items.length === 1 ? (first.variables || {}) : {},
+            saved_filter_id: items.length === 1 ? first.data?.id ?? null : null,
+            saved_filter_system_key: items.length === 1 ? first.data?.systemKey ?? null : null,
+            saved_filter_name: items.length === 1 ? first.data?.name ?? null : null,
+        };
+        delete persistedFilter.finalFullFilter;
+        setFilterObjectToLocalStorage(persistedFilter);
+    };
+
     const persistActiveSavedFilter = (savedFilter: any, filterJson: any, variables: Record<string, any>) => {
+        if (allowMultipleSavedFilters) {
+            persistActiveSavedFilters([{ data: savedFilter, query: filterJson, variables }]);
+            return;
+        }
         const persistedFilter = {
             ...(getFilterObjectFromLocalStorage() || {}),
             custom_filter_predicate: null,
@@ -1372,6 +1479,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
         const persistedFilter = {
             ...(getFilterObjectFromLocalStorage() || {}),
+            saved_filter_items: [],
             saved_filter_predicate: null,
             saved_filter_variables: {},
             saved_filter_id: null,
@@ -1388,8 +1496,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const deleteSavedFilter = async () => {
         // delte the saved filter with id 
         await deleteEntity(savedFilterTobeDeleted);
-        if (String(savedFilterTobeDeleted) === String(currentSavedFilterData?.id)) {
-            clearActiveSavedFilter();
+        if (allowMultipleSavedFilters) {
+            const nextItems = activeSavedFilters.filter((item: any) => String(item.data?.id) !== String(savedFilterTobeDeleted));
+            setActiveSavedFilters(nextItems);
+            if (String(savedFilterTobeDeleted) === String(currentSavedFilterData?.id)) {
+                setCurrentSavedFilterData(null);
+                setCurrentSavedFilterQuery(null);
+                setCurrentSavedFilterVariables({});
+            }
+            persistActiveSavedFilters(nextItems);
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1);
+        } else if (String(savedFilterTobeDeleted) === String(currentSavedFilterData?.id)) {
+            removeSavedFilter();
         }
         setIsDeleteSQDialogVisible(false);
         setTimeout(() => {
@@ -1412,12 +1531,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
                 await updateEntity({ id: +formValues.id, data: formData }).unwrap();
 
-                setSearchChips([]);
-                setSearchFilter(null);
-                setFilterRules(initialState);
-                setCustomFilter(null)
-                setPredefinedSearchChip(null);
-                setPredefinedSearchBaseFilter(null);
+                if (!allowMultipleSavedFilters) {
+                    setSearchChips([]);
+                    setSearchFilter(null);
+                    setFilterRules(initialState);
+                    setCustomFilter(null)
+                    setPredefinedSearchChip(null);
+                    setPredefinedSearchBaseFilter(null);
+                }
                 // Apply the rename immediately, both to the active filter and to
                 // the cached list — otherwise the list still holds the pre-rename
                 // entry, which wins the id-based lookup the next time saved-filter
@@ -1427,7 +1548,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setSavedFilters((prev) => prev.map((f: any) => String(f?.id) === String(formValues.id) ? { ...f, ...savedFilterRecord } : f));
                 setCurrentSavedFilterData(savedFilterRecord);
                 setCurrentSavedFilterQuery(filterJson);
-                persistActiveSavedFilter(savedFilterRecord, filterJson, currentSavedFilterVariables);
+                if (allowMultipleSavedFilters) {
+                    const nextItems = activeSavedFilters.map((item: any) =>
+                        getSavedFilterKey(item.data) === getSavedFilterKey(savedFilterRecord)
+                            ? { data: savedFilterRecord, query: filterJson, variables: currentSavedFilterVariables }
+                            : item
+                    );
+                    setActiveSavedFilters(nextItems);
+                    persistActiveSavedFilters(nextItems);
+                } else {
+                    persistActiveSavedFilter(savedFilterRecord, filterJson, currentSavedFilterVariables);
+                }
                 setHasSearched(true);
                 setRefreshKey((prev) => prev + 1);
             } else {
@@ -1442,12 +1573,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 formData.append("userId", user?.id);
                 const result = await createEntity(formData).unwrap();
 
-                setSearchChips([]);
-                setSearchFilter(null);
-                setFilterRules(initialState);
-                setCustomFilter(null)
-                setPredefinedSearchChip(null);
-                setPredefinedSearchBaseFilter(null);
+                if (!allowMultipleSavedFilters) {
+                    setSearchChips([]);
+                    setSearchFilter(null);
+                    setFilterRules(initialState);
+                    setCustomFilter(null)
+                    setPredefinedSearchChip(null);
+                    setPredefinedSearchBaseFilter(null);
+                }
                 // The custom filter just became this saved filter — apply it, and
                 // seed the cached list with it, immediately (see rename branch above).
                 const savedFilterRecord = { id: result.data.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) };
@@ -1455,7 +1588,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setCurrentSavedFilterData(savedFilterRecord);
                 setCurrentSavedFilterQuery(filterJson);
                 setCurrentSavedFilterVariables({});
-                persistActiveSavedFilter(savedFilterRecord, filterJson, {});
+                if (allowMultipleSavedFilters) {
+                    const nextItems = [...activeSavedFilters, { data: savedFilterRecord, query: filterJson, variables: {} }];
+                    setActiveSavedFilters(nextItems);
+                    persistActiveSavedFilters(nextItems);
+                } else {
+                    persistActiveSavedFilter(savedFilterRecord, filterJson, {});
+                }
                 setHasSearched(true);
                 setRefreshKey((prev) => prev + 1);
             }
@@ -1553,6 +1692,28 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             return false;
         }
 
+        if (allowMultipleSavedFilters) {
+            const key = getSavedFilterKey(savedfilter);
+            const nextItem = { data: savedfilter, query: filterJson, variables };
+            const existingItem = activeSavedFilters.find((item: any) => getSavedFilterKey(item.data) === key);
+            if (existingItem && areFilterStateValuesEqual(existingItem.query, filterJson) && areFilterStateValuesEqual(existingItem.variables, variables)) {
+                return true;
+            }
+            const nextItems = existingItem
+                ? activeSavedFilters.map((item: any) => getSavedFilterKey(item.data) === key ? nextItem : item)
+                : [...activeSavedFilters, nextItem];
+            setActiveSavedFilters(nextItems);
+            setCurrentSavedFilterData(savedfilter);
+            setCurrentSavedFilterQuery(filterJson);
+            setCurrentSavedFilterVariables(variables);
+            setEditingSavedFilterKey(null);
+            persistActiveSavedFilters(nextItems);
+            setShowOverlay(false);
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1);
+            return true;
+        }
+
         // Applying the already-active filter must be a no-op. This is important
         // for lifecycle extensions: applying a filter causes a new list load,
         // which invokes onBeforeListDataLoad/onListLoad again.
@@ -1589,6 +1750,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     }
 
     const removeSavedFilter = () => {
+        if (allowMultipleSavedFilters) {
+            const key = getSavedFilterKey(currentSavedFilterData);
+            const nextItems = activeSavedFilters.filter((item: any) => getSavedFilterKey(item.data) !== key);
+            setActiveSavedFilters(nextItems);
+            setCurrentSavedFilterData(null);
+            setCurrentSavedFilterQuery(null);
+            setCurrentSavedFilterVariables({});
+            setEditingSavedFilterKey(null);
+            persistActiveSavedFilters(nextItems);
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1);
+            return;
+        }
         clearActiveSavedFilter();
     }
 
@@ -1698,14 +1872,35 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const managedChipItems = useMemo<ManagedChipItem[]>(() => {
         const items: ManagedChipItem[] = [];
 
-        if (currentSavedFilterData?.name) {
-            items.push({
-                id: "saved-filter",
-                type: "saved",
-                label: `Saved: ${currentSavedFilterData.name}`,
-                onRemove: () => removeSavedFilter(),
-            });
-        }
+        const savedItems = allowMultipleSavedFilters
+            ? activeSavedFilters
+            : (currentSavedFilterData?.name ? [{ data: currentSavedFilterData }] : []);
+        savedItems.forEach((item: any) => {
+            if (item.data?.name) {
+                items.push({
+                    id: `saved-filter:${getSavedFilterKey(item.data)}`,
+                    type: "saved",
+                    label: `Saved: ${item.data.name}`,
+                    onRemove: () => {
+                        if (!allowMultipleSavedFilters) {
+                            removeSavedFilter();
+                            return;
+                        }
+                        const nextItems = activeSavedFilters.filter((active: any) => getSavedFilterKey(active.data) !== getSavedFilterKey(item.data));
+                        setActiveSavedFilters(nextItems);
+                        if (getSavedFilterKey(currentSavedFilterData) === getSavedFilterKey(item.data)) {
+                            setCurrentSavedFilterData(null);
+                            setCurrentSavedFilterQuery(null);
+                            setCurrentSavedFilterVariables({});
+                        }
+                        persistActiveSavedFilters(nextItems);
+                        setHasSearched(true);
+                        setRefreshKey((prev) => prev + 1);
+                    },
+                    ...(allowMultipleSavedFilters ? { onOpen: () => openSavedCustomFilter(item.data) } : {}),
+                });
+            }
+        });
 
         if (predefinedSearchChip?.name && predefinedSearchChip?.value) {
             items.push({
@@ -1751,6 +1946,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         return items;
     }, [
         currentSavedFilterData,
+        activeSavedFilters,
+        allowMultipleSavedFilters,
         predefinedSearchChip,
         customFilter,
         customRuleCount,
@@ -1987,7 +2184,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const removePredefinedSearchChip = () => {
         setPredefinedSearchChip(null);
         setPredefinedSearchBaseFilter(null)
-        setCustomFilter(null);
         setHasSearched(true);
         setRefreshKey((prev) => prev + 1)
     };
@@ -2192,6 +2388,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                             className={`text-color solid-search-overlay-option ${focusedIndex === optionIndex ? "solid-search-overlay-option-active" : ""}`}
                                                             onMouseDown={(e) => {
                                                                 e.preventDefault();
+                                                                e.stopPropagation();
+                                                            }}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
                                                                 handlePredefinedSearch(predefinedSearch);
                                                             }}
                                                             onMouseEnter={() => setFocusedIndex(optionIndex)}
@@ -2234,6 +2434,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         className={`text-color solid-search-overlay-option ${focusedIndex === optionIndex ? "solid-search-overlay-option-active" : ""}`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
+                                                            e.stopPropagation();
+                                                        }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             const currentValue = inputValue?.trim();
                                                             if (currentValue) {
                                                                 const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
@@ -2317,6 +2521,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                     key={savedfilter.id}
                                                     savedfilter={savedfilter}
                                                     activeSavedFilterReference={currentSavedFilterData?.systemKey || currentSavedFilterData?.id}
+                                                    activeSavedFilterReferences={allowMultipleSavedFilters ? activeSavedFilters.map((item: any) => getSavedFilterKey(item.data)) : undefined}
                                                     applySavedFilter={applySavedFilter}
                                                     openSavedCustomFilter={openSavedCustomFilter}
                                                     setSavedFilterTobeDeleted={setSavedFilterTobeDeleted}
