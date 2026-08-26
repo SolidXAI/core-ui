@@ -733,15 +733,22 @@
 @media (max-width: 1200px) {
   .solid-module-explorer-workspace {
     grid-template-columns: 1fr !important;
+    grid-template-rows: minmax(12rem, 38%) minmax(0, 1fr);
+    min-height: 0;
   }
 
   .solid-module-explorer-sidebar {
     border-right: none;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    overflow: hidden;
   }
 
   .solid-module-explorer-resizer {
     display: none;
+  }
+
+  .solid-module-explorer-main {
+    overflow-y: auto;
   }
 }
 
