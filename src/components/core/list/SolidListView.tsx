@@ -105,7 +105,6 @@ export type SolidListViewHandle = {
     custom_filter_predicate?: any;
     search_predicate?: any;
     saved_filter_predicate?: any;
-    saved_filter_items?: any[];
     predefined_search_predicate?: any;
   }) => void;
   /**
@@ -888,7 +887,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.saved_filter_id = latestFilterPredicatesRef.current.saved_filter_id || null;
       fileterTobeStored.saved_filter_system_key = latestFilterPredicatesRef.current.saved_filter_system_key || null;
       fileterTobeStored.saved_filter_name = latestFilterPredicatesRef.current.saved_filter_name || null;
-      fileterTobeStored.saved_filter_items = latestFilterPredicatesRef.current.saved_filter_items || [];
       fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
       fileterTobeStored.predefined_search_chip = latestFilterPredicatesRef.current.predefined_search_chip || null;
       setFilterObjectToLocalStorage(fileterTobeStored);
@@ -1442,7 +1440,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                           viewData={solidListViewMetaData}
                           handleApplyCustomFilter={handleApplyCustomFilter}
                           filterPredicates={filterPredicates}
-                          allowMultipleSavedFilters
                         >
                         </SolidGlobalSearchElement>
                       </div>
