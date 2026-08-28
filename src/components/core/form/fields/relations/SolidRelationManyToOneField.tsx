@@ -486,12 +486,10 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams}></RenderSolidFormEmbededView>
                     }
                 </div>
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} className={styles.fieldError} />
+                )}
             </div>
-            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
-            )}
         </div>
     );
 }
@@ -1040,14 +1038,10 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} > </RenderSolidFormEmbededView>
                     }
                 </div>
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} className={styles.fieldError} />
+                )}
             </div>
-            {
-                isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1" >
-                        <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
-                )
-            }
         </div>
     );
 }
