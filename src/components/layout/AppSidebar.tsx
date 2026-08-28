@@ -10,15 +10,16 @@ import SolidLink from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { env } from "../../adapters/env";
+import { normalizeAssetUrl } from "../../helpers/assetUrl";
 import { resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
 import type { MenuItemIconSource } from "../../helpers/menuItemIcons";
 import { SolidMenuItemIcon } from "./SolidMenuItemIcon";
 
-type SolidMenuItem = MenuItemIconSource & {
+type SolidMenuItem = Omit<MenuItemIconSource, "children" | "icon"> & {
     key?: string;
     title: string;
     path?: string;
-    icon?: string | { src?: string };
+    icon?: string | null;
     children?: SolidMenuItem[];
 };
 
@@ -112,6 +113,31 @@ function resolveDefaultWorkspace(items: SolidMenuItem[]) {
         items[0]
     );
 }
+
+const WorkspaceIcon = ({ workspace, className }: { workspace?: SolidMenuItem; className: string }) => {
+    const iconUrl = normalizeAssetUrl(workspace?.icon) || null;
+    const [failedUrl, setFailedUrl] = useState<string | null>(null);
+    const showImage = !!iconUrl && failedUrl !== iconUrl;
+
+    useEffect(() => {
+        setFailedUrl(null);
+    }, [iconUrl]);
+
+    return (
+        <span className={`${className}${showImage ? " has-image" : ""}`}>
+            {showImage ? (
+                <img
+                    src={iconUrl}
+                    alt=""
+                    aria-hidden="true"
+                    onError={() => setFailedUrl(iconUrl)}
+                />
+            ) : (
+                (workspace?.title || "W").slice(0, 1).toUpperCase()
+            )}
+        </span>
+    );
+};
 
 const SidebarMenuTree = ({
     items,
@@ -366,9 +392,7 @@ const AppSidebar = () => {
                             onClick={() => setWorkspaceOpen((prev) => !prev)}
                             aria-label="Select workspace"
                         >
-                            <span className="solid-workspace-avatar">
-                                {(selectedWorkspace?.title || "W").slice(0, 1).toUpperCase()}
-                            </span>
+                            <WorkspaceIcon workspace={selectedWorkspace} className="solid-workspace-avatar" />
                             {!isSidebarContentCollapsed && (
                                 <>
                                     <span className="solid-workspace-label-wrap">
@@ -394,7 +418,7 @@ const AppSidebar = () => {
                                         className={`solid-workspace-item ${workspace.key === selectedWorkspace?.key ? "is-active" : ""}`}
                                         onClick={() => selectWorkspace(workspace)}
                                     >
-                                        <span className="solid-workspace-item-avatar">{workspace.title.slice(0, 1).toUpperCase()}</span>
+                                        <WorkspaceIcon workspace={workspace} className="solid-workspace-item-avatar" />
                                         <span className="solid-workspace-item-label">{workspace.title}</span>
                                     </button>
                                 ))}
