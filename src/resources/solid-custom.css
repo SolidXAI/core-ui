@@ -4763,12 +4763,17 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   opacity: 0.55;
 }
 
-.solid-datatable-wrapper .greyed-out-row > td.solid-data-table-row-action-cell {
+.solid-datatable-wrapper .greyed-out-row > td.solid-data-table-row-action-cell,
+.solid-datatable-wrapper .greyed-out-row > td.solid-tree-actions-cell {
   opacity: 1;
 }
 
 .solid-card-view-card.greyed-out-row,
 .solid-kanban-card.greyed-out-row {
+  opacity: 1;
+}
+
+.solid-archived-card-content {
   opacity: 0.55;
 }
 
