@@ -342,6 +342,10 @@ const AppSidebar = () => {
     ]
         .filter(Boolean)
         .join(" ");
+    // The collapsed preference belongs to the desktop sidebar. Mobile uses
+    // the navbar visibility state for its drawer, so it must always render
+    // the full menu when opened.
+    const isSidebarContentCollapsed = isDesktop && isCollapsed;
 
     const selectWorkspace = (workspace: SolidMenuItem) => {
         setSelectedWorkspaceKey(workspace.key || "");
@@ -365,7 +369,7 @@ const AppSidebar = () => {
                             <span className="solid-workspace-avatar">
                                 {(selectedWorkspace?.title || "W").slice(0, 1).toUpperCase()}
                             </span>
-                            {!isCollapsed && (
+                            {!isSidebarContentCollapsed && (
                                 <>
                                     <span className="solid-workspace-label-wrap">
                                         <span className="solid-workspace-label-top">Workspace</span>
@@ -381,7 +385,7 @@ const AppSidebar = () => {
                             )}
                         </button>
 
-                        {workspaceOpen && !isCollapsed && (
+                        {workspaceOpen && !isSidebarContentCollapsed && (
                             <div className="solid-workspace-menu">
                                 {workspaces.map((workspace) => (
                                     <button
@@ -400,7 +404,7 @@ const AppSidebar = () => {
 
                 </div>
 
-                {!isCollapsed ? (
+                {!isSidebarContentCollapsed ? (
                     <>
                         <div className="solid-sidebar-search-wrap">
                             <input
