@@ -1,32 +1,7 @@
 import type { DashboardWidgetComponentProps } from "../../../../types/dashboard";
 
-type DashboardTableColumn = {
-  field: string;
-  label: string;
-}
-
-const normalizeColumns = (columns: any[]): DashboardTableColumn[] =>
-    columns
-      .map((column) => {
-        if (typeof column === "string") {
-          return {
-            field: column,
-            label: column,
-          };
-        }
-
-        const field = column?.field ?? column?.name ?? column?.key;
-        if (!field) return null;
-
-        return {
-          field,
-          label: column?.label ?? column?.displayName ?? field,
-        };
-      })
-      .filter(Boolean) as DashboardTableColumn[];
-
 export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponentProps) {
-  const columns = normalizeColumns(Array.isArray(runtime?.data?.columns) ? runtime.data.columns : [])
+  const columns: string[] = Array.isArray(runtime?.data?.columns) ? runtime.data.columns : [];
   const records: Record<string, any>[] = Array.isArray(runtime?.data?.records) ? runtime.data.records : [];
 
   return (
@@ -36,10 +11,10 @@ export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponen
           <tr>
             {columns.map((column) => (
               <th
-                key={column.field}
+                key={column}
                 style={{ textAlign: "left", borderBottom: "1px solid #eceff3", padding: "6px 8px", fontSize: "0.84rem" }}
               >
-                {column.label}
+                {column}
               </th>
             ))}
           </tr>
@@ -52,7 +27,7 @@ export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponen
                   key={`${index}-${column}`}
                   style={{ textAlign: "left", borderBottom: "1px solid #f3f4f6", padding: "6px 8px", fontSize: "0.83rem", whiteSpace: "nowrap" }}
                 >
-                  {`${record?.[column.field] ?? ""}`}
+                  {`${record?.[column] ?? ""}`}
                 </td>
               ))}
             </tr>
