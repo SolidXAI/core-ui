@@ -71,8 +71,8 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
 
-  .solid-workspace-avatar,
-  .solid-workspace-item-avatar {
+  .solid-workspace-avatar:not(.has-image),
+  .solid-workspace-item-avatar:not(.has-image) {
     background: linear-gradient(135deg, #ffb56b, #f28c28) !important;
     color: #1a120d !important;
   }
