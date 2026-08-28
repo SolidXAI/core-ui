@@ -4,6 +4,75 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.16] - 2026-08-28
+
+### Added
+
+- implement dark theme styles for workflow editor components
+- add hasAnyActiveFilters prop to various components for filter management
+- add error message for unsupported media extensions and enhance media type handling
+
+### Fixed
+
+- prevent duplicate session cleared event emission on logout
+- apply stored theme before rendering in SolidLoadingState component
+- adjust font weights in global search filter overlay for consistency
+- update global search filter overlay UI for improved styling and structure
+- show direct recover action on archived cards
+
+### Changed
+
+- optimize signOut function and remove unnecessary loading spinner in AuthLayout
+- streamline filter handling in SolidChatterHeader and update active filter styles
+
+### Other
+
+- adjust CSS for better responsiveness and readability in various components
+- tree-view many-to-one column click action now follows recordClickAction viewmode
+- reverted tailwind generated file
+- cogwheel layout panel position issue
+- primereact css and icons dependancies removed
+
+## [0.1.16-beta.1] - 2026-08-25
+
+### Fixed
+
+- prevent duplicate session cleared event emission on logout
+- apply stored theme before rendering in SolidLoadingState component
+- show direct recover action on archived cards
+
+### Changed
+
+- optimize signOut function and remove unnecessary loading spinner in AuthLayout
+
+### Other
+
+- adjust CSS for better responsiveness and readability in various components
+- tree-view many-to-one column click action now follows recordClickAction viewmode
+
+## [0.1.16-beta.0] - 2026-08-21
+
+### Added
+
+- implement dark theme styles for workflow editor components
+- add hasAnyActiveFilters prop to various components for filter management
+- add error message for unsupported media extensions and enhance media type handling
+
+### Fixed
+
+- adjust font weights in global search filter overlay for consistency
+- update global search filter overlay UI for improved styling and structure
+
+### Changed
+
+- streamline filter handling in SolidChatterHeader and update active filter styles
+
+### Other
+
+- reverted tailwind generated file
+- cogwheel layout panel position issue
+- primereact css and icons dependancies removed
+
 ## [0.1.15] - 2026-08-20
 
 ### Added

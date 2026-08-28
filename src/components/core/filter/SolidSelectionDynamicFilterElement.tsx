@@ -45,7 +45,7 @@ export const SolidSelectionDynamicFilterElement = ({ value, updateInputs, index,
             completeMethod={selectionDynamicSearch}
             onChange={(e) => updateInputs(index, e.value)}
             className="w-full"
-            inputClassName="w-full p-inputtext-sm solid-filter-compact-control"
+            inputClassName="w-full solid-filter-compact-control"
         />
     )
 }

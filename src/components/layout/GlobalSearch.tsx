@@ -1,4 +1,5 @@
 import { usePathname } from "../../hooks/usePathname";
+import { Search } from "lucide-react";
 import { SolidInput } from "../shad-cn-ui";
 
 export const GlobalSearch = () => {
@@ -20,7 +21,7 @@ export const GlobalSearch = () => {
     };
     return (
         <div className='absolute left-50 solid-global-search' style={{ transform: 'translateX(-50%)' }}>
-            <span className="pi pi-search" />
+            <Search size={16} aria-hidden="true" />
             <SolidInput
                 placeholder={getPlaceholder()}
                 className='max-h-2rem w-25rem border border-cyan-200'

@@ -71,6 +71,13 @@ export const getAllowedMediaExtensionsLabel = (mediaAllowedExtensions?: string[]
     return selectedExtensions.map((extension) => `.${extension}`).join(", ");
 };
 
+export const getAllowedMediaExtensionsErrorMessage = (mediaAllowedExtensions?: string[] | null): string | null => {
+    const allowedExtensionsLabel = getAllowedMediaExtensionsLabel(mediaAllowedExtensions);
+    return allowedExtensionsLabel
+        ? `Please upload a file with one of these extensions: ${allowedExtensionsLabel}`
+        : null;
+};
+
 export default function getAcceptedFileTypes(mediaTypes?: string[] | null, mediaAllowedExtensions?: string[] | null, mediaConfig?: MediaConfig | null) {
     const effectiveExtensions = normalizeExtensions(mediaAllowedExtensions);
     if (effectiveExtensions.length > 0) {

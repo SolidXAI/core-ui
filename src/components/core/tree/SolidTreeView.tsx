@@ -1396,6 +1396,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         column,
         setLightboxUrls,
         setOpenLightbox,
+        recordClickAction: rowClickFormMode
       });
 
       if (!React.isValidElement(listColumn)) return null;
@@ -1766,7 +1767,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               <SolidButton
                 key={index}
                 type="button"
-                icon={button?.attrs?.icon ?? "pi pi-pencil"}
+                icon={button?.attrs?.icon}
+                leftIcon={!button?.attrs?.icon ? <Pencil size={14} aria-hidden /> : undefined}
                 className={`gap-2 ${button?.attrs?.className ?? ""}`}
                 label={
                   button.attrs.showLabel !== false
@@ -2018,6 +2020,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                       setDialogVisible={setDeleteRecordsDialogVisible}
                       setShowSaveFilterPopup={setShowSaveFilterPopup}
                       filters={filters}
+                      hasAnyActiveFilters={hasAnyActiveFilters}
                       handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                       setRecoverDialogVisible={setRecoverDialogVisible}
                     />

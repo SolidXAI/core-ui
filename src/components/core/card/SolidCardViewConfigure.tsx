@@ -64,6 +64,7 @@ export const SolidCardViewConfigure = ({
   setLayoutDialogVisible,
   setShowSaveFilterPopup,
   filters,
+  hasAnyActiveFilters,
   handleRefreshView,
   params,
   headerButtons = [],
@@ -219,7 +220,7 @@ export const SolidCardViewConfigure = ({
             </SolidDropdownMenuCheckboxItem>
           )}
 
-          {(canCustomizeLayout || canSaveCustomFilter || canShowArchivedRecords) && <SolidDropdownMenuSeparator />}
+          {(canCustomizeLayout || hasAnyActiveFilters && canSaveCustomFilter || canShowArchivedRecords) && <SolidDropdownMenuSeparator />}
 
           {canCustomizeLayout && (
             <SolidDropdownMenuSub>
@@ -227,7 +228,7 @@ export const SolidCardViewConfigure = ({
                 <SolidIcon name="si-sliders-h" className="solid-header-action-button-icon" aria-hidden />
                 <span className="solid-header-action-button-label">Layout</span>
               </SolidDropdownMenuSubTrigger>
-              <SolidDropdownMenuSubContent className="customize-layout-panel">
+              <SolidDropdownMenuSubContent className="customize-layout-panel" side="left">
                 {showSwitchType && (
                   <>
                     <SolidDropdownMenuLabel>Switch Type</SolidDropdownMenuLabel>
@@ -254,7 +255,7 @@ export const SolidCardViewConfigure = ({
             </SolidDropdownMenuSub>
           )}
 
-          {canSaveCustomFilter && (
+          {hasAnyActiveFilters && canSaveCustomFilter && (
             <SolidDropdownMenuItem
               className="solid-header-dropdown-item"
               onSelect={() => {
