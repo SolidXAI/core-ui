@@ -1,7 +1,7 @@
 import { env } from "../../adapters/env";
 import { useContext } from "react";
-import SolidLogoDark from '../../resources/images/SolidXLogo-dark.svg'
-import SolidLogoLight from '../../resources/images/SolidXLogo-light.svg'
+import SolidLogoDark from '../../resources/images/solidx-logo/solidx-logo-dark.png'
+import SolidLogoLight from '../../resources/images/solidx-logo/solidx-logo-light.png'
 import { ChatIcon } from "../layout/SolidAiStudioLayout";
 import { LayoutContext } from "../layout/context/layoutcontext";
 
