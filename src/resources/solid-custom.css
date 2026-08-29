@@ -7081,9 +7081,10 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   max-width: 440px;
   min-height: 100%;
   box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  padding: clamp(92px, 12vh, 124px) 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 4vh, 40px) 0;
 }
 
 .solid-auth-theme-wrapper.left .solid-auth-form-pane-brand,
@@ -7094,6 +7095,13 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   right: 0;
   display: flex;
   justify-content: flex-start;
+}
+
+.solid-auth-theme-wrapper.left .solid-auth-form-pane-inner.has-form-logo .solid-auth-form-pane-brand,
+.solid-auth-theme-wrapper.right .solid-auth-form-pane-inner.has-form-logo .solid-auth-form-pane-brand {
+  position: static;
+  width: 100%;
+  margin-bottom: 24px;
 }
 
 .solid-auth-theme-wrapper.left .solid-auth-form-pane-content,
@@ -7247,6 +7255,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
     position: static;
     width: 100%;
+    margin-bottom: 0;
   }
 
   .solid-auth-theme-wrapper.left .solid-auth-form-pane-content,
