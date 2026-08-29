@@ -178,7 +178,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
     const formPane = (
         <div className="solid-auth-form-pane solid-login-dark-bg">
-            <div className={`solid-auth-form-pane-inner ${appLogoPosition === "in_form_view" ? "has-form-logo" : ""}`}>
+            <div className="solid-auth-form-pane-inner">
                 {appLogoPosition === "in_form_view" && (
                     <div className="solid-auth-form-pane-brand">
                         {renderBrand("start")}
