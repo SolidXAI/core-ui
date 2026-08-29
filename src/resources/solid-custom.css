@@ -392,6 +392,20 @@ textarea {
   font-weight: 700;
 }
 
+.solid-workspace-avatar img,
+.solid-workspace-item-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  border-radius: inherit;
+}
+
+.solid-workspace-avatar.has-image,
+.solid-workspace-item-avatar.has-image {
+  background: transparent;
+}
+
 .solid-workspace-label-wrap {
   display: flex;
   flex-direction: column;
