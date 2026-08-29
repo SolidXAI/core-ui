@@ -2056,14 +2056,6 @@ textarea {
   overflow: hidden;
 }
 
-.solid-auth-theme-wrapper.left .solid-left-layout::after,
-.solid-auth-theme-wrapper.right .solid-right-layout::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(2, 6, 23, 0.24), rgba(2, 6, 23, 0.48));
-}
-
 .solid-auth-theme-wrapper.left .solid-left-layout>*,
 .solid-auth-theme-wrapper.right .solid-right-layout>* {
   position: relative;
@@ -2437,14 +2429,6 @@ textarea {
 .solid-auth-theme-wrapper.right .solid-right-layout {
   background-color: #27272a;
   border-left: 1px solid #18181b;
-}
-
-.solid-auth-theme-wrapper.left .solid-left-layout::after,
-.solid-auth-theme-wrapper.right .solid-right-layout::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(24, 24, 27, 0.62);
 }
 
 .solid-auth-theme-wrapper.left .solid-left-layout>*,
