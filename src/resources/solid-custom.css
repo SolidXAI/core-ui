@@ -2053,8 +2053,6 @@ textarea {
 .solid-auth-theme-wrapper.left .solid-left-layout,
 .solid-auth-theme-wrapper.right .solid-right-layout {
   position: relative;
-  background-size: cover;
-  background-position: center;
   overflow: hidden;
 }
 
@@ -2445,8 +2443,6 @@ textarea {
 .solid-auth-theme-wrapper.left .solid-left-layout,
 .solid-auth-theme-wrapper.right .solid-right-layout {
   background-color: #27272a;
-  background-size: cover;
-  background-position: center;
   border-left: 1px solid #18181b;
 }
 
@@ -2984,7 +2980,8 @@ textarea {
   min-height: 100vh;
   background-color: #27272a;
   background-size: cover;
-  background-position: center;
+  background-position: center center;
+  background-repeat: no-repeat;
   overflow: hidden;
 }
 
@@ -7151,6 +7148,21 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 .solid-auth-theme-wrapper.right .solid-auth-image-pane {
   min-height: 100%;
   height: 100%;
+}
+
+.solid-auth-theme-wrapper.left .solid-logo.in_image_view,
+.solid-auth-theme-wrapper.right .solid-logo.in_image_view {
+  width: 140px;
+  max-width: calc(100% - 48px);
+}
+
+.solid-auth-theme-wrapper.left .solid-logo.in_image_view img,
+.solid-auth-theme-wrapper.right .solid-logo.in_image_view img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .solid-auth-theme-wrapper.center .solid-center-layout {
