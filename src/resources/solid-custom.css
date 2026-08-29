@@ -2070,13 +2070,6 @@ textarea {
   z-index: 1;
 }
 
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view {
-  top: 24px;
-  left: 24px;
-  right: auto;
-}
-
 .solid-center-layout {
   width: min(460px, calc(100vw - 32px));
 }
@@ -2458,13 +2451,6 @@ textarea {
 .solid-auth-theme-wrapper.right .solid-right-layout>* {
   position: relative;
   z-index: 2;
-}
-
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view {
-  top: 24px;
-  left: 24px;
-  right: auto;
 }
 
 .auth-container {
@@ -7145,19 +7131,29 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   height: 100%;
 }
 
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view {
+.solid-auth-image-pane .solid-logo.in_image_view {
   width: 140px;
   max-width: calc(100% - 48px);
+  position: absolute;
+  top: 24px;
 }
 
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view img,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view img {
+.solid-auth-image-pane .solid-logo.in_image_view img {
   display: block;
   width: 100%;
   height: auto;
   max-width: 100%;
   object-fit: contain;
+}
+
+.solid-auth-image-pane.pane-on-right .solid-logo.in_image_view {
+  left: auto;
+  right: 24px;
+}
+
+.solid-auth-image-pane.pane-on-left .solid-logo.in_image_view {
+  left: 24px;
+  right: auto;
 }
 
 .solid-auth-theme-wrapper.center .solid-center-layout {
