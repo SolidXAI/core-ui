@@ -376,7 +376,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       }
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
-        showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
+        showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label ?? column.attrs.name ?? JSON.stringify(column.attrs)));
         // return;
       }
       if (fieldMetadata) {
