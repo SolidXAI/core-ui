@@ -339,7 +339,7 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
 
   return (
     <div className="flex flex-col gap-6">
-      <div style={{ ...cardStyle, width: "50%" }}>
+      <div className="solid-ai-model-config-card" style={{ ...cardStyle, width: "50%" }}>
         <p className="solid-settings-subheading">Model Config</p>
         <div className="flex flex-col gap-4 mt-4">
           <div>
@@ -365,7 +365,7 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
         </div>
       </div>
 
-      <div style={{ ...cardStyle, width: "50%" }}>
+      <div className="solid-ai-model-config-card" style={{ ...cardStyle, width: "50%" }}>
         <p className="solid-settings-subheading">Behavior</p>
         <div className="flex flex-col gap-4 mt-4">
           <div className="flex items-center gap-2">

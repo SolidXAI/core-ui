@@ -25,7 +25,9 @@ import {
   SolidTabGroup,
   SolidTextarea,
   SolidIcon,
+  SolidLightbox,
 } from "../../shad-cn-ui";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { useSolidAutocompleteField } from "../../../hooks/useSolidAutocompleteField";
 import { SolidFormFooter } from "../form/SolidFormFooter";
 import { ModuleMetadataExplorer } from "./ModuleMetadataExplorer";
@@ -46,6 +48,7 @@ const CreateModule = ({ params, data }: any) => {
   const [fileDetails, setFileDetails] = useState<{ name: string; type: string } | null>(null);
   const [uploadedSize, setUploadedSize] = useState<string>("0 MB");
   const [totalSize, setTotalSize] = useState<string>("0 KB");
+  const [isMenuIconLightboxOpen, setIsMenuIconLightboxOpen] = useState(false);
 
   const formatFileSize = (size: number) => {
     return size >= 1024 * 1024
@@ -169,6 +172,9 @@ const CreateModule = ({ params, data }: any) => {
       setUploadProgress(100);
       setUploadCompleted(true);
       setUploadedSize(totalSize); // Set uploaded size to total size after completion
+      if (typeof reader.result === "string") {
+        setmenuIconPreview(reader.result);
+      }
     };
 
     reader.readAsDataURL(file);
@@ -180,25 +186,37 @@ const CreateModule = ({ params, data }: any) => {
     accept: {
       'image/jpeg': [],
       'image/png': [],
-      'image/svg+xml': ['.svg']
     },
     maxSize: 2 * 1024 * 1024, // 2MB
   });
 
   useEffect(() => {
-    if (data) {
-      setmenuIconPreview(`${env("API_URL")}/${data.menuIconUrl}`);
+    const menuIconUrl = typeof data?.menuIconUrl === "string"
+      ? data.menuIconUrl.trim()
+      : "";
 
-      const fileName = data?.menuIconUrl?.split("/").pop(); // Extract filename from URL
-      setFileDetails({ name: fileName || "Unknown File", type: "Uploaded File" });
-
-      // Set the upload progress to 100% since the file is already uploaded
-      setUploadProgress(100);
-      setUploadCompleted(true);
-
-      // Ensure Formik has the existing file URL
-      formik.setFieldValue("menuIconUrl", data.menuIconUrl);
+    if (!menuIconUrl) {
+      setmenuIconPreview(null);
+      setFileDetails(null);
+      setUploadProgress(0);
+      setUploadCompleted(false);
+      setUploadedSize("0 KB");
+      setTotalSize("0 KB");
+      formik.setFieldValue("menuIconUrl", null);
+      return;
     }
+
+    setmenuIconPreview(`${env("API_URL")}/${menuIconUrl}`);
+
+    const fileName = menuIconUrl.split("/").pop();
+    setFileDetails({ name: fileName || "Uploaded File", type: "Uploaded File" });
+
+    // Set the upload progress to 100% since the file is already uploaded.
+    setUploadProgress(100);
+    setUploadCompleted(true);
+
+    // Ensure Formik has the existing file URL.
+    formik.setFieldValue("menuIconUrl", data.menuIconUrl);
   }, [data])
   const handleCancelUpload = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -400,7 +418,7 @@ const CreateModule = ({ params, data }: any) => {
               <div className="field w-full px-2 pt-2">
                 <div className={`${styles.fieldWrapper} relative`}>
                   <label htmlFor="menuIconUrl" className={`${styles.fieldLabel} form-field-label`}>
-                    Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
+                    Menu Icon <small className="text-red-500 helper-text">(only png and jpeg are allowed)</small>
                   </label>
                   <div {...getRootPropsmenuIcon()} className="solid-dropzone-wrapper">
                     <input {...getInputPropsmenuIcon()} />
@@ -417,14 +435,27 @@ const CreateModule = ({ params, data }: any) => {
                         <div className="flex w-full flex-col gap-1">
                           <div className="flex items-center justify-between">
                             <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
-                            <button
-                              type="button"
-                              className="solid-file-icon-btn is-danger solid-module-upload-remove"
-                              aria-label="Remove uploaded menu icon"
-                              onClick={handleCancelUpload}
-                            >
-                              <SolidIcon name="si-times" aria-hidden />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              {typeof menuIconPreview === "string" && (
+                                <button
+                                  type="button"
+                                  className="solid-file-icon-btn"
+                                  aria-label="View uploaded menu icon"
+                                  title="View icon"
+                                  onClick={() => setIsMenuIconLightboxOpen(true)}
+                                >
+                                  <SolidIcon name="si-eye" aria-hidden />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                className="solid-file-icon-btn is-danger solid-module-upload-remove"
+                                aria-label="Remove uploaded menu icon"
+                                onClick={handleCancelUpload}
+                              >
+                                <SolidIcon name="si-times" aria-hidden />
+                              </button>
+                            </div>
                           </div>
                           {uploadCompleted ? (
                             <div className="flex items-center gap-2 text-sm">
@@ -521,6 +552,13 @@ const CreateModule = ({ params, data }: any) => {
         </div>
       </form>
       <SolidFormFooter params={params}></SolidFormFooter>
+      {typeof menuIconPreview === "string" && (
+        <SolidLightbox
+          open={isMenuIconLightboxOpen}
+          slides={[{ src: menuIconPreview } satisfies SolidLightboxSlide]}
+          onClose={() => setIsMenuIconLightboxOpen(false)}
+        />
+      )}
     </div>
   );
 
