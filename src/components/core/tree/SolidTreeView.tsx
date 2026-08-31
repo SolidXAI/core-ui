@@ -1727,7 +1727,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={(event) => event.stopPropagation()}>
           <button
             type="button"
-            className="solid-tree-row-menu-trigger"
+            className="retrieve-button solid-row-menu-trigger"
             aria-label="Recover row"
             data-no-row-click="true"
             onClick={() => {
@@ -1943,7 +1943,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   </div>
                 )}
 
-                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                <div className="solid-header-buttons-wrapper max-lg:hidden items-center lg:flex">
                   {visibleHeaderButtons
                     ?.filter((button: any) => button?.attrs?.actionInContextMenu !== true)
                     ?.map((button: any, index: number) => (

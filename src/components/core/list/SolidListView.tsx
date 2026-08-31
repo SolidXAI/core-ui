@@ -376,7 +376,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       }
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
-        showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
+        showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label ?? column.attrs.name ?? JSON.stringify(column.attrs)));
         // return;
       }
       if (fieldMetadata) {
@@ -1105,13 +1105,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         ? [errorMessages]
         : [];
     if (messages.length > 0) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: messages.join(', ') }));
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR_OCCURED, detail: messages.join(', ') }));
     }
   };
 
   const showFieldError = async (error: any) => {
     if (error) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: String(error), life: 3000 }));
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR_OCCURED, detail: String(error), life: 3000 }));
     }
   };
 
@@ -1462,7 +1462,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     </div>
                   )}
 
-                  <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                  <div className="solid-header-buttons-wrapper max-lg:hidden items-center lg:flex">
                     {visibleHeaderButtons
                       ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                       ?.map((button: any, index: number) => (

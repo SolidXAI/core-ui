@@ -266,7 +266,7 @@ export const SolidListViewConfigure = (
                                         onActionComplete={() => setIsCogMenuOpen(false)}
                                     />
                                 ))}
-                            <div className="lg:hidden flex flex-col gap-1">
+                            <div className="max-lg:flex lg:hidden flex-col gap-1">
                                 {mobileOnlyHeaderButtons
                                     ?.map((button: any, index: number) => (
                                         <SolidListViewHeaderContextMenuButton

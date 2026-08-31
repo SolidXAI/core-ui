@@ -142,7 +142,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           {/* <p className="kanban-card-content">{data.content}</p> */}
           <div
             style={{
-              opacity: snapshot.isDragging ? 0.9 : (isArchivedRecord ? 0.55 : 1),
+              opacity: snapshot.isDragging ? 0.9 : 1,
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
               cursor: isArchivedRecord ? "default" : (isDragDisabled ? "pointer" : "grab")
             }}
@@ -152,7 +152,10 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           >
             {renderKanbanAction(data)}
             {DynamicCardWidget ? (
-              <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
+              <div
+                className={isArchivedRecord ? "solid-archived-card-content" : undefined}
+                style={isArchivedRecord ? { pointerEvents: "none" } : undefined}
+              >
                 <DynamicCardWidget
                   rowData={data}
                   solidKanbanViewMetaData={solidKanbanViewMetaData}
