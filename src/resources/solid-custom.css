@@ -2070,25 +2070,10 @@ textarea {
   overflow: hidden;
 }
 
-.solid-auth-theme-wrapper.left .solid-left-layout::after,
-.solid-auth-theme-wrapper.right .solid-right-layout::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(2, 6, 23, 0.24), rgba(2, 6, 23, 0.48));
-}
-
 .solid-auth-theme-wrapper.left .solid-left-layout>*,
 .solid-auth-theme-wrapper.right .solid-right-layout>* {
   position: relative;
   z-index: 1;
-}
-
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view {
-  top: 24px;
-  left: 24px;
-  right: auto;
 }
 
 .solid-center-layout {
@@ -2460,25 +2445,10 @@ textarea {
   border-left: 1px solid #18181b;
 }
 
-.solid-auth-theme-wrapper.left .solid-left-layout::after,
-.solid-auth-theme-wrapper.right .solid-right-layout::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(24, 24, 27, 0.62);
-}
-
 .solid-auth-theme-wrapper.left .solid-left-layout>*,
 .solid-auth-theme-wrapper.right .solid-right-layout>* {
   position: relative;
   z-index: 2;
-}
-
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view {
-  top: 24px;
-  left: 24px;
-  right: auto;
 }
 
 .auth-container {
@@ -7130,15 +7100,16 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   max-width: 440px;
   min-height: 100%;
   box-sizing: border-box;
-  display: grid;
-  place-items: center;
-  padding: clamp(92px, 12vh, 124px) 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(28px, 4vh, 40px) 0;
 }
 
 .solid-auth-theme-wrapper.left .solid-auth-form-pane-brand,
 .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
   position: absolute;
-  top: clamp(28px, 4vh, 36px);
+  top: clamp(104px, 14vh, 140px);
   left: 0;
   right: 0;
   display: flex;
@@ -7164,19 +7135,29 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   height: 100%;
 }
 
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view {
+.solid-auth-image-pane .solid-logo.in_image_view {
   width: 140px;
   max-width: calc(100% - 48px);
+  position: absolute;
+  top: 24px;
 }
 
-.solid-auth-theme-wrapper.left .solid-logo.in_image_view img,
-.solid-auth-theme-wrapper.right .solid-logo.in_image_view img {
+.solid-auth-image-pane .solid-logo.in_image_view img {
   display: block;
   width: 100%;
   height: auto;
   max-width: 100%;
   object-fit: contain;
+}
+
+.solid-auth-image-pane.pane-on-right .solid-logo.in_image_view {
+  left: auto;
+  right: 24px;
+}
+
+.solid-auth-image-pane.pane-on-left .solid-logo.in_image_view {
+  left: 24px;
+  right: auto;
 }
 
 .solid-auth-theme-wrapper.center .solid-center-layout {
@@ -7202,6 +7183,20 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   left: 0;
   right: 0;
   bottom: clamp(28px, 4vh, 36px);
+}
+
+@media (max-height: 950px) and (min-width: 768px) {
+  .solid-auth-theme-wrapper.left .solid-auth-form-pane-brand,
+  .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
+    top: clamp(88px, 11vh, 104px);
+  }
+}
+
+@media (max-height: 850px) and (min-width: 768px) {
+  .solid-auth-theme-wrapper.left .solid-auth-form-pane-brand,
+  .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
+    top: clamp(40px, 6vh, 56px);
+  }
 }
 
 .solid-auth-legal-footer-row {
@@ -7286,6 +7281,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
     position: static;
     width: 100%;
+    margin-bottom: 0;
   }
 
   .solid-auth-theme-wrapper.left .solid-auth-form-pane-content,
