@@ -2211,7 +2211,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                     );
                                                 })}
                                             </div>
-                                            <div className="solid-filter-dialog-sep" />
+                                            <hr className="solid-search-overlay-section-separator" />
                                         </>
                                     )}
                                     <div className="solid-search-overlay-section solid-search-overlay-section--search">
@@ -2294,14 +2294,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="solid-filter-dialog-sep" />
                                 </>
                             }
                             {selectableSavedFilters.length > 0 &&
                                 <>
                                     <hr className="solid-search-overlay-section-separator" />
                                     <div className="solid-search-overlay-section solid-search-overlay-section--saved">
-                                        <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact">
+                                        <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact items-center">
                                             <div className="solid-search-overlay-panel-callout-icon">
                                                 <Bookmark size={13} />
                                             </div>

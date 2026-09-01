@@ -611,7 +611,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
                   />
                 </div>
 
-                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                <div className="solid-header-buttons-wrapper max-lg:hidden items-center lg:flex">
                   {visibleHeaderButtons
                     .filter((button: any) => button?.attrs?.actionInContextMenu !== true)
                     .map((button: any, index: number) => (
@@ -656,6 +656,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
                   filters={filters}
+                  hasAnyActiveFilters={hasAnyActiveFilters}
                   handleRefreshView={handleFetchUpdatedRecords}
                   params={params}
                   headerButtons={visibleHeaderButtons}

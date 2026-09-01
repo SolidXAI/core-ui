@@ -111,7 +111,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                     value={value}
                     onChange={(e) => updateInputs(index, e.target.value)}
                     placeholder="Value"
-                    className='w-full p-inputtext-sm solid-filter-compact-control'
+                    className='w-full solid-filter-compact-control'
                 />
             );
         }
@@ -122,7 +122,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                     value={value}
                     onChange={(e) => updateInputs(index, e.value)}
                     placeholder="Value"
-                    className='w-full p-inputtext-sm solid-filter-compact-control'
+                    className='w-full solid-filter-compact-control'
                 />
             );
         }
@@ -133,7 +133,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                     type="date"
                     value={value || ""}
                     onChange={(e) => updateInputs(index, e.target.value)}
-                    className="w-full p-inputtext-sm solid-filter-compact-control"
+                    className="w-full solid-filter-compact-control"
                 />
             );
         }
@@ -144,7 +144,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                     type="datetime-local"
                     value={value || ""}
                     onChange={(e) => updateInputs(index, e.target.value)}
-                    className="w-full p-inputtext-sm solid-filter-compact-control"
+                    className="w-full solid-filter-compact-control"
                 />
             );
         }
@@ -155,7 +155,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                     type="time"
                     value={value || ""}
                     onChange={(e) => updateInputs(index, e.target.value)}
-                    className="w-full p-inputtext-sm solid-filter-compact-control"
+                    className="w-full solid-filter-compact-control"
                 />
             );
         }

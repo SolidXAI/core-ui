@@ -4,6 +4,248 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.17-beta.0] - 2026-08-31
+
+### Added
+
+- enable support for multiple saved filters in SolidGlobalSearchElement and SolidListView
+
+### Fixed
+
+- enhance error handling for missing field metadata in SolidListView
+- stabilize logo spacing across zoom levels
+- vertically center logo and form in split layouts
+- remove redundant styles for auth logo positioning and sizing
+- adjust auth logo positioning and sizing for improved layout
+- update auth logo positioning and sizing for better responsiveness
+- prevent stale action response from affecting breadcrumb display
+- recover button greyed out state to active
+- improve mobile responsiveness for settings workspace and AI model config card
+- json editor proper scroll and render
+- explorer footer in smaller viewport
+- update error message summary to use ERROR_OCCURED instead of SEND_REPORT
+- locale dropdown is rendered outside the viewport
+- selection static alignment and out of view rendering of dropdown
+- alignment issue in Explorer JSON editor footer
+- update sidebar collapsed state handling for mobile view
+- alignment and validation error rendering
+- scroll behaviour for explorer in settings at mobile viewport
+- checkbox grid layout fix in fiield metadata form
+
+### Other
+
+- Remove SVG support from menu icon upload restrictions
+- Update workspace avatar styles to handle missing images across themes
+- Enhance CreateModule and AppSidebar components with menu icon lightbox and workspace avatar support
+- Add dark theme styles for datasource introspection components
+- Revert "fixed column handling for table in dashboard"
+- Revert "feat: enable support for multiple saved filters in SolidGlobalSearchE…"
+- bug fix around list ,tree,card,kanban views header button visibility
+- missed out grid class in place for settings checkbox in fieldType
+- fixed column handling for table
+
+## [0.1.16] - 2026-08-28
+
+### Added
+
+- implement dark theme styles for workflow editor components
+- add hasAnyActiveFilters prop to various components for filter management
+- add error message for unsupported media extensions and enhance media type handling
+
+### Fixed
+
+- prevent duplicate session cleared event emission on logout
+- apply stored theme before rendering in SolidLoadingState component
+- adjust font weights in global search filter overlay for consistency
+- update global search filter overlay UI for improved styling and structure
+- show direct recover action on archived cards
+
+### Changed
+
+- optimize signOut function and remove unnecessary loading spinner in AuthLayout
+- streamline filter handling in SolidChatterHeader and update active filter styles
+
+### Other
+
+- adjust CSS for better responsiveness and readability in various components
+- tree-view many-to-one column click action now follows recordClickAction viewmode
+- reverted tailwind generated file
+- cogwheel layout panel position issue
+- primereact css and icons dependancies removed
+
+## [0.1.16-beta.1] - 2026-08-25
+
+### Fixed
+
+- prevent duplicate session cleared event emission on logout
+- apply stored theme before rendering in SolidLoadingState component
+- show direct recover action on archived cards
+
+### Changed
+
+- optimize signOut function and remove unnecessary loading spinner in AuthLayout
+
+### Other
+
+- adjust CSS for better responsiveness and readability in various components
+- tree-view many-to-one column click action now follows recordClickAction viewmode
+
+## [0.1.16-beta.0] - 2026-08-21
+
+### Added
+
+- implement dark theme styles for workflow editor components
+- add hasAnyActiveFilters prop to various components for filter management
+- add error message for unsupported media extensions and enhance media type handling
+
+### Fixed
+
+- adjust font weights in global search filter overlay for consistency
+- update global search filter overlay UI for improved styling and structure
+
+### Changed
+
+- streamline filter handling in SolidChatterHeader and update active filter styles
+
+### Other
+
+- reverted tailwind generated file
+- cogwheel layout panel position issue
+- primereact css and icons dependancies removed
+
+## [0.1.15] - 2026-08-20
+
+### Added
+
+- enhance media file type handling with dynamic configuration support
+- sync form state with API response after save to prevent stale values
+- add responsive basis utilities to Tailwind safelist for dynamic layouts
+- add isInitialLoad flag to SolidLoadList and SolidBeforeListDataLoad types; enhance filter handling in SolidGlobalSearchElement and SolidListView
+- add saved filter properties to SolidCardView and SolidKanbanView
+
+### Fixed
+
+- many-to-one link in listview now follows viewmode set in settings
+- adjust line height for header list items in globals.css
+- correct class name for search overlay panel and remove unnecessary styles
+- update error handling and improve UI label for column selector
+
+### Changed
+
+- remove unused mimeType property from MediaConfig type
+- streamline media extension handling in DropzonePlaceholder and helpers
+- remove unused defined filter logic and related styles from global search and list view components
+- simplify PDFViewer by removing blob URL handling and using direct iframe rendering
+
+### Maintenance
+
+- widen reusable utility safelist in current config
+
+### Other
+
+- fixed formatting
+- taking impact of mediaAllowedExtensions in core-ui
+- - form viewmode behaviour after save - kanban and card view edit row action
+- added form viewmode widget
+- admin header actions visibilityu issues
+- update styles for search overlay sections and add separator
+- clean up in global search element
+- changes around global search element css
+- Refactor SolidCardView and SolidKanbanView to support imperative handles and enhance filter management; add registry for card and kanban views
+- Enhance Kanban and Card components with custom button handling and context menu integration
+- Refactor SolidTreeView to resolve saved filter variables and add new helper functions
+- resolved on form header
+- visibility on kanban, card and tree view
+- visibility issues resolved
+- show theme toggle
+- toggle issue in all views resolved
+- search toggle issue
+- remove minimal theme
+- theme registry name
+- light minimal
+- disable pointer events also
+- taking disabled impact if workflowFieldUpdateEnabled is false and change ui-ux
+- some ui bug
+- ui fixes
+- added modern theme
+- setting result tab inline row
+- some spacing issue'
+- enterprise theme added
+- dark theme issues
+- solid theme provider changes
+
+## [0.1.15-beta.0] - 2026-08-20
+
+## [0.1.14] - 2026-08-20
+
+### Added
+
+- add MediaUploadPage for uploading media files and integrate with existing components
+- enhance PDFViewer with zoom and rotation controls, improve error handling
+- add error boundary for PDF rendering in PDFViewer component
+- replace default buttons with SolidButton in PDFViewer component
+- add pdfjs-dist dependency and update PDFViewer worker configuration
+- streamline saved filter application and renaming process in SolidGlobalSearchElement
+- update savedFilters state management to handle renaming and immediate application of custom filters
+- update mentionable users query and refactor related hooks
+- add defined filters support in SolidGlobalSearchElement and SolidListView
+- implement saveParentRelationField handling for improved embedded relation management
+- add support for embedded relation save and new functionality across form components
+- add support for error and finally nodes in workflow definitions and editors
+- enhance workflow node editor with topology summary and improved slot display
+- enhance workflow definition editor and list functionality
+- enhance popup functionality with dynamic buttons and event handling
+- add workflow field normalization for form data handling
+- enhance archived records handling and pagination in workflow execution
+- enhance workflow expression suggestions to include secrets
+- add Workflow Execution Detail page and related routes
+- update datasource introspection and core types
+- add WorkflowAddNodeDialog for node insertion in workflow editor
+- enhance workflow node editor with improved layout and new child slot handling
+- add workflow definition list and editor pages
+- update solid-tailwind-generated.css and solid-core.d.ts
+
+### Fixed
+
+- adjust min-height for PDFViewer component to improve layout consistency
+- correct import paths for PublishStatusColumnDefaults in multiple components
+- update mention suggestions handling to use response data
+- update CSS variables for consistent styling across components
+- prevent legacy draft/publish columns from being incorrectly treated as superclass-handled in introspection
+- update container class to enforce width and max-width with important flag
+
+### Changed
+
+- remove react-pdf dependency and implement native PDF rendering
+- replace radio dot with icon in SolidDropdownMenu and clean up CSS
+- remove mobile search element from SolidListView
+- simplify save condition for existing records in SolidFormActionHeader
+- extract date format resolution into a separate function for better readability
+- update WorkflowNodeChildSlotDefinition to use 'case-collection' and add layout option
+
+### Other
+
+- ui fixes
+- Refactor MediaCardWidget to use new MediaFileSizeWidget for file size formatting
+- update media upload styles and improve dropzone functionality
+- handle change password and version info
+- tree view sorting removed
+- update defined filter badge styles for improved layout and interaction
+- use single state and make it hidden only for the mobile
+- cleanup global search mobile view
+- Implement draft/publish workflow with version history integration and confirmation dialog; refactor SolidFormView to utilize new workflow hooks
+- Enhance media field components with error handling and toast notifications for delete and replace actions; update font sizes in CSS for better readability
+- changes
+- Refactor SolidFormView and SolidVersionHistory components to simplify workflow status handling and remove unused code
+- Prevent default behavior on mouse down for custom and grouping filter buttons
+- Remove SolidLocale status banner and associated styles
+- update WorkflowDefinitionListPage styles for improved layout and readability
+- row click action renamed to record click action and take impact in Card, Kanban and tree
+- Enhance SolidLocale component with information card and placeholder
+- some changes
+- remove unnecessary code
+- some issues around some import in card and kanban and tree view lightbox added for media and sidebar menu search issue resolved
+
 ## [0.1.14-beta.13] - 2026-08-19
 
 ### Added

@@ -61,6 +61,7 @@ export const SolidListViewConfigure = (
         setDialogVisible,
         setShowSaveFilterPopup,
         filters,
+        hasAnyActiveFilters,
         handleFetchUpdatedRecords,
         setRecoverDialogVisible,
 
@@ -265,7 +266,7 @@ export const SolidListViewConfigure = (
                                         onActionComplete={() => setIsCogMenuOpen(false)}
                                     />
                                 ))}
-                            <div className="lg:hidden flex flex-col gap-1">
+                            <div className="max-lg:flex lg:hidden flex-col gap-1">
                                 {mobileOnlyHeaderButtons
                                     ?.map((button: any, index: number) => (
                                         <SolidListViewHeaderContextMenuButton
@@ -305,8 +306,7 @@ export const SolidListViewConfigure = (
 
                             {(
                                 isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
-                                isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
-                                true
+                                hasAnyActiveFilters && isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`)
                             ) && <SolidDropdownMenuSeparator />}
 
                             {isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) && (
@@ -315,7 +315,7 @@ export const SolidListViewConfigure = (
                                         <SlidersHorizontal size={14} className="solid-header-action-button-icon" />
                                         <span className="solid-header-action-button-label">Layout</span>
                                     </SolidDropdownMenuSubTrigger>
-                                    <SolidDropdownMenuSubContent className="customize-layout-panel">
+                                    <SolidDropdownMenuSubContent className="customize-layout-panel" side="left">
                                         {showSwitchType && (
                                             <>
                                                 <SolidDropdownMenuLabel>Switch Type</SolidDropdownMenuLabel>
@@ -350,7 +350,7 @@ export const SolidListViewConfigure = (
                                     </SolidDropdownMenuSubContent>
                                 </SolidDropdownMenuSub>
                             )}
-                            {isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) && (
+                            {hasAnyActiveFilters && isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) && (
                                 <SolidDropdownMenuItem
                                     className="solid-header-dropdown-item"
                                     onSelect={() => {

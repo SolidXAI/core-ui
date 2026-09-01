@@ -25,7 +25,7 @@ export const SolidBooleanFilterElement = ({ value, updateInputs, index, fieldMet
             completeMethod={selectionStaticSearch}
             onChange={(e) => updateInputs(index, e.value)}
             className="w-full"
-            inputClassName="w-full p-inputtext-sm solid-filter-compact-control"
+            inputClassName="w-full solid-filter-compact-control"
         />
     )
 }
