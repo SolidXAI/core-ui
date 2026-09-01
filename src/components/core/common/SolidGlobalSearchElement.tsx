@@ -1,9 +1,11 @@
 import React, { forwardRef, useCallback, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { toTitleCase } from "../../../helpers/helpers";
 import {clearFilterObjectFromLocalStorage,getFilterObjectFromLocalStorage,setFilterObjectToLocalStorage,
 } from "./globalSearchPersistence";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
+import { showToast } from "../../../redux/features/toastSlice";
 import qs from "qs";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
@@ -572,6 +574,7 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
+    const dispatch = useDispatch();
     type OverlayOption =
         | { id: string; kind: "field"; field: any }
         | { id: string; kind: "predefined"; predefined: any }
@@ -1386,15 +1389,29 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     };
 
     const deleteSavedFilter = async () => {
-        // delte the saved filter with id 
-        await deleteEntity(savedFilterTobeDeleted);
-        if (String(savedFilterTobeDeleted) === String(currentSavedFilterData?.id)) {
-            clearActiveSavedFilter();
+        try {
+            await deleteEntity(savedFilterTobeDeleted).unwrap();
+            dispatch(showToast({
+                severity: "success",
+                summary: ERROR_MESSAGES.DELETED,
+                detail: ERROR_MESSAGES.ENTITY_DELETE,
+            }));
+
+            if (String(savedFilterTobeDeleted) === String(currentSavedFilterData?.id)) {
+                clearActiveSavedFilter();
+            }
+            setIsDeleteSQDialogVisible(false);
+            setTimeout(() => {
+                setSavedFilterFetchDataRefreshKey(prev => prev + 1)
+            }, 500)
+        } catch (error: any) {
+            const errorMessage = error?.data?.message || error?.data?.error || error?.message || ERROR_MESSAGES.SOMETHING_WRONG;
+            dispatch(showToast({
+                severity: "error",
+                summary: ERROR_MESSAGES.DELETE_FAIELD,
+                detail: errorMessage,
+            }));
         }
-        setIsDeleteSQDialogVisible(false);
-        setTimeout(() => {
-            setSavedFilterFetchDataRefreshKey(prev => prev + 1)
-        }, 500)
     }
     const handleSaveFilter = async (formValues: any) => {
         setShowSaveFilterPopup(false)
@@ -1411,6 +1428,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 formData.append("userId", user?.id);
 
                 await updateEntity({ id: +formValues.id, data: formData }).unwrap();
+                dispatch(showToast({
+                    severity: "success",
+                    summary: ERROR_MESSAGES.SAVED_FILTER_UPDATED,
+                    detail: ERROR_MESSAGES.SAVED_FILTER_UPDATED_SUCCESSFULLY,
+                }));
 
                 setSearchChips([]);
                 setSearchFilter(null);
@@ -1441,6 +1463,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 formData.append("isPrivate", formValues.isPrivate);
                 formData.append("userId", user?.id);
                 const result = await createEntity(formData).unwrap();
+                dispatch(showToast({
+                    severity: "success",
+                    summary: ERROR_MESSAGES.SAVED_FILTER_CREATED,
+                    detail: ERROR_MESSAGES.SAVED_FILTER_CREATED_SUCCESSFULLY,
+                }));
 
                 setSearchChips([]);
                 setSearchFilter(null);
@@ -1459,8 +1486,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 setHasSearched(true);
                 setRefreshKey((prev) => prev + 1);
             }
-        } catch (error) {
-
+        } catch (error: any) {
+            const errorMessage = error?.data?.message || error?.data?.error || error?.message || ERROR_MESSAGES.SOMETHING_WRONG;
+            dispatch(showToast({
+                severity: "error",
+                summary: ERROR_MESSAGES.ERROR,
+                detail: errorMessage,
+            }));
         }
     }
 
