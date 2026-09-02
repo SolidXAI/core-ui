@@ -3980,6 +3980,37 @@ html.dark .solid-header-cog-trigger:hover,
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 90%, transparent);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  position: relative;
+}
+
+.solid-data-table-column-resizer {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 8px;
+  z-index: 2;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.solid-data-table-column-resizer::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: 3px;
+  width: 1px;
+  background: color-mix(in srgb, var(--border) 72%, transparent);
+  opacity: 0.7;
+  transition: background-color 120ms ease, opacity 120ms ease;
+}
+
+.solid-data-table-column-resizer:hover::after,
+.solid-data-table-column-resizer:focus-visible::after {
+  width: 1px;
+  opacity: 1;
+  background: var(--muted-foreground);
 }
 
 .solid-data-table-td {
