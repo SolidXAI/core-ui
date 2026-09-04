@@ -1600,23 +1600,24 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     detail: ERROR_MESSAGES.SAVED_FILTER_CREATED_SUCCESSFULLY,
                 }));
 
-                if (!allowMultipleSavedFilters) {
-                    setSearchChips([]);
-                    setSearchFilter(null);
-                    setFilterRules(initialState);
-                    setCustomFilter(null)
-                    setPredefinedSearchChip(null);
-                    setPredefinedSearchBaseFilter(null);
-                }
+                setSearchChips([]);
+                setSearchFilter(null);
+                setFilterRules(initialState);
+                setCustomFilter(null)
+                setPredefinedSearchChip(null);
+                setPredefinedSearchBaseFilter(null);
                 // The custom filter just became this saved filter — apply it, and
                 // seed the cached list with it, immediately (see rename branch above).
+                // A newly created saved filter replaces any other active filters/saved
+                // filters rather than joining them — only applying an existing saved
+                // filter is additive when allowMultipleSavedFilters is on.
                 const savedFilterRecord = { id: result.data.id, name: formValues.name, isPrivate: formValues.isPrivate, filterQueryJson: JSON.stringify(filterJson, null, 2) };
                 setSavedFilters((prev) => [savedFilterRecord, ...prev]);
                 setCurrentSavedFilterData(savedFilterRecord);
                 setCurrentSavedFilterQuery(filterJson);
                 setCurrentSavedFilterVariables({});
                 if (allowMultipleSavedFilters) {
-                    const nextItems = [...activeSavedFilters, { data: savedFilterRecord, query: filterJson, variables: {} }];
+                    const nextItems = [{ data: savedFilterRecord, query: filterJson, variables: {} }];
                     setActiveSavedFilters(nextItems);
                     persistActiveSavedFilters(nextItems);
                 } else {
