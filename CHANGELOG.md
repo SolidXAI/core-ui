@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.17-beta.2] - 2026-09-04
+
+### Other
+
+- Refactor theme styles for solid-light-enterprise and solid-light-modern
+
 ## [0.1.17-beta.1] - 2026-09-04
 
 ### Added
