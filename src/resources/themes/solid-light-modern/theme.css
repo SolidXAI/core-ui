@@ -212,9 +212,9 @@ aside.solid-sidebar,
   }
 
   .solid-list-surface,
-.solid-form-section,
-.solid-card-view-card,
-.solid-kanban-card {
+  .solid-form-section,
+  .solid-card-view-card,
+  .solid-kanban-card {
     background: #f6efe2;
     border: 1px solid var(--solid-border-default);
     border-radius: 20px;
@@ -341,7 +341,7 @@ aside.solid-sidebar,
   }
 
   .custom-add-button,
-.custom-add-button.solid-btn {
+  .custom-add-button.solid-btn {
     border: 1px solid var(--solid-border-default) !important;
     background: #f3ebdd !important;
     background-color: #f3ebdd !important;
@@ -351,7 +351,7 @@ aside.solid-sidebar,
   }
 
   .custom-add-button:hover:not(:disabled),
-.custom-add-button.solid-btn:hover:not(:disabled) {
+  .custom-add-button.solid-btn:hover:not(:disabled) {
     background: #ede2d1 !important;
     background-color: #ede2d1 !important;
     border-color: var(--solid-border-default) !important;
@@ -359,7 +359,7 @@ aside.solid-sidebar,
   }
 
   .solid-list-toolbar .solid-btn,
-.solid-form-toolbar-actions .solid-btn {
+  .solid-form-toolbar-actions .solid-btn {
     height: 38px;
     border-radius: 10px;
     font-size: 12.5px;
@@ -609,7 +609,7 @@ aside.solid-sidebar,
   }
 
   .solid-list-page-wrapper .solid-datatable-wrapper > .solid-data-table-root,
-.solid-list-page-wrapper .solid-datatable-wrapper > div:first-child {
+  .solid-list-page-wrapper .solid-datatable-wrapper > div:first-child {
     margin-top: 10px;
     margin-bottom: 10px;
   }
@@ -668,8 +668,8 @@ aside.solid-sidebar,
   }
 
   .solid-data-table-head .solid-tree-sticky-cell,
-.solid-data-table-head .solid-tree-sticky-cell-left,
-.solid-data-table-head .solid-tree-sticky-cell-right {
+  .solid-data-table-head .solid-tree-sticky-cell-left,
+  .solid-data-table-head .solid-tree-sticky-cell-right {
     background: #d7cebd !important;
   }
 
@@ -735,14 +735,14 @@ aside.solid-sidebar,
   }
 
   .solid-paginator-btn,
-.solid-paginator-select {
+  .solid-paginator-select {
     background: #f3ebdd !important;
     background-color: #f3ebdd !important;
     border-color: var(--solid-border-default) !important;
   }
 
   .solid-row-menu-trigger,
-.solid-tree-row-menu-trigger {
+  .solid-tree-row-menu-trigger {
     background: #f3ebdd !important;
     background-color: #f3ebdd !important;
     border-color: var(--solid-border-default) !important;
@@ -751,7 +751,7 @@ aside.solid-sidebar,
   }
 
   .solid-row-menu-trigger:hover,
-.solid-tree-row-menu-trigger:hover {
+  .solid-tree-row-menu-trigger:hover {
     background: #ede2d1 !important;
     background-color: #ede2d1 !important;
     color: #2e2e2e !important;
@@ -796,7 +796,7 @@ aside.solid-sidebar,
   }
 
   .solid-form-content > .flex,
-.solid-form-content > .solid-layout-accordion {
+  .solid-form-content > .solid-layout-accordion {
     background: rgba(247, 239, 226, 0.98);
     border: 1px solid var(--solid-border-default);
     border-radius: 16px;

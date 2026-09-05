@@ -161,9 +161,9 @@ aside.solid-sidebar,
   }
 
   .solid-list-surface,
-.solid-form-section,
-.solid-card-view-card,
-.solid-kanban-card {
+  .solid-form-section,
+  .solid-card-view-card,
+  .solid-kanban-card {
     background: #2c3448;
     border: 1px solid rgba(65, 76, 104, 0.7);
     border-radius: 20px;
@@ -237,7 +237,7 @@ aside.solid-sidebar,
   }
 
   .solid-list-toolbar .solid-btn,
-.solid-form-toolbar-actions .solid-btn {
+  .solid-form-toolbar-actions .solid-btn {
     height: 40px;
     border-radius: 12px;
     font-size: 12px;
@@ -424,7 +424,7 @@ aside.solid-sidebar,
   }
 
   .solid-form-content > .flex,
-.solid-form-content > .solid-layout-accordion {
+  .solid-form-content > .solid-layout-accordion {
     background: rgba(44, 52, 72, 0.94);
     border: 1px solid rgba(65, 76, 104, 0.56);
     border-radius: 16px;

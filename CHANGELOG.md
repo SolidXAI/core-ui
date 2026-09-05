@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.17-beta.2] - 2026-09-04
+
+### Other
+
+- Refactor theme styles for solid-light-enterprise and solid-light-modern
+
+## [0.1.17-beta.1] - 2026-09-04
+
+### Added
+
+- add support for retrieving and applying multiple saved filters in SolidTreeView
+- enable support for multiple saved filter items in SolidCardView and SolidKanbanView
+- add toast notifications for saved filter actions and update error messages
+
+### Fixed
+
+- ensure saved filter replaces active filters when multiple saved filters are not allowed
+- update logo positioning and sizing for improved layout and responsiveness
+
+### Other
+
+- Restore multiple saved filters support (revert revert of #210)
+- Fix vertical alignment in datasource introspection table cells
+- Enhance dark theme support for SolidJsonEditor with improved styling
+
 ## [0.1.17-beta.0] - 2026-08-31
 
 ### Added

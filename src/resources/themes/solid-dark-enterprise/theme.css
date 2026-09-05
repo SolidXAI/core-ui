@@ -284,7 +284,7 @@ aside.solid-sidebar,
   }
 
   .solid-form-section .grid > [class*="col"] > div,
-.solid-form-content .grid > [class*="col"] > div {
+  .solid-form-content .grid > [class*="col"] > div {
     padding: 0.9rem 1rem;
     border-radius: 12px;
     background: linear-gradient(180deg, rgba(20, 30, 44, 0.9), rgba(16, 25, 37, 0.92));
@@ -419,12 +419,12 @@ aside.solid-sidebar,
   }
 
   .solid-header-cog-trigger,
-.layout-topbar button {
+  .layout-topbar button {
     border-radius: 10px;
   }
 
   .solid-header-cog-trigger:hover,
-.layout-topbar button:hover {
+  .layout-topbar button:hover {
     background: rgba(110, 168, 254, 0.12);
   }
 
