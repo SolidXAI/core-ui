@@ -4,8 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { FileSpreadsheet, FileText, Trash2, Upload } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { showToast } from '../../../../redux/features/toastSlice';
-import styles from './SolidImport.module.css'
-import { DocumentSvg } from './DocumentSvg';
+import './solid-import.css';import { DocumentSvg } from './DocumentSvg';
 import { useCreateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { SolidButton } from '../../../shad-cn-ui';
@@ -70,7 +69,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
 
     return (
         <div>
-            <div className={styles.SolidImportContextWrapper}>
+            <div className={"solid-import-solid-import-context-wrapper"}>
                 <div {...rootProps}>
                     <input {...getInputProps()} />
                     <div className="solid-import-dropzone-copy">

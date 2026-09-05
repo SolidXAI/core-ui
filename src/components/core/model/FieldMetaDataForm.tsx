@@ -31,7 +31,7 @@ import {
   SolidMessage,
   SolidCodeEditor,
 } from "../../shad-cn-ui";
-import styles from "../form/fields/solidFields.module.css";
+import "../form/fields/solid-fields.css";
 import "./FieldMetaDataForm.css";
 
 
@@ -360,12 +360,12 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
       <div className="">
         <label
           htmlFor="moduleName"
-          className={classNames("form-field-label", styles.fieldLabel)}
+          className={classNames("form-field-label", "solid-field-label")}
         >
           Module
         </label>
         <div className={classNames("mt-2 solid-standard-autocomplete", {
-          [styles.fieldInvalidControl]: Boolean(errors?.moduleName),
+          ["solid-field-invalid-control"]: Boolean(errors?.moduleName),
         })}>
           <SolidAutocomplete
             value={triggerModuleField.selectedItem}
@@ -378,19 +378,19 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
           />
         </div>
         {errors?.moduleName && (
-          <p className={styles.fieldError}>{errors.moduleName}</p>
+          <p className={"solid-field-error"}>{errors.moduleName}</p>
         )}
       </div>
 
       <div className="">
         <label
           htmlFor="modelName"
-          className={classNames("form-field-label", styles.fieldLabel)}
+          className={classNames("form-field-label", "solid-field-label")}
         >
           Model
         </label>
         <div className={classNames("mt-2 solid-standard-autocomplete", {
-          [styles.fieldInvalidControl]: Boolean(errors?.modelName),
+          ["solid-field-invalid-control"]: Boolean(errors?.modelName),
         })}>
           <SolidAutocomplete
             value={triggerModelField.selectedItem}
@@ -403,7 +403,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
           />
         </div>
         {errors?.modelName && (
-          <p className={styles.fieldError}>{errors.modelName}</p>
+          <p className={"solid-field-error"}>{errors.modelName}</p>
         )}
       </div>
 
@@ -412,7 +412,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
       <div>
         <label
           htmlFor="operations"
-          className={classNames("form-field-label", styles.fieldLabel)}
+          className={classNames("form-field-label", "solid-field-label")}
         >
           Operations
         </label>
@@ -432,12 +432,12 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
             }
             placeholder="Select operations"
             className={classNames("solid-standard-autocomplete max-w-16rem", {
-              [styles.fieldInvalidControl]: Boolean(errors?.operations),
+              ["solid-field-invalid-control"]: Boolean(errors?.operations),
             })}
           />
         </div>
         {errors?.operations && (
-          <p className={styles.fieldError}>{errors.operations}</p>
+          <p className={"solid-field-error"}>{errors.operations}</p>
         )}
       </div>
 
@@ -1921,7 +1921,7 @@ const FieldMetaDataForm = ({
                       <div className="flex flex-wrap -mx-2 -mt-2">
                         {currentFields.includes("displayName") && (
                           <div className="field mt-2 min-w-0 basis-full px-2 pt-2 md:basis-1/2">
-                            <label htmlFor="displayName" className={classNames("form-field-label", styles.fieldLabel)}>
+                            <label htmlFor="displayName" className={classNames("form-field-label", "solid-field-label")}>
                               Display Name
                             </label>
                             <SolidInput
@@ -1938,19 +1938,19 @@ const FieldMetaDataForm = ({
                                 }
                               }}
                               value={formik.values.displayName}
-                              className={classNames(styles.fieldInput, {
+                              className={classNames("solid-field-input", {
                                 "is-invalid": isFormFieldValid(formik, "displayName"),
                               })}
                             />
                             {isFormFieldValid(formik, "displayName") && (
-                              <p className={styles.fieldError}>{formik?.errors?.displayName?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.displayName?.toString()}</p>
                             )}
                           </div>
                         )}
 
                         {currentFields.includes("name") && (
                           <div className="field mt-2 min-w-0 basis-full px-2 pt-2 md:mt-0 md:basis-1/2">
-                            <label htmlFor="name" className={classNames("form-field-label", styles.fieldLabel)}>
+                            <label htmlFor="name" className={classNames("form-field-label", "solid-field-label")}>
                               Name
                             </label>
                             <SolidInput
@@ -1960,18 +1960,18 @@ const FieldMetaDataForm = ({
                               name="name"
                               onChange={formik.handleChange}
                               value={formik.values.name}
-                              className={classNames(styles.fieldInput, {
+                              className={classNames("solid-field-input", {
                                 "is-invalid": isFormFieldValid(formik, "name"),
                               })}
                             />
                             {isFormFieldValid(formik, "name") && (
-                              <p className={styles.fieldError}>{formik?.errors?.name?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.name?.toString()}</p>
                             )}
                           </div>
                         )}
                         {currentFields.includes("description") && (
                           <div className="field mt-2 min-w-0 basis-full px-2 pt-2 md:mt-2 md:basis-1/2">
-                            <label htmlFor="description" className={classNames("form-field-label", styles.fieldLabel)}>
+                            <label htmlFor="description" className={classNames("form-field-label", "solid-field-label")}>
                               Description
                             </label>
                             <SolidTextarea
@@ -1981,12 +1981,12 @@ const FieldMetaDataForm = ({
                               onChange={formik.handleChange}
                               value={formik.values.description}
                               rows={5}
-                              className={classNames(styles.fieldTextarea, {
+                              className={classNames("solid-field-textarea", {
                                 "is-invalid": isFormFieldValid(formik, "description"),
                               })}
                             />
                             {isFormFieldValid(formik, "description") && (
-                              <p className={styles.fieldError}>{formik?.errors?.description?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.description?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -2016,7 +2016,7 @@ const FieldMetaDataForm = ({
                             </div>
                             {showColumnName && (
                               <div className="field mt-4 w-full gap-2">
-                                <label htmlFor="columnName" className={classNames("form-field-label", styles.fieldLabel)}>
+                                <label htmlFor="columnName" className={classNames("form-field-label", "solid-field-label")}>
                                   Column Name
                                 </label>
                                 <SolidInput
@@ -2026,12 +2026,12 @@ const FieldMetaDataForm = ({
                                   name="columnName"
                                   onChange={formik.handleChange}
                                   value={formik.values.columnName}
-                                  className={classNames(styles.fieldInput, {
+                                  className={classNames("solid-field-input", {
                                     "is-invalid": isFormFieldValid(formik, "columnName"),
                                   })}
                                 />
                                 {isFormFieldValid(formik, "columnName") && (
-                                  <p className={styles.fieldError}>{formik?.errors?.columnName?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.columnName?.toString()}</p>
                                 )}
                               </div>
                             )}
@@ -2054,10 +2054,10 @@ const FieldMetaDataForm = ({
                         <div className="flex flex-wrap -mx-2 -mt-2">
                           {currentFields.includes("length") && (
                             <div className="field flex w-1/2 flex-col gap-2 px-2 pt-2">
-                              <label htmlFor="length" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="length" className={classNames("form-field-label", "solid-field-label")}>
                                 Length
                               </label>
-                              <div className={styles.fieldNumberWrapper}>
+                              <div className={"solid-field-number-wrapper"}>
                                 <SolidNumberInput
                                   id="length"
                                   name="length"
@@ -2072,7 +2072,7 @@ const FieldMetaDataForm = ({
                                 />
                               </div>
                               {isFormFieldValid(formik, "length") && (
-                                <p className={styles.fieldError}>{formik?.errors?.length?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.length?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2083,7 +2083,7 @@ const FieldMetaDataForm = ({
                               <label
                                 style={{ marginBottom: "0px" }}
                                 htmlFor="defaultValue"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Default Value
                               </label>
@@ -2104,7 +2104,7 @@ const FieldMetaDataForm = ({
                               <label
                                 style={{ marginBottom: "0px" }}
                                 htmlFor="defaultValue"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Default Value
                               </label>
@@ -2116,7 +2116,7 @@ const FieldMetaDataForm = ({
                                   name="defaultValue"
                                   onChange={formik.handleChange}
                                   value={formik.values.defaultValue}
-                                  className={classNames(styles.fieldInput, {
+                                  className={classNames("solid-field-input", {
                                     "is-invalid": isFormFieldValid(
                                       formik,
                                       "defaultValue"
@@ -2125,7 +2125,7 @@ const FieldMetaDataForm = ({
                                 />
                               }
                               {(selectedTypeValue === "float" || selectedTypeValue === "decimal") &&
-                                <div className={styles.fieldNumberWrapper}>
+                                <div className={"solid-field-number-wrapper"}>
                                   <SolidNumberInput
                                     id="defaultValue"
                                     name="defaultValue"
@@ -2139,7 +2139,7 @@ const FieldMetaDataForm = ({
                                 </div>
                               }
                               {(selectedTypeValue === "int" || selectedTypeValue === "bigint") &&
-                                <div className={styles.fieldNumberWrapper}>
+                                <div className={"solid-field-number-wrapper"}>
                                   <SolidNumberInput
                                     id="defaultValue"
                                     name="defaultValue"
@@ -2179,7 +2179,7 @@ const FieldMetaDataForm = ({
                                 );
                               })()}
                               {isFormFieldValid(formik, "defaultValue") && (
-                                <p className={styles.fieldError}>{formik?.errors?.defaultValue?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.defaultValue?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2188,13 +2188,13 @@ const FieldMetaDataForm = ({
                             <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="mediaTypes"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Media Type
                               </label>
                               <div
                                 className={classNames("solid-standard-autocomplete", {
-                                  [styles.fieldInvalidControl]: isFormFieldValid(formik, "mediaTypes"),
+                                  ["solid-field-invalid-control"]: isFormFieldValid(formik, "mediaTypes"),
                                 })}
                               >
                                 <SolidAutocomplete
@@ -2223,7 +2223,7 @@ const FieldMetaDataForm = ({
                                 />
                               </div>
                               {isFormFieldValid(formik, "mediaTypes") && (
-                                <p className={styles.fieldError}>{formik?.errors?.mediaTypes?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.mediaTypes?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2231,11 +2231,11 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:mt-0 md:w-1/2">
                               <label
                                 htmlFor="mediaMaxSizeKb"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Media Max Size (Mb)
                               </label>
-                              <div className={styles.fieldNumberWrapper}>
+                              <div className={"solid-field-number-wrapper"}>
                                 <SolidNumberInput
                                   id="mediaMaxSizeKb"
                                   name="mediaMaxSizeKb"
@@ -2251,7 +2251,7 @@ const FieldMetaDataForm = ({
                               </div>
 
                               {isFormFieldValid(formik, "mediaMaxSizeKb") && (
-                                <p className={styles.fieldError}>{formik?.errors?.mediaMaxSizeKb?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.mediaMaxSizeKb?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2259,13 +2259,13 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="mediaAllowedExtensions"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Allowed Extensions
                               </label>
                               <div
                                 className={classNames("solid-standard-autocomplete", {
-                                  [styles.fieldInvalidControl]: isFormFieldValid(formik, "mediaAllowedExtensions"),
+                                  ["solid-field-invalid-control"]: isFormFieldValid(formik, "mediaAllowedExtensions"),
                                 })}
                               >
                                 <SolidAutocomplete
@@ -2286,9 +2286,9 @@ const FieldMetaDataForm = ({
                                   className="w-full"
                                 />
                               </div>
-                              <p className={styles.fieldHelper}>Optional. Pick specific extensions from the selected media types.</p>
+                              <p className={"solid-field-helper"}>Optional. Pick specific extensions from the selected media types.</p>
                               {isFormFieldValid(formik, "mediaAllowedExtensions") && (
-                                <p className={styles.fieldError}>{formik?.errors?.mediaAllowedExtensions?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.mediaAllowedExtensions?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2296,13 +2296,13 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="mediaStorageProviderId"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Media  Storage Provider
                               </label>
 
                               <div className={classNames("solid-standard-autocomplete", {
-                                [styles.fieldInvalidControl]: isFormFieldValid(formik, "mediaStorageProvider"),
+                                ["solid-field-invalid-control"]: isFormFieldValid(formik, "mediaStorageProvider"),
                               })}>
                                 <SolidAutocomplete
                                   value={mediaStorageProviderField.selectedItem}
@@ -2319,7 +2319,7 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "mediaStorageProvider"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.mediaStorageProviderId?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.mediaStorageProviderId?.toString()}</p>
                                 )}
                             </div>
                           )}
@@ -2328,7 +2328,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="mediaEmbedded"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Media Embedded
                               </label>
@@ -2359,7 +2359,7 @@ const FieldMetaDataForm = ({
                                 })}
                               />
                               {isFormFieldValid(formik, "mediaEmbedded") && (
-                                <p className={styles.fieldError}>{formik?.errors?.mediaEmbedded?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.mediaEmbedded?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2391,7 +2391,7 @@ const FieldMetaDataForm = ({
                               <label
                                 style={{ marginBottom: "0px" }}
                                 htmlFor="relationType"
-                                className={classNames("form-field-label md:shrink-0", styles.fieldLabel)}
+                                className={classNames("form-field-label md:shrink-0", "solid-field-label")}
                               >
                                 Relation Type
                               </label>
@@ -2410,7 +2410,7 @@ const FieldMetaDataForm = ({
                               />
 
                               {isFormFieldValid(formik, "relationType") && (
-                                <p className={styles.fieldError}>{formik?.errors?.relationType?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.relationType?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2418,7 +2418,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationCascade"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Relation Cascade
                               </label>
@@ -2442,7 +2442,7 @@ const FieldMetaDataForm = ({
                                 })}
                               />
                               {isFormFieldValid(formik, "relationCascade") && (
-                                <p className={styles.fieldError}>{formik?.errors?.relationCascade?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.relationCascade?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2451,13 +2451,13 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationModelModuleName"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Co-Module Name
                               </label>
 
                               <div className={classNames("solid-standard-autocomplete", {
-                                [styles.fieldInvalidControl]: isFormFieldValid(
+                                ["solid-field-invalid-control"]: isFormFieldValid(
                                   formik,
                                   "relationModelModuleName"
                                 ),
@@ -2498,7 +2498,7 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "relationModelModuleName"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.relationModelModuleName?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.relationModelModuleName?.toString()}</p>
                                 )}
                             </div>
                           )}
@@ -2509,13 +2509,13 @@ const FieldMetaDataForm = ({
                               <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                 <label
                                   htmlFor="relationCoModelSingularName"
-                                  className={classNames("form-field-label", styles.fieldLabel)}
+                                  className={classNames("form-field-label", "solid-field-label")}
                                 >
                                   Co-Model Name
                                 </label>
 
                                 <div className={classNames("solid-standard-autocomplete", {
-                                  [styles.fieldInvalidControl]: isFormFieldValid(
+                                  ["solid-field-invalid-control"]: isFormFieldValid(
                                     formik,
                                     "relationCoModelSingularName"
                                   ),
@@ -2535,7 +2535,7 @@ const FieldMetaDataForm = ({
                                   formik,
                                   "relationCoModelSingularName"
                                 ) && (
-                                    <p className={styles.fieldError}>{formik?.errors?.relationCoModelSingularName?.toString()}</p>
+                                    <p className={"solid-field-error"}>{formik?.errors?.relationCoModelSingularName?.toString()}</p>
                                   )}
                                 {formik.values.relationType === "one-to-many" &&
                                   <p className="fieldSubTitle">This is the child model.</p>
@@ -2549,7 +2549,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationCoModelColumnName"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Relation Co-Model Column Name
                               </label>
@@ -2560,7 +2560,7 @@ const FieldMetaDataForm = ({
                                 onChange={formik.handleChange}
                                 disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationCoModelColumnName}
-                                className={classNames(styles.fieldInput, {
+                                className={classNames("solid-field-input", {
                                   "is-invalid": isFormFieldValid(
                                     formik,
                                     "relationCoModelColumnName"
@@ -2568,7 +2568,7 @@ const FieldMetaDataForm = ({
                                 })}
                               />
                               {isFormFieldValid(formik, "relationCoModelColumnName") && (
-                                <p className={styles.fieldError}>{formik?.errors?.relationCoModelColumnName?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.relationCoModelColumnName?.toString()}</p>
                               )}
                               <p className="fieldSubTitle">Allows you to control the column name of the foreign key. Eg. when adding a country field to state model, by default foreign key column in the state table will be called country_id, use this field to create a foreign key with a different name. </p>
 
@@ -2578,13 +2578,13 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="userKey"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Set User Key
                               </label>
 
                               <div className={classNames("solid-standard-autocomplete", {
-                                [styles.fieldInvalidControl]: isFormFieldValid(
+                                ["solid-field-invalid-control"]: isFormFieldValid(
                                   formik,
                                   "userKey"
                                 ),
@@ -2604,7 +2604,7 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "userKey"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.userKey?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.userKey?.toString()}</p>
                                 )}
                             </div>
                           )}
@@ -2615,7 +2615,7 @@ const FieldMetaDataForm = ({
                               <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                 <label
                                   htmlFor="relationFieldFixedFilter"
-                                  className={classNames("form-field-label", styles.fieldLabel)}
+                                  className={classNames("form-field-label", "solid-field-label")}
                                 >
                                   Relation Field Fixed Filter
                                 </label>
@@ -2627,7 +2627,7 @@ const FieldMetaDataForm = ({
                                   onChange={formik.handleChange}
                                   value={formik.values.relationFieldFixedFilter}
                                   rows={5}
-                                  className={classNames(styles.fieldTextarea, {
+                                  className={classNames("solid-field-textarea", {
                                     "is-invalid": isFormFieldValid(
                                       formik,
                                       "relationFieldFixedFilter"
@@ -2650,7 +2650,7 @@ const FieldMetaDataForm = ({
                                   })}
                                 /> */}
                                 {isFormFieldValid(formik, "relationFieldFixedFilter") && (
-                                  <p className={styles.fieldError}>{formik?.errors?.relationFieldFixedFilter?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.relationFieldFixedFilter?.toString()}</p>
                                 )}
                                 <p className="fieldSubTitle">Many to one fields are rendered as autocomplete dropdown on the SolidX ui. Use the fixed filter to load a pre-filtered set of records from the co-model. Please note user input entered in the autocomplete is used to apply a dynamic filter.</p>
 
@@ -2659,7 +2659,7 @@ const FieldMetaDataForm = ({
 
                           {currentFields.includes("relationCreateInverse") && (
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
-                              <label htmlFor="relationCreateInverse" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="relationCreateInverse" className={classNames("form-field-label", "solid-field-label")}>
                                 Relation Create Inverse
                               </label>
                               <div className="solid-field-checkbox-row">
@@ -2670,10 +2670,10 @@ const FieldMetaDataForm = ({
                                   disabled={formik.values.relationType === "one-to-many"}
                                   onChange={(event) => formik.setFieldValue("relationCreateInverse", event.currentTarget.checked)}
                                 />
-                                <label htmlFor="relationCreateInverse" className={classNames("ml-2", "form-field-label", styles.fieldLabel)}>Create Inverse</label>
+                                <label htmlFor="relationCreateInverse" className={classNames("ml-2", "form-field-label", "solid-field-label")}>Create Inverse</label>
                               </div>
                               {isFormFieldValid(formik, "relationCreateInverse") && (
-                                <p className={styles.fieldError}>{formik?.errors?.relationCreateInverse?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.relationCreateInverse?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2687,7 +2687,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationCoModelFieldName"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Field Name In {formik.values.relationCoModelSingularName} Model
                               </label>
@@ -2698,7 +2698,7 @@ const FieldMetaDataForm = ({
                                 onChange={formik.handleChange}
                                 disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationCoModelFieldName}
-                                className={classNames(styles.fieldInput, {
+                                className={classNames("solid-field-input", {
                                   "is-invalid": isFormFieldValid(
                                     formik,
                                     "relationCoModelFieldName"
@@ -2715,7 +2715,7 @@ const FieldMetaDataForm = ({
                                 <p className="fieldSubTitle">In this case a {formik.values.relationCoModelFieldName} field will be created in the <span style={{ fontWeight: "700" }}>{formik.values.relationCoModelSingularName ?? '{{}}'}</span> when setting create inverse true.</p>
                               }
                               {isFormFieldValid(formik, "relationCoModelFieldName") && (
-                                <p className={styles.fieldError}>{formik?.errors?.relationCoModelFieldName?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.relationCoModelFieldName?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2757,7 +2757,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="relationJoinTableName"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Relation Join Table Name
                               </label>
@@ -2768,7 +2768,7 @@ const FieldMetaDataForm = ({
                                 onChange={formik.handleChange}
                                 disabled={isExistingFieldReadOnly}
                                 value={formik.values.relationJoinTableName}
-                                className={classNames(styles.fieldInput, {
+                                className={classNames("solid-field-input", {
                                   "is-invalid": isFormFieldValid(
                                     formik,
                                     "relationJoinTableName"
@@ -2776,7 +2776,7 @@ const FieldMetaDataForm = ({
                                 })}
                               />
                               {isFormFieldValid(formik, "relationJoinTableName") && (
-                                <p className={styles.fieldError}>{formik?.errors?.relationJoinTableName?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.relationJoinTableName?.toString()}</p>
                               )}
 
                             </div>
@@ -2786,13 +2786,13 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="selectionDynamicProvider"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Selection Dynamic Provider
                               </label>
 
                               <div className={classNames("solid-standard-autocomplete", {
-                                [styles.fieldInvalidControl]: isFormFieldValid(
+                                ["solid-field-invalid-control"]: isFormFieldValid(
                                   formik,
                                   "selectionDynamicProvider"
                                 ),
@@ -2834,7 +2834,7 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "selectionDynamicProvider"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.selectionDynamicProvider?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.selectionDynamicProvider?.toString()}</p>
                                 )}
                             </div>
                           )}
@@ -2842,7 +2842,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="selectionValueType"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Select Value Type
                               </label>
@@ -2870,7 +2870,7 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "selectionValueType"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.selectionValueType?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.selectionValueType?.toString()}</p>
                                 )}
                             </div>
                           )}
@@ -2879,7 +2879,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                               <label
                                 htmlFor="selectionStaticValues"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Selection Static Values
                               </label>
@@ -2914,7 +2914,7 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "selectionStaticValues"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.selectionStaticValues?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.selectionStaticValues?.toString()}</p>
                                 )}
                             </div>
                           )}
@@ -2923,7 +2923,7 @@ const FieldMetaDataForm = ({
                             <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                               <label
                                 htmlFor="computedFieldValueType"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Computed Field Value Type
                               </label>
@@ -2934,7 +2934,7 @@ const FieldMetaDataForm = ({
                                 field="label"
                                 dropdown
                                 className={classNames("solid-standard-autocomplete", {
-                                  [styles.fieldInvalidControl]: isFormFieldValid(formik, "computedFieldValueType"),
+                                  ["solid-field-invalid-control"]: isFormFieldValid(formik, "computedFieldValueType"),
                                 })}
                                 onChange={(e) => {
                                   setSelectedComputedFieldValueType(e.value);
@@ -2959,7 +2959,7 @@ const FieldMetaDataForm = ({
                                 })}
                               /> */}
                               {isFormFieldValid(formik, "computedFieldValueType") && (
-                                <p className={styles.fieldError}>{formik?.errors?.computedFieldValueType?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.computedFieldValueType?.toString()}</p>
                               )}
                             </div>
                           )}
@@ -2970,12 +2970,12 @@ const FieldMetaDataForm = ({
                               <div className="field mt-2 flex flex-col gap-2 px-2 pt-2 md:w-1/2">
                                 <label
                                   htmlFor="computedFieldValueProvider"
-                                  className={classNames("form-field-label", styles.fieldLabel)}
+                                  className={classNames("form-field-label", "solid-field-label")}
                                 >
                                   Computed Field Provider
                                 </label>
                                 <div className={classNames("solid-standard-autocomplete", {
-                                  [styles.fieldInvalidControl]: isFormFieldValid(
+                                  ["solid-field-invalid-control"]: isFormFieldValid(
                                     formik,
                                     "computedFieldValueProvider"
                                   ),
@@ -2994,7 +2994,7 @@ const FieldMetaDataForm = ({
                                   formik,
                                   "computedFieldValueProvider"
                                 ) && (
-                                    <p className={styles.fieldError}>{formik?.errors?.computedFieldValueProvider?.toString()}</p>
+                                    <p className={"solid-field-error"}>{formik?.errors?.computedFieldValueProvider?.toString()}</p>
                                   )}
                               </div>
                             )}
@@ -3011,7 +3011,7 @@ const FieldMetaDataForm = ({
                                 <div className="flex items-center gap-2">
                                   <label
                                     htmlFor="computedFieldTriggerConfig"
-                                    className={classNames("form-field-label", styles.fieldLabel)}
+                                    className={classNames("form-field-label", "solid-field-label")}
                                   >
                                     Computed Field Trigger Config
                                   </label>
@@ -3044,14 +3044,14 @@ const FieldMetaDataForm = ({
                                     />
                                   ))}
                                 {typeof formik.errors.computedFieldTriggerConfig === 'string' && (
-                                  <p className={styles.fieldError}>{formik.errors.computedFieldTriggerConfig}</p>
+                                  <p className={"solid-field-error"}>{formik.errors.computedFieldTriggerConfig}</p>
                                 )}
                               </div>
                             )}
 
                           {currentFields.includes("selectionDynamicProviderCtxt") && (
                             <div className="field mt-4 flex flex-col gap-2 px-2 pt-2">
-                              <label htmlFor="selectionDynamicProviderCtxt" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="selectionDynamicProviderCtxt" className={classNames("form-field-label", "solid-field-label")}>
                                 Selection Dynamic Provider Context
                               </label>
                               <SolidCodeEditor
@@ -3068,14 +3068,14 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "selectionDynamicProviderCtxt"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.selectionDynamicProviderCtxt?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.selectionDynamicProviderCtxt?.toString()}</p>
                                 )}
                             </div>
                           )}
 
                           {currentFields.includes("computedFieldValueProviderCtxt") && (
                             <div className="field mt-4 flex flex-col gap-2 px-2 pt-2">
-                              <label htmlFor="computedFieldValueProviderCtxt" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="computedFieldValueProviderCtxt" className={classNames("form-field-label", "solid-field-label")}>
                                 Computed Field Value Provider Context
                               </label>
                               <SolidCodeEditor
@@ -3092,7 +3092,7 @@ const FieldMetaDataForm = ({
                                 formik,
                                 "computedFieldValueProviderCtxt"
                               ) && (
-                                  <p className={styles.fieldError}>{formik?.errors?.computedFieldValueProviderCtxt?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.computedFieldValueProviderCtxt?.toString()}</p>
                                 )}
                             </div>
                           )}
@@ -3109,7 +3109,7 @@ const FieldMetaDataForm = ({
                                 <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                   <label
                                     htmlFor="regexPattern"
-                                    className={classNames("form-field-label", styles.fieldLabel)}
+                                    className={classNames("form-field-label", "solid-field-label")}
                                   >
                                     Password Policy
                                   </label>
@@ -3136,7 +3136,7 @@ const FieldMetaDataForm = ({
                                 <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                                   <label
                                     htmlFor="regexPattern"
-                                    className={classNames("form-field-label", styles.fieldLabel)}
+                                    className={classNames("form-field-label", "solid-field-label")}
                                   >
                                     Regex Pattern
                                   </label>
@@ -3146,7 +3146,7 @@ const FieldMetaDataForm = ({
                                     name="regexPattern"
                                     onChange={formik.handleChange}
                                     value={formik.values.regexPattern}
-                                    className={classNames(styles.fieldInput, {
+                                    className={classNames("solid-field-input", {
                                       "is-invalid": isFormFieldValid(
                                         formik,
                                         "regexPattern"
@@ -3154,14 +3154,14 @@ const FieldMetaDataForm = ({
                                     })}
                                   />
                                   {isFormFieldValid(formik, "regexPattern") && (
-                                    <p className={styles.fieldError}>{formik?.errors?.regexPattern?.toString()}</p>
+                                    <p className={"solid-field-error"}>{formik?.errors?.regexPattern?.toString()}</p>
                                   )}
                                 </div>
                                 {showRegexFields && (
                                   <div className="field mt-2 mb-3 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:mb-3 md:basis-1/2">
                                     <label
                                       htmlFor="regexPatternNotMatchingErrorMsg"
-                                      className={classNames("form-field-label", styles.fieldLabel)}
+                                      className={classNames("form-field-label", "solid-field-label")}
                                     >
                                       Regex Pattern Not Matching Error Msg
                                     </label>
@@ -3171,7 +3171,7 @@ const FieldMetaDataForm = ({
                                       name="regexPatternNotMatchingErrorMsg"
                                       onChange={formik.handleChange}
                                       value={formik.values.regexPatternNotMatchingErrorMsg}
-                                      className={classNames(styles.fieldInput, {
+                                      className={classNames("solid-field-input", {
                                         "is-invalid": isFormFieldValid(
                                           formik,
                                           "regexPatternNotMatchingErrorMsg"
@@ -3179,7 +3179,7 @@ const FieldMetaDataForm = ({
                                       })}
                                     />
                                     {isFormFieldValid(formik, "regexPatternNotMatchingErrorMsg") && (
-                                      <p className={styles.fieldError}>{formik?.errors?.regexPatternNotMatchingErrorMsg?.toString()}</p>
+                                      <p className={"solid-field-error"}>{formik?.errors?.regexPatternNotMatchingErrorMsg?.toString()}</p>
                                     )}
                                   </div>
                                 )}
@@ -3190,7 +3190,7 @@ const FieldMetaDataForm = ({
                               <>
                                 {showMinFields && (
                                   <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
-                                    <label htmlFor="min" className={classNames("form-field-label", styles.fieldLabel)}>
+                                    <label htmlFor="min" className={classNames("form-field-label", "solid-field-label")}>
                                       Min {(selectedTypeValue !== "int" && selectedTypeValue !== "decimal") && `(Characters Allowed)`}
 
                                     </label>
@@ -3206,7 +3206,7 @@ const FieldMetaDataForm = ({
                               /> */}
                                     {/* <RenderMinValueInput></RenderMinValueInput> */}
 
-                                    <div className={styles.fieldNumberWrapper}>
+                                    <div className={"solid-field-number-wrapper"}>
                                       <SolidNumberInput
                                         id="min"
                                         name="min"
@@ -3223,13 +3223,13 @@ const FieldMetaDataForm = ({
                                       />
                                     </div>
                                     {isFormFieldValid(formik, "min") && (
-                                      <p className={styles.fieldError}>{formik?.errors?.min?.toString()}</p>
+                                      <p className={"solid-field-error"}>{formik?.errors?.min?.toString()}</p>
                                     )}
                                   </div>
                                 )}
                                 {showMaxFields && (
                                   <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
-                                    <label htmlFor="max" className={classNames("form-field-label", styles.fieldLabel)}>
+                                    <label htmlFor="max" className={classNames("form-field-label", "solid-field-label")}>
                                       Max {(selectedTypeValue !== "int" &&
                                         selectedTypeValue !== "decimal") && `(Characters allowed)`}
                                     </label>
@@ -3244,7 +3244,7 @@ const FieldMetaDataForm = ({
                                 })}
                               /> */}
 
-                                    <div className={styles.fieldNumberWrapper}>
+                                    <div className={"solid-field-number-wrapper"}>
                                       <SolidNumberInput
                                         id="max"
                                         name="max"
@@ -3263,7 +3263,7 @@ const FieldMetaDataForm = ({
 
 
                                     {isFormFieldValid(formik, "max") && (
-                                      <p className={styles.fieldError}>{formik?.errors?.max?.toString()}</p>
+                                      <p className={"solid-field-error"}>{formik?.errors?.max?.toString()}</p>
                                     )}
                                   </div>
                                 )}
@@ -3271,7 +3271,7 @@ const FieldMetaDataForm = ({
                             }
                             {showOrmOptions && (
                               <div className="field mt-2 flex min-w-0 basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
-                                <label htmlFor="ormType" className={classNames("form-field-label", styles.fieldLabel)}>
+                                <label htmlFor="ormType" className={classNames("form-field-label", "solid-field-label")}>
                                   Type
                                 </label>
 
@@ -3297,7 +3297,7 @@ const FieldMetaDataForm = ({
                                 />
 
                                 {isFormFieldValid(formik, "ormType") && (
-                                  <p className={styles.fieldError}>{formik?.errors?.ormType?.toString()}</p>
+                                  <p className={"solid-field-error"}>{formik?.errors?.ormType?.toString()}</p>
                                 )}
                               </div>
                             )}
@@ -3321,7 +3321,7 @@ const FieldMetaDataForm = ({
                                 checked={formik.values.required}
                                 disabled={formik.values.isPrimaryKey || formik.values.unique}
                               />
-                              <label htmlFor="required" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="required" className={classNames("form-field-label", "solid-field-label")}>
                                 Required {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
                                 {!formik.values.isPrimaryKey && formik.values.unique && "(Auto-enabled for Unique)"}
                               </label>
@@ -3329,7 +3329,7 @@ const FieldMetaDataForm = ({
                             <p className="text-xs mt-2">You won't be able to create an entry if this field is empty</p>
 
                             {isFormFieldValid(formik, "required") && (
-                              <p className={styles.fieldError}>{formik?.errors?.required?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.required?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3356,14 +3356,14 @@ const FieldMetaDataForm = ({
                                 checked={formik.values.unique}
                                 disabled={formik.values.isPrimaryKey}
                               />
-                              <label htmlFor="unique" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="unique" className={classNames("form-field-label", "solid-field-label")}>
                                 Unique {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
                               </label>
                             </div>
                             <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content</p>
 
                             {isFormFieldValid(formik, "unique") && (
-                              <p className={styles.fieldError}>{formik?.errors?.unique?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.unique?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3378,12 +3378,12 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.index}
                               />
-                              <label htmlFor="index" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="index" className={classNames("form-field-label", "solid-field-label")}>
                                 Index
                               </label>
                             </div>
                             {isFormFieldValid(formik, "index") && (
-                              <p className={styles.fieldError}>{formik?.errors?.index?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.index?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3398,7 +3398,7 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.private}
                               />
-                              <label htmlFor="private" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="private" className={classNames("form-field-label", "solid-field-label")}>
                                 Private
                               </label>
                             </div>
@@ -3406,7 +3406,7 @@ const FieldMetaDataForm = ({
 
 
                             {isFormFieldValid(formik, "private") && (
-                              <p className={styles.fieldError}>{formik?.errors?.private?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.private?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3422,12 +3422,12 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.encrypt}
                               />
-                              <label htmlFor="encrypt" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="encrypt" className={classNames("form-field-label", "solid-field-label")}>
                                 Encrypt
                               </label>
                             </div>
                             {isFormFieldValid(formik, "encrypt") && (
-                              <p className={styles.fieldError}>{formik?.errors?.encrypt?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.encrypt?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3442,12 +3442,12 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.isMultiSelect}
                               />
-                              <label htmlFor="isMultiSelect" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="isMultiSelect" className={classNames("form-field-label", "solid-field-label")}>
                                 Is MultiSelect
                               </label>
                             </div>
                             {isFormFieldValid(formik, "isMultiSelect") && (
-                              <p className={styles.fieldError}>{formik?.errors?.isMultiSelect?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.isMultiSelect?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3462,14 +3462,14 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.enableAuditTracking}
                               />
-                              <label htmlFor="enableAuditTracking" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="enableAuditTracking" className={classNames("form-field-label", "solid-field-label")}>
                                 Enable Audit Tracking
                               </label>
                             </div>
                             <p className="fieldSubTitle">By selecting this option, you are setting audit trail for this field.</p>
 
                             {isFormFieldValid(formik, "enableAuditTracking") && (
-                              <p className={styles.fieldError}>{formik?.errors?.enableAuditTracking?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.enableAuditTracking?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3484,14 +3484,14 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.isUserKey}
                               />
-                              <label htmlFor="isUserKey" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="isUserKey" className={classNames("form-field-label", "solid-field-label")}>
                                 Is Userkey
                               </label>
                             </div>
                             <p className="fieldSubTitle">By selecting this option, you are setting this field as the model's user key. Any existing user key configuration will be overwritten</p>
 
                             {isFormFieldValid(formik, "isUserKey") && (
-                              <p className={styles.fieldError}>{formik?.errors?.isUserKey?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.isUserKey?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3512,14 +3512,14 @@ const FieldMetaDataForm = ({
                                 }}
                                 checked={formik.values.isPrimaryKey}
                               />
-                              <label htmlFor="isPrimaryKey" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="isPrimaryKey" className={classNames("form-field-label", "solid-field-label")}>
                                 Is Primary Key
                               </label>
                             </div>
                             <p className="fieldSubTitle">By selecting this option, you are setting this field as the primary key for this legacy table.</p>
 
                             {isFormFieldValid(formik, "isPrimaryKey") && (
-                              <p className={styles.fieldError}>{formik?.errors?.isPrimaryKey?.toString()}</p>
+                              <p className={"solid-field-error"}>{formik?.errors?.isPrimaryKey?.toString()}</p>
                             )}
                           </div>
                         )}
@@ -3532,7 +3532,7 @@ const FieldMetaDataForm = ({
                             <div className="field flex w-full flex-col gap-2">
                               <label
                                 htmlFor="encryptionType"
-                                className={classNames("form-field-label", styles.fieldLabel)}
+                                className={classNames("form-field-label", "solid-field-label")}
                               >
                                 Encryption Type
                               </label>
@@ -3555,7 +3555,7 @@ const FieldMetaDataForm = ({
                               /> */}
 
                               <div className={classNames("solid-standard-autocomplete", {
-                                [styles.fieldInvalidControl]: isFormFieldValid(formik, "encryptionType"),
+                                ["solid-field-invalid-control"]: isFormFieldValid(formik, "encryptionType"),
                               })}>
                                 <SolidAutocomplete
                                   value={encryptionTypeField.selectedItem}
@@ -3568,13 +3568,13 @@ const FieldMetaDataForm = ({
                                 />
                               </div>
                               {isFormFieldValid(formik, "encryptionType") && (
-                                <p className={styles.fieldError}>{formik?.errors?.encryptionType?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.encryptionType?.toString()}</p>
                               )}
                             </div>
                           </div>
                           <div className="px-2 pt-2 md:w-1/2">
                             <div className="field flex w-full flex-col gap-2">
-                              <label htmlFor="decryptWhen" className={classNames("form-field-label", styles.fieldLabel)}>
+                              <label htmlFor="decryptWhen" className={classNames("form-field-label", "solid-field-label")}>
                                 Decrypt When
                               </label>
                               {/* <SolidAutocomplete
@@ -3593,7 +3593,7 @@ const FieldMetaDataForm = ({
                               /> */}
 
                               <div className={classNames("solid-standard-autocomplete", {
-                                [styles.fieldInvalidControl]: isFormFieldValid(formik, "decryptWhen"),
+                                ["solid-field-invalid-control"]: isFormFieldValid(formik, "decryptWhen"),
                               })}>
                                 <SolidAutocomplete
                                   value={decryptWhenField.selectedItem}
@@ -3606,7 +3606,7 @@ const FieldMetaDataForm = ({
                                 />
                               </div>
                               {isFormFieldValid(formik, "decryptWhen") && (
-                                <p className={styles.fieldError}>{formik?.errors?.decryptWhen?.toString()}</p>
+                                <p className={"solid-field-error"}>{formik?.errors?.decryptWhen?.toString()}</p>
                               )}
                             </div>
                           </div>

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
-import styles from "./solidFields.module.css";
+import "./solid-fields.css";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import {
@@ -202,9 +202,9 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className={"solid-field-wrapper"}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -230,7 +230,7 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
                 }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <p className={"solid-field-error"}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );
@@ -268,9 +268,9 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className={"solid-field-wrapper"}>
             {showFieldLabel !== false && (
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -305,7 +305,7 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                 }
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <p className={"solid-field-error"}>{formik.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );
@@ -365,9 +365,9 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className={"solid-field-wrapper"}>
             {showFieldLabel !== false && (
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -396,7 +396,7 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
                 <span className="ml-2">{fieldLabel || "Yes"}</span>
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <p className={"solid-field-error"}>{formik.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );
@@ -423,11 +423,11 @@ export const DefaultBooleanFormViewWidget = ({ formik, fieldContext }: SolidForm
 
 
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`${"solid-field-view-label"} form-field-label`}>{fieldLabel}</p>
             )}
-            <p className={styles.fieldViewValue}>
+            <p className={"solid-field-view-value"}>
                 {(() => {
                     const value = formik.values[fieldLayoutInfo.attrs.name];
                     if (value === true) return trueLabel;

@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { loadSession } from "../../../adapters/auth/storage";
 import { SolidIcon, type SolidIconMeta, type SolidIconName } from "../../shad-cn-ui";
-import styles from "./SolidAiChat.module.css";
+import "./solid-ai-chat.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -17,7 +17,7 @@ interface Message {
     id: string;
     role: "user" | "assistant" | "event";
     content: string;
-    timestamp: Date;
+    aiTimestamp: Date;
     // event messages only
     eventState?: "active" | "done";
     // tool call events only
@@ -31,7 +31,7 @@ interface Message {
     toolOutputRaw?: string;
     // step tracking for dividers
     step?: number;
-    // error flag for styled error bubble
+    // error flag for styled error aiBubble
     isError?: boolean;
 }
 
@@ -88,7 +88,7 @@ function CopyButton({ text }: { text: string }) {
         setTimeout(() => setCopied(false), 2000);
     };
     return (
-        <button className={styles.CopyBtn} onClick={handleCopy} title="Copy" aria-label="Copy message">
+        <button className={"solid-ai-copy-btn"} onClick={handleCopy} title="Copy" aria-label="Copy message">
             <SolidIcon
                 name={copied ? "si-check" : "si-copy"}
                 style={{ fontSize: "11px" }}
@@ -108,10 +108,10 @@ function CodeBlock({ children, className }: { children?: React.ReactNode; classN
         setTimeout(() => setCopied(false), 2000);
     };
     return (
-        <div className={styles.CodeBlockWrapper}>
-            <div className={styles.CodeBlockHeader}>
-                <span className={styles.CodeLang}>{lang || "code"}</span>
-                <button className={styles.CodeCopyBtn} onClick={handleCopy}>
+        <div className={"solid-ai-code-block-wrapper"}>
+            <div className={"solid-ai-code-block-header"}>
+                <span className={"solid-ai-code-lang"}>{lang || "code"}</span>
+                <button className={"solid-ai-code-copy-btn"} onClick={handleCopy}>
                     <SolidIcon
                         name={copied ? "si-check" : "si-copy"}
                         style={{ fontSize: "11px" }}
@@ -120,7 +120,7 @@ function CodeBlock({ children, className }: { children?: React.ReactNode; classN
                     {copied ? "Copied" : "Copy"}
                 </button>
             </div>
-            <pre className={styles.CodePre}><code>{code}</code></pre>
+            <pre className={"solid-ai-code-pre"}><code>{code}</code></pre>
         </div>
     );
 }
@@ -130,16 +130,16 @@ const markdownComponents = {
         // Detect by className — only named fenced blocks (```lang) become CodeBlock.
         // Inline backticks and unnamed fenced blocks render as inline code.
         const isBlock = /language-/.test(className || "");
-        if (!isBlock) return <code className={styles.InlineCode} {...props}>{children}</code>;
+        if (!isBlock) return <code className={"solid-ai-inline-code"} {...props}>{children}</code>;
         return <CodeBlock className={className}>{children}</CodeBlock>;
     },
     pre({ children }: any) { return <>{children}</>; },
     table({ children }: any) {
-        return <div className={styles.MarkdownTableWrapper}><table>{children}</table></div>;
+        return <div className={"solid-ai-markdown-table-wrapper"}><table>{children}</table></div>;
     },
     a({ href, children }: any) {
         return (
-            <a href={href} target="_blank" rel="noopener noreferrer" className={styles.MarkdownLink}>
+            <a href={href} target="_blank" rel="noopener noreferrer" className={"solid-ai-markdown-link"}>
                 {children}
             </a>
         );
@@ -243,7 +243,7 @@ function parseToolResult(output: string): { status: Message["toolStatus"]; text:
 
 /**
  * Detects LLM metadata strings that should not be rendered as chat messages.
- * These include token counts, model info, finish_reason, and message-list summaries.
+ * These include token counts, model info, finish_reason, and solid-ai-message-list summaries.
  */
 function isLlmMetadata(content: string): boolean {
     if (!content) return true;
@@ -255,7 +255,7 @@ function isLlmMetadata(content: string): boolean {
 
 // ── Message grouping ──────────────────────────────────────────────────────────
 // Groups consecutive event + assistant messages into a single AI turn so we can
-// render the avatar once per turn rather than per message.
+// render the solid-ai-avatar once per turn rather than per message.
 
 type MsgGroup =
     | { kind: "user"; msg: Message }
@@ -294,7 +294,7 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
         const type = m.event_type;
         const data = m.event_data || {};
         const id = `hist-${m.id}`;
-        // The backend ISO timestamp or the current time as fallback.
+        // The backend ISO solid-ai-timestamp or the current time as fallback.
         const ts = m.timestamp ? new Date(m.timestamp) : new Date();
 
         switch (type) {
@@ -303,20 +303,20 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                     id,
                     role: "user",
                     content: m.content || data.content || "",
-                    timestamp: ts,
+                    aiTimestamp: ts,
                 });
                 currentEventIdx = null;
                 break;
 
             case "AgentStarted":
             case "StepStarted":
-                // Create a "Thinking…" event row.
+                // Create a "Thinking…" event solid-ai-row.
                 currentEventIdx = result.length;
                 result.push({
                     id,
                     role: "event",
                     content: "Thinking…",
-                    timestamp: ts,
+                    aiTimestamp: ts,
                     eventState: "done",
                 });
                 break;
@@ -329,7 +329,7 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                     id,
                     role: "event",
                     content: toolName,
-                    timestamp: ts,
+                    aiTimestamp: ts,
                     eventState: "done",
                     toolName,
                     toolDesc: describeToolArgs(toolArgs),
@@ -388,7 +388,7 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                 if (!llmContent || isLlmMetadata(llmContent)) break;
                 const prevAssistantLlm = [...result].reverse().find(r => r.role === "assistant");
                 if (prevAssistantLlm?.content === llmContent) break;
-                result.push({ id, role: "assistant", content: llmContent, timestamp: ts });
+                result.push({ id, role: "assistant", content: llmContent, aiTimestamp: ts });
                 currentEventIdx = null;
                 break;
             }
@@ -397,7 +397,7 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                 if (!tcContent) { currentEventIdx = null; break; }
                 const prevAssistantTc = [...result].reverse().find(r => r.role === "assistant");
                 if (prevAssistantTc?.content === tcContent) { currentEventIdx = null; break; }
-                result.push({ id, role: "assistant", content: tcContent, timestamp: ts });
+                result.push({ id, role: "assistant", content: tcContent, aiTimestamp: ts });
                 currentEventIdx = null;
                 break;
             }
@@ -413,21 +413,21 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                     id,
                     role: "assistant",
                     content: `Error: ${data.error || m.content || "Unknown error"}`,
-                    timestamp: ts,
+                    aiTimestamp: ts,
                 });
                 currentEventIdx = null;
                 break;
 
             default:
                 if (m.role === "user") {
-                    result.push({ id, role: "user", content: m.content || "", timestamp: ts });
+                    result.push({ id, role: "user", content: m.content || "", aiTimestamp: ts });
                     currentEventIdx = null;
                 } else if (m.role === "assistant") {
                     const fallbackContent = m.content || "";
                     if (fallbackContent && !isLlmMetadata(fallbackContent)) {
                         const prevAst = [...result].reverse().find(r => r.role === "assistant");
                         if (prevAst?.content !== fallbackContent) {
-                            result.push({ id, role: "assistant", content: fallbackContent, timestamp: ts });
+                            result.push({ id, role: "assistant", content: fallbackContent, aiTimestamp: ts });
                         }
                     }
                     currentEventIdx = null;
@@ -572,7 +572,7 @@ export const SolidAiChat: React.FC = () => {
                     return;
                 }
 
-                // Add a new persistent event row, auto-freezing any previous live one.
+                // Add a new persistent event solid-ai-row, auto-freezing any previous live one.
                 // Pass extra fields (toolName, toolDesc, …) for tool card events.
                 const addEvent = (content: string, extra?: Partial<Message>) => {
                     const prevId = liveEventIdRef.current;
@@ -582,7 +582,7 @@ export const SolidAiChat: React.FC = () => {
                         const base = prevId
                             ? prev.map((m) => m.id === prevId ? { ...m, eventState: "done" as const } : m)
                             : prev;
-                        return [...base, { id, role: "event" as const, content, timestamp: new Date(), eventState: "active" as const, ...extra }];
+                        return [...base, { id, role: "event" as const, content, aiTimestamp: new Date(), eventState: "active" as const, ...extra }];
                     });
                 };
 
@@ -633,7 +633,7 @@ export const SolidAiChat: React.FC = () => {
                     case "StepStarted": {
                         const step: number = data.data?.step ?? 1;
                         currentStepRef.current = step;
-                        // Only create a "Thinking…" row when there's no active live event
+                        // Only create a "Thinking…" solid-ai-row when there's no active live event
                         // (e.g. step 2+ after tool results already froze the previous card).
                         if (!liveEventIdRef.current) addEvent("Thinking…", { step });
                         break;
@@ -675,7 +675,7 @@ export const SolidAiChat: React.FC = () => {
                         const delta: string = data.data?.delta ?? "";
                         if (!delta) break;
                         hasStreamedRef.current = true;
-                        // Freeze the live event row on the first token, then stream.
+                        // Freeze the live event solid-ai-row on the first token, then stream.
                         const evtId = liveEventIdRef.current;
                         liveEventIdRef.current = null;
                         setMessages((prev) => {
@@ -686,7 +686,7 @@ export const SolidAiChat: React.FC = () => {
                             if (last?.role === "assistant" && last.id.startsWith("stream-")) {
                                 return [...msgs.slice(0, -1), { ...last, content: last.content + delta }];
                             }
-                            return [...msgs, { id: `stream-${Date.now()}`, role: "assistant", content: delta, timestamp: new Date() }];
+                            return [...msgs, { id: `stream-${Date.now()}`, role: "assistant", content: delta, aiTimestamp: new Date() }];
                         });
                         break;
                     }
@@ -703,7 +703,7 @@ export const SolidAiChat: React.FC = () => {
                                     : prev;
                                 const lastAssistant = [...msgs].reverse().find(m => m.role === "assistant");
                                 if (!lastAssistant || lastAssistant.content !== llmContent) {
-                                    msgs = [...msgs, { id: `llm-${Date.now()}`, role: "assistant" as const, content: llmContent, timestamp: new Date() }];
+                                    msgs = [...msgs, { id: `llm-${Date.now()}`, role: "assistant" as const, content: llmContent, aiTimestamp: new Date() }];
                                 }
                                 return msgs;
                             });
@@ -756,7 +756,7 @@ export const SolidAiChat: React.FC = () => {
                                 const lastAssistant = [...msgs].reverse().find(m => m.role === "assistant");
                                 const alreadyRendered = lastAssistant && lastAssistant.content === content;
                                 if (!hasStreamedRef.current && !alreadyRendered) {
-                                    msgs = [...msgs, { id: `tc-${Date.now()}`, role: "assistant", content, timestamp: new Date() }];
+                                    msgs = [...msgs, { id: `tc-${Date.now()}`, role: "assistant", content, aiTimestamp: new Date() }];
                                 }
                             }
                             return msgs;
@@ -775,7 +775,7 @@ export const SolidAiChat: React.FC = () => {
                             const msgs = evtId
                                 ? prev.map((m) => m.id === evtId ? { ...m, eventState: "done" as const } : m)
                                 : prev;
-                            return [...msgs, { id: `err-${Date.now()}`, role: "assistant" as const, content: errMsg, timestamp: new Date(), isError: true }];
+                            return [...msgs, { id: `err-${Date.now()}`, role: "assistant" as const, content: errMsg, aiTimestamp: new Date(), isError: true }];
                         });
                         break;
                     }
@@ -824,7 +824,7 @@ export const SolidAiChat: React.FC = () => {
         hasStreamedRef.current = false;
         currentStepRef.current = null;
         liveEventIdRef.current = null;
-        setMessages((prev) => [...prev, { id: `u-${Date.now()}`, role: "user", content: trimmed, timestamp: new Date() }]);
+        setMessages((prev) => [...prev, { id: `u-${Date.now()}`, role: "user", content: trimmed, aiTimestamp: new Date() }]);
         wsRef.current?.send(JSON.stringify({ action: "message", session_id: sessionId, content: trimmed }));
         setInput("");
         if (textareaRef.current) {
@@ -922,12 +922,12 @@ export const SolidAiChat: React.FC = () => {
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className={styles.Container}>
+        <div className={"solid-ai-container"}>
 
             {/* ── Header ── */}
-            <header className={styles.Header}>
-                <span className={`${styles.StatusDot} ${isProcessing ? styles.StatusRunning : isConnected ? styles.StatusOnline : styles.StatusOffline}`} />
-                <span className={styles.StatusLabel}>
+            <header className={"solid-ai-header"}>
+                <span className={`${"solid-ai-status-dot"} ${isProcessing ? "solid-ai-status-running" : isConnected ? "solid-ai-status-online" : "solid-ai-status-offline"}`} />
+                <span className={"solid-ai-status-label"}>
                     <SolidIcon
                         name={isConnected ? "si-wifi" : "si-times-circle"}
                         style={{ fontSize: "11px" }}
@@ -936,50 +936,50 @@ export const SolidAiChat: React.FC = () => {
                     {isConnected ? (isProcessing ? "Running…" : sessionId ? "Connected" : "Starting…") : "Offline"}
                 </span>
 
-                <div className={styles.HeaderSpacer} />
+                <div className={"solid-ai-header-spacer"} />
 
-                <button className={styles.NewChatHeaderBtn} onClick={handleNewChat} title="New conversation">
+                <button className={"solid-ai-new-chat-header-btn"} onClick={handleNewChat} title="New conversation">
                     <SolidIcon name="si-plus" style={{ fontSize: "10px" }} aria-hidden />
                     New Chat
                 </button>
 
                 {/* Hamburger + sessions dropdown — rightmost */}
-                <div className={styles.SessionMenuAnchor} ref={sessionMenuRef}>
-                    <button className={styles.HamburgerBtn} onClick={handleToggleSessionMenu} title="Session history" aria-label="Open session history">
+                <div className={"solid-ai-session-menu-anchor"} ref={sessionMenuRef}>
+                    <button className={"solid-ai-hamburger-btn"} onClick={handleToggleSessionMenu} title="Session history" aria-label="Open session history">
                         <SolidIcon name="si-bars" style={{ fontSize: "13px" }} aria-hidden />
                     </button>
 
                     {showSessionMenu && (
-                        <div className={styles.SessionMenu}>
-                            <button className={styles.SessionMenuNewChat} onClick={handleNewChat}>
+                        <div className={"solid-ai-session-menu"}>
+                            <button className={"solid-ai-session-menu-new-chat"} onClick={handleNewChat}>
                                 <SolidIcon name="si-plus" style={{ fontSize: "12px" }} aria-hidden />
                                 New Chat
                             </button>
-                            <div className={styles.SessionMenuSectionLabel}>Recent Sessions</div>
-                            <div className={styles.SessionList}>
+                            <div className={"solid-ai-session-menu-section-label"}>Recent Sessions</div>
+                            <div className={"solid-ai-session-list"}>
                                 {isLoadingSessions ? (
-                                    <div className={styles.SessionMenuLoading}>
+                                    <div className={"solid-ai-session-menu-loading"}>
                                         <SolidIcon name="si-spinner" spin style={{ fontSize: "11px" }} aria-hidden />
                                         Loading…
                                     </div>
                                 ) : sessions.length === 0 ? (
-                                    <div className={styles.SessionMenuEmpty}>No past sessions found</div>
+                                    <div className={"solid-ai-session-menu-empty"}>No past sessions found</div>
                                 ) : (
                                     sessions.map((s) => (
                                         <div
                                             key={s.session_id}
-                                            className={`${styles.SessionItem} ${s.session_id === activeHistoryId ? styles.SessionItemActive : ""}`}
+                                            className={`${"solid-ai-session-item"} ${s.session_id === activeHistoryId ? "solid-ai-session-item-active" : ""}`}
                                             onClick={() => handleSelectSession(s.session_id)}
                                         >
-                                            <div className={styles.SessionItemMain}>
-                                                <span className={styles.SessionItemPreview}>{s.preview || "New conversation"}</span>
-                                                <span className={styles.SessionItemMeta}>
+                                            <div className={"solid-ai-session-item-main"}>
+                                                <span className={"solid-ai-session-item-preview"}>{s.preview || "New conversation"}</span>
+                                                <span className={"solid-ai-session-item-meta"}>
                                                     {formatSessionDate(s.created_at)}
                                                     {s.total_steps > 0 && ` · ${s.total_steps} turn${s.total_steps !== 1 ? "s" : ""}`}
                                                 </span>
                                             </div>
                                             <button
-                                                className={styles.SessionDeleteBtn}
+                                                className={"solid-ai-session-delete-btn"}
                                                 onClick={(e) => handleDeleteSession(e, s.session_id)}
                                                 disabled={isDeletingSessionId === s.session_id}
                                                 title="Delete conversation"
@@ -1002,17 +1002,17 @@ export const SolidAiChat: React.FC = () => {
 
             {/* ── Reconnecting banner ── */}
             {!isConnected && (
-                <div className={styles.ReconnectBanner}>
+                <div className={"solid-ai-reconnect-banner"}>
                     <SolidIcon name="si-spinner" spin style={{ fontSize: "11px" }} aria-hidden />
                     Reconnecting…
                 </div>
             )}
 
             {/* ── Message list ── */}
-            <div className={styles.MessageList} ref={scrollRef}>
+            <div className={"solid-ai-message-list"} ref={scrollRef}>
                 {hasMoreHistory && (
-                    <div className={styles.LoadOlderWrap}>
-                        <button className={styles.LoadOlderBtn} onClick={handleLoadOlder} disabled={isLoadingHistory}>
+                    <div className={"solid-ai-load-older-wrap"}>
+                        <button className={"solid-ai-load-older-btn"} onClick={handleLoadOlder} disabled={isLoadingHistory}>
                             {isLoadingHistory
                                 ? (
                                     <>
@@ -1032,19 +1032,19 @@ export const SolidAiChat: React.FC = () => {
                 )}
 
                 {isLoadingHistory && messages.length === 0 && (
-                    <div className={styles.HistoryLoading}>
+                    <div className={"solid-ai-history-loading"}>
                         <SolidIcon name="si-spinner" spin style={{ fontSize: "16px" }} aria-hidden />
                         <span>Loading conversation…</span>
                     </div>
                 )}
 
                 {messages.length === 0 && !isLoadingHistory && (
-                    <div className={styles.EmptyState}>
-                        <div className={styles.EmptyIcon}>
+                    <div className={"solid-ai-empty-state"}>
+                        <div className={"solid-ai-empty-icon"}>
                             <SolidIcon name="si-comments" style={{ fontSize: "28px" }} aria-hidden />
                         </div>
-                        <p className={styles.EmptyTitle}>How can I help you today?</p>
-                        <p className={styles.EmptySubtitle}>Ask me anything about your SolidX project.</p>
+                        <p className={"solid-ai-empty-title"}>How can I help you today?</p>
+                        <p className={"solid-ai-empty-subtitle"}>Ask me anything about your SolidX project.</p>
                     </div>
                 )}
 
@@ -1053,18 +1053,18 @@ export const SolidAiChat: React.FC = () => {
                     if (group.kind === "user") {
                         const msg = group.msg;
                         return (
-                            <div key={msg.id} className={`${styles.Row} ${styles.RowUser}`}>
+                            <div key={msg.id} className={`${"solid-ai-row"} ${"solid-ai-row-user"}`}>
                                 {/* Avatar first in DOM → rightmost with row-reverse */}
-                                <div className={`${styles.Avatar} ${styles.AvatarUser}`}>
+                                <div className={`${"solid-ai-avatar"} ${"solid-ai-avatar-user"}`}>
                                     <SolidIcon name="si-user" style={{ fontSize: "12px" }} aria-hidden />
                                 </div>
-                                <div className={styles.BubbleGroup}>
-                                    <div className={`${styles.Bubble} ${styles.BubbleUser}`}>
-                                        <p className={styles.UserText}>{msg.content}</p>
+                                <div className={"solid-ai-bubble-group"}>
+                                    <div className={`${"solid-ai-bubble"} ${"solid-ai-bubble-user"}`}>
+                                        <p className={"solid-ai-user-text"}>{msg.content}</p>
                                     </div>
-                                    <div className={`${styles.BubbleMeta} ${styles.BubbleMetaUser}`}>
-                                        <span className={styles.Timestamp}>
-                                            {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                    <div className={`${"solid-ai-bubble-meta"} ${"solid-ai-bubble-meta-user"}`}>
+                                        <span className={"solid-ai-timestamp"}>
+                                            {msg.aiTimestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                         </span>
                                         <CopyButton text={msg.content} />
                                     </div>
@@ -1073,13 +1073,13 @@ export const SolidAiChat: React.FC = () => {
                         );
                     }
 
-                    // ── AI turn: avatar once, events + response stacked ─────
+                    // ── AI turn: solid-ai-avatar once, events + response stacked ─────
                     return (
-                        <div key={group.groupKey} className={styles.AiTurnGroup}>
-                            <div className={styles.Avatar}>
+                        <div key={group.groupKey} className={"solid-ai-turn-group"}>
+                            <div className={"solid-ai-avatar"}>
                                 <SolidIcon name="si-android" style={{ fontSize: "12px" }} aria-hidden />
                             </div>
-                            <div className={styles.AiTurnContent}>
+                            <div className={"solid-ai-turn-content"}>
                                 {group.msgs.flatMap((msg) => {
                                     const items: React.ReactNode[] = [];
 
@@ -1089,10 +1089,10 @@ export const SolidAiChat: React.FC = () => {
                                         // ── Tool call card ──────────────────────────────
                                         if (msg.toolName) {
                                             const status = msg.toolStatus || (active ? "running" : "success");
-                                            const cardClass = status === "running" ? styles.ToolCardRunning :
-                                                status === "warning" ? styles.ToolCardWarning :
-                                                    status === "error" ? styles.ToolCardError :
-                                                        styles.ToolCardDone;
+                                            const cardClass = status === "running" ? "solid-ai-tool-card-running" :
+                                                status === "warning" ? "solid-ai-tool-card-warning" :
+                                                    status === "error" ? "solid-ai-tool-card-error" :
+                                                        "solid-ai-tool-card-done";
 
                                             const statusIcon: SolidIconMeta = status === "running"
                                                 ? { name: "si-spinner", spin: true }
@@ -1102,10 +1102,10 @@ export const SolidAiChat: React.FC = () => {
                                                         ? { name: "si-times-circle" }
                                                         : { name: "si-check-circle" };
 
-                                            const statusIconClass = status === "warning" ? styles.ToolCardStatusWarning :
-                                                status === "error" ? styles.ToolCardStatusError :
-                                                    status === "success" ? styles.ToolCardStatusDone :
-                                                        styles.ToolCardStatusIcon;
+                                            const statusIconClass = status === "warning" ? "solid-ai-tool-card-status-warning" :
+                                                status === "error" ? "solid-ai-tool-card-status-error" :
+                                                    status === "success" ? "solid-ai-tool-card-status-done" :
+                                                        "solid-ai-tool-card-status-icon";
 
                                             const hasExpandable = !!msg.toolOutput || !!msg.toolArgs;
                                             const isExpanded = expandedToolIds.has(msg.id);
@@ -1118,9 +1118,9 @@ export const SolidAiChat: React.FC = () => {
                                                 : undefined;
 
                                             items.push(
-                                                <div key={msg.id} className={`${styles.ToolCard} ${cardClass}`}>
+                                                <div key={msg.id} className={`${"solid-ai-tool-card"} ${cardClass}`}>
                                                     <button
-                                                        className={styles.ToolCardHeaderBtn}
+                                                        className={"solid-ai-tool-card-header-btn"}
                                                         onClick={toggleExpand}
                                                         data-expandable={hasExpandable && status !== "running" ? "true" : undefined}
                                                     >
@@ -1132,60 +1132,60 @@ export const SolidAiChat: React.FC = () => {
                                                         />
                                                         <SolidIcon
                                                             name={getToolIconName(msg.toolName ?? "")}
-                                                            className={styles.ToolCardToolIcon}
+                                                            className={"solid-ai-tool-card-tool-icon"}
                                                             aria-hidden
                                                         />
-                                                        <span className={styles.ToolCardName}>{msg.toolName}</span>
-                                                        {msg.toolDesc && <span className={styles.ToolCardDesc} title={msg.toolDesc}>{msg.toolDesc}</span>}
-                                                        <span className={styles.ToolCardBadge}>{getToolCategory(msg.toolName)}</span>
+                                                        <span className={"solid-ai-tool-card-name"}>{msg.toolName}</span>
+                                                        {msg.toolDesc && <span className={"solid-ai-tool-card-desc"} title={msg.toolDesc}>{msg.toolDesc}</span>}
+                                                        <span className={"solid-ai-tool-card-badge"}>{getToolCategory(msg.toolName)}</span>
                                                         {msg.durationMs != null && (
-                                                            <span className={styles.ToolCardDuration}>{formatDuration(msg.durationMs)}</span>
+                                                            <span className={"solid-ai-tool-card-duration"}>{formatDuration(msg.durationMs)}</span>
                                                         )}
                                                         {hasExpandable && status !== "running" && (
                                                             <SolidIcon
                                                                 name="si-chevron-right"
-                                                                className={`${styles.ToolCardChevron} ${isExpanded ? styles.ToolCardChevronOpen : ""}`}
+                                                                className={`${"solid-ai-tool-card-chevron"} ${isExpanded ? "solid-ai-tool-card-chevron-open" : ""}`}
                                                                 aria-hidden
                                                             />
                                                         )}
                                                     </button>
                                                     {/* Progress substeps: always visible */}
                                                     {msg.toolProgress && msg.toolProgress.length > 0 && (
-                                                        <div className={styles.ToolCardProgress}>
+                                                        <div className={"solid-ai-tool-card-progress"}>
                                                             {msg.toolProgress.map((p, i) => (
-                                                                <div key={i} className={`${styles.ToolProgressItem} ${p.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
+                                                                <div key={i} className={`${"solid-ai-tool-progress-item"} ${p.status === "running" ? "solid-ai-tool-progress-running" : "solid-ai-tool-progress-done"}`}>
                                                                     <SolidIcon
                                                                         name={p.status === "running" ? "si-spinner" : "si-check-circle"}
                                                                         spin={p.status === "running"}
                                                                         style={{ fontSize: "10px" }}
                                                                         aria-hidden
                                                                     />
-                                                                    <span className={styles.ToolProgressLabel}>{p.label}</span>
+                                                                    <span className={"solid-ai-tool-progress-label"}>{p.label}</span>
                                                                     {p.durationMs != null && p.status === "done" && (
-                                                                        <span className={styles.ToolProgressDuration}>{formatDuration(p.durationMs)}</span>
+                                                                        <span className={"solid-ai-tool-progress-duration"}>{formatDuration(p.durationMs)}</span>
                                                                     )}
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     )}
                                                     {isExpanded && (msg.toolArgs || msg.toolOutput) && (
-                                                        <div className={styles.ToolCardExpandable}>
+                                                        <div className={"solid-ai-tool-card-expandable"}>
                                                             {msg.toolArgs && Object.keys(msg.toolArgs).length > 0 && (
-                                                                <div className={styles.ToolCardOutput}>
-                                                                    <div className={styles.ToolOutputHeader}>
+                                                                <div className={"solid-ai-tool-card-output"}>
+                                                                    <div className={"solid-ai-tool-output-header"}>
                                                                         <span>Arguments</span>
                                                                     </div>
-                                                                    <pre className={styles.ToolOutputText}>
+                                                                    <pre className={"solid-ai-tool-output-text"}>
                                                                         {JSON.stringify(msg.toolArgs, null, 2)}
                                                                     </pre>
                                                                 </div>
                                                             )}
                                                             {msg.toolOutput && (
-                                                                <div className={styles.ToolCardOutput}>
-                                                                    <div className={styles.ToolOutputHeader}>
+                                                                <div className={"solid-ai-tool-card-output"}>
+                                                                    <div className={"solid-ai-tool-output-header"}>
                                                                         <span>Result</span>
                                                                     </div>
-                                                                    <pre className={`${styles.ToolOutputText} ${status === "warning" ? styles.ToolOutputWarning : status === "error" ? styles.ToolOutputError : ""}`}>
+                                                                    <pre className={`${"solid-ai-tool-output-text"} ${status === "warning" ? "solid-ai-tool-output-warning" : status === "error" ? "solid-ai-tool-output-error" : ""}`}>
                                                                         {msg.toolOutputRaw || msg.toolOutput}
                                                                     </pre>
                                                                 </div>
@@ -1197,32 +1197,32 @@ export const SolidAiChat: React.FC = () => {
                                             return items;
                                         }
 
-                                        // ── Thinking bubble: only show while active ──────
+                                        // ── Thinking solid-ai-bubble: only show while active ──────
                                         if (active) {
                                             items.push(
-                                                <div key={msg.id} className={styles.ThinkingBubble}>
-                                                    <div className={styles.ThinkingDots}>
-                                                        <span className={styles.ThinkingDot} />
-                                                        <span className={styles.ThinkingDot} />
-                                                        <span className={styles.ThinkingDot} />
+                                                <div key={msg.id} className={"solid-ai-thinking-bubble"}>
+                                                    <div className={"solid-ai-thinking-dots"}>
+                                                        <span className={"solid-ai-thinking-dot"} />
+                                                        <span className={"solid-ai-thinking-dot"} />
+                                                        <span className={"solid-ai-thinking-dot"} />
                                                     </div>
-                                                    <span className={styles.ThinkingLabel}>Thinking…</span>
+                                                    <span className={"solid-ai-thinking-label"}>Thinking…</span>
                                                 </div>
                                             );
                                         }
                                         return items;
                                     }
 
-                                    // ── Error bubble ────────────────────────────────────
+                                    // ── Error solid-ai-bubble ────────────────────────────────────
                                     if (msg.isError) {
                                         items.push(
-                                            <div key={msg.id} className={styles.ErrorBubble}>
-                                                <div className={styles.ErrorIcon}>
+                                            <div key={msg.id} className={"solid-ai-error-bubble"}>
+                                                <div className={"solid-ai-error-icon"}>
                                                     <SolidIcon name="si-exclamation-circle" style={{ fontSize: "13px" }} aria-hidden />
                                                 </div>
-                                                <div className={styles.ErrorContent}>
-                                                    <p className={styles.ErrorTitle}>Error</p>
-                                                    <p className={styles.ErrorText}>{msg.content}</p>
+                                                <div className={"solid-ai-error-content"}>
+                                                    <p className={"solid-ai-error-title"}>Error</p>
+                                                    <p className={"solid-ai-error-text"}>{msg.content}</p>
                                                 </div>
                                             </div>
                                         );
@@ -1232,18 +1232,18 @@ export const SolidAiChat: React.FC = () => {
                                     // ── Assistant message ───────────────────────────────
                                     const isStreaming = msg.id.startsWith("stream-") && isProcessing;
                                     items.push(
-                                        <div key={msg.id} className={styles.BubbleGroup}>
-                                            <div className={`${styles.Bubble} ${styles.BubbleAssistant}`}>
-                                                <div className={styles.MarkdownRoot}>
+                                        <div key={msg.id} className={"solid-ai-bubble-group"}>
+                                            <div className={`${"solid-ai-bubble"} ${"solid-ai-bubble-assistant"}`}>
+                                                <div className={"solid-ai-markdown-root"}>
                                                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                                         {msg.content}
                                                     </ReactMarkdown>
                                                 </div>
-                                                {isStreaming && <span className={styles.StreamingCursor} />}
+                                                {isStreaming && <span className={"solid-ai-streaming-cursor"} />}
                                             </div>
-                                            <div className={`${styles.BubbleMeta} ${styles.BubbleMetaAssistant}`}>
-                                                <span className={styles.Timestamp}>
-                                                    {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                            <div className={`${"solid-ai-bubble-meta"} ${"solid-ai-bubble-meta-assistant"}`}>
+                                                <span className={"solid-ai-timestamp"}>
+                                                    {msg.aiTimestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                                 </span>
                                                 <CopyButton text={msg.content} />
                                             </div>
@@ -1258,11 +1258,11 @@ export const SolidAiChat: React.FC = () => {
             </div>
 
             {/* ── Input area ── */}
-            <div className={styles.InputArea}>
-                <div className={`${styles.InputBox} ${!isConnected || !sessionId ? styles.InputBoxDisabled : ""}`}>
+            <div className={"solid-ai-input-area"}>
+                <div className={`${"solid-ai-input-box"} ${!isConnected || !sessionId ? "solid-ai-input-box-disabled" : ""}`}>
                     <textarea
                         ref={textareaRef}
-                        className={styles.Textarea}
+                        className={"solid-ai-textarea"}
                         placeholder={inputPlaceholder}
                         value={input}
                         onChange={autoResize}
@@ -1271,7 +1271,7 @@ export const SolidAiChat: React.FC = () => {
                         rows={1}
                     />
                     <button
-                        className={`${styles.SendBtn} ${canSend ? styles.SendBtnActive : ""}`}
+                        className={`${"solid-ai-send-btn"} ${canSend ? "solid-ai-send-btn-active" : ""}`}
                         disabled={!canSend}
                         onClick={handleSend}
                         aria-label="Send message"

@@ -7,7 +7,7 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { SolidCodeEditor } from "../../../shad-cn-ui";
-import styles from "./solidFields.module.css";
+import "./solid-fields.css";
 export class SolidJsonField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -112,9 +112,9 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
     return (
         <div className="relative">
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -181,9 +181,9 @@ export const DefaultJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFie
     return (
 
 
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel != false &&
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`${"solid-field-view-label"} form-field-label`}>{fieldLabel}</p>
             }
             <SolidCodeEditor
                 value={code}

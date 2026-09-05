@@ -1,6 +1,6 @@
 import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
 import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
-import styles from "./PublishedStatusListViewWidget.module.css";
+import "./published-status-list-view-widget.css";
 
 export const PublishedStatusListViewWidget = ({ rowData, column }: SolidListFieldWidgetProps) => {
     const colVal = rowData[column.attrs.name];
@@ -8,12 +8,12 @@ export const PublishedStatusListViewWidget = ({ rowData, column }: SolidListFiel
     const publishedAt = rowData?.publishedAt || (column.attrs.name === 'publishedAt' ? colVal : null);
 
     return (
-        <div className={styles.publishedStatusCell}>
-            <span className={`${styles.publishedStatusPill} ${isPublished ? styles.published : styles.unpublished}`}>
+        <div className={"published-status-published-status-cell"}>
+            <span className={`${"published-status-published-status-pill"} ${isPublished ? "published-status-published" : "published-status-unpublished"}`}>
                 {isPublished ? 'Published' : 'Unpublished'}
             </span>
             {isPublished && publishedAt && (
-                <span className={styles.publishedStatusTime}>
+                <span className={"published-status-published-status-time"}>
                     <DateFieldViewComponent value={publishedAt} showTime fallback="" />
                 </span>
             )}

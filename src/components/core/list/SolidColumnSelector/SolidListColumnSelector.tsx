@@ -3,8 +3,7 @@ import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { createSolidEntityApi } from '../../../../redux/api/solidEntityApi';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
-import styles from './SolidListColumnSelector.module.css'
-import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import './solid-list-column-selector.css';import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { showToast } from '../../../../redux/features/toastSlice';
 import { asCompatibleReactNode, CompatibleDraggable, CompatibleDroppable } from '../../common/dndCompat';
 
@@ -161,7 +160,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
-                                className={`flex flex-col cogwheel-column-filter px-0 ${isDragging ? styles.SolidColumnDragContextActive : ''}`}
+                                className={`flex flex-col cogwheel-column-filter px-0 ${isDragging ? "solid-list-column-solid-column-drag-context-active" : ''}`}
                                 style={{ maxHeight: 400, overflowY: 'auto' }}
                             >
                                 {fields.map((column, index) => (
@@ -171,7 +170,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className={`flex items-center justify-between gap-4 px-2 py-2 ${snapshot.isDragging ? styles.SolidColumnDraggedActiveElement : ''}`}
+                                                className={`flex items-center justify-between gap-4 px-2 py-2 ${snapshot.isDragging ? "solid-list-column-solid-column-dragged-active-element" : ''}`}
                                                 style={{
                                                     ...provided.draggableProps.style,
                                                 }}

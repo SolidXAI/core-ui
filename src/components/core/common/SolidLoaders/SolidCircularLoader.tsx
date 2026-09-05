@@ -1,7 +1,5 @@
-import styles from './SolidLoaders.module.css'
-
-export const SolidCircularLoader = () => {
+import './solid-circular-loader.css';export const SolidCircularLoader = () => {
     return (
-        <div className={styles.SolidCircularLoader}></div>
+        <div className={"solid-circular-loader"}></div>
     )
 }

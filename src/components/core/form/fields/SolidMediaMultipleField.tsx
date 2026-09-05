@@ -29,7 +29,7 @@ import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../..
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { showToast } from "../../../../redux/features/toastSlice";
-import styles from "./solidFields.module.css";
+import "./solid-fields.css";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { buildMediaFieldKey, getPersistedMediaId } from "./mediaFieldUtils";
 
@@ -379,9 +379,9 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
 
     return (
         <div style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
-            <div className={`${styles.fieldWrapper} relative`}>
+            <div className={`${"solid-field-wrapper"} relative`}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -411,20 +411,20 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 }
             </div>
             {fileDetails.length > 0 &&
-                <div className={`${styles.mediaAttachmentCard} mt-4`}>
-                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                <div className={`${"solid-field-media-attachment-card"} mt-4`}>
+                    <div className={`${"solid-field-media-attachment-row"} flex items-center md:gap-2`}>
                         <FileReaderExt fileDetails={fileDetails[0]} />
-                        <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                        <div className={`${"solid-field-media-attachment-meta"} w-full`}>
                             <div className="flex items-start justify-between gap-4">
                                 <button
                                     type="button"
-                                    className={styles.mediaAttachmentName}
+                                    className={"solid-field-media-attachment-name"}
                                     onClick={() => handleFileView(fileDetails[0])}
                                     title={fileDetails[0].name}
                                 >
                                     {fileDetails[0].name}
                                 </button>
-                                <div className={`${styles.mediaAttachmentActions} flex items-center gap-2`}>
+                                <div className={`${"solid-field-media-attachment-actions"} flex items-center gap-2`}>
                                         <button
                                             type="button"
                                             className="solid-file-icon-btn"
@@ -440,7 +440,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                         </button>
                                     <button
                                         type="button"
-                                        className="solid-file-icon-btn is-danger"
+                                        className="solid-file-icon-btn solid-field-danger"
                                         disabled={isFieldDisabled || isFieldReadonly}
                                         aria-label="Remove file"
                                         onClick={() => confirmDeleteFile(fileDetails[0].fileKey)}
@@ -449,7 +449,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                     </button>
                                 </div>
                             </div>
-                            <div className={styles.mediaAttachmentSize}>
+                            <div className={"solid-field-media-attachment-size"}>
                                 {formatFileSize(fileDetails[0].size)}
                             </div>
                         </div>
@@ -485,20 +485,20 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         const fileId = file.fileKey;
                         return (
                             <div key={fileId} className={index === fileDetails.length - 1 ? "" : "mb-3"}>
-                                <div className={styles.mediaAttachmentCard}>
-                                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                                <div className={"solid-field-media-attachment-card"}>
+                                    <div className={`${"solid-field-media-attachment-row"} flex items-center md:gap-2`}>
                                         <FileReaderExt fileDetails={file} />
-                                        <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                                        <div className={`${"solid-field-media-attachment-meta"} w-full`}>
                                             <div className="flex items-start justify-between gap-4">
                                                 <button
                                                     type="button"
-                                                    className={styles.mediaAttachmentName}
+                                                    className={"solid-field-media-attachment-name"}
                                                     onClick={() => handleFileView(file)}
                                                     title={file.name}
                                                 >
                                                     {file.name}
                                                 </button>
-                                                <div className={`${styles.mediaAttachmentActions} flex items-center gap-2`}>
+                                                <div className={`${"solid-field-media-attachment-actions"} flex items-center gap-2`}>
                                                     <button
                                                         type="button"
                                                         className="solid-file-icon-btn"
@@ -514,7 +514,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="solid-file-icon-btn is-danger"
+                                                        className="solid-file-icon-btn solid-field-danger"
                                                         disabled={isFieldDisabled || isFieldReadonly}
                                                         aria-label="Remove file"
                                                         onClick={() => confirmDeleteFile(fileId)}
@@ -523,7 +523,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                     </button>
                                                 </div>
                                             </div>
-                                            <div className={styles.mediaAttachmentSize}>
+                                            <div className={"solid-field-media-attachment-size"}>
                                                 {formatFileSize(file.size)}
                                             </div>
                                         </div>
@@ -645,20 +645,20 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
     }
 
     const renderMediaFileCard = (file: { name: string; type: string; size: number; id: number | string; fileUrl: string }, className = "") => (
-        <div className={`${styles.mediaAttachmentCard} ${className}`.trim()}>
-            <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+        <div className={`${"solid-field-media-attachment-card"} ${className}`.trim()}>
+            <div className={`${"solid-field-media-attachment-row"} flex items-center md:gap-2`}>
                 <FileReaderExt fileDetails={file} />
-                <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                <div className={`${"solid-field-media-attachment-meta"} w-full`}>
                     <div className="flex items-start justify-between gap-4">
                         <button
                             type="button"
-                            className={styles.mediaAttachmentName}
+                            className={"solid-field-media-attachment-name"}
                             onClick={() => handleFileView(file)}
                             title={file.name}
                         >
                             {file.name}
                         </button>
-                        <div className={`${styles.mediaAttachmentActions} flex items-center md:gap-2`}>
+                        <div className={`${"solid-field-media-attachment-actions"} flex items-center md:gap-2`}>
                             <button
                                 type="button"
                                 className="solid-file-icon-btn"
@@ -673,7 +673,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                             </button>
                         </div>
                     </div>
-                    <div className={styles.mediaAttachmentSize}>
+                    <div className={"solid-field-media-attachment-size"}>
                         {formatFileSize(file.size)}
                     </div>
                 </div>
@@ -682,15 +682,15 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
     );
 
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel != false &&
-                <p className={`${styles.fieldViewLabel} form-field-label`}>
+                <p className={`${"solid-field-view-label"} form-field-label`}>
                     {fieldLabel}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </p>
             }
             {fileDetails.length > 0 &&
-                renderMediaFileCard(fileDetails[0], styles.mediaAttachmentCardView)
+                renderMediaFileCard(fileDetails[0], "solid-field-media-attachment-card-view")
             }
 
             {fileDetails.length > 1 &&

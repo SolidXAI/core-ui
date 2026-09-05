@@ -1,13 +1,13 @@
 /* === Field UI refresh === */
 
-.fieldWrapper {
+.solid-field-wrapper {
     display: flex;
     flex-direction: column;
     gap: 4px;
     margin-top: 10px;
 }
 
-.fieldLabel {
+.solid-field-label {
     font-size: 11px;
     color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
     font-weight: 500;
@@ -19,7 +19,7 @@
     letter-spacing: 0.01em;
 }
 
-.fieldInput {
+.solid-field-input {
     width: 100% !important;
     height: 34px !important;
     border-radius: 8px !important;
@@ -32,19 +32,19 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-.fieldInput:focus,
-.fieldInput:focus-visible {
+.solid-field-input:focus,
+.solid-field-input:focus-visible {
     outline: none !important;
     border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
 }
 
-.fieldInput:disabled {
+.solid-field-input:disabled {
     opacity: 0.75 !important;
     cursor: not-allowed !important;
     background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
 }
 
-.fieldTextarea {
+.solid-field-textarea {
     width: 100% !important;
     border-radius: 8px !important;
     border: 1px solid var(--border) !important;
@@ -58,32 +58,32 @@
     line-height: 1.5 !important;
 }
 
-.fieldTextarea:focus,
-.fieldTextarea:focus-visible {
+.solid-field-textarea:focus,
+.solid-field-textarea:focus-visible {
     outline: none !important;
     border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
 }
 
-.fieldTextarea:disabled {
+.solid-field-textarea:disabled {
     opacity: 0.75 !important;
     cursor: not-allowed !important;
     background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
 }
 
-.fieldInput:global(.is-invalid),
-.fieldTextarea:global(.is-invalid),
-:global(.is-invalid).fieldInput,
-:global(.is-invalid).fieldTextarea {
+.solid-field-input.is-invalid,
+.solid-field-textarea.is-invalid,
+.is-invalid.solid-field-input,
+.is-invalid.solid-field-textarea {
     border-color: #ef4444 !important;
     box-shadow: 0 0 0 1px #fecaca inset !important;
 }
 
 /* InputNumber wrapper — className lands on the outer span */
-.fieldNumberWrapper {
+.solid-field-number-wrapper {
     width: 100%;
 }
 
-.fieldNumberWrapper :global(.solid-input) {
+.solid-field-number-wrapper .solid-input {
     width: 100% !important;
     height: 34px !important;
     border-radius: 8px !important;
@@ -96,64 +96,53 @@
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
-.fieldNumberWrapper :global(.solid-input):focus,
-.fieldNumberWrapper :global(.solid-input):focus-visible {
+.solid-field-number-wrapper .solid-input:focus,
+.solid-field-number-wrapper .solid-input:focus-visible {
     outline: none !important;
     border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 65%, var(--border)) !important;
 }
 
-.fieldNumberWrapper :global(.solid-input):disabled {
+.solid-field-number-wrapper .solid-input:disabled {
     opacity: 0.75 !important;
     cursor: not-allowed !important;
     background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
 }
 
-.fieldNumberWrapper :global(.is-invalid) {
+.solid-field-number-wrapper .is-invalid {
     border-color: #ef4444 !important;
     box-shadow: 0 0 0 1px #fecaca inset !important;
 }
 
-.fieldError {
+.solid-field-error {
     margin: 2px 0 0;
     color: #ef4444;
     font-size: 11.5px;
     line-height: 1.3;
 }
 
-.fieldHelper {
+.solid-field-helper {
     margin: 2px 0 0;
     color: var(--muted-foreground);
     font-size: 11.5px;
     line-height: 1.35;
 }
 
-.fieldInvalid :global(.solid-autocomplete-control) {
+.solid-field-invalid .solid-autocomplete-control {
     border-color: #ef4444 !important;
     box-shadow: 0 0 0 1px #fecaca inset !important;
 }
 
-.fieldInvalidControl :global(.solid-autocomplete-control) {
+.solid-field-invalid-control .solid-autocomplete-control {
     border-color: #ef4444 !important;
 }
 
-:global(.solid-segmented.is-invalid) {
+.solid-segmented.is-invalid {
     border-color: #ef4444 !important;
     box-shadow: 0 0 0 1px #fecaca inset !important;
     border-radius: 8px;
 }
 
-.fieldErrorBadge {
-    display: inline-flex;
-    align-items: center;
-    color: #ef4444;
-    padding: 2px 0;
-    border: none;
-    background: transparent;
-    font-size: 12px;
-    margin-top: 6px;
-}
-
-:global(.solid-file-icon-btn) {
+.solid-file-icon-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -166,37 +155,37 @@
     transition: all 0.12s ease;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-:global(.solid-file-icon-btn:hover:not(:disabled)) {
+.solid-file-icon-btn:hover:not(:disabled) {
     background: #f3f4f6;
     border-color: #cfd4e3;
     color: #111827;
 }
 
-:global(.solid-file-icon-btn:disabled) {
+.solid-file-icon-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-:global(.solid-file-icon-btn.is-danger) {
+.solid-file-icon-btn.solid-field-danger {
     color: #b91c1c;
     border-color: #f1c1c1;
     background: #fff5f5;
 }
 
-:global(.solid-file-icon-btn.is-danger:hover:not(:disabled)) {
+.solid-file-icon-btn.solid-field-danger:hover:not(:disabled) {
     color: #7f1d1d;
     border-color: #f59fa0;
     background: #ffe9e9;
 }
 
-.fieldViewWrapper {
+.solid-field-view-wrapper {
     display: flex;
     flex-direction: column;
     gap: 2px;
     margin-top: 10px;
 }
 
-.fieldViewLabel {
+.solid-field-view-label {
     margin: 0;
     font-size: 11px;
     color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
@@ -205,7 +194,7 @@
     letter-spacing: 0.01em;
 }
 
-.fieldViewValue {
+.solid-field-view-value {
     margin: 0;
     font-size: 13px;
     color: var(--foreground);
@@ -213,7 +202,7 @@
     line-height: 1.4;
 }
 
-.mediaAttachmentCard {
+.solid-field-media-attachment-card {
     display: flex;
     align-items: center;
     border: 1px solid var(--border);
@@ -223,22 +212,22 @@
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
-.mediaAttachmentCardView {
+.solid-field-media-attachment-card-view {
     margin-top: 10px;
 }
 
-.mediaAttachmentRow {
+.solid-field-media-attachment-row {
     width: 100%;
 }
 
-.mediaAttachmentMeta {
+.solid-field-media-attachment-meta {
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.mediaAttachmentName {
+.solid-field-media-attachment-name {
     appearance: none;
     background: transparent;
     border: 0;
@@ -259,16 +248,16 @@
     transition: color 0.15s ease;
 }
 
-.mediaAttachmentName:hover {
+.solid-field-media-attachment-name:hover {
     color: var(--primary-color, var(--primary));
 }
 
-.mediaAttachmentName:focus-visible {
+.solid-field-media-attachment-name:focus-visible {
     outline: none;
     color: var(--primary-color, var(--primary));
 }
 
-.mediaAttachmentSize {
+.solid-field-media-attachment-size {
     font-size: 11.5px;
     line-height: 1.3;
     font-weight: 500;
@@ -276,6 +265,6 @@
     letter-spacing: 0.01em;
 }
 
-.mediaAttachmentActions {
+.solid-field-media-attachment-actions {
     flex-shrink: 0;
 }

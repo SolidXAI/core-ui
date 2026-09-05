@@ -62,8 +62,8 @@
   }
 
   .solid-center-layout .solid-logo-title,
-  .solid-auth-title,
-  .solid-auth-input-label {
+.solid-auth-title,
+.solid-auth-input-label {
     color: var(--auth-title-color);
   }
 
@@ -72,7 +72,7 @@
   }
 
   .solid-auth-subtitle,
-  .solid-auth-subtitle a {
+.solid-auth-subtitle a {
     color: var(--auth-subtitle-color) !important;
   }
 
@@ -134,13 +134,13 @@
   }
 
   .solid-kanban-card,
-  .solid-media-card {
+.solid-media-card {
     border: none;
     background: transparent;
   }
 
   .solid-kanban-card:hover,
-  .solid-media-card:hover {
+.solid-media-card:hover {
     border: none;
     background: transparent;
   }
@@ -151,8 +151,8 @@
   }
 
   .kanban-image-preview,
-  .kanban-media-image-preview,
-  .kanban-media-view-card {
+.kanban-media-image-preview,
+.kanban-media-view-card {
     background-color: #fff;
   }
 

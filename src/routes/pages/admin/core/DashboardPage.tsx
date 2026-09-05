@@ -26,7 +26,7 @@ import {
 } from "../../../../redux/api/dashboardRuntimeApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import type { DashboardGridLayoutItem, DashboardWidgetComponentProps } from "../../../../types/dashboard";
-import styles from "./DashboardPage.module.css";
+import "./solid-dashboard.css";
 
 type Option = {
   label: string;
@@ -82,8 +82,8 @@ const toIso = (value: Date | null | undefined): string | null => {
   return value.toISOString();
 };
 
-const getErrorMessage = (error: any, fallback: string): string => {
-  const message = error?.data?.message ?? error?.data?.error ?? error?.message;
+const getErrorMessage = (dashboardError: any, fallback: string): string => {
+  const message = dashboardError?.data?.message ?? dashboardError?.data?.dashboardError ?? dashboardError?.message;
   return Array.isArray(message) ? message.join(", ") : message || fallback;
 };
 
@@ -423,10 +423,10 @@ const isSameFilterValue = (variable: any, left: DashboardVariableValue, right: D
 };
 
 const getDashboardTitle = (definition: any, fallback: string) =>
-  definition?.displayName ?? definition?.title ?? definition?.name ?? fallback;
+  definition?.displayName ?? definition?.dashboardTitle ?? definition?.name ?? fallback;
 
 const getWidgetTitle = (widget: any, fallback: string) =>
-  widget?.displayName ?? widget?.title ?? widget?.name ?? fallback;
+  widget?.displayName ?? widget?.dashboardTitle ?? widget?.name ?? fallback;
 
 const isUnauthorizedWidgetRuntime = (runtime: any): boolean =>
   !!(runtime?.meta?.unauthorized || runtime?.uiHints?.state === "unauthorized");
@@ -777,12 +777,12 @@ export function DashboardPage() {
           life: 3000,
         })
       );
-    } catch (error) {
+    } catch (dashboardError) {
       dispatch(
         showToast({
           severity: "error",
           summary: ERROR_MESSAGES.UPDATE_FAILED,
-          detail: getErrorMessage(error, ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_FAILED),
+          detail: getErrorMessage(dashboardError, ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_FAILED),
           life: 4000,
         })
       );
@@ -801,8 +801,8 @@ export function DashboardPage() {
       const presetOptions = getDatePresetOptions(variable);
       const preset = range?.preset && presetOptions.some((entry) => entry.value === range.preset) ? range.preset : "custom";
       return (
-        <div key={variableName} className={styles.filterField}>
-          <label className={styles.filterLabel}>{label}</label>
+        <div key={variableName} className={"solid-dashboard-filter-field"}>
+          <label className={"solid-dashboard-filter-label"}>{label}</label>
           <SolidSelect
             value={preset}
             options={presetOptions}
@@ -829,7 +829,7 @@ export function DashboardPage() {
             }}
           />
           {preset === "custom" ? (
-          <div className={styles.dateRange}>
+          <div className={"solid-dashboard-date-range"}>
             <SolidDatePicker
               selected={range.start ?? null}
               inputClassName="w-full"
@@ -868,8 +868,8 @@ export function DashboardPage() {
         : toOptions(variable?.selectionStaticValues ?? variable?.options ?? []);
       const selectedValues = Array.isArray(value) ? value : [];
       return (
-        <div key={variableName} className={styles.filterField}>
-          <label className={styles.filterLabel}>{label}</label>
+        <div key={variableName} className={"solid-dashboard-filter-field"}>
+          <label className={"solid-dashboard-filter-label"}>{label}</label>
           <SolidAutocomplete
             multiple
             dropdown
@@ -899,8 +899,8 @@ export function DashboardPage() {
       const selectedOption = options.find((entry) => `${entry.value}` === selectedValue) ?? null;
 
       return (
-        <div key={variableName} className={styles.filterField}>
-          <label className={styles.filterLabel}>{label}</label>
+        <div key={variableName} className={"solid-dashboard-filter-field"}>
+          <label className={"solid-dashboard-filter-label"}>{label}</label>
           <SolidAutocomplete
             dropdown
             field="label"
@@ -927,8 +927,8 @@ export function DashboardPage() {
         : [];
 
     return (
-      <div key={variableName} className={styles.filterField}>
-        <label className={styles.filterLabel}>{label}</label>
+      <div key={variableName} className={"solid-dashboard-filter-field"}>
+        <label className={"solid-dashboard-filter-label"}>{label}</label>
         <SolidSelect
           value={typeof value === "string" ? value : ""}
           options={options}
@@ -945,9 +945,9 @@ export function DashboardPage() {
   const renderWidgetBody = (widgetDefinition: any, runtime: any) => {
     if (isUnauthorizedWidgetRuntime(runtime)) {
       return (
-        <div className={styles.widgetUnauthorizedState}>
-          <AlertTriangle size={18} className={styles.widgetUnauthorizedIcon} />
-          <span className={styles.widgetUnauthorizedText}>
+        <div className={"solid-dashboard-widget-unauthorized-state"}>
+          <AlertTriangle size={18} className={"solid-dashboard-widget-unauthorized-icon"} />
+          <span className={"solid-dashboard-widget-unauthorized-text"}>
             {runtime?.uiHints?.message ?? "Unauthorized"}
           </span>
         </div>
@@ -970,34 +970,34 @@ export function DashboardPage() {
 
   if (definitionLoading) {
     return (
-      <div className={styles.page}>
+      <div className={"solid-dashboard-page"}>
         <SolidSpinner />
       </div>
     );
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <div className={styles.titleBlock}>
-          <h1 className={styles.title}>{getDashboardTitle(definition, dashboardName)}</h1>
-          <p className={styles.subtitle}>{definition?.description ?? `${moduleName} / ${dashboardName}`}</p>
+    <div className={"solid-dashboard-page"}>
+      <div className={"solid-dashboard-header"}>
+        <div className={"solid-dashboard-title-block"}>
+          <h1 className={"solid-dashboard-title"}>{getDashboardTitle(definition, dashboardName)}</h1>
+          <p className={"solid-dashboard-subtitle"}>{definition?.description ?? `${moduleName} / ${dashboardName}`}</p>
         </div>
 
-        <div className={styles.headerActions}>
-          <div className={styles.filterButtonWrap}>
+        <div className={"solid-dashboard-header-actions"}>
+          <div className={"solid-dashboard-filter-button-wrap"}>
             <SolidButton
-              className={styles.iconButton}
+              className={"solid-dashboard-icon-button"}
               leftIcon={<Filter size={16} />}
               onClick={() => setIsFilterDialogOpen(true)}
               tooltip="Filters"
               aria-label="Filters"
             />
-            {appliedFilterCount > 0 ? <span className={styles.filterCountBadge}>{appliedFilterCount}</span> : null}
+            {appliedFilterCount > 0 ? <span className={"solid-dashboard-filter-count-badge"}>{appliedFilterCount}</span> : null}
           </div>
 
           <SolidButton
-            className={styles.iconButton}
+            className={"solid-dashboard-icon-button"}
             leftIcon={<RefreshCw size={16} />}
             onClick={() => void handleRefresh()}
             disabled={dataLoading}
@@ -1006,7 +1006,7 @@ export function DashboardPage() {
           />
 
           <SolidButton
-            className={styles.iconButton}
+            className={"solid-dashboard-icon-button"}
             leftIcon={<Save size={16} />}
             onClick={() => void handleSaveLayout()}
             disabled={saveLayoutLoading || isCompactLayout}
@@ -1020,12 +1020,12 @@ export function DashboardPage() {
         open={isFilterDialogOpen}
         onOpenChange={setIsFilterDialogOpen}
         header="Dashboard Filters"
-        contentClassName={styles.filterDialogContent}
+        contentClassName={"solid-dashboard-filter-dialog-content"}
       >
         <SolidDialogBody>
-          <div className={styles.filterModalColumn}>{variables.map(renderVariable)}</div>
+          <div className={"solid-dashboard-filter-modal-column"}>{variables.map(renderVariable)}</div>
         </SolidDialogBody>
-        <SolidDialogFooter className={styles.filterModalActions}>
+        <SolidDialogFooter className={"solid-dashboard-filter-modal-actions"}>
           <SolidButton variant="outline" onClick={() => void handleClearFilters()}>
             Clear
           </SolidButton>
@@ -1035,17 +1035,17 @@ export function DashboardPage() {
         </SolidDialogFooter>
       </SolidDialog>
 
-      {dataError ? <p className={styles.error}>Failed to load dashboard data.</p> : null}
+      {dataError ? <p className={"solid-dashboard-error"}>Failed to load dashboard data.</p> : null}
 
       {showDashboardLoadingState ? (
-        <div className={styles.dashboardLoadingState}>
+        <div className={"solid-dashboard-loading-state"}>
           <SolidSpinner size={30} label="Loading records" />
-          <p className={styles.dashboardLoadingCopy}>Please wait while dashboard data is loading...</p>
+          <p className={"solid-dashboard-loading-copy"}>Please wait while dashboard data is loading...</p>
         </div>
       ) : (
         <div
           ref={gridRef}
-          className={`grid-stack ${styles.gridStack} ${isCompactLayout ? styles.gridStackCompact : ""}`}
+          className={`solid-dashboard-grid-stack ${"solid-dashboard-grid-stack"} ${isCompactLayout ? "solid-dashboard-grid-stack-compact" : ""}`}
         >
           {orderedWidgets.map((widget: any) => {
             const widgetName = widget?.id ?? widget?.name;
@@ -1064,10 +1064,10 @@ export function DashboardPage() {
                 gs-min-w={slot?.minW ?? 2}
                 gs-min-h={slot?.minH ?? 2}
               >
-                <div className={`grid-stack-item-content ${styles.widgetCard}`}>
-                  <h3 className={styles.widgetTitle}>{getWidgetTitle(widget, widgetName)}</h3>
-                  <div className={styles.widgetBody}>
-                    {runtime ? renderWidgetBody(widget, runtime) : <p className={styles.muted}>No data</p>}
+                <div className={`grid-stack-item-content ${"solid-dashboard-widget-card"}`}>
+                  <h3 className={"solid-dashboard-widget-title"}>{getWidgetTitle(widget, widgetName)}</h3>
+                  <div className={"solid-dashboard-widget-body"}>
+                    {runtime ? renderWidgetBody(widget, runtime) : <p className={"solid-dashboard-muted"}>No data</p>}
                   </div>
                 </div>
               </div>

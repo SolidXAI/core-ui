@@ -1,6 +1,5 @@
 import { AlertTriangle, CircleX, MoveRight } from 'lucide-react'
-import styles from './SolidImport.module.css'
-import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
+import './solid-import.css';import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { showToast } from '../../../../redux/features/toastSlice';
@@ -256,7 +255,7 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
     );
     return (
         <div>
-            <div className={styles.SolidImportContextWrapper}>
+            <div className={"solid-import-solid-import-context-wrapper"}>
                 {isLoading ? (
                     <div className="solid-import-loading-state">
                         <SolidSpinner size={22} label="Loading mapping info" />
@@ -291,7 +290,7 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                             </div>
                         ) : null}
                         <div className='solid-import-mapping-table'>
-                            <div className={`solid-import-mapping-head ${styles.ImportTableHeader}`}>
+                            <div className={`solid-import-mapping-head ${"solid-import-import-table-header"}`}>
                                 <div className="solid-import-mapping-head-cell">File Column</div>
                                 <div className="solid-import-mapping-head-cell">SolidX Field</div>
                             </div>

@@ -1,5 +1,5 @@
 
-import styles from './solidFields.module.css';
+import './solid-fields.css';
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -143,9 +143,9 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-        <div className={styles.fieldWrapper}>
+        <div className={"solid-field-wrapper"}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -161,11 +161,11 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
                 onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                 onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                className={styles.fieldInput}
+                className={"solid-field-input"}
                 autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <p className={"solid-field-error"}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );

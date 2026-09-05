@@ -11,7 +11,7 @@ import { SolidFieldTooltip } from "../../../../components/common/SolidFieldToolt
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
 import dayjs from "dayjs";
-import styles from "./solidFields.module.css";
+import "./solid-fields.css";
 import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
@@ -140,9 +140,9 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
 
     return (
         <div className="relative">
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -185,13 +185,13 @@ export const DefaultDateTimeFormViewWidget = ({
     const format = fieldLayoutInfo.attrs?.format as string | undefined;
 
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>
+                <p className={`${"solid-field-view-label"} form-field-label`}>
                     {fieldLabel}
                 </p>
             )}
-            <p className={styles.fieldViewValue}>
+            <p className={"solid-field-view-value"}>
                 <DateFieldViewComponent value={rawValue} format={format} showTime={true} fallback="-"></DateFieldViewComponent>
             </p>
         </div>

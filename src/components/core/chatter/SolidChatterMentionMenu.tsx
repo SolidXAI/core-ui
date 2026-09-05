@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import styles from './chatter.module.css';
+import './solid-chatter.css';
 
 interface Props {
     isLoading: boolean;
@@ -18,26 +18,26 @@ export const SolidChatterMentionMenu = ({ isLoading, users, activeIndex, onSelec
     }, [activeIndex]);
 
     return (
-        <div className={styles.chatterMentionMenu}>
+        <div className={"solid-chatter-mention-menu"}>
             {isLoading && (
-                <div className={styles.chatterMentionEmpty}>Searching users...</div>
+                <div className={"solid-chatter-mention-empty"}>Searching users...</div>
             )}
             {!isLoading && users.length === 0 && (
-                <div className={styles.chatterMentionEmpty}>No users found</div>
+                <div className={"solid-chatter-mention-empty"}>No users found</div>
             )}
             {!isLoading && users.map((user, index) => (
                 <button
                     key={user.id}
                     ref={index === activeIndex ? activeOptionRef : null}
                     type="button"
-                    className={`${styles.chatterMentionOption} ${index === activeIndex ? styles.chatterMentionOptionActive : ''}`}
+                    className={`${"solid-chatter-mention-option"} ${index === activeIndex ? "solid-chatter-mention-option-active" : ''}`}
                     onMouseDown={(event) => {
                         event.preventDefault();
                         onSelect(user);
                     }}
                 >
-                    <span className={styles.chatterMentionName}>{user.fullName || user.username}</span>
-                    <span className={styles.chatterMentionUsername}>@{user.username}</span>
+                    <span className={"solid-chatter-mention-name"}>{user.fullName || user.username}</span>
+                    <span className={"solid-chatter-mention-username"}>@{user.username}</span>
                 </button>
             ))}
         </div>

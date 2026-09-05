@@ -1,6 +1,6 @@
 
 import * as Yup from 'yup';
-import styles from './solidFields.module.css';
+import './solid-fields.css';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
@@ -102,20 +102,20 @@ export const DefaultComputedFormWidget = ({ formik, fieldContext }: SolidFormFie
     if (viewMode === 'view') {
         // View mode: display as plain text (same as DefaultShortTextFormViewWidget)
         return (
-            <div className={styles.fieldViewWrapper}>
+            <div className={"solid-field-view-wrapper"}>
                 {showFieldLabel !== false && (
-                    <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                    <p className={`${"solid-field-view-label"} form-field-label`}>{fieldLabel}</p>
                 )}
-                <p className={styles.fieldViewValue}>{value && typeof value === 'string' ? value : ''}</p>
+                <p className={"solid-field-view-value"}>{value && typeof value === 'string' ? value : ''}</p>
             </div>
         );
     }
 
     // Edit mode: read-only input to make it clear this is a server-computed value
     return (
-        <div className={styles.fieldWrapper}>
+        <div className={"solid-field-wrapper"}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                     {fieldLabel}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
@@ -127,7 +127,7 @@ export const DefaultComputedFormWidget = ({ formik, fieldContext }: SolidFormFie
                 value={value || ''}
                 readOnly
                 disabled
-                className={styles.fieldInput}
+                className={"solid-field-input"}
             />
         </div>
     );

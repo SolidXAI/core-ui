@@ -1,5 +1,4 @@
-import styles from './chatter.module.css'
-import { usePostChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
+import './solid-chatter.css';import { usePostChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
 import { useEffect, useState, useRef } from 'react'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
 import { SolidButton, SolidTextarea } from '../../shad-cn-ui'
@@ -112,19 +111,19 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
     };
 
     return (
-        <form className={styles.chatterMessageComposer} onSubmit={handleSubmit}>
+        <form className={"solid-chatter-message-composer"} onSubmit={handleSubmit}>
             {/* {type === 'email' &&
                 <div className='mb-2 flex items-center gap-1 text-sm'>
                     <span className='font-bold'>To:</span>
-                    <div className={styles.chatterEmails}>
+                    <div className={"solid-chatter-emails"}>
                         {tempEmails.map((mail, index) => (
                             <span key={index}>
                                 {mail}
                             </span>
                         ))}
                     </div>
-                    <div className={`si si-sort-down-fill text-[var(--primary-color)] ${styles.emailTooltipIcon}`} style={{ fontSize: 8 }}>
-                        <div className={styles.emailsTooltip}>
+                    <div className={`si si-sort-down-fill text-[var(--primary-color)] ${"solid-chatter-email-tooltip-icon"}`} style={{ fontSize: 8 }}>
+                        <div className={"solid-chatter-emails-tooltip"}>
                             {tempEmails.map((mail, index) => (
                                 <span key={index} className='text-color text-sm'>
                                     {mail}
@@ -134,7 +133,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                     </div>
                 </div>
             } */}
-            <div className={`${styles.solidMessageWrapper} flex flex-col gap-2 w-full`}>
+            <div className={`${"solid-chatter-message-wrapper"} flex flex-col gap-2 w-full`}>
                 <div className='flex items-center justify-between'>
                     <p className='form-field-label m-0'>
                         {type === 'email' ? 'Email Message' : 'Internal Note'}
@@ -151,7 +150,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                     className="w-full p-2"
                     rows={4}
                 />
-                <p className={styles.chatterComposerHelp}>
+                <p className={"solid-chatter-composer-help"}>
                     Type @ to mention a user. Press Ctrl+Enter to save.
                 </p>
                 {mentionRange && (
@@ -206,15 +205,15 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                 </div>
             </div>
             {selectedFiles.length > 0 && (
-                <div className={styles.chatterSelectedFiles}>
+                <div className={"solid-chatter-selected-files"}>
                     {selectedFiles.map((file, index) => (
-                        <div key={index} className={styles.chatterSelectedFileCard}>
-                            <div className={styles.chatterSelectedFileIcon}>
+                        <div key={index} className={"solid-chatter-selected-file-card"}>
+                            <div className={"solid-chatter-selected-file-icon"}>
                                 <FileText size={16} />
                             </div>
-                            <div className={styles.chatterSelectedFileMeta}>
-                                <p className={styles.chatterSelectedFileName}>{file.name}</p>
-                                <span className={styles.chatterSelectedFileSize}>{formatFileSize(file.size)}</span>
+                            <div className={"solid-chatter-selected-file-meta"}>
+                                <p className={"solid-chatter-selected-file-name"}>{file.name}</p>
+                                <span className={"solid-chatter-selected-file-size"}>{formatFileSize(file.size)}</span>
                             </div>
                             <SolidButton
                                 type="button"

@@ -1,4 +1,4 @@
-.page {
+.solid-dashboard-page {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -9,20 +9,20 @@
   overscroll-behavior: contain;
 }
 
-.header {
+.solid-dashboard-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.headerActions {
+.solid-dashboard-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.iconButton {
+.solid-dashboard-icon-button {
   min-width: 36px;
   width: 36px;
   height: 36px;
@@ -32,12 +32,12 @@
   justify-content: center;
 }
 
-.filterButtonWrap {
+.solid-dashboard-filter-button-wrap {
   position: relative;
   display: inline-flex;
 }
 
-.filterCountBadge {
+.solid-dashboard-filter-count-badge {
   position: absolute;
   top: -5px;
   right: -5px;
@@ -54,81 +54,71 @@
   border: 1px solid #fff;
 }
 
-.titleBlock {
+.solid-dashboard-title-block {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.title {
+.solid-dashboard-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
 }
 
-.subtitle {
+.solid-dashboard-subtitle {
   margin: 0;
   color: #6b7280;
   font-size: 0.9rem;
 }
 
-.filterDialogContent {
+.solid-dashboard-filter-dialog-content {
   width: min(540px, calc(100vw - 32px));
 }
 
-.filterModalColumn {
+.solid-dashboard-filter-modal-column {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
 }
 
-.filterModalActions {
+.solid-dashboard-filter-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-.filterField {
+.solid-dashboard-filter-field {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.filterLabel {
+.solid-dashboard-filter-label {
   font-size: 0.85rem;
   font-weight: 500;
 }
 
-.dateRange {
+.solid-dashboard-date-range {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-.dateRange :global(.react-datepicker-wrapper),
-.dateRange :global(.react-datepicker__input-container) {
+.solid-dashboard-date-range .react-datepicker-wrapper,
+.solid-dashboard-date-range .react-datepicker__input-container {
   width: 100%;
 }
 
-.multiSelect {
-  width: 100%;
-  min-height: 84px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
-  padding: 6px;
-  font-size: 0.9rem;
-}
-
-.gridStack {
+.solid-dashboard-grid-stack {
   width: 100%;
 }
 
-.gridStackCompact {
+.solid-dashboard-grid-stack-compact {
   min-height: 0;
 }
 
-.dashboardLoadingState {
+.solid-dashboard-loading-state {
   min-height: calc(100vh - 240px);
   display: flex;
   align-items: center;
@@ -139,14 +129,14 @@
   text-align: center;
 }
 
-.dashboardLoadingCopy {
+.solid-dashboard-loading-copy {
   margin: 0;
   color: #6b7280;
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.widgetCard {
+.solid-dashboard-widget-card {
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   background: #ffffff;
@@ -156,19 +146,19 @@
   overflow: hidden;
 }
 
-.widgetTitle {
+.solid-dashboard-widget-title {
   margin: 0 0 10px;
   font-size: 1rem;
   font-weight: 600;
 }
 
-.widgetBody {
+.solid-dashboard-widget-body {
   flex: 1;
   min-height: 0;
   display: flex;
 }
 
-.widgetUnauthorizedState {
+.solid-dashboard-widget-unauthorized-state {
   flex: 1;
   width: 100%;
   min-height: 180px;
@@ -181,72 +171,72 @@
   color: #6b7280;
 }
 
-.widgetUnauthorizedIcon {
+.solid-dashboard-widget-unauthorized-icon {
   color: #f59e0b;
 }
 
-.widgetUnauthorizedText {
+.solid-dashboard-widget-unauthorized-text {
   font-size: 0.92rem;
   font-weight: 500;
 }
 
-.error {
+.solid-dashboard-error {
   color: #b91c1c;
   font-size: 0.9rem;
 }
 
-.muted {
+.solid-dashboard-muted {
   color: #6b7280;
   font-size: 0.9rem;
 }
 
-:global(html.dark) .widgetCard,
-:global([data-theme="dark"]) .widgetCard {
+html.dark .solid-dashboard-widget-card,
+[data-theme="dark"] .solid-dashboard-widget-card {
   border-color: color-mix(in srgb, var(--border) 82%, transparent);
   background: var(--card);
   box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 2%, transparent);
 }
 
-:global(html.dark) .widgetTitle,
-:global([data-theme="dark"]) .widgetTitle {
+html.dark .solid-dashboard-widget-title,
+[data-theme="dark"] .solid-dashboard-widget-title {
   color: var(--foreground);
 }
 
 @media (max-width: 768px) {
-  .page {
+  .solid-dashboard-page {
     padding: 12px;
     gap: 12px;
   }
 
-  .header {
+  .solid-dashboard-header {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .headerActions {
+  .solid-dashboard-header-actions {
     width: 100%;
     justify-content: flex-end;
     flex-wrap: wrap;
   }
 
-  .title {
+  .solid-dashboard-title {
     font-size: 1.08rem;
   }
 
-  .subtitle {
+  .solid-dashboard-subtitle {
     font-size: 0.82rem;
   }
 
-  .dateRange {
+  .solid-dashboard-date-range {
     grid-template-columns: 1fr;
   }
 
-  .widgetCard {
+  .solid-dashboard-widget-card {
     padding: 10px;
     border-radius: 12px;
   }
 
-  .widgetTitle {
+  .solid-dashboard-widget-title {
     margin-bottom: 8px;
     font-size: 0.94rem;
   }
