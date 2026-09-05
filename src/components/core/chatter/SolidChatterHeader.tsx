@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import styles from './chatter.module.css'
-import { SolidMessageComposer } from './SolidMessageComposer'
+import './solid-chatter.css';import { SolidMessageComposer } from './SolidMessageComposer'
 import { useLazyGetusersQuery } from '../../../redux/api/userApi'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
 import {
@@ -129,7 +128,7 @@ export const SolidChatterHeader = (props: Props) => {
     };
 
     return (
-        <div className={`${styles.chatterTitle} ${title ? styles.chatterTitleWithLabel : ''} solid-list-toolbar`}>
+        <div className={`${"solid-chatter-title"} ${title ? "chatter-title-with-label" : ''} solid-list-toolbar`}>
             <div className='flex justify-between items-center solid-list-toolbar-row'>
                 <p className="m-0 view-title solid-text-wrapper form-wrapper-title">
                     {title || ''}

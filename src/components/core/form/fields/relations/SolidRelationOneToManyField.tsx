@@ -14,7 +14,7 @@ import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
 import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
-import styles from "../solidFields.module.css";
+import "../solid-fields.css";
 
 export type FormViewParams = {
     moduleName: any;
@@ -324,9 +324,9 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
     return (
         <div>
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
@@ -475,9 +475,9 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
 
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-view-label"} form-field-label`}>{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
@@ -689,7 +689,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
     return (
         <div>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>{fieldLabel}
                     {/* {fieldMetadata.required && <span className="text-red-500"> *</span>} */}
                     {/* <SolidFieldTooltip fieldContext={fieldContext} /> */}
                 </label>

@@ -1,4 +1,4 @@
-.publishedStatusCell {
+.published-status-published-status-cell {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
@@ -6,7 +6,7 @@
     min-width: 94px;
 }
 
-.publishedStatusPill {
+.published-status-published-status-pill {
     display: inline-flex;
     align-items: center;
     min-height: 22px;
@@ -18,19 +18,19 @@
     line-height: 1;
 }
 
-.publishedStatusPill.published {
+.published-status-published-status-pill.published-status-published {
     color: #166534;
     border-color: #22c55e40;
     background: #dcfce7;
 }
 
-.publishedStatusPill.unpublished {
+.published-status-published-status-pill.published-status-unpublished {
     color: #991b1b;
     border-color: #ef444440;
     background: #fee2e2;
 }
 
-.publishedStatusTime {
+.published-status-published-status-time {
     color: var(--muted-foreground);
     font-size: 10.5px;
     line-height: 1.25;

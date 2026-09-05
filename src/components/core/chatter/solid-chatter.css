@@ -1,19 +1,9 @@
-.chatterTitle {
+.solid-chatter-title {
     padding: 0.2rem 0 0.55rem 2.75rem;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
 }
 
-
-.chatterMessageComposer .chatterMessageInput {
-    background-color: var(--background);
-    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
-}
-
-.chatterMessageComposer .chatterMessageInput::placeholder {
-    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
-}
-
-.chatterMentionMenu {
+.solid-chatter-mention-menu {
     width: min(22rem, 100%);
     max-height: 13rem;
     overflow-y: auto;
@@ -28,7 +18,7 @@
     z-index: 20;
 }
 
-.chatterMentionOption {
+.solid-chatter-mention-option {
     appearance: none;
     border: 0;
     background: transparent;
@@ -42,33 +32,33 @@
     border-radius: 0.35rem;
 }
 
-.chatterMentionOption:hover,
-.chatterMentionOption:focus {
+.solid-chatter-mention-option:hover,
+.solid-chatter-mention-option:focus {
     background: color-mix(in srgb, var(--primary-color, var(--primary)) 10%, transparent);
     outline: none;
 }
 
-.chatterMentionOptionActive {
+.solid-chatter-mention-option-active {
     background: color-mix(in srgb, var(--primary-color, var(--primary)) 12%, transparent);
 }
 
-.chatterMentionName {
+.solid-chatter-mention-name {
     font-size: 0.78rem;
     font-weight: 600;
     line-height: 1.2;
 }
 
-.chatterMentionUsername,
-.chatterMentionEmpty {
+.solid-chatter-mention-username,
+.solid-chatter-mention-empty {
     font-size: 0.72rem;
     color: var(--muted-foreground);
 }
 
-.chatterMentionEmpty {
+.solid-chatter-mention-empty {
     padding: 0.5rem 0.55rem;
 }
 
-.chatterComposerHelp {
+.solid-chatter-composer-help {
     margin: -0.2rem 0 0;
     font-size: 0.68rem;
     font-style: italic;
@@ -76,18 +66,18 @@
     color: var(--muted-foreground);
 }
 
-.chatterEmails {
+.solid-chatter-emails {
     max-width: 80%;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.emailTooltipIcon {
+.solid-chatter-email-tooltip-icon {
     position: relative;
 }
 
-.emailsTooltip {
+.solid-chatter-emails-tooltip {
     visibility: hidden;
     position: absolute;
     right: 0px !important;
@@ -102,17 +92,17 @@
     gap: 5px;
 }
 
-.emailTooltipIcon:hover .emailsTooltip {
+.solid-chatter-email-tooltip-icon:hover .solid-chatter-emails-tooltip {
     visibility: visible !important;
 }
 
-.chatterDatetimeDivider {
+.solid-chatter-datetime-divider {
     border-top: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
     position: relative;
     margin: 30px 0 15px 0;
 }
 
-.chatterDividerContent {
+.solid-chatter-divider-content {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -126,7 +116,7 @@
     color: var(--muted-foreground);
 }
 
-.solidMessageWrapper {
+.solid-chatter-message-wrapper {
     border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
     padding: 0.7rem 0.8rem;
     border-radius: 0.7rem;
@@ -140,42 +130,42 @@
     overflow-wrap: anywhere;
 }
 
-:global(.solidMessageWrapper p) {
+.solid-chatter-message-wrapper p {
     margin: 0;
     font-size: inherit;
     line-height: inherit;
     color: inherit;
 }
 
-:global(.solid-purple-button) {
+.solid-purple-button {
     --solid-btn-bg: var(--primary-color, var(--primary));
     --solid-btn-border: var(--primary-color, var(--primary));
     --solid-btn-fg: #fff;
 }
 
-:global(.solid-purple-button:hover) {
+.solid-purple-button:hover {
     --solid-btn-bg: color-mix(in srgb, var(--primary-color, var(--primary)) 86%, #0f172a);
     --solid-btn-border: color-mix(in srgb, var(--primary-color, var(--primary)) 86%, #0f172a);
 }
 
-.solidChatterMessageBox {
+.solid-chatter-message-box {
     margin-top: 0px;
     padding-left: 0.3rem;
 }
 
-.solidChatterMessageCard {
+.solid-chatter-message-card {
     border-radius: 0.75rem;
     background: transparent;
     padding: 0.25rem 0;
 }
 
-.solidChatterMessageLayout {
+.solid-chatter-message-layout {
     display: flex;
     gap: 0.65rem;
     align-items: flex-start;
 }
 
-.solidChatterAvatar {
+.solid-chatter-avatar {
     width: 25px;
     height: 25px;
     border-radius: 50%;
@@ -189,7 +179,7 @@
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
 }
 
-.solidChatterMessageContent {
+.solid-chatter-message-content {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -197,7 +187,7 @@
     gap: 0.4rem;
 }
 
-.solidChatterMessageHeader {
+.solid-chatter-message-header {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -205,32 +195,32 @@
     flex-wrap: wrap;
 }
 
-.solidChatterUser {
+.solid-chatter-user {
     margin: 0;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--foreground);
 }
 
-.solidChatterMeta {
+.solid-chatter-meta {
     margin: 0;
     font-size: 0.70rem;
     color: var(--muted-foreground);
 }
 
-.solidChatterTime {
+.solid-chatter-time {
     font-size: 0.70rem;
     color: var(--muted-foreground);
     white-space: nowrap;
 }
 
-.solidChatterAttachments {
+.solid-chatter-attachments {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
 }
 
-.solidChatterAttachment {
+.solid-chatter-attachment {
     border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
     border-radius: 0.55rem;
     padding: 0.3rem 0.5rem;
@@ -240,18 +230,18 @@
     gap: 0.25rem;
 }
 
-.solidChatterAttachment img {
+.solid-chatter-attachment img {
     border-radius: 0.45rem;
 }
 
-.chatterSelectedFiles {
+.solid-chatter-selected-files {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-top: 0.75rem;
 }
 
-.chatterSelectedFileCard {
+.solid-chatter-selected-file-card {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -262,7 +252,7 @@
     min-width: 220px;
 }
 
-.chatterSelectedFileIcon {
+.solid-chatter-selected-file-icon {
     width: 28px;
     height: 28px;
     border-radius: 0.45rem;
@@ -274,12 +264,12 @@
     flex-shrink: 0;
 }
 
-.chatterSelectedFileMeta {
+.solid-chatter-selected-file-meta {
     flex: 1;
     min-width: 0;
 }
 
-.chatterSelectedFileName {
+.solid-chatter-selected-file-name {
     margin: 0;
     font-size: 0.8rem;
     font-weight: 500;
@@ -287,12 +277,12 @@
     word-break: break-word;
 }
 
-.chatterSelectedFileSize {
+.solid-chatter-selected-file-size {
     font-size: 0.7rem;
     color: var(--muted-foreground);
 }
 
-.solidChatterBadge {
+.solid-chatter-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
@@ -303,30 +293,30 @@
     background: color-mix(in srgb, var(--muted) 16%, var(--card) 84%);
 }
 
-.solidChatterBadge.audit {
+.solid-chatter-badge.solid-chatter-audit {
     color: #9333ea;
     border-color: rgba(147, 51, 234, 0.2);
     background: rgba(147, 51, 234, 0.08);
 }
 
-.solidChatterBadge.custom {
+.solid-chatter-badge.solid-chatter-custom {
     color: #722ED1;
     border-color: rgba(114, 46, 209, 0.2);
     background: rgba(114, 46, 209, 0.08);
 }
 
-:global(.solid-chatter-body) {
+.solid-chatter-body {
     padding: 0.35rem 0.85rem 1rem 0.2rem;
     overflow-y: auto;
     scrollbar-gutter: stable;
 }
-:global(.solidMessageWrapper .solidMessageText) {
+.solid-chatter-message-wrapper .solid-chatter-message-text {
     margin: 0;
     font-size: inherit;
     color: inherit;
     line-height: inherit;
 }
-.solidMessageText {
+.solid-chatter-message-text {
     margin: 0;
     font-size: inherit;
     color: inherit;

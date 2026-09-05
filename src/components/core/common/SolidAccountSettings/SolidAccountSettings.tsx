@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidChangePassword } from "./SolidChangePassword";
 import { SolidVersionInfo } from "./SolidVersionInfo";
-import styles from "./SolidAccountSettings.module.css";
+import "./solid-account-settings.css";
 import { useGetSolidVersionInfoQuery, useLazyGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
 import { getSettingsMap, toLegacySettingsShape } from "../../../../helpers/settingsPayload";
 
@@ -52,24 +52,24 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
   if (!showProfileSettingsDialog) return null;
 
   return (
-    <div className={styles.backdrop} role="presentation" onClick={() => setShowProfileSettingsDialog(false)}>
+    <div className={"solid-account-settings-backdrop"} role="presentation" onClick={() => setShowProfileSettingsDialog(false)}>
       <section
-        className={styles.modal}
+        className={"solid-account-settings-modal"}
         role="dialog"
         aria-modal="true"
         aria-labelledby="solid-account-settings-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <header className={styles.header}>
+        <header className={"solid-account-settings-header"}>
           <div>
-            <h2 id="solid-account-settings-title" className={styles.title}>
+            <h2 id="solid-account-settings-title" className={"solid-account-settings-title"}>
               Account Settings
             </h2>
-            <p className={styles.subtitle}>Manage your profile and security settings.</p>
+            <p className={"solid-account-settings-subtitle"}>Manage your profile and security settings.</p>
           </div>
           <button
             type="button"
-            className={styles.closeButton}
+            className={"solid-account-settings-close-button"}
             onClick={() => setShowProfileSettingsDialog(false)}
             aria-label="Close account settings"
           >
@@ -77,14 +77,14 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
           </button>
         </header>
 
-        <div className={styles.tabsLine} role="tablist" aria-label="Account setting sections">
+        <div className={"solid-account-settings-tabs-line"} role="tablist" aria-label="Account setting sections">
           {settings.map((option) => (
             <button
               key={option.key}
               type="button"
               role="tab"
               aria-selected={option.key === settingKey}
-              className={`${styles.tabTrigger} ${option.key === settingKey ? styles.tabActive : ""}`}
+              className={`${"solid-account-settings-tab-trigger"} ${option.key === settingKey ? "solid-account-settings-tab-active" : ""}`}
               onClick={() => setSettingKey(option.key)}
             >
               {option.label}
@@ -92,7 +92,7 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
           ))}
         </div>
 
-        <div className={styles.formWrapper}>{renderSettingComponent}</div>
+        <div className={"solid-account-settings-form-wrapper"}>{renderSettingComponent}</div>
       </section>
     </div>
   );

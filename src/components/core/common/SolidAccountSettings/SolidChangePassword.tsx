@@ -8,7 +8,7 @@ import { useSession } from "../../../../hooks/useSession";
 import { useChangePasswordMutation } from "../../../../redux/api/authApi";
 import { SolidPasswordHelperText } from "../SolidPasswordHelperText";
 import { SolidButton } from "../../../shad-cn-ui/SolidButton";
-import styles from "./SolidAccountSettings.module.css";
+import "./solid-account-settings.css";
 
 type ToastState = {
   id: number;
@@ -23,20 +23,20 @@ const ToastMessage = ({ toast, onClose }: { toast: ToastState; onClose: () => vo
   if (!toast) return null;
   const severityClass =
     toast.severity === "error"
-      ? styles.toastError
+      ? "solid-account-settings-toast-error"
       : toast.severity === "success"
-        ? styles.toastSuccess
+        ? "solid-account-settings-toast-success"
         : toast.severity === "warn"
-          ? styles.toastWarn
-          : styles.toastInfo;
+          ? "solid-account-settings-toast-warn"
+          : "solid-account-settings-toast-info";
 
   return (
-    <div className={`${styles.toast} ${severityClass}`} role="status" aria-live="polite">
+    <div className={`${"solid-account-settings-toast"} ${severityClass}`} role="status" aria-live="polite">
       <div>
-        <div className={styles.toastTitle}>{toast.summary}</div>
-        <div className={styles.toastBody}>{toast.detail}</div>
+        <div className={"solid-account-settings-toast-title"}>{toast.summary}</div>
+        <div className={"solid-account-settings-toast-body"}>{toast.detail}</div>
       </div>
-      <button type="button" className={styles.toastClose} onClick={onClose} aria-label="Close notification">
+      <button type="button" className={"solid-account-settings-toast-close"} onClick={onClose} aria-label="Close notification">
         ×
       </button>
     </div>
@@ -60,12 +60,12 @@ const PasswordInput = ({
 }) => {
   const [visible, setVisible] = useState(false);
   return (
-    <div className={styles.passwordWrap}>
+    <div className={"solid-account-settings-password-wrap"}>
       <input
         id={id}
         name={name}
         type={visible ? "text" : "password"}
-        className={styles.input}
+        className={"solid-account-settings-input"}
         value={value}
         onChange={onChange}
         onBlur={onBlur}
@@ -73,7 +73,7 @@ const PasswordInput = ({
       />
       <button
         type="button"
-        className={styles.passwordToggle}
+        className={"solid-account-settings-password-toggle"}
         onClick={() => setVisible((prev) => !prev)}
         aria-label={visible ? "Hide password" : "Show password"}
       >
@@ -186,12 +186,12 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
   const isChangePasswordDisabled = !formik.dirty || !formik.isValid || formik.isSubmitting;
 
   return (
-    <form onSubmit={formik.handleSubmit} className={styles.accountForm}>
+    <form onSubmit={formik.handleSubmit} className={"solid-account-settings-account-form"}>
       <ToastMessage toast={toast} onClose={() => setToast(null)} />
 
-      <div className={styles.accountScroll}>
-        <div className={styles.formStack}>
-          <div className={styles.field}>
+      <div className={"solid-account-settings-account-scroll"}>
+        <div className={"solid-account-settings-form-stack"}>
+          <div className={"solid-account-settings-field"}>
             <label htmlFor="currentPassword">Current Password</label>
             <PasswordInput
               id="currentPassword"
@@ -200,10 +200,10 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
             />
-            {fieldError("currentPassword") ? <p className={styles.errorText}>{fieldError("currentPassword")}</p> : null}
+            {fieldError("currentPassword") ? <p className={"solid-account-settings-error-text"}>{fieldError("currentPassword")}</p> : null}
           </div>
 
-          <div className={styles.field}>
+          <div className={"solid-account-settings-field"}>
             <label htmlFor="newPassword">New Password</label>
             <PasswordInput
               id="newPassword"
@@ -212,10 +212,10 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
             />
-            {fieldError("newPassword") ? <p className={styles.errorText}>{fieldError("newPassword")}</p> : null}
+            {fieldError("newPassword") ? <p className={"solid-account-settings-error-text"}>{fieldError("newPassword")}</p> : null}
           </div>
 
-          <div className={styles.field}>
+          <div className={"solid-account-settings-field"}>
             <label htmlFor="confirmPassword">Confirm New Password</label>
             <PasswordInput
               id="confirmPassword"
@@ -224,16 +224,16 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
             />
-            {fieldError("confirmPassword") ? <p className={styles.errorText}>{fieldError("confirmPassword")}</p> : null}
+            {fieldError("confirmPassword") ? <p className={"solid-account-settings-error-text"}>{fieldError("confirmPassword")}</p> : null}
           </div>
         </div>
 
-        <div className={styles.passwordHintWrap}>
+        <div className={"solid-account-settings-password-hint-wrap"}>
           <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} />
         </div>
       </div>
 
-      <div className={styles.footerActions}>
+      <div className={"solid-account-settings-footer-actions"}>
         <SolidButton type="submit" size="sm" loading={formik.isSubmitting} disabled={isChangePasswordDisabled}>
           Change Password
         </SolidButton>

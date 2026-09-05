@@ -18,7 +18,7 @@ import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import { useRouter } from "../../../../../hooks/useRouter";
 import { usePathname } from "../../../../../hooks/usePathname";
 import { camelCase, capitalize } from "lodash";
-import styles from "../solidFields.module.css";
+import "../solid-fields.css";
 import { SolidListView } from "../../../../core/list/SolidListView";
 import { RenderSolidFormEmbededView } from "./SolidRelationManyToOneField";
 import { buildSyntheticChangeEvent } from "../fieldEventUtils";
@@ -197,9 +197,9 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
 
     return (
         <div className="relative">
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel !== false && (
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
@@ -361,7 +361,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         <div className="flex items-center gap-4 justify-between">
             <div className="flex items-center gap-4">
                 {showFieldLabel !== false && (
-                    <label className={`${styles.fieldLabel} form-field-label`}>
+                    <label className={`${"solid-field-label"} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
@@ -410,7 +410,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                                 checked={currentValues.some((s) => s.value === item.value)}
                                 onChange={() => handleCheckboxChange(item)}
                             />
-                            <label htmlFor={item.label} className={`${styles.fieldLabel} form-field-label m-0`}>
+                            <label htmlFor={item.label} className={`${"solid-field-label"} form-field-label m-0`}>
                                 {item.label}
                             </label>
                         </div>
@@ -613,9 +613,9 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
 
     return (
         <div>
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel !== false && (
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
@@ -746,11 +746,11 @@ export const DefaultRelationManyToManyFormViewWidget = ({ fieldContext }: SolidF
     const displayValue = `${visibleValues.join(", ")}${hiddenCount > 0 ? ` +${hiddenCount} more` : ""}`;
 
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`${"solid-field-view-label"} form-field-label`}>{fieldLabel}</p>
             )}
-            <p className={styles.fieldViewValue}>{displayValue}</p>
+            <p className={"solid-field-view-value"}>{displayValue}</p>
         </div>
     );
 };

@@ -10,7 +10,7 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
-import styles from "./solidFields.module.css";
+import "./solid-fields.css";
 
 const toDateValue = (value: any) => {
     if (!value) return null;
@@ -140,9 +140,9 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
     return (
         <div className="relative">
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
@@ -178,13 +178,13 @@ export const DefaultDateFormViewWidget = ({ formik, fieldContext, }: SolidFormFi
 
 
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>
+                <p className={`${"solid-field-view-label"} form-field-label`}>
                     {fieldLabel}
                 </p>
             )}
-            <p className={styles.fieldViewValue}>
+            <p className={"solid-field-view-value"}>
                 <DateFieldViewComponent value={rawValue} format={format} fallback="-"></DateFieldViewComponent>
             </p>
         </div>

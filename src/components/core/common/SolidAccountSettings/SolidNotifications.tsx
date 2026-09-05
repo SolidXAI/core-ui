@@ -5,7 +5,7 @@ import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { SolidButton } from "../../../shad-cn-ui/SolidButton";
-import styles from "./SolidAccountSettings.module.css";
+import "./solid-account-settings.css";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 
 export const SolidNotifications = () => {
@@ -58,25 +58,25 @@ export const SolidNotifications = () => {
   });
 
   return (
-    <form onSubmit={formik.handleSubmit} className={styles.accountForm}>
-      <div className={styles.accountScroll}>
-        <div className={styles.switchRow}>
+    <form onSubmit={formik.handleSubmit} className={"solid-account-settings-account-form"}>
+      <div className={"solid-account-settings-account-scroll"}>
+        <div className={"solid-account-settings-switch-row"}>
           <div>
-            <label className={styles.sectionTitle}>Enable Notification</label>
-            <div className={styles.versionCaption}>Decide whether you want to be notified of new messages or updates.</div>
+            <label className={"solid-account-settings-section-title"}>Enable Notification</label>
+            <div className={"solid-account-settings-version-caption"}>Decide whether you want to be notified of new messages or updates.</div>
           </div>
-          <label className={styles.switch} aria-label="Enable notification">
+          <label className={"solid-account-settings-switch"} aria-label="Enable notification">
             <input
               type="checkbox"
               checked={Boolean(formik.values.enableNotification)}
               onChange={(event) => formik.setFieldValue("enableNotification", event.target.checked)}
             />
-            <span className={styles.switchTrack} />
+            <span className={"solid-account-settings-switch-track"} />
           </label>
         </div>
       </div>
 
-      <div className={styles.footerActions}>
+      <div className={"solid-account-settings-footer-actions"}>
         <SolidButton type="submit" size="sm" loading={formik.isSubmitting}>
           Save
         </SolidButton>

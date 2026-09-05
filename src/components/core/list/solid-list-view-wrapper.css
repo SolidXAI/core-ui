@@ -1,0 +1,13 @@
+.solid-list-view-list-content-wrapper {
+  transition: width 0.3s ease;
+  min-width: 0;
+  border-right: 0;
+}
+
+.solid-list-view-row-actions-overlay {
+  min-width: 120px;
+}
+
+.solid-list-view-retrieve-icon {
+  font-size: 1rem;
+}

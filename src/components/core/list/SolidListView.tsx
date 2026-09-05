@@ -27,7 +27,7 @@ import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { useDispatch, useSelector } from "react-redux";
-import styles from "./SolidListViewWrapper.module.css";
+import "./solid-list-view-wrapper.css";
 import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
@@ -1406,7 +1406,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // };
   return (
     <div className={`page-parent-wrapper ${isEmbeddedList ? "solid-list-page-wrapper-embedded" : "solid-list-page-wrapper"} flex ${isEmbeddedList ? "min-h-0 overflow-visible" : "h-full min-h-0 overflow-hidden"}`}>
-      <div className={`solid-list-content flex flex-col ${isEmbeddedList ? "min-h-0" : "flex-grow-1"} ${styles.ListContentWrapper}`}>
+      <div className={`solid-list-content flex flex-col ${isEmbeddedList ? "min-h-0" : "flex-grow-1"} ${"solid-list-view-list-content-wrapper"}`}>
         <div className={`solid-list-surface flex flex-col min-h-0 ${isEmbeddedList ? "" : "flex-1"}`}>
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-col lg:flex-row">
@@ -1580,7 +1580,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
               ) : (
                 <div
-                  className={`solid-datatable-wrapper solid-list-table-area min-h-0 ${isEmbeddedList ? "overflow-visible" : "flex-1 overflow-hidden"} ${styles.listTableArea}`}
+                  className={`solid-datatable-wrapper solid-list-table-area min-h-0 ${isEmbeddedList ? "overflow-visible" : "flex-1 overflow-hidden"}`}
                 >
                   <DataTable
                     value={listViewData}
@@ -1814,7 +1814,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                 aria-label="Recover record"
                                 title="Recover"
                               >
-                                <RotateCcw size={14} className={styles.retrieveIcon} />
+                                <RotateCcw size={14} className={"solid-list-view-retrieve-icon"} />
                               </button>
                             </div>
                           ) : (
@@ -1831,7 +1831,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       solidListViewMetaData={solidListViewMetaData}
                                       params={params}
                                       handleCustomButtonClick={handleCustomButtonClick}
-                                      contentClassName={styles.rowActionsOverlay}
+                                      contentClassName={"solid-list-view-row-actions-overlay"}
                                       onSelectRow={(selectedRow: any) => {
                                         setSelectedSolidViewData(selectedRow);
                                       }}

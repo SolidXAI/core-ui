@@ -5,7 +5,7 @@ import { useGetUserQuery, useUpdateUserProfileMutation } from "../../../../redux
 import { useSession } from "../../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { SolidButton } from "../../../shad-cn-ui/SolidButton";
-import styles from "./SolidAccountSettings.module.css";
+import "./solid-account-settings.css";
 
 type ToastState = {
   id: number;
@@ -20,20 +20,20 @@ const ToastMessage = ({ toast, onClose }: { toast: ToastState; onClose: () => vo
   if (!toast) return null;
   const severityClass =
     toast.severity === "error"
-      ? styles.toastError
+      ? "solid-account-settings-toast-error"
       : toast.severity === "success"
-        ? styles.toastSuccess
+        ? "solid-account-settings-toast-success"
         : toast.severity === "warn"
-          ? styles.toastWarn
-          : styles.toastInfo;
+          ? "solid-account-settings-toast-warn"
+          : "solid-account-settings-toast-info";
 
   return (
-    <div className={`${styles.toast} ${severityClass}`} role="status" aria-live="polite">
+    <div className={`${"solid-account-settings-toast"} ${severityClass}`} role="status" aria-live="polite">
       <div>
-        <div className={styles.toastTitle}>{toast.summary}</div>
-        <div className={styles.toastBody}>{toast.detail}</div>
+        <div className={"solid-account-settings-toast-title"}>{toast.summary}</div>
+        <div className={"solid-account-settings-toast-body"}>{toast.detail}</div>
       </div>
-      <button type="button" className={styles.toastClose} onClick={onClose} aria-label="Close notification">
+      <button type="button" className={"solid-account-settings-toast-close"} onClick={onClose} aria-label="Close notification">
         ×
       </button>
     </div>
@@ -55,17 +55,17 @@ const ConfirmDialog = ({
 }) => {
   if (!visible) return null;
   return (
-    <div className={styles.confirmBackdrop} role="presentation" onClick={onCancel}>
+    <div className={"solid-account-settings-confirm-backdrop"} role="presentation" onClick={onCancel}>
       <div
-        className={styles.confirmModal}
+        className={"solid-account-settings-confirm-modal"}
         role="dialog"
         aria-modal="true"
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className={styles.confirmHeader}>{title}</div>
-        <div className={styles.confirmBody}>{text}</div>
-        <div className={styles.confirmActions}>
+        <div className={"solid-account-settings-confirm-header"}>{title}</div>
+        <div className={"solid-account-settings-confirm-body"}>{text}</div>
+        <div className={"solid-account-settings-confirm-actions"}>
           <SolidButton size="sm" variant="destructive" onClick={onConfirm}>
             Confirm
           </SolidButton>
@@ -232,18 +232,18 @@ export const SolidPersonalInfo = () => {
 
   return (
     <>
-      <form onSubmit={formik.handleSubmit} className={styles.accountForm}>
+      <form onSubmit={formik.handleSubmit} className={"solid-account-settings-account-form"}>
         <ToastMessage toast={toast} onClose={() => setToast(null)} />
 
-        <div className={styles.accountScroll}>
-          <div className={styles.sectionTitle}>Profile Picture</div>
+        <div className={"solid-account-settings-account-scroll"}>
+          <div className={"solid-account-settings-section-title"}>Profile Picture</div>
 
-          <div className={styles.avatarRow}>
-            <div className={styles.avatarShell}>
+          <div className={"solid-account-settings-avatar-row"}>
+            <div className={"solid-account-settings-avatar-shell"}>
               {liveAvatarUrl ? (
-                <img src={liveAvatarUrl} alt="Profile" className={styles.avatarImage} />
+                <img src={liveAvatarUrl} alt="Profile" className={"solid-account-settings-avatar-image"} />
               ) : (
-                <span className={styles.avatarFallback} style={{ backgroundColor: avatarBg }}>
+                <span className={"solid-account-settings-avatar-fallback"} style={{ backgroundColor: avatarBg }}>
                   {initials}
                 </span>
               )}
@@ -251,7 +251,7 @@ export const SolidPersonalInfo = () => {
               {liveAvatarUrl ? (
                 <button
                   type="button"
-                  className={styles.avatarRemove}
+                  className={"solid-account-settings-avatar-remove"}
                   onClick={handleDeleteAvatar}
                   aria-label="Delete profile picture"
                 >
@@ -264,7 +264,7 @@ export const SolidPersonalInfo = () => {
               type="button"
               size="sm"
               variant="outline"
-              className={styles.accountSecondaryBtn}
+              className={"solid-account-settings-account-secondary-btn"}
               onClick={() => fileInputRef.current?.click()}
             >
               Upload Avatar
@@ -283,36 +283,36 @@ export const SolidPersonalInfo = () => {
             />
           </div>
 
-          <div className={styles.dashedDivider} />
+          <div className={"solid-account-settings-dashed-divider"} />
 
-          <div className={styles.sectionTitle}>Details</div>
-          <div className={styles.grid}>
-            <div className={styles.field}>
+          <div className={"solid-account-settings-section-title"}>Details</div>
+          <div className={"solid-account-settings-grid"}>
+            <div className={"solid-account-settings-field"}>
               <label htmlFor="fullName">Name</label>
               <input
                 id="fullName"
                 name="fullName"
                 value={formik.values.fullName}
                 onChange={formik.handleChange}
-                className={styles.input}
+                className={"solid-account-settings-input"}
               />
             </div>
 
-            <div className={styles.field}>
+            <div className={"solid-account-settings-field"}>
               <label htmlFor="email">Email</label>
-              <input id="email" disabled value={userData?.data?.email || ""} className={styles.input} />
+              <input id="email" disabled value={userData?.data?.email || ""} className={"solid-account-settings-input"} />
             </div>
 
-            <div className={styles.field}>
+            <div className={"solid-account-settings-field"}>
               <label htmlFor="mobile">Contact Number</label>
-              <input id="mobile" disabled value={userData?.data?.mobile || ""} className={styles.input} />
+              <input id="mobile" disabled value={userData?.data?.mobile || ""} className={"solid-account-settings-input"} />
             </div>
 
-            <div className={styles.field}>
+            <div className={"solid-account-settings-field"}>
               <label>Role</label>
-              <div className={styles.roleBox}>
+              <div className={"solid-account-settings-role-box"}>
                 {roleLabels.map((name: string) => (
-                  <span key={name} className={styles.roleChip}>
+                  <span key={name} className={"solid-account-settings-role-chip"}>
                     {name}
                   </span>
                 ))}
@@ -321,7 +321,7 @@ export const SolidPersonalInfo = () => {
           </div>
         </div>
 
-        <div className={styles.footerActions}>
+        <div className={"solid-account-settings-footer-actions"}>
           <SolidButton type="submit" size="sm" loading={formik.isSubmitting} disabled={isSaveDisabled}>
             Save
           </SolidButton>

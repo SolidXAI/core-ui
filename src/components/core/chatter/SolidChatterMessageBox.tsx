@@ -2,8 +2,7 @@
 import { getTextColor, stringToColor } from '../../../helpers/getRandomColors'
 import Image from "../../common/Image"
 import { useEffect, useMemo, useRef, useState } from 'react'
-import styles from './chatter.module.css'
-import { SolidChatterCustomMessage } from './SolidChatterCustomMessage'
+import './solid-chatter.css';import { SolidChatterCustomMessage } from './SolidChatterCustomMessage'
 import { SolidChatterAuditMessage } from './SolidChatterAuditMessage'
 import { Check, GitBranch, MessageSquare, Paperclip, Pencil, Trash2, X } from 'lucide-react'
 import { SolidButton, SolidLightbox, SolidTag, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger, SolidIcon, SolidTextarea, type SolidIconName } from '../../shad-cn-ui'
@@ -293,20 +292,20 @@ export const SolidChatterMessageBox = (props: Props) => {
     };
 
     return (
-        <div className={styles.solidChatterMessageBox}>
-            <div className={styles.solidChatterMessageCard}>
-                <div className={styles.solidChatterMessageLayout}>
-                    <div className={styles.solidChatterAvatar} style={avatarStyle}>
+        <div className={"solid-chatter-message-box"}>
+            <div className={"solid-chatter-message-card"}>
+                <div className={"solid-chatter-message-layout"}>
+                    <div className={"solid-chatter-avatar"} style={avatarStyle}>
                         {initials || user.charAt(0).toUpperCase()}
                     </div>
-                    <div className={styles.solidChatterMessageContent}>
-                        <div className={styles.solidChatterMessageHeader}>
+                    <div className={"solid-chatter-message-content"}>
+                        <div className={"solid-chatter-message-header"}>
                             <div className='flex items-center gap-2 flex-wrap'>
-                                <p className={styles.solidChatterUser}>{user}</p>
+                                <p className={"solid-chatter-user"}>{user}</p>
                                 <SolidTooltip>
                                     <SolidTooltipTrigger asChild>
                                         <span
-                                            className={`${styles.solidChatterBadge} ${messageType === 'audit' ? styles.audit : styles.custom}`}
+                                            className={`${"solid-chatter-badge"} ${messageType === 'audit' ? "solid-chatter-audit" : "solid-chatter-custom"}`}
                                             aria-label={messageLabel}
                                         >
                                             <TypeIcon size={12} />
@@ -333,17 +332,17 @@ export const SolidChatterMessageBox = (props: Props) => {
                                         title="Edit note"
                                     />
                                 )}
-                                <span className={styles.solidChatterTime}>{time}</span>
+                                <span className={"solid-chatter-time"}>{time}</span>
                             </div>
                         </div>
                         {modelDisplayName && (
-                            <p className={`${styles.solidChatterMeta} m-0`}>
+                            <p className={`${"solid-chatter-meta"} m-0`}>
                                 {modelDisplayName}
                                 {modelUserKey && <> · <span className='font-medium'>{modelUserKey}</span></>}
                             </p>
                         )}
                         {localMessage && !isEditing && (
-                            <div className={styles.solidMessageWrapper}>
+                            <div className={"solid-chatter-message-wrapper"}>
                                 {messageType === 'audit'
                                     ? <SolidChatterAuditMessage auditRecord={auditRecord} />
                                     : <SolidChatterCustomMessage message={localMessage} />}
@@ -361,7 +360,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                                     rows={4}
                                     className="w-full py-2"
                                 />
-                                <p className={styles.chatterComposerHelp}>
+                                <p className={"solid-chatter-composer-help"}>
                                     Type @ to mention a user. Press Ctrl+Enter to save.
                                 </p>
                                 {mentionRange && (
@@ -440,11 +439,11 @@ export const SolidChatterMessageBox = (props: Props) => {
                             </div>
                         )}
                         {visibleAttachments.length > 0 && (
-                            <div className={styles.solidChatterAttachments}>
+                            <div className={"solid-chatter-attachments"}>
                                 {visibleAttachments.map((attachment) => {
                                     const isImage = attachment.mimeType.startsWith('image/');
                                     return (
-                                        <div key={attachment.id} className={styles.solidChatterAttachment} style={{ position: 'relative' }}>
+                                        <div key={attachment.id} className={"solid-chatter-attachment"} style={{ position: 'relative' }}>
                                             {isEditing && canEditNote && (
                                                 <SolidButton
                                                     type="button"

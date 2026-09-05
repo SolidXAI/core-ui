@@ -5,7 +5,7 @@
 ───────────────────────────────────────────────────────────────────────────── */
 
 /* ── Container ── */
-.Container {
+.solid-ai-container {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -19,7 +19,7 @@
 }
 
 /* ── Header ── */
-.Header {
+.solid-ai-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -31,7 +31,7 @@
     flex-shrink: 0;
 }
 
-.NewChatHeaderBtn {
+.solid-ai-new-chat-header-btn {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -50,52 +50,33 @@
     transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 
-.NewChatHeaderBtn:hover {
+.solid-ai-new-chat-header-btn:hover {
     background: var(--accent);
     color: var(--accent-foreground);
     border-color: var(--solid-border-strong, var(--border));
 }
 
-.HeaderSpacer {
+.solid-ai-header-spacer {
     flex: 1;
 }
 
-.LogoBadge {
-    width: 26px;
-    height: 26px;
-    border-radius: 7px;
-    background: linear-gradient(135deg, var(--primary), #8b5cf6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--primary-foreground);
-    flex-shrink: 0;
-}
-
-.HeaderTitle {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    color: var(--foreground);
-}
-
-.StatusDot {
+.solid-ai-status-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
     flex-shrink: 0;
 }
 
-.StatusOnline {
+.solid-ai-status-online {
     background: #22c55e;
     box-shadow: 0 0 5px #22c55e66;
 }
 
-.StatusOffline {
+.solid-ai-status-offline {
     background: #ef4444;
 }
 
-.StatusLabel {
+.solid-ai-status-label {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -104,7 +85,7 @@
 }
 
 /* ── Hamburger button ── */
-.HamburgerBtn {
+.solid-ai-hamburger-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -119,19 +100,19 @@
     flex-shrink: 0;
 }
 
-.HamburgerBtn:hover {
+.solid-ai-hamburger-btn:hover {
     background: var(--accent);
     color: var(--accent-foreground);
     border-color: var(--solid-border-strong, var(--border));
 }
 
 /* ── Sessions menu anchor ── */
-.SessionMenuAnchor {
+.solid-ai-session-menu-anchor {
     position: relative;
 }
 
 /* ── Sessions dropdown ── */
-.SessionMenu {
+.solid-ai-session-menu {
     position: absolute;
     top: calc(100% + 6px);
     right: 0;
@@ -157,7 +138,7 @@
     }
 }
 
-.SessionMenuNewChat {
+.solid-ai-session-menu-new-chat {
     display: flex;
     align-items: center;
     gap: 7px;
@@ -174,11 +155,11 @@
     transition: background 0.12s;
 }
 
-.SessionMenuNewChat:hover {
+.solid-ai-session-menu-new-chat:hover {
     background: var(--accent);
 }
 
-.SessionMenuSectionLabel {
+.solid-ai-session-menu-section-label {
     padding: 8px 13px 5px;
     font-size: 10px;
     font-weight: 600;
@@ -187,23 +168,23 @@
     letter-spacing: 0.07em;
 }
 
-.SessionList {
+.solid-ai-session-list {
     max-height: 296px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
 }
 
-.SessionList::-webkit-scrollbar {
+.solid-ai-session-list::-webkit-scrollbar {
     width: 4px;
 }
 
-.SessionList::-webkit-scrollbar-thumb {
+.solid-ai-session-list::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 4px;
 }
 
-.SessionItem {
+.solid-ai-session-item {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -215,15 +196,15 @@
     transition: background 0.12s;
 }
 
-.SessionItem:first-child {
+.solid-ai-session-item:first-child {
     border-top: none;
 }
 
-.SessionItemActive {
+.solid-ai-session-item-active {
     background: var(--accent) !important;
 }
 
-.SessionItemMain {
+.solid-ai-session-item-main {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -235,11 +216,11 @@
     transition: background 0.1s;
 }
 
-.SessionItemMain:hover {
+.solid-ai-session-item-main:hover {
     background: var(--accent);
 }
 
-.SessionItemPreview {
+.solid-ai-session-item-preview {
     font-size: 12px;
     color: var(--foreground);
     white-space: nowrap;
@@ -248,12 +229,12 @@
     max-width: 100%;
 }
 
-.SessionItemMeta {
+.solid-ai-session-item-meta {
     font-size: 10px;
     color: var(--muted);
 }
 
-.SessionDeleteBtn {
+.solid-ai-session-delete-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -269,24 +250,24 @@
     margin-right: 4px;
 }
 
-.SessionDeleteBtn:hover:not(:disabled) {
+.solid-ai-session-delete-btn:hover:not(:disabled) {
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
 }
 
-.SessionDeleteBtn:disabled {
+.solid-ai-session-delete-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.SessionMenuEmpty {
+.solid-ai-session-menu-empty {
     padding: 20px 13px;
     text-align: center;
     font-size: 12px;
     color: var(--muted);
 }
 
-.SessionMenuLoading {
+.solid-ai-session-menu-loading {
     padding: 16px 13px;
     display: flex;
     align-items: center;
@@ -297,7 +278,7 @@
 }
 
 /* ── Reconnecting banner ── */
-.ReconnectBanner {
+.solid-ai-reconnect-banner {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -311,7 +292,7 @@
 }
 
 /* ── Message list ── */
-.MessageList {
+.solid-ai-message-list {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
@@ -323,17 +304,17 @@
     scrollbar-color: var(--border) transparent;
 }
 
-.MessageList::-webkit-scrollbar {
+.solid-ai-message-list::-webkit-scrollbar {
     width: 4px;
 }
 
-.MessageList::-webkit-scrollbar-thumb {
+.solid-ai-message-list::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 4px;
 }
 
 /* ── Empty state ── */
-.EmptyState {
+.solid-ai-empty-state {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -344,7 +325,7 @@
     text-align: center;
 }
 
-.EmptyIcon {
+.solid-ai-empty-icon {
     width: 52px;
     height: 52px;
     border-radius: 14px;
@@ -358,21 +339,21 @@
     opacity: 0.8;
 }
 
-.EmptyTitle {
+.solid-ai-empty-title {
     font-size: 15px;
     font-weight: 600;
     color: var(--foreground);
     opacity: 0.7;
 }
 
-.EmptySubtitle {
+.solid-ai-empty-subtitle {
     font-size: 12px;
     color: var(--muted-foreground);
     opacity: 0.7;
 }
 
 /* ── AI turn group (avatar once + all events/responses) ── */
-.AiTurnGroup {
+.solid-ai-turn-group {
     display: flex;
     align-items: flex-start;
     gap: 9px;
@@ -380,7 +361,7 @@
     width: 100%;
 }
 
-.AiTurnContent {
+.solid-ai-turn-content {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -389,7 +370,7 @@
 }
 
 /* ── Message rows ── */
-.Row {
+.solid-ai-row {
     display: flex;
     align-items: flex-start;
     gap: 9px;
@@ -397,19 +378,14 @@
     width: 100%;
 }
 
-.RowUser {
+.solid-ai-row-user {
     flex-direction: row-reverse;
     align-self: flex-end;
     margin-left: auto;
 }
 
-.RowAssistant {
-    flex-direction: row;
-    align-self: flex-start;
-}
-
 /* ── Avatar ── */
-.Avatar {
+.solid-ai-avatar {
     width: 26px;
     height: 26px;
     border-radius: 7px;
@@ -423,13 +399,13 @@
     margin-top: 2px;
 }
 
-.AvatarUser {
+.solid-ai-avatar-user {
     background: var(--accent);
     color: var(--accent-foreground);
 }
 
 /* ── Bubble group ── */
-.BubbleGroup {
+.solid-ai-bubble-group {
     display: flex;
     flex-direction: column;
     gap: 3px;
@@ -437,7 +413,7 @@
     max-width: calc(100% - 70px);
 }
 
-.Bubble {
+.solid-ai-bubble {
     border-radius: 14px;
     padding: 9px 13px;
     line-height: 1.65;
@@ -445,27 +421,27 @@
     position: relative;
 }
 
-.BubbleUser {
+.solid-ai-bubble-user {
     background: var(--accent);
     border: 1px solid var(--solid-border-strong, var(--border));
     border-bottom-right-radius: 4px;
     color: var(--accent-foreground);
 }
 
-.BubbleAssistant {
+.solid-ai-bubble-assistant {
     background: var(--card);
     border: 1px solid var(--border);
     color: var(--foreground);
 }
 
-.UserText {
+.solid-ai-user-text {
     font-size: 14px;
     margin: 0;
     white-space: pre-wrap;
 }
 
 /* ── Bubble meta ── */
-.BubbleMeta {
+.solid-ai-bubble-meta {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -474,26 +450,26 @@
     height: 18px;
 }
 
-.Row:hover .BubbleMeta,
-.AiTurnGroup:hover .BubbleMeta {
+.solid-ai-row:hover .solid-ai-bubble-meta,
+.solid-ai-turn-group:hover .solid-ai-bubble-meta {
     opacity: 1;
 }
 
-.BubbleMetaUser {
+.solid-ai-bubble-meta-user {
     flex-direction: row-reverse;
 }
 
-.BubbleMetaAssistant {
+.solid-ai-bubble-meta-assistant {
     flex-direction: row;
 }
 
-.Timestamp {
+.solid-ai-timestamp {
     font-size: 10px;
     color: var(--muted);
 }
 
 /* ── Copy button ── */
-.CopyBtn {
+.solid-ai-copy-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -507,57 +483,24 @@
     transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.CopyBtn:hover {
+.solid-ai-copy-btn:hover {
     background: var(--primary);
     color: var(--primary-foreground);
     border-color: var(--primary);
 }
 
 /* ── Typing dots (kept for reference, no longer used in JSX) ── */
-.TypingBubble {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 11px 14px;
-}
 
 /* ── Agent status bubble ── */
-.StatusBubble {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 7px 12px;
-    color: var(--primary);
-}
-
-.StatusText {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    color: var(--muted-foreground);
-    font-style: italic;
-}
-
-.StatusStep {
-    color: var(--foreground);
-    font-style: normal;
-    font-weight: 500;
-}
-
-.StatusSep {
-    color: var(--muted);
-    font-style: normal;
-}
 
 /* ── Load older messages ── */
-.LoadOlderWrap {
+.solid-ai-load-older-wrap {
     display: flex;
     justify-content: center;
     padding-bottom: 6px;
 }
 
-.LoadOlderBtn {
+.solid-ai-load-older-btn {
     display: flex;
     align-items: center;
     gap: 5px;
@@ -571,19 +514,19 @@
     transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.LoadOlderBtn:hover:not(:disabled) {
+.solid-ai-load-older-btn:hover:not(:disabled) {
     background: var(--accent);
     color: var(--primary);
     border-color: var(--primary);
 }
 
-.LoadOlderBtn:disabled {
+.solid-ai-load-older-btn:disabled {
     opacity: 0.6;
     cursor: default;
 }
 
 /* ── History loading spinner ── */
-.HistoryLoading {
+.solid-ai-history-loading {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -596,34 +539,6 @@
 }
 
 /* ── Tool activity indicator ── */
-.ToolBubble {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 13px;
-    color: var(--primary);
-}
-
-.ToolLabel {
-    font-size: 12px;
-    color: var(--muted-foreground);
-}
-
-.Dot {
-    width: 5px;
-    height: 5px;
-    background: var(--primary);
-    border-radius: 50%;
-    animation: bounce 1.2s infinite;
-}
-
-.Dot:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.Dot:nth-child(3) {
-    animation-delay: 0.4s;
-}
 
 @keyframes bounce {
 
@@ -641,67 +556,67 @@
 }
 
 /* ── Markdown ── */
-.MarkdownRoot {
+.solid-ai-markdown-root {
     font-size: inherit;
     font-family: inherit;
     line-height: 1.65;
     color: inherit;
 }
 
-.MarkdownRoot > *:first-child {
+.solid-ai-markdown-root > *:first-child {
     margin-top: 0 !important;
 }
 
-.MarkdownRoot > *:last-child {
+.solid-ai-markdown-root > *:last-child {
     margin-bottom: 0 !important;
 }
 
-.MarkdownRoot p {
+.solid-ai-markdown-root p {
     margin: 0 0 8px;
 }
 
-.MarkdownRoot p:last-child {
+.solid-ai-markdown-root p:last-child {
     margin-bottom: 0;
 }
 
-.MarkdownRoot h1,
-.MarkdownRoot h2,
-.MarkdownRoot h3 {
+.solid-ai-markdown-root h1,
+.solid-ai-markdown-root h2,
+.solid-ai-markdown-root h3 {
     font-weight: 600;
     margin: 16px 0 4px;
     color: inherit;
     line-height: 1.3;
 }
 
-.MarkdownRoot h1 {
+.solid-ai-markdown-root h1 {
     font-size: 1.15em;
 }
 
-.MarkdownRoot h2 {
+.solid-ai-markdown-root h2 {
     font-size: 1.05em;
 }
 
-.MarkdownRoot h3 {
+.solid-ai-markdown-root h3 {
     font-size: 1em;
     opacity: 0.85;
 }
 
-.MarkdownRoot ul,
-.MarkdownRoot ol {
+.solid-ai-markdown-root ul,
+.solid-ai-markdown-root ol {
     padding-left: 18px;
     margin: 5px 0;
 }
 
-.MarkdownRoot li {
+.solid-ai-markdown-root li {
     margin: 3px 0;
     line-height: 1.55;
 }
 
-.MarkdownRoot li > p {
+.solid-ai-markdown-root li > p {
     margin: 0;
 }
 
-.MarkdownRoot blockquote {
+.solid-ai-markdown-root blockquote {
     border-left: 2px solid var(--border);
     padding: 4px 11px;
     margin: 8px 0;
@@ -709,8 +624,8 @@
     font-style: italic;
 }
 
-.MarkdownRoot a,
-.MarkdownLink {
+.solid-ai-markdown-root a,
+.solid-ai-markdown-link {
     color: var(--primary);
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -718,34 +633,34 @@
     transition: opacity 0.15s;
 }
 
-.MarkdownRoot a:hover,
-.MarkdownLink:hover {
+.solid-ai-markdown-root a:hover,
+.solid-ai-markdown-link:hover {
     opacity: 0.72;
 }
 
-.MarkdownRoot hr {
+.solid-ai-markdown-root hr {
     border: none;
     border-top: 1px solid var(--border);
     margin: 12px 0;
 }
 
 /* ── Markdown table ── */
-.MarkdownTableWrapper {
+.solid-ai-markdown-table-wrapper {
     overflow-x: auto;
     margin: 8px 0;
     border-radius: 7px;
     border: 1px solid var(--border);
 }
 
-.MarkdownRoot table {
+.solid-ai-markdown-root table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
     margin: 0;
 }
 
-.MarkdownRoot th,
-.MarkdownRoot td {
+.solid-ai-markdown-root th,
+.solid-ai-markdown-root td {
     border-bottom: 1px solid var(--border);
     border-right: 1px solid var(--border);
     padding: 6px 12px;
@@ -753,16 +668,16 @@
     vertical-align: top;
 }
 
-.MarkdownRoot th:last-child,
-.MarkdownRoot td:last-child {
+.solid-ai-markdown-root th:last-child,
+.solid-ai-markdown-root td:last-child {
     border-right: none;
 }
 
-.MarkdownRoot tr:last-child td {
+.solid-ai-markdown-root tr:last-child td {
     border-bottom: none;
 }
 
-.MarkdownRoot th {
+.solid-ai-markdown-root th {
     background: var(--accent);
     font-weight: 600;
     font-size: 12px;
@@ -771,12 +686,12 @@
     letter-spacing: 0.03em;
 }
 
-.MarkdownRoot td code {
+.solid-ai-markdown-root td code {
     font-size: 12px;
 }
 
 /* ── Inline code ── */
-.InlineCode {
+.solid-ai-inline-code {
     background: var(--accent);
     border: 1px solid var(--border);
     padding: 1px 5px;
@@ -787,14 +702,14 @@
 }
 
 /* ── Code block ── */
-.CodeBlockWrapper {
+.solid-ai-code-block-wrapper {
     margin: 8px 0;
     border-radius: 8px;
     border: 1px solid var(--border);
     overflow: hidden;
 }
 
-.CodeBlockHeader {
+.solid-ai-code-block-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -803,7 +718,7 @@
     border-bottom: 1px solid var(--border);
 }
 
-.CodeLang {
+.solid-ai-code-lang {
     font-size: 10px;
     font-weight: 600;
     color: var(--muted-foreground);
@@ -811,7 +726,7 @@
     letter-spacing: 0.06em;
 }
 
-.CodeCopyBtn {
+.solid-ai-code-copy-btn {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -825,12 +740,12 @@
     transition: background 0.15s, color 0.15s;
 }
 
-.CodeCopyBtn:hover {
+.solid-ai-code-copy-btn:hover {
     background: var(--accent);
     color: var(--primary);
 }
 
-.CodePre {
+.solid-ai-code-pre {
     margin: 0;
     padding: 13px;
     background: var(--background);
@@ -844,14 +759,14 @@
 }
 
 /* ── Input area ── */
-.InputArea {
+.solid-ai-input-area {
     padding: 10px 14px 14px;
     border-top: 1px solid var(--border);
     background: var(--card);
     flex-shrink: 0;
 }
 
-.InputBox {
+.solid-ai-input-box {
     position: relative;
     display: flex;
     align-items: flex-end;
@@ -862,17 +777,17 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.InputBox:focus-within {
+.solid-ai-input-box:focus-within {
     border-color: var(--primary);
     box-shadow: none !important;
 }
 
-.InputBoxDisabled {
+.solid-ai-input-box-disabled {
     opacity: 0.45;
     pointer-events: none;
 }
 
-.Textarea {
+.solid-ai-textarea {
     flex: 1;
     background: transparent;
     border: none;
@@ -890,16 +805,16 @@
     scrollbar-color: var(--border) transparent;
 }
 
-.Textarea::placeholder {
+.solid-ai-textarea::placeholder {
     color: var(--muted);
 }
 
-.Textarea:focus {
+.solid-ai-textarea:focus {
     outline: none;
 }
 
 /* ── Send button (inside InputBox) ── */
-.SendBtn {
+.solid-ai-send-btn {
     width: 28px;
     height: 28px;
     border-radius: 8px;
@@ -915,23 +830,23 @@
     margin: 0 6px 7px 0;
 }
 
-.SendBtnActive {
+.solid-ai-send-btn-active {
     background: var(--primary);
     color: var(--primary-foreground);
     cursor: pointer;
     border-radius: 8px;
 }
 
-.SendBtnActive:hover {
+.solid-ai-send-btn-active:hover {
     opacity: 0.88;
 }
 
-.SendBtnActive:active {
+.solid-ai-send-btn-active:active {
     transform: scale(0.92);
 }
 
 /* ── Tool call cards ── */
-.ToolCard {
+.solid-ai-tool-card {
     border-radius: 6px;
     border: 1px solid var(--border);
     overflow: hidden;
@@ -941,67 +856,57 @@
     font-size: 11px;
 }
 
-.ToolCardRunning {
+.solid-ai-tool-card-running {
     border-color: rgba(59, 130, 246, 0.25);
     background: rgba(59, 130, 246, 0.02);
 }
 
-.ToolCardDone {
+.solid-ai-tool-card-done {
     border-color: var(--border);
     background: transparent;
     opacity: 0.7;
 }
 
-.ToolCardDone:hover {
+.solid-ai-tool-card-done:hover {
     opacity: 0.9;
 }
 
-.ToolCardWarning {
+.solid-ai-tool-card-warning {
     border-color: rgba(245, 158, 11, 0.5);
     background: rgba(245, 158, 11, 0.04);
 }
 
-.ToolCardError {
+.solid-ai-tool-card-error {
     border-color: rgba(239, 68, 68, 0.5);
     background: rgba(239, 68, 68, 0.04);
 }
 
-.ToolCardHeader {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
-    font-size: 12px;
-    flex-wrap: nowrap;
-    min-width: 0;
-}
-
-.ToolCardStatusIcon {
+.solid-ai-tool-card-status-icon {
     font-size: 10px;
     color: rgb(59, 130, 246);
     flex-shrink: 0;
 }
 
-.ToolCardStatusDone {
+.solid-ai-tool-card-status-done {
     color: rgb(34, 197, 94);
     opacity: 0.7;
 }
 
-.ToolCardStatusWarning {
+.solid-ai-tool-card-status-warning {
     color: rgb(245, 158, 11);
 }
 
-.ToolCardStatusError {
+.solid-ai-tool-card-status-error {
     color: rgb(239, 68, 68);
 }
 
-.ToolCardToolIcon {
+.solid-ai-tool-card-tool-icon {
     font-size: 10px;
     color: var(--muted);
     flex-shrink: 0;
 }
 
-.ToolCardName {
+.solid-ai-tool-card-name {
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
     font-size: 10.5px;
     font-weight: 500;
@@ -1010,7 +915,7 @@
     flex-shrink: 0;
 }
 
-.ToolCardDesc {
+.solid-ai-tool-card-desc {
     font-size: 10.5px;
     color: var(--muted);
     overflow: hidden;
@@ -1021,7 +926,7 @@
     max-width: 260px;
 }
 
-.ToolCardBadge {
+.solid-ai-tool-card-badge {
     font-size: 9px;
     color: var(--muted);
     border: 1px solid var(--border);
@@ -1034,7 +939,7 @@
     opacity: 0.7;
 }
 
-.ToolCardDuration {
+.solid-ai-tool-card-duration {
     font-size: 9px;
     font-variant-numeric: tabular-nums;
     color: var(--muted);
@@ -1042,7 +947,7 @@
     flex-shrink: 0;
 }
 
-.ToolCardProgress {
+.solid-ai-tool-card-progress {
     border-top: 1px solid var(--border);
     padding: 3px 8px 4px;
     display: flex;
@@ -1051,7 +956,7 @@
     background: rgba(0, 0, 0, 0.015);
 }
 
-.ToolProgressItem {
+.solid-ai-tool-progress-item {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -1059,12 +964,12 @@
     color: var(--muted);
 }
 
-.ToolProgressLabel {
+.solid-ai-tool-progress-label {
     flex: 1;
     min-width: 0;
 }
 
-.ToolProgressDuration {
+.solid-ai-tool-progress-duration {
     font-size: 9px;
     font-variant-numeric: tabular-nums;
     color: var(--muted);
@@ -1073,18 +978,18 @@
     margin-left: auto;
 }
 
-.ToolProgressRunning {
+.solid-ai-tool-progress-running {
     color: rgba(59, 130, 246, 0.8);
     font-weight: 500;
 }
 
-.ToolProgressDone {
+.solid-ai-tool-progress-done {
     color: var(--muted);
     opacity: 0.65;
 }
 
 /* ── Tool output preview ── */
-.ToolCardOutput {
+.solid-ai-tool-card-output {
     border-top: 1px solid var(--border);
     padding: 6px 10px;
     background: rgba(0, 0, 0, 0.015);
@@ -1093,7 +998,7 @@
     gap: 4px;
 }
 
-.ToolOutputHeader {
+.solid-ai-tool-output-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1104,7 +1009,7 @@
     letter-spacing: 0.02em;
 }
 
-.ToolOutputText {
+.solid-ai-tool-output-text {
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
     font-size: 11px;
     line-height: 1.5;
@@ -1117,53 +1022,18 @@
     margin: 0;
 }
 
-.ToolOutputWarning {
+.solid-ai-tool-output-warning {
     color: rgb(180, 83, 9);
 }
 
-.ToolOutputError {
+.solid-ai-tool-output-error {
     color: rgb(185, 28, 28);
 }
 
 /* ── Persistent event / step rows ── */
-.EventRow {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-family: inherit;
-    line-height: 1.4;
-    width: fit-content;
-    max-width: 100%;
-    transition: background 0.15s, color 0.15s;
-}
-
-.EventRowActive {
-    background: var(--accent);
-    border: 1px solid var(--border);
-    color: var(--muted-foreground);
-}
-
-.EventRowActive i {
-    color: var(--primary);
-}
-
-.EventRowDone {
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--muted);
-    opacity: 0.45;
-}
-
-.EventRowDone i {
-    color: var(--muted-foreground);
-    opacity: 0.6;
-}
 
 /* ── Thinking indicator bubble ── */
-.ThinkingBubble {
+.solid-ai-thinking-bubble {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1175,13 +1045,13 @@
     width: fit-content;
 }
 
-.ThinkingDots {
+.solid-ai-thinking-dots {
     display: flex;
     gap: 4px;
     align-items: center;
 }
 
-.ThinkingDot {
+.solid-ai-thinking-dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
@@ -1189,16 +1059,16 @@
     animation: bounce 1.2s infinite;
 }
 
-.ThinkingDot:nth-child(2) { animation-delay: 0.15s; }
-.ThinkingDot:nth-child(3) { animation-delay: 0.3s; }
+.solid-ai-thinking-dot:nth-child(2) { animation-delay: 0.15s; }
+.solid-ai-thinking-dot:nth-child(3) { animation-delay: 0.3s; }
 
-.ThinkingLabel {
+.solid-ai-thinking-label {
     font-size: 12px;
     color: var(--muted-foreground);
 }
 
 /* ── Streaming cursor ── */
-.StreamingCursor {
+.solid-ai-streaming-cursor {
     display: inline-block;
     width: 2px;
     height: 14px;
@@ -1215,38 +1085,15 @@
 }
 
 /* ── Step divider ── */
-.StepDividerRow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 6px 0 2px;
-    width: 100%;
-}
-
-.StepDividerLine {
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-}
-
-.StepDividerLabel {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--muted-foreground);
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    white-space: nowrap;
-    opacity: 0.6;
-}
 
 /* ── Error bubble ── */
-.ErrorBubble {
+.solid-ai-error-bubble {
     display: flex;
     gap: 9px;
     align-items: flex-start;
 }
 
-.ErrorIcon {
+.solid-ai-error-icon {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1259,7 +1106,7 @@
     margin-top: 2px;
 }
 
-.ErrorContent {
+.solid-ai-error-content {
     border-radius: 14px;
     border-bottom-left-radius: 4px;
     border: 1px solid rgba(239, 68, 68, 0.3);
@@ -1268,14 +1115,14 @@
     max-width: 85%;
 }
 
-.ErrorTitle {
+.solid-ai-error-title {
     font-size: 11px;
     font-weight: 600;
     color: #ef4444;
     margin: 0 0 3px;
 }
 
-.ErrorText {
+.solid-ai-error-text {
     font-size: 13px;
     color: rgb(185, 28, 28);
     margin: 0;
@@ -1283,15 +1130,9 @@
 }
 
 /* ── Status dot extra states ── */
-.StatusRunning {
+.solid-ai-status-running {
     background: #722ED1;
     box-shadow: 0 0 5px rgba(114, 46, 209, 0.4);
-    animation: statusPulse 1.5s ease-in-out infinite;
-}
-
-.StatusConnecting {
-    background: #eab308;
-    box-shadow: 0 0 5px #eab30866;
     animation: statusPulse 1.5s ease-in-out infinite;
 }
 
@@ -1301,28 +1142,8 @@
 }
 
 /* ── Tool card collapsible header button ── */
-.ToolCardHeaderBtn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    width: 100%;
-    padding: 4px 8px;
-    font-size: 11px;
-    flex-wrap: nowrap;
-    min-width: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    text-align: left;
-    font-family: inherit;
-    color: inherit;
-}
 
-.ToolCardHeaderBtn:not([data-expandable="true"]) {
-    cursor: default;
-}
-
-.ToolCardChevron {
+.solid-ai-tool-card-chevron {
     font-size: 10px;
     color: var(--muted-foreground);
     transition: transform 0.2s;
@@ -1330,10 +1151,10 @@
     margin-left: 2px;
 }
 
-.ToolCardChevronOpen {
+.solid-ai-tool-card-chevron-open {
     transform: rotate(90deg);
 }
 
-.ToolCardExpandable {
+.solid-ai-tool-card-expandable {
     border-top: 1px solid var(--border);
 }

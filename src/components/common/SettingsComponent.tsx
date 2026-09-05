@@ -33,7 +33,7 @@ import {
 import { SettingDropzoneActivePlaceholder } from "./SolidSettings/SettingDropzoneActivePlaceholder";
 import { SettingsImageRemoveButton } from "./SolidSettings/SettingsImageRemoveButton";
 import { SolidUploadedImage } from "./SolidSettings/SolidUploadedImage";
-import styles from "./SettingsComponent.module.css";
+import "./settings-component.css";
 
 type SettingsFormValue = string | number | boolean | null | File;
 type SettingsFilterMode = "all" | "read-only" | "editable";
@@ -306,11 +306,11 @@ export function SettingsComponent() {
   const moduleTabs = moduleEntries.map((entry) => ({
     value: entry.moduleName,
     label: (
-      <span className={styles.moduleTab}>
-        <span className={styles.moduleTabBadge}>{entry.badge}</span>
-        <span className={styles.moduleTabText}>
-          <span className={styles.moduleTabLabel}>{entry.label}</span>
-          <span className={styles.moduleTabMeta}>{entry.settings.length} settings</span>
+      <span className={"solid-settings-module-tab"}>
+        <span className={"solid-settings-module-tab-badge"}>{entry.badge}</span>
+        <span className={"solid-settings-module-tab-text"}>
+          <span className={"solid-settings-module-tab-label"}>{entry.label}</span>
+          <span className={"solid-settings-module-tab-meta"}>{entry.settings.length} settings</span>
         </span>
       </span>
     ),
@@ -318,15 +318,15 @@ export function SettingsComponent() {
       <div>
         {groupedModuleSettings.length ? (
           groupedModuleSettings.map((group) => (
-            <section key={group.key} className={styles.groupSection}>
-              <div className={styles.groupCard}>
-                <div className={styles.groupHeader}>
+            <section key={group.key} className={"solid-settings-group-section"}>
+              <div className={"solid-settings-group-card"}>
+                <div className={"solid-settings-group-header"}>
                   <div>
-                    <h3 className={styles.groupTitle}>{group.label}</h3>
-                    <div className={styles.groupMeta}>{group.settings.length} item{group.settings.length === 1 ? "" : "s"}</div>
+                    <h3 className={"solid-settings-group-title"}>{group.label}</h3>
+                    <div className={"solid-settings-group-meta"}>{group.settings.length} item{group.settings.length === 1 ? "" : "s"}</div>
                   </div>
                 </div>
-                <div className={styles.groupBody}>
+                <div className={"solid-settings-group-body"}>
                   {group.settings.map((setting) => {
                     const value = formValues[setting.key];
                     const settingName = setting.label || humanizeSettingToken(setting.key);
@@ -344,22 +344,22 @@ export function SettingsComponent() {
                       updateFileValue,
                     };
                     return (
-                      <div key={setting.key} className={styles.settingRow}>
-                        <div className={styles.settingLabelWrap}>
-                          <div className={styles.settingLabelLine}>
-                            <p className={styles.settingLabel}>{settingName}</p>
+                      <div key={setting.key} className={"solid-settings-setting-row"}>
+                        <div className={"solid-settings-setting-label-wrap"}>
+                          <div className={"solid-settings-setting-label-line"}>
+                            <p className={"solid-settings-setting-label"}>{settingName}</p>
                             {settingHelpText ? (
                               <SolidTooltip>
                                 <SolidTooltipTrigger asChild>
                                   <button
                                     type="button"
-                                    className={styles.settingHelpButton}
+                                    className={"solid-settings-setting-help-button"}
                                     aria-label={`Show help for ${settingName}`}
                                   >
                                     <CircleHelp size={14} aria-hidden />
                                   </button>
                                 </SolidTooltipTrigger>
-                                <SolidTooltipContent align="start" className={styles.settingHelpTooltip}>
+                                <SolidTooltipContent align="start" className={"solid-settings-setting-help-tooltip"}>
                                   {settingHelpText}
                                 </SolidTooltipContent>
                               </SolidTooltip>
@@ -377,14 +377,14 @@ export function SettingsComponent() {
                               </SolidTooltip>
                             ) : null}
                           </div>
-                          {setting.description ? <p className={styles.settingDescription}>{setting.description}</p> : null}
+                          {setting.description ? <p className={"solid-settings-setting-description"}>{setting.description}</p> : null}
                         </div>
 
                         {!setting.editable ? (
                           setting.controlType === "custom" ? (
                             customWidgetErrorText ? (
-                              <div className={styles.readonlyValue}>
-                                <span className={styles.customWidgetError}>{customWidgetErrorText}</span>
+                              <div className={"solid-settings-readonly-value"}>
+                                <span className={"solid-settings-custom-widget-error"}>{customWidgetErrorText}</span>
                               </div>
                             ) : SettingsWidget ? (
                               (() => {
@@ -393,22 +393,22 @@ export function SettingsComponent() {
                               })()
                             ) : null
                           ) : setting.controlType === "mediaSingle" && value ? (
-                            <div className={styles.mediaPreview}>
+                            <div className={"solid-settings-media-preview"}>
                               <SolidUploadedImage src={normalizeAssetUrl(String(value))} />
                             </div>
                           ) : (
-                            <div className={styles.readonlyValue}>
-                              <span className={value === null || value === undefined || value === "" ? styles.emptyValue : undefined}>
+                            <div className={"solid-settings-readonly-value"}>
+                              <span className={value === null || value === undefined || value === "" ? "solid-settings-empty-value" : undefined}>
                                 {formatReadonlyValue(setting, value)}
                               </span>
                             </div>
                           )
                         ) : (
-                          <div className={`${styles.controlStack} ${setting.controlType === "custom" ? styles.customControlStack : ""}`}>
+                          <div className={`${"solid-settings-control-stack"} ${setting.controlType === "custom" ? "solid-settings-custom-control-stack" : ""}`}>
                             {setting.controlType === "boolean" ? (
-                              <div className={styles.boolRow}>
+                              <div className={"solid-settings-bool-row"}>
                                 <SolidSwitch checked={Boolean(value)} onChange={(checked) => updateValue(setting.key, checked)} />
-                                <span className={styles.boolText}>{value ? "Enabled" : "Disabled"}</span>
+                                <span className={"solid-settings-bool-text"}>{value ? "Enabled" : "Disabled"}</span>
                               </div>
                             ) : null}
 
@@ -459,11 +459,11 @@ export function SettingsComponent() {
                             ) : null}
 
                             {setting.controlType === "mediaSingle" ? (
-                              <div className={styles.mediaField}>
-                                <div className={styles.mediaComposer}>
-                                  <label className={styles.mediaDropzone}>
+                              <div className={"solid-settings-media-field"}>
+                                <div className={"solid-settings-media-composer"}>
+                                  <label className={"solid-settings-media-dropzone"}>
                                     <input
-                                      className={styles.mediaInput}
+                                      className={"solid-settings-media-input"}
                                       type="file"
                                       accept=".png,.jpg,.jpeg,.svg,.webp"
                                       onChange={(event) => updateFileValue(setting.key, event.target.files?.[0] ?? null)}
@@ -471,11 +471,11 @@ export function SettingsComponent() {
                                     <SettingDropzoneActivePlaceholder note="PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB" />
                                   </label>
                                   {(filePreviews[setting.key] || value) ? (
-                                    <div className={styles.mediaPreview}>
+                                    <div className={"solid-settings-media-preview"}>
                                       <SolidUploadedImage src={filePreviews[setting.key] || normalizeAssetUrl(String(value))} />
                                     </div>
                                   ) : (
-                                    <div className={styles.mediaEmptyState}>Preview appears here after upload</div>
+                                    <div className={"solid-settings-media-empty-state"}>Preview appears here after upload</div>
                                   )}
                                 </div>
                                 {(filePreviews[setting.key] || value) ? (
@@ -486,8 +486,8 @@ export function SettingsComponent() {
 
                             {setting.controlType === "custom" ? (
                               customWidgetErrorText ? (
-                                <div className={styles.readonlyValue}>
-                                  <span className={styles.customWidgetError}>{customWidgetErrorText}</span>
+                                <div className={"solid-settings-readonly-value"}>
+                                  <span className={"solid-settings-custom-widget-error"}>{customWidgetErrorText}</span>
                                 </div>
                               ) : SettingsWidget ? (
                                 (() => {
@@ -506,24 +506,24 @@ export function SettingsComponent() {
             </section>
           ))
         ) : (
-          <div className={styles.emptyState}>No settings match the current filter.</div>
+          <div className={"solid-settings-empty-state"}>No settings match the current filter.</div>
         )}
       </div>
     ),
   }));
 
   return (
-    <div className={styles.page}>
-      <div className={`page-header ${styles.pageHeader}`}>
-        <div className={styles.headerIntro}>
+    <div className={"solid-settings-page"}>
+      <div className="solid-settings-page-header">
+        <div className={"solid-settings-header-intro"}>
           <div className="form-wrapper-title">Settings</div>
-          <div className={styles.subtitle}>Manage platform configuration across modules from a single workspace.</div>
-          <div className={styles.summaryChips}>
-            <span className={styles.summaryChip}>{moduleEntries.length} module{moduleEntries.length === 1 ? "" : "s"}</span>
-            <span className={styles.summaryChip}>{totalSettingsCount} setting{totalSettingsCount === 1 ? "" : "s"}</span>
+          <div className={"solid-settings-subtitle"}>Manage platform configuration across modules from a single workspace.</div>
+          <div className={"solid-settings-summary-chips"}>
+            <span className={"solid-settings-summary-chip"}>{moduleEntries.length} module{moduleEntries.length === 1 ? "" : "s"}</span>
+            <span className={"solid-settings-summary-chip"}>{totalSettingsCount} setting{totalSettingsCount === 1 ? "" : "s"}</span>
             <button
               type="button"
-              className={`${styles.summaryChip} ${styles.summaryChipButton} ${filterMode === "editable" ? styles.summaryChipActive : ""}`}
+              className={`${"solid-settings-summary-chip"} ${"solid-settings-summary-chip-button"} ${filterMode === "editable" ? "solid-settings-summary-chip-active" : ""}`}
               aria-pressed={filterMode === "editable"}
               onClick={() => setFilterMode((current) => (current === "editable" ? "all" : "editable"))}
             >
@@ -531,39 +531,39 @@ export function SettingsComponent() {
             </button>
           </div>
         </div>
-        <div className={styles.headerSearch}>
-          <div className={styles.searchIcon}>
+        <div className={"solid-settings-header-search"}>
+          <div className={"solid-settings-search-icon"}>
             <Search size={16} />
             <SolidInput
-              className={styles.searchInput}
+              className={"solid-settings-search-input"}
               value={searchTerm}
               placeholder="Search settings, groups, or modules"
               onChange={(event: any) => setSearchTerm(event.target.value)}
             />
           </div>
           {searchTerm ? (
-            <span className={styles.resultsMeta}>
+            <span className={"solid-settings-results-meta"}>
               {filteredSettings.length} result{filteredSettings.length === 1 ? "" : "s"}
             </span>
           ) : null}
         </div>
-        <div className={styles.toolbarActions}>
-          <div className={styles.legend}>
+        <div className={"solid-settings-toolbar-actions"}>
+          <div className={"solid-settings-legend"}>
             <button
               type="button"
-              className={`${styles.readonlyFilterButton} ${filterMode === "read-only" ? styles.readonlyFilterButtonActive : ""}`}
+              className={`${"solid-settings-readonly-filter-button"} ${filterMode === "read-only" ? "solid-settings-readonly-filter-button-active" : ""}`}
               aria-pressed={filterMode === "read-only"}
               aria-label={filterMode === "read-only" ? "Disable read-only filter" : "Enable read-only filter"}
               onClick={() => setFilterMode((current) => (current === "read-only" ? "all" : "read-only"))}
             >
               <SolidTag tone="warn">Read only</SolidTag>
             </button>
-            <span className={filterMode === "read-only" ? styles.legendLabelActive : undefined}>
+            <span className={filterMode === "read-only" ? "solid-settings-legend-label-active" : undefined}>
               {filterMode === "read-only" ? "Read-only filter active" : "System-managed value"}
             </span>
             <SolidTooltip>
               <SolidTooltipTrigger asChild>
-                <button type="button" className={styles.legendButton} aria-label="Read-only legend details">
+                <button type="button" className={"solid-settings-legend-button"} aria-label="Read-only solid-settings-legend details">
                   i
                 </button>
               </SolidTooltipTrigger>
@@ -578,19 +578,19 @@ export function SettingsComponent() {
         </div>
       </div>
 
-      <div className={styles.workspace}>
+      <div className={"solid-settings-workspace"}>
         {moduleTabs.length ? (
           <SolidTabGroup
             tabs={moduleTabs}
             value={activeModule}
             onValueChange={setActiveModule}
-            className={styles.tabGroup}
-            listClassName={styles.tabList}
-            panelClassName={styles.tabPanel}
+            className={"solid-settings-tab-group"}
+            listClassName={"solid-settings-tab-list"}
+            panelClassName={"solid-settings-tab-panel"}
             orientation="vertical"
           />
         ) : (
-          <div className={styles.emptyState}>No settings are available.</div>
+          <div className={"solid-settings-empty-state"}>No settings are available.</div>
         )}
       </div>
     </div>

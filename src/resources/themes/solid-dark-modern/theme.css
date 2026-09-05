@@ -7,13 +7,13 @@
   }
 
   body,
-  #root,
-  .layout-wrapper,
-  .layout-main-container,
-  .main-content,
-  .page-parent-wrapper,
-  .solid-list-page-wrapper,
-  .solid-form-page-wrapper {
+#root,
+.layout-wrapper,
+.layout-main-container,
+.main-content,
+.page-parent-wrapper,
+.solid-list-page-wrapper,
+.solid-form-page-wrapper {
     background:
       radial-gradient(circle at top right, rgba(249, 115, 22, 0.08), transparent 24%),
       linear-gradient(180deg, #0c1018 0%, #121826 100%);
@@ -27,16 +27,16 @@
   }
 
   .page-parent-wrapper,
-  .solid-list-page-wrapper,
-  .solid-form-wrapper,
-  .solid-list-content {
+.solid-list-page-wrapper,
+.solid-form-wrapper,
+.solid-list-content {
     background: transparent;
   }
 
   .solid-sidebar,
-  aside.solid-sidebar,
-  .solid-sidebar.is-open,
-  .solid-sidebar.is-collapsed {
+aside.solid-sidebar,
+.solid-sidebar.is-open,
+.solid-sidebar.is-collapsed {
     background: #111621 !important;
     color: #f2f4f8 !important;
     border-right: 1px solid rgba(51, 61, 84, 0.56) !important;
@@ -44,9 +44,9 @@
   }
 
   .solid-sidebar-header,
-  .solid-sidebar-search-wrap,
-  .solid-sidebar-tree-wrap,
-  .solid-sidebar-footer {
+.solid-sidebar-search-wrap,
+.solid-sidebar-tree-wrap,
+.solid-sidebar-footer {
     background: transparent !important;
     border-color: rgba(58, 68, 92, 0.34) !important;
   }
@@ -56,15 +56,15 @@
   }
 
   .solid-sidebar-search-wrap,
-  .solid-sidebar-footer {
+.solid-sidebar-footer {
     padding-left: 14px;
     padding-right: 14px;
   }
 
   .solid-workspace-trigger,
-  .solid-sidebar-search,
-  .solid-sidebar-footer .userProfile,
-  .solid-sidebar-external-trigger {
+.solid-sidebar-search,
+.solid-sidebar-footer .userProfile,
+.solid-sidebar-external-trigger {
     background: #191f2d !important;
     border: 1px solid rgba(58, 68, 92, 0.56) !important;
     border-radius: 14px !important;
@@ -72,23 +72,23 @@
   }
 
   .solid-workspace-avatar:not(.has-image),
-  .solid-workspace-item-avatar:not(.has-image) {
+.solid-workspace-item-avatar:not(.has-image) {
     background: linear-gradient(135deg, #ffb56b, #f28c28) !important;
     color: #1a120d !important;
   }
 
   .solid-workspace-label-top,
-  .solid-sidebar-search::placeholder {
+.solid-sidebar-search::placeholder {
     color: rgba(171, 180, 201, 0.72) !important;
   }
 
   .solid-workspace-label,
-  .solid-workspace-item-label,
-  .solid-sidebar-tree-link,
-  .solid-sidebar-tree-parent,
-  .solid-sidebar-tree-label,
-  .solid-sidebar-tree-toggle,
-  .solid-sidebar-mobile-action {
+.solid-workspace-item-label,
+.solid-sidebar-tree-link,
+.solid-sidebar-tree-parent,
+.solid-sidebar-tree-label,
+.solid-sidebar-tree-toggle,
+.solid-sidebar-mobile-action {
     color: #eef2f8 !important;
   }
 
@@ -120,9 +120,9 @@
   }
 
   .solid-sidebar-tree-row.is-active .solid-sidebar-tree-label,
-  .solid-sidebar-tree-row.is-active .solid-sidebar-tree-link,
-  .solid-sidebar-tree-row.is-active .solid-sidebar-tree-parent,
-  .solid-sidebar-tree-row.is-active .solid-sidebar-tree-toggle {
+.solid-sidebar-tree-row.is-active .solid-sidebar-tree-link,
+.solid-sidebar-tree-row.is-active .solid-sidebar-tree-parent,
+.solid-sidebar-tree-row.is-active .solid-sidebar-tree-toggle {
     color: #fff2df !important;
     font-weight: 700 !important;
   }
@@ -178,8 +178,8 @@
   }
 
   .solid-list-toolbar .view-title,
-  .form-wrapper-title,
-  .view-title {
+.form-wrapper-title,
+.view-title {
     font-size: 1.08rem;
     font-weight: 800;
     line-height: 1.2;
@@ -188,14 +188,14 @@
   }
 
   .solid-list-toolbar .solid-list-toolbar-actions,
-  .solid-form-toolbar-actions,
-  .solid-header-buttons-wrapper {
+.solid-form-toolbar-actions,
+.solid-header-buttons-wrapper {
     gap: 0.6rem !important;
   }
 
   .solid-list-toolbar .solid-global-search-element,
-  .solid-kanban-toolbar .solid-global-search-element,
-  .solid-tree-toolbar .solid-global-search-element {
+.solid-kanban-toolbar .solid-global-search-element,
+.solid-tree-toolbar .solid-global-search-element {
     height: 44px;
     border: 1px solid rgba(65, 76, 104, 0.72);
     border-radius: 12px;
@@ -205,30 +205,30 @@
   }
 
   .solid-list-toolbar .solid-global-search-element:focus-within,
-  .solid-kanban-toolbar .solid-global-search-element:focus-within,
-  .solid-tree-toolbar .solid-global-search-element:focus-within {
+.solid-kanban-toolbar .solid-global-search-element:focus-within,
+.solid-tree-toolbar .solid-global-search-element:focus-within {
     border-color: #f28c28;
     box-shadow: 0 0 0 4px rgba(242, 140, 40, 0.14);
   }
 
   .solid-list-toolbar .solid-global-search-element input,
-  .solid-kanban-toolbar .solid-global-search-element input,
-  .solid-tree-toolbar .solid-global-search-element input {
+.solid-kanban-toolbar .solid-global-search-element input,
+.solid-tree-toolbar .solid-global-search-element input {
     height: 40px;
     font-size: 13px;
     color: #eef2f8;
   }
 
   .solid-list-toolbar .solid-global-search-element input::placeholder,
-  .solid-kanban-toolbar .solid-global-search-element input::placeholder,
-  .solid-tree-toolbar .solid-global-search-element input::placeholder {
+.solid-kanban-toolbar .solid-global-search-element input::placeholder,
+.solid-tree-toolbar .solid-global-search-element input::placeholder {
     color: #aeb6c9;
   }
 
   .solid-list-toolbar .custom-filter-button,
-  .solid-list-toolbar .solid-icon-button,
-  .solid-header-cog-trigger,
-  .solid-form-toolbar-actions .solid-icon-button {
+.solid-list-toolbar .solid-icon-button,
+.solid-header-cog-trigger,
+.solid-form-toolbar-actions .solid-icon-button {
     border: 1px solid rgba(65, 76, 104, 0.72) !important;
     background: #1f2738 !important;
     color: #eef2f8 !important;
@@ -270,8 +270,8 @@
   }
 
   .solid-form-content,
-  .solid-form-wrapper .solid-form-content.solid-form-view,
-  .solid-form-wrapper .solid-form-content.solid-form-edit {
+.solid-form-wrapper .solid-form-content.solid-form-view,
+.solid-form-wrapper .solid-form-content.solid-form-edit {
     padding: 24px;
     background: linear-gradient(180deg, #20283a 0%, #1b2232 100%);
   }
@@ -286,9 +286,9 @@
   }
 
   .solid-form-content .react-datepicker-wrapper input,
-  .solid-form-content .solid-input,
-  .solid-form-content .solid-select,
-  .solid-form-content .solid-autocomplete-control {
+.solid-form-content .solid-input,
+.solid-form-content .solid-select,
+.solid-form-content .solid-autocomplete-control {
     min-height: 46px;
   }
 
@@ -406,7 +406,7 @@
   }
 
   .solid-paginator-btn,
-  .solid-paginator-select {
+.solid-paginator-select {
     border-radius: 12px !important;
   }
 

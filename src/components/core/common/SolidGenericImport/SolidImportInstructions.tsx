@@ -1,6 +1,5 @@
 import { Download, FileSpreadsheet, MoveRight } from 'lucide-react';
-import styles from './SolidImport.module.css'
-import { useLazyGetImportInstructionsQuery } from '../../../../redux/api/importTransactionApi';
+import './solid-import.css';import { useLazyGetImportInstructionsQuery } from '../../../../redux/api/importTransactionApi';
 import { useEffect } from 'react';
 import { getSession } from "../../../../adapters/auth/index";
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
@@ -65,7 +64,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
 
     return (
         <div>
-            <div className={styles.SolidImportContextWrapper}>
+            <div className={"solid-import-solid-import-context-wrapper"}>
                 {isLoading ? (
                     <div className="solid-import-loading-state">
                         <SolidSpinner size={22} label="Loading import instructions" />

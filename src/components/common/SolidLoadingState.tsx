@@ -2,7 +2,7 @@ import { useLayoutEffect } from "react";
 import type { ReactNode } from "react";
 import { SolidSpinner } from "../shad-cn-ui";
 import { getDefaultThemeKey, isRegisteredThemeKey, type ThemeMode } from "../../theme/theme-registry";
-import styles from "./SolidLoadingState.module.css";
+import "./solid-loading-state.css";
 
 const THEME_MODE_STORAGE_KEY = "solidx.theme.mode";
 const LIGHT_THEME_STORAGE_KEY = "solidx.theme.light";
@@ -47,11 +47,11 @@ export function SolidLoadingState({
   }, []);
 
   return (
-    <section className={styles.solidLoadingState} aria-busy="true" aria-live="polite">
-      <div className={styles.card}>
-        <SolidSpinner size={28} className={styles.spinner} label={spinnerLabel} />
-        <h2 className={styles.title}>{title}</h2>
-        <p className={styles.description}>{description}</p>
+    <section className={"solid-loading-state"} aria-busy="true" aria-live="polite">
+      <div className={"solid-loading-card"}>
+        <SolidSpinner size={28} className={"solid-loading-spinner"} label={spinnerLabel} />
+        <h2 className={"solid-loading-title"}>{title}</h2>
+        <p className={"solid-loading-description"}>{description}</p>
         {children}
       </div>
     </section>

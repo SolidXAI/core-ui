@@ -1,5 +1,5 @@
 
-import styles from './chatter.module.css';
+import './solid-chatter.css';
 
 interface Props {
     date: string;
@@ -11,8 +11,8 @@ export const SolidChatterDateDivider = ({ date }: Props) => {
         : new Date(date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
     return (
-        <div className={styles.chatterDatetimeDivider}>
-            <div className={`${styles.chatterDividerContent} absolute`}>
+        <div className={"solid-chatter-datetime-divider"}>
+            <div className={`${"solid-chatter-divider-content"} absolute`}>
                 {displayDate}
             </div>
         </div>

@@ -1,0 +1,84 @@
+.solid-module-welcome-section {
+    background-color: var(--solid-dashboard-welcome-bg);
+    padding: 24px;
+    border-radius: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.solid-module-home-home-svg {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+.solid-module-home-title1 {
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--solid-dark-title);
+    margin: 0;
+}
+
+.solid-module-home-color-cards {
+    border-radius: 0.5rem;
+    padding: 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.solid-module-home-dashboard-card-one {
+    border: 1px solid var(--solid-dashboard-card-one-border);
+    background: var(--solid-dashboard-card-one-bg);
+}
+
+.solid-module-home-dashboard-card-one .solid-module-home-card-svg-wrapper {
+    background-color: var(--solid-admin-card-color-1);
+}
+
+.solid-module-home-dashboard-card-two {
+    border: 1px solid var(--solid-dashboard-card-two-border);
+    background: var(--solid-dashboard-card-two-bg);
+}
+
+.solid-module-home-dashboard-card-two .solid-module-home-card-svg-wrapper {
+    background-color: var(--solid-admin-card-color-2);
+}
+
+.solid-module-home-dashboard-card-three {
+    border: 1px solid var(--solid-dashboard-card-three-border);
+    background: var(--solid-dashboard-card-three-bg);
+}
+
+.solid-module-home-dashboard-card-three .solid-module-home-card-svg-wrapper {
+    background-color: var(--solid-admin-card-color-3);
+}
+
+@media(max-width:991px) {
+    .solid-module-welcome-section {
+        padding: 16px;
+        height: 100%;
+        padding-bottom: 0 !important;
+        padding-right: 0px !important;
+    }
+
+    .solid-module-home-color-cards {
+        padding: 16px;
+    }
+
+    .solid-module-home-title1 {
+        font-size: 1.4rem;
+    }
+
+    .solid-module-home-home-svg {
+        position: relative;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+
+
+}

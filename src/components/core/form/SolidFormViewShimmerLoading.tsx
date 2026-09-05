@@ -1,7 +1,5 @@
 
-import styles from './solidFormViewShimmerLoading.module.css'
-
-const SkeletonBlock = ({ width, height, className }: { width?: string; height?: string; className?: string }) => (
+import './solid-form-view-shimmer-loading.css';const SkeletonBlock = ({ width, height, className }: { width?: string; height?: string; className?: string }) => (
     <div className={`solid-skeleton ${className ?? ""}`} style={{ width, height }} />
 );
 
@@ -24,7 +22,7 @@ export const SolidFormViewShimmerLoading = () => {
                     <SkeletonBlock width="30%" height="2rem" />
                 </div>
             </div>
-            <div className={styles.solidFormViewShimmerLoadingWrapper}>
+            <div className={"solid-form-view-shimmer-loading-wrapper"}>
                 <div className='p-4'>
                     <div className='flex flex-wrap -mx-2 -mt-2'>
                         <div className='field w-1/2 px-2 pt-2'>

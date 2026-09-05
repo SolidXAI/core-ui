@@ -1,8 +1,7 @@
 
 
 import { useSession } from "../../hooks/useSession";
-import styles from './solidModuleHome.module.css'
-import { DocsSvg } from '../Svg/DocsSvg';
+import './solid-module-home.css';import { DocsSvg } from '../Svg/DocsSvg';
 import { SettingsSvg } from '../Svg/SettingsSvg';
 import { DevDocs } from '../Svg/DevDocs';
 import { HomePageModuleSvg } from '../Svg/HomePageModuleSvg';
@@ -46,16 +45,16 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                 </div>
             </div>
             <div className="p-6 md:p-8 flex flex-col gap-6">
-                <div className={styles.solidModuleWelcomeSection}>
+                <div className={"solid-module-welcome-section"}>
                     <div className='flex flex-col gap-2 pr-4 lg:pr-0'>
-                        <h3 className={styles.solidModuleHomeTitle1}>
+                        <h3 className={"solid-module-home-title1"}>
                             Welcome, {status === "loading" ? "." : user}
                         </h3>
                         <p className='m-0 w-35rem text-sl'>
                             This is the home page for the {moduleName} module. You can find documentation and settings below.
                         </p>
                     </div>
-                    <div className={styles.homeSvg}>
+                    <div className={"solid-module-home-home-svg"}>
                         <HomePageModuleSvg />
                     </div>
                 </div>
@@ -66,26 +65,26 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                         icon: <DocsSvg />,
                         title: 'Admin Docs',
                         description: 'Explore the administrator documentation to manage and configure your system',
-                        class: styles.dashboardCardOne,
+                        class: "solid-module-home-dashboard-card-one",
                         url: 'https://docs.solidxai.com/docs/admin-docs/'
                     }, {
                         icon: <DevDocs />,
                         title: 'Dev Docs',
                         description: 'Dive into the developer documentation to build, extend, and integrate with the platform',
-                        class: styles.dashboardCardTwo,
+                        class: "solid-module-home-dashboard-card-two",
                         url: 'https://docs.solidxai.com/docs/developer-docs/'
                     }, {
                         icon: <SettingsSvg />,
                         title: 'Settings',
                         description: 'Access and update your account settings, preferences, and profile information',
-                        class: styles.dashboardCardThree,
+                        class: "solid-module-home-dashboard-card-three",
                         type: 'popup'
                     }].map((card, i) => (
                         <div className='w-full md:w-1/2 xl:w-1/3 px-2 pt-2' key={i}>
-                            <div className={`${styles.solidModuleHomeColorCards} ${card.class}`}>
+                            <div className={`${"solid-module-home-color-cards"} ${card.class}`}>
                                 <div>
-                                    <div className={styles.solidModuleHomeCardSvgWrapper}>{card.icon}</div>
-                                    <h3 className={`${styles.solidModuleHomeTitle1} mt-6`}>{card.title}</h3>
+                                    <div className={"solid-module-home-card-svg-wrapper"}>{card.icon}</div>
+                                    <h3 className={`${"solid-module-home-title1"} mt-6`}>{card.title}</h3>
                                     <p className='mb-0 mt-2 mr-2 text-xs'>
                                         {card.description}
                                     </p>

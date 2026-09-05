@@ -1,4 +1,4 @@
-.backdrop {
+.solid-account-settings-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1100;
@@ -9,7 +9,7 @@
   padding: 16px;
 }
 
-.modal {
+.solid-account-settings-modal {
   width: min(540px, calc(100vw - 20px));
   max-height: calc(100vh - 32px);
   min-width: 0;
@@ -24,7 +24,7 @@
   overscroll-behavior: contain;
 }
 
-.header {
+.solid-account-settings-header {
   min-height: 62px;
   border-bottom: 1px solid var(--border);
   padding: 12px 14px;
@@ -34,11 +34,11 @@
   gap: 12px;
 }
 
-.header > div {
+.solid-account-settings-header > div {
   min-width: 0;
 }
 
-.title {
+.solid-account-settings-title {
   margin: 0;
   color: var(--card-foreground);
   font-size: 20px;
@@ -47,13 +47,13 @@
   letter-spacing: -0.01em;
 }
 
-.subtitle {
+.solid-account-settings-subtitle {
   margin: 4px 0 0;
   font-size: 12px;
   color: var(--muted-foreground);
 }
 
-.closeButton {
+.solid-account-settings-close-button {
   width: 30px;
   height: 30px;
   border-radius: 8px;
@@ -65,12 +65,12 @@
   cursor: pointer;
 }
 
-.closeButton:hover {
+.solid-account-settings-close-button:hover {
   background: var(--accent);
   color: var(--accent-foreground);
 }
 
-.tabsLine {
+.solid-account-settings-tabs-line {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -78,7 +78,7 @@
   padding: 0 14px;
 }
 
-.tabTrigger {
+.solid-account-settings-tab-trigger {
   border: 0;
   background: transparent;
   color: var(--muted-foreground);
@@ -89,17 +89,17 @@
   cursor: pointer;
 }
 
-.tabTrigger:hover {
+.solid-account-settings-tab-trigger:hover {
   color: var(--foreground);
 }
 
-.tabActive {
+.solid-account-settings-tab-active {
   color: var(--foreground);
   font-weight: 600;
   border-bottom-color: var(--foreground);
 }
 
-.formWrapper {
+.solid-account-settings-form-wrapper {
   flex: 1;
   min-height: 0;
   min-width: 0;
@@ -108,7 +108,7 @@
   background: var(--card);
 }
 
-.toast {
+.solid-account-settings-toast {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -120,19 +120,19 @@
   background: var(--card);
 }
 
-.toastTitle {
+.solid-account-settings-toast-title {
   font-size: 12px;
   font-weight: 600;
   line-height: 1.25;
 }
 
-.toastBody {
+.solid-account-settings-toast-body {
   font-size: 12px;
   color: var(--muted-foreground);
   line-height: 1.25;
 }
 
-.toastClose {
+.solid-account-settings-toast-close {
   width: 22px;
   height: 22px;
   border: 0;
@@ -142,28 +142,28 @@
   cursor: pointer;
 }
 
-.toastClose:hover {
+.solid-account-settings-toast-close:hover {
   background: var(--accent);
   color: var(--accent-foreground);
 }
 
-.toastError {
+.solid-account-settings-toast-error {
   border-color: color-mix(in srgb, #ef4444 46%, var(--border));
 }
 
-.toastSuccess {
+.solid-account-settings-toast-success {
   border-color: color-mix(in srgb, #22c55e 46%, var(--border));
 }
 
-.toastWarn {
+.solid-account-settings-toast-warn {
   border-color: color-mix(in srgb, #f59e0b 46%, var(--border));
 }
 
-.toastInfo {
+.solid-account-settings-toast-info {
   border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
 }
 
-.confirmBackdrop {
+.solid-account-settings-confirm-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1200;
@@ -173,7 +173,7 @@
   padding: 16px;
 }
 
-.confirmModal {
+.solid-account-settings-confirm-modal {
   width: min(360px, calc(100vw - 24px));
   border-radius: 12px;
   border: 1px solid var(--border);
@@ -182,32 +182,32 @@
   box-shadow: 0 18px 44px rgba(2, 6, 23, 0.35);
 }
 
-.confirmHeader {
+.solid-account-settings-confirm-header {
   border-bottom: 1px solid var(--border);
   padding: 12px 14px;
   font-size: 14px;
   font-weight: 600;
 }
 
-.confirmBody {
+.solid-account-settings-confirm-body {
   padding: 14px;
   font-size: 13px;
   color: var(--muted-foreground);
 }
 
-.confirmActions {
+.solid-account-settings-confirm-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
   padding: 0 14px 14px;
 }
 
-.tabsLine::-webkit-scrollbar {
+.solid-account-settings-tabs-line::-webkit-scrollbar {
   display: none;
 }
 
 @media (max-width: 900px) {
-  .tabsLine {
+  .solid-account-settings-tabs-line {
     gap: 12px;
     overflow-x: auto;
     white-space: nowrap;
@@ -216,7 +216,7 @@
   }
 }
 
-.accountForm {
+.solid-account-settings-account-form {
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -227,25 +227,25 @@
   background: transparent;
 }
 
-.accountScroll {
+.solid-account-settings-account-scroll {
   min-height: 0;
   padding: 12px 12px 0;
 }
 
-.sectionTitle {
+.solid-account-settings-section-title {
   margin: 0 0 8px;
   font-size: 14px;
   font-weight: 650;
   color: var(--foreground);
 }
 
-.avatarRow {
+.solid-account-settings-avatar-row {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.avatarShell {
+.solid-account-settings-avatar-shell {
   position: relative;
   width: 72px;
   height: 72px;
@@ -255,14 +255,14 @@
   background: var(--muted);
 }
 
-.avatarImage {
+.solid-account-settings-avatar-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: inherit;
 }
 
-.avatarFallback {
+.solid-account-settings-avatar-fallback {
   width: 100%;
   height: 100%;
   display: grid;
@@ -273,7 +273,7 @@
   border-radius: inherit;
 }
 
-.avatarRemove {
+.solid-account-settings-avatar-remove {
   position: absolute;
   right: -2px;
   top: -2px;
@@ -288,35 +288,35 @@
   cursor: pointer;
 }
 
-.avatarRemove:hover {
+.solid-account-settings-avatar-remove:hover {
   background: #ef4444;
   color: #fff;
 }
 
-.dashedDivider {
+.solid-account-settings-dashed-divider {
   margin: 14px 0;
   border-bottom: 1px dashed var(--border);
 }
 
-.grid {
+.solid-account-settings-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
 }
 
-.field {
+.solid-account-settings-field {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.field label {
+.solid-account-settings-field label {
   font-size: 12px;
   color: var(--muted-foreground);
   font-weight: 500;
 }
 
-.input {
+.solid-account-settings-input {
   width: 100%;
   height: 34px;
   border-radius: 8px;
@@ -327,18 +327,18 @@
   font-size: 13px;
 }
 
-.input:disabled {
+.solid-account-settings-input:disabled {
   opacity: 0.78;
   cursor: not-allowed;
   background: color-mix(in srgb, var(--muted) 35%, transparent);
 }
 
-.input:focus-visible {
+.solid-account-settings-input:focus-visible {
   outline: none;
   border-color: var(--primary);
 }
 
-.roleBox {
+.solid-account-settings-role-box {
   min-height: 34px;
   border-radius: 8px;
   border: 1px solid var(--border);
@@ -349,7 +349,7 @@
   gap: 6px;
 }
 
-.roleChip {
+.solid-account-settings-role-chip {
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 3px 8px;
@@ -358,41 +358,37 @@
   background: var(--card);
 }
 
-.footerActions {
+.solid-account-settings-footer-actions {
   border-top: 1px solid var(--border);
   padding: 10px 12px 12px;
   display: flex;
   justify-content: flex-start;
 }
 
-.passwordHintWrap {
+.solid-account-settings-password-hint-wrap {
   margin: 8px;
 }
 
-.accountPrimaryBtn.solid-btn {
-  font-weight: 500;
-}
-
-.accountSecondaryBtn.solid-btn {
+.solid-account-settings-account-secondary-btn.solid-btn {
   --solid-btn-bg: var(--card);
   --solid-btn-fg: var(--foreground);
   --solid-btn-border: var(--border);
   font-weight: 500;
 }
 
-.accountSecondaryBtn.solid-btn:hover {
+.solid-account-settings-account-secondary-btn.solid-btn:hover {
   background: color-mix(in srgb, var(--accent) 75%, transparent);
 }
 
-.passwordWrap {
+.solid-account-settings-password-wrap {
   position: relative;
 }
 
-.passwordWrap .input {
+.solid-account-settings-password-wrap .solid-account-settings-input {
   padding-right: 56px;
 }
 
-.passwordToggle {
+.solid-account-settings-password-toggle {
   position: absolute;
   right: 7px;
   top: 50%;
@@ -408,44 +404,44 @@
   cursor: pointer;
 }
 
-.passwordToggle:hover {
+.solid-account-settings-password-toggle:hover {
   background: var(--accent);
   color: var(--accent-foreground);
 }
 
-.errorText {
+.solid-account-settings-error-text {
   margin: 0;
   color: #ef4444;
   font-size: 12px;
   line-height: 1.2;
 }
 
-.formStack {
+.solid-account-settings-form-stack {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
 }
 
-.versionPanel {
+.solid-account-settings-version-panel {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.versionCaption {
+.solid-account-settings-version-caption {
   margin: 0;
   font-size: 12px;
   color: var(--muted-foreground);
 }
 
-.versionList {
+.solid-account-settings-version-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
 }
 
-.versionRow {
+.solid-account-settings-version-row {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: color-mix(in srgb, var(--muted) 20%, transparent);
@@ -456,22 +452,22 @@
   gap: 8px;
 }
 
-.versionName {
+.solid-account-settings-version-name {
   font-size: 13px;
   font-weight: 600;
 }
 
-.versionHint {
+.solid-account-settings-version-hint {
   font-size: 11px;
   color: var(--muted-foreground);
 }
 
-.versionTags {
+.solid-account-settings-version-tags {
   display: flex;
   gap: 6px;
 }
 
-.versionTag {
+.solid-account-settings-version-tag {
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 3px 8px;
@@ -479,35 +475,35 @@
   background: var(--card);
 }
 
-.repoLocal {
+.solid-account-settings-repo-local {
   border-color: color-mix(in srgb, #f59e0b 48%, var(--border));
   color: #b45309;
 }
 
-.repoNpm {
+.solid-account-settings-repo-npm {
   border-color: color-mix(in srgb, #22c55e 48%, var(--border));
   color: #15803d;
 }
 
-.versionLoaderWrap {
+.solid-account-settings-version-loader-wrap {
   min-height: 200px;
   display: grid;
   place-items: center;
 }
 
-.versionError {
+.solid-account-settings-version-error {
   color: var(--muted-foreground);
   margin: 0;
   font-size: 13px;
 }
 
-.versionActions {
+.solid-account-settings-version-actions {
   margin-top: 12px;
   display: flex;
   justify-content: flex-start;
 }
 
-.diagnosticsBackdrop {
+.solid-account-settings-diagnostics-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1300;
@@ -517,7 +513,7 @@
   padding: 16px;
 }
 
-.diagnosticsModal {
+.solid-account-settings-diagnostics-modal {
   width: min(1100px, calc(100vw - 24px));
   max-height: calc(100vh - 28px);
   overflow: auto;
@@ -529,14 +525,14 @@
   padding: 16px;
 }
 
-.diagnosticsHeader {
+.solid-account-settings-diagnostics-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
 
-.diagnosticsHeaderActions {
+.solid-account-settings-diagnostics-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -544,7 +540,7 @@
   justify-content: flex-end;
 }
 
-.diagnosticsRefreshStatus {
+.solid-account-settings-diagnostics-refresh-status {
   font-size: 12px;
   color: var(--muted-foreground);
   min-height: 18px;
@@ -552,7 +548,7 @@
   align-items: center;
 }
 
-.diagnosticsSummary {
+.solid-account-settings-diagnostics-summary {
   margin-top: 12px;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -564,20 +560,20 @@
   font-size: 13px;
 }
 
-.diagnosticsTableWrap {
+.solid-account-settings-diagnostics-table-wrap {
   margin-top: 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: auto;
 }
 
-.diagnosticsTabs {
+.solid-account-settings-diagnostics-tabs {
   margin-top: 12px;
   display: flex;
   gap: 8px;
 }
 
-.diagnosticsTab {
+.solid-account-settings-diagnostics-tab {
   border: 1px solid var(--border);
   border-radius: 999px;
   background: transparent;
@@ -588,45 +584,45 @@
   cursor: pointer;
 }
 
-.diagnosticsTab:hover {
+.solid-account-settings-diagnostics-tab:hover {
   color: var(--foreground);
 }
 
-.diagnosticsTabActive {
+.solid-account-settings-diagnostics-tab-active {
   background: color-mix(in srgb, var(--accent) 42%, transparent);
   color: var(--foreground);
 }
 
-.diagnosticsTable {
+.solid-account-settings-diagnostics-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
 }
 
-.diagnosticsTable thead tr {
+.solid-account-settings-diagnostics-table thead tr {
   border-bottom: 1px solid var(--border);
 }
 
-.diagnosticsTable tbody tr {
+.solid-account-settings-diagnostics-table tbody tr {
   border-bottom: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
 }
 
-.diagnosticsTable th,
-.diagnosticsTable td {
+.solid-account-settings-diagnostics-table th,
+.solid-account-settings-diagnostics-table td {
   text-align: left;
   padding: 8px 10px;
   vertical-align: top;
 }
 
-.diagnosticsEmpty {
+.solid-account-settings-diagnostics-empty {
   opacity: 0.75;
 }
 
-.diagnosticsMono {
+.solid-account-settings-diagnostics-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-.diagnosticsRuntimeGrid {
+.solid-account-settings-diagnostics-runtime-grid {
   margin-top: 12px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -638,11 +634,11 @@
   font-size: 13px;
 }
 
-.diagnosticsSpan2 {
+.solid-account-settings-diagnostics-span2 {
   grid-column: span 2;
 }
 
-.switchRow {
+.solid-account-settings-switch-row {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
@@ -652,20 +648,20 @@
   gap: 12px;
 }
 
-.switch {
+.solid-account-settings-switch {
   position: relative;
   display: inline-flex;
   width: 42px;
   height: 24px;
 }
 
-.switch input {
+.solid-account-settings-switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-.switchTrack {
+.solid-account-settings-switch-track {
   position: absolute;
   inset: 0;
   border-radius: 999px;
@@ -674,7 +670,7 @@
   transition: 120ms ease;
 }
 
-.switchTrack::after {
+.solid-account-settings-switch-track::after {
   content: "";
   position: absolute;
   top: 2px;
@@ -687,111 +683,111 @@
   box-shadow: 0 1px 3px rgba(2, 6, 23, 0.2);
 }
 
-.switch input:checked + .switchTrack {
+.solid-account-settings-switch input:checked + .solid-account-settings-switch-track {
   background: color-mix(in srgb, var(--primary) 70%, transparent);
   border-color: color-mix(in srgb, var(--primary) 60%, var(--border));
 }
 
-.switch input:checked + .switchTrack::after {
+.solid-account-settings-switch input:checked + .solid-account-settings-switch-track::after {
   left: 20px;
 }
 
 @media (max-width: 760px) {
-  .modal {
+  .solid-account-settings-modal {
     width: min(98vw, 540px);
   }
 
-  .diagnosticsModal {
+  .solid-account-settings-diagnostics-modal {
     width: min(98vw, 1100px);
     padding: 12px;
   }
 
-  .diagnosticsHeader {
+  .solid-account-settings-diagnostics-header {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .diagnosticsRuntimeGrid {
+  .solid-account-settings-diagnostics-runtime-grid {
     grid-template-columns: 1fr;
   }
 
-  .diagnosticsSpan2 {
+  .solid-account-settings-diagnostics-span2 {
     grid-column: span 1;
   }
 }
 
 @media (max-width: 640px) {
-  .backdrop {
+  .solid-account-settings-backdrop {
     padding: 8px;
   }
 
-  .modal {
+  .solid-account-settings-modal {
     width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
     border-radius: 14px;
   }
 
-  .header {
+  .solid-account-settings-header {
     padding: 14px 12px 10px;
     align-items: flex-start;
   }
 
-  .title {
+  .solid-account-settings-title {
     font-size: 18px;
   }
 
-  .subtitle {
+  .solid-account-settings-subtitle {
     font-size: 11.5px;
     line-height: 1.4;
   }
 
-  .tabsLine {
+  .solid-account-settings-tabs-line {
     gap: 10px;
     padding: 0 12px;
     overscroll-behavior-x: contain;
   }
 
-  .tabTrigger {
+  .solid-account-settings-tab-trigger {
     flex: 0 0 auto;
     font-size: 12px;
     padding: 11px 0 9px;
   }
 
-  .formWrapper {
+  .solid-account-settings-form-wrapper {
     padding: 8px;
   }
 
-  .accountScroll {
+  .solid-account-settings-account-scroll {
     padding: 8px 8px 0;
   }
 
-  .avatarRow,
-  .versionRow {
+  .solid-account-settings-avatar-row,
+  .solid-account-settings-version-row {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .versionTags {
+  .solid-account-settings-version-tags {
     flex-wrap: wrap;
   }
 
-  .footerActions {
+  .solid-account-settings-footer-actions {
     padding: 10px 8px 12px;
   }
 
-  .confirmActions {
+  .solid-account-settings-confirm-actions {
     padding: 0 8px 12px;
     flex-direction: column-reverse;
   }
 
-  .footerActions :global(.solid-btn),
-  .confirmActions :global(.solid-btn),
-  .versionActions :global(.solid-btn) {
+  .solid-account-settings-footer-actions .solid-btn,
+  .solid-account-settings-confirm-actions .solid-btn,
+  .solid-account-settings-version-actions .solid-btn {
     width: 100%;
     justify-content: center;
   }
 
-  .versionActions {
+  .solid-account-settings-version-actions {
     width: 100%;
   }
 }

@@ -1,5 +1,5 @@
 import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "../../../../../../types/solid-core";
-import styles from "../../../../form/fields/solidFields.module.css";
+import "../../../../form/fields/solid-fields.css";
 
 export const formatMediaFileSize = (value: unknown) => {
   const size = Number(value);
@@ -37,11 +37,11 @@ export const MediaFileSizeFormViewWidget = ({ formik, fieldContext }: SolidFormF
   const value = formik.values[fieldLayoutInfo.attrs.name];
 
   return (
-    <div className={styles.fieldViewWrapper}>
+    <div className={"solid-field-view-wrapper"}>
       {showFieldLabel !== false && (
-        <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+        <p className={`${"solid-field-view-label"} form-field-label`}>{fieldLabel}</p>
       )}
-      <p className={styles.fieldViewValue}>{formatMediaFileSize(value)}</p>
+      <p className={"solid-field-view-value"}>{formatMediaFileSize(value)}</p>
     </div>
   );
 };

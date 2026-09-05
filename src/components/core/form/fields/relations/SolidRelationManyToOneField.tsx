@@ -21,7 +21,7 @@ import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import { getVirtualScrollerOptions } from "../../../../../helpers/autoCompleteVirtualScroll";
 import { getRelatedRecordDisplayText } from "../../../../../helpers/relationDisplay";
 import { buildSyntheticChangeEvent } from "../fieldEventUtils";
-import styles from "../solidFields.module.css";
+import "../solid-fields.css";
 
 type AutoCompleteCompleteEvent = { query: string };
 
@@ -438,9 +438,9 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     }
     return (
         <div className="relative">
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
@@ -578,11 +578,11 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
     const userKeyField = fieldLayoutInfo?.attrs?.coModelFieldToDisplay ? fieldLayoutInfo?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
     const displayValue = getRelatedRecordDisplayText(value, userKeyField);
     return (
-        <div className={styles.fieldViewWrapper}>
+        <div className={"solid-field-view-wrapper"}>
             {showFieldLabel !== false && (
-                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+                <p className={`${"solid-field-view-label"} form-field-label`}>{fieldLabel}</p>
             )}
-            <p className={styles.fieldViewValue}>{displayValue || ''}</p>
+            <p className={"solid-field-view-value"}>{displayValue || ''}</p>
         </div>
     );
 }
@@ -992,9 +992,9 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
     }
     return (
         <div className="relative" >
-            <div className={styles.fieldWrapper}>
+            <div className={"solid-field-wrapper"}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${"solid-field-label"} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
