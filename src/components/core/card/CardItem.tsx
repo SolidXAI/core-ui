@@ -127,7 +127,10 @@ const CardItem: React.FC<CardItemProps> = ({
           </div>
         )}
         {DynamicCardWidget ? (
-          <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
+          <div
+            className={isArchivedRecord ? "solid-archived-card-content" : undefined}
+            style={isArchivedRecord ? { pointerEvents: "none" } : undefined}
+          >
             <DynamicCardWidget
               rowData={data}
               solidKanbanViewMetaData={solidCardViewMetaData}

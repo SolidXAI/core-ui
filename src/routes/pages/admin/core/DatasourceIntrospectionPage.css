@@ -1489,3 +1489,292 @@
     justify-content: flex-end;
   }
 }
+
+/* Datasource introspection uses a large set of bespoke surfaces. Keep all of
+   them on the active application theme instead of the light-mode literals above. */
+html.dark .sdix-page,
+[data-theme="dark"] .sdix-page {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html.dark .sdix-toolbar-search,
+html.dark .sdix-workspace-loading,
+html.dark .sdix-workspace-rail,
+html.dark .sdix-workspace-rail__item,
+html.dark .sdix-wizard-stepper-item,
+html.dark .sdix-wizard-panel,
+html.dark .sdix-wizard-footer,
+html.dark .sdix-drawer-footer,
+html.dark .sdix-table-shell,
+html.dark .sdix-settings-row,
+html.dark .sdix-preview-card,
+html.dark .sdix-metadata-preview > div,
+html.dark .sdix-drawer-section,
+html.dark .sdix-column-table,
+html.dark .sdix-stage-panel__card,
+html.dark .sdix-review-meta,
+html.dark .sdix-ddl-code,
+[data-theme="dark"] .sdix-toolbar-search,
+[data-theme="dark"] .sdix-workspace-loading,
+[data-theme="dark"] .sdix-workspace-rail,
+[data-theme="dark"] .sdix-workspace-rail__item,
+[data-theme="dark"] .sdix-wizard-stepper-item,
+[data-theme="dark"] .sdix-wizard-panel,
+[data-theme="dark"] .sdix-wizard-footer,
+[data-theme="dark"] .sdix-drawer-footer,
+[data-theme="dark"] .sdix-table-shell,
+[data-theme="dark"] .sdix-settings-row,
+[data-theme="dark"] .sdix-preview-card,
+[data-theme="dark"] .sdix-metadata-preview > div,
+[data-theme="dark"] .sdix-drawer-section,
+[data-theme="dark"] .sdix-column-table,
+[data-theme="dark"] .sdix-stage-panel__card,
+[data-theme="dark"] .sdix-review-meta,
+[data-theme="dark"] .sdix-ddl-code {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+html.dark .sdix-workspace-rail__header,
+html.dark .sdix-wizard-footer,
+html.dark .sdix-drawer-footer,
+html.dark .sdix-column-row,
+[data-theme="dark"] .sdix-workspace-rail__header,
+[data-theme="dark"] .sdix-wizard-footer,
+[data-theme="dark"] .sdix-drawer-footer,
+[data-theme="dark"] .sdix-column-row {
+  border-color: var(--border);
+}
+
+html.dark .sdix-workspace-header__identity h2,
+html.dark .sdix-workspace-rail__header strong,
+html.dark .sdix-workspace-rail__item-main strong,
+html.dark .sdix-wizard-stepper-item,
+html.dark .sdix-table-primary-cell strong,
+html.dark .sdix-settings-static strong,
+html.dark .sdix-preview-card strong,
+html.dark .sdix-metadata-preview strong,
+html.dark .sdix-settings-row label,
+html.dark .sdix-drawer-header__identity .solid-radix-dialog-title,
+html.dark .sdix-columns__header h4,
+html.dark .sdix-column-meta strong,
+html.dark .sdix-stage-panel__header h3,
+html.dark .sdix-stage-panel__card-title,
+html.dark .sdix-workspace-summary__item strong,
+html.dark .sdix-review-meta strong,
+html.dark .sdix-stage-progress h3,
+[data-theme="dark"] .sdix-workspace-header__identity h2,
+[data-theme="dark"] .sdix-workspace-rail__header strong,
+[data-theme="dark"] .sdix-workspace-rail__item-main strong,
+[data-theme="dark"] .sdix-wizard-stepper-item,
+[data-theme="dark"] .sdix-table-primary-cell strong,
+[data-theme="dark"] .sdix-settings-static strong,
+[data-theme="dark"] .sdix-preview-card strong,
+[data-theme="dark"] .sdix-metadata-preview strong,
+[data-theme="dark"] .sdix-settings-row label,
+[data-theme="dark"] .sdix-drawer-header__identity .solid-radix-dialog-title,
+[data-theme="dark"] .sdix-columns__header h4,
+[data-theme="dark"] .sdix-column-meta strong,
+[data-theme="dark"] .sdix-stage-panel__header h3,
+[data-theme="dark"] .sdix-stage-panel__card-title,
+[data-theme="dark"] .sdix-workspace-summary__item strong,
+[data-theme="dark"] .sdix-review-meta strong,
+[data-theme="dark"] .sdix-stage-progress h3 {
+  color: var(--foreground);
+}
+
+html.dark .sdix-workspace-header__identity p,
+html.dark .sdix-workspace-rail__item-main span,
+html.dark .sdix-wizard-footer__meta,
+html.dark .sdix-drawer-footer__meta,
+html.dark .sdix-table-primary-cell span,
+html.dark .sdix-muted-cell,
+html.dark .sdix-settings-static span,
+html.dark .sdix-preview-card span,
+html.dark .sdix-metadata-preview span,
+html.dark .sdix-form-row label,
+html.dark .sdix-settings-row p,
+html.dark .sdix-drawer-header__meta,
+html.dark .sdix-form-field label,
+html.dark .sdix-columns__header p,
+html.dark .sdix-column-meta small,
+html.dark .sdix-inline-note,
+html.dark .sdix-stage-panel__header p,
+html.dark .sdix-workspace-summary__item span,
+html.dark .sdix-stage-panel__list,
+html.dark .sdix-review-meta span,
+html.dark .sdix-review-note,
+html.dark .sdix-stage-progress p,
+html.dark .sdix-column-placeholder,
+html.dark .sdix-loading,
+html.dark .sdix-empty-state,
+[data-theme="dark"] .sdix-workspace-header__identity p,
+[data-theme="dark"] .sdix-workspace-rail__item-main span,
+[data-theme="dark"] .sdix-wizard-footer__meta,
+[data-theme="dark"] .sdix-drawer-footer__meta,
+[data-theme="dark"] .sdix-table-primary-cell span,
+[data-theme="dark"] .sdix-muted-cell,
+[data-theme="dark"] .sdix-settings-static span,
+[data-theme="dark"] .sdix-preview-card span,
+[data-theme="dark"] .sdix-metadata-preview span,
+[data-theme="dark"] .sdix-form-row label,
+[data-theme="dark"] .sdix-settings-row p,
+[data-theme="dark"] .sdix-drawer-header__meta,
+[data-theme="dark"] .sdix-form-field label,
+[data-theme="dark"] .sdix-columns__header p,
+[data-theme="dark"] .sdix-column-meta small,
+[data-theme="dark"] .sdix-inline-note,
+[data-theme="dark"] .sdix-stage-panel__header p,
+[data-theme="dark"] .sdix-workspace-summary__item span,
+[data-theme="dark"] .sdix-stage-panel__list,
+[data-theme="dark"] .sdix-review-meta span,
+[data-theme="dark"] .sdix-review-note,
+[data-theme="dark"] .sdix-stage-progress p,
+[data-theme="dark"] .sdix-column-placeholder,
+[data-theme="dark"] .sdix-loading,
+[data-theme="dark"] .sdix-empty-state {
+  color: var(--muted-foreground);
+}
+
+html.dark .sdix-workspace-rail__item:hover,
+html.dark .sdix-wizard-stepper-item:hover,
+html.dark .sdix-settings-row:hover,
+[data-theme="dark"] .sdix-workspace-rail__item:hover,
+[data-theme="dark"] .sdix-wizard-stepper-item:hover,
+[data-theme="dark"] .sdix-settings-row:hover {
+  background: var(--surface-hover);
+  border-color: var(--primary);
+}
+
+html.dark .sdix-workspace-rail__item.is-active,
+html.dark .sdix-wizard-stepper-item.is-active,
+[data-theme="dark"] .sdix-workspace-rail__item.is-active,
+[data-theme="dark"] .sdix-wizard-stepper-item.is-active {
+  background: color-mix(in srgb, var(--primary) 16%, var(--card));
+  border-color: var(--primary);
+  box-shadow: none;
+}
+
+html.dark .sdix-workspace-rail__header span,
+html.dark .sdix-inline-status,
+html.dark .sdix-settings-static,
+html.dark .sdix-workspace-summary__item,
+[data-theme="dark"] .sdix-workspace-rail__header span,
+[data-theme="dark"] .sdix-inline-status,
+[data-theme="dark"] .sdix-settings-static,
+[data-theme="dark"] .sdix-workspace-summary__item {
+  background: var(--surface-ground);
+  border-color: var(--border);
+  color: var(--muted-foreground);
+}
+
+html.dark .sdix-wizard-stepper-item.is-complete,
+[data-theme="dark"] .sdix-wizard-stepper-item.is-complete {
+  background: color-mix(in srgb, var(--primary) 14%, var(--card));
+  border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
+}
+
+html.dark .sdix-wizard-stepper-badge,
+[data-theme="dark"] .sdix-wizard-stepper-badge {
+  background: var(--surface-ground);
+  border-color: var(--border);
+  color: var(--muted-foreground);
+}
+
+html.dark .sdix-wizard-stepper-item.is-active .sdix-wizard-stepper-badge,
+[data-theme="dark"] .sdix-wizard-stepper-item.is-active .sdix-wizard-stepper-badge {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+html.dark .sdix-table-primary-cell,
+html.dark .sdix-column-row,
+html.dark .sdix-ddl-code,
+[data-theme="dark"] .sdix-table-primary-cell,
+[data-theme="dark"] .sdix-column-row,
+[data-theme="dark"] .sdix-ddl-code {
+  color: var(--foreground);
+}
+
+html.dark .sdix-column-row--head,
+[data-theme="dark"] .sdix-column-row--head {
+  background: var(--sidebar-accent);
+  color: var(--muted-foreground);
+}
+
+html.dark .sdix-status-badge,
+[data-theme="dark"] .sdix-status-badge {
+  border: 1px solid var(--border);
+}
+
+html.dark .sdix-status-badge.is-mapped,
+html.dark .sdix-status-badge.is-unmapped,
+html.dark .sdix-status-badge.is-superclass,
+html.dark .sdix-status-badge.is-muted,
+[data-theme="dark"] .sdix-status-badge.is-mapped,
+[data-theme="dark"] .sdix-status-badge.is-unmapped,
+[data-theme="dark"] .sdix-status-badge.is-superclass,
+[data-theme="dark"] .sdix-status-badge.is-muted {
+  background: color-mix(in srgb, var(--primary) 14%, var(--card));
+  color: var(--primary);
+}
+
+html.dark .sdix-status-badge.is-blocked,
+html.dark .sdix-json-validation-error,
+[data-theme="dark"] .sdix-status-badge.is-blocked,
+[data-theme="dark"] .sdix-json-validation-error {
+  background: color-mix(in srgb, var(--destructive) 14%, var(--card));
+  border-color: color-mix(in srgb, var(--destructive) 42%, var(--border));
+  color: var(--destructive);
+}
+
+html.dark .sdix-drawer.solid-radix-dialog-content,
+html.dark .sdix-field-config-dialog,
+[data-theme="dark"] .sdix-drawer.solid-radix-dialog-content,
+[data-theme="dark"] .sdix-field-config-dialog {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+html.dark .sdix-drawer-overlay,
+[data-theme="dark"] .sdix-drawer-overlay {
+  background: color-mix(in srgb, var(--background) 78%, transparent);
+}
+
+html.dark .sdix-blocker,
+html.dark .sdix-blocker-panel,
+html.dark .sdix-blocker-panel__body,
+[data-theme="dark"] .sdix-blocker,
+[data-theme="dark"] .sdix-blocker-panel,
+[data-theme="dark"] .sdix-blocker-panel__body {
+  background: color-mix(in srgb, var(--card) 92%, var(--destructive) 8%);
+  border-color: color-mix(in srgb, var(--destructive) 42%, var(--border));
+  color: var(--destructive);
+  box-shadow: none;
+}
+
+html.dark .sdix-blocker__content h3,
+html.dark .sdix-blocker__content p,
+html.dark .sdix-blocker__note,
+html.dark .sdix-blocker__eyebrow,
+[data-theme="dark"] .sdix-blocker__content h3,
+[data-theme="dark"] .sdix-blocker__content p,
+[data-theme="dark"] .sdix-blocker__note,
+[data-theme="dark"] .sdix-blocker__eyebrow {
+  color: var(--destructive);
+}
+
+html.dark .sdix-stage-progress--success,
+[data-theme="dark"] .sdix-stage-progress--success {
+  background: color-mix(in srgb, var(--card) 88%, var(--primary) 12%);
+  border-color: color-mix(in srgb, var(--primary) 46%, var(--border));
+}
+
+html.dark .sdix-stage-panel__eyebrow,
+[data-theme="dark"] .sdix-stage-panel__eyebrow {
+  color: var(--primary);
+}

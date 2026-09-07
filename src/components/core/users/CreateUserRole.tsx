@@ -71,7 +71,7 @@ const CreateUserRole = ({ data }: any) => {
     if (errorMessages.length > 0) {
       dispatch(showToast({
         severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
+        summary: ERROR_MESSAGES.ERROR_OCCURED,
         detail: errorMessages.map(String).join(", "),
       }));
     }

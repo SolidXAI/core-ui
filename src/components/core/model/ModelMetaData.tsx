@@ -216,7 +216,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     const errors = await formik.validateForm(); // Trigger validation and get the updated errors
     const errorMessages = Object.values(errors);
     if (errorMessages.length > 0) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.map(String).join(', '), life: 3000 }));
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR_OCCURED, detail: errorMessages.map(String).join(', '), life: 3000 }));
     }
   };
 

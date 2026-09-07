@@ -3,7 +3,8 @@ import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Image from "../common/Image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import SolidLogoLight from '../../resources/images/solidx-logo/solidx-logo-light.png'
+import SolidLogoDark from '../../resources/images/solidx-logo/solidx-logo-dark.png'
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
 import { LayoutContext } from "../layout/context/layoutcontext";
@@ -92,6 +93,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
+    const fallbackLogoSrc = authTheme === "light" ? SolidLogoDark : SolidLogoLight;
     const authBackgroundSrc = solidSideBanner();
     const appTitle = solidSettingsData?.data?.appTitle || "";
     const appSubtitle = solidSettingsData?.data?.appSubtitle || "";
@@ -103,23 +105,20 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const copyright = solidSettingsData?.data?.copyright || "";
 
     const renderBrand = (align: "center" | "start" = "start") => {
-      if (!authLogoSrc && !appTitle) return null;
-
-        const brandLabel = appTitle || "Application logo";
+        const brandLabel = appTitle || "SolidX logo";
 
         return (
             <div className={`solid-auth-brand ${align === "center" ? "is-center" : ""}`} aria-label={brandLabel}>
-                {authLogoSrc ? (
-                    <span className="solid-auth-brand-logo">
-                        <img src={authLogoSrc} alt={brandLabel} />
-                    </span>
-                ) : null}
-                {appTitle ? <span className="solid-auth-brand-text">{appTitle}</span> : null}
+                <span className="solid-auth-brand-logo">
+                    <img src={authLogoSrc || fallbackLogoSrc} alt={brandLabel} />
+                </span>
+                {authLogoSrc && appTitle ? <span className="solid-auth-brand-text">{appTitle}</span> : null}
             </div>
         );
     };
 
     const authLayout = solidSettingsData?.data?.authPagesLayout || "center";
+    const appLogoPosition = solidSettingsData?.data?.appLogoPosition || "in_form_view";
     const isCenter = authLayout === "center";
     const isLeft = authLayout === "left";
     const isRight = authLayout === "right";
@@ -180,9 +179,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const formPane = (
         <div className="solid-auth-form-pane solid-login-dark-bg">
             <div className="solid-auth-form-pane-inner">
-                <div className="solid-auth-form-pane-brand">
-                    {renderBrand("start")}
-                </div>
+                {appLogoPosition === "in_form_view" && (
+                    <div className="solid-auth-form-pane-brand">
+                        {renderBrand("start")}
+                    </div>
+                )}
                 <div className="solid-auth-form-pane-content">
                     {authChildren}
                 </div>
@@ -196,11 +197,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             className={`solid-auth-image-pane position-relative ${isLeft ? "solid-left-layout pane-on-right" : "solid-right-layout pane-on-left"}`.trim()}
             style={{ backgroundImage: toCssBackgroundImage(authBackgroundSrc) }}
         >
-            {solidSettingsData?.data?.appLogoPosition === "in_image_view" &&
-                <div className={`solid-logo flex items-center gap-4 ${solidSettingsData?.data?.appLogoPosition}`}>
+            {appLogoPosition === "in_image_view" &&
+                <div className={`solid-logo flex items-center gap-4 ${appLogoPosition}`}>
                     <Image
                         alt="solid logo"
-                        src={normalizeAssetUrl(solidSettingsData?.data?.appLogo) || SolidLogo}
+                        src={normalizeAssetUrl(solidSettingsData?.data?.appLogo) || fallbackLogoSrc}
                         className="relative"
                         fill
                     />
@@ -252,7 +253,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 )}
                 {isCenter && <div className="solid-center-layout" style={{ position: "relative", zIndex: 1 }}>
                     <div className="solid-auth-center-stack">
-                    {renderBrand("center")}
+                        {renderBrand("center")}
                         {showAuthContent &&
                             <div className="solid-auth-center-details">
                                 {appSubtitle ? <p className="solid-auth-center-subtitle">{appSubtitle}</p> : null}
@@ -264,24 +265,24 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     </div>
                     {legalFooter}
                 </div>}
-            <SolidDialog
-                visible={isRestricted}
-                onHide={handleRegistration}
-                header="Access Restricted"
-                headerClassName="py-2" contentClassName="px-0 pb-0"
-                className="solid-confirm-dialog"
-                footer={
-                    <div className="flex items-center justify-start">
-                        <SolidButton size="sm" onClick={handleRegistration}>Close</SolidButton>
+                <SolidDialog
+                    visible={isRestricted}
+                    onHide={handleRegistration}
+                    header="Access Restricted"
+                    headerClassName="py-2" contentClassName="px-0 pb-0"
+                    className="solid-confirm-dialog"
+                    footer={
+                        <div className="flex items-center justify-start">
+                            <SolidButton size="sm" onClick={handleRegistration}>Close</SolidButton>
+                        </div>
+                    }
+                >
+                    <SolidDivider className="m-0" />
+                    <div className="p-6">
+                        <p>Sign-up is not available. Please contact the admin.</p>
                     </div>
-                }
-            >
-                <SolidDivider className="m-0" />
-                <div className="p-6">
-                    <p>Sign-up is not available. Please contact the admin.</p>
-                </div>
-            </SolidDialog>
-        </div>
+                </SolidDialog>
+            </div>
         </AuthSettingsContext.Provider>
     )
 }

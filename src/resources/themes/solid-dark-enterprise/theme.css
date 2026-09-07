@@ -69,8 +69,8 @@
     border-color: rgba(110, 168, 254, 0.18) !important;
   }
 
-  .solid-workspace-avatar,
-  .solid-workspace-item-avatar,
+  .solid-workspace-avatar:not(.has-image),
+  .solid-workspace-item-avatar:not(.has-image),
   .solid-collapsed-item.is-active {
     background: #6ea8fe !important;
     color: #08111d !important;
