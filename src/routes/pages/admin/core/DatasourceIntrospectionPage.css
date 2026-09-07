@@ -445,7 +445,7 @@
 .sdix-table-area .solid-table-density-compact .solid-data-table-td {
   height: 30px;
   padding: 0.26rem 0.5rem;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .sdix-table-primary-cell {

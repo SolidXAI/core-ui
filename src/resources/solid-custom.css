@@ -7103,15 +7103,14 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 24px;
   padding: clamp(28px, 4vh, 40px) 0;
 }
 
 .solid-auth-theme-wrapper.left .solid-auth-form-pane-brand,
 .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
-  position: absolute;
-  top: clamp(104px, 14vh, 140px);
-  left: 0;
-  right: 0;
+  position: static;
+  width: 100%;
   display: flex;
   justify-content: flex-start;
 }
@@ -7183,20 +7182,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   left: 0;
   right: 0;
   bottom: clamp(28px, 4vh, 36px);
-}
-
-@media (max-height: 950px) and (min-width: 768px) {
-  .solid-auth-theme-wrapper.left .solid-auth-form-pane-brand,
-  .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
-    top: clamp(88px, 11vh, 104px);
-  }
-}
-
-@media (max-height: 850px) and (min-width: 768px) {
-  .solid-auth-theme-wrapper.left .solid-auth-form-pane-brand,
-  .solid-auth-theme-wrapper.right .solid-auth-form-pane-brand {
-    top: clamp(40px, 6vh, 56px);
-  }
 }
 
 .solid-auth-legal-footer-row {

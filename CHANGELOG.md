@@ -4,6 +4,73 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.18-beta.0] - 2026-09-07
+
+## [0.1.17] - 2026-09-07
+
+### Added
+
+- enable support for multiple saved filters in SolidGlobalSearchElement and SolidListView
+
+### Fixed
+
+- enhance error handling for missing field metadata in SolidListView
+- stabilize logo spacing across zoom levels
+- vertically center logo and form in split layouts
+- remove redundant styles for auth logo positioning and sizing
+- adjust auth logo positioning and sizing for improved layout
+- update auth logo positioning and sizing for better responsiveness
+- prevent stale action response from affecting breadcrumb display
+- recover button greyed out state to active
+- improve mobile responsiveness for settings workspace and AI model config card
+- json editor proper scroll and render
+- explorer footer in smaller viewport
+- update error message summary to use ERROR_OCCURED instead of SEND_REPORT
+- locale dropdown is rendered outside the viewport
+- selection static alignment and out of view rendering of dropdown
+- alignment issue in Explorer JSON editor footer
+- update sidebar collapsed state handling for mobile view
+- alignment and validation error rendering
+- scroll behaviour for explorer in settings at mobile viewport
+- checkbox grid layout fix in fiield metadata form
+
+### Other
+
+- Remove SVG support from menu icon upload restrictions
+- Update workspace avatar styles to handle missing images across themes
+- Enhance CreateModule and AppSidebar components with menu icon lightbox and workspace avatar support
+- Add dark theme styles for datasource introspection components
+- Revert "fixed column handling for table in dashboard"
+- Revert "feat: enable support for multiple saved filters in SolidGlobalSearchE…"
+- bug fix around list ,tree,card,kanban views header button visibility
+- missed out grid class in place for settings checkbox in fieldType
+- fixed column handling for table
+
+## [0.1.17-beta.2] - 2026-09-04
+
+### Other
+
+- Refactor theme styles for solid-light-enterprise and solid-light-modern
+
+## [0.1.17-beta.1] - 2026-09-04
+
+### Added
+
+- add support for retrieving and applying multiple saved filters in SolidTreeView
+- enable support for multiple saved filter items in SolidCardView and SolidKanbanView
+- add toast notifications for saved filter actions and update error messages
+
+### Fixed
+
+- ensure saved filter replaces active filters when multiple saved filters are not allowed
+- update logo positioning and sizing for improved layout and responsiveness
+
+### Other
+
+- Restore multiple saved filters support (revert revert of #210)
+- Fix vertical alignment in datasource introspection table cells
+- Enhance dark theme support for SolidJsonEditor with improved styling
+
 ## [0.1.17-beta.0] - 2026-08-31
 
 ### Added

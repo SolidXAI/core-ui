@@ -52,6 +52,7 @@ type SolidCardFilterInput = {
   custom_filter_predicate?: any;
   search_predicate?: any;
   saved_filter_predicate?: any;
+  saved_filter_items?: any[];
   predefined_search_predicate?: any;
 };
 
@@ -423,6 +424,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
       saved_filter_id: filterPredicates.saved_filter_id || null,
       saved_filter_system_key: filterPredicates.saved_filter_system_key || null,
       saved_filter_name: filterPredicates.saved_filter_name || null,
+      saved_filter_items: filterPredicates.saved_filter_items || [],
       predefined_search_predicate: filterPredicates.predefined_search_predicate || {},
       predefined_search_chip: filterPredicates.predefined_search_chip || null,
     });
@@ -593,6 +595,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
                     viewData={solidCardViewMetaDataResponse}
                     handleApplyCustomFilter={handleApplyCustomFilter}
                     filterPredicates={filterPredicates}
+                    allowMultipleSavedFilters
                   />
                 </div>
               </div>
