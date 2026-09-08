@@ -486,7 +486,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             {listViewParams &&
                 <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
-            {readOnlyPermission !== true && formViewParams &&
+            {formViewParams &&
                 <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
         </div>
