@@ -4615,20 +4615,26 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   }
 
   .solid-tree-page-wrapper .solid-data-table-selection-col {
-    width: 3rem;
-    min-width: 3rem;
-    max-width: 3rem;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
+    display: none !important;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 
   .solid-tree-page-wrapper .solid-tree-group-header-cell,
   .solid-tree-page-wrapper .solid-tree-group-body-cell {
     background: var(--background);
-    width: 13rem !important;
-    min-width: 13rem !important;
-    max-width: 13rem !important;
+    width: 10rem !important;
+    min-width: 10rem !important;
+    max-width: 10rem !important;
     overflow: hidden;
+  }
+
+  .solid-tree-page-wrapper .solid-tree-group-header-cell.solid-tree-sticky-cell-left,
+  .solid-tree-page-wrapper .solid-tree-group-body-cell.solid-tree-sticky-cell-left {
+    left: 0 !important;
   }
 
   .solid-tree-page-wrapper .solid-data-table-head .solid-tree-group-header-cell {
@@ -4647,22 +4653,41 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
     overflow: hidden;
   }
 
+  .solid-tree-page-wrapper .solid-tree-group-body-cell .solid-tree-cell {
+    display: grid;
+    grid-template-columns: auto 1.25rem minmax(0, 1fr);
+    align-items: flex-start;
+    column-gap: 0.25rem;
+  }
+
+  .solid-tree-page-wrapper .solid-tree-group-body-cell .solid-tree-expander {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.0625rem;
+  }
+
   .solid-tree-page-wrapper .solid-tree-group-body-cell .solid-tree-cell-content {
     padding-right: 0.5rem;
+    align-items: flex-start;
   }
 
   .solid-tree-page-wrapper .solid-tree-group-label {
     width: 100%;
     max-width: 100%;
     overflow: visible;
+    align-items: flex-start;
   }
 
   .solid-tree-page-wrapper .solid-tree-group-label-text {
+    display: -webkit-box;
     max-width: 100%;
-    overflow: visible;
-    text-overflow: clip;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: normal;
     word-break: normal;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
 
