@@ -245,3 +245,32 @@
 .workflow-node-docs pre {
   max-width: 100%;
 }
+
+html.dark .workflow-node-docs,
+[data-theme="dark"] .workflow-node-docs {
+  color: var(--foreground);
+}
+
+html.dark .workflow-node-docs-title-row h2,
+html.dark .workflow-node-docs-section-trigger.solid-accordion-trigger,
+html.dark .workflow-node-docs-row-heading strong,
+html.dark .workflow-node-docs-section-title,
+html.dark .workflow-node-docs-examples-inline strong,
+[data-theme="dark"] .workflow-node-docs-title-row h2,
+[data-theme="dark"] .workflow-node-docs-section-trigger.solid-accordion-trigger,
+[data-theme="dark"] .workflow-node-docs-row-heading strong,
+[data-theme="dark"] .workflow-node-docs-section-title,
+[data-theme="dark"] .workflow-node-docs-examples-inline strong {
+  color: var(--foreground);
+}
+
+html.dark .workflow-node-docs-type,
+html.dark .workflow-node-docs-description,
+html.dark .workflow-node-docs-meta-row span,
+html.dark .workflow-node-docs-meta-row code,
+[data-theme="dark"] .workflow-node-docs-type,
+[data-theme="dark"] .workflow-node-docs-description,
+[data-theme="dark"] .workflow-node-docs-meta-row span,
+[data-theme="dark"] .workflow-node-docs-meta-row code {
+  color: var(--muted-foreground);
+}

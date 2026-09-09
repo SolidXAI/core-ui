@@ -37,7 +37,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
                     optionLabel='label'
                     optionValue='value'
                     placeholder="Select Operator"
-                    className="p-inputtext-sm w-full "
+                    className="w-full solid-filter-compact-control"
                 />
             </div>
 

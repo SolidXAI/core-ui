@@ -68,8 +68,11 @@ export type SolidTreeViewHandle = {
     custom_filter_predicate?: any;
     search_predicate?: any;
     saved_filter_predicate?: any;
+    saved_filter_items?: any[];
     predefined_search_predicate?: any;
   }) => void;
+  getSavedFilters: () => any[];
+  applySavedFilter: (name: string, variables?: Record<string, any>) => boolean;
   setPagination: (nextFirst: number, nextRows: number) => void;
   setSort: (nextSortField: string, nextSortOrder: 1 | -1 | 0) => void;
   setShowArchived: (value: boolean) => void;
@@ -1069,6 +1072,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           search_predicate: latestFilterPredicatesRef.current.search_predicate || null,
           saved_filter_predicate: latestFilterPredicatesRef.current.saved_filter_predicate || null,
           saved_filter_variables: latestFilterPredicatesRef.current.saved_filter_variables || {},
+          saved_filter_id: latestFilterPredicatesRef.current.saved_filter_id || null,
+          saved_filter_system_key: latestFilterPredicatesRef.current.saved_filter_system_key || null,
+          saved_filter_name: latestFilterPredicatesRef.current.saved_filter_name || null,
+          saved_filter_items: latestFilterPredicatesRef.current.saved_filter_items || [],
           predefined_search_predicate: latestFilterPredicatesRef.current.predefined_search_predicate || null,
           grouping_rules: latestFilterPredicatesRef.current.grouping_rules || null,
           aggregation_rules: latestFilterPredicatesRef.current.aggregation_rules || null,
@@ -1396,6 +1403,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         column,
         setLightboxUrls,
         setOpenLightbox,
+        recordClickAction: rowClickFormMode
       });
 
       if (!React.isValidElement(listColumn)) return null;
@@ -1560,6 +1568,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       solidGlobalSearchElementRef.current?.clearFilter?.();
     },
     applyFilter: (filter) => { handleApplyCustomFilter(filter); },
+    getSavedFilters: () => solidGlobalSearchElementRef.current?.getSavedFilters?.() ?? [],
+    applySavedFilter: (name, variables) => solidGlobalSearchElementRef.current?.applySavedFilterByName?.(name, variables) ?? false,
     setPagination: (nextFirst: number, nextRows: number) => {
       const currentLimit = getPagination("root").limit;
       if (nextRows !== currentLimit) {
@@ -1726,7 +1736,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         <div className="flex items-center justify-end gap-1 cursor-pointer" onClick={(event) => event.stopPropagation()}>
           <button
             type="button"
-            className="solid-tree-row-menu-trigger"
+            className="retrieve-button solid-row-menu-trigger"
             aria-label="Recover row"
             data-no-row-click="true"
             onClick={() => {
@@ -1766,7 +1776,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               <SolidButton
                 key={index}
                 type="button"
-                icon={button?.attrs?.icon ?? "pi pi-pencil"}
+                icon={button?.attrs?.icon}
+                leftIcon={!button?.attrs?.icon ? <Pencil size={14} aria-hidden /> : undefined}
                 className={`gap-2 ${button?.attrs?.className ?? ""}`}
                 label={
                   button.attrs.showLabel !== false
@@ -1919,6 +1930,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                         viewData={solidTreeViewMetaData}
                         handleApplyCustomFilter={handleApplyCustomFilter}
                         filterPredicates={filterPredicates}
+                        allowMultipleSavedFilters
                       />
                     </div>
                   </>
@@ -1941,7 +1953,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   </div>
                 )}
 
-                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                <div className="solid-header-buttons-wrapper max-lg:hidden items-center lg:flex">
                   {visibleHeaderButtons
                     ?.filter((button: any) => button?.attrs?.actionInContextMenu !== true)
                     ?.map((button: any, index: number) => (
@@ -2018,6 +2030,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                       setDialogVisible={setDeleteRecordsDialogVisible}
                       setShowSaveFilterPopup={setShowSaveFilterPopup}
                       filters={filters}
+                      hasAnyActiveFilters={hasAnyActiveFilters}
                       handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                       setRecoverDialogVisible={setRecoverDialogVisible}
                     />

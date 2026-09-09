@@ -1,5 +1,6 @@
 import Link from "../common/Link";
 import { useState, useEffect } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
 import { SolidMenuItemIcon } from "./SolidMenuItemIcon";
@@ -19,7 +20,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
         const isSelected = activeId !== null && item.id !== null && item.id === activeId;
         const isParentActive = activeId !== null && item.items?.length > 0 && hasActiveChild(item.items);
         return (
-            <div key={item?.key} className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "p-highlight" : ""}`} onClick={options.onClick} >
+            <div key={item?.key} className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "is-active" : ""}`} onClick={options.onClick} >
                 <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-between font-normal">
                     <div className="flex items-center" style={{ gap: 10 }}>
                         <SolidMenuItemIcon item={item.source ?? item} />
@@ -28,7 +29,9 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
                         </span>
                     </div>
                     {item?.items?.length > 0 &&
-                        <span className={`sidebar-chevrons ${expandedKeys[item.key] ? "pi pi-angle-up" : "pi pi-angle-down"}`} />
+                        expandedKeys[item.key]
+                            ? <ChevronUp className="sidebar-chevrons" size={16} aria-hidden="true" />
+                            : <ChevronDown className="sidebar-chevrons" size={16} aria-hidden="true" />
                     }
                 </Link>
             </div>
@@ -84,7 +87,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
 
                     return (
                         <li key={item.key}>
-                            <div className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "p-highlight" : ""}`}>
+                            <div className={`flex items-center cursor-pointer menuHead px-4 ${isSelected || isParentActive ? "is-active" : ""}`}>
                                 <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-between font-normal">
                                     <div className="flex items-center" style={{ gap: 10 }}>
                                         <SolidMenuItemIcon item={item.source ?? item} />
@@ -98,7 +101,9 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
                                         onClick={() => toggleExpansion(item.key)}
                                         aria-label={`Toggle ${item.label} menu`}
                                     >
-                                        <span className={`sidebar-chevrons ${isExpanded ? "pi pi-angle-up" : "pi pi-angle-down"}`} />
+                                        {isExpanded
+                                            ? <ChevronUp className="sidebar-chevrons" size={16} aria-hidden="true" />
+                                            : <ChevronDown className="sidebar-chevrons" size={16} aria-hidden="true" />}
                                     </button>
                                 )}
                             </div>

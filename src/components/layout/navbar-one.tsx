@@ -152,7 +152,7 @@ const NavbarOne = () => {
                             </div>
                         )}
                         {/* <div className="input-icon inputDiv navtwo-searchbox">
-                            <i className="pi pi-search" style={{ color: '#8D9199' }}></i>
+                            <Search size={14} style={{ color: '#8D9199' }} aria-hidden />
                             <input
                                 type="text"
                                 placeholder="Jump to."
@@ -185,21 +185,9 @@ const NavbarOne = () => {
                 alt="Solid"
               />
             </a> */}
-                    {/* </div>
-          <div className="p-inputgroup"> */}
-                    {/* <div className="p-inputgroup navtwo-searchbox">
-              
-              <span className="p-inputgroup-addon">
-                <i className="pi pi-search"></i>
-              </span>
-              <InputText
-                placeholder="Search"
-                onChange={e => setSearchTerm(e.target.value)} 
-                />
-              <span className="p-inputgroup-addon">⌘+k</span>
-            </div> */}
+                    {/* </div> */}
                     {/* <div className="input-icon inputDiv navtwo-searchbox">
-              <i className="pi pi-search" style={{ color: '#8D9199' }}></i>
+              <Search size={14} style={{ color: '#8D9199' }} aria-hidden />
               <input
                 type="text"
                 placeholder="Jump to."
@@ -216,7 +204,7 @@ const NavbarOne = () => {
               />
             </div> */}
 
-                    {/* <Button icon="pi pi-search" className="p-button-outlined" onClick={handleSearch} /> */}
+                    {/* <Button leftIcon={<Search size={14} />} className="solid-btn--outline" onClick={handleSearch} /> */}
                     {/* </div> */}
 
                     <div

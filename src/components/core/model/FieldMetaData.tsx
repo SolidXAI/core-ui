@@ -108,7 +108,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
   const showToaster = async (message: any, severity: any) => {
     const errorMessages = Object.values(message);
     if (errorMessages.length > 0) {
-      dispatch(showToast({ severity, summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.map(String).join(', '), life: 3000 }));
+      dispatch(showToast({ severity, summary: ERROR_MESSAGES.ERROR_OCCURED, detail: errorMessages.map(String).join(', '), life: 3000 }));
     }
   };
 

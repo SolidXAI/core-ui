@@ -112,14 +112,21 @@ export const SolidDropdownMenuSubTrigger = React.forwardRef<
   );
 });
 
+type SolidDropdownMenuSubContentProps = React.ComponentPropsWithoutRef<typeof DropdownMenu.SubContent> & {
+  side?: "left" | "right";
+};
+
 export const SolidDropdownMenuSubContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentPropsWithoutRef<typeof DropdownMenu.SubContent>
->(function SolidDropdownMenuSubContent({ className, sideOffset = 2, alignOffset = -4, ...props }, ref) {
+  SolidDropdownMenuSubContentProps
+>(function SolidDropdownMenuSubContent({ className, side = "right", sideOffset = 2, alignOffset = -4, ...props }, ref) {
+  const SubContent = DropdownMenu.SubContent as unknown as React.ComponentType<any>;
+
   return (
     <DropdownMenu.Portal>
-      <DropdownMenu.SubContent
+      <SubContent
         ref={ref}
+        side={side}
         sideOffset={sideOffset}
         alignOffset={alignOffset}
         className={cx("solid-dropdown-menu-content solid-dropdown-menu-subcontent", className)}

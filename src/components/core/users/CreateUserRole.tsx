@@ -71,7 +71,7 @@ const CreateUserRole = ({ data }: any) => {
     if (errorMessages.length > 0) {
       dispatch(showToast({
         severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
+        summary: ERROR_MESSAGES.ERROR_OCCURED,
         detail: errorMessages.map(String).join(", "),
       }));
     }
@@ -153,7 +153,7 @@ const CreateUserRole = ({ data }: any) => {
                       name="username"
                       onChange={formik.handleChange}
                       value={formik.values.username}
-                      className="p-inputtext-sm w-full small-input"
+                      className="w-full small-input"
                       aria-invalid={!!isFormFieldValid(formik, "username")}
                     />
                     {isFormFieldValid(formik, "username") && (

@@ -2,6 +2,7 @@
 import React from "react";
 import { useRouter } from "../../../hooks/useRouter";
 import { DraggableProvided } from "@hello-pangea/dnd";
+import { RotateCcw } from "lucide-react";
 import { CompatibleDraggable } from "../common/dndCompat";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import {
@@ -60,7 +61,27 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
     router.push(`${editButtonUrl}/${data?.id}?viewMode=edit`);
   };
 
+  const renderRecoverAction = (data) => {
+    if (!showArchived || !isArchivedRecord || !onRecover) return null;
+
+    return (
+      <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className="retrieve-button solid-row-menu-trigger"
+          onClick={() => onRecover(data)}
+          aria-label="Recover record"
+          title="Recover"
+        >
+          <RotateCcw size={14} aria-hidden />
+        </button>
+      </div>
+    );
+  };
+
   const renderKanbanAction = (data) => {
+    if (isArchivedRecord) return renderRecoverAction(data);
+
     return (
       <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
         <SolidDropdownMenu>
@@ -74,24 +95,13 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             </button>
           </SolidDropdownMenuTrigger>
           <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
-            {!isArchivedRecord ? (
-              <SolidDropdownMenuItem
-                className="solid-header-dropdown-item"
-                onSelect={openEdit}
-              >
-                <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
-                <span className="solid-header-action-button-label">Edit</span>
-              </SolidDropdownMenuItem>
-            ) : null}
-            {showArchived && data?.deletedAt !== null && data?.deletedAt !== undefined && onRecover ? (
-              <SolidDropdownMenuItem
-                className="solid-header-dropdown-item"
-                onSelect={() => onRecover(data)}
-              >
-                <SolidIcon name="si-refresh" className="solid-header-action-button-icon" aria-hidden />
-                <span className="solid-header-action-button-label">Recover</span>
-              </SolidDropdownMenuItem>
-            ) : null}
+            <SolidDropdownMenuItem
+              className="solid-header-dropdown-item"
+              onSelect={openEdit}
+            >
+              <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
+              <span className="solid-header-action-button-label">Edit</span>
+            </SolidDropdownMenuItem>
             {onDelete && (data?.deletedAt === null || data?.deletedAt === undefined) ? (
               <SolidDropdownMenuItem
                 className="solid-header-dropdown-item solid-header-dropdown-item-danger"
@@ -132,7 +142,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           {/* <p className="kanban-card-content">{data.content}</p> */}
           <div
             style={{
-              opacity: snapshot.isDragging ? 0.9 : (isArchivedRecord ? 0.55 : 1),
+              opacity: snapshot.isDragging ? 0.9 : 1,
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
               cursor: isArchivedRecord ? "default" : (isDragDisabled ? "pointer" : "grab")
             }}
@@ -142,7 +152,10 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           >
             {renderKanbanAction(data)}
             {DynamicCardWidget ? (
-              <div style={isArchivedRecord ? { pointerEvents: "none" } : undefined}>
+              <div
+                className={isArchivedRecord ? "solid-archived-card-content" : undefined}
+                style={isArchivedRecord ? { pointerEvents: "none" } : undefined}
+              >
                 <DynamicCardWidget
                   rowData={data}
                   solidKanbanViewMetaData={solidKanbanViewMetaData}

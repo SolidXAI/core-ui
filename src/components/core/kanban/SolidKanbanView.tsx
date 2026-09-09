@@ -59,6 +59,7 @@ type SolidKanbanFilterInput = {
   custom_filter_predicate?: any;
   search_predicate?: any;
   saved_filter_predicate?: any;
+  saved_filter_items?: any[];
   predefined_search_predicate?: any;
 };
 
@@ -1073,6 +1074,8 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         // @ts-ignore
         urlData.saved_filter_name = customFilter.saved_filter_name || null;
         // @ts-ignore
+        urlData.saved_filter_items = customFilter.saved_filter_items || [];
+        // @ts-ignore
         urlData.predefined_search_predicate = customFilter.predefined_search_predicate || {};
         // @ts-ignore
         urlData.predefined_search_chip = customFilter.predefined_search_chip || null;
@@ -1193,7 +1196,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                     `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
                 <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
-                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
+                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} allowMultipleSavedFilters></SolidGlobalSearchElement>
                 </div>
               </div>
 
@@ -1211,7 +1214,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                   />
                 </div>
 
-                <div className="solid-header-buttons-wrapper hidden items-center lg:flex">
+                <div className="solid-header-buttons-wrapper max-lg:hidden items-center lg:flex">
                   {visibleHeaderButtons
                     ?.filter((button: any) => button?.attrs?.actionInContextMenu !== true)
                     ?.map((button: any, index: number) => (
@@ -1262,13 +1265,12 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                   showArchived={showArchived}
                   setLayoutDialogVisible={setLayoutDialogVisible}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
+                  hasAnyActiveFilters={hasAnyActiveFilters}
                   handleRefreshView={handleRefreshView}
                 />
               </div>
             </div>
           </div>
-
-          <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
             <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick}></KanbanBoard>
           }

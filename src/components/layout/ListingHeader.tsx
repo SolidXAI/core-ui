@@ -1,5 +1,6 @@
 
 import React, { useRef, useState } from "react";
+import { Cog, Plus, RefreshCcw, Trash2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 // import { RootState } from "../../redux/store";
 import { gridView, listView } from "../../redux/features/dataViewSlice";
@@ -22,19 +23,19 @@ const ListingHeader = () => {
   const items = [
     {
       label: "Settings",
-      icon: "pi pi-cog",
+      icon: <Cog size={14} aria-hidden />,
       command: () => {
       },
     },
     {
       label: "Update",
-      icon: "pi pi-refresh",
+      icon: <RefreshCcw size={14} aria-hidden />,
       command: () => {
       },
     },
     {
       label: "Delete",
-      icon: "pi pi-trash",
+      icon: <Trash2 size={14} aria-hidden />,
       command: () => {
       },
     },
@@ -104,6 +105,9 @@ const ListingHeader = () => {
   ];
 
   const justifyTemplate = (option: any) => {
+    if (React.isValidElement(option.icon)) {
+      return option.icon;
+    }
     const m = parseSolidIconMeta(option.icon);
     return m ? <SolidIcon name={m.name} spin={m.spin} /> : <i className={option.icon}></i>;
   };
@@ -136,13 +140,12 @@ const ListingHeader = () => {
         style={{ height: "60px", minHeight: 60, backgroundColor: '#f6f6f9' }}
       >
         <div className="flex items-center">
-          {/* <i className="pi pi-users" style={{backgroundColor:"#1D6CBC"}}></i> */}
           {/* <img src="/images/icons/icon-users.svg" />
                 <span className="listHead ml-2">Employees</span> */}
           <div className="">
             {/* <SplitButton
               label="Add"
-              icon="pi pi-plus"
+              icon={<Plus size={14} aria-hidden />}
               onClick={save}
               model={items}
               severity="info"
@@ -155,9 +158,6 @@ const ListingHeader = () => {
         </div>
         {/* <GlobalSearch /> */}
         <div className="flex items-center">
-
-          {/* <Button label="Show" icon="pi pi-external-link" onClick={() => setVisible(true)} /> */}
-
           <div>
             {/* <Menu model={items} popup ref={menu} /> */}
             {pathname == "/admin/address-master/states" &&
@@ -165,7 +165,7 @@ const ListingHeader = () => {
 
             }
             {/* <Button
-              icon="pi pi-cog"
+              icon={<Cog size={14} aria-hidden />}
               className="transparent-background"
               onClick={toggleMenu}
               aria-haspopup
