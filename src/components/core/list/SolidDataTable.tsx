@@ -259,6 +259,7 @@ export function SolidDataTable({
                     className={cx("solid-data-table-row", rowClassName?.(rowData))}
                     onClick={(event) => {
                       const target = event.target as HTMLElement;
+                      if (!event.currentTarget.contains(target)) return;
                       if (target.closest("button,a,input,label,[data-no-row-click='true']")) return;
                       onRowClick?.({ data: rowData });
                     }}
