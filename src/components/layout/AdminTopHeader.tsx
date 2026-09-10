@@ -81,17 +81,22 @@ export const AdminTopHeader = () => {
     // When on a form view, clicking the model name (second crumb) should navigate back to list
     // Index 1 is the model name in a breadcrumb like: Module > Model > Action
     if (crumbIndex === 1 && showBack) {
+      const segments = pathname.split("/").filter(Boolean);
       if (typeof window !== "undefined") {
         // First, try to use the full stored URL (preserves all query params)
         const storedFullUrl = sessionStorage.getItem("fromViewUrl");
         if (storedFullUrl) {
-          router.push(storedFullUrl);
-          return;
+          const storedUrl = new URL(storedFullUrl, window.location.origin);
+          const storedSegments = storedUrl.pathname.split("/").filter(Boolean);
+
+          if (storedSegments[2] === segments[2] && storedSegments[3] === segments[3]) {
+            router.push(storedFullUrl);
+            return;
+          }
         }
       }
       
       // Fallback: construct URL from current path and stored view
-      const segments = pathname.split("/").filter(Boolean);
       if (segments[0] === "admin" && segments[1] === "core") {
         const moduleName = segments[2];
         const modelName = segments[3];
