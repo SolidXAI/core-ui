@@ -3528,7 +3528,7 @@ const FieldMetaDataForm = ({
 
                       {formik.values.encrypt === true && (
                         <div className="mt-2 flex flex-wrap -mx-2">
-                          <div className="w-full px-2 pt-2 md:w-1/2">
+                          <div className="basis-full px-2 pt-2 md:basis-1/2">
                             <div className="field flex w-full flex-col gap-2">
                               <label
                                 htmlFor="encryptionType"
@@ -3572,7 +3572,7 @@ const FieldMetaDataForm = ({
                               )}
                             </div>
                           </div>
-                          <div className="px-2 pt-2 md:w-1/2">
+                          <div className="basis-full px-2 pt-2 md:basis-1/2">
                             <div className="field flex w-full flex-col gap-2">
                               <label htmlFor="decryptWhen" className={classNames("form-field-label", styles.fieldLabel)}>
                                 Decrypt When
