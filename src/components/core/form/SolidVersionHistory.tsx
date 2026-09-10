@@ -92,16 +92,8 @@ export const SolidVersionHistory = ({ params, currentRecord }: SolidVersionHisto
 
     return (
         <div className="w-full p-2">
-            <div className="flex items-center justify-between gap-2 pb-2">
+            <div className="flex items-center gap-2 pb-2">
                 <h3 className="m-0 text-base font-semibold">Version History</h3>
-                <SolidButton
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    icon="si si-refresh"
-                    onClick={fetchVersions}
-                    loading={isLoading}
-                />
             </div>
             <div className="overflow-x-auto rounded border border-[var(--surface-border)]">
                 <table className="w-full border-collapse text-sm">

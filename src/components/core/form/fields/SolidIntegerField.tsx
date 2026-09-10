@@ -161,29 +161,28 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
-            <div className={styles.fieldNumberWrapper}>
-                <SolidNumberInput
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    id={fieldLayoutInfo.attrs.name}
-                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    onChange={(e: any) => {
-                        const nextVal = typeof e.value === "number" ? e.value : null;
-                        fieldContext.onChange(
-                            {
-                                target: {
-                                    name: fieldLayoutInfo.attrs.name,
-                                    value: nextVal,
-                                    type: "number",
-                                },
-                            } as any,
-                            "onFieldChange"
-                        );
-                    }}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    autoComplete={autoComplete}
-                />
-            </div>
+            <SolidNumberInput
+                className={styles.fieldInput}
+                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                disabled={formDisabled || fieldDisabled}
+                id={fieldLayoutInfo.attrs.name}
+                aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                onChange={(e: any) => {
+                    const nextVal = typeof e.value === "number" ? e.value : null;
+                    fieldContext.onChange(
+                        {
+                            target: {
+                                name: fieldLayoutInfo.attrs.name,
+                                value: nextVal,
+                                type: "number",
+                            },
+                        } as any,
+                        "onFieldChange"
+                    );
+                }}
+                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                autoComplete={autoComplete}
+            />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}

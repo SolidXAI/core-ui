@@ -351,7 +351,7 @@ function UserDetailsContent({
       <div className="solid-user-details-stack">
         <SolidPanel header="Basic Info" className="solid-column-panel">
           <div className="flex flex-wrap -mx-2 -mt-2">
-            <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+            <div className="field flex basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
               <label htmlFor="fullName" className="form-field-label">
                 Full Name
               </label>
@@ -368,7 +368,7 @@ function UserDetailsContent({
               {fieldError("fullName") ? <SolidMessage severity="error" text={fieldError("fullName")} /> : null}
             </div>
 
-            <div className="field flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+            <div className="field flex basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
               <label htmlFor="username" className="form-field-label">
                 Username
               </label>
@@ -386,7 +386,7 @@ function UserDetailsContent({
               {fieldError("username") ? <SolidMessage severity="error" text={fieldError("username")} /> : null}
             </div>
 
-            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+            <div className="field mt-4 flex basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
               <label htmlFor="email" className="form-field-label">
                 Email
               </label>
@@ -404,7 +404,7 @@ function UserDetailsContent({
               {fieldError("email") ? <SolidMessage severity="error" text={fieldError("email")} /> : null}
             </div>
 
-            <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+            <div className="field mt-4 flex basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
               <label htmlFor="mobile" className="form-field-label">
                 Mobile
               </label>
@@ -423,7 +423,7 @@ function UserDetailsContent({
 
             {!isEditMode ? (
               <>
-                <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                <div className="field mt-4 flex basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                   <label htmlFor="password" className="form-field-label">
                     Password
                   </label>
@@ -439,7 +439,7 @@ function UserDetailsContent({
                   {fieldError("password") ? <SolidMessage severity="error" text={fieldError("password")} /> : null}
                 </div>
 
-                <div className="field mt-4 flex w-full flex-col gap-2 px-2 pt-2 md:w-1/2">
+                <div className="field mt-4 flex basis-full flex-col gap-2 px-2 pt-2 md:basis-1/2">
                   <label htmlFor="confirmPassword" className="form-field-label">
                     Confirm Password
                   </label>

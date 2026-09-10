@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.18-beta.1] - 2026-09-08
+
+### Other
+
+- view widget issue fix when parent has read permissions only
+
 ## [0.1.18-beta.0] - 2026-09-07
 
 ## [0.1.17] - 2026-09-07

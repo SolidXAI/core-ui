@@ -153,7 +153,7 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                     disabled={formDisabled || fieldDisabled || readOnlyPermission}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     placeholderText={fieldLayoutInfo.attrs.placeholder}
-                    className=""
+                    inputClassName={styles.fieldInput}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (

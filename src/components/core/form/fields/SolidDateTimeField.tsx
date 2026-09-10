@@ -156,7 +156,7 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
                     showTimeSelect
                     dateFormat="yyyy-MM-dd h:mm aa"
                     placeholderText={fieldLayoutInfo.attrs.placeholder}
-                    className=""
+                    inputClassName={styles.fieldInput}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
