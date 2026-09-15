@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.18-beta.2] - 2026-09-15
+
+### Fixed
+
+- formatting
+- alignment and width - settings grid - encrypt autocomplete inconsistent rendering
+- validation error absolute position to relative
+- added input classname to  input fields sharing same visibilty, fixing the improper alignment of the form
+
+### Changed
+
+- remove refresh button from version history component
+
+### Other
+
+- - IAM -> User form break - Solid fields following consistent height
+
 ## [0.1.18-beta.1] - 2026-09-08
 
 ### Other
