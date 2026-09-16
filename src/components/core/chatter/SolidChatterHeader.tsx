@@ -131,10 +131,12 @@ export const SolidChatterHeader = (props: Props) => {
     return (
         <div className={`${styles.chatterTitle} ${title ? styles.chatterTitleWithLabel : ''} solid-list-toolbar`}>
             <div className='flex justify-between items-center solid-list-toolbar-row'>
-                <p className="m-0 view-title solid-text-wrapper form-wrapper-title">
-                    {title || ''}
-                </p>
-                <div className='flex items-center solid-header-buttons-wrapper'>
+                {title && 
+                    (<p className="m-0 view-title solid-text-wrapper form-wrapper-title">
+                        {title}
+                    </p>
+                )}
+                <div className='flex items-center ml-auto solid-header-buttons-wrapper'>
                     {/* <Button
                         label="Send Message"
                         size="small"
