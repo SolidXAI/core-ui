@@ -448,6 +448,25 @@
   vertical-align: middle;
 }
 
+.sdix-table-area .sdix-table-selection-col {
+  width: 52px;
+  min-width: 52px;
+  max-width: 52px;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  text-align: center;
+}
+
+.sdix-table-area .sdix-table-selection-col .solid-table-header-button {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.sdix-table-area .sdix-table-selection-col .sdix-selection-cell {
+  width: 100%;
+}
+
 .sdix-table-primary-cell {
   display: flex;
   flex-direction: column;
