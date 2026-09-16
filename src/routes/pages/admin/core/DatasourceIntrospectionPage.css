@@ -1259,6 +1259,11 @@
   word-break: break-word;
 }
 
+.sdix-stage-panel__command code {
+  color: inherit;
+  font: inherit;
+}
+
 .sdix-stage-progress {
   flex: 1 1 auto;
   min-height: 18rem;
@@ -1777,4 +1782,21 @@ html.dark .sdix-stage-progress--success,
 html.dark .sdix-stage-panel__eyebrow,
 [data-theme="dark"] .sdix-stage-panel__eyebrow {
   color: var(--primary);
+}
+
+html.dark .sdix-stage-panel__command,
+[data-theme="dark"] .sdix-stage-panel__command {
+  background: color-mix(in srgb, var(--background) 74%, #ffffff 6%);
+  border-color: color-mix(in srgb, var(--border) 84%, #ffffff 16%);
+  border-radius: 0.5rem;
+  border-style: solid;
+  border-width: 1px;
+  color: color-mix(in srgb, var(--foreground) 92%, #ffffff 8%);
+  overflow-x: auto;
+  padding: 0.68rem 0.78rem;
+}
+
+html.dark .sdix-stage-panel__command code,
+[data-theme="dark"] .sdix-stage-panel__command code {
+  color: inherit;
 }
