@@ -93,13 +93,33 @@
 }
 
 .solid-field-checkbox-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  max-width: 100%;
+  min-width: 0;
+  line-height: 1.2;
+  vertical-align: top;
+}
+
+.solid-field-checkbox-row .solid-checkbox {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  line-height: 0;
+}
+
+.solid-field-checkbox-row .solid-checkbox-box {
+  flex: 0 0 auto;
 }
 
 .solid-field-checkbox-row .form-field-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
   margin: 0;
+  line-height: 1.2;
 }
 
 .solid-field-settings-grid {
@@ -265,7 +285,7 @@ html.dark .solid-field-form-shell .solid-file-icon-btn.is-danger:hover:not(:disa
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 425px) {
   .solid-field-settings-grid {
     grid-template-columns: 1fr;
   }

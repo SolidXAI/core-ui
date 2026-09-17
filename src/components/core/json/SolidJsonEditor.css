@@ -200,3 +200,92 @@
 .solid-json-editor.is-readonly .ace-jsoneditor .ace_cursor {
   opacity: 0.45;
 }
+
+/* Keep the code editor surface aligned with the application theme. The
+   datasource introspection Review Mapping tab shares this editor with the
+   model and module explorers. */
+html.dark .solid-json-editor .ace-jsoneditor,
+html.dark .solid-json-editor .ace-jsoneditor .ace_gutter,
+html.dark .solid-json-editor .ace-jsoneditor .ace_scroller,
+html.dark .solid-json-editor .ace-jsoneditor .ace_content,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_gutter,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_scroller,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_content {
+  background: var(--surface-ground, var(--background)) !important;
+  color: var(--foreground) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_gutter,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_gutter {
+  color: var(--muted-foreground) !important;
+  border-right: 1px solid var(--border);
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_gutter-active-line,
+html.dark .solid-json-editor .ace-jsoneditor .ace_active-line,
+html.dark .solid-json-editor .ace-jsoneditor .ace_marker-layer .ace_active-line,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_gutter-active-line,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_active-line,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_marker-layer .ace_active-line {
+  background: color-mix(in srgb, var(--foreground) 10%, transparent) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_marker-layer .ace_selection,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_marker-layer .ace_selection {
+  background: color-mix(in srgb, var(--primary) 28%, transparent) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_marker-layer .ace_bracket,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_marker-layer .ace_bracket {
+  border: 1px solid color-mix(in srgb, var(--foreground) 58%, transparent) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_cursor,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_cursor {
+  border-left-color: var(--foreground) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_print-margin,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_print-margin {
+  background: color-mix(in srgb, var(--foreground) 10%, transparent) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_constant,
+html.dark .solid-json-editor .ace-jsoneditor .ace_constant.ace_numeric,
+html.dark .solid-json-editor .ace-jsoneditor .ace_constant.ace_language,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_constant,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_constant.ace_numeric,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_constant.ace_language {
+  color: var(--primary) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_string,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_string {
+  color: color-mix(in srgb, var(--primary) 68%, var(--foreground)) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_keyword,
+html.dark .solid-json-editor .ace-jsoneditor .ace_meta,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_keyword,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_meta {
+  color: color-mix(in srgb, var(--primary) 72%, var(--foreground)) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_variable,
+html.dark .solid-json-editor .ace-jsoneditor .ace_variable.ace_parameter,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_variable,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_variable.ace_parameter {
+  color: color-mix(in srgb, var(--destructive) 72%, var(--foreground)) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_comment,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_comment {
+  color: var(--muted-foreground) !important;
+}
+
+html.dark .solid-json-editor .ace-jsoneditor .ace_invalid,
+[data-theme="dark"] .solid-json-editor .ace-jsoneditor .ace_invalid {
+  color: var(--destructive) !important;
+  background: color-mix(in srgb, var(--destructive) 28%, transparent) !important;
+}

@@ -196,7 +196,7 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                     timeOnly
                     showTimeSelect
                     dateFormat="HH:mm"
-                    className=""
+                    inputClassName={styles.fieldInput}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (

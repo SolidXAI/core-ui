@@ -59,6 +59,7 @@ type SolidKanbanFilterInput = {
   custom_filter_predicate?: any;
   search_predicate?: any;
   saved_filter_predicate?: any;
+  saved_filter_items?: any[];
   predefined_search_predicate?: any;
 };
 
@@ -1073,6 +1074,8 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         // @ts-ignore
         urlData.saved_filter_name = customFilter.saved_filter_name || null;
         // @ts-ignore
+        urlData.saved_filter_items = customFilter.saved_filter_items || [];
+        // @ts-ignore
         urlData.predefined_search_predicate = customFilter.predefined_search_predicate || {};
         // @ts-ignore
         urlData.predefined_search_chip = customFilter.predefined_search_chip || null;
@@ -1193,7 +1196,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                     `lg:flex`. Only media-scoped visibility classes are safe on this element. */}
                 <div className={`${showGlobalSearchElement ? "flex" : "max-lg:hidden lg:flex"} w-full mt-3 lg:mt-0 lg:min-w-0`}>
                   {/* Keep global search mounted for now because kanban bootstrap/filter hydration still flows through this element. */}
-                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} ></SolidGlobalSearchElement>
+                  <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} filterPredicates={filterPredicates} allowMultipleSavedFilters></SolidGlobalSearchElement>
                 </div>
               </div>
 
