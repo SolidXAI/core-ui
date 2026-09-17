@@ -693,6 +693,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [activeSavedFilters, setActiveSavedFilters] = useState<any[]>([]);
     const [editingSavedFilterKey, setEditingSavedFilterKey] = useState<string | null>(null);
     const [showSavedFilterComponent, setShowSavedFilterComponent] = useState<boolean>(false);
+    const [chipOrder, setChipOrder] = useState<string[]>([]);
 
 
     const [savedFilterTobeDeleted, setSavedFilterTobeDeleted] = useState<any | null>(null);
@@ -704,7 +705,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [showChipManager, setShowChipManager] = useState(false);
     const chipManagerRef = useRef<HTMLDivElement | null>(null);
     const chipManagerTriggerRef = useRef<HTMLButtonElement | null>(null);
-
     const focusSearchInput = () => {
         requestAnimationFrame(() => {
             searchInputRef.current?.focus();
@@ -849,6 +849,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const getSavedFilterKey = (savedFilter: any) =>
         savedFilter?.systemKey ? `system:${savedFilter.systemKey}` : `id:${savedFilter?.id}`;
 
+    const getSearchChipId = (columnName: string) => `search:${columnName}`;
+    const getSavedFilterChipId = (savedFilter: any) => `saved-filter:${getSavedFilterKey(savedFilter)}`;
+
+    const markAppliedChip = (chipId: string) => {
+        setChipOrder((prev) => prev.includes(chipId) ? prev : [...prev, chipId]);
+    };
+
+    const getOrderedChipIds = (activeChipIds: string[], order: string[]) => {
+        const uniqueActiveChipIds = Array.from(new Set(activeChipIds));
+        return [
+            ...uniqueActiveChipIds.filter((id) => !order.includes(id)),
+            ...order.filter((id) => uniqueActiveChipIds.includes(id)),
+        ];
+    };
+
     const getPersistedSavedFilterItems = (queryObject: any): any[] => {
         if (!allowMultipleSavedFilters) return [];
         if (Array.isArray(queryObject?.saved_filter_items)) {
@@ -966,6 +981,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
         setGroupingRules((prev) => areFilterStateValuesEqual(prev, nextGroupingRules) ? prev : nextGroupingRules);
         setAggregationRules((prev) => areFilterStateValuesEqual(prev, nextAggregationRules) ? prev : nextAggregationRules);
+        setChipOrder((prev) => Array.isArray(queryObject?.chip_order) && !areFilterStateValuesEqual(prev, queryObject.chip_order) ? queryObject.chip_order : prev);
     }, [allowMultipleSavedFilters, availableSavedFilters, initialState, viewData]);
 
     const resetAppliedFilters = ({ preserveGrouping = false }: { preserveGrouping?: boolean } = {}) => {
@@ -981,6 +997,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setCurrentSavedFilterRules(null);
         setActiveSavedFilters([]);
         setEditingSavedFilterKey(null);
+        setChipOrder([]);
         if (!preserveGrouping) {
             setGroupingRules(defaultGroupingRules);
             setAggregationRules(defaultAggregationRules);
@@ -1224,6 +1241,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             // Support comma-separated values: split, trim and add as separate chips
             const values = inputValue.split(",").map(v => v.trim()).filter(v => v !== "");
             const fieldName = columnName || fallbackField.fieldName;
+            markAppliedChip(getSearchChipId(fieldName));
             const chipsToAdd = values.map(v => ({
                 columnName: fieldName,
                 value: v,
@@ -1263,6 +1281,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         //     };
         // }
         setCustomFilter(finalCustomFilter);
+        markAppliedChip("custom-filter");
         setShowGlobalSearchElement(false);
         setHasSearched(true)
         setRefreshKey((prev) => prev + 1)
@@ -1301,6 +1320,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setShowGroupFilterElement(false);
         setGroupingRules(groupingRules);
         setAggregationRules(aggregationRules);
+        if (groupingRules.some((rule) => rule.fieldName !== null)) {
+            markAppliedChip("grouping-rules");
+        }
         setRefreshKey((prev) => prev + 1)
     }
 
@@ -1368,6 +1390,26 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             if (!allowMultipleSavedFilters && currentSavedFilterData?.name) {
                 finalFilter.saved_filter_name = currentSavedFilterData.name;
             }
+            const activeChipIds = new Set<string>();
+            activeSavedFilters.forEach((item: any) => {
+                if (item?.data?.name) activeChipIds.add(getSavedFilterChipId(item.data));
+            });
+            if (!allowMultipleSavedFilters && currentSavedFilterData?.name) {
+                activeChipIds.add(getSavedFilterChipId(currentSavedFilterData));
+            }
+            if (predefinedSearchChip?.name && predefinedSearchChip?.value) {
+                activeChipIds.add("predefined-search");
+            }
+            if (customFilter && customRuleCount > 0) {
+                activeChipIds.add("custom-filter");
+            }
+            if (groupingRules.some((rule) => rule.fieldName !== null)) {
+                activeChipIds.add("grouping-rules");
+            }
+            searchChips.forEach((chip: any) => {
+                if (chip?.columnName) activeChipIds.add(getSearchChipId(chip.columnName));
+            });
+            finalFilter.chip_order = getOrderedChipIds(Array.from(activeChipIds), chipOrder);
             handleApplyCustomFilter(finalFilter, true);
             setHasSearched(false)
             // }
@@ -1468,6 +1510,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             saved_filter_id: savedFilter?.id ?? null,
             saved_filter_system_key: savedFilter?.systemKey ?? null,
             saved_filter_name: savedFilter?.name ?? null,
+            chip_order: [getSavedFilterChipId(savedFilter)],
         };
         delete persistedFilter.finalFullFilter;
         setFilterObjectToLocalStorage(persistedFilter);
@@ -1488,6 +1531,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             saved_filter_id: null,
             saved_filter_system_key: null,
             saved_filter_name: null,
+            chip_order: chipOrder.filter((id) => !id.startsWith("saved-filter:")),
         };
         delete persistedFilter.finalFullFilter;
         setFilterObjectToLocalStorage(persistedFilter);
@@ -1736,6 +1780,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const key = getSavedFilterKey(savedfilter);
             const nextItem = { data: savedfilter, query: filterJson, variables };
             const existingItem = activeSavedFilters.find((item: any) => getSavedFilterKey(item.data) === key);
+            markAppliedChip(getSavedFilterChipId(savedfilter));
             if (existingItem && areFilterStateValuesEqual(existingItem.query, filterJson) && areFilterStateValuesEqual(existingItem.variables, variables)) {
                 return true;
             }
@@ -1782,6 +1827,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setCurrentSavedFilterData(savedfilter);
         setCurrentSavedFilterQuery(filterJson);
         setCurrentSavedFilterVariables(variables);
+        setChipOrder([getSavedFilterChipId(savedfilter)]);
         persistActiveSavedFilter(savedfilter, filterJson, variables);
         setShowOverlay(false);
         setHasSearched(true);
@@ -1983,7 +2029,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             });
         });
 
-        return items;
+        const orderedChipIds = getOrderedChipIds(items.map((item) => item.id), chipOrder);
+
+        return items
+            .map((item, index) => ({ item, index }))
+            .sort((a, b) => {
+                const orderA = orderedChipIds.indexOf(a.item.id);
+                const orderB = orderedChipIds.indexOf(b.item.id);
+                if (orderA !== -1 && orderB !== -1 && orderA !== orderB) return orderA - orderB;
+                if (orderA !== -1 && orderB === -1) return -1;
+                if (orderA === -1 && orderB !== -1) return 1;
+                return a.index - b.index;
+            })
+            .map(({ item }) => item);
     }, [
         currentSavedFilterData,
         activeSavedFilters,
@@ -1994,6 +2052,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         groupingRules,
         groupedSearchChips,
         searchableFields,
+        chipOrder,
     ]);
 
     const MAX_VISIBLE_CHIPS = 3;
@@ -2062,6 +2121,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const trimmed = inputValue?.trim();
             if (!trimmed) return;
             const values = trimmed.split(",").map((v) => v.trim()).filter((v) => v !== "");
+            markAppliedChip(getSearchChipId(value.fieldName));
             const chipsToAdd = values.map(v => ({
                 columnName: value.fieldName,
                 value: v,
@@ -2203,6 +2263,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 name: predefinedSearch.name,
                 value: inputValue.trim()
             });
+            markAppliedChip("predefined-search");
 
             setPredefinedSearchBaseFilter(processedFilter);
 

@@ -107,6 +107,7 @@ export type SolidListViewHandle = {
     saved_filter_predicate?: any;
     saved_filter_items?: any[];
     predefined_search_predicate?: any;
+    chip_order?: string[];
   }) => void;
   /**
    * Returns the saved filters currently available in the list view, including
@@ -891,6 +892,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       fileterTobeStored.saved_filter_items = latestFilterPredicatesRef.current.saved_filter_items || [];
       fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
       fileterTobeStored.predefined_search_chip = latestFilterPredicatesRef.current.predefined_search_chip || null;
+      fileterTobeStored.chip_order = latestFilterPredicatesRef.current.chip_order || [];
       setFilterObjectToLocalStorage(fileterTobeStored);
     }
     triggerGetSolidEntities(queryString);
