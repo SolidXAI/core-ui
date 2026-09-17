@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.18] - 2026-09-17
+
+### Added
+
+- add support for retrieving and applying multiple saved filters in SolidTreeView
+- enable support for multiple saved filter items in SolidCardView and SolidKanbanView
+- add toast notifications for saved filter actions and update error messages
+
+### Fixed
+
+- formatting
+- ensure saved filter replaces active filters when multiple saved filters are not allowed
+- alignment and width - settings grid - encrypt autocomplete inconsistent rendering
+- update logo positioning and sizing for improved layout and responsiveness
+- validation error absolute position to relative
+- added input classname to  input fields sharing same visibilty, fixing the improper alignment of the form
+
+### Changed
+
+- remove refresh button from version history component
+
+### Other
+
+- view widget issue fix when parent has read permissions only
+- Refactor theme styles for solid-light-enterprise and solid-light-modern
+- Restore multiple saved filters support (revert revert of #210)
+- Fix vertical alignment in datasource introspection table cells
+- Enhance dark theme support for SolidJsonEditor with improved styling
+- - IAM -> User form break - Solid fields following consistent height
+
 ## [0.1.18-beta.2] - 2026-09-15
 
 ### Fixed
