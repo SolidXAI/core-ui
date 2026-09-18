@@ -156,6 +156,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
         if (isArchivedRecord) return;
 
         if (isLightboxMediaKind(file?.previewKind)) {
+            setShowAllFiles(false);
             setLightboxUrls?.([{
                 src: file.fileUrl,
                 downloadUrl: file.fileUrl,
