@@ -1,5 +1,30 @@
 import type { DashboardWidgetComponentProps } from "../../../../types/dashboard";
 
+const acronymLabels: Record<string, string> = {
+  api: "API",
+  id: "ID",
+  isbn: "ISBN",
+  mq: "MQ",
+  sla: "SLA",
+  ui: "UI",
+  url: "URL",
+};
+
+const formatColumnHeader = (column: string): string => {
+  return `${column ?? ""}`
+    .replace(/\./g, " ")
+    .replace(/[_-]+/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      const lower = word.toLowerCase();
+      return acronymLabels[lower] ?? `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
+    })
+    .join(" ");
+};
+
 export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponentProps) {
   const columns: string[] = Array.isArray(runtime?.data?.columns) ? runtime.data.columns : [];
   const records: Record<string, any>[] = Array.isArray(runtime?.data?.records) ? runtime.data.records : [];
@@ -14,7 +39,7 @@ export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponen
                 key={column}
                 style={{ textAlign: "left", borderBottom: "1px solid #eceff3", padding: "6px 8px", fontSize: "0.84rem" }}
               >
-                {column}
+                {formatColumnHeader(column)}
               </th>
             ))}
           </tr>
