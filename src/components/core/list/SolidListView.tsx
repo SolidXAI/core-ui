@@ -42,6 +42,7 @@ import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePa
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
+import type { SolidListRowActionEvent } from "../../../types/list-row-action";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
   getFilterObjectFromLocalStorage,
@@ -1700,7 +1701,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         size="small"
                                         variant="ghost"
                                         onClick={() => {
-                                          const event = {
+                                          const event: SolidListRowActionEvent = {
                                             params,
                                             rowData: rowData,
                                             solidListViewMetaData:
