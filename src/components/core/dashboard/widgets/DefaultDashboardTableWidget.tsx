@@ -1,4 +1,4 @@
-import type { DashboardWidgetComponentProps } from "../../../../types/dashboard";
+import type { DashboardTableColumn, DashboardWidgetComponentProps } from "../../../../types/dashboard";
 
 const acronymLabels: Record<string, string> = {
   api: "API",
@@ -25,8 +25,28 @@ const formatColumnHeader = (column: string): string => {
     .join(" ");
 };
 
+type NormalizedDashboardTableColumn = {
+  field: string;
+  header: string;
+};
+
+const normalizeColumn = (column: DashboardTableColumn): NormalizedDashboardTableColumn => {
+  if (typeof column === "string") {
+    return {
+      field: column,
+      header: formatColumnHeader(column),
+    };
+  }
+
+  return {
+    field: column.field,
+    header: column.header ?? formatColumnHeader(column.field),
+  };
+};
+
 export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponentProps) {
-  const columns: string[] = Array.isArray(runtime?.data?.columns) ? runtime.data.columns : [];
+  const rawColumns: DashboardTableColumn[] = Array.isArray(runtime?.data?.columns) ? runtime.data.columns : [];
+  const columns = rawColumns.map(normalizeColumn);
   const records: Record<string, any>[] = Array.isArray(runtime?.data?.records) ? runtime.data.records : [];
 
   return (
@@ -36,10 +56,10 @@ export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponen
           <tr>
             {columns.map((column) => (
               <th
-                key={column}
+                key={column.field}
                 style={{ textAlign: "left", borderBottom: "1px solid #eceff3", padding: "6px 8px", fontSize: "0.84rem" }}
               >
-                {formatColumnHeader(column)}
+                {column.header}
               </th>
             ))}
           </tr>
@@ -49,10 +69,10 @@ export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponen
             <tr key={`record-${index}`}>
               {columns.map((column) => (
                 <td
-                  key={`${index}-${column}`}
+                  key={`${index}-${column.field}`}
                   style={{ textAlign: "left", borderBottom: "1px solid #f3f4f6", padding: "6px 8px", fontSize: "0.83rem", whiteSpace: "nowrap" }}
                 >
-                  {`${record?.[column] ?? ""}`}
+                  {`${record?.[column.field] ?? ""}`}
                 </td>
               ))}
             </tr>
