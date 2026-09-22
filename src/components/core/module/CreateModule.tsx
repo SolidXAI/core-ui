@@ -429,13 +429,13 @@ const CreateModule = ({ params, data }: any) => {
                   )}
 
                   {fileDetails && (
-                    <div className="solid-file-upload-wrapper mt-4">
-                      <div className="flex items-center gap-2">
+                    <div className="solid-file-upload-wrapper solid-module-menu-icon-upload mt-4">
+                      <div className="solid-module-menu-icon-row flex items-center gap-2">
                         <FileReaderExt fileDetails={fileDetails} />
-                        <div className="flex w-full flex-col gap-1">
-                          <div className="flex items-center justify-between">
+                        <div className="solid-module-menu-icon-meta flex w-full flex-col gap-1">
+                          <div className="solid-module-menu-icon-header flex items-center justify-between">
                             <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
-                            <div className="flex items-center gap-2">
+                            <div className="solid-module-menu-icon-actions flex items-center gap-2">
                               {typeof menuIconPreview === "string" && (
                                 <button
                                   type="button"
