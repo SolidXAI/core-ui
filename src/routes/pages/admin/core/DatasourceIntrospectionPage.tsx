@@ -2927,7 +2927,9 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                             </div>
                           );
                         }}
-                        style={{ width: 52, minWidth: 52 }}
+                        className="sdix-table-selection-col"
+                        headerClassName="sdix-table-selection-col"
+                        style={{ width: 52, minWidth: 52, maxWidth: 52 }}
                       />
                       <Column
                         field="tableName"

@@ -741,8 +741,7 @@
     border-color: var(--solid-border-default) !important;
   }
 
-  .solid-row-menu-trigger,
-  .solid-tree-row-menu-trigger {
+  .solid-row-menu-trigger {
     background: #f3ebdd !important;
     background-color: #f3ebdd !important;
     border-color: var(--solid-border-default) !important;
@@ -750,8 +749,7 @@
     box-shadow: none !important;
   }
 
-  .solid-row-menu-trigger:hover,
-  .solid-tree-row-menu-trigger:hover {
+  .solid-row-menu-trigger:hover {
     background: #ede2d1 !important;
     background-color: #ede2d1 !important;
     color: #2e2e2e !important;

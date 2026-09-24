@@ -2,6 +2,7 @@ import { useSession } from "../../../hooks/useSession";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
+import type { SolidListRowActionEvent } from "../../../types/list-row-action";
 
 export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
 
@@ -29,7 +30,7 @@ export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidL
             title={presentation.tooltip}
             aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
             onClick={() => {
-                const event = {
+                const event: SolidListRowActionEvent = {
                     params,
                     rowData: rowData,
                     solidListViewMetaData: solidListViewMetaData.data,
