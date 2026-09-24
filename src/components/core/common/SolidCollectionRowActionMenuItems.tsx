@@ -2,6 +2,7 @@ import { isButtonVisibleInCurrentEnv } from "../../../helpers/buttonEnvironment"
 import { resolveButtonPresentation } from "../../../helpers/buttonPresentation";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from "../../../hooks/useSession";
+import type { SolidListRowActionEvent } from "../../../types/list-row-action";
 import {
   SolidDropdownMenuItem,
   SolidDropdownMenuSeparator,
@@ -14,7 +15,7 @@ type SolidCollectionRowActionMenuItemsProps = {
   params: any;
   rowData: any;
   solidViewMetaData: any;
-  handleCustomButtonClick: (buttonAttrs: any, event: any) => void;
+  handleCustomButtonClick: (buttonAttrs: any, event: SolidListRowActionEvent) => void;
   showSeparator?: boolean;
   onActionComplete?: () => void;
 };
@@ -70,11 +71,12 @@ export function SolidCollectionRowActionMenuItems({
               ? (presentation.tooltip ?? button?.attrs?.action ?? "Action")
               : undefined}
             onSelect={() => {
-              handleCustomButtonClick(button.attrs, {
+              const event: SolidListRowActionEvent = {
                 params,
                 rowData,
                 solidListViewMetaData: solidViewMetaData?.data ?? solidViewMetaData,
-              });
+              };
+              handleCustomButtonClick(button.attrs, event);
               onActionComplete?.();
             }}
           >

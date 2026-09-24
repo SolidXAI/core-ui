@@ -4,12 +4,10 @@ export type DashboardWidgetComponentProps = {
   variables: Record<string, any>;
 };
 
-export type DashboardTableColumn =
-  | string
-  | {
-      field: string;
-      header?: string;
-    };
+export type DashboardTableColumn = {
+  field: string;
+  header: string;
+};
 
 export type DashboardWidgetRendererKey =
   | "kpi"

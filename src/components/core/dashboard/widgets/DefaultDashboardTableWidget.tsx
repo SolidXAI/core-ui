@@ -1,52 +1,7 @@
 import type { DashboardTableColumn, DashboardWidgetComponentProps } from "../../../../types/dashboard";
 
-const acronymLabels: Record<string, string> = {
-  api: "API",
-  id: "ID",
-  isbn: "ISBN",
-  mq: "MQ",
-  sla: "SLA",
-  ui: "UI",
-  url: "URL",
-};
-
-const formatColumnHeader = (column: string): string => {
-  return `${column ?? ""}`
-    .replace(/\./g, " ")
-    .replace(/[_-]+/g, " ")
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((word) => {
-      const lower = word.toLowerCase();
-      return acronymLabels[lower] ?? `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
-    })
-    .join(" ");
-};
-
-type NormalizedDashboardTableColumn = {
-  field: string;
-  header: string;
-};
-
-const normalizeColumn = (column: DashboardTableColumn): NormalizedDashboardTableColumn => {
-  if (typeof column === "string") {
-    return {
-      field: column,
-      header: formatColumnHeader(column),
-    };
-  }
-
-  return {
-    field: column.field,
-    header: column.header ?? formatColumnHeader(column.field),
-  };
-};
-
 export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponentProps) {
-  const rawColumns: DashboardTableColumn[] = Array.isArray(runtime?.data?.columns) ? runtime.data.columns : [];
-  const columns = rawColumns.map(normalizeColumn);
+  const columns: DashboardTableColumn[] = Array.isArray(runtime?.data?.columns) ? runtime.data.columns : [];
   const records: Record<string, any>[] = Array.isArray(runtime?.data?.records) ? runtime.data.records : [];
 
   return (
