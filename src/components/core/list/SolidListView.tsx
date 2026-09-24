@@ -537,11 +537,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [
     triggerRecoverSolidEntities,
     {
-      data: recoverByData,
       isLoading: recoverByIsLoading,
       error: recoverError,
       isError: recoverIsError,
-      isSuccess: recoverByIsSuccess,
     },
   ] = useRecoverSolidEntityMutation();
 
@@ -577,20 +575,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   }, [solidEntityListViewData]);
 
-  const [
-    deleteSolidSingleEntiry,
-    { isSuccess: isDeleteSolidSingleEntitySuccess },
-  ] = useDeleteSolidEntityMutation();
+  const [deleteSolidSingleEntiry] = useDeleteSolidEntityMutation();
 
   // Delete mutation
   const [
     deleteManySolidEntities,
     {
       isLoading: isSolidEntitiesDeleted,
-      isSuccess: isDeleteSolidEntitiesSucess,
-      isError: isSolidEntitiesDeleteError,
-      error: SolidEntitiesDeleteError,
-      data: DeletedSolidEntities,
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
 
@@ -650,10 +641,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       setQueryDataLoaded(true);
     }
   }, [
-    isDeleteSolidEntitiesSucess,
-    isDeleteSolidSingleEntitySuccess,
-    recoverByIdIsSuccess,
-    recoverByIsSuccess,
     solidListViewMetaData,
     solidListViewLayout
   ]);
@@ -1072,17 +1059,27 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [deleteEntity, setDeleteEntity] = useState(false);
 
   // Recover functions
-  const recoverById = (id: any) => {
-    triggerRecoverSolidEntitiesById(id);
+  const recoverById = async (id: any) => {
+    try {
+      await triggerRecoverSolidEntitiesById(id).unwrap();
+      await setQueryString();
+    } catch {
+      // Error state is handled by the recover effect below.
+    }
   };
 
-  const recoverAll = () => {
+  const recoverAll = async () => {
     let recoverList: any = [];
     selectedRecoverRecords.forEach((element: any) => {
       recoverList.push(element.id);
     });
-    triggerRecoverSolidEntities(recoverList);
-    setRecoverDialogVisible(false);
+    try {
+      await triggerRecoverSolidEntities(recoverList).unwrap();
+      setRecoverDialogVisible(false);
+      await setQueryString();
+    } catch {
+      setRecoverDialogVisible(false);
+    }
   };
 
   useEffect(() => {
@@ -1119,20 +1116,19 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   // handle bulk deletion
-  const deleteBulk = () => {
+  const deleteBulk = async () => {
     let deleteList: any = [];
     selectedRecords.forEach((element: any) => {
       deleteList.push(element.id);
     });
-    deleteManySolidEntities(deleteList)
-      .unwrap()
-      .then(() => {
-        dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
-        setDialogVisible(false);
-      })
-      .catch((error) => {
-        dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
-      });
+    try {
+      await deleteManySolidEntities(deleteList).unwrap();
+      dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
+      setDialogVisible(false);
+      await setQueryString();
+    } catch (error: any) {
+      dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
+    }
   };
 
   // handle closing of the delete dialog...
@@ -1344,6 +1340,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.ENTITY_DELETE, life: 3000 }));
+        await setQueryString();
       } else {
         dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: response?.error?.data?.error }));
       }
