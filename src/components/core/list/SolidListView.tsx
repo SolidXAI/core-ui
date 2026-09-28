@@ -1060,12 +1060,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   // Recover functions
   const recoverById = async (id: any) => {
-    try {
-      await triggerRecoverSolidEntitiesById(id).unwrap();
-      await setQueryString();
-    } catch {
-      // Error state is handled by the recover effect below.
-    }
+    await triggerRecoverSolidEntitiesById(id).unwrap();
+    await setQueryString();
   };
 
   const recoverAll = async () => {
