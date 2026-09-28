@@ -1619,6 +1619,24 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     sortMode="single"
                     paginatorTemplate="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
                     currentPageReportTemplate="{first} - {last} of {totalRecords}"
+                    paginatorLeft={params.embeded !== true ? (
+                      <div className="solid-list-selection-status" aria-live="polite">
+                        <span>{selectedRecords.length + selectedRecoverRecords.length} selected</span>
+                        {selectedRecords.length + selectedRecoverRecords.length > 0 && (
+                          <button
+                            type="button"
+                            className="solid-list-selection-clear"
+                            onClick={() => {
+                              setSelectedRecords([]);
+                              setSelectedRecoverRecords([]);
+                            }}
+                            aria-label="Clear selected rows"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    ) : null}
                     onRowClick={(e) => {
                       const rowData = e.data;
 

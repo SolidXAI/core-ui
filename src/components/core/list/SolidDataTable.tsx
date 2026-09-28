@@ -53,6 +53,7 @@ type SolidDataTableProps = {
   rowClassName?: (rowData: any) => string;
   tableClassName?: string;
   paginatorClassName?: string;
+  paginatorLeft?: React.ReactNode;
   currentPageReportTemplate?: string;
   [key: string]: any;
 };
@@ -128,6 +129,7 @@ export function SolidDataTable({
   rowClassName,
   tableClassName,
   paginatorClassName,
+  paginatorLeft,
   currentPageReportTemplate = "{first} - {last} of {totalRecords}",
 }: SolidDataTableProps) {
   const columns = normalizeColumns(children);
@@ -311,6 +313,7 @@ export function SolidDataTable({
         <div
           className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background", paginatorClassName)}
         >
+          {paginatorLeft ? <div className="solid-paginator-left">{paginatorLeft}</div> : null}
           <div className="solid-paginator-meta flex items-center gap-2 sm:ml-auto">
             <span className="solid-paginator-label">Rows</span>
             <SolidSelect

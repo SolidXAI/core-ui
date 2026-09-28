@@ -1951,6 +1951,66 @@ li.header-li-px {
   white-space: nowrap;
 }
 
+.solid-kanban-statusbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 4px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.solid-kanban-statusbar-selection,
+.solid-kanban-statusbar-board,
+.solid-kanban-statusbar-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.solid-kanban-statusbar-selection {
+  min-width: 100px;
+}
+
+.solid-kanban-statusbar-board {
+  margin-left: auto;
+}
+
+.solid-kanban-statusbar-separator {
+  color: var(--muted-foreground);
+}
+
+.solid-kanban-statusbar-page-size .solid-select-wrap {
+  width: 76px;
+}
+
+.solid-kanban-statusbar-page-size .solid-select {
+  min-height: 28px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .solid-kanban-statusbar {
+    flex-wrap: wrap;
+  }
+
+  .solid-kanban-statusbar-board {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
 .kaban-heading-area .count {
   background-color: #bbbbbb;
   color: #000;
@@ -5465,7 +5525,7 @@ flex-shrink: 0; */
   flex-direction: column;
   overflow-x: auto;
   overflow-y: auto;
-  height: calc(100vh - 120px) !important;
+  height: auto !important;
   min-height: 0;
   min-width: 0;
   flex: 1 1 auto;

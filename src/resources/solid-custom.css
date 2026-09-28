@@ -4111,6 +4111,36 @@ html.dark .solid-header-cog-trigger:hover,
   align-items: center;
 }
 
+.solid-paginator-left {
+  display: inline-flex;
+  align-items: center;
+  margin-right: auto;
+}
+
+.solid-list-selection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.solid-list-selection-clear {
+  border: 0;
+  padding: 2px 5px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.solid-list-selection-clear:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
 .solid-paginator-label,
 .solid-paginator-report {
   font-size: 0.7rem;

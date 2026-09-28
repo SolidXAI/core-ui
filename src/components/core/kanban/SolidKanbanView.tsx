@@ -44,6 +44,7 @@ import {
   SolidDialogSeparator,
   SolidDialogTitle,
   SolidIcon,
+  SolidSelect,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
 import { kebabCase } from "lodash";
@@ -88,6 +89,7 @@ type KanbanSwimlaneDefinition = {
 };
 
 const DEFAULT_RECORD_SORT = ["id:desc"];
+const SWIMLANE_PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 const getKanbanSortParam = (sortValue?: string) => {
   if (!sortValue) {
@@ -1264,21 +1266,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                   ))}
                 </div>
 
-                {enableCardSelection && selectedRecords.length > 0 && (
-                  <div className="solid-kanban-selection-summary" aria-live="polite">
-                    <span>{selectedRecords.length} selected</span>
-                    <SolidButton
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedRecords([])}
-                      aria-label="Clear selected cards"
-                    >
-                      Clear
-                    </SolidButton>
-                  </div>
-                )}
-
                 {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
                   <SolidCreateButton createButtonUrl={createButtonUrl} createActionQueryParams={createActionQueryParams} responsiveIconOnly={true} />
                 }
@@ -1323,6 +1310,50 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
           {solidKanbanViewMetaData && kanbanViewData &&
             <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick} enableCardSelection={enableCardSelection} selectedRecords={selectedRecords} onCardSelectionChange={handleCardSelectionChange} onToggleLaneSelection={handleLaneSelectionChange}></KanbanBoard>
           }
+          <div className="solid-kanban-statusbar" role="status" aria-label="Kanban board status">
+            <div className="solid-kanban-statusbar-selection" aria-live="polite">
+              {enableCardSelection ? (
+                <>
+                  <span>{selectedRecords.length} selected</span>
+                  {selectedRecords.length > 0 && (
+                    <SolidButton
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedRecords([])}
+                      aria-label="Clear selected cards"
+                    >
+                      Clear
+                    </SolidButton>
+                  )}
+                </>
+              ) : null}
+            </div>
+            <div className="solid-kanban-statusbar-board">
+              <span>
+                Showing {kanbanViewData?.length ?? 0} {(kanbanViewData?.length ?? 0) === 1 ? "swimlane" : "swimlanes"}
+              </span>
+              <span className="solid-kanban-statusbar-separator" aria-hidden="true">·</span>
+              <label className="solid-kanban-statusbar-page-size">
+                <span>Max cards per swimlane</span>
+                <SolidSelect
+                  id="kanban-swimlane-page-size"
+                  value={recordsInSwimlane}
+                  options={Array.from(new Set([...SWIMLANE_PAGE_SIZE_OPTIONS, recordsInSwimlane]))
+                    .sort((left, right) => left - right)
+                    .map((value) => ({ label: String(value), value }))}
+                  optionLabel="label"
+                  optionValue="value"
+                  onChange={(event) => {
+                    const nextPageSize = Number(event.value);
+                    if (Number.isFinite(nextPageSize) && nextPageSize > 0 && nextPageSize !== recordsInSwimlane) {
+                      setRecordsInSwimlane(nextPageSize);
+                    }
+                  }}
+                />
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
