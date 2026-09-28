@@ -22,6 +22,8 @@ import { usePathname } from "../../../../hooks/usePathname";
 import { useSearchParams } from "../../../../hooks/useSearchParams";
 import { updatePasswordField } from "../../../../helpers/updatePasswordField";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../../redux/features/toastSlice";
 
 export class SolidPasswordField implements ISolidField {
 
@@ -303,6 +305,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
         formik.touched[fieldName] && formik.errors[fieldName];
 
     const [visible, setVisible] = useState(false);
+    const dispatch = useDispatch();
 
     const fieldName = fieldLayoutInfo.attrs.name;
     const confirmFieldName = `${fieldName}Confirm`;
@@ -329,12 +332,20 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     confirmFieldValue: values[confirmFieldName],
                 });
 
+                dispatch(showToast({
+                    severity: "success",
+                    summary: "Success",
+                    detail: "Password updated successfully",
+                }));
                 // formik.setFieldValue(fieldName, values[fieldName]);
                 resetForm();
                 setVisible(false);
-            } catch (err) {
-                console.error(err);
-                // TODO: show user-friendly error
+            } catch (err: unknown) {
+                dispatch(showToast({
+                    severity: "error",
+                    summary: "Error",
+                    detail: err instanceof Error ? err.message : ERROR_MESSAGES.FAILED_TO_UPDATE_PASSWORD,
+                }));
             }
         },
     });

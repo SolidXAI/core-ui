@@ -37,6 +37,11 @@ export async function updatePasswordField({
   });
 
   if (!response.ok) {
-    throw new Error(ERROR_MESSAGES.FAILED_TO_UPDATE_PASSWORD);
+    const errorResponse = await response.json().catch(() => null);
+    const errorMessage = errorResponse?.data?.message
+      || errorResponse?.message
+      || ERROR_MESSAGES.FAILED_TO_UPDATE_PASSWORD;
+    const detail = Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage;
+    throw new Error(detail);
   }
 }
