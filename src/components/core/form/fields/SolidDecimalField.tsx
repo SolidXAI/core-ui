@@ -52,7 +52,7 @@ export class SolidDecimalField implements ISolidField {
         if (fieldMetadata.min != null) {
             schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_INTEGER(fieldLabel,fieldMetadata.min));
         }
-        if (fieldMetadata.max && fieldMetadata.max > 0) {
+        if (fieldMetadata.max != null) {
             schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_INTEGER(fieldLabel,fieldMetadata.max));
         }
         return schema;
