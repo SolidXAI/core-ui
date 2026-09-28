@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.19-beta.0] - 2026-09-28
+
+### Added
+
+- introduce SolidListRowActionEvent type for custom row actions
+
+### Fixed
+
+- decimal handling and validations (#247)
+- chatter artifact in solid enterprise theme (#238)
+- align datasource table checkboxes
+- improve dark command text
+- resolve tree view button display issue
+
+### Maintenance
+
+- sync AppSidebar with dev
+
+### Other
+
+- Fix mobile menu icon upload layout (#241)
+- Fix/user name display (#234)
+- Soft delete recover (#246)
+- entity read permission open in view mode default (#245)
+- Dashboard table header (#244)
+- lightbox close 2 clicks small fix
+- fix media preview close issue while multiple media
+- breadcrumb issue fixed
+- nav bar of mobile fixed
+
 ## [0.1.18] - 2026-09-17
 
 ### Added
