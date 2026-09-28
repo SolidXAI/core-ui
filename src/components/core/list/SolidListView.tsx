@@ -1644,8 +1644,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       if (params.embeded === true) {
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
+                        const effectiveViewMode = hasUpdatePermission ? recordClickFormMode : "view";
                         storeCurrentModelViewContext();
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${recordClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
+                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${effectiveViewMode}&${buildEditNavigationQueryString(rowData)}`);
                       }
                     }
                     }
