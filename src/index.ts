@@ -82,6 +82,7 @@ export type { SolidListViewColumnParams } from './components/core/list/SolidList
 export type {
     SolidListRowActionEvent,
     SolidListRowActionProps,
+    SolidKanbanCardActionProps,
 } from './types/list-row-action';
 
 // export * from './components/core/list/SolidListingHeader';

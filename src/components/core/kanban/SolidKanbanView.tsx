@@ -61,6 +61,7 @@ type SolidKanbanFilterInput = {
   saved_filter_predicate?: any;
   saved_filter_items?: any[];
   predefined_search_predicate?: any;
+  replaceFilters?: boolean;
 };
 
 export type SolidKanbanViewHandle = {
@@ -76,6 +77,7 @@ export type SolidKanbanViewHandle = {
     filters: any;
     filterPredicates: any;
     kanbanData: any[];
+    selectedRecords: any[];
     loading: boolean;
   };
 };
@@ -379,6 +381,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   const [kanbanLoadMoreData, setKanbanLoadMoreData] = useState<any>({});
   const [recordsInSwimlane, setRecordsInSwimlane] = useState(10);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [recordsToDelete, setRecordsToDelete] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
@@ -400,6 +403,9 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
     isSystemModule: solidKanbanViewMetaData?.data?.solidView?.module?.isSystem === true,
   });
+  const enableCardSelection =
+    solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.enableCardSelection === true &&
+    params.embeded !== true;
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
@@ -652,6 +658,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
         // triggerGetSolidEntities(queryString);
         setSelectedRecords([]);
+        setRecordsToDelete([]);
       }
     }
   }, [groupByFieldName, isDeleteSolidEntitiesSucess, solidKanbanViewMetaData, swimlaneDefinitions]);
@@ -731,10 +738,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
   // handle bulk deletion
   const deleteBulk = () => {
-    let deleteList: any = [];
-    selectedRecords.forEach((element: any) => {
-      deleteList.push(element.id);
-    });
+    const deleteList = recordsToDelete.map((element: any) => element.id);
     deleteManySolidEntities(deleteList);
     setDialogVisible(false);
   };
@@ -742,12 +746,36 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   // handle closing of the delete dialog...
   const onDeleteClose = () => {
     setDialogVisible(false);
-    setSelectedRecords([]);
+    setRecordsToDelete([]);
   }
 
   const openDeleteDialogForRecord = (record: any) => {
-    setSelectedRecords(record ? [record] : []);
+    setRecordsToDelete(record ? [record] : []);
     setDialogVisible(true);
+  };
+
+  const openBulkDeleteDialog = () => {
+    setRecordsToDelete(selectedRecords);
+    setDialogVisible(true);
+  };
+
+  const handleCardSelectionChange = (record: any, selected: boolean) => {
+    if (!record?.id) return;
+    setSelectedRecords((previousRecords) => {
+      const recordId = String(record.id);
+      const withoutRecord = previousRecords.filter((item) => String(item?.id) !== recordId);
+      return selected ? [...withoutRecord, record] : withoutRecord;
+    });
+  };
+
+  const handleLaneSelectionChange = (records: any[], selected: boolean) => {
+    const laneRecords = Array.isArray(records) ? records.filter((record) => record?.id != null) : [];
+    const laneIds = new Set(laneRecords.map((record) => String(record.id)));
+    setSelectedRecords((previousRecords) => {
+      const outsideLane = previousRecords.filter((record) => !laneIds.has(String(record?.id)));
+      if (!selected) return outsideLane;
+      return [...outsideLane, ...laneRecords];
+    });
   };
 
   const handleRecoverRecord = async (record: any) => {
@@ -929,6 +957,9 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
+        setSelectedRecords((previousRecords) => previousRecords.map((record) =>
+          String(record?.id) === String(updatedItem?.id) ? updatedItem : record
+        ));
         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.IS_SUCCESS, detail: ERROR_MESSAGES.KANBAN_UPDATED }));
       } else {
         dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DUPLICATE_KEY, detail: kanbanUpdateResponse?.error }));
@@ -1019,7 +1050,9 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       }
 
       const customFilter = filterPredicates;
-      const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
+      const updatedFilter = filterPredicates.replaceFilters
+        ? queryfilter
+        : { ...(filters || {}), ...(queryfilter || {}) };
 
       // Then update state
       setFilterPredicates(structuredClone(filterPredicates));
@@ -1162,9 +1195,10 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       filters,
       filterPredicates,
       kanbanData: cloneKanbanData(),
+      selectedRecords,
       loading,
     }),
-  }), [groupByFieldName, showArchived, filters, filterPredicates, kanbanViewData, loading]);
+  }), [groupByFieldName, showArchived, filters, filterPredicates, kanbanViewData, selectedRecords, loading]);
 
   const toggleBothSidebars = () => {
     if (visibleNavbar) {
@@ -1227,18 +1261,33 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                         selectedRecords={selectedRecords}
                         filters={filters}
                       />
-                    ))}
+                  ))}
                 </div>
+
+                {enableCardSelection && selectedRecords.length > 0 && (
+                  <div className="solid-kanban-selection-summary" aria-live="polite">
+                    <span>{selectedRecords.length} selected</span>
+                    <SolidButton
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedRecords([])}
+                      aria-label="Clear selected cards"
+                    >
+                      Clear
+                    </SolidButton>
+                  </div>
+                )}
 
                 {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
                   <SolidCreateButton createButtonUrl={createButtonUrl} createActionQueryParams={createActionQueryParams} responsiveIconOnly={true} />
                 }
 
-                {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <SolidButton
+                {enableCardSelection && actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <SolidButton
                   type="button"
                   variant="destructive"
                   size="sm"
-                  onClick={() => setDialogVisible(true)}
+                  onClick={openBulkDeleteDialog}
                 >
                   Delete
                 </SolidButton>}
@@ -1272,7 +1321,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
             </div>
           </div>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} onDelete={actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false ? openDeleteDialogForRecord : undefined} onRecover={handleRecoverRecord} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl} recordClickAction={recordClickAction} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick} enableCardSelection={enableCardSelection} selectedRecords={selectedRecords} onCardSelectionChange={handleCardSelectionChange} onToggleLaneSelection={handleLaneSelectionChange}></KanbanBoard>
           }
         </div>
       </div>
@@ -1290,7 +1339,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         title={`Delete ${entityDisplayName}`}
         message={
           <p className="solid-shadcn-dialog-text">
-            {selectedRecords.length === 1
+            {recordsToDelete.length === 1
               ? `Are you sure you want to delete this ${entityDisplayName} record?`
               : `Are you sure you want to delete the selected ${entityDisplayName} records?`}
           </p>

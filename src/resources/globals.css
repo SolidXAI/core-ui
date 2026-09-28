@@ -1932,6 +1932,25 @@ li.header-li-px {
   padding: 0 1px 3px;
 }
 
+.solid-kanban-lane-selection {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-right: 2px;
+}
+
+.solid-kanban-lane-checkbox,
+.solid-kanban-card-selection .solid-checkbox {
+  margin: 0;
+}
+
+.solid-kanban-selection-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
 .kaban-heading-area .count {
   background-color: #bbbbbb;
   color: #000;
@@ -4687,6 +4706,35 @@ li.header-li-px {
   position: relative;
   border: 0;
   background: transparent;
+}
+
+.solid-kanban-card-selection {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 4px;
+  background: var(--solid-card-background, #fff);
+  cursor: pointer;
+}
+
+html.dark .solid-kanban-card-selection,
+[data-theme="dark"] .solid-kanban-card-selection {
+  background: var(--solid-card-background, #1f2937);
+}
+
+.solid-kanban-card-selected {
+  outline: 2px solid var(--solid-primary-color, #2563eb);
+  outline-offset: 1px;
+}
+
+.solid-kanban-card-content {
+  min-height: 100%;
 }
 
 .solid-media-card {
