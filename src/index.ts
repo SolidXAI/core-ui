@@ -79,6 +79,11 @@ export * from './components/core/list/listViewRegistry';
 export * from './components/core/tree/treeViewRegistry';
 export { SolidListViewColumn, getNumberOfInputs } from './components/core/list/SolidListViewColumn';
 export type { SolidListViewColumnParams } from './components/core/list/SolidListViewColumn';
+export type {
+    SolidListRowActionEvent,
+    SolidListRowActionProps,
+    SolidKanbanCardActionProps,
+} from './types/list-row-action';
 
 // export * from './components/core/list/SolidListingHeader';
 export { SolidManyToOneFilterElement } from './components/core/list/SolidManyToOneFilterElement';

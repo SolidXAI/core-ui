@@ -54,6 +54,9 @@ import DeleteModuleRowAction from "../components/core/extension/solid-core/modul
 import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
 import { DefaultDateListWidget, DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
 import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanCardWidget";
+import MqMessageDetailsKanbanCardAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageDetailsKanbanCardAction";
+import MqMessageKanbanQuickFilterHeaderAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanQuickFilterHeaderAction";
+import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/extension/solid-core/mqMessage/MqMessageSelectedRecordsSummaryHeaderAction";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
 import { MediaFileSizeFormViewWidget, MediaFileSizeListWidget } from "../components/core/extension/solid-core/media/fileSize/MediaFileSizeWidget";
 import { MediaRelativeUriFormViewWidget, MediaRelativeUriListWidget } from "../components/core/extension/solid-core/media/relativeUri/MediaRelativeUriPreview";
@@ -400,6 +403,10 @@ registerExtensionComponent("SolidMqMessageStageFormViewWIdget", SolidMqMessageSt
 
 // Kanban
 registerExtensionComponent("MqMessageKanbanCardWidget", MqMessageKanbanCardWidget, ExtensionComponentTypes.kanbanCardWidget);
+registerExtensionComponent("MqMessageDetailsKanbanCardAction", MqMessageDetailsKanbanCardAction, ExtensionComponentTypes.kanbanCardAction);
+registerExtensionComponent("MqMessageKanbanQuickFilterHeaderAction", MqMessageKanbanQuickFilterHeaderAction, ExtensionComponentTypes.kanbanHeaderAction);
+registerExtensionComponent("MqMessageSelectedRecordsSummaryHeaderAction", MqMessageSelectedRecordsSummaryHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("MqMessageKanbanSelectedRecordsSummaryHeaderAction", MqMessageSelectedRecordsSummaryHeaderAction, ExtensionComponentTypes.kanbanHeaderAction);
 registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.cardWidget);
 
 // Dashboard widgets (default first-party set)

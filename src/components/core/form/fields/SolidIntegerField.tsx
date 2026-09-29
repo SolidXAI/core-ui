@@ -29,7 +29,10 @@ export class SolidIntegerField implements ISolidField {
     initialValue(): any {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
-        if (this.fieldContext.parentData && this.fieldContext.parentData[fieldName]) {
+        if ( this.fieldContext.parentData &&
+        this.fieldContext.parentData[fieldName] !== undefined &&
+        this.fieldContext.parentData[fieldName] !== null) {
+
             const parentDataForKey = this.fieldContext.parentData[fieldName];
             if (parentDataForKey && typeof parentDataForKey !== 'object') {
                 return this.fieldContext.parentData[fieldName]
@@ -38,7 +41,7 @@ export class SolidIntegerField implements ISolidField {
 
         const existingValue = this.fieldContext.data[fieldName];
 
-        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue ?? '';
     }
 
     validationSchema(): Yup.Schema {
@@ -56,11 +59,11 @@ export class SolidIntegerField implements ISolidField {
             schema = schema.nullable(); // Allow null when not required
         }
         // 2. length (min/max)
-        if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
+        if (fieldMetadata.min != null) {
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_INTEGER(fieldLabel, fieldMetadata.min));
         }
-        if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
+        if (fieldMetadata.max != null) {
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_INTEGER(fieldLabel, fieldMetadata.max));
         }
         return schema;
     }
@@ -180,7 +183,7 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
                         "onFieldChange"
                     );
                 }}
-                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                value={formik.values[fieldLayoutInfo.attrs.name] ?? ''}
                 autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
@@ -201,8 +204,8 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-    const min = fieldMetadata.min || 0;
-    const max = fieldMetadata.max || 5;
+    const min = fieldMetadata.min ?? 0;
+    const max = fieldMetadata.max ?? 5;
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
     const fieldName = fieldLayoutInfo.attrs.name;
     const currentValue = Number(formik.values[fieldName] ?? min);
@@ -233,7 +236,7 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
                         );
                     }}
                     renderTrack={({ props, children }) => {
-                        const percent = ((currentValue - min) / (max - min)) * 100;
+                        const percent = max === min ? 0 : ((currentValue - min) / (max - min)) * 100;
                         return (
                             <div
                                 {...props}

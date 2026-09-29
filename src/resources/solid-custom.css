@@ -334,7 +334,9 @@ textarea {
   inset: 0 auto 0 0;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   width: var(--sidebar-width);
+  box-sizing: border-box;
   background: var(--sidebar-background);
   color: var(--sidebar-foreground);
   border-right: 1px solid var(--sidebar-border);
@@ -531,6 +533,7 @@ textarea {
   left: 0;
   width: 14px;
   height: 100vh;
+  height: 100dvh;
   border: 0;
   background: transparent;
   z-index: 61;
@@ -1414,6 +1417,11 @@ textarea {
 
   .solid-sidebar {
     width: min(88vw, 320px);
+    width: min(88svw, 320px);
+    width: min(88dvw, 320px);
+    max-width: calc(100vw - 48px);
+    max-width: calc(100svw - 48px);
+    max-width: calc(100dvw - 48px);
     transform: translateX(-104%);
   }
 
@@ -1423,6 +1431,11 @@ textarea {
 
   .solid-sidebar.is-collapsed {
     width: min(88vw, 320px);
+    width: min(88svw, 320px);
+    width: min(88dvw, 320px);
+    max-width: calc(100vw - 48px);
+    max-width: calc(100svw - 48px);
+    max-width: calc(100dvw - 48px);
   }
 
   .solid-sidebar-hotspot {
@@ -4098,6 +4111,36 @@ html.dark .solid-header-cog-trigger:hover,
   align-items: center;
 }
 
+.solid-paginator-left {
+  display: inline-flex;
+  align-items: center;
+  margin-right: auto;
+}
+
+.solid-list-selection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.solid-list-selection-clear {
+  border: 0;
+  padding: 2px 5px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.solid-list-selection-clear:hover {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
 .solid-paginator-label,
 .solid-paginator-report {
   font-size: 0.7rem;
@@ -4493,6 +4536,15 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   box-shadow: -8px 0 12px -12px rgba(15, 23, 42, 0.18);
 }
 
+.solid-data-table-td.solid-tree-actions-cell {
+  vertical-align: middle;
+}
+
+.solid-data-table-td.solid-tree-actions-cell > div {
+  align-items: center;
+  min-height: 100%;
+}
+
 .solid-data-table-head .solid-tree-group-header-cell {
   min-height: 42px;
   z-index: 10 !important;
@@ -4684,25 +4736,27 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-tree-row-menu-trigger {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: var(--background);
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: color-mix(in srgb, var(--foreground) 76%, transparent);
+  cursor: pointer;
   transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
+    background 120ms ease,
     color 120ms ease;
 }
 
-.solid-tree-row-menu-trigger:hover {
-  background: color-mix(in srgb, var(--accent) 92%, transparent);
-  border-color: color-mix(in srgb, var(--border) 74%, transparent);
-  color: var(--foreground);
+.solid-tree-row-menu-trigger:hover,
+.solid-tree-row-menu-trigger[data-state="open"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .solid-tree-row-menu .solid-dropdown-menu-item {

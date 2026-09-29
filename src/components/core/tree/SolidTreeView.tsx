@@ -48,6 +48,7 @@ import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectio
 import { SolidListViewHeaderButton } from "../list/SolidListViewHeaderButton";
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
+import type { SolidListRowActionEvent } from "../../../types/list-row-action";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1787,7 +1788,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 size="sm"
                 iconPos="left"
                 onClick={() => {
-                  const event = {
+                  const event: SolidListRowActionEvent = {
                     params,
                     rowData: rowData,
                     solidListViewMetaData: solidTreeViewMetaData?.data,
@@ -1878,7 +1879,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 <SolidDropdownMenuItem
                   key={`${rowData?.id || "row"}-${button?.attrs?.label || index}`}
                   onSelect={() => {
-                    const event = {
+                    const event: SolidListRowActionEvent = {
                       params,
                       rowData,
                       solidListViewMetaData: solidTreeViewMetaData?.data,

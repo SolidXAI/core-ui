@@ -1932,6 +1932,85 @@ li.header-li-px {
   padding: 0 1px 3px;
 }
 
+.solid-kanban-lane-selection {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  margin-right: 2px;
+}
+
+.solid-kanban-lane-checkbox,
+.solid-kanban-card-selection .solid-checkbox {
+  margin: 0;
+}
+
+.solid-kanban-selection-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.solid-kanban-statusbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  padding: 4px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+}
+
+.solid-kanban-statusbar-selection,
+.solid-kanban-statusbar-board,
+.solid-kanban-statusbar-page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.solid-kanban-statusbar-selection {
+  min-width: 100px;
+}
+
+.solid-kanban-statusbar-board {
+  margin-left: auto;
+}
+
+.solid-kanban-statusbar-separator {
+  color: var(--muted-foreground);
+}
+
+.solid-kanban-statusbar-page-size .solid-select-wrap {
+  width: 76px;
+}
+
+.solid-kanban-statusbar-page-size .solid-select {
+  min-height: 28px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .solid-kanban-statusbar {
+    flex-wrap: wrap;
+  }
+
+  .solid-kanban-statusbar-board {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
 .kaban-heading-area .count {
   background-color: #bbbbbb;
   color: #000;
@@ -4689,6 +4768,35 @@ li.header-li-px {
   background: transparent;
 }
 
+.solid-kanban-card-selection {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: 4px;
+  background: var(--solid-card-background, #fff);
+  cursor: pointer;
+}
+
+html.dark .solid-kanban-card-selection,
+[data-theme="dark"] .solid-kanban-card-selection {
+  background: var(--solid-card-background, #1f2937);
+}
+
+.solid-kanban-card-selected {
+  outline: 2px solid var(--solid-primary-color, #2563eb);
+  outline-offset: 1px;
+}
+
+.solid-kanban-card-content {
+  min-height: 100%;
+}
+
 .solid-media-card {
   box-shadow: none;
   border-radius: 0;
@@ -5417,7 +5525,7 @@ flex-shrink: 0; */
   flex-direction: column;
   overflow-x: auto;
   overflow-y: auto;
-  height: calc(100vh - 120px) !important;
+  height: auto !important;
   min-height: 0;
   min-width: 0;
   flex: 1 1 auto;
