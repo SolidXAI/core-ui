@@ -431,7 +431,9 @@ const CreateModule = ({ params, data }: any) => {
                   {fileDetails && (
                     <div className="solid-file-upload-wrapper solid-module-menu-icon-upload mt-4">
                       <div className="solid-module-menu-icon-row flex items-center gap-2">
-                        <FileReaderExt fileDetails={fileDetails} />
+                        <div className="solid-module-menu-icon-file">
+                          <FileReaderExt fileDetails={fileDetails} />
+                        </div>
                         <div className="solid-module-menu-icon-meta flex w-full flex-col gap-1">
                           <div className="solid-module-menu-icon-header flex items-center justify-between">
                             <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
