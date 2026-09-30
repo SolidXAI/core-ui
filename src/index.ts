@@ -574,6 +574,24 @@ export { closePopup, openPopup } from './redux/features/popupSlice';
 export { default as toastReducer } from './redux/features/toastSlice';
 export { showToast, clearToast } from './redux/features/toastSlice';
 export type { ToastMessage, ToastSeverity } from './redux/features/toastSlice';
+
+// SolidX Agent chat (floating launcher, embedded chat, SDK, chat widgets).
+export { solidAgent, SOLID_AGENT_EVENTS } from './components/core/solid-agent/sdk/solidAgent';
+export type { SolidAgentEventName, SolidAgentEventPayloads } from './components/core/solid-agent/sdk/solidAgent';
+export { SolidAgentEmbedded } from './components/core/solid-agent/SolidAgentEmbedded';
+export { SolidAgentMount } from './components/core/solid-agent/SolidAgentMount';
+export { SolidAgentMarkdown, SolidAgentCopyButton } from './components/core/solid-agent/SolidAgentMarkdown';
+export { SolidAgentChatItem, getDefaultChatWidgetName } from './components/core/solid-agent/thread/SolidAgentChatItem';
+export { getChatWidgetData } from './components/core/solid-agent/widgets/chatWidgetUtils';
+export { disposeAgentRuntime } from './components/core/solid-agent/client/agentRuntime';
+export { default as agentReducer } from './redux/features/agentSlice';
+export { AgentEventTypes } from './components/core/solid-agent/types';
+export type {
+    AgentChatItem,
+    AgentContext,
+    AgentMode,
+    SolidAgentOpenOptions,
+} from './components/core/solid-agent/types';
 export { default as themeReducer } from './redux/features/themeSlice';
 export { default as userReducer } from './redux/features/userSlice';
 export { default as useSolidPopup } from './redux/hooks/useSolidPopup';
@@ -602,6 +620,7 @@ export type {
     SolidLoadForm,
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
+    SolidChatWidgetProps,
     SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidBeforeListDataLoad,

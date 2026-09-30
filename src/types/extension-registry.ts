@@ -16,6 +16,9 @@ export const ExtensionComponentTypes = {
     workflowNodeDocs: "workflowNodeDocs",
     workflowNodeFieldEditor: "workflowNodeFieldEditor",
     workflowNodePaletteCard: "workflowNodePaletteCard",
+    // Rendered inside the SolidX Agent chat when the agent emits a UiWidget event
+    // whose `widget` equals the registered name. Receives ChatWidgetProps.
+    chatInteractionWidget: "chatInteractionWidget",
 } as const;
 
 export type ExtensionComponentType =

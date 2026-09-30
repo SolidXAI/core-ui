@@ -1,0 +1,793 @@
+/* Chat widget styles, ported from the SolidX agent-ui chat (SolidAiChat.module.css) so the
+   default chat widgets look the same. Colours come from the Solid theme variables. */
+
+/* ── AI turn group, rows, avatars, bubbles, meta, copy button ── */
+.AiTurnGroup {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    /* max-width: 800px; */
+    width: 100%;
+}
+
+.AiTurnContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Message rows ── */
+.Row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 800px;
+    width: 100%;
+}
+
+.RowUser {
+    flex-direction: row-reverse;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.RowAssistant {
+    flex-direction: row;
+    align-self: flex-start;
+}
+
+/* ── Avatar ── */
+.Avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--foreground);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.AvatarAi {
+    background: var(--accent);
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+
+.AvatarUser {
+    background: var(--foreground);
+    color: var(--background);
+}
+
+/* ── Bubble group ── */
+.BubbleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    max-width: calc(100%);
+}
+
+.Bubble {
+    border-radius: 16px;
+    padding: 11px 15px;
+    line-height: 1.65;
+    word-break: break-word;
+    position: relative;
+}
+
+.BubbleUser {
+    background: var(--foreground);
+    border: 1px solid var(--foreground);
+    border-bottom-right-radius: 4px;
+    color: var(--background);
+}
+
+.BubbleAssistant {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--foreground);
+}
+
+.UserText {
+    font-size: 14px;
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+/* ── Bubble meta ── */
+.BubbleMeta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.15s;
+    height: 18px;
+}
+
+.Row:hover .BubbleMeta,
+.AiTurnGroup:hover .BubbleMeta {
+    opacity: 1;
+}
+
+.BubbleMetaUser {
+    flex-direction: row-reverse;
+}
+
+.BubbleMetaAssistant {
+    flex-direction: row;
+}
+
+.Timestamp {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+/* ── Copy button ── */
+.CopyBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--muted-foreground);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.CopyBtn:hover {
+    background: var(--foreground);
+    color: var(--background);
+    border-color: var(--foreground);
+}
+
+/* ── Bounce animation (thinking dots) ── */
+@keyframes bounce {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.55;
+    }
+
+    30% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+}
+
+/* ── Markdown, inline code, code blocks ── */
+.MarkdownRoot {
+    font-size: inherit;
+    font-family: inherit;
+    line-height: 1.65;
+    color: inherit;
+}
+
+.MarkdownRoot>*:first-child {
+    margin-top: 0 !important;
+}
+
+.MarkdownRoot>*:last-child {
+    margin-bottom: 0 !important;
+}
+
+.MarkdownRoot p {
+    margin: 0 0 8px;
+}
+
+.MarkdownRoot p:last-child {
+    margin-bottom: 0;
+}
+
+.MarkdownRoot h1,
+.MarkdownRoot h2,
+.MarkdownRoot h3 {
+    font-weight: 600;
+    margin: 16px 0 4px;
+    color: inherit;
+    line-height: 1.3;
+}
+
+.MarkdownRoot h1 {
+    font-size: 1.15em;
+}
+
+.MarkdownRoot h2 {
+    font-size: 1.05em;
+}
+
+.MarkdownRoot h3 {
+    font-size: 1em;
+    opacity: 0.85;
+}
+
+.MarkdownRoot ul,
+.MarkdownRoot ol {
+    padding-left: 18px;
+    margin: 5px 0;
+}
+
+.MarkdownRoot li {
+    margin: 3px 0;
+    line-height: 1.55;
+}
+
+.MarkdownRoot li>p {
+    margin: 0;
+}
+
+.MarkdownRoot blockquote {
+    border-left: 2px solid var(--border);
+    padding: 4px 11px;
+    margin: 8px 0;
+    color: var(--muted-foreground);
+    font-style: italic;
+}
+
+.MarkdownRoot a,
+.MarkdownLink {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.MarkdownRoot a:hover,
+.MarkdownLink:hover {
+    opacity: 0.72;
+}
+
+.MarkdownRoot hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+}
+
+/* ── Markdown table ── */
+.MarkdownTableWrapper {
+    overflow-x: auto;
+    margin: 8px 0;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+}
+
+.MarkdownRoot table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 0;
+}
+
+.MarkdownRoot th,
+.MarkdownRoot td {
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 6px 12px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.MarkdownRoot th:last-child,
+.MarkdownRoot td:last-child {
+    border-right: none;
+}
+
+.MarkdownRoot tr:last-child td {
+    border-bottom: none;
+}
+
+.MarkdownRoot th {
+    background: var(--accent);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.MarkdownRoot td code {
+    font-size: 12px;
+}
+
+/* ── Inline code ── */
+.InlineCode {
+    background: var(--accent);
+    border: 1px solid var(--border);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    color: var(--foreground);
+}
+
+/* ── Code block ── */
+.CodeBlockWrapper {
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.CodeBlockHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--accent);
+    padding: 5px 11px;
+    border-bottom: 1px solid var(--border);
+}
+
+.CodeLang {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.CodeCopyBtn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.CodeCopyBtn:hover {
+    background: var(--accent);
+    color: var(--foreground);
+}
+
+.CodePre {
+    margin: 0;
+    padding: 13px;
+    background: var(--accent);
+    overflow-x: auto;
+    font-size: 12.5px;
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    line-height: 1.6;
+    color: var(--foreground);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+/* ── Tool card ── */
+.ToolCard {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+    font-size: 13px;
+}
+
+.ToolCardRunning {
+    border-color: color-mix(in srgb, var(--foreground) 15%, transparent);
+    background: color-mix(in srgb, var(--foreground) 2%, transparent);
+}
+
+.ToolCardDone {
+    border-color: var(--border);
+    background: transparent;
+    opacity: 0.85;
+}
+
+.ToolCardDone:hover {
+    opacity: 1;
+}
+
+.ToolCardWarning {
+    border-color: rgba(245, 158, 11, 0.5);
+    background: rgba(245, 158, 11, 0.04);
+}
+
+.ToolCardError {
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(239, 68, 68, 0.04);
+}
+
+.ToolCardHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+
+.ToolCardStatusIcon {
+    font-size: 13px;
+    color: var(--foreground);
+    flex-shrink: 0;
+}
+
+.ToolCardStatusDone {
+    color: var(--foreground);
+    opacity: 0.5;
+}
+
+.ToolCardStatusWarning {
+    color: rgb(245, 158, 11);
+}
+
+.ToolCardStatusError {
+    color: rgb(239, 68, 68);
+}
+
+.ToolCardToolIcon {
+    font-size: 12px;
+    color: var(--muted-foreground);
+    flex-shrink: 0;
+}
+
+.ToolCardName {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--foreground);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ToolCardDesc {
+    font-size: 12px;
+    color: var(--muted-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1;
+    max-width: 300px;
+}
+
+.ToolCardBadge {
+    font-size: 10px;
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    line-height: 17px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.ToolCardDuration {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ToolCardProgress {
+    border-top: 1px solid var(--border);
+    padding: 6px 12px 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: var(--accent);
+}
+
+.ToolProgressItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted-foreground);
+}
+
+.ToolProgressLabel {
+    flex: 1;
+    min-width: 0;
+}
+
+.ToolProgressDuration {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted-foreground);
+    opacity: 0.7;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.ToolProgressRunning {
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.ToolProgressDone {
+    color: var(--muted);
+    opacity: 0.65;
+}
+
+/* ── Tool output preview ── */
+.ToolCardOutput {
+    border-top: 1px solid var(--border);
+    padding: 8px 12px;
+    background: var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ToolOutputHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.ToolOutputText {
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--foreground);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    margin: 0;
+}
+
+.ToolOutputWarning {
+    color: var(--solid-warning-text, rgb(180, 83, 9));
+}
+
+.ToolOutputError {
+    color: var(--solid-error-text, rgb(185, 28, 28));
+}
+
+/* ── Thinking bubble and streaming cursor ── */
+.ThinkingBubble {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    width: fit-content;
+}
+
+.ThinkingDots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.ThinkingDot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--foreground);
+    animation: bounce 1.2s infinite;
+}
+
+.ThinkingDot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.ThinkingDot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.ThinkingLabel {
+    font-size: 12px;
+    color: var(--muted-foreground);
+}
+
+/* ── Streaming cursor ── */
+.StreamingCursor {
+    display: inline-block;
+    width: 2px;
+    height: 14px;
+    background: var(--foreground);
+    opacity: 0.6;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: cursorBlink 0.9s step-start infinite;
+}
+
+@keyframes cursorBlink {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+/* ── Error bubble ── */
+.ErrorBubble {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+}
+
+.ErrorIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.ErrorContent {
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.05);
+    padding: 9px 13px;
+    max-width: 85%;
+}
+
+.ErrorTitle {
+    font-size: 11px;
+    font-weight: 600;
+    color: #ef4444;
+    margin: 0 0 3px;
+}
+
+.ErrorText {
+    font-size: 13px;
+    color: var(--solid-error-text, rgb(185, 28, 28));
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── Tool card header button, chevron, expandable ── */
+.ToolCardHeaderBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13px;
+    flex-wrap: nowrap;
+    min-width: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+}
+
+.ToolCardHeaderBtn:not([data-expandable="true"]) {
+    cursor: default;
+}
+
+.ToolCardChevron {
+    font-size: 11px;
+    color: var(--muted-foreground);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 2px;
+}
+
+.ToolCardChevronOpen {
+    transform: rotate(90deg);
+}
+
+.ToolCardExpandable {
+    border-top: 1px solid var(--border);
+}
+
+/* ── Spinner (running tool / progress step) ── */
+.Spin {
+    animation: toolSpin 0.9s linear infinite;
+}
+
+@keyframes toolSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Attachments on a sent user message ── */
+.MessageAttachments {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.MessageAttachmentImageBtn {
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: none;
+    cursor: zoom-in;
+    overflow: hidden;
+    display: block;
+}
+
+.MessageAttachmentImage {
+    display: block;
+    max-width: 160px;
+    max-height: 120px;
+    object-fit: cover;
+}
+
+.MessageAttachmentFile {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 220px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--foreground);
+    font-size: 12px;
+}
+
+.MessageAttachmentName {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.MessageAttachmentSize {
+    flex-shrink: 0;
+    font-size: 10.5px;
+    color: var(--muted);
+}
+
+.AttachmentLightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    cursor: zoom-out;
+}
+
+.AttachmentLightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+}
