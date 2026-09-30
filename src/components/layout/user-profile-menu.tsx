@@ -75,9 +75,9 @@ const UserProfileMenu = () => {
     ?.filter((role: any) => role.name !== "Internal User")
     .map((role: any) => role.name)
     .join(" | ");
-  const displayName = settingsMap?.enableUsername
+  const displayName = userData?.data?.fullName || (settingsMap?.enableUsername
     ? userData?.data?.username
-    : userData?.data?.email;
+    : userData?.data?.email);
   const primaryRole = roleLabel?.split("|")?.[0]?.trim() || "User";
 
   const UserProfileAvatar = ({ compact = false }: { compact?: boolean }) => {
