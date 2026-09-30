@@ -13,6 +13,7 @@ const DEFAULT_FILE_ICON: FileTypeIconTone = {
 const FILE_TYPE_ICON_MAP: Record<string, FileTypeIconTone> = {
     pdf: { bg: "#DC2626", corner: "#FCA5A5" },
     txt: { bg: "#475569", corner: "#CBD5E1" },
+    md: { bg: "#475569", corner: "#CBD5E1" },
     doc: { bg: "#2563EB", corner: "#93C5FD" },
     docx: { bg: "#2563EB", corner: "#93C5FD" },
     xls: { bg: "#16A34A", corner: "#86EFAC" },
@@ -22,6 +23,7 @@ const FILE_TYPE_ICON_MAP: Record<string, FileTypeIconTone> = {
     pptx: { bg: "#EA580C", corner: "#FDBA74" },
     zip: { bg: "#7C3AED", corner: "#C4B5FD" },
     rar: { bg: "#7C3AED", corner: "#C4B5FD" },
+    "7z": { bg: "#7C3AED", corner: "#C4B5FD" },
     webm: { bg: "#4F46E5", corner: "#A5B4FC" },
     ogg: { bg: "#DB2777", corner: "#F9A8D4" },
     wav: { bg: "#DB2777", corner: "#F9A8D4" }

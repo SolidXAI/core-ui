@@ -24,7 +24,7 @@ import getAcceptedFileTypes, { getAllowedMediaExtensionsErrorMessage } from "../
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { openMediaInNewTab } from "../../../../helpers/mediaUrl";
-import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
+import { getMediaFileName, getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
@@ -209,7 +209,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     const fileUrl = URL.createObjectURL(file);
                     objectUrls.push(fileUrl);
                     return {
-                        name: file.name,
+                        name: getMediaFileName(file),
                         type: file.type,
                         size: file.size,
                         mediaId: null,
@@ -224,7 +224,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 }
 
                 return {
-                    name: file.originalFileName,
+                    name: getMediaFileName(file),
                     type: file.mimeType,
                     size: file.fileSize,
                     mediaId: getPersistedMediaId(file),
@@ -592,7 +592,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                     const fileUrl = URL.createObjectURL(file);
                     objectUrls.push(fileUrl);
                     return {
-                        name: file.name,
+                        name: getMediaFileName(file),
                         type: file.type,
                         size: file.size,
                         id: `${file.name}-${file.size}`,
@@ -606,7 +606,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                 }
 
                 return {
-                    name: file.originalFileName,
+                    name: getMediaFileName(file),
                     type: file.mimeType,
                     size: file.fileSize,
                     id: file.id,
