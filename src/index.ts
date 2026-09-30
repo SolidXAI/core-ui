@@ -235,13 +235,13 @@ export {
 export {
     modelsApi,
     useCreatemodelMutation,
-    useDeleteMultipleModelsMutation,
-    useDeletemodelMutation,
+    useApplyDeleteModelMutation,
     useGenerateCodeForModelMutation,
     useGetModelsQuery,
     useGetmodelByIdQuery,
     useLazyGetModelsQuery,
     useLazyGetmodelByIdQuery,
+    usePreviewDeleteModelMutation,
     useUpdatemodelMutation
 } from './redux/api/modelApi';
 

@@ -1,9 +1,5 @@
 import { CreateButton } from "../../../components/common/CreateButton";
-import {
-  useDeleteMultipleModelsMutation,
-  useGenerateCodeForModelMutation,
-  useLazyGetModelsQuery,
-} from "../../../redux/api/modelApi";
+import { useGenerateCodeForModelMutation, useLazyGetModelsQuery } from "../../../redux/api/modelApi";
 import Link from "../../common/Link";
 import qs from "qs";
 import { useEffect, useState } from "react";
@@ -34,15 +30,12 @@ export const ModelListViewData = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState<1 | -1 | 0>(0);
-  const [selectedMenus, setSelectedMenus] = useState<ModelMetaData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isDialogVisible, setDialogVisible] = useState(false);
   const [isGenerateCodeVisible, setGenerateCodeVisible] = useState(false);
   const [generateCodeForModel, setGenerateCodeForModel] = useState<string | null>(null);
 
   const [triggerGetModels, { data: model, isLoading }] = useLazyGetModelsQuery();
   const [generateCode] = useGenerateCodeForModelMutation();
-  const [deleteManyModel] = useDeleteMultipleModelsMutation();
 
   useEffect(() => {
     if (model) {
@@ -60,7 +53,6 @@ export const ModelListViewData = () => {
     };
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
     triggerGetModels(queryString);
-    setSelectedMenus([]);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPageChange = (event: { first: number; rows: number }) => {
@@ -163,18 +155,6 @@ export const ModelListViewData = () => {
     setQueryString(0, rows, sortField, sortOrder, defaults);
   };
 
-  const deleteBulk = () => {
-    const deleteList = selectedMenus.map((element) => element.id);
-    deleteManyModel(deleteList);
-    setDialogVisible(false);
-    setSelectedMenus([]);
-  };
-
-  const onDeleteClose = () => {
-    setDialogVisible(false);
-    setSelectedMenus([]);
-  };
-
   const handleGenerateCode = async () => {
     if (!generateCodeForModel) return;
     await generateCode({ id: generateCodeForModel });
@@ -219,16 +199,6 @@ export const ModelListViewData = () => {
     <div className="solid-model-list w-full">
       <div className="flex gap-4 mb-6 items-center flex-wrap">
         <CreateButton />
-        {selectedMenus.length > 0 && (
-          <SolidButton
-            type="button"
-            label="Delete"
-            size="small"
-            severity="danger"
-            className="small-button"
-            onClick={() => setDialogVisible(true)}
-          />
-        )}
       </div>
 
       <div className="flex flex-col md:flex-row items-start gap-4 mb-4">
@@ -270,10 +240,7 @@ export const ModelListViewData = () => {
         onSort={onSort}
         sortField={sortField}
         sortOrder={sortOrder}
-        selection={selectedMenus}
-        onSelectionChange={({ value }) => setSelectedMenus(value)}
       >
-        <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
         <Column field="id" header="Id" className="text-sm" sortable headerClassName="table-header-fs" />
         <Column
           field="displayName"
@@ -293,20 +260,6 @@ export const ModelListViewData = () => {
         <Column header="Edit" body={detailsBodyTemplate} />
         <Column header="Code" body={generateCodeBodyTemplate} />
       </SolidDataTable>
-
-      <SolidDialog
-        visible={isDialogVisible}
-        header="Confirm Delete"
-        modal
-        className="solid-confirm-dialog"
-        onHide={() => setDialogVisible(false)}
-      >
-        <p>Are you sure you want to delete the selected Models?</p>
-        <div className="flex justify-center gap-4 mt-4">
-          <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={deleteBulk} />
-          <SolidButton label="No" className="small-button" variant="ghost" onClick={onDeleteClose} />
-        </div>
-      </SolidDialog>
 
       <SolidDialog
         visible={isGenerateCodeVisible}
