@@ -191,12 +191,13 @@ const transformRulesToFilters = (input: any, viewData: any) => {
 
 
             const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
-            const isManyToMany = fieldMeta?.type === 'relation' && fieldMeta?.relationType === 'many-to-many';
+            const isToManyRelation = fieldMeta?.type === 'relation'
+                && ['one-to-many', 'many-to-many'].includes(fieldMeta?.relationType);
 
 
             let transformedRule;
-            if (isManyToMany) {
-                // For many-to-many relations, always use array format for $in/$notIn
+            if (isToManyRelation) {
+                // Collection relations must be filtered through a related scalar field.
                 transformedRule = {
                     [rule.fieldName]: {
                         id: {
