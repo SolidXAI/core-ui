@@ -332,6 +332,31 @@ export type SolidFormFieldWidgetProps = {
     fieldContext?: SolidFieldProps;
 }
 
+/**
+ * Props of a SolidX Agent chat widget (ExtensionComponentTypes.chatInteractionWidget).
+ * Resolved from `event_data.widget`, or from the default widget for `eventType`.
+ */
+export type SolidChatWidgetProps = {
+    /** Agent event type, e.g. "ToolCalling", "LlmComplete", "UserMessage". */
+    eventType: string;
+    /** The event's payload (accumulated for live events such as a running tool). */
+    eventData: Record<string, any>;
+    /** Stable id of this widget in the thread; replies are addressed to it. */
+    widgetId: string;
+    /** True while the event is still updating (streaming text, running tool). */
+    live: boolean;
+    /** When the event arrived (epoch ms); shown as the message time. */
+    timestamp: number;
+    /** A final widget is read-only. */
+    final: boolean;
+    /** Answers this widget; sent to the agent as `widget_reply` (and as text). */
+    reply: (value: unknown) => void;
+    /** Posts a new user message, e.g. from a "Fix with agent" button. */
+    sendPrompt: (text: string) => void;
+    /** Page context the conversation was started with (module, model, record). */
+    agentContext?: import("../components/core/solid-agent/types").AgentContext;
+}
+
 export type SolidSettingsWidgetProps = {
     setting: any;
     value: any;

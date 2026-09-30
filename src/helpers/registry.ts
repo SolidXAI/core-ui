@@ -85,6 +85,25 @@ import {
 
 import { scheduleFrequencyOnFieldChangeHandler } from "../components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
 import { MetadataExplorerFormWidget } from "../components/core/extension/solid-core/metadata/MetadataExplorerFormWidget";
+import { DefaultUserMessageChatWidget } from "../components/core/solid-agent/widgets/DefaultUserMessageChatWidget";
+import { DefaultAssistantMessageChatWidget } from "../components/core/solid-agent/widgets/DefaultAssistantMessageChatWidget";
+import { DefaultToolCallChatWidget } from "../components/core/solid-agent/widgets/DefaultToolCallChatWidget";
+import { DefaultErrorChatWidget } from "../components/core/solid-agent/widgets/DefaultErrorChatWidget";
+import { DefaultNoticeChatWidget } from "../components/core/solid-agent/widgets/DefaultNoticeChatWidget";
+import { DefaultUnknownChatWidget } from "../components/core/solid-agent/widgets/DefaultUnknownChatWidget";
+import { DefaultThinkingChatWidget } from "../components/core/solid-agent/widgets/DefaultThinkingChatWidget";
+import { SolidMarkdownChatWidget } from "../components/core/solid-agent/widgets/SolidMarkdownChatWidget";
+import { SolidQuestionChatWidget } from "../components/core/solid-agent/widgets/SolidQuestionChatWidget";
+import { SolidChecklistChatWidget } from "../components/core/solid-agent/widgets/SolidChecklistChatWidget";
+import { SolidDiffListChatWidget } from "../components/core/solid-agent/widgets/SolidDiffListChatWidget";
+import { SolidCodeChatWidget } from "../components/core/solid-agent/widgets/SolidCodeChatWidget";
+import { SolidJsonChatWidget } from "../components/core/solid-agent/widgets/SolidJsonChatWidget";
+import { SolidTableChatWidget } from "../components/core/solid-agent/widgets/SolidTableChatWidget";
+import { SolidGalleryChatWidget } from "../components/core/solid-agent/widgets/SolidGalleryChatWidget";
+import { SolidProgressChatWidget } from "../components/core/solid-agent/widgets/SolidProgressChatWidget";
+import { SolidStatusChatWidget } from "../components/core/solid-agent/widgets/SolidStatusChatWidget";
+import { SolidLinkCardChatWidget } from "../components/core/solid-agent/widgets/SolidLinkCardChatWidget";
+import { SolidToolActivityChatWidget } from "../components/core/solid-agent/widgets/SolidToolActivityChatWidget";
 
 
 type ExtensionComponentMetadata = {
@@ -128,15 +147,11 @@ export const getExtensionComponent = (name: string): React.ComponentType<any> | 
     return null;
 };
 
-export const getExtensionComponents = (type: ExtensionComponentType, fieldType: string = ''): string[] | [] => {
-    // TODO: iterate over all registered extensionComponents to fetch a list of componnents matching the type & fieldType (optional)
-    // if (extensionRegistry.components[name]) {
-    //     return extensionRegistry.components[name].component;
-    // }
-
-    // return null;
-
-    return [];
+/** Names of every registered component of `type` (and `fieldType`, when given). Aliases are included. */
+export const getExtensionComponents = (type: ExtensionComponentType, fieldType: string = ''): string[] => {
+    return Object.entries(extensionRegistry.components)
+        .filter(([, meta]) => meta.type === type && (!fieldType || meta.fieldType === fieldType))
+        .map(([name]) => name);
 };
 
 export const getExtensionFunction = (name: string) => {
@@ -434,3 +449,26 @@ registerExtensionFunction("mqMessageOnFormLoadHandler", mqMessageOnFormLoadHandl
 
 
 registerExtensionFunction("scheduleFrequencyOnFieldChangeHandler", scheduleFrequencyOnFieldChangeHandler, ExtensionFunctionTypes.onFieldChange);
+
+// SolidX Agent chat widgets.
+// Defaults render an event by its event_type when event_data.widget is absent (see SolidAgentChatItem).
+registerExtensionComponent("DefaultUserMessageChatWidget", DefaultUserMessageChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultAssistantMessageChatWidget", DefaultAssistantMessageChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultToolCallChatWidget", DefaultToolCallChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultErrorChatWidget", DefaultErrorChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["error"]);
+registerExtensionComponent("DefaultNoticeChatWidget", DefaultNoticeChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultThinkingChatWidget", DefaultThinkingChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultUnknownChatWidget", DefaultUnknownChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+// Named widgets, chosen by event_data.widget (full name or the short alias).
+registerExtensionComponent("SolidMarkdownChatWidget", SolidMarkdownChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["markdown"]);
+registerExtensionComponent("SolidQuestionChatWidget", SolidQuestionChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["question"]);
+registerExtensionComponent("SolidChecklistChatWidget", SolidChecklistChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["checklist"]);
+registerExtensionComponent("SolidDiffListChatWidget", SolidDiffListChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["diff-list"]);
+registerExtensionComponent("SolidCodeChatWidget", SolidCodeChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["code"]);
+registerExtensionComponent("SolidJsonChatWidget", SolidJsonChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["json"]);
+registerExtensionComponent("SolidTableChatWidget", SolidTableChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["table"]);
+registerExtensionComponent("SolidGalleryChatWidget", SolidGalleryChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["gallery"]);
+registerExtensionComponent("SolidProgressChatWidget", SolidProgressChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["progress"]);
+registerExtensionComponent("SolidStatusChatWidget", SolidStatusChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["status"]);
+registerExtensionComponent("SolidLinkCardChatWidget", SolidLinkCardChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["link-card"]);
+registerExtensionComponent("SolidToolActivityChatWidget", SolidToolActivityChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["tool-activity"]);

@@ -6,6 +6,7 @@ import themeReducer from "../features/themeSlice";
 import toastReducer from "../features/toastSlice";
 import userReducer from "../features/userSlice";
 import solidStudioReducer from "../features/solidStudioSlice";
+import agentReducer from "../features/agentSlice";
 import { authApi } from "../api/authApi";
 import { aiInteractionApi } from "../api/aiInteractionApi";
 import { exportTemplateApi } from "../api/exportTemplateApi";
@@ -67,4 +68,5 @@ export const solidReducers = {
     dataViewState: dataViewReducer,
     solidStudio: solidStudioReducer,
     toast: toastReducer,
+    solidAgent: agentReducer,
 };  
