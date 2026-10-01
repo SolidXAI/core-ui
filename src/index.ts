@@ -590,6 +590,7 @@ export type {
     AgentChatItem,
     AgentContext,
     AgentMode,
+    AgentType,
     SolidAgentOpenOptions,
 } from './components/core/solid-agent/types';
 export { default as themeReducer } from './redux/features/themeSlice';

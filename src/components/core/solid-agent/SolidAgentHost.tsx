@@ -30,7 +30,7 @@ function writePrefs(prefs: { dockWidth: number }) {
 /**
  * The single mount point of the SolidX Agent in the admin shell (rendered by AdminLayout).
  * Shows the floating bubble and the chat window; hidden unless the `solidAgentEnabled` setting
- * is on, `solidAgentUrl` is set and the user has agent:invoke. Ctrl/Cmd+J toggles the window,
+ * is on, `solidxAgentBackendUrl` is set and the user has agent:invoke. Ctrl/Cmd+J toggles the window,
  * Esc inside it minimizes back to the bubble.
  */
 export default function SolidAgentHost() {

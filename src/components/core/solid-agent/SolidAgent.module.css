@@ -1,13 +1,28 @@
 /* SolidX Agent chat. Colours come from the active Solid theme (theme-variables.css),
    so light/dark themes need no extra rules here. */
 
+/* The theme's colours, resolved once on :root (where Solid themes declare them) and inherited as
+   finished values. A page area that redefines --foreground/--border/... for its own design
+   system (e.g. testingHub's .th-design uses bare HSL triplets) can't break an embedded chat.
+   The chat CSS (here and widgets/) reads only these, via the --agent-* aliases. */
+:global(:root) {
+  --solid-agent-primary: var(--primary-color, var(--primary, #722ed1));
+  --solid-agent-bg: var(--card, #ffffff);
+  --solid-agent-page: var(--background, #f6f8fc);
+  --solid-agent-fg: var(--foreground, #0f172a);
+  --solid-agent-muted: var(--muted, #64748b);
+  --solid-agent-muted-fg: var(--muted-foreground, #475569);
+  --solid-agent-border: var(--border, #e2e8f0);
+  --solid-agent-accent: var(--accent, #eef2ff);
+}
+
 .root {
-  --agent-primary: var(--primary, #722ed1);
-  --agent-bg: var(--card, #ffffff);
-  --agent-page: var(--background, #f6f8fc);
-  --agent-fg: var(--foreground, #0f172a);
-  --agent-muted: var(--muted, #64748b);
-  --agent-border: var(--border, #e2e8f0);
+  --agent-primary: var(--solid-agent-primary);
+  --agent-bg: var(--solid-agent-bg);
+  --agent-page: var(--solid-agent-page);
+  --agent-fg: var(--solid-agent-fg);
+  --agent-muted: var(--solid-agent-muted);
+  --agent-border: var(--solid-agent-border);
   --agent-tint: color-mix(in srgb, var(--agent-primary) 10%, transparent);
   --agent-ok: #16a34a;
   --agent-warn: #b45309;
@@ -240,6 +255,9 @@
 .textarea:focus { border-color: var(--agent-primary); box-shadow: 0 0 0 3px var(--agent-tint); }
 .textarea:disabled { background: var(--agent-page); cursor: not-allowed; }
 .composerRow { display: flex; align-items: center; gap: 8px; }
+/* Send / Stop sit at the right edge, whatever comes before them in the row. */
+.composerRow > .sendBtn,
+.composerRow > .stopBtn { margin-left: auto; }
 .composerDragging { background: var(--agent-tint); outline: 2px dashed var(--agent-primary); outline-offset: -6px; }
 .iconBtn:disabled { opacity: 0.45; cursor: not-allowed; }
 

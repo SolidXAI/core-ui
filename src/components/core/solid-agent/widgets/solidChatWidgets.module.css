@@ -43,25 +43,25 @@
     width: 28px;
     height: 28px;
     border-radius: 8px;
-    background: var(--accent);
-    border: 1px solid var(--border);
+    background: var(--solid-agent-accent);
+    border: 1px solid var(--solid-agent-border);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     flex-shrink: 0;
     margin-top: 2px;
 }
 
 .AvatarAi {
-    background: var(--accent);
-    border: 1px solid var(--border);
+    background: var(--solid-agent-accent);
+    border: 1px solid var(--solid-agent-border);
     box-shadow: none;
 }
 
 .AvatarUser {
-    background: var(--foreground);
-    color: var(--background);
+    background: var(--solid-agent-fg);
+    color: var(--solid-agent-page);
 }
 
 /* ── Bubble group ── */
@@ -82,16 +82,16 @@
 }
 
 .BubbleUser {
-    background: var(--foreground);
-    border: 1px solid var(--foreground);
+    background: var(--solid-agent-fg);
+    border: 1px solid var(--solid-agent-fg);
     border-bottom-right-radius: 4px;
-    color: var(--background);
+    color: var(--solid-agent-page);
 }
 
 .BubbleAssistant {
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--foreground);
+    background: var(--solid-agent-bg);
+    border: 1px solid var(--solid-agent-border);
+    color: var(--solid-agent-fg);
 }
 
 .UserText {
@@ -125,7 +125,7 @@
 
 .Timestamp {
     font-size: 10px;
-    color: var(--muted);
+    color: var(--solid-agent-muted);
 }
 
 /* ── Copy button ── */
@@ -133,10 +133,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent);
-    border: 1px solid var(--border);
+    background: var(--solid-agent-accent);
+    border: 1px solid var(--solid-agent-border);
     border-radius: 5px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     width: 20px;
     height: 20px;
     cursor: pointer;
@@ -144,9 +144,9 @@
 }
 
 .CopyBtn:hover {
-    background: var(--foreground);
-    color: var(--background);
-    border-color: var(--foreground);
+    background: var(--solid-agent-fg);
+    color: var(--solid-agent-page);
+    border-color: var(--solid-agent-fg);
 }
 
 /* ── Bounce animation (thinking dots) ── */
@@ -227,16 +227,16 @@
 }
 
 .MarkdownRoot blockquote {
-    border-left: 2px solid var(--border);
+    border-left: 2px solid var(--solid-agent-border);
     padding: 4px 11px;
     margin: 8px 0;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     font-style: italic;
 }
 
 .MarkdownRoot a,
 .MarkdownLink {
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     text-decoration: underline;
     text-underline-offset: 2px;
     cursor: pointer;
@@ -250,7 +250,7 @@
 
 .MarkdownRoot hr {
     border: none;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--solid-agent-border);
     margin: 12px 0;
 }
 
@@ -259,7 +259,7 @@
     overflow-x: auto;
     margin: 8px 0;
     border-radius: 7px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--solid-agent-border);
 }
 
 .MarkdownRoot table {
@@ -271,8 +271,8 @@
 
 .MarkdownRoot th,
 .MarkdownRoot td {
-    border-bottom: 1px solid var(--border);
-    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--solid-agent-border);
+    border-right: 1px solid var(--solid-agent-border);
     padding: 6px 12px;
     text-align: left;
     vertical-align: top;
@@ -288,10 +288,10 @@
 }
 
 .MarkdownRoot th {
-    background: var(--accent);
+    background: var(--solid-agent-accent);
     font-weight: 600;
     font-size: 12px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
@@ -302,20 +302,20 @@
 
 /* ── Inline code ── */
 .InlineCode {
-    background: var(--accent);
-    border: 1px solid var(--border);
+    background: var(--solid-agent-accent);
+    border: 1px solid var(--solid-agent-border);
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 12.5px;
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
 }
 
 /* ── Code block ── */
 .CodeBlockWrapper {
     margin: 8px 0;
     border-radius: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--solid-agent-border);
     overflow: hidden;
 }
 
@@ -323,15 +323,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--accent);
+    background: var(--solid-agent-accent);
     padding: 5px 11px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--solid-agent-border);
 }
 
 .CodeLang {
     font-size: 10px;
     font-weight: 600;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
@@ -341,7 +341,7 @@
     align-items: center;
     gap: 4px;
     font-size: 11px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     background: none;
     border: none;
     cursor: pointer;
@@ -351,27 +351,27 @@
 }
 
 .CodeCopyBtn:hover {
-    background: var(--accent);
-    color: var(--foreground);
+    background: var(--solid-agent-accent);
+    color: var(--solid-agent-fg);
 }
 
 .CodePre {
     margin: 0;
     padding: 13px;
-    background: var(--accent);
+    background: var(--solid-agent-accent);
     overflow-x: auto;
     font-size: 12.5px;
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
     line-height: 1.6;
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--solid-agent-border) transparent;
 }
 
 /* ── Tool card ── */
 .ToolCard {
     border-radius: 8px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--solid-agent-border);
     overflow: hidden;
     width: 100%;
     max-width: 100%;
@@ -380,12 +380,12 @@
 }
 
 .ToolCardRunning {
-    border-color: color-mix(in srgb, var(--foreground) 15%, transparent);
-    background: color-mix(in srgb, var(--foreground) 2%, transparent);
+    border-color: color-mix(in srgb, var(--solid-agent-fg) 15%, transparent);
+    background: color-mix(in srgb, var(--solid-agent-fg) 2%, transparent);
 }
 
 .ToolCardDone {
-    border-color: var(--border);
+    border-color: var(--solid-agent-border);
     background: transparent;
     opacity: 0.85;
 }
@@ -416,12 +416,12 @@
 
 .ToolCardStatusIcon {
     font-size: 13px;
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     flex-shrink: 0;
 }
 
 .ToolCardStatusDone {
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     opacity: 0.5;
 }
 
@@ -435,7 +435,7 @@
 
 .ToolCardToolIcon {
     font-size: 12px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     flex-shrink: 0;
 }
 
@@ -443,14 +443,14 @@
     font-family: inherit;
     font-size: 13px;
     font-weight: 500;
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     white-space: nowrap;
     flex-shrink: 0;
 }
 
 .ToolCardDesc {
     font-size: 12px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -461,8 +461,8 @@
 
 .ToolCardBadge {
     font-size: 10px;
-    color: var(--muted-foreground);
-    border: 1px solid var(--border);
+    color: var(--solid-agent-muted-fg);
+    border: 1px solid var(--solid-agent-border);
     border-radius: 4px;
     padding: 1px 6px;
     line-height: 17px;
@@ -474,18 +474,18 @@
 .ToolCardDuration {
     font-size: 11px;
     font-variant-numeric: tabular-nums;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     white-space: nowrap;
     flex-shrink: 0;
 }
 
 .ToolCardProgress {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--solid-agent-border);
     padding: 6px 12px 7px;
     display: flex;
     flex-direction: column;
     gap: 3px;
-    background: var(--accent);
+    background: var(--solid-agent-accent);
 }
 
 .ToolProgressItem {
@@ -493,7 +493,7 @@
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
 }
 
 .ToolProgressLabel {
@@ -504,27 +504,27 @@
 .ToolProgressDuration {
     font-size: 11px;
     font-variant-numeric: tabular-nums;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     opacity: 0.7;
     white-space: nowrap;
     margin-left: auto;
 }
 
 .ToolProgressRunning {
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     font-weight: 500;
 }
 
 .ToolProgressDone {
-    color: var(--muted);
+    color: var(--solid-agent-muted);
     opacity: 0.65;
 }
 
 /* ── Tool output preview ── */
 .ToolCardOutput {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--solid-agent-border);
     padding: 8px 12px;
-    background: var(--accent);
+    background: var(--solid-agent-accent);
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -536,7 +536,7 @@
     justify-content: space-between;
     font-size: 11px;
     font-weight: 600;
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
@@ -545,7 +545,7 @@
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
     font-size: 12px;
     line-height: 1.55;
-    color: var(--foreground);
+    color: var(--solid-agent-fg);
     white-space: pre-wrap;
     word-break: break-all;
     max-height: 300px;
@@ -570,8 +570,8 @@
     padding: 10px 14px;
     border-radius: 14px;
     border-bottom-left-radius: 4px;
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: var(--solid-agent-bg);
+    border: 1px solid var(--solid-agent-border);
     width: fit-content;
 }
 
@@ -585,7 +585,7 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--foreground);
+    background: var(--solid-agent-fg);
     animation: bounce 1.2s infinite;
 }
 
@@ -599,7 +599,7 @@
 
 .ThinkingLabel {
     font-size: 12px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
 }
 
 /* ── Streaming cursor ── */
@@ -607,7 +607,7 @@
     display: inline-block;
     width: 2px;
     height: 14px;
-    background: var(--foreground);
+    background: var(--solid-agent-fg);
     opacity: 0.6;
     margin-left: 2px;
     vertical-align: text-bottom;
@@ -693,7 +693,7 @@
 
 .ToolCardChevron {
     font-size: 11px;
-    color: var(--muted-foreground);
+    color: var(--solid-agent-muted-fg);
     transition: transform 0.2s;
     flex-shrink: 0;
     margin-left: 2px;
@@ -704,7 +704,7 @@
 }
 
 .ToolCardExpandable {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--solid-agent-border);
 }
 
 /* ── Spinner (running tool / progress step) ── */
@@ -731,7 +731,7 @@
 
 .MessageAttachmentImageBtn {
     padding: 0;
-    border: 1px solid var(--border);
+    border: 1px solid var(--solid-agent-border);
     border-radius: 10px;
     background: none;
     cursor: zoom-in;
@@ -753,10 +753,10 @@
     gap: 6px;
     max-width: 220px;
     padding: 6px 10px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--solid-agent-border);
     border-radius: 10px;
-    background: var(--card);
-    color: var(--foreground);
+    background: var(--solid-agent-bg);
+    color: var(--solid-agent-fg);
     font-size: 12px;
 }
 
@@ -771,7 +771,7 @@
 .MessageAttachmentSize {
     flex-shrink: 0;
     font-size: 10.5px;
-    color: var(--muted);
+    color: var(--solid-agent-muted);
 }
 
 .AttachmentLightbox {

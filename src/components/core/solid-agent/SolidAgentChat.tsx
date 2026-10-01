@@ -1,16 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector, useStore } from "react-redux";
 import { History, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
-import { agentModeChanged, agentPrefillConsumed, type AgentState } from "../../../redux/features/agentSlice";
-import { ensureAgentRuntime } from "./client/agentRuntime";
+import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import { deleteSession, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
-import type { AgentAttachment, AgentMode } from "./types";
+import type { AgentAttachment, AgentMode, AgentType } from "./types";
+import { useAgentChat } from "./useAgentChat";
 
 type Props = {
     agentUrl: string;
+    /** Which agent backend `agentUrl` belongs to (default "agent", shared with the launcher). */
+    agentType?: AgentType;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
     embedded?: boolean;
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
@@ -34,11 +35,15 @@ function formatDate(iso: string | null) {
     return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
-export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !embedded, suggestions = DEFAULT_SUGGESTIONS }: Props) {
-    const dispatch = useDispatch();
-    const store = useStore();
-    const agent = useSelector((state: any) => state.solidAgent as AgentState);
-    const runtime = ensureAgentRuntime(agentUrl, dispatch, () => (store.getState() as any).solidAgent);
+export function SolidAgentChat({
+    agentUrl,
+    agentType = "agent",
+    embedded = false,
+    // SDK prefill goes through the shared "agent" conversation only.
+    handlesPrefill = !embedded && agentType === "agent",
+    suggestions = DEFAULT_SUGGESTIONS,
+}: Props) {
+    const { agent, dispatch, runtime } = useAgentChat(agentType, agentUrl);
 
     const [showHistory, setShowHistory] = useState(false);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
@@ -46,7 +51,7 @@ export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !e
 
     // SDK requests: solidAgent.open({ prompt, autoSend, context }).
     useEffect(() => {
-        if (!handlesPrefill || !agent.prefill) return;
+        if (!handlesPrefill || !agent.prefill || !runtime) return;
         const { prompt, autoSend, context, nonce } = agent.prefill;
         dispatch(agentPrefillConsumed());
         setShowHistory(false);
@@ -64,9 +69,9 @@ export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !e
     }, [showHistory, agentUrl]);
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
-    const send = useCallback((text: string) => runtime.sendMessage(text), [runtime]);
+    const send = useCallback((text: string) => runtime?.sendMessage(text), [runtime]);
     const sendWithAttachments = useCallback(
-        (text: string, attachments: AgentAttachment[]) => runtime.sendMessage(text, undefined, attachments),
+        (text: string, attachments: AgentAttachment[]) => runtime?.sendMessage(text, undefined, attachments),
         [runtime],
     );
     const offline = agent.connection === "reconnecting" || agent.connection === "offline";
@@ -104,7 +109,7 @@ export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !e
                     <strong>SolidX Agent</strong>
                     <span className={styles.headerSub}>{statusText}</span>
                 </div>
-                <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime.newChat(); setShowHistory(false); }}>
+                <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime?.newChat(); setShowHistory(false); }}>
                     <Plus size={16} />
                 </button>
                 <button
@@ -160,7 +165,7 @@ export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !e
                                 type="button"
                                 className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
                                 onClick={() => {
-                                    runtime.resume(session.session_id);
+                                    runtime?.resume(session.session_id);
                                     setShowHistory(false);
                                 }}
                             >
@@ -176,7 +181,7 @@ export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !e
                                     if (!window.confirm("Delete this conversation?")) return;
                                     await deleteSession(agentUrl, session.session_id);
                                     setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
-                                    if (session.session_id === agent.historySessionId) runtime.newChat();
+                                    if (session.session_id === agent.historySessionId) runtime?.newChat();
                                 }}
                             >
                                 <Trash2 size={14} />
@@ -191,8 +196,8 @@ export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !e
                     hasMore={agent.hasMoreHistory}
                     context={agent.context ?? undefined}
                     emptyState={empty}
-                    onLoadOlder={() => void runtime.loadOlder()}
-                    onReply={(widgetId, widget, value) => runtime.replyToWidget(widgetId, widget, value)}
+                    onLoadOlder={() => void runtime?.loadOlder()}
+                    onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value)}
                     onPrompt={send}
                 />
             )}
@@ -204,7 +209,7 @@ export function SolidAgentChat({ agentUrl, embedded = false, handlesPrefill = !e
                 seed={seed?.text}
                 seedKey={seed?.key}
                 onSend={sendWithAttachments}
-                onStop={() => runtime.cancel()}
+                onStop={() => runtime?.cancel()}
             />
         </>
     );
