@@ -122,7 +122,7 @@ export function AgentToolRegistryEditorPage() {
       </section>
       <section className="agent-tool-editor__panel">
         <header><h2>Agent interface preview</h2><p>Embedded SolidX Agent chat.</p></header>
-        <div className="agent-tool-editor__chat"><SolidAgentEmbedded height="100%" /></div>
+        <div className="agent-tool-editor__chat"><SolidAgentEmbedded /></div>
       </section>
     </div> },
     { value: "agents", label: "Agents", content: <section className="agent-tool-editor__agents"><div><h2>Associated agents</h2><p>Agents linked to this tool. Associations are read-only here.</p></div>
