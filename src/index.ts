@@ -581,6 +581,7 @@ export type { ToastMessage, ToastSeverity } from './redux/features/toastSlice';
 export { solidAgent, SOLID_AGENT_EVENTS } from './components/core/solid-agent/sdk/solidAgent';
 export type { SolidAgentEventName, SolidAgentEventPayloads } from './components/core/solid-agent/sdk/solidAgent';
 export { SolidAgentEmbedded } from './components/core/solid-agent/SolidAgentEmbedded';
+export type { AgentInputContext } from './components/core/solid-agent/useAdminInputContext';
 export { SolidAgentMount } from './components/core/solid-agent/SolidAgentMount';
 export { SolidAgentMarkdown, SolidAgentCopyButton } from './components/core/solid-agent/SolidAgentMarkdown';
 export { SolidAgentChatItem, getDefaultChatWidgetName } from './components/core/solid-agent/thread/SolidAgentChatItem';

@@ -6,6 +6,7 @@ import { deleteSession, fetchSessionList, type AgentSessionSummary } from "./cli
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
 import type { AgentAttachment, AgentMode, AgentRuntimeType } from "./types";
+import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
 import { AgentSignIn } from "./AgentSignIn";
@@ -15,6 +16,7 @@ type Props = {
     agentUrl: string;
     /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
     agentRuntime?: AgentRuntimeType;
+    inputContext?: AgentInputContext;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
     embedded?: boolean;
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
@@ -41,6 +43,7 @@ function formatDate(iso: string | null) {
 export function SolidAgentChat({
     agentUrl,
     agentRuntime = "solidx",
+    inputContext = {},
     embedded = false,
     // SDK prefill goes through the shared "solidx" conversation only.
     handlesPrefill = !embedded && agentRuntime === "solidx",
@@ -62,9 +65,9 @@ export function SolidAgentChat({
         const { prompt, autoSend, context, nonce } = agent.prefill;
         dispatch(agentPrefillConsumed());
         setShowHistory(false);
-        if (autoSend) runtime.sendMessage(prompt, context);
+        if (autoSend) runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) });
         else setSeed({ text: prompt, key: nonce });
-    }, [agent.prefill, handlesPrefill, dispatch, runtime]);
+    }, [agent.prefill, handlesPrefill, dispatch, runtime, inputContext]);
 
     useEffect(() => {
         if (!showHistory || !signedIn) return;
@@ -76,10 +79,10 @@ export function SolidAgentChat({
     }, [showHistory, agentUrl, signedIn]);
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
-    const send = useCallback((text: string) => runtime?.sendMessage(text), [runtime]);
+    const send = useCallback((text: string) => runtime?.sendMessage(text, inputContext), [runtime, inputContext]);
     const sendWithAttachments = useCallback(
-        (text: string, attachments: AgentAttachment[]) => runtime?.sendMessage(text, undefined, attachments),
-        [runtime],
+        (text: string, attachments: AgentAttachment[]) => runtime?.sendMessage(text, inputContext, attachments),
+        [runtime, inputContext],
     );
     const offline = agent.connection === "reconnecting" || agent.connection === "offline";
     const statusColor = agent.connection === "open" ? (agent.working ? "#eab308" : "#22c55e") : offline ? "#dc2626" : "#94a3b8";

@@ -3,6 +3,7 @@ import styles from "./SolidAgent.module.css";
 import { SolidAgentChat } from "./SolidAgentChat";
 import { useAgentAvailability } from "./useAgentAvailability";
 import type { AgentRuntimeType } from "./types";
+import { useAdminInputContext, type AgentInputContext } from "./useAdminInputContext";
 
 type Props = {
     /**
@@ -10,6 +11,8 @@ type Props = {
      * launcher's conversation) or "agentHub" (setting solidxAgentHubBackendUrl, its own conversation).
      */
     agentRuntime?: AgentRuntimeType;
+    /** Additional key/value context sent with each message to the agent. */
+    inputContext?: AgentInputContext;
     /** Container height; the chat fills it. */
     height?: number | string;
     suggestions?: string[];
@@ -22,8 +25,10 @@ const AGENT_LABEL: Record<AgentRuntimeType, string> = { solidx: "SolidX Agent", 
  * The agent chat rendered inside a page (a tab or form widget) instead of the floating window.
  * With agentRuntime "solidx" it shares the same connection and thread as the launcher.
  */
-export function SolidAgentEmbedded({ agentRuntime = "solidx", height = 560, suggestions, className }: Props) {
+export function SolidAgentEmbedded({ agentRuntime = "solidx", inputContext: suppliedInputContext, height = 560, suggestions, className }: Props) {
     const { ready, enabled, agentUrls, canUse } = useAgentAvailability();
+    const inferredInputContext = useAdminInputContext();
+    const inputContext = { ...inferredInputContext, ...(suppliedInputContext ?? {}) };
     if (!ready) return null;
     const agentUrl = agentUrls[agentRuntime] ?? null;
     if (!enabled || !canUse) {
@@ -42,7 +47,7 @@ export function SolidAgentEmbedded({ agentRuntime = "solidx", height = 560, sugg
             style={{ height, display: "flex", flexDirection: "column", border: "1px solid var(--solid-agent-border)", borderRadius: 12, overflow: "hidden", background: "var(--solid-agent-bg)" }}
         >
             {/* key: switching type remounts the chat onto the other backend's conversation. */}
-            <SolidAgentChat key={agentRuntime} agentUrl={agentUrl} agentRuntime={agentRuntime} embedded suggestions={suggestions} />
+            <SolidAgentChat key={agentRuntime} agentUrl={agentUrl} agentRuntime={agentRuntime} inputContext={inputContext} embedded suggestions={suggestions} />
         </div>
     );
 }

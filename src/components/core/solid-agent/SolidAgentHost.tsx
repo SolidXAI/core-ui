@@ -5,6 +5,7 @@ import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentOpenRequested, type AgentState } from "../../../redux/features/agentSlice";
 import { SolidAgentChat } from "./SolidAgentChat";
 import { useAgentAvailability } from "./useAgentAvailability";
+import { useAdminInputContext } from "./useAdminInputContext";
 
 const PREFS_KEY = "solid-agent.window";
 const MIN_DOCK = 360;
@@ -36,6 +37,7 @@ function writePrefs(prefs: { dockWidth: number }) {
 export default function SolidAgentHost() {
     const dispatch = useDispatch();
     const { ready, enabled, agentUrl, canUse } = useAgentAvailability();
+    const inputContext = useAdminInputContext();
     const agent = useSelector((state: any) => state.solidAgent as AgentState | undefined);
     const [dockWidth, setDockWidth] = useState(() => readPrefs().dockWidth);
     const windowRef = useRef<HTMLDivElement>(null);
@@ -121,7 +123,7 @@ export default function SolidAgentHost() {
                     }}
                 >
                     {mode === "docked" && <div className={styles.resizeHandle} onPointerDown={startResize} aria-hidden="true" />}
-                    <SolidAgentChat agentUrl={agentUrl} />
+                    <SolidAgentChat agentUrl={agentUrl} inputContext={inputContext} />
                 </div>
             ) : (
                 <button type="button" className={styles.bubble} onClick={toggle} aria-label="Open the SolidX Agent (Ctrl+J)" title="SolidX Agent (Ctrl+J)">
