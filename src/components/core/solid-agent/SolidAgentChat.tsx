@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { History, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import { deleteSession, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
@@ -7,6 +7,9 @@ import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
 import type { AgentAttachment, AgentMode, AgentType } from "./types";
 import { useAgentChat } from "./useAgentChat";
+import { useAgentAuth } from "./useAgentAuth";
+import { AgentSignIn } from "./AgentSignIn";
+import { clearAgentAuth } from "./client/agentAuth";
 
 type Props = {
     agentUrl: string;
@@ -44,6 +47,10 @@ export function SolidAgentChat({
     suggestions = DEFAULT_SUGGESTIONS,
 }: Props) {
     const { agent, dispatch, runtime } = useAgentChat(agentType, agentUrl);
+    // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
+    const agentAuth = useAgentAuth(agentUrl);
+    const signedIn = agentAuth.status === "signedIn";
+    const signedInAs = agentAuth.auth?.user?.email ?? agentAuth.auth?.user?.username;
 
     const [showHistory, setShowHistory] = useState(false);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
@@ -60,13 +67,13 @@ export function SolidAgentChat({
     }, [agent.prefill, handlesPrefill, dispatch, runtime]);
 
     useEffect(() => {
-        if (!showHistory) return;
+        if (!showHistory || !signedIn) return;
         let alive = true;
         fetchSessionList(agentUrl).then((list) => alive && setSessions(list ?? []));
         return () => {
             alive = false;
         };
-    }, [showHistory, agentUrl]);
+    }, [showHistory, agentUrl, signedIn]);
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const send = useCallback((text: string) => runtime?.sendMessage(text), [runtime]);
@@ -77,7 +84,8 @@ export function SolidAgentChat({
     const offline = agent.connection === "reconnecting" || agent.connection === "offline";
     const statusColor = agent.connection === "open" ? (agent.working ? "#eab308" : "#22c55e") : offline ? "#dc2626" : "#94a3b8";
     const statusText =
-        agent.connection === "open" ? (agent.working ? "Working…" : "Ready")
+        agentAuth.status === "signedOut" ? "Sign in required"
+        : agent.connection === "open" ? (agent.working ? "Working…" : "Ready")
         : agent.connection === "connecting" ? "Connecting…"
         : offline ? "Reconnecting…" : "Idle";
 
@@ -109,19 +117,32 @@ export function SolidAgentChat({
                     <strong>SolidX Agent</strong>
                     <span className={styles.headerSub}>{statusText}</span>
                 </div>
-                <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime?.newChat(); setShowHistory(false); }}>
-                    <Plus size={16} />
-                </button>
-                <button
-                    type="button"
-                    className={styles.iconBtn}
-                    title="History"
-                    aria-label="Chat history"
-                    aria-pressed={showHistory}
-                    onClick={() => setShowHistory((v) => !v)}
-                >
-                    <History size={16} />
-                </button>
+                {signedIn && (
+                    <>
+                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime?.newChat(); setShowHistory(false); }}>
+                            <Plus size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.iconBtn}
+                            title="History"
+                            aria-label="Chat history"
+                            aria-pressed={showHistory}
+                            onClick={() => setShowHistory((v) => !v)}
+                        >
+                            <History size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            className={styles.iconBtn}
+                            title={signedInAs ? `Sign out of the agent (${String(signedInAs)})` : "Sign out of the agent"}
+                            aria-label="Sign out of the agent"
+                            onClick={() => { setShowHistory(false); clearAgentAuth(agentUrl); }}
+                        >
+                            <LogOut size={15} />
+                        </button>
+                    </>
+                )}
                 {!embedded && (
                     <>
                         {agent.mode !== "docked" && (
@@ -145,72 +166,81 @@ export function SolidAgentChat({
                 )}
             </div>
 
-            {offline && (
-                <div className={styles.banner} role="status">
-                    <WifiOff size={14} /> Reconnecting to the agent… Your messages will be sent once it is back.
-                </div>
-            )}
-            {agent.authError && (
-                <div className={`${styles.banner} ${styles.bannerError}`} role="alert">
-                    {agent.authError}
-                </div>
-            )}
-
-            {showHistory ? (
-                <div className={styles.historyPanel} aria-label="Past conversations">
-                    {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
-                    {sessions.map((session) => (
-                        <div key={session.session_id} style={{ display: "flex", alignItems: "center" }}>
-                            <button
-                                type="button"
-                                className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
-                                onClick={() => {
-                                    runtime?.resume(session.session_id);
-                                    setShowHistory(false);
-                                }}
-                            >
-                                <span className={styles.historyPreview}>{session.preview || "New conversation"}</span>
-                                <span className={styles.historyDate}>{formatDate(session.created_at)}</span>
-                            </button>
-                            <button
-                                type="button"
-                                className={styles.iconBtn}
-                                aria-label="Delete conversation"
-                                title="Delete"
-                                onClick={async () => {
-                                    if (!window.confirm("Delete this conversation?")) return;
-                                    await deleteSession(agentUrl, session.session_id);
-                                    setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
-                                    if (session.session_id === agent.historySessionId) runtime?.newChat();
-                                }}
-                            >
-                                <Trash2 size={14} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
+            {agentAuth.status === "checking" ? (
+                <div style={{ flex: "1 1 auto" }} />
+            ) : agentAuth.status === "signedOut" ? (
+                // The agent forgot the token (expired/restarted) if it already reported an auth error.
+                <AgentSignIn agentUrl={agentUrl} expired={!!agent.authError} />
             ) : (
-                <AgentThread
-                    items={agent.items}
-                    thinking={agent.working && agent.thinking}
-                    hasMore={agent.hasMoreHistory}
-                    context={agent.context ?? undefined}
-                    emptyState={empty}
-                    onLoadOlder={() => void runtime?.loadOlder()}
-                    onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value)}
-                    onPrompt={send}
-                />
-            )}
+                <>
+                {offline && (
+                    <div className={styles.banner} role="status">
+                        <WifiOff size={14} /> Reconnecting to the agent… Your messages will be sent once it is back.
+                    </div>
+                )}
+                {agent.authError && (
+                    <div className={`${styles.banner} ${styles.bannerError}`} role="alert">
+                        {agent.authError}
+                    </div>
+                )}
 
-            <AgentComposer
-                working={agent.working}
-                disabled={!!agent.authError}
-                commands={agent.commands}
-                seed={seed?.text}
-                seedKey={seed?.key}
-                onSend={sendWithAttachments}
-                onStop={() => runtime?.cancel()}
-            />
+                {showHistory ? (
+                    <div className={styles.historyPanel} aria-label="Past conversations">
+                        {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
+                        {sessions.map((session) => (
+                            <div key={session.session_id} style={{ display: "flex", alignItems: "center" }}>
+                                <button
+                                    type="button"
+                                    className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
+                                    onClick={() => {
+                                        runtime?.resume(session.session_id);
+                                        setShowHistory(false);
+                                    }}
+                                >
+                                    <span className={styles.historyPreview}>{session.preview || "New conversation"}</span>
+                                    <span className={styles.historyDate}>{formatDate(session.created_at)}</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.iconBtn}
+                                    aria-label="Delete conversation"
+                                    title="Delete"
+                                    onClick={async () => {
+                                        if (!window.confirm("Delete this conversation?")) return;
+                                        await deleteSession(agentUrl, session.session_id);
+                                        setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
+                                        if (session.session_id === agent.historySessionId) runtime?.newChat();
+                                    }}
+                                >
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <AgentThread
+                        items={agent.items}
+                        thinking={agent.working && agent.thinking}
+                        hasMore={agent.hasMoreHistory}
+                        context={agent.context ?? undefined}
+                        emptyState={empty}
+                        onLoadOlder={() => void runtime?.loadOlder()}
+                        onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value)}
+                        onPrompt={send}
+                    />
+                )}
+
+                <AgentComposer
+                    working={agent.working}
+                    disabled={!!agent.authError}
+                    commands={agent.commands}
+                    seed={seed?.text}
+                    seedKey={seed?.key}
+                    onSend={sendWithAttachments}
+                    onStop={() => runtime?.cancel()}
+                />
+                </>
+            )}
         </>
     );
 }

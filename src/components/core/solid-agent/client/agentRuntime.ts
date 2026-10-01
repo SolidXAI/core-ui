@@ -11,6 +11,7 @@ import { historyToItems, normalizeAgentFrame } from "../agentEvents";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { AgentEventTypes, type AgentType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
+import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
 
@@ -202,8 +203,9 @@ export function getAgentRuntime(): AgentRuntime | null {
     return runtime;
 }
 
-/** Closes the connection (e.g. on logout). */
+/** Closes the connection and forgets this tab's agent logins (e.g. on logout). */
 export function disposeAgentRuntime() {
     runtime?.dispose();
     runtime = null;
+    clearAllAgentAuth();
 }
