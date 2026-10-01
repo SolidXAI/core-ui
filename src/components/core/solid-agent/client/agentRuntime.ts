@@ -9,34 +9,39 @@ import {
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, normalizeAgentFrame } from "../agentEvents";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
-import { AgentEventTypes, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
+import { AgentEventTypes, type AgentType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
+import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
 
 /**
- * The one live connection to the agent, shared by the floating window and any embedded chat.
- * Owns the AgentSocket, normalises frames to `{ eventType, eventData }`, batches LlmToken
+ * A live connection to one agent backend. The "agent" type is shared by the floating window and
+ * any embedded chat of that type (ensureAgentRuntime); other types get their own runtime per
+ * embedded chat (see useAgentChat). Owns the AgentSocket, normalises frames to `{ eventType, eventData }`, batches LlmToken
  * deltas to one dispatch per animation frame, loads history on session start, and emits the
  * public SDK events on the event bus.
  */
 
-const SESSION_KEY = "solid-agent.session_id";
-
 type Dispatch = (action: any) => any;
 type GetAgentState = () => AgentState | undefined;
 
-function readSessionId(): string | null {
+/** Where each agent type remembers its last session (the "agent" key predates agent types). */
+function sessionKey(agentType: AgentType) {
+    return agentType === "agent" ? "solid-agent.session_id" : `solid-agent.${agentType}.session_id`;
+}
+
+function readSessionId(key: string): string | null {
     try {
-        return localStorage.getItem(SESSION_KEY);
+        return localStorage.getItem(key);
     } catch {
         return null;
     }
 }
 
-function writeSessionId(id: string | null) {
+function writeSessionId(key: string, id: string | null) {
     try {
-        id ? localStorage.setItem(SESSION_KEY, id) : localStorage.removeItem(SESSION_KEY);
+        id ? localStorage.setItem(key, id) : localStorage.removeItem(key);
     } catch {
         // Storage blocked (private mode); the session just won't survive a reload.
     }
@@ -49,8 +54,16 @@ export class AgentRuntime {
     private unsubscribers: Array<() => void> = [];
     private lastContext: AgentContext | undefined;
 
-    constructor(readonly agentUrl: string, private dispatch: Dispatch, private getState: GetAgentState) {
-        this.socket = new AgentSocket(agentUrl, readSessionId());
+    private readonly sessionKey: string;
+
+    constructor(
+        readonly agentUrl: string,
+        private dispatch: Dispatch,
+        private getState: GetAgentState,
+        readonly agentType: AgentType = "agent",
+    ) {
+        this.sessionKey = sessionKey(agentType);
+        this.socket = new AgentSocket(agentUrl, readSessionId(this.sessionKey));
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => this.dispatch(agentConnectionChanged(status))),
@@ -87,7 +100,7 @@ export class AgentRuntime {
             context: this.lastContext,
             widget_reply: { widgetId, value },
         });
-        eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value });
+        eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value, agentType: this.agentType });
     }
 
     cancel() {
@@ -96,14 +109,14 @@ export class AgentRuntime {
     }
 
     newChat() {
-        writeSessionId(null);
+        writeSessionId(this.sessionKey, null);
         this.lastContext = undefined;
         this.dispatch(agentThreadReset());
         this.socket.newSession();
     }
 
     resume(sessionId: string) {
-        writeSessionId(sessionId);
+        writeSessionId(this.sessionKey, sessionId);
         this.dispatch(agentThreadReset());
         this.socket.resume(sessionId);
     }
@@ -150,14 +163,15 @@ export class AgentRuntime {
     private emitSdkEvents(event: AgentChatEvent) {
         if (event.eventType === AgentEventTypes.sessionStarted) {
             const sessionId = event.frame.session_id ?? event.eventData.session_id ?? null;
-            writeSessionId(sessionId);
-            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId });
+            writeSessionId(this.sessionKey, sessionId);
+            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentType });
             const state = this.getState();
             const historyId = event.frame.history_session_id ?? event.eventData.history_session_id ?? sessionId;
             if (state && state.items.length === 0 && historyId) void this.loadHistory(historyId, 1);
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             eventBus.emit(SOLID_AGENT_EVENTS.turnComplete, {
                 sessionId: this.socket.currentSessionId,
+                agentType: this.agentType,
                 content: event.eventData.content ?? event.frame.content,
             });
         }
@@ -177,7 +191,7 @@ export class AgentRuntime {
 
 let runtime: AgentRuntime | null = null;
 
-/** Returns the shared runtime, creating (or re-pointing) it for `agentUrl`. */
+/** Returns the shared "agent" runtime, creating (or re-pointing) it for `agentUrl`. */
 export function ensureAgentRuntime(agentUrl: string, dispatch: Dispatch, getState: GetAgentState): AgentRuntime {
     if (runtime && runtime.agentUrl === agentUrl) return runtime;
     runtime?.dispose();
@@ -189,8 +203,9 @@ export function getAgentRuntime(): AgentRuntime | null {
     return runtime;
 }
 
-/** Closes the connection (e.g. on logout). */
+/** Closes the connection and forgets this tab's agent logins (e.g. on logout). */
 export function disposeAgentRuntime() {
     runtime?.dispose();
     runtime = null;
+    clearAllAgentAuth();
 }

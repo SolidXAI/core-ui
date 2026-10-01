@@ -19,6 +19,12 @@ export type AgentContext = {
 
 export type AgentMode = "bubble" | "compact" | "docked" | "maximized";
 
+/**
+ * Which agent backend a chat talks to: "agent" (setting solidxAgentBackendUrl; the floating
+ * launcher) or "agentHub" (setting solidxAgentHubBackendUrl).
+ */
+export type AgentType = "agent" | "agentHub";
+
 export type AgentConnection = "idle" | "connecting" | "open" | "reconnecting" | "offline";
 
 /** A slash command advertised by the agent in `session_started`. */

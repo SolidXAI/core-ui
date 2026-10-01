@@ -185,7 +185,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
                 value={text}
                 disabled={disabled}
                 aria-label="Message the SolidX Agent"
-                placeholder={dragging ? "Drop files to attach" : placeholder ?? "Ask the agent… (/ for commands)"}
+                placeholder={dragging ? "Drop files to attach" : placeholder ?? "Ask the agent…"}
                 onChange={(event) => {
                     setText(event.target.value);
                     setActive(0);

@@ -1,12 +1,15 @@
-import { getSession } from "../../../../adapters/auth/getSession";
 import type { AgentAction, AgentConnection, AgentWireFrame } from "../types";
+import { clearAgentAuth, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
+import { toWsUrl } from "./agentUrls";
+
+export { toHttpBase, toWsUrl } from "./agentUrls";
 
 /**
  * WebSocket client for the SolidX Agent (`<agentUrl>/ws/agent`).
  *
  * Held outside Redux because sockets are not serializable; the host wires its listeners to
- * dispatch into agentSlice. Every outbound frame carries the admin app's `accessToken` and
- * `user_id` (the agent validates the token against solid-api `/iam/me`). Unexpected closes
+ * dispatch into agentSlice. Every outbound frame carries the `agentToken` from the agent login
+ * (agentAuth.ts); nothing is sent until the user has signed in with an API key. Unexpected closes
  * reconnect with backoff (1s, 2s, 4s, then 15s) and re-send `resume_session`; frames sent
  * while disconnected are queued and flushed once the session is re-established.
  */
@@ -15,14 +18,6 @@ const BACKOFF_MS = [1000, 2000, 4000, 8000, 15000];
 
 type EventListener = (frame: AgentWireFrame) => void;
 type StatusListener = (status: AgentConnection) => void;
-
-export function toHttpBase(url: string): string {
-    return url.trim().replace(/\/$/, "").replace(/^ws(s?):\/\//i, "http$1://");
-}
-
-export function toWsUrl(url: string): string {
-    return `${url.trim().replace(/\/$/, "").replace(/^http(s?):\/\//i, "ws$1://")}/ws/agent`;
-}
 
 export class AgentSocket {
     private ws: WebSocket | null = null;
@@ -36,8 +31,18 @@ export class AgentSocket {
     /** False until the agent confirms the session (session_started) on the current socket. */
     private sessionReady = false;
 
+    private offAuthChange: () => void;
+
     constructor(private agentUrl: string, private initialSessionId: string | null = null) {
         this.sessionId = initialSessionId;
+        // Signing in (or again, after the token expired) starts/resumes the session on the open socket.
+        this.offAuthChange = onAgentAuthChange(agentUrl, () => {
+            if (this.ws?.readyState === WebSocket.OPEN && !this.sessionReady) this.openSession();
+        });
+    }
+
+    private openSession() {
+        void this.sendRaw(this.sessionId ? { action: "resume_session", session_id: this.sessionId } : { action: "start_session" });
     }
 
     get currentSessionId() {
@@ -73,7 +78,7 @@ export class AgentSocket {
             this.attempt = 0;
             this.sessionReady = false;
             this.setStatus("open");
-            void this.sendRaw(this.sessionId ? { action: "resume_session", session_id: this.sessionId } : { action: "start_session" });
+            this.openSession();
         };
 
         ws.onmessage = (message) => {
@@ -90,6 +95,10 @@ export class AgentSocket {
                 this.sessionId = frame.session_id ?? payload?.session_id ?? null;
                 this.sessionReady = true;
                 this.flushQueue();
+            } else if (eventType === "error" && /agent token/i.test(String(payload?.error ?? ""))) {
+                // The agent forgot the token (idle 30 min or restarted): sign in again.
+                this.sessionReady = false;
+                clearAgentAuth(this.agentUrl);
             } else if (eventType === "error" && !this.sessionReady) {
                 // Start/resume failed (e.g. auth); stop holding messages so their errors show.
                 this.sessionReady = true;
@@ -143,7 +152,9 @@ export class AgentSocket {
         else this.connect();
     }
 
+    /** Closes for good (the runtime is being disposed). */
     close() {
+        this.offAuthChange();
         this.closedByUser = true;
         if (this.timer) clearTimeout(this.timer);
         this.timer = null;
@@ -162,13 +173,12 @@ export class AgentSocket {
     }
 
     private async sendRaw(action: AgentAction) {
-        const session = await getSession();
-        const accessToken = session?.user?.accessToken;
-        if (!accessToken || this.ws?.readyState !== WebSocket.OPEN) {
+        const agentToken = (await loadAgentAuth(this.agentUrl))?.agentToken;
+        if (!agentToken || this.ws?.readyState !== WebSocket.OPEN) {
             if (action.action !== "start_session" && action.action !== "resume_session") this.queue.push(action);
             return;
         }
-        this.ws.send(JSON.stringify({ ...action, user_id: (session as any)?.user?.id ?? null, accessToken }));
+        this.ws.send(JSON.stringify({ ...action, agentToken }));
     }
 
     private scheduleReconnect() {

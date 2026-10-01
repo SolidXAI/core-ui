@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import styles from "../SolidAgent.module.css";
 import { AgentEventTypes, type AgentChatItem, type AgentContext } from "../types";
+import { parseWidgetContent } from "./inlineWidget";
+
+export { parseWidgetContent, type InlineChatWidget } from "./inlineWidget";
 
 /** Registry name of the widget that renders an event when `event_data.widget` is absent. */
 export const getDefaultChatWidgetName = (eventType: string): string => {
@@ -29,6 +32,14 @@ export const getDefaultChatWidgetName = (eventType: string): string => {
             return "DefaultUnknownChatWidget";
     }
 };
+
+/** Assistant text events whose content may carry a widget as JSON (see parseWidgetContent). */
+const TEXT_EVENT_TYPES = new Set<string>([
+    AgentEventTypes.llmToken,
+    AgentEventTypes.llmComplete,
+    AgentEventTypes.turnComplete,
+    AgentEventTypes.turnCompleteLegacy,
+]);
 
 type ErrorBoundaryProps = { widget: string; eventData: Record<string, any>; children: React.ReactNode };
 type ErrorBoundaryState = { error: Error | null };
@@ -69,18 +80,25 @@ type SolidAgentChatItemProps = {
 };
 
 /**
- * Renders one thread item. The widget named in `event_data.widget` wins; otherwise the default
- * widget for the event type. Both resolve through the extension registry, so a UI module can
- * register new chat widgets or override a default by registering the same name.
+ * Renders one thread item. The widget named in `event_data.widget` wins; then a widget the agent
+ * sent as its text reply (`{"widgetName", "data"}`, see parseWidgetContent; a reply that does not
+ * parse renders as text, unchanged); otherwise the default widget for the event type. All resolve
+ * through the extension registry, so a UI module can register new chat widgets or override a
+ * default by registering the same name.
  */
 export const SolidAgentChatItem = ({ item, agentContext, onReply, onPrompt }: SolidAgentChatItemProps) => {
-    const widgetName = item.widget ?? getDefaultChatWidgetName(item.eventType);
+    const isText = !item.widget && TEXT_EVENT_TYPES.has(item.eventType);
+    const content = item.eventData?.content;
+    const inline = useMemo(() => (isText ? parseWidgetContent(content) : null), [isText, content]);
+
+    const widgetName = item.widget ?? inline?.widget ?? getDefaultChatWidgetName(item.eventType);
     const DynamicWidget = getExtensionComponent(widgetName) ?? getExtensionComponent("DefaultUnknownChatWidget");
     const widgetId = item.widgetId ?? item.id;
+    const eventData = inline ? inline.data : item.eventData;
 
     const widgetProps: SolidChatWidgetProps = {
         eventType: item.eventType,
-        eventData: item.eventData,
+        eventData,
         widgetId,
         live: !!item.live,
         final: !!item.final,
@@ -91,7 +109,7 @@ export const SolidAgentChatItem = ({ item, agentContext, onReply, onPrompt }: So
     };
 
     return (
-        <SolidChatWidgetErrorBoundary widget={widgetName} eventData={item.eventData}>
+        <SolidChatWidgetErrorBoundary widget={widgetName} eventData={eventData}>
             {DynamicWidget && <DynamicWidget {...widgetProps} />}
         </SolidChatWidgetErrorBoundary>
     );

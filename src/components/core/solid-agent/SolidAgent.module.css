@@ -1,13 +1,28 @@
 /* SolidX Agent chat. Colours come from the active Solid theme (theme-variables.css),
    so light/dark themes need no extra rules here. */
 
+/* The theme's colours, resolved once on :root (where Solid themes declare them) and inherited as
+   finished values. A page area that redefines --foreground/--border/... for its own design
+   system (e.g. testingHub's .th-design uses bare HSL triplets) can't break an embedded chat.
+   The chat CSS (here and widgets/) reads only these, via the --agent-* aliases. */
+:global(:root) {
+  --solid-agent-primary: var(--primary-color, var(--primary, #722ed1));
+  --solid-agent-bg: var(--card, #ffffff);
+  --solid-agent-page: var(--background, #f6f8fc);
+  --solid-agent-fg: var(--foreground, #0f172a);
+  --solid-agent-muted: var(--muted, #64748b);
+  --solid-agent-muted-fg: var(--muted-foreground, #475569);
+  --solid-agent-border: var(--border, #e2e8f0);
+  --solid-agent-accent: var(--accent, #eef2ff);
+}
+
 .root {
-  --agent-primary: var(--primary, #722ed1);
-  --agent-bg: var(--card, #ffffff);
-  --agent-page: var(--background, #f6f8fc);
-  --agent-fg: var(--foreground, #0f172a);
-  --agent-muted: var(--muted, #64748b);
-  --agent-border: var(--border, #e2e8f0);
+  --agent-primary: var(--solid-agent-primary);
+  --agent-bg: var(--solid-agent-bg);
+  --agent-page: var(--solid-agent-page);
+  --agent-fg: var(--solid-agent-fg);
+  --agent-muted: var(--solid-agent-muted);
+  --agent-border: var(--solid-agent-border);
   --agent-tint: color-mix(in srgb, var(--agent-primary) 10%, transparent);
   --agent-ok: #16a34a;
   --agent-warn: #b45309;
@@ -240,6 +255,9 @@
 .textarea:focus { border-color: var(--agent-primary); box-shadow: 0 0 0 3px var(--agent-tint); }
 .textarea:disabled { background: var(--agent-page); cursor: not-allowed; }
 .composerRow { display: flex; align-items: center; gap: 8px; }
+/* Send / Stop sit at the right edge, whatever comes before them in the row. */
+.composerRow > .sendBtn,
+.composerRow > .stopBtn { margin-left: auto; }
 .composerDragging { background: var(--agent-tint); outline: 2px dashed var(--agent-primary); outline-offset: -6px; }
 .iconBtn:disabled { opacity: 0.45; cursor: not-allowed; }
 
@@ -425,3 +443,71 @@
 .linkCard { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--agent-border); border-radius: 10px; color: var(--agent-fg); text-decoration: none; cursor: pointer; background: var(--agent-bg); font: inherit; text-align: left; width: 100%; }
 .linkCard:hover { border-color: var(--agent-primary); }
 .widgetFallback { padding: 10px 12px; border: 1px dashed var(--agent-border); border-radius: 10px; font-size: 12px; color: var(--agent-muted); display: flex; flex-direction: column; gap: 6px; }
+
+/* Agent sign-in (API key → agentToken), shown in place of the thread while signed out. */
+.signIn { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; align-items: center; justify-content: center; padding: 20px 16px; }
+.signInCard {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px;
+  border: 1px solid var(--agent-border);
+  border-radius: 14px;
+  background: var(--agent-bg);
+  color: var(--agent-fg);
+}
+.signInIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--agent-tint);
+  color: var(--agent-primary);
+}
+.signInTitle { font-size: 15px; }
+.signInText { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--agent-muted); }
+.signInLabel { margin-top: 4px; font-size: 12px; font-weight: 600; }
+.signInField {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px 0 10px;
+  border: 1px solid var(--agent-border);
+  border-radius: 10px;
+  background: var(--agent-bg);
+}
+.signInField:focus-within { border-color: var(--agent-primary); box-shadow: 0 0 0 3px var(--agent-tint); }
+.signInInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 36px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--agent-fg);
+  font: inherit;
+  font-size: 13px;
+  font-family: var(--agent-mono);
+}
+.signInCard .banner { border: 0; border-radius: 8px; }
+.signInBtn {
+  height: 36px;
+  border: 0;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--agent-primary);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.signInBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+.signInBtn .spinIcon { color: #fff; }

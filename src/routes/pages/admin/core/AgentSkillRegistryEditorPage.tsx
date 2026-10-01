@@ -339,7 +339,7 @@ export function AgentSkillRegistryEditorPage() {
               <p>Embedded SolidX Agent chat.</p>
             </header>
             <div className="agent-skill-editor__chat">
-              <SolidAgentEmbedded height="100%" />
+              <SolidAgentEmbedded />
             </div>
           </section>
         </div>
