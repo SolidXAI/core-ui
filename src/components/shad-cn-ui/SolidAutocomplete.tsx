@@ -383,26 +383,30 @@ export function SolidAutocomplete({
         <div className="solid-autocomplete-manager-panel">
           <div className="solid-autocomplete-manager-header">
             <div className="solid-autocomplete-manager-title">Selected ({selectedItems.length})</div>
-            <button type="button" className="solid-autocomplete-manager-clear" onClick={clearAllSelected}>
-              Clear all
-            </button>
+            {!(disabled || readOnly) && (
+              <button type="button" className="solid-autocomplete-manager-clear" onClick={clearAllSelected}>
+                Clear all
+              </button>
+            )}
           </div>
           <div className="solid-autocomplete-manager-body">
             {selectedItems.map((item, index) => (
               <span key={`managed-${toItemKey(item, index)}`} className="solid-autocomplete-chip">
                 <span className="solid-autocomplete-chip-label">{getDisplayValue(item, field)}</span>
-                <button
-                  type="button"
-                  className="solid-autocomplete-chip-remove"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => {
-                    onUnselect?.({ value: item });
-                    removeSelectedAt(index);
-                  }}
-                  aria-label="Remove selection"
-                >
-                  <X size={12} />
-                </button>
+                {!(disabled || readOnly) && (
+                  <button
+                    type="button"
+                    className="solid-autocomplete-chip-remove"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      onUnselect?.({ value: item });
+                      removeSelectedAt(index);
+                    }}
+                    aria-label="Remove selection"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
               </span>
             ))}
           </div>
