@@ -161,10 +161,8 @@
 }
 
 .agent-skill-editor__skill {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 1rem;
-  min-height: 42rem;
+  width: 100%;
+  min-width: 0;
 }
 
 .agent-skill-editor__panel {
@@ -188,7 +186,6 @@
 
 .agent-skill-editor__code {
   flex: 1;
-  min-height: 36rem;
   border: 0 !important;
   border-radius: 0 !important;
 }
@@ -196,12 +193,6 @@
 .agent-skill-editor__code--invalid {
   border: 1px solid #ef4444 !important;
   box-shadow: 0 0 0 1px #fecaca inset;
-}
-
-.agent-skill-editor__chat {
-  flex: 1;
-  min-height: 36rem;
-  padding: 0.75rem;
 }
 
 .agent-skill-editor__agent-grid {
@@ -248,10 +239,6 @@
 }
 
 @media (max-width: 900px) {
-  .agent-skill-editor__skill {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .agent-skill-editor__fields {
     flex-direction: column;
   }

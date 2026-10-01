@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
-import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
+import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import {
   SolidButton,
   SolidCodeEditor,
@@ -138,6 +138,7 @@ export function AgentSkillRegistryEditorPage() {
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagDraft, setTagDraft] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+  const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
 
   React.useEffect(() => {
     setName(record?.name ?? "");
@@ -191,6 +192,7 @@ export function AgentSkillRegistryEditorPage() {
           summary: "Saved",
           detail: "Skill updated successfully.",
         }));
+        setAuditRefreshVersion((version) => version + 1);
         refetch();
       } else {
         const result: any = await createSkill(payload).unwrap();
@@ -319,7 +321,7 @@ export function AgentSkillRegistryEditorPage() {
           <section className="agent-skill-editor__panel">
             <header>
               <h2>Skill instructions <b>*</b></h2>
-              <p>Write the skill body in Markdown.</p>
+              <p>Write the skill's Markdown body here.</p>
             </header>
             <SolidCodeEditor
               value={body}
@@ -328,19 +330,11 @@ export function AgentSkillRegistryEditorPage() {
                 setFieldErrors((current) => ({ ...current, body: "" }));
               }}
               language="markdown"
-              height="100%"
+              fontSize={12}
+              height="max(32rem, calc(100dvh - 18rem))"
               className={`agent-skill-editor__code${fieldErrors.body ? " agent-skill-editor__code--invalid" : ""}`}
             />
             {fieldErrors.body && <small className="agent-skill-editor__field-error agent-skill-editor__body-error">{fieldErrors.body}</small>}
-          </section>
-          <section className="agent-skill-editor__panel">
-            <header>
-              <h2>Agent interface preview</h2>
-              <p>Embedded SolidX Agent chat.</p>
-            </header>
-            <div className="agent-skill-editor__chat">
-              <SolidAgentEmbedded />
-            </div>
           </section>
         </div>
       ),
@@ -392,6 +386,22 @@ export function AgentSkillRegistryEditorPage() {
 
       {isLoading ? (
         <div className="agent-skill-editor__loading">Loading skill…</div>
+      ) : record?.id ? (
+        <AgentRegistryAuditPanel
+          modelSingularName="agentSkillRegistry"
+          recordId={record.id}
+          refreshVersion={auditRefreshVersion}
+          modelUserKey={record.name}
+        >
+          <SolidTabGroup
+            tabs={tabs}
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="agent-skill-editor__tabs"
+            listClassName="agent-skill-editor__tab-list"
+            panelClassName="agent-skill-editor__tab-panel"
+          />
+        </AgentRegistryAuditPanel>
       ) : (
         <SolidTabGroup
           tabs={tabs}

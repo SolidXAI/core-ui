@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
-import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
+import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { SolidButton, SolidCodeEditor, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import "./AgentToolRegistryEditorPage.css";
 
@@ -90,6 +90,7 @@ export function AgentToolRegistryEditorPage() {
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagDraft, setTagDraft] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+  const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
 
   React.useEffect(() => {
     setName(record?.name ?? "");
@@ -127,6 +128,7 @@ export function AgentToolRegistryEditorPage() {
       if (record?.id) {
         await updateTool({ id: record.id, data: payload }).unwrap();
         dispatch(showToast({ severity: "success", summary: "Saved", detail: "Tool updated successfully." }));
+        setAuditRefreshVersion((version) => version + 1);
         refetch();
       } else {
         const result: any = await createTool(payload).unwrap();
@@ -180,13 +182,9 @@ export function AgentToolRegistryEditorPage() {
     </div> },
     { value: "tool", label: "Tool", content: <div className="agent-tool-editor__tool">
       <section className="agent-tool-editor__panel">
-        <header><h2>Tool source code <b>*</b></h2><p>Write the tool implementation in Python.</p></header>
-        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" height="100%" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
+        <header><h2>Tool source code <b>*</b></h2><p>Write the tool's Python code here.</p></header>
+        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" fontSize={12} height="max(32rem, calc(100dvh - 18rem))" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
         {fieldErrors.sourceCode && <small className="agent-tool-editor__field-error agent-tool-editor__code-error">{fieldErrors.sourceCode}</small>}
-      </section>
-      <section className="agent-tool-editor__panel">
-        <header><h2>Agent interface preview</h2><p>Embedded SolidX Agent chat.</p></header>
-        <div className="agent-tool-editor__chat"><SolidAgentEmbedded /></div>
       </section>
     </div> },
     { value: "agents", label: "Agents", content: <section className="agent-tool-editor__agents"><div><h2>Associated agents</h2><p>Agents linked to this tool. Associations are read-only here.</p></div>
@@ -199,6 +197,10 @@ export function AgentToolRegistryEditorPage() {
       <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
       <SolidButton loading={isCreating || isSaving} onClick={save}>Save Tool</SolidButton>
     </div></header>
-    {isLoading ? <div className="agent-tool-editor__loading">Loading tool…</div> : <SolidTabGroup tabs={tabs} value={activeTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />}
+    {isLoading ? <div className="agent-tool-editor__loading">Loading tool…</div> : record?.id ? (
+      <AgentRegistryAuditPanel modelSingularName="agentToolRegistry" recordId={record.id} refreshVersion={auditRefreshVersion} modelUserKey={record.name}>
+        <SolidTabGroup tabs={tabs} value={activeTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />
+      </AgentRegistryAuditPanel>
+    ) : <SolidTabGroup tabs={tabs} value={activeTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />}
   </main>;
 }

@@ -21,17 +21,16 @@
 .agent-tool-editor__tag-input>input { flex:1 1 12rem; min-width:10rem; border:0; outline:0; color:inherit; background:transparent; font:inherit; font-weight:400; }
 .agent-tool-editor__tag { display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .35rem .25rem .7rem; border-radius:999px; color:var(--primary-color,var(--primary)); background:color-mix(in srgb,var(--primary-color,var(--primary)) 11%,transparent); font-size:.78rem; font-weight:500; }
 .agent-tool-editor__tag button { display:inline-grid; width:1.25rem; height:1.25rem; place-items:center; border:0; border-radius:50%; color:inherit; background:transparent; cursor:pointer; }
-.agent-tool-editor__tool { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:1rem; min-height:42rem; }
+.agent-tool-editor__tool { width:100%; min-width:0; }
 .agent-tool-editor__panel { display:flex; flex-direction:column; min-width:0; overflow:hidden; border:1px solid var(--surface-border,var(--border)); border-radius:.75rem; }
 .agent-tool-editor__panel header { padding:.9rem 1rem; border-bottom:1px solid var(--surface-border,var(--border)); }
 .agent-tool-editor__tool h2,.agent-tool-editor__agents h2 { font-size:1rem; }
-.agent-tool-editor__code { flex:1; min-height:36rem; border:0!important; border-radius:0!important; }
+.agent-tool-editor__code { flex:1; border:0!important; border-radius:0!important; }
 .agent-tool-editor__code--invalid { border:1px solid #ef4444!important; box-shadow:0 0 0 1px #fecaca inset; }
-.agent-tool-editor__chat { flex:1; min-height:36rem; padding:.75rem; }
 .agent-tool-editor__agent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); gap:.75rem; }
 .agent-tool-editor__agent-card { gap:.75rem; min-height:4.5rem; padding:.85rem 1rem; border:1px solid var(--surface-border,var(--border)); border-radius:.7rem; background:var(--surface-ground,var(--background)); }
 .agent-tool-editor__agent-card>span { display:grid; width:2.4rem; height:2.4rem; flex:0 0 auto; place-items:center; border-radius:50%; color:var(--primary-color,var(--primary)); background:color-mix(in srgb,var(--primary-color,var(--primary)) 12%,transparent); font-weight:700; }
 .agent-tool-editor__agent-card strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.9rem; }
 .agent-tool-editor__empty,.agent-tool-editor__loading { padding:2.5rem 1rem; border:1px dashed var(--surface-border,var(--border)); border-radius:.75rem; color:var(--text-color-secondary,var(--muted-foreground)); text-align:center; }
-@media(max-width:900px) { .agent-tool-editor__fields { flex-direction:column; } .agent-tool-editor__tool { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:900px) { .agent-tool-editor__fields { flex-direction:column; } }
 @media(max-width:600px) { .agent-tool-editor { padding:1rem; } .agent-tool-editor__header { align-items:flex-start; flex-direction:column; } .agent-tool-editor__actions { width:100%; } }
