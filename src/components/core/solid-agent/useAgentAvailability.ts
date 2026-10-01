@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { solidGet } from "../../../http/solidHttp";
 import { getSettingsMap } from "../../../helpers/settingsPayload";
-import type { AgentType } from "./types";
+import type { AgentRuntimeType } from "./types";
 
 export type AgentAvailability = {
     ready: boolean;
     enabled: boolean;
-    /** Backend URL of the "agent" type (the floating launcher). */
+    /** Backend URL of the "solidx" runtime (the floating launcher). */
     agentUrl: string | null;
     /** Backend URL per agent type; null when that backend is not configured. */
-    agentUrls: Record<AgentType, string | null>;
+    agentUrls: Record<AgentRuntimeType, string | null>;
     canUse: boolean;
 };
 
-const NO_URLS: Record<AgentType, string | null> = { agent: null, agentHub: null };
+const NO_URLS: Record<AgentRuntimeType, string | null> = { solidx: null, agentHub: null };
 const UNAVAILABLE: AgentAvailability = { ready: true, enabled: false, agentUrl: null, agentUrls: NO_URLS, canUse: false };
 
 /** Settings key holding each agent type's backend URL (see solid-core default settings). */
-const URL_SETTING: Record<AgentType, string> = {
-    agent: "solidxAgentBackendUrl",
+const URL_SETTING: Record<AgentRuntimeType, string> = {
+    solidx: "solidxAgentBackendUrl",
     agentHub: "solidxAgentHubBackendUrl",
 };
 
@@ -42,12 +42,12 @@ async function loadAvailability(): Promise<AgentAvailability> {
     const [settingsRes, meRes] = await Promise.all([solidGet("/setting/wrapped"), solidGet("/iam/me")]);
     const settings = getSettingsMap(settingsRes?.data);
     const enabled = settings.solidAgentEnabled === true || settings.solidAgentEnabled === "true";
-    const agentUrls: Record<AgentType, string | null> = {
-        agent: urlSetting(settings[URL_SETTING.agent]),
+    const agentUrls: Record<AgentRuntimeType, string | null> = {
+        solidx: urlSetting(settings[URL_SETTING.solidx]),
         agentHub: urlSetting(settings[URL_SETTING.agentHub]),
     };
     const canUse = unwrapUser(meRes?.data)?.canUseAgent === true;
-    return { ready: true, enabled, agentUrl: agentUrls.agent, agentUrls, canUse };
+    return { ready: true, enabled, agentUrl: agentUrls.solidx, agentUrls, canUse };
 }
 
 /**

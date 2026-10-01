@@ -593,6 +593,7 @@ export type {
     AgentChatItem,
     AgentContext,
     AgentMode,
+    AgentRuntimeType,
     AgentType,
     SolidAgentOpenOptions,
 } from './components/core/solid-agent/types';

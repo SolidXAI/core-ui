@@ -5,7 +5,7 @@ import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/
 import { deleteSession, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
-import type { AgentAttachment, AgentMode, AgentType } from "./types";
+import type { AgentAttachment, AgentMode, AgentRuntimeType } from "./types";
 import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
 import { AgentSignIn } from "./AgentSignIn";
@@ -13,8 +13,8 @@ import { clearAgentAuth } from "./client/agentAuth";
 
 type Props = {
     agentUrl: string;
-    /** Which agent backend `agentUrl` belongs to (default "agent", shared with the launcher). */
-    agentType?: AgentType;
+    /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
+    agentRuntime?: AgentRuntimeType;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
     embedded?: boolean;
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
@@ -40,13 +40,13 @@ function formatDate(iso: string | null) {
 
 export function SolidAgentChat({
     agentUrl,
-    agentType = "agent",
+    agentRuntime = "solidx",
     embedded = false,
-    // SDK prefill goes through the shared "agent" conversation only.
-    handlesPrefill = !embedded && agentType === "agent",
+    // SDK prefill goes through the shared "solidx" conversation only.
+    handlesPrefill = !embedded && agentRuntime === "solidx",
     suggestions = DEFAULT_SUGGESTIONS,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentType, agentUrl);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl);
     const signedIn = agentAuth.status === "signedIn";

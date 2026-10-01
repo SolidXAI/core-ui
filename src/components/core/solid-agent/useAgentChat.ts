@@ -2,28 +2,28 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useDispatch, useSelector, useStore } from "react-redux";
 import agentReducer, { type AgentState } from "../../../redux/features/agentSlice";
 import { AgentRuntime, ensureAgentRuntime } from "./client/agentRuntime";
-import type { AgentType } from "./types";
+import type { AgentRuntimeType } from "./types";
 
 type Dispatch = (action: any) => any;
 
 export type AgentChatBinding = {
     agent: AgentState;
     dispatch: Dispatch;
-    /** Null only for a non-"agent" chat during its first render, before its connection opens. */
+    /** Null only for an "agentHub" chat during its first render, before its connection opens. */
     runtime: AgentRuntime | null;
 };
 
 /**
  * The state and connection a chat renders from.
  *
- * - "agent": the store's `solidAgent` slice and the shared runtime, so the floating launcher
- *   and any embedded "agent" chat show the same conversation.
- * - Any other type (e.g. "agentHub"): a private thread, reduced by the same agentSlice reducer,
+ * - "solidx": the store's `solidAgent` slice and the shared runtime, so the floating launcher
+ *   and any embedded "solidx" chat show the same conversation.
+ * - "agentHub": a private thread, reduced by the same agentSlice reducer,
  *   and its own runtime, opened on mount and closed on unmount. It never touches the
  *   launcher's conversation.
  */
-export function useAgentChat(agentType: AgentType, agentUrl: string): AgentChatBinding {
-    const shared = agentType === "agent";
+export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string): AgentChatBinding {
+    const shared = agentRuntime === "solidx";
 
     const storeDispatch = useDispatch();
     const store = useStore();
@@ -41,13 +41,13 @@ export function useAgentChat(agentType: AgentType, agentUrl: string): AgentChatB
     const [localRuntime, setLocalRuntime] = useState<AgentRuntime | null>(null);
     useEffect(() => {
         if (shared) return;
-        const runtime = new AgentRuntime(agentUrl, localDispatch, () => localState.current, agentType);
+        const runtime = new AgentRuntime(agentUrl, localDispatch, () => localState.current, agentRuntime);
         setLocalRuntime(runtime);
         return () => {
             runtime.dispose();
             setLocalRuntime(null);
         };
-    }, [shared, agentUrl, agentType, localDispatch]);
+    }, [shared, agentUrl, agentRuntime, localDispatch]);
 
     if (shared) {
         const runtime = ensureAgentRuntime(agentUrl, storeDispatch, () => (store.getState() as any).solidAgent);

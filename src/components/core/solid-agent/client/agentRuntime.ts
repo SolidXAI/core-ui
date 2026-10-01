@@ -9,14 +9,14 @@ import {
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, normalizeAgentFrame } from "../agentEvents";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
-import { AgentEventTypes, type AgentType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
+import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
 import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
 
 /**
- * A live connection to one agent backend. The "agent" type is shared by the floating window and
+ * A live connection to one agent backend. The "solidx" runtime is shared by the floating window and
  * any embedded chat of that type (ensureAgentRuntime); other types get their own runtime per
  * embedded chat (see useAgentChat). Owns the AgentSocket, normalises frames to `{ eventType, eventData }`, batches LlmToken
  * deltas to one dispatch per animation frame, loads history on session start, and emits the
@@ -26,9 +26,9 @@ import { AgentSocket } from "./agentSocket";
 type Dispatch = (action: any) => any;
 type GetAgentState = () => AgentState | undefined;
 
-/** Where each agent type remembers its last session (the "agent" key predates agent types). */
-function sessionKey(agentType: AgentType) {
-    return agentType === "agent" ? "solid-agent.session_id" : `solid-agent.${agentType}.session_id`;
+/** Keep the original SolidX storage key; Agent Hub has its own key. */
+function sessionKey(agentRuntime: AgentRuntimeType) {
+    return agentRuntime === "solidx" ? "solid-agent.session_id" : `solid-agent.${agentRuntime}.session_id`;
 }
 
 function readSessionId(key: string): string | null {
@@ -60,9 +60,9 @@ export class AgentRuntime {
         readonly agentUrl: string,
         private dispatch: Dispatch,
         private getState: GetAgentState,
-        readonly agentType: AgentType = "agent",
+        readonly agentRuntime: AgentRuntimeType = "solidx",
     ) {
-        this.sessionKey = sessionKey(agentType);
+        this.sessionKey = sessionKey(agentRuntime);
         this.socket = new AgentSocket(agentUrl, readSessionId(this.sessionKey));
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
@@ -100,7 +100,7 @@ export class AgentRuntime {
             context: this.lastContext,
             widget_reply: { widgetId, value },
         });
-        eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value, agentType: this.agentType });
+        eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value, agentType: this.agentRuntime });
     }
 
     cancel() {
@@ -164,14 +164,14 @@ export class AgentRuntime {
         if (event.eventType === AgentEventTypes.sessionStarted) {
             const sessionId = event.frame.session_id ?? event.eventData.session_id ?? null;
             writeSessionId(this.sessionKey, sessionId);
-            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentType });
+            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentRuntime });
             const state = this.getState();
             const historyId = event.frame.history_session_id ?? event.eventData.history_session_id ?? sessionId;
             if (state && state.items.length === 0 && historyId) void this.loadHistory(historyId, 1);
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             eventBus.emit(SOLID_AGENT_EVENTS.turnComplete, {
                 sessionId: this.socket.currentSessionId,
-                agentType: this.agentType,
+                agentType: this.agentRuntime,
                 content: event.eventData.content ?? event.frame.content,
             });
         }
@@ -191,7 +191,7 @@ export class AgentRuntime {
 
 let runtime: AgentRuntime | null = null;
 
-/** Returns the shared "agent" runtime, creating (or re-pointing) it for `agentUrl`. */
+/** Returns the shared "solidx" runtime, creating (or re-pointing) it for `agentUrl`. */
 export function ensureAgentRuntime(agentUrl: string, dispatch: Dispatch, getState: GetAgentState): AgentRuntime {
     if (runtime && runtime.agentUrl === agentUrl) return runtime;
     runtime?.dispose();

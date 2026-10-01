@@ -20,10 +20,12 @@ export type AgentContext = {
 export type AgentMode = "bubble" | "compact" | "docked" | "maximized";
 
 /**
- * Which agent backend a chat talks to: "agent" (setting solidxAgentBackendUrl; the floating
+ * Which agent backend a chat talks to: "solidx" (setting solidxAgentBackendUrl; the floating
  * launcher) or "agentHub" (setting solidxAgentHubBackendUrl).
  */
-export type AgentType = "agent" | "agentHub";
+export type AgentRuntimeType = "solidx" | "agentHub";
+/** @deprecated Use AgentRuntimeType. */
+export type AgentType = AgentRuntimeType;
 
 export type AgentConnection = "idle" | "connecting" | "open" | "reconnecting" | "offline";
 
