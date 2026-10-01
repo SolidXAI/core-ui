@@ -18,6 +18,8 @@ import { DashboardPage } from "./pages/admin/core/DashboardPage";
 import { DatasourcesPage } from "./pages/admin/core/DatasourcesPage";
 import { DatasourceIntrospectionPage } from "./pages/admin/core/DatasourceIntrospectionPage";
 import { WorkflowDefinitionEditorPage } from "./pages/admin/core/WorkflowDefinitionEditorPage";
+import { AgentSkillRegistryEditorPage } from "./pages/admin/core/AgentSkillRegistryEditorPage";
+import { AgentToolRegistryEditorPage } from "./pages/admin/core/AgentToolRegistryEditorPage";
 import { WorkflowExecutionDetailPage } from "./pages/admin/core/WorkflowExecutionDetailPage";
 import { MediaUploadPage } from "./pages/admin/core/MediaUploadPage";
 import { LoginPage } from "./pages/auth/LoginPage";
@@ -95,6 +97,8 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />), handle: { title: "Form", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/media/upload", element: <MediaUploadPage />, handle: { title: "Upload Media", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/workflow-definition/editor/:id", element: <WorkflowDefinitionEditorPage />, handle: { title: "Workflow Definition Editor", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/agent-skill-registry/editor/:id", element: <AgentSkillRegistryEditorPage />, handle: { title: "Agent Skill Registry Editor", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/agent-tool-registry/editor/:id", element: <AgentToolRegistryEditorPage />, handle: { title: "Agent Tool Registry Editor", manageDocumentMeta: true } },
     { path: "/admin/core/settings", element: pick("settings", <SettingsPage />), handle: { title: "Settings", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/datasources", element: <DatasourcesPage />, handle: { title: "Datasources", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/modules/:moduleId/datasource-introspection", element: <DatasourceIntrospectionPage />, handle: { title: "Datasource Introspection", manageDocumentMeta: true } },
