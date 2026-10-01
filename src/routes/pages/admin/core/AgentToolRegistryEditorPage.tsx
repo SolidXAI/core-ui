@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
-import { SolidButton, SolidCodeEditor, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { SolidButton, SolidCodeEditor, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import "./AgentToolRegistryEditorPage.css";
 
 type Agent = { id?: number | string; name?: string; title?: string };
@@ -13,12 +13,24 @@ type AgentToolLink = { agentRegistry?: Agent | number | string | null };
 type ToolRecord = {
   id: number;
   name?: string;
+  iconName?: string | null;
   description?: string;
   tags?: unknown;
   type?: string;
-  source_code?: string;
+  sourceCode?: string;
   agentTools?: AgentToolLink[] | AgentToolLink | null;
 };
+
+function extractEntityRecord(response: unknown): Record<string, any> | undefined {
+  let candidate: unknown = response;
+  for (let depth = 0; depth < 3; depth += 1) {
+    if (!candidate || typeof candidate !== "object") return undefined;
+    const value = candidate as Record<string, unknown>;
+    if ("id" in value || "name" in value) return value;
+    candidate = value.data;
+  }
+  return candidate && typeof candidate === "object" ? candidate as Record<string, any> : undefined;
+}
 
 function parseTags(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(String).map((tag) => tag.trim()).filter(Boolean);
@@ -29,6 +41,31 @@ function parseTags(value: unknown): string[] {
   } catch {
     return value === "{}" ? [] : value.split(",").map((tag) => tag.trim()).filter(Boolean);
   }
+}
+
+function formatErrorMessage(value: unknown): string | undefined {
+  if (typeof value === "string") return value.trim() || undefined;
+  if (Array.isArray(value)) {
+    const messages = value.map(formatErrorMessage).filter((message): message is string => Boolean(message));
+    return messages.length ? messages.join("; ") : undefined;
+  }
+  if (value && typeof value === "object") {
+    const error = value as Record<string, unknown>;
+    return formatErrorMessage(error.message)
+      ?? formatErrorMessage(error.constraints)
+      ?? formatErrorMessage(error.error);
+  }
+  return undefined;
+}
+
+function getSaveErrorMessage(error: unknown): string {
+  if (!error || typeof error !== "object") return "Failed to save tool.";
+  const apiError = error as Record<string, any>;
+  return formatErrorMessage(apiError.data?.data?.message)
+    ?? formatErrorMessage(apiError.data?.message)
+    ?? formatErrorMessage(apiError.data?.error)
+    ?? formatErrorMessage(apiError.message)
+    ?? "Failed to save tool.";
 }
 
 export function AgentToolRegistryEditorPage() {
@@ -43,20 +80,23 @@ export function AgentToolRegistryEditorPage() {
   );
   const [createTool, { isLoading: isCreating }] = useCreateSolidEntityMutation();
   const [updateTool, { isLoading: isSaving }] = useUpdateSolidEntityMutation();
-  const record = (response?.data ?? response) as ToolRecord | undefined;
+  const record = extractEntityRecord(response) as ToolRecord | undefined;
   const [activeTab, setActiveTab] = React.useState("general");
   const [name, setName] = React.useState("");
+  const [iconName, setIconName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [type, setType] = React.useState("custom");
   const [sourceCode, setSourceCode] = React.useState("");
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagDraft, setTagDraft] = React.useState("");
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
     setName(record?.name ?? "");
+    setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setType(record?.type ?? "custom");
-    setSourceCode(record?.source_code ?? "");
+    setSourceCode(record?.sourceCode ?? "");
     setTags(parseTags(record?.tags));
   }, [record]);
 
@@ -65,15 +105,24 @@ export function AgentToolRegistryEditorPage() {
     if (!next) return;
     if (!tags.some((tag) => tag.toLowerCase() === next.toLowerCase())) setTags((current) => [...current, next]);
     setTagDraft("");
+    setFieldErrors((current) => ({ ...current, tags: "" }));
   };
 
   const save = async () => {
-    if (!name.trim() || !description.trim()) {
-      setActiveTab("general");
-      dispatch(showToast({ severity: "error", summary: "Missing information", detail: "Name and description are required." }));
+    const nextErrors: Record<string, string> = {};
+    if (!name.trim()) nextErrors.name = "Name is required.";
+    if (!description.trim()) nextErrors.description = "Description is required.";
+    if (tags.length === 0) nextErrors.tags = "At least one tag is required.";
+    if (!type.trim()) nextErrors.type = "Tool type is required.";
+    if (!sourceCode.trim()) nextErrors.sourceCode = "Tool source code is required.";
+
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      setActiveTab(nextErrors.sourceCode ? "tool" : "general");
+      dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(nextErrors).join(" ") }));
       return;
     }
-    const payload = { name: name.trim(), description: description.trim(), type, source_code: sourceCode, tags: JSON.stringify(tags) };
+    const payload = { name: name.trim(), iconName: iconName || null, description: description.trim(), type, sourceCode: sourceCode, tags: JSON.stringify(tags) };
     try {
       if (record?.id) {
         await updateTool({ id: record.id, data: payload }).unwrap();
@@ -86,7 +135,20 @@ export function AgentToolRegistryEditorPage() {
         if (createdId) navigate(`/admin/core/solid-core/agent-tool-registry/editor/${createdId}`, { replace: true });
       }
     } catch (error: any) {
-      dispatch(showToast({ severity: "error", summary: "Save failed", detail: error?.data?.message ?? error?.message ?? "Failed to save tool." }));
+      const errorDetail = getSaveErrorMessage(error);
+      const serverFieldErrors: Record<string, string> = {};
+      if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
+        for (const field of ["name", "description", "tags", "type", "sourceCode"]) {
+          if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
+          const label = field === "sourceCode" ? "Tool source code" : field[0].toUpperCase() + field.slice(1);
+          serverFieldErrors[field] = `${label} is required.`;
+        }
+      }
+      if (Object.keys(serverFieldErrors).length > 0) {
+        setFieldErrors(serverFieldErrors);
+        setActiveTab(serverFieldErrors.sourceCode ? "tool" : "general");
+      }
+      dispatch(showToast({ severity: "error", summary: "Save failed", detail: errorDetail }));
     }
   };
 
@@ -103,22 +165,24 @@ export function AgentToolRegistryEditorPage() {
   const tabs = [
     { value: "general", label: "General Info", content: <div className="agent-tool-editor__general">
       <div className="agent-tool-editor__fields">
-        <label className="agent-tool-editor__field"><span>Name <b>*</b></span><SolidInput value={name} onChange={(e) => setName(e.target.value)} /></label>
-        <label className="agent-tool-editor__field"><span>Description <b>*</b></span><SolidInput value={description} onChange={(e) => setDescription(e.target.value)} /></label>
+        <label className="agent-tool-editor__field"><span>Name <b>*</b></span><SolidInput value={name} aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "agent-tool-name-error" : undefined} className={fieldErrors.name ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setName(e.target.value); setFieldErrors((current) => ({ ...current, name: "" })); }} />{fieldErrors.name && <small id="agent-tool-name-error" className="agent-tool-editor__field-error">{fieldErrors.name}</small>}</label>
+        <div className="agent-tool-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
+        <label className="agent-tool-editor__field"><span>Description <b>*</b></span><SolidInput value={description} aria-invalid={Boolean(fieldErrors.description)} aria-describedby={fieldErrors.description ? "agent-tool-description-error" : undefined} className={fieldErrors.description ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setDescription(e.target.value); setFieldErrors((current) => ({ ...current, description: "" })); }} />{fieldErrors.description && <small id="agent-tool-description-error" className="agent-tool-editor__field-error">{fieldErrors.description}</small>}</label>
       </div>
-      <label className="agent-tool-editor__field"><span>Tool type</span><select value={type} onChange={(e) => setType(e.target.value)}>
+      <label className="agent-tool-editor__field"><span>Tool type <b>*</b></span><select value={type} aria-invalid={Boolean(fieldErrors.type)} aria-describedby={fieldErrors.type ? "agent-tool-type-error" : undefined} className={fieldErrors.type ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setType(e.target.value); setFieldErrors((current) => ({ ...current, type: "" })); }}>
         <option value="solidx">SolidX</option><option value="thirdparty">Third Party</option><option value="custom">Custom</option>
-      </select></label>
-      <div className="agent-tool-editor__field"><span>Tags</span><div className="agent-tool-editor__tag-input">
-        {tags.map((tag, index) => <span className="agent-tool-editor__tag" key={`${tag}-${index}`}>{tag}<button type="button" aria-label={`Remove ${tag}`} onClick={() => setTags((current) => current.filter((_, i) => i !== index))}><X size={13} /></button></span>)}
+      </select>{fieldErrors.type && <small id="agent-tool-type-error" className="agent-tool-editor__field-error">{fieldErrors.type}</small>}</label>
+      <div className="agent-tool-editor__field"><span>Tags <b>*</b></span><div className={`agent-tool-editor__tag-input${fieldErrors.tags ? " agent-tool-editor__tag-input--invalid" : ""}`}>
+        {tags.map((tag, index) => <span className="agent-tool-editor__tag" key={`${tag}-${index}`}>{tag}<button type="button" aria-label={`Remove ${tag}`} onClick={() => setTags((current) => { const next = current.filter((_, i) => i !== index); if (next.length) setFieldErrors((errors) => ({ ...errors, tags: "" })); return next; })}><X size={13} /></button></span>)}
         <input value={tagDraft} aria-label="Add a tag" placeholder="Type a tag and press Enter" onChange={(e) => setTagDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} />
         <SolidButton type="button" variant="secondary" size="small" onClick={addTag}><Plus size={14} /> Add</SolidButton>
-      </div><small>Tags are saved as a JSON array.</small></div>
+      </div>{fieldErrors.tags && <small className="agent-tool-editor__field-error">{fieldErrors.tags}</small>}<small>Tags are saved as a JSON array.</small></div>
     </div> },
     { value: "tool", label: "Tool", content: <div className="agent-tool-editor__tool">
       <section className="agent-tool-editor__panel">
-        <header><h2>Tool source code</h2><p>Write the tool implementation in Python.</p></header>
-        <SolidCodeEditor value={sourceCode} onChange={(value) => setSourceCode(value ?? "")} language="python" height="100%" className="agent-tool-editor__code" />
+        <header><h2>Tool source code <b>*</b></h2><p>Write the tool implementation in Python.</p></header>
+        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" height="100%" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
+        {fieldErrors.sourceCode && <small className="agent-tool-editor__field-error agent-tool-editor__code-error">{fieldErrors.sourceCode}</small>}
       </section>
       <section className="agent-tool-editor__panel">
         <header><h2>Agent interface preview</h2><p>Embedded SolidX Agent chat.</p></header>

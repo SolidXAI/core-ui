@@ -559,6 +559,8 @@ export {
   SolidRichTextEditor,
   SolidLightbox,
   SolidIcon,
+  SolidIconPicker,
+  type SolidIconPickerProps,
   type SolidIconName,
   type SolidIconMeta,
   parseSolidIconMeta,

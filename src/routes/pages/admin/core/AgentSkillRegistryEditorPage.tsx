@@ -8,6 +8,7 @@ import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/Soli
 import {
   SolidButton,
   SolidCodeEditor,
+  SolidIconPicker,
   SolidInput,
   SolidTabGroup,
 } from "../../../../components/shad-cn-ui";
@@ -23,11 +24,23 @@ type AgentReference = {
 type SkillRecord = {
   id: number;
   name?: string;
+  iconName?: string | null;
   description?: string;
   body?: string;
   tags?: unknown;
   agentSkills?: AgentReference[] | AgentReference | null;
 };
+
+function extractEntityRecord(response: unknown): Record<string, any> | undefined {
+  let candidate: unknown = response;
+  for (let depth = 0; depth < 3; depth += 1) {
+    if (!candidate || typeof candidate !== "object") return undefined;
+    const value = candidate as Record<string, unknown>;
+    if ("id" in value || "name" in value) return value;
+    candidate = value.data;
+  }
+  return candidate && typeof candidate === "object" ? candidate as Record<string, any> : undefined;
+}
 
 function parseTags(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -46,6 +59,33 @@ function parseTags(value: unknown): string[] {
   }
 
   return [];
+}
+
+function formatErrorMessage(value: unknown): string | undefined {
+  if (typeof value === "string") return value.trim() || undefined;
+  if (Array.isArray(value)) {
+    const messages = value.map(formatErrorMessage).filter((message): message is string => Boolean(message));
+    return messages.length ? messages.join("; ") : undefined;
+  }
+  if (value && typeof value === "object") {
+    const error = value as Record<string, unknown>;
+    return formatErrorMessage(error.message)
+      ?? formatErrorMessage(error.constraints)
+      ?? formatErrorMessage(error.error);
+  }
+  return undefined;
+}
+
+function getSaveErrorMessage(error: unknown): string {
+  if (!error || typeof error !== "object") return "Failed to save skill.";
+  const apiError = error as Record<string, any>;
+  // Nest validation details are nested at data.data.message; prefer them over
+  // the generic outer "Bad Request Exception" message.
+  return formatErrorMessage(apiError.data?.data?.message)
+    ?? formatErrorMessage(apiError.data?.message)
+    ?? formatErrorMessage(apiError.data?.error)
+    ?? formatErrorMessage(apiError.message)
+    ?? "Failed to save skill.";
 }
 
 function skillAgents(record?: SkillRecord): AgentReference[] {
@@ -88,17 +128,20 @@ export function AgentSkillRegistryEditorPage() {
   );
   const [createSkill, { isLoading: isCreating }] = useCreateSolidEntityMutation();
   const [updateSkill, { isLoading: isSaving }] = useUpdateSolidEntityMutation();
-  const record = (response?.data ?? response) as SkillRecord | undefined;
+  const record = extractEntityRecord(response) as SkillRecord | undefined;
 
   const [activeTab, setActiveTab] = React.useState("general");
   const [name, setName] = React.useState("");
+  const [iconName, setIconName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [body, setBody] = React.useState("");
   const [tags, setTags] = React.useState<string[]>([]);
   const [tagDraft, setTagDraft] = React.useState("");
+  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
     setName(record?.name ?? "");
+    setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setBody(record?.body ?? "");
     setTags(parseTags(record?.tags));
@@ -111,21 +154,30 @@ export function AgentSkillRegistryEditorPage() {
       setTags((current) => [...current, nextTag]);
     }
     setTagDraft("");
+    setFieldErrors((current) => ({ ...current, tags: "" }));
   };
 
   const handleSave = async () => {
-    if (!name.trim() || !description.trim()) {
-      setActiveTab("general");
+    const nextErrors: Record<string, string> = {};
+    if (!name.trim()) nextErrors.name = "Name is required.";
+    if (!description.trim()) nextErrors.description = "Description is required.";
+    if (!body.trim()) nextErrors.body = "Skill instructions are required.";
+    if (tags.length === 0) nextErrors.tags = "At least one tag is required.";
+
+    setFieldErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
+      setActiveTab(nextErrors.body ? "skill" : "general");
       dispatch(showToast({
         severity: "error",
         summary: "Missing information",
-        detail: "Name and description are required.",
+        detail: Object.values(nextErrors).join(" "),
       }));
       return;
     }
 
     const payload = {
       name: name.trim(),
+      iconName: iconName || null,
       description: description.trim(),
       body,
       tags: JSON.stringify(tags),
@@ -155,10 +207,22 @@ export function AgentSkillRegistryEditorPage() {
         }
       }
     } catch (error: any) {
+      const errorDetail = getSaveErrorMessage(error);
+      const serverFieldErrors: Record<string, string> = {};
+      if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
+        for (const field of ["name", "description", "body", "tags"]) {
+          if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
+          serverFieldErrors[field] = `${field === "body" ? "Skill instructions" : field[0].toUpperCase() + field.slice(1)} is required.`;
+        }
+      }
+      if (Object.keys(serverFieldErrors).length > 0) {
+        setFieldErrors(serverFieldErrors);
+        setActiveTab(serverFieldErrors.body || serverFieldErrors.tags ? "skill" : "general");
+      }
       dispatch(showToast({
         severity: "error",
         summary: "Save failed",
-        detail: error?.data?.message ?? error?.message ?? "Failed to save skill.",
+        detail: errorDetail,
       }));
     }
   };
@@ -173,23 +237,53 @@ export function AgentSkillRegistryEditorPage() {
           <div className="agent-skill-editor__fields">
             <label className="agent-skill-editor__field">
               <span>Name <b>*</b></span>
-              <SolidInput value={name} onChange={(event) => setName(event.target.value)} />
+              <SolidInput
+                value={name}
+                aria-invalid={Boolean(fieldErrors.name)}
+                aria-describedby={fieldErrors.name ? "agent-skill-name-error" : undefined}
+                className={fieldErrors.name ? "agent-skill-editor__input--invalid" : undefined}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setFieldErrors((current) => ({ ...current, name: "" }));
+                }}
+              />
+              {fieldErrors.name && <small id="agent-skill-name-error" className="agent-skill-editor__field-error">{fieldErrors.name}</small>}
             </label>
+            <div className="agent-skill-editor__field">
+              <span>Icon</span>
+              <SolidIconPicker value={iconName} onChange={setIconName} />
+            </div>
             <label className="agent-skill-editor__field">
               <span>Description <b>*</b></span>
-              <SolidInput value={description} onChange={(event) => setDescription(event.target.value)} />
+              <SolidInput
+                value={description}
+                aria-invalid={Boolean(fieldErrors.description)}
+                aria-describedby={fieldErrors.description ? "agent-skill-description-error" : undefined}
+                className={fieldErrors.description ? "agent-skill-editor__input--invalid" : undefined}
+                onChange={(event) => {
+                  setDescription(event.target.value);
+                  setFieldErrors((current) => ({ ...current, description: "" }));
+                }}
+              />
+              {fieldErrors.description && <small id="agent-skill-description-error" className="agent-skill-editor__field-error">{fieldErrors.description}</small>}
             </label>
           </div>
           <div className="agent-skill-editor__field">
-            <span>Tags</span>
-            <div className="agent-skill-editor__tag-input">
+            <span>Tags <b>*</b></span>
+            <div className={`agent-skill-editor__tag-input${fieldErrors.tags ? " agent-skill-editor__tag-input--invalid" : ""}`}>
               {tags.map((tag, index) => (
                 <span className="agent-skill-editor__tag" key={`${tag}-${index}`}>
                   {tag}
                   <button
                     type="button"
                     aria-label={`Remove ${tag}`}
-                    onClick={() => setTags((current) => current.filter((_, tagIndex) => tagIndex !== index))}
+                    onClick={() => {
+                      setTags((current) => {
+                        const nextTags = current.filter((_, tagIndex) => tagIndex !== index);
+                        if (nextTags.length > 0) setFieldErrors((errors) => ({ ...errors, tags: "" }));
+                        return nextTags;
+                      });
+                    }}
                   >
                     <X size={13} />
                   </button>
@@ -211,6 +305,7 @@ export function AgentSkillRegistryEditorPage() {
                 <Plus size={14} /> Add
               </SolidButton>
             </div>
+            {fieldErrors.tags && <small className="agent-skill-editor__field-error">{fieldErrors.tags}</small>}
             <small>Tags are saved as a JSON array.</small>
           </div>
         </div>
@@ -223,16 +318,20 @@ export function AgentSkillRegistryEditorPage() {
         <div className="agent-skill-editor__skill">
           <section className="agent-skill-editor__panel">
             <header>
-              <h2>Skill instructions</h2>
+              <h2>Skill instructions <b>*</b></h2>
               <p>Write the skill body in Markdown.</p>
             </header>
             <SolidCodeEditor
               value={body}
-              onChange={(value) => setBody(value ?? "")}
+              onChange={(value) => {
+                setBody(value ?? "");
+                setFieldErrors((current) => ({ ...current, body: "" }));
+              }}
               language="markdown"
               height="100%"
-              className="agent-skill-editor__code"
+              className={`agent-skill-editor__code${fieldErrors.body ? " agent-skill-editor__code--invalid" : ""}`}
             />
+            {fieldErrors.body && <small className="agent-skill-editor__field-error agent-skill-editor__body-error">{fieldErrors.body}</small>}
           </section>
           <section className="agent-skill-editor__panel">
             <header>

@@ -13,8 +13,11 @@
 .agent-tool-editor__field { display:flex; flex:1; flex-direction:column; gap:.5rem; min-width:0; font-size:.875rem; font-weight:600; }
 .agent-tool-editor__field b { color:var(--red-500,#dc2626); }
 .agent-tool-editor__field small { color:var(--text-color-secondary,var(--muted-foreground)); font-weight:400; }
+.agent-tool-editor__field .agent-tool-editor__field-error,.agent-tool-editor__code-error { margin:2px 0 0; color:#ef4444; font-size:11.5px; font-weight:400; line-height:1.3; }
+.agent-tool-editor__input--invalid { border-color:#ef4444!important; box-shadow:0 0 0 1px #fecaca inset!important; }
 .agent-tool-editor__field select { min-height:2.5rem; padding:.5rem .75rem; border:1px solid var(--surface-border,var(--border)); border-radius:.5rem; color:inherit; background:var(--surface-ground,var(--background)); font:inherit; }
 .agent-tool-editor__tag-input { flex-wrap:wrap; gap:.5rem; min-height:3rem; padding:.5rem; border:1px solid var(--surface-border,var(--border)); border-radius:.5rem; background:var(--surface-ground,var(--background)); }
+.agent-tool-editor__tag-input--invalid { border-color:#ef4444; box-shadow:0 0 0 1px #fecaca inset; }
 .agent-tool-editor__tag-input>input { flex:1 1 12rem; min-width:10rem; border:0; outline:0; color:inherit; background:transparent; font:inherit; font-weight:400; }
 .agent-tool-editor__tag { display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .35rem .25rem .7rem; border-radius:999px; color:var(--primary-color,var(--primary)); background:color-mix(in srgb,var(--primary-color,var(--primary)) 11%,transparent); font-size:.78rem; font-weight:500; }
 .agent-tool-editor__tag button { display:inline-grid; width:1.25rem; height:1.25rem; place-items:center; border:0; border-radius:50%; color:inherit; background:transparent; cursor:pointer; }
@@ -23,6 +26,7 @@
 .agent-tool-editor__panel header { padding:.9rem 1rem; border-bottom:1px solid var(--surface-border,var(--border)); }
 .agent-tool-editor__tool h2,.agent-tool-editor__agents h2 { font-size:1rem; }
 .agent-tool-editor__code { flex:1; min-height:36rem; border:0!important; border-radius:0!important; }
+.agent-tool-editor__code--invalid { border:1px solid #ef4444!important; box-shadow:0 0 0 1px #fecaca inset; }
 .agent-tool-editor__chat { flex:1; min-height:36rem; padding:.75rem; }
 .agent-tool-editor__agent-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(15rem,1fr)); gap:.75rem; }
 .agent-tool-editor__agent-card { gap:.75rem; min-height:4.5rem; padding:.85rem 1rem; border:1px solid var(--surface-border,var(--border)); border-radius:.7rem; background:var(--surface-ground,var(--background)); }

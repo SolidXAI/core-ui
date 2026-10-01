@@ -1,0 +1,78 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.25rem;
+}
+
+.title {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-color, inherit);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconStage {
+  display: flex;
+  min-height: 8rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--surface-border, var(--border, #3f3f46));
+  border-radius: 0.75rem;
+  background: var(--surface-ground, var(--muted, #303030));
+  color: var(--primary-color, #60a5fa);
+}
+
+.description {
+  display: -webkit-box;
+  min-height: 2.7em;
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-color-secondary, var(--muted-foreground, #a1a1aa));
+  font-size: 0.8rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.footer,
+.badges,
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.footer {
+  justify-content: space-between;
+  min-height: 1.5rem;
+}
+
+.badge,
+.tag {
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badge {
+  background: var(--primary-color, #2563eb);
+  color: var(--primary-color-text, #fff);
+  text-transform: capitalize;
+}
+
+.tag {
+  border: 1px solid var(--surface-border, var(--border, #52525b));
+  color: var(--text-color-secondary, var(--muted-foreground, #a1a1aa));
+}

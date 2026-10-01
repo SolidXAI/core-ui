@@ -4,6 +4,7 @@ import { RolePermissionsManyToManyFieldWidget } from "../components/core/extensi
 import { CustomHtml } from "../components/core/form/widgets/CustomHtml";
 import React from "react";
 import { SolidShortTextFieldImageListWidget } from "../components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
+import { SolidIconNameListViewWidget } from "../components/core/list/widgets/SolidIconNameListViewWidget";
 import { SolidShortTextAvatarWidget } from "../components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "../components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "../components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
@@ -58,6 +59,7 @@ import MqMessageDetailsKanbanCardAction from "../components/core/extension/solid
 import MqMessageKanbanQuickFilterHeaderAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanQuickFilterHeaderAction";
 import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/extension/solid-core/mqMessage/MqMessageSelectedRecordsSummaryHeaderAction";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
+import { AgentRegistryCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
 import { MediaFileSizeFormViewWidget, MediaFileSizeListWidget } from "../components/core/extension/solid-core/media/fileSize/MediaFileSizeWidget";
 import { MediaRelativeUriFormViewWidget, MediaRelativeUriListWidget } from "../components/core/extension/solid-core/media/relativeUri/MediaRelativeUriPreview";
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
@@ -162,6 +164,7 @@ export const getExtensionFunction = (name: string) => {
 // 1. list view columns field widget 
 // - shortText
 registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("SolidIconNameListViewWidget", SolidIconNameListViewWidget, ExtensionComponentTypes.listFieldWidget);
 
 // - shortText (image list)
 registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextFieldImageListWidget, ExtensionComponentTypes.listFieldWidget);
@@ -423,6 +426,7 @@ registerExtensionComponent("MqMessageKanbanQuickFilterHeaderAction", MqMessageKa
 registerExtensionComponent("MqMessageSelectedRecordsSummaryHeaderAction", MqMessageSelectedRecordsSummaryHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("MqMessageKanbanSelectedRecordsSummaryHeaderAction", MqMessageSelectedRecordsSummaryHeaderAction, ExtensionComponentTypes.kanbanHeaderAction);
 registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.cardWidget);
+registerExtensionComponent("AgentRegistryCardWidget", AgentRegistryCardWidget, ExtensionComponentTypes.cardWidget);
 
 // Dashboard widgets (default first-party set)
 registerExtensionComponent("DefaultDashboardKpiWidget", DefaultDashboardKpiWidget, ExtensionComponentTypes.dashboardWidget);

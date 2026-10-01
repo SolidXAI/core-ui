@@ -6,7 +6,7 @@ export const HISTORY_PAGE_SIZE = 50;
 export type AgentSessionSummary = {
     session_id: string;
     status: string;
-    total_steps: number;
+    totalSteps: number;
     created_at: string | null;
     preview: string;
 };
