@@ -1,5 +1,8 @@
 import './styles';
 
+export { ALLOWED_MODELS_BY_PROVIDER, getAllowedModelIdsForProvider } from './constants/allowed-ai-models';
+export type { AllowedModelProvider, AllowedModelsByProvider } from './constants/allowed-ai-models';
+
 export { AutoCompleteField } from './components/common/AutoCompleteField';
 export { CancelButton, SolidCancelButton } from './components/common/CancelButton';
 // export * from './components/common/CodeEditor';
@@ -114,7 +117,7 @@ export { getFileTypeIconTone, SolidFileTypeIcon } from './helpers/fileTypeIcon';
 export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
-export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export { getExtensionComponent, registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
 export { QueueSlaHeatmapWidget } from './components/core/dashboard/widgets/QueueSlaHeatmapWidget';
 export {
     WorkflowFlowCanvas,
@@ -626,6 +629,7 @@ export type {
     SolidLoadForm,
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
+    SolidChatterMessageWidgetProps,
     SolidChatWidgetProps,
     SolidKanbanCardWidgetProps,
     SolidChartRendererProps,

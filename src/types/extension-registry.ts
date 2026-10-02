@@ -19,6 +19,8 @@ export const ExtensionComponentTypes = {
     // Rendered inside the SolidX Agent chat when the agent emits a UiWidget event
     // whose `widget` equals the registered name. Receives ChatWidgetProps.
     chatInteractionWidget: "chatInteractionWidget",
+    // Renders the body of a custom chatter message. Receives SolidChatterMessageWidgetProps.
+    chatterMessageWidget: "chatterMessageWidget",
 } as const;
 
 export type ExtensionComponentType =

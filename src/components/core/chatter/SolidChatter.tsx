@@ -140,6 +140,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         date: formatDate(displayTimeSource),
                         media: msg._media,
                         messageSubType: msg.messageSubType,
+                        chatterMessage: msg,
                         status: msg.status,
                         modelDisplayName: msg.modelDisplayName,
                         modelUserKey: msg.modelUserKey
@@ -252,6 +253,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                             auditRecord={message.auditRecord}
                             media={message.media}
                             messageSubType={message.messageSubType}
+                            chatterMessage={message.chatterMessage}
                             status={message.status}
                             modelDisplayName={message.modelDisplayName}
                             modelUserKey={message.modelUserKey}

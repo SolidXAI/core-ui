@@ -11,6 +11,7 @@ import {
   SolidSwitch,
   SolidTextarea,
 } from "../../../shad-cn-ui";
+import { getAllowedModelIdsForProvider } from "../../../../constants/allowed-ai-models";
 
 
 export interface ModelBehavior {
@@ -331,6 +332,8 @@ interface ModelConfigTabProps {
 }
 
 export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: ModelConfigTabProps) => {
+  const allowedModelIds = getAllowedModelIdsForProvider(modelEntry.providerId);
+  const modelOptions = allowedModelIds.map((modelId) => ({ label: modelId, value: modelId }));
   const providerOptions = Object.entries(providers).map(([key, entry]) => {
     const typeLabel = PROVIDER_TYPE_OPTIONS.find((o) => o.value === entry.type)?.label ?? entry.type;
     const label = BUILT_IN_TYPES.includes(key) ? typeLabel : `${key} (${typeLabel})`;
@@ -349,17 +352,20 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
               value={modelEntry.providerId}
               options={providerOptions}
               native={false}
-              onChange={(e) => onModelEntryChange({ ...modelEntry, providerId: e.value })}
+              onChange={(e) => onModelEntryChange({ ...modelEntry, providerId: e.value, model: "" })}
               placeholder="Select Provider"
             />
           </div>
           <div>
             <label className="form-field-label">Model</label>
-            <SolidInput
-              placeholder="e.g. gpt-4o-mini"
-              value={modelEntry.model || ""}
-              onChange={(e) => onModelEntryChange({ ...modelEntry, model: e.target.value })}
+            <SolidSelect
               className="w-full"
+              value={modelEntry.model || ""}
+              options={modelOptions}
+              native={false}
+              onChange={(e) => onModelEntryChange({ ...modelEntry, model: e.value })}
+              placeholder={modelOptions.length ? "Select Model" : "No built-in models for this provider"}
+              disabled={!modelOptions.length}
             />
           </div>
         </div>

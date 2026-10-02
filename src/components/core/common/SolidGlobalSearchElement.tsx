@@ -27,6 +27,7 @@ import {
     SolidDialogTitle,
 } from "../../shad-cn-ui/SolidDialog";
 
+const savedFiltersEntityApi = createSolidEntityApi("savedFilters");
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -768,14 +769,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         [allAvailableSavedFilters]
     );
 
-    const entityApi = createSolidEntityApi("savedFilters");
     const {
         useCreateSolidEntityMutation,
         useDeleteSolidEntityMutation,
         useGetSolidEntityByIdQuery,
         useUpdateSolidEntityMutation,
         useLazyGetSolidEntitiesQuery
-    } = entityApi;
+    } = savedFiltersEntityApi;
 
     const [
         createEntity,

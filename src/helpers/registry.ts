@@ -141,13 +141,12 @@ export const registerExtensionFunction = (name: string, fn: (...args: any[]) => 
     extensionRegistry.functions[name] = { fn, type };
 };
 
-export const getExtensionComponent = (name: string): React.ComponentType<any> | null => {
-    if (extensionRegistry.components[name]) {
-        return extensionRegistry.components[name].component;
-    }
-
-    return null;
-};
+export function getExtensionComponent(name: string): React.ComponentType<any> | null;
+export function getExtensionComponent(name: string, type: ExtensionComponentType): React.ComponentType<any> | null;
+export function getExtensionComponent(name: string, type?: ExtensionComponentType): React.ComponentType<any> | null {
+    const registered = extensionRegistry.components[name];
+    return registered && (!type || registered.type === type) ? registered.component : null;
+}
 
 /** Names of every registered component of `type` (and `fieldType`, when given). Aliases are included. */
 export const getExtensionComponents = (type: ExtensionComponentType, fieldType: string = ''): string[] => {

@@ -8,7 +8,7 @@ import "./AgentRegistryAuditPanel.css";
 
 type AgentRegistryAuditPanelProps = {
   children: React.ReactNode;
-  modelSingularName: "agentSkillRegistry" | "agentToolRegistry";
+  modelSingularName: "agentRegistry" | "agentSkillRegistry" | "agentToolRegistry";
   recordId: number;
   refreshVersion: number;
   modelUserKey?: string;
