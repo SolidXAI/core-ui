@@ -1057,6 +1057,43 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
+  const [pendingConfirmedRowAction, setPendingConfirmedRowAction] = useState<any>(null);
+
+  const handleRowActionClick = (button: any, rowData: any) => {
+    const event: SolidListRowActionEvent = {
+      params,
+      rowData,
+      solidListViewMetaData: solidListViewMetaData?.data,
+    };
+    if (button?.attrs?.confirmMessage) {
+      setPendingConfirmedRowAction({ attrs: button.attrs, event });
+      return;
+    }
+    handleCustomButtonClick(button.attrs, event);
+  };
+
+  const confirmCustomRowAction = async () => {
+    if (!pendingConfirmedRowAction) return;
+    const { attrs, event } = pendingConfirmedRowAction;
+    setPendingConfirmedRowAction(null);
+    try {
+      await Promise.resolve(handleCustomButtonClick(attrs, event));
+      dispatch(showToast({
+        severity: "success",
+        summary: attrs.successSummary || "Action completed",
+        detail: attrs.successMessage || `${attrs.label || "Action"} completed successfully.`,
+        life: 4000,
+      }));
+      await setQueryString();
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Action failed",
+        detail: error?.response?.data?.message || error?.response?.data?.error || error?.message || "The action could not be completed.",
+        life: 5000,
+      }));
+    }
+  };
 
   // Recover functions
   const recoverById = async (id: any) => {
@@ -1695,6 +1732,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                               body={(rowData) => {
                                 return (
                                   (() => {
+                                    const allowedRowStates = button?.attrs?.visibleWhenFieldIn;
+                                    const currentRowState = rowData?.[button?.attrs?.visibleWhenField];
+                                    if (Array.isArray(allowedRowStates) && allowedRowStates.length > 0 &&
+                                      currentRowState !== undefined && currentRowState !== null && currentRowState !== "" &&
+                                      !allowedRowStates.includes(String(currentRowState))) return null;
                                     const presentation = resolveButtonPresentation(button?.attrs);
                                     if (!presentation.showIcon && !presentation.showLabel) return null;
                                     return (
@@ -1713,13 +1755,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         size="small"
                                         variant="ghost"
                                         onClick={() => {
-                                          const event: SolidListRowActionEvent = {
-                                            params,
-                                            rowData: rowData,
-                                            solidListViewMetaData:
-                                              solidListViewMetaData?.data,
-                                          };
-                                          handleCustomButtonClick(button.attrs, event);
+                                          handleRowActionClick(button, rowData);
                                         }}
                                       />
                                     );
@@ -1877,6 +1913,16 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           )}
         </div>
       </div>
+      <SolidConfirmDialog
+        open={Boolean(pendingConfirmedRowAction)}
+        onCancel={() => setPendingConfirmedRowAction(null)}
+        onConfirm={() => void confirmCustomRowAction()}
+        title={pendingConfirmedRowAction?.attrs?.confirmTitle || "Confirm action"}
+        message={<p className="solid-shadcn-dialog-text">{pendingConfirmedRowAction?.attrs?.confirmMessage}</p>}
+        confirmLabel={pendingConfirmedRowAction?.attrs?.confirmLabel || "Confirm"}
+        cancelLabel="Cancel"
+        className="solid-shadcn-confirm-dialog"
+      />
       <SolidConfirmDialog
         open={isDialogVisible}
         onCancel={onDeleteClose}

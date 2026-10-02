@@ -45,6 +45,8 @@ import { SolidManyToManyRelationAvatarListWidget } from "../components/core/list
 import { SolidManyToOneRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
 import { PillWidget } from "../components/core/list/widgets/PillWidget";
 import { SolidUserBlockedStatusListWidget } from "../components/core/list/widgets/SolidUserBlockedStatusListWidget";
+import { AgentProcessNeedsRestartListWidget } from "../components/core/list/widgets/AgentProcessNeedsRestartListWidget";
+import { restartAgentHubProcessRowAction, stopAgentHubProcessRowAction } from "../components/core/solid-agent/processes/agentHubProcessApi";
 import { SolidShortTextFieldAvatarWidget } from "../components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "../components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
 import { DefaultTimeFormEditWidget, DefaultTimeFormViewWidget } from "../components/core/form/fields/SolidTimeField";
@@ -199,6 +201,7 @@ registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelation
 
 // - users status
 registerExtensionComponent("SolidUserBlockedStatusListWidget", SolidUserBlockedStatusListWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("AgentProcessNeedsRestartListWidget", AgentProcessNeedsRestartListWidget, ExtensionComponentTypes.listFieldWidget);
 
 // - generic selection/status pill
 registerExtensionComponent("PillWidget", PillWidget, ExtensionComponentTypes.listFieldWidget);
@@ -456,6 +459,8 @@ registerExtensionFunction("mqMessageOnFormLoadHandler", mqMessageOnFormLoadHandl
 
 
 registerExtensionFunction("scheduleFrequencyOnFieldChangeHandler", scheduleFrequencyOnFieldChangeHandler, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("stopAgentHubProcessRowAction", stopAgentHubProcessRowAction, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("restartAgentHubProcessRowAction", restartAgentHubProcessRowAction, ExtensionFunctionTypes.onFieldChange);
 
 // SolidX Agent chat widgets.
 // Defaults render an event by its event_type when event_data.widget is absent (see SolidAgentChatItem).
