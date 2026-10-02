@@ -34,7 +34,7 @@ export function AgentSignIn({ agentUrl, expired = false }: Props) {
             result.status === 401
                 ? "That API key was not accepted. Check it and try again."
                 : result.status === 403
-                  ? "Your account does not have access to the agent (agent:invoke)."
+                  ? "Your account does not have access to this agent."
                   : result.error,
         );
     };

@@ -14,6 +14,7 @@ import { resolveAttachmentMedia } from "./agentAttachmentMedia";
 import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
+import { agentIdOf } from "./agentUrls";
 
 /**
  * A live connection to one agent backend. The "solidx" runtime is shared by the floating window and
@@ -26,9 +27,11 @@ import { AgentSocket } from "./agentSocket";
 type Dispatch = (action: any) => any;
 type GetAgentState = () => AgentState | undefined;
 
-/** Keep the original SolidX storage key; Agent Hub has its own key. */
-function sessionKey(agentRuntime: AgentRuntimeType) {
-    return agentRuntime === "solidx" ? "solid-agent.session_id" : `solid-agent.${agentRuntime}.session_id`;
+/** Keep the original SolidX storage key; Agent Hub keeps one per agent (its agent URL names the agent). */
+function sessionKey(agentRuntime: AgentRuntimeType, agentUrl: string) {
+    if (agentRuntime === "solidx") return "solid-agent.session_id";
+    const agentId = agentIdOf(agentUrl);
+    return agentId === undefined ? `solid-agent.${agentRuntime}.session_id` : `solid-agent.${agentRuntime}.${agentId}.session_id`;
 }
 
 function readSessionId(key: string): string | null {
@@ -62,7 +65,7 @@ export class AgentRuntime {
         private getState: GetAgentState,
         readonly agentRuntime: AgentRuntimeType = "solidx",
     ) {
-        this.sessionKey = sessionKey(agentRuntime);
+        this.sessionKey = sessionKey(agentRuntime, agentUrl);
         this.socket = new AgentSocket(agentUrl, readSessionId(this.sessionKey));
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),

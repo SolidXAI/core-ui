@@ -1,15 +1,12 @@
 import type { AgentAction, AgentConnection, AgentWireFrame } from "../types";
-import { clearAgentAuth, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
-import { toWsUrl } from "./agentUrls";
-
-export { toHttpBase, toWsUrl } from "./agentUrls";
+import { agentWsUrl, clearAgentAuth, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
 
 /**
- * WebSocket client for the SolidX Agent (`<agentUrl>/ws/agent`).
+ * WebSocket client for the agent, connecting to the full `wsUrl` named at sign-in (agentAuth.ts).
  *
  * Held outside Redux because sockets are not serializable; the host wires its listeners to
- * dispatch into agentSlice. Every outbound frame carries the `agentToken` from the agent login
- * (agentAuth.ts); nothing is sent until the user has signed in with an API key. Unexpected closes
+ * dispatch into agentSlice. Every outbound frame carries the `agentToken` from the agent login;
+ * there is no socket until the user has signed in with an API key, and signing out closes it. Unexpected closes
  * reconnect with backoff (1s, 2s, 4s, then 15s) and re-send `resume_session`; frames sent
  * while disconnected are queued and flushed once the session is re-established.
  */
@@ -35,9 +32,11 @@ export class AgentSocket {
 
     constructor(private agentUrl: string, private initialSessionId: string | null = null) {
         this.sessionId = initialSessionId;
-        // Signing in (or again, after the token expired) starts/resumes the session on the open socket.
+        // Signing in opens the socket on the wsUrl it named; signing out (or the token expiring) closes it.
         this.offAuthChange = onAgentAuthChange(agentUrl, () => {
-            if (this.ws?.readyState === WebSocket.OPEN && !this.sessionReady) this.openSession();
+            if (this.closedByUser) return;
+            if (agentWsUrl(agentUrl)) this.connect();
+            else this.disconnect();
         });
     }
 
@@ -63,11 +62,17 @@ export class AgentSocket {
         const state = this.ws?.readyState;
         if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) return;
         this.closedByUser = false;
+        const url = agentWsUrl(this.agentUrl);
+        if (!url) {
+            // Not signed in: the auth listener connects once sign-in names the wsUrl.
+            this.setStatus("idle");
+            return;
+        }
         this.setStatus(this.attempt === 0 ? "connecting" : "reconnecting");
 
         let ws: WebSocket;
         try {
-            ws = new WebSocket(toWsUrl(this.agentUrl));
+            ws = new WebSocket(url);
         } catch {
             this.scheduleReconnect();
             return;
@@ -160,6 +165,20 @@ export class AgentSocket {
         this.timer = null;
         this.ws?.close();
         this.ws = null;
+    }
+
+    /** Drops the socket after sign-out; the next sign-in reconnects. */
+    private disconnect() {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = null;
+        this.attempt = 0;
+        this.sessionReady = false;
+        if (this.ws) {
+            this.ws.onclose = null; // No reconnect.
+            this.ws.close();
+            this.ws = null;
+        }
+        this.setStatus("idle");
     }
 
     private flushQueue() {

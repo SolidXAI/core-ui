@@ -1,5 +1,4 @@
 import { clearAgentAuth, loadAgentAuth } from "./agentAuth";
-import { toHttpBase } from "./agentUrls";
 
 export const HISTORY_PAGE_SIZE = 50;
 
@@ -13,13 +12,13 @@ export type AgentSessionSummary = {
 
 export type AgentHistoryPage = { messages: any[]; has_more: boolean };
 
-/** Calls the agent with `Authorization: Bearer <agentToken>`; null when signed out or on error. */
+/** Calls the agent at the `httpUrl` named at sign-in, with `Authorization: Bearer <agentToken>`; null when signed out or on error. */
 async function agentFetch<T>(agentUrl: string, path: string, init: RequestInit = {}): Promise<T | null> {
-    const agentToken = (await loadAgentAuth(agentUrl))?.agentToken;
-    if (!agentToken) return null;
-    const res = await fetch(`${toHttpBase(agentUrl)}${path}`, {
+    const auth = await loadAgentAuth(agentUrl);
+    if (!auth) return null;
+    const res = await fetch(`${auth.httpUrl.replace(/\/$/, "")}${path}`, {
         ...init,
-        headers: { Authorization: `Bearer ${agentToken}`, ...(init.headers ?? {}) },
+        headers: { Authorization: `Bearer ${auth.agentToken}`, ...(init.headers ?? {}) },
     });
     // The agent forgot the token (idle 30 min or restarted): sign in again.
     if (res.status === 401) clearAgentAuth(agentUrl);

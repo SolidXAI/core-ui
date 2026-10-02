@@ -10,7 +10,7 @@ import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
 import { AgentSignIn } from "./AgentSignIn";
-import { clearAgentAuth } from "./client/agentAuth";
+import { signOutOfAgent } from "./client/agentAuth";
 
 type Props = {
     agentUrl: string;
@@ -140,7 +140,7 @@ export function SolidAgentChat({
                             className={styles.iconBtn}
                             title={signedInAs ? `Sign out of the agent (${String(signedInAs)})` : "Sign out of the agent"}
                             aria-label="Sign out of the agent"
-                            onClick={() => { setShowHistory(false); clearAgentAuth(agentUrl); }}
+                            onClick={() => { setShowHistory(false); void signOutOfAgent(agentUrl); }}
                         >
                             <LogOut size={15} />
                         </button>
