@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { preserveModelMenuContext } from "../helpers/modelViewPersistence";
 
 const isAbsoluteUrl = (href: string) => /^[a-z][a-z0-9+.-]*:/.test(href) || href.startsWith("//");
 
@@ -11,7 +12,7 @@ export function useRouter() {
       return;
     }
 
-    navigate(href);
+    navigate(preserveModelMenuContext(href));
   };
 
   const replace = (href: string) => {
@@ -20,7 +21,7 @@ export function useRouter() {
       return;
     }
 
-    navigate(href, { replace: true });
+    navigate(preserveModelMenuContext(href), { replace: true });
   };
 
   return {
