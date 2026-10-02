@@ -778,7 +778,7 @@ textarea {
 
 .solid-user-menu-trigger-name {
   font-size: 12.5px;
-  line-height: 1.1;
+  line-height: 1.2;
   font-weight: 650;
   white-space: nowrap;
   overflow: hidden;
@@ -787,8 +787,11 @@ textarea {
 
 .solid-user-menu-trigger-role {
   font-size: 10.5px;
-  line-height: 1.1;
+  line-height: 1.2;
   color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .solid-user-avatar {
