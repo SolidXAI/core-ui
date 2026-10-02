@@ -1,5 +1,5 @@
 import type { AgentAction, AgentConnection, AgentWireFrame } from "../types";
-import { agentWsUrl, clearAgentAuth, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
+import { agentWsUrl, clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
 
 /**
  * WebSocket client for the agent, connecting to the full `wsUrl` named at sign-in (agentAuth.ts).
@@ -27,10 +27,15 @@ export class AgentSocket {
     private sessionId: string | null = null;
     /** False until the agent confirms the session (session_started) on the current socket. */
     private sessionReady = false;
+    private checkingProcessAvailability = false;
 
     private offAuthChange: () => void;
 
-    constructor(private agentUrl: string, private initialSessionId: string | null = null) {
+    constructor(
+        private agentUrl: string,
+        private initialSessionId: string | null = null,
+        private checkProcessAvailability = false,
+    ) {
         this.sessionId = initialSessionId;
         // Signing in opens the socket on the wsUrl it named; signing out (or the token expiring) closes it.
         this.offAuthChange = onAgentAuthChange(agentUrl, () => {
@@ -205,10 +210,29 @@ export class AgentSocket {
         const delay = BACKOFF_MS[Math.min(this.attempt, BACKOFF_MS.length - 1)];
         this.attempt += 1;
         this.setStatus(this.attempt > BACKOFF_MS.length ? "offline" : "reconnecting");
+        if (this.checkProcessAvailability && this.attempt >= 2 && this.attempt % 3 === 2) {
+            void this.checkAgentProcess(this.attempt);
+        }
         this.timer = setTimeout(() => {
             this.timer = null;
             this.connect();
         }, delay);
+    }
+
+    private async checkAgentProcess(failedAttempt: number) {
+        if (this.checkingProcessAvailability) return;
+        this.checkingProcessAvailability = true;
+        try {
+            const auth = await loadAgentAuth(this.agentUrl);
+            if (!auth || this.closedByUser || this.attempt !== failedAttempt) return;
+            if (!(await isAgentProcessAvailable(auth)) && !this.closedByUser && this.attempt === failedAttempt) {
+                // Repeated WebSocket failures plus a failed process health check mean the stored
+                // endpoint is stale. Returning to sign-in lets the manager issue a fresh wsUrl.
+                clearAgentAuth(this.agentUrl);
+            }
+        } finally {
+            this.checkingProcessAvailability = false;
+        }
     }
 
     private setStatus(status: AgentConnection) {

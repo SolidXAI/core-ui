@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronDown, ExternalLink, FlaskConical, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ExternalLink, FlaskConical, Pencil, Plus, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -9,10 +9,11 @@ import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
+import { AgentSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
 import { ALLOWED_MODELS_BY_PROVIDER, type AllowedModelProvider } from "../../../../constants/allowed-ai-models";
-import { SolidButton, SolidCodeEditor, SolidDialog, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
 import "./AgentRegistryEditorPage.css";
 
@@ -20,6 +21,7 @@ type Item = { id: number; name?: string; title?: string; displayName?: string; d
 type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; roleMetadata?: Item; secret?: Item; envVarName?: string; alwaysInclude?: boolean; requiresApproval?: boolean };
 type Input = { name: string; description: string; dataType: string };
 type Agent = Item & {
+  configVersion?: number;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
@@ -185,10 +187,12 @@ function useCatalog(api: typeof skillApi, query = "offset=0&limit=1000") {
   return { records: items(data?.records) as Item[], isLoading, refetch };
 }
 
-function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render }: {
+function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor }: {
   label: string; description: string; options: Item[]; selected: Item[];
   onAdd: (id: number) => void; onRemove: (id: number) => void; createUrl?: string;
-  render: (item: Item) => React.ReactNode;
+  render: (item: Item, link?: Link) => React.ReactNode;
+  renderSettings?: (item: Item, link?: Link) => React.ReactNode;
+  linkFor?: (id: number) => Link | undefined;
 }) {
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
@@ -208,7 +212,8 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
       </div>}
     </div>
     {selected.length ? <div className="agent-editor__cards">{selected.map((item) => <div className="agent-editor__linked-card" key={item.id}>
-      <div className="agent-editor__card-content">{render(item)}</div>
+      <div className="agent-editor__card-content">{render(item, linkFor?.(item.id))}</div>
+      {renderSettings?.(item, linkFor?.(item.id))}
       <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>
     </div>)}</div> : <div className="agent-editor__empty">No {label.toLowerCase()} linked yet.</div>}
   </section>;
@@ -228,12 +233,15 @@ export function AgentRegistryEditorPage() {
   const [updateAgent, { isLoading: updating }] = entityApi.useUpdateSolidEntityMutation();
   const [createSkillLink] = agentSkillApi.useCreateSolidEntityMutation();
   const [deleteSkillLink] = agentSkillApi.useDeleteSolidEntityMutation();
+  const [updateSkillLink] = agentSkillApi.useUpdateSolidEntityMutation();
   const [createToolLink] = agentToolApi.useCreateSolidEntityMutation();
   const [deleteToolLink] = agentToolApi.useDeleteSolidEntityMutation();
+  const [updateToolLink] = agentToolApi.useUpdateSolidEntityMutation();
   const [createRoleLink] = agentRoleApi.useCreateSolidEntityMutation();
   const [deleteRoleLink] = agentRoleApi.useDeleteSolidEntityMutation();
   const [createSecretLink] = agentSecretApi.useCreateSolidEntityMutation();
   const [deleteSecretLink] = agentSecretApi.useDeleteSolidEntityMutation();
+  const [updateSecretLink] = agentSecretApi.useUpdateSolidEntityMutation();
   const record = recordFrom(response) as Agent | undefined;
   const [tab, setTab] = React.useState("basics");
   const [testAgentOpen, setTestAgentOpen] = React.useState(false);
@@ -253,6 +261,12 @@ export function AgentRegistryEditorPage() {
   const [toolIds, setToolIds] = React.useState<number[]>([]);
   const [roleIds, setRoleIds] = React.useState<number[]>([]);
   const [secretIds, setSecretIds] = React.useState<number[]>([]);
+  const [alwaysIncludeValues, setAlwaysIncludeValues] = React.useState<Record<number, boolean>>({});
+  const [requiresApprovalValues, setRequiresApprovalValues] = React.useState<Record<number, boolean>>({});
+  const [secretEnvVarNames, setSecretEnvVarNames] = React.useState<Record<number, string>>({});
+  const [pendingSecret, setPendingSecret] = React.useState<Item | null>(null);
+  const [secretEnvVarDraft, setSecretEnvVarDraft] = React.useState("");
+  const [secretEnvVarError, setSecretEnvVarError] = React.useState("");
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [auditVersion, setAuditVersion] = React.useState(0);
 
@@ -267,6 +281,9 @@ export function AgentRegistryEditorPage() {
     setToolIds(items(record.agentTools).map((link) => link.agentToolRegistry?.id).filter(Boolean));
     setRoleIds(items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean));
     setSecretIds(items(record.agentSecrets).map((link) => link.secret?.id).filter(Boolean));
+    setAlwaysIncludeValues(Object.fromEntries(items(record.agentSkills).map((link) => [link.agentSkillRegistry?.id, link.alwaysInclude !== false]).filter(([key]) => key)));
+    setRequiresApprovalValues(Object.fromEntries(items(record.agentTools).map((link) => [link.agentToolRegistry?.id, link.requiresApproval === true]).filter(([key]) => key)));
+    setSecretEnvVarNames(Object.fromEntries(items(record.agentSecrets).map((link) => [link.secret?.id, link.envVarName ?? link.secret?.key ?? link.secret?.name ?? ""]).filter(([key]) => key)));
   }, [record?.id, response]);
 
   React.useEffect(() => {
@@ -292,14 +309,22 @@ export function AgentRegistryEditorPage() {
     setter((current) => current.includes(value) ? current.filter((id) => id !== value) : [...current, value]);
 
   const syncLinks = async (agentId: number, previous: Link[] | undefined, selected: number[], field: string,
-    create: any, remove: any, extra: Record<string, unknown> = {}) => {
+    create: any, remove: any, update: any, extra: Record<string, unknown> | ((targetId: number) => Record<string, unknown>) = {}) => {
     const links = items(previous) as Link[];
     const oldIds = links.map((link) => (link as any)[field]?.id).filter(Boolean);
     for (const link of links) {
       if (!selected.includes((link as any)[field]?.id)) await remove(link.id).unwrap();
     }
     for (const targetId of selected) {
-      if (!oldIds.includes(targetId)) await create({ agentRegistryId: agentId, [`${field}Id`]: targetId, ...extra }).unwrap();
+      const values = typeof extra === "function" ? extra(targetId) : extra;
+      if (!oldIds.includes(targetId)) {
+        await create({ agentRegistryId: agentId, [`${field}Id`]: targetId, ...values }).unwrap();
+        continue;
+      }
+      const existing = links.find((link) => (link as any)[field]?.id === targetId);
+      if (existing && Object.entries(values).some(([key, value]) => (existing as any)[key] !== value)) {
+        await update({ id: existing.id, data: values }).unwrap();
+      }
     }
   };
 
@@ -324,8 +349,7 @@ export function AgentRegistryEditorPage() {
       requiredInputs: JSON.stringify(inputs.map((input) => ({ ...input, name: input.name.trim(), description: input.description.trim() }))),
       reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
-      ...(!record?.id ? { status: "draft", configVersion: 1 } : {}),
-      ...(nextStatus ? { status: nextStatus } : {}),
+      status: nextStatus ?? record?.status ?? "draft",
     };
     let newlyCreatedId: number | undefined;
     let scalarSaved = false;
@@ -335,10 +359,13 @@ export function AgentRegistryEditorPage() {
       const savedId = Number(record?.id ?? recordFrom(result)?.id);
       if (!savedId) throw new Error("Agent saved, but its ID was not returned.");
       if (!record?.id) newlyCreatedId = savedId;
-      await syncLinks(savedId, record?.agentSkills, skillIds, "agentSkillRegistry", createSkillLink, deleteSkillLink, { alwaysInclude: true });
-      await syncLinks(savedId, record?.agentTools, toolIds, "agentToolRegistry", createToolLink, deleteToolLink, { requiresApproval: false });
-      await syncLinks(savedId, record?.agentRoles, roleIds, "roleMetadata", createRoleLink, deleteRoleLink);
-      await syncLinks(savedId, record?.agentSecrets, secretIds, "secret", createSecretLink, deleteSecretLink);
+      await syncLinks(savedId, record?.agentSkills, skillIds, "agentSkillRegistry", createSkillLink, deleteSkillLink, updateSkillLink,
+        (targetId) => ({ alwaysInclude: alwaysIncludeValues[targetId] ?? true }));
+      await syncLinks(savedId, record?.agentTools, toolIds, "agentToolRegistry", createToolLink, deleteToolLink, updateToolLink,
+        (targetId) => ({ requiresApproval: requiresApprovalValues[targetId] ?? false }));
+      await syncLinks(savedId, record?.agentRoles, roleIds, "roleMetadata", createRoleLink, deleteRoleLink, undefined);
+      await syncLinks(savedId, record?.agentSecrets, secretIds, "secret", createSecretLink, deleteSecretLink, updateSecretLink,
+        (targetId) => ({ envVarName: secretEnvVarNames[targetId] ?? "" }));
       dispatch(showToast({ severity: "success", summary: nextStatus ? "Agent status updated" : "Saved", detail: nextStatus ? `Agent moved to ${nextStatus}.` : "Agent and its associations saved." }));
       setAuditVersion((version) => version + 1);
       if (record?.id) refetch();
@@ -360,6 +387,36 @@ export function AgentRegistryEditorPage() {
   const groups = roles.records.reduce((acc, role) => {
     const key = role.module?.displayName ?? "Default"; (acc[key] ??= []).push(role); return acc;
   }, {} as Record<string, Item[]>);
+  const linkForTarget = (links: Link[] | undefined, fieldName: string, targetId: number) =>
+    items(links).find((link) => (link as any)[fieldName]?.id === targetId);
+  const beginSecretEnvVarEdit = (secret: Item) => {
+    setPendingSecret(secret);
+    setSecretEnvVarDraft(secretEnvVarNames[secret.id] ?? String(secret.key ?? secret.name ?? secret.displayName ?? ""));
+    setSecretEnvVarError("");
+  };
+  const commitSecretEnvVar = () => {
+    const value = secretEnvVarDraft.trim();
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
+      setSecretEnvVarError("Use a valid environment variable name (letters, numbers, and underscores; it cannot start with a number).");
+      return;
+    }
+    if (["APP_ENCRYPTION_KEY", "DATABASE_URL", "AGENTHUB_MANAGER_INTERNAL_TOKEN", "AGENTHUB_BRIDGE_PROCESS_KEY"].includes(value)) {
+      setSecretEnvVarError("This environment variable name is reserved by AgentHub.");
+      return;
+    }
+    if (secretIds.some((id) => id !== pendingSecret?.id && secretEnvVarNames[id] === value)) {
+      setSecretEnvVarError("Each linked secret must use a different environment variable name.");
+      return;
+    }
+    if (pendingSecret) {
+      setSecretEnvVarNames((current) => ({ ...current, [pendingSecret.id]: value }));
+      setSecretIds((current) => current.includes(pendingSecret.id) ? current : [...current, pendingSecret.id]);
+    }
+    setPendingSecret(null);
+    setSecretEnvVarError("");
+  };
+  const linkSetting = (label: string, checked: boolean, onChange: (checked: boolean) => void, hint: string) =>
+    <label className="agent-editor__link-setting"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span><strong>{label}</strong><small>{hint}</small></span></label>;
   const agentStatus = record?.status ?? "draft";
   const tabs = [
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
@@ -386,7 +443,7 @@ export function AgentRegistryEditorPage() {
       </div>{settingsError ? <p className="agent-editor__hint">Settings could not be loaded. Try refreshing this page.</p>
         : !modelOptions.length && <p className="agent-editor__hint">No configured models are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
       <section className="agent-editor__section agent-editor__workflow" aria-labelledby="agent-lifecycle-title">
-        <div className="agent-editor__section-head"><div><h2 id="agent-lifecycle-title">Agent lifecycle</h2><p>Track this agent through its available stages. Select a stage to update its status.</p></div><SolidWorkflowStatusPill label={agentStatus} /></div>
+        <div className="agent-editor__section-head"><div><h2 id="agent-lifecycle-title">Agent lifecycle</h2><p>Track this agent through its available stages. Select a stage to update its status.</p></div><div className="agent-editor__workflow-meta">{record?.configVersion != null && <span className="agent-editor__config-version" aria-label={`Configuration version ${record.configVersion}`}>Config v{record.configVersion}</span>}<SolidWorkflowStatusPill label={agentStatus} /></div></div>
         <div className="agent-editor__workflow-stages" aria-label={`Current agent stage: ${agentStatus}`}>
           {([[
             "draft", "Draft", "Editable configuration; not available to users."],
@@ -410,10 +467,16 @@ export function AgentRegistryEditorPage() {
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
-      render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />} /> },
+      linkFor={(id) => linkForTarget(record?.agentSkills, "agentSkillRegistry", id)}
+      render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
+      renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Always include", alwaysIncludeValues[item.id] ?? true,
+          (checked) => setAlwaysIncludeValues((current) => ({ ...current, [item.id]: checked })), "Add the full skill to the agent prompt. Turn off to load it on demand.")}</div>} /> },
     { value: "tools", label: "Tools", content: <LinkPicker label="Tools" description="Tools available to this agent." options={tools.records} selected={linked(toolIds, tools.records, items(record?.agentTools).map((link) => link.agentToolRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setToolIds, id)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
-      render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />} /> },
+      linkFor={(id) => linkForTarget(record?.agentTools, "agentToolRegistry", id)}
+      render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
+      renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Require approval", requiresApprovalValues[item.id] ?? false,
+          (checked) => setRequiresApprovalValues((current) => ({ ...current, [item.id]: checked })), "Pause before running this tool until a user approves it.")}</div>} /> },
     { value: "policies", label: "Policies", content: <div className="agent-editor__stack"><section className="agent-editor__section"><h2>Roles</h2><p>Grant the agent the roles it may use.</p>
       {Object.entries(groups).map(([groupName, groupRoles]) => <fieldset className="agent-editor__role-group" key={groupName}><legend>{groupName}</legend>
         {(groupRoles ?? []).map((role) => <label key={role.id}><input type="checkbox" checked={roleIds.includes(role.id)} onChange={() => toggle(setRoleIds, role.id)} /> {role.name}</label>)}
@@ -423,22 +486,34 @@ export function AgentRegistryEditorPage() {
           <label className="agent-editor__field" key={label as string}><span>{label as string}</span><input type="number" min={label === "Cost limit" ? 0 : 1} step={label === "Cost limit" ? 0.01 : 1} value={value as number} onChange={(event) => (setter as (value: number) => void)(Number(event.target.value))} /></label>)}
       </div>{errors.limits && <small className="agent-editor__error">{errors.limits}</small>}</section></div> },
     { value: "secrets", label: "Secrets", content: <LinkPicker label="Secrets" description="Grant access to existing secrets. Secret values are never shown here." options={secrets.records} selected={linked(secretIds, secrets.records, items(record?.agentSecrets).map((link) => link.secret).filter(Boolean))}
-      onAdd={(id) => toggle(setSecretIds, id)} onRemove={(id) => toggle(setSecretIds, id)}
-      render={(item) => <div className="agent-editor__secret"><strong>{item.displayName ?? item.key}</strong><span>{item.key}</span><p>{item.description}</p></div>} /> },
+      onAdd={(id) => { const secret = secrets.records.find((item) => item.id === id); if (secret) beginSecretEnvVarEdit(secret); }} onRemove={(id) => toggle(setSecretIds, id)}
+      linkFor={(id) => linkForTarget(record?.agentSecrets, "secret", id)}
+      render={(item, link) => <div className="agent-editor__secret"><strong>{item.displayName ?? item.name ?? item.key}</strong><span>{item.key}</span><p>{item.description}</p>
+        <div className="agent-editor__secret-env"><span>Process environment</span><code>{secretEnvVarNames[item.id] ?? link?.envVarName ?? item.key ?? item.name}</code>
+          <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={14} /></button></div></div>} /> },
     ...((record?.id ? [
-      ["processes", "Processes", record.agentProcesses], ["sessions", "Sessions", record.agentSessions], ["jobs", "Jobs", record.agentJobs],
+      ["processes", "Processes", record.agentProcesses], ["jobs", "Jobs", record.agentJobs],
     ] : []) as [string, string, Item[]][]).map(([value, label, related]) => ({ value, label, content: <section className="agent-editor__section"><h2>{label}</h2>
       {items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
+    ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
   ];
   const content = <SolidTabGroup tabs={tabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
-  return <main className="agent-editor"><header className="agent-editor__header"><div><p>Agent Hub / Agent Registry</p><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1></div><div className="agent-editor__actions">
+  return <main className="agent-editor"><header className="agent-editor__header"><div><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1></div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
     {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={() => { setTestAgentWindowMode("maximized"); setTestAgentOpen(true); }}>Test Agent</SolidButton>}
     <SolidButton loading={creating || updating} disabled={isLoading || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
   </div></header>{isLoading ? <div className="agent-editor__empty">Loading agent…</div> : isError || (id !== "new" && !record?.id) ?
     <div className="agent-editor__empty">This agent could not be loaded.</div> : record?.id ?
     <AgentRegistryAuditPanel modelSingularName="agentRegistry" recordId={record.id} refreshVersion={auditVersion} modelUserKey={record.name}>{content}</AgentRegistryAuditPanel> : content}
+    <SolidDialog open={Boolean(pendingSecret)} onOpenChange={(open) => { if (!open) { setPendingSecret(null); setSecretEnvVarError(""); } }}
+      header="Set secret environment variable" style={{ width: "min(34rem, 94vw)" }}
+      footer={<div className="agent-editor__secret-dialog-actions"><SolidButton type="button" variant="secondary" onClick={() => { setPendingSecret(null); setSecretEnvVarError(""); }}>Cancel</SolidButton>
+        <SolidButton type="button" onClick={commitSecretEnvVar}>Use secret</SolidButton></div>}>
+      <SolidDialogBody className="agent-editor__secret-dialog-body"><div className="agent-editor__secret-dialog"><p>Choose the environment variable name AgentHub will set for <strong>{pendingSecret?.displayName ?? pendingSecret?.name ?? pendingSecret?.key}</strong>. The default is the secret name.</p>
+        <label className="agent-editor__field"><span>Environment variable name</span><SolidInput autoFocus value={secretEnvVarDraft} aria-invalid={Boolean(secretEnvVarError)} onChange={(event) => { setSecretEnvVarDraft(event.target.value); setSecretEnvVarError(""); }} />
+          {secretEnvVarError && <small className="agent-editor__error">{secretEnvVarError}</small>}</label></div></SolidDialogBody>
+    </SolidDialog>
     {record?.id && <SolidDialog
       open={testAgentOpen}
       onOpenChange={setTestAgentOpen}

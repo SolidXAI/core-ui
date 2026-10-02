@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
-import { deleteSession, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
+import { deleteSession, fetchAgentConfigVersionStatus, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
 import type { AgentAttachment, AgentMode, AgentRuntimeType } from "./types";
@@ -62,13 +62,37 @@ export function SolidAgentChat({
 }: Props) {
     const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
-    const agentAuth = useAgentAuth(agentUrl);
+    const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
     const signedInAs = agentAuth.auth?.user?.email ?? agentAuth.auth?.user?.username;
 
     const [showHistory, setShowHistory] = useState(false);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
+    const [staleAgentConfig, setStaleAgentConfig] = useState(false);
+
+    useEffect(() => {
+        if (agentRuntime !== "agentHub" || !signedIn) {
+            setStaleAgentConfig(false);
+            return;
+        }
+
+        let alive = true;
+        const refreshConfigStatus = async () => {
+            try {
+                const status = await fetchAgentConfigVersionStatus(agentUrl);
+                if (alive && status) setStaleAgentConfig(status.stale);
+            } catch {
+                // Keep the last known status when the agent is temporarily unreachable.
+            }
+        };
+        void refreshConfigStatus();
+        const timer = window.setInterval(() => void refreshConfigStatus(), 30_000);
+        return () => {
+            alive = false;
+            window.clearInterval(timer);
+        };
+    }, [agentRuntime, agentUrl, signedIn]);
 
     // SDK requests: solidAgent.open({ prompt, autoSend, context }).
     useEffect(() => {
@@ -191,6 +215,11 @@ export function SolidAgentChat({
                 {offline && (
                     <div className={styles.banner} role="status">
                         <WifiOff size={14} /> Reconnecting to the agent… Your messages will be sent once it is back.
+                    </div>
+                )}
+                {agentRuntime === "agentHub" && staleAgentConfig && (
+                    <div className={styles.banner} role="status">
+                        This session is using an older agent configuration. Ask an administrator to restart the agent, then sign in again to load the latest version.
                     </div>
                 )}
                 {agent.authError && (

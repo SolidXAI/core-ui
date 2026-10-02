@@ -11,6 +11,11 @@ export type AgentSessionSummary = {
 };
 
 export type AgentHistoryPage = { messages: any[]; has_more: boolean };
+export type AgentConfigVersionStatus = {
+    processConfigVersion: number;
+    latestConfigVersion: number;
+    stale: boolean;
+};
 
 /** Calls the agent at the `httpUrl` named at sign-in, with `Authorization: Bearer <agentToken>`; null when signed out or on error. */
 async function agentFetch<T>(agentUrl: string, path: string, init: RequestInit = {}): Promise<T | null> {
@@ -37,6 +42,10 @@ export function fetchSessionHistory(agentUrl: string, sessionId: string, page = 
 /** The current user's past conversations (the agent derives the user from the token). */
 export function fetchSessionList(agentUrl: string) {
     return agentFetch<AgentSessionSummary[]>(agentUrl, "/api/agent/sessions/history");
+}
+
+export function fetchAgentConfigVersionStatus(agentUrl: string) {
+    return agentFetch<AgentConfigVersionStatus>(agentUrl, "/api/agent/config-version", { cache: "no-store" });
 }
 
 export function deleteSession(agentUrl: string, sessionId: string) {

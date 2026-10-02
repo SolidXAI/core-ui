@@ -61,6 +61,7 @@ import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/exte
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
 import { AgentRegistryCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
 import { AgentResourceCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
+import { AgentEventOutcomeListWidget } from "../components/core/extension/solid-core/agentEvent/list/AgentEventOutcomeListWidget";
 import { MediaFileSizeFormViewWidget, MediaFileSizeListWidget } from "../components/core/extension/solid-core/media/fileSize/MediaFileSizeWidget";
 import { MediaRelativeUriFormViewWidget, MediaRelativeUriListWidget } from "../components/core/extension/solid-core/media/relativeUri/MediaRelativeUriPreview";
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
@@ -213,6 +214,7 @@ registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", S
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("MediaRelativeUriListWidget", MediaRelativeUriListWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("MediaFileSizeListWidget", MediaFileSizeListWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("AgentEventOutcomeListWidget", AgentEventOutcomeListWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);

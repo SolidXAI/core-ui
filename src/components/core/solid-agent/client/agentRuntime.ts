@@ -66,7 +66,7 @@ export class AgentRuntime {
         readonly agentRuntime: AgentRuntimeType = "solidx",
     ) {
         this.sessionKey = sessionKey(agentRuntime, agentUrl);
-        this.socket = new AgentSocket(agentUrl, readSessionId(this.sessionKey));
+        this.socket = new AgentSocket(agentUrl, readSessionId(this.sessionKey), agentRuntime === "agentHub");
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => this.dispatch(agentConnectionChanged(status))),

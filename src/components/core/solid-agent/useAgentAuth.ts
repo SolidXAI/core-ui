@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { loadAgentAuth, onAgentAuthChange, type AgentAuth } from "./client/agentAuth";
+import { clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onAgentAuthChange, type AgentAuth } from "./client/agentAuth";
 
 export type AgentAuthState =
     | { status: "checking"; auth: null }
@@ -7,14 +7,25 @@ export type AgentAuthState =
     | { status: "signedIn"; auth: AgentAuth };
 
 /** The agent login for `agentUrl` in this tab, kept current as the user signs in or the token expires. */
-export function useAgentAuth(agentUrl: string): AgentAuthState {
+export function useAgentAuth(agentUrl: string, checkProcessAvailability = false): AgentAuthState {
     const [state, setState] = useState<AgentAuthState>({ status: "checking", auth: null });
 
     useEffect(() => {
         let alive = true;
         const refresh = () => {
-            void loadAgentAuth(agentUrl).then((auth) => {
-                if (alive) setState(auth ? { status: "signedIn", auth } : { status: "signedOut", auth: null });
+            void loadAgentAuth(agentUrl).then(async (auth) => {
+                if (!auth) {
+                    if (alive) setState({ status: "signedOut", auth: null });
+                    return;
+                }
+                if (checkProcessAvailability && !(await isAgentProcessAvailable(auth))) {
+                    // The stored wsUrl points at a dead process. Signing in again asks the manager
+                    // for a live process and its current WebSocket URL.
+                    clearAgentAuth(agentUrl);
+                    if (alive) setState({ status: "signedOut", auth: null });
+                    return;
+                }
+                if (alive) setState({ status: "signedIn", auth });
             });
         };
         refresh();
@@ -23,7 +34,7 @@ export function useAgentAuth(agentUrl: string): AgentAuthState {
             alive = false;
             off();
         };
-    }, [agentUrl]);
+    }, [agentUrl, checkProcessAvailability]);
 
     return state;
 }

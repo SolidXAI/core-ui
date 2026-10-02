@@ -116,6 +116,25 @@ export function agentWsUrl(agentUrl: string): string | null {
     return readStored(agentUrl)?.wsUrl ?? null;
 }
 
+/** Checks the process named by the most recent AgentHub login before reusing its WebSocket URL. */
+export async function isAgentProcessAvailable(auth: AgentAuth): Promise<boolean> {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 5000);
+    try {
+        const response = await fetch(`${auth.httpUrl.replace(/\/$/, "")}/health`, {
+            cache: "no-store",
+            signal: controller.signal,
+        });
+        if (!response.ok) return false;
+        const body = await response.json().catch(() => null);
+        return body?.status === "ready";
+    } catch {
+        return false;
+    } finally {
+        window.clearTimeout(timeout);
+    }
+}
+
 /** Exchanges a Solid API key for an agentToken and stores it for this tab. */
 export async function signInWithApiKey(agentUrl: string, apiKey: string): Promise<AgentSignInResult> {
     const key = apiKey.trim();

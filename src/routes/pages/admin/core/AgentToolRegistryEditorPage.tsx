@@ -5,10 +5,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentToolSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
+import { AgentRegistryCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
 import { SolidButton, SolidCodeEditor, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import "./AgentToolRegistryEditorPage.css";
 
-type Agent = { id?: number | string; name?: string; title?: string };
+const SharedAgentRegistryCard = AgentRegistryCardWidget as React.ComponentType<{ rowData: Record<string, any> }>;
+
+type Agent = { id?: number | string; name?: string; title?: string; [key: string]: any };
 type AgentToolLink = { agentRegistry?: Agent | number | string | null };
 type ToolRecord = {
   id: number;
@@ -17,6 +21,8 @@ type ToolRecord = {
   description?: string;
   tags?: unknown;
   type?: string;
+  status?: string | null;
+  lastLoadError?: string | null;
   sourceCode?: string;
   agentTools?: AgentToolLink[] | AgentToolLink | null;
 };
@@ -41,6 +47,11 @@ function parseTags(value: unknown): string[] {
   } catch {
     return value === "{}" ? [] : value.split(",").map((tag) => tag.trim()).filter(Boolean);
   }
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 function formatErrorMessage(value: unknown): string | undefined {
@@ -109,7 +120,7 @@ export function AgentToolRegistryEditorPage() {
     setFieldErrors((current) => ({ ...current, tags: "" }));
   };
 
-  const save = async () => {
+  const save = async (nextStatus?: "active" | "inactive") => {
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) nextErrors.name = "Name is required.";
     if (!description.trim()) nextErrors.description = "Description is required.";
@@ -123,11 +134,17 @@ export function AgentToolRegistryEditorPage() {
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(nextErrors).join(" ") }));
       return;
     }
-    const payload = { name: name.trim(), iconName: iconName || null, description: description.trim(), type, sourceCode: sourceCode, tags: JSON.stringify(tags) };
+    const payload = {
+      name: name.trim(), iconName: iconName || null, description: description.trim(), type,
+      sourceCode, tags: JSON.stringify(tags),
+      ...(type === "custom" ? { checksum: await sha256Hex(sourceCode) } : {}),
+      ...(nextStatus ? { status: nextStatus } : record?.status === "load_failed" ? { status: "active" } : {}),
+      ...((nextStatus === "active" || (!nextStatus && record?.status === "load_failed")) ? { lastLoadError: null } : {}),
+    };
     try {
       if (record?.id) {
         await updateTool({ id: record.id, data: payload }).unwrap();
-        dispatch(showToast({ severity: "success", summary: "Saved", detail: "Tool updated successfully." }));
+        dispatch(showToast({ severity: "success", summary: nextStatus ? "Tool status updated" : "Saved", detail: nextStatus ? `Tool moved to ${nextStatus}. Restart linked agent processes to apply the change.` : "Tool updated successfully." }));
         setAuditRefreshVersion((version) => version + 1);
         refetch();
       } else {
@@ -154,18 +171,28 @@ export function AgentToolRegistryEditorPage() {
     }
   };
 
-  const relatedTools = record?.agentTools;
-  const links = Array.isArray(relatedTools) ? relatedTools : relatedTools ? [relatedTools] : [];
-  const seen = new Set<string>();
-  const agents = links.map((link) => link.agentRegistry).filter((agent): agent is Agent => Boolean(agent && typeof agent === "object"))
-    .filter((agent) => {
-      const key = String(agent.id ?? agent.name ?? agent.title ?? "");
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+  const agents = React.useMemo(() => {
+    const relatedTools = record?.agentTools;
+    const links = Array.isArray(relatedTools) ? relatedTools : relatedTools ? [relatedTools] : [];
+    const seen = new Set<string>();
+    return links.map((link) => link.agentRegistry).filter((agent): agent is Agent => Boolean(agent && typeof agent === "object"))
+      .filter((agent) => {
+        const key = String(agent.id ?? agent.name ?? agent.title ?? "");
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }, [record?.agentTools]);
+  const sessionAgents = React.useMemo(() => agents.filter((agent): agent is Agent & { id: number | string } => agent.id !== undefined && agent.id !== null), [agents]);
   const tabs = [
     { value: "general", label: "General Info", content: <div className="agent-tool-editor__general">
+      {record?.status && <section className={`agent-tool-editor__runtime-status${record.status === "load_failed" ? " agent-tool-editor__runtime-status--failed" : ""}`} role={record.status === "load_failed" ? "alert" : "status"}>
+        <div className="agent-tool-editor__runtime-heading"><strong>Runtime status</strong><span>{record.status.replace(/[_-]+/g, " ")}</span></div>
+        {record.status === "load_failed" ? <>
+          <p>The AgentHub runtime could not load this tool. After correcting its source or checksum, restart linked agent processes so the runtime retries loading it.</p>
+          {record.lastLoadError && <pre>{record.lastLoadError}</pre>}
+        </> : <p>{record.lastLoadError || "No tool load error has been reported."}</p>}
+      </section>}
       <div className="agent-tool-editor__fields">
         <label className="agent-tool-editor__field"><span>Name <b>*</b></span><SolidInput value={name} aria-invalid={Boolean(fieldErrors.name)} aria-describedby={fieldErrors.name ? "agent-tool-name-error" : undefined} className={fieldErrors.name ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setName(e.target.value); setFieldErrors((current) => ({ ...current, name: "" })); }} />{fieldErrors.name && <small id="agent-tool-name-error" className="agent-tool-editor__field-error">{fieldErrors.name}</small>}</label>
         <div className="agent-tool-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
@@ -179,6 +206,29 @@ export function AgentToolRegistryEditorPage() {
         <input value={tagDraft} aria-label="Add a tag" placeholder="Type a tag and press Enter" onChange={(e) => setTagDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} />
         <SolidButton type="button" variant="secondary" size="small" onClick={addTag}><Plus size={14} /> Add</SolidButton>
       </div>{fieldErrors.tags && <small className="agent-tool-editor__field-error">{fieldErrors.tags}</small>}<small>Tags are saved as a JSON array.</small></div>
+      {record?.id && <section className="agent-tool-editor__workflow" aria-labelledby="agent-tool-lifecycle-title">
+        <div className="agent-tool-editor__workflow-head"><div><h2 id="agent-tool-lifecycle-title">Tool lifecycle</h2><p>Activate or deactivate this tool for linked agents. Load failures are reported by AgentHub.</p></div></div>
+        <div className="agent-tool-editor__workflow-stages" aria-label={`Current tool stage: ${(record.status ?? "active").replace(/[_-]+/g, " ")}`}>
+          {([ ["active", "Active", "Enabled for loading into linked agents."], ["inactive", "Inactive", "Not loaded for linked agents."], ["load_failed", "Load failed", "AgentHub could not load this tool."] ] as const).map(([value, label, description], index) => {
+            const currentStatus = record.status ?? "active";
+            const isCurrent = currentStatus === value;
+            const canRetry = value === "load_failed" && isCurrent;
+            const disabled = isCreating || isSaving || (!canRetry && (value === "load_failed" || isCurrent));
+            return <React.Fragment key={value}>
+              {index > 0 && <div className="agent-tool-editor__workflow-connector" aria-hidden="true" />}
+              <button type="button" className={`agent-tool-editor__workflow-stage agent-tool-editor__workflow-stage--${value}${isCurrent ? " is-current" : ""}`}
+                aria-current={isCurrent ? "step" : undefined} aria-pressed={isCurrent} disabled={disabled}
+                onClick={() => void save(value === "load_failed" ? "active" : value)}>
+                <span className="agent-tool-editor__workflow-mark">{index + 1}</span>
+                <span className="agent-tool-editor__workflow-copy"><strong>{label}</strong><small>{description}</small><small className="agent-tool-editor__workflow-cta">{canRetry ? "Click to retry loading" : isCurrent ? "Current stage" : value === "load_failed" ? "Set automatically by AgentHub" : "Click to move to this stage"}</small></span>
+                {isCurrent && <span className="agent-tool-editor__workflow-current">Current</span>}
+              </button>
+            </React.Fragment>;
+          })}
+        </div>
+        {record.status === "load_failed" && <small className="agent-tool-editor__workflow-hint">Fix the source or checksum first. Retrying saves the current tool configuration and clears the reported error; restart linked agent processes to load the updated tool.</small>}
+        <small className="agent-tool-editor__workflow-hint">Changing stage saves the current tool configuration. Restart linked agent processes to apply the change.</small>
+      </section>}
     </div> },
     { value: "tool", label: "Tool", content: <div className="agent-tool-editor__tool">
       <section className="agent-tool-editor__panel">
@@ -188,14 +238,15 @@ export function AgentToolRegistryEditorPage() {
       </section>
     </div> },
     { value: "agents", label: "Agents", content: <section className="agent-tool-editor__agents"><div><h2>Associated agents</h2><p>Agents linked to this tool. Associations are read-only here.</p></div>
-      {isLoading ? <p>Loading associated agents…</p> : agents.length ? <div className="agent-tool-editor__agent-grid">{agents.map((agent, index) => <article className="agent-tool-editor__agent-card" key={String(agent.id ?? agent.name ?? index)}><span>{(agent.name ?? agent.title ?? "A").slice(0, 1).toUpperCase()}</span><strong>{agent.name ?? agent.title ?? "Unnamed agent"}</strong></article>)}</div> : <div className="agent-tool-editor__empty">No agents are currently associated with this tool.</div>}
+      {isLoading ? <p>Loading associated agents…</p> : agents.length ? <div className="agent-tool-editor__agent-grid">{agents.map((agent, index) => <div className="agent-tool-editor__agent-card" key={String(agent.id ?? agent.name ?? index)}><SharedAgentRegistryCard rowData={agent} /></div>)}</div> : <div className="agent-tool-editor__empty">No agents are currently associated with this tool.</div>}
     </section> },
+    { value: "sessions", label: "Sessions", content: <AgentToolSessionsPanel agents={sessionAgents} /> },
   ];
 
   return <main className="agent-tool-editor">
     <header className="agent-tool-editor__header"><div><p>Agent Hub / Tool Registry</p><h1>{record ? "Edit Tool" : "Create Tool"}</h1></div><div className="agent-tool-editor__actions">
       <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
-      <SolidButton loading={isCreating || isSaving} onClick={save}>Save Tool</SolidButton>
+      <SolidButton loading={isCreating || isSaving} onClick={() => void save()}>Save Tool</SolidButton>
     </div></header>
     {isLoading ? <div className="agent-tool-editor__loading">Loading tool…</div> : record?.id ? (
       <AgentRegistryAuditPanel modelSingularName="agentToolRegistry" recordId={record.id} refreshVersion={auditRefreshVersion} modelUserKey={record.name}>

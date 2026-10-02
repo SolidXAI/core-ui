@@ -22,6 +22,9 @@ export function AgentResourceCardWidget({ rowData }: SolidKanbanCardWidgetProps)
   const description = typeof rowData?.description === "string" ? rowData.description.trim() : "";
   const tags = toTags(rowData?.tags);
   const status = typeof rowData?.status === "string" && rowData.status.trim() ? rowData.status.trim() : "";
+  const loadError = status === "load_failed" && typeof rowData?.lastLoadError === "string"
+    ? rowData.lastLoadError.trim()
+    : "";
   const kind = typeof rowData?.type === "string" && rowData.type.trim() ? rowData.type.trim() : "";
 
   return (
@@ -34,6 +37,7 @@ export function AgentResourceCardWidget({ rowData }: SolidKanbanCardWidgetProps)
       </div>
       <div className={styles.heading}><h3 className={styles.title} title={name}>{name}</h3></div>
       <p className={styles.description} title={description || undefined}>{description || "No description provided."}</p>
+      {loadError && <p className={styles.loadError} title={loadError}>{loadError}</p>}
       {(kind || tags.length > 0) && <div className={styles.footer}>
         <div className={styles.meta}>{kind && <span className={styles.badge}>{kind.replace(/[_-]+/g, " ")}</span>}</div>
         {tags.length > 0 && <div className={styles.tags}>{tags.slice(0, 3).map((tag) => <span className={styles.tag} key={tag}>{tag}</span>)}</div>}
