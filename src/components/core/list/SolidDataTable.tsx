@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ArrowDownWideNarrow, ArrowUpDown, ArrowUpWideNarrow } from "lucide-react";
 import { SolidSelect } from "../../shad-cn-ui/SolidSelect";
 
@@ -50,6 +50,7 @@ type SolidDataTableProps = {
   selectionMode?: "checkbox" | null;
   onSelectionChange?: (event: { value: any[] }) => void;
   onRowClick?: (event: { data: any }) => void;
+  resizableColumns?: boolean;
   rowClassName?: (rowData: any) => string;
   tableClassName?: string;
   paginatorClassName?: string;
@@ -59,6 +60,14 @@ type SolidDataTableProps = {
 };
 
 const cx = (...parts: Array<string | undefined | false>) => parts.filter(Boolean).join(" ");
+
+const MIN_COLUMN_WIDTH = 64;
+
+type ColumnResizeState = {
+  key: string;
+  startX: number;
+  startWidth: number;
+};
 
 function renderHeaderNode(header?: HeaderRenderer) {
   if (typeof header === "function") return header();
@@ -126,6 +135,7 @@ export function SolidDataTable({
   selectionMode,
   onSelectionChange,
   onRowClick,
+  resizableColumns = false,
   rowClassName,
   tableClassName,
   paginatorClassName,
@@ -134,6 +144,74 @@ export function SolidDataTable({
 }: SolidDataTableProps) {
   const columns = normalizeColumns(children);
   const pageRows = value ?? [];
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const tableRef = useRef<HTMLTableElement | null>(null);
+  const resizeStateRef = useRef<ColumnResizeState | null>(null);
+
+  useEffect(() => {
+    const handlePointerMove = (event: PointerEvent) => {
+      const resizeState = resizeStateRef.current;
+      if (!resizeState) return;
+
+      const width = Math.max(
+        MIN_COLUMN_WIDTH,
+        resizeState.startWidth + event.clientX - resizeState.startX,
+      );
+      setColumnWidths((current) => ({ ...current, [resizeState.key]: width }));
+    };
+
+    const stopResize = () => {
+      resizeStateRef.current = null;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.addEventListener("pointermove", handlePointerMove);
+    document.addEventListener("pointerup", stopResize);
+    document.addEventListener("pointercancel", stopResize);
+    return () => {
+      document.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("pointerup", stopResize);
+      document.removeEventListener("pointercancel", stopResize);
+      stopResize();
+    };
+  }, []);
+
+  const getColumnKey = (column: React.ReactElement<SolidColumnProps>, index: number) =>
+    `${column.props.field || "column"}-${index}`;
+
+  const startColumnResize = (
+    event: React.PointerEvent<HTMLSpanElement>,
+    column: React.ReactElement<SolidColumnProps>,
+    index: number,
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const header = event.currentTarget.parentElement;
+    if (!header) return;
+
+    const key = getColumnKey(column, index);
+    const measuredWidths = tableRef.current
+      ? Array.from(tableRef.current.querySelectorAll("thead th")).reduce<Record<string, number>>(
+        (widths, header, headerIndex) => {
+          const measuredWidth = (header as HTMLElement).getBoundingClientRect().width;
+          if (measuredWidth > 0) {
+            widths[getColumnKey(columns[headerIndex], headerIndex)] = measuredWidth;
+          }
+          return widths;
+        },
+        {},
+      )
+      : {};
+    setColumnWidths((current) => ({ ...measuredWidths, ...current }));
+    resizeStateRef.current = {
+      key,
+      startX: event.clientX,
+      startWidth: header.getBoundingClientRect().width,
+    };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
 
   const selectedKeys = new Set((selection || []).map((row: any) => String(row?.[dataKey])));
   const allSelected = pageRows.length > 0 && pageRows.every((row: any) => selectedKeys.has(String(row?.[dataKey])));
@@ -193,11 +271,25 @@ export function SolidDataTable({
       }}
     >
       <div className={cx("solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background", isAutoHeight && "solid-data-table-viewport-auto")}>
-        <table className={cx("w-full text-sm border-collapse", tableClassName)}>
+        <table
+          ref={tableRef}
+          className={cx("w-full text-sm border-collapse", tableClassName)}
+          style={Object.keys(columnWidths).length > 0 ? { width: "max-content", tableLayout: "fixed" } : undefined}
+        >
+          {Object.keys(columnWidths).length > 0 && (
+            <colgroup>
+              {columns.map((column, index) => {
+                const width = columnWidths[getColumnKey(column, index)];
+                return <col key={`column-width-${index}`} style={width ? { width } : undefined} />;
+              })}
+            </colgroup>
+          )}
           <thead className="solid-data-table-head">
             <tr>
               {columns.map((column, index) => {
                 const props = column.props;
+                const columnKey = getColumnKey(column, index);
+                const columnWidth = columnWidths[columnKey];
                 const isSelectionColumn = props.selectionMode === "multiple";
                 const isSortable = Boolean(props.sortable && props.field && !isSelectionColumn);
                 const isActiveSort = isSortable && sortField === props.field;
@@ -213,7 +305,15 @@ export function SolidDataTable({
                       isSelectionColumn ? "solid-data-table-selection-col" : undefined,
                       props.headerClassName
                     )}
-                    style={getFrozenCellStyle(props, { ...props.style, ...props.headerStyle }, true)}
+                    style={getFrozenCellStyle(
+                      props,
+                      {
+                        ...props.style,
+                        ...props.headerStyle,
+                        ...(columnWidth ? { width: columnWidth, minWidth: columnWidth } : {}),
+                      },
+                      true,
+                    )}
                   >
                     {isSelectionColumn ? (
                       <input
@@ -238,6 +338,14 @@ export function SolidDataTable({
                         {renderHeaderNode(props.header)}
                         {isSortable ? iconNode : null}
                       </button>
+                    )}
+                    {resizableColumns && !isSelectionColumn && (
+                      <span
+                        className="solid-data-table-column-resizer"
+                        role="separator"
+                        aria-label={`Resize ${typeof props.header === "string" ? props.header : props.field || "column"} column`}
+                        onPointerDown={(event) => startColumnResize(event, column, index)}
+                      />
                     )}
                   </th>
                 );
@@ -268,6 +376,7 @@ export function SolidDataTable({
                   >
                     {columns.map((column, index) => {
                       const props = column.props;
+                      const columnWidth = columnWidths[getColumnKey(column, index)];
                       const isSelectionColumn = props.selectionMode === "multiple";
                       const content = isSelectionColumn
                         ? (
@@ -295,7 +404,13 @@ export function SolidDataTable({
                             isSelectionColumn ? "solid-data-table-selection-col" : undefined,
                             props.className
                           )}
-                          style={getFrozenCellStyle(props, props.style)}
+                          style={getFrozenCellStyle(
+                            props,
+                            {
+                              ...props.style,
+                              ...(columnWidth ? { width: columnWidth, minWidth: columnWidth } : {}),
+                            },
+                          )}
                         >
                           {content}
                         </td>
