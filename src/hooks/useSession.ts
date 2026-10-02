@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { loadSession } from "../adapters/auth/storage";
 import { getSession } from "../adapters/auth/getSession";
 import type { Session } from "../adapters/auth/types";
+import type { SessionClearedPayload } from "../adapters/auth/signOut";
 import { eventBus, AppEvents } from "../helpers/eventBus";
 
 type UseSessionResult = {
@@ -38,7 +39,17 @@ export function useSession(): UseSessionResult {
       setData(session || null);
       setStatus(session?.user?.accessToken ? "authenticated" : "unauthenticated");
     });
-    const offClear = eventBus.on(AppEvents.SessionCleared, () => {
+    const offClear = eventBus.on<SessionClearedPayload>(AppEvents.SessionCleared, (payload) => {
+      // For a normal sign-out, clear the session held by this React tree so
+      // route guards update immediately. During a page redirect, storage is
+      // already cleared and the new page will check it, so updating this old
+      // tree would briefly render the login screen before the redirect.
+      console.log(
+        payload?.redirecting
+          ? "[Auth] SessionCleared received; waiting for page redirect"
+          : "[Auth] SessionCleared listener received event"
+      );
+      if (payload?.redirecting) return;
       setData(null);
       setStatus("unauthenticated");
     });
