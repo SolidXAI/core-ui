@@ -14,6 +14,7 @@ import { signOutOfAgent } from "./client/agentAuth";
 
 type Props = {
     agentUrl: string;
+    title?: string;
     /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
     agentRuntime?: AgentRuntimeType;
     inputContext?: AgentInputContext;
@@ -22,6 +23,14 @@ type Props = {
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
     handlesPrefill?: boolean;
     suggestions?: string[];
+    /** Controlled window actions for an embedded chat rendered in a modal. */
+    windowControls?: {
+        mode: "docked" | "maximized";
+        onDock: () => void;
+        onMaximize: () => void;
+        onRestore: () => void;
+        onClose: () => void;
+    };
 };
 
 const DEFAULT_SUGGESTIONS = [
@@ -42,12 +51,14 @@ function formatDate(iso: string | null) {
 
 export function SolidAgentChat({
     agentUrl,
+    title = "SolidX Agent",
     agentRuntime = "solidx",
     inputContext = {},
     embedded = false,
     // SDK prefill goes through the shared "solidx" conversation only.
     handlesPrefill = !embedded && agentRuntime === "solidx",
     suggestions = DEFAULT_SUGGESTIONS,
+    windowControls,
 }: Props) {
     const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
@@ -79,6 +90,7 @@ export function SolidAgentChat({
     }, [showHistory, agentUrl, signedIn]);
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
+    const windowMode = windowControls?.mode ?? agent.mode;
     const send = useCallback((text: string) => runtime?.sendMessage(text, inputContext), [runtime, inputContext]);
     const sendWithAttachments = useCallback(
         (text: string, attachments: AgentAttachment[]) => runtime?.sendMessage(text, inputContext, attachments),
@@ -117,7 +129,7 @@ export function SolidAgentChat({
                     <span className={styles.statusDot} style={{ background: statusColor }} />
                 </div>
                 <div className={styles.headerTitle}>
-                    <strong>SolidX Agent</strong>
+                    <strong>{title}</strong>
                     <span className={styles.headerSub}>{statusText}</span>
                 </div>
                 {signedIn && (
@@ -146,24 +158,24 @@ export function SolidAgentChat({
                         </button>
                     </>
                 )}
-                {!embedded && (
+                {(!embedded || windowControls) && (
                     <>
-                        {agent.mode !== "docked" && (
-                            <button type="button" className={styles.iconBtn} title="Dock to the side" aria-label="Dock to the side" onClick={() => setMode("docked")}>
+                        {windowMode !== "docked" && (
+                            <button type="button" className={styles.iconBtn} title="Dock to the side" aria-label="Dock to the side" onClick={() => windowControls ? windowControls.onDock() : setMode("docked")}>
                                 <PanelRight size={16} />
                             </button>
                         )}
-                        {agent.mode === "maximized" ? (
-                            <button type="button" className={styles.iconBtn} title="Restore" aria-label="Restore size" onClick={() => setMode("compact")}>
+                        {windowMode === "maximized" ? (
+                            <button type="button" className={styles.iconBtn} title="Restore" aria-label="Restore size" onClick={() => windowControls ? windowControls.onRestore() : setMode("compact")}>
                                 <Minimize2 size={15} />
                             </button>
                         ) : (
-                            <button type="button" className={styles.iconBtn} title="Maximize" aria-label="Maximize" onClick={() => setMode("maximized")}>
+                            <button type="button" className={styles.iconBtn} title="Maximize" aria-label="Maximize" onClick={() => windowControls ? windowControls.onMaximize() : setMode("maximized")}>
                                 <Maximize2 size={15} />
                             </button>
                         )}
-                        <button type="button" className={styles.iconBtn} title="Minimize (Esc)" aria-label="Minimize" onClick={() => setMode("bubble")}>
-                            {agent.mode === "compact" ? <Minus size={16} /> : <X size={16} />}
+                        <button type="button" className={styles.iconBtn} title={windowControls ? "Close test agent" : "Minimize (Esc)"} aria-label={windowControls ? "Close test agent" : "Minimize"} onClick={() => windowControls ? windowControls.onClose() : setMode("bubble")}>
+                            {windowControls || windowMode !== "compact" ? <X size={16} /> : <Minus size={16} />}
                         </button>
                     </>
                 )}

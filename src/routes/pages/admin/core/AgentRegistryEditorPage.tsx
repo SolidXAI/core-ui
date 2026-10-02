@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronDown, ExternalLink, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ExternalLink, FlaskConical, Plus, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -8,11 +8,12 @@ import { useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
-import { AgentRegistryCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
+import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
 import { ALLOWED_MODELS_BY_PROVIDER, type AllowedModelProvider } from "../../../../constants/allowed-ai-models";
-import { SolidButton, SolidCodeEditor, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { SolidButton, SolidCodeEditor, SolidDialog, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
 import "./AgentRegistryEditorPage.css";
 
 type Item = { id: number; name?: string; title?: string; displayName?: string; description?: string; iconName?: string; key?: string; module?: { id?: number; displayName?: string }; [key: string]: any };
@@ -235,6 +236,8 @@ export function AgentRegistryEditorPage() {
   const [deleteSecretLink] = agentSecretApi.useDeleteSolidEntityMutation();
   const record = recordFrom(response) as Agent | undefined;
   const [tab, setTab] = React.useState("basics");
+  const [testAgentOpen, setTestAgentOpen] = React.useState(false);
+  const [testAgentWindowMode, setTestAgentWindowMode] = React.useState<"docked" | "maximized">("maximized");
   const [name, setName] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -300,7 +303,7 @@ export function AgentRegistryEditorPage() {
     }
   };
 
-  const save = async () => {
+  const save = async (nextStatus?: "draft" | "active" | "disabled") => {
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Name is required.";
     if (!title.trim()) next.title = "Title is required.";
@@ -322,6 +325,7 @@ export function AgentRegistryEditorPage() {
       reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
       ...(!record?.id ? { status: "draft", configVersion: 1 } : {}),
+      ...(nextStatus ? { status: nextStatus } : {}),
     };
     let newlyCreatedId: number | undefined;
     let scalarSaved = false;
@@ -335,7 +339,7 @@ export function AgentRegistryEditorPage() {
       await syncLinks(savedId, record?.agentTools, toolIds, "agentToolRegistry", createToolLink, deleteToolLink, { requiresApproval: false });
       await syncLinks(savedId, record?.agentRoles, roleIds, "roleMetadata", createRoleLink, deleteRoleLink);
       await syncLinks(savedId, record?.agentSecrets, secretIds, "secret", createSecretLink, deleteSecretLink);
-      dispatch(showToast({ severity: "success", summary: "Saved", detail: "Agent and its associations saved." }));
+      dispatch(showToast({ severity: "success", summary: nextStatus ? "Agent status updated" : "Saved", detail: nextStatus ? `Agent moved to ${nextStatus}.` : "Agent and its associations saved." }));
       setAuditVersion((version) => version + 1);
       if (record?.id) refetch();
       else navigate(`/admin/core/solid-core/agent-registry/editor/${savedId}`, { replace: true });
@@ -356,6 +360,7 @@ export function AgentRegistryEditorPage() {
   const groups = roles.records.reduce((acc, role) => {
     const key = role.module?.displayName ?? "Default"; (acc[key] ??= []).push(role); return acc;
   }, {} as Record<string, Item[]>);
+  const agentStatus = record?.status ?? "draft";
   const tabs = [
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
       <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
@@ -380,17 +385,35 @@ export function AgentRegistryEditorPage() {
             {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</label>)}
       </div>{settingsError ? <p className="agent-editor__hint">Settings could not be loaded. Try refreshing this page.</p>
         : !modelOptions.length && <p className="agent-editor__hint">No configured models are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
-      <div className="agent-editor__field"><span>Status</span><SolidWorkflowStatusPill label={record?.status ?? "draft"} /><small>Read only. Status is managed by the agent workflow.</small></div>
+      <section className="agent-editor__section agent-editor__workflow" aria-labelledby="agent-lifecycle-title">
+        <div className="agent-editor__section-head"><div><h2 id="agent-lifecycle-title">Agent lifecycle</h2><p>Track this agent through its available stages. Select a stage to update its status.</p></div><SolidWorkflowStatusPill label={agentStatus} /></div>
+        <div className="agent-editor__workflow-stages" aria-label={`Current agent stage: ${agentStatus}`}>
+          {([[
+            "draft", "Draft", "Editable configuration; not available to users."],
+            ["active", "Active", "Available to authorized users and the AgentHub runtime."],
+            ["disabled", "Disabled", "Unavailable for new interactions."],
+          ] as const).map(([value, label, description], index) => <React.Fragment key={value}>
+            {index > 0 && <div className="agent-editor__workflow-connector" aria-hidden="true" />}
+            <button type="button" className={`agent-editor__workflow-stage${agentStatus === value ? " is-current" : ""}`} aria-current={agentStatus === value ? "step" : undefined}
+              aria-pressed={agentStatus === value} disabled={creating || updating || agentStatus === value} onClick={() => void save(value)}>
+              <span className="agent-editor__workflow-stage-mark">{index + 1}</span>
+              <div className="agent-editor__workflow-stage-copy"><strong>{label}</strong><small>{description}</small><small className="agent-editor__workflow-stage-cta">{agentStatus === value ? "Current stage" : "Click to move to this stage"}</small></div>
+              {agentStatus === value && <span className="agent-editor__workflow-current">Current</span>}
+            </button>
+          </React.Fragment>)}
+        </div>
+        <small className="agent-editor__workflow-save-hint">Changing stage saves the current form and its linked skills, tools, roles, and secrets.</small>
+      </section>
     </div> },
     { value: "persona", label: "Persona", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div></div>
       <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" height="max(34rem, calc(100dvh - 18rem))" />
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
-      render={(item) => <AgentRegistryCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />} /> },
+      render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />} /> },
     { value: "tools", label: "Tools", content: <LinkPicker label="Tools" description="Tools available to this agent." options={tools.records} selected={linked(toolIds, tools.records, items(record?.agentTools).map((link) => link.agentToolRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setToolIds, id)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
-      render={(item) => <AgentRegistryCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />} /> },
+      render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />} /> },
     { value: "policies", label: "Policies", content: <div className="agent-editor__stack"><section className="agent-editor__section"><h2>Roles</h2><p>Grant the agent the roles it may use.</p>
       {Object.entries(groups).map(([groupName, groupRoles]) => <fieldset className="agent-editor__role-group" key={groupName}><legend>{groupName}</legend>
         {(groupRoles ?? []).map((role) => <label key={role.id}><input type="checkbox" checked={roleIds.includes(role.id)} onChange={() => toggle(setRoleIds, role.id)} /> {role.name}</label>)}
@@ -411,8 +434,26 @@ export function AgentRegistryEditorPage() {
   const content = <SolidTabGroup tabs={tabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
   return <main className="agent-editor"><header className="agent-editor__header"><div><p>Agent Hub / Agent Registry</p><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1></div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
-    <SolidButton loading={creating || updating} disabled={isLoading || isError || (id !== "new" && !record?.id)} onClick={save}>Save Agent</SolidButton>
+    {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={() => { setTestAgentWindowMode("maximized"); setTestAgentOpen(true); }}>Test Agent</SolidButton>}
+    <SolidButton loading={creating || updating} disabled={isLoading || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
   </div></header>{isLoading ? <div className="agent-editor__empty">Loading agent…</div> : isError || (id !== "new" && !record?.id) ?
     <div className="agent-editor__empty">This agent could not be loaded.</div> : record?.id ?
-    <AgentRegistryAuditPanel modelSingularName="agentRegistry" recordId={record.id} refreshVersion={auditVersion} modelUserKey={record.name}>{content}</AgentRegistryAuditPanel> : content}</main>;
+    <AgentRegistryAuditPanel modelSingularName="agentRegistry" recordId={record.id} refreshVersion={auditVersion} modelUserKey={record.name}>{content}</AgentRegistryAuditPanel> : content}
+    {record?.id && <SolidDialog
+      open={testAgentOpen}
+      onOpenChange={setTestAgentOpen}
+      onHide={() => setTestAgentOpen(false)}
+      showHeader={false}
+      ariaLabel={`Test ${record.name ?? "SolidX Agent"}`}
+      className="agent-editor__test-dialog"
+      style={testAgentWindowMode === "maximized"
+        ? { position: "fixed", inset: 16, width: "auto", maxWidth: "none", height: "auto", maxHeight: "none", transform: "none", borderRadius: 14, padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }
+        : { position: "fixed", top: 16, right: 16, bottom: 16, left: "auto", width: "min(28rem, calc(100vw - 32px))", maxWidth: "none", height: "auto", maxHeight: "none", transform: "none", borderRadius: 14, padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}
+    >
+      <div className="agent-editor__test-dialog-body">
+        <SolidAgentEmbedded agentRuntime="agentHub" agentId={record.id} title={record.name ?? "SolidX Agent"} height="100%" className="agent-editor__test-chat"
+          windowControls={{ mode: testAgentWindowMode, onDock: () => setTestAgentWindowMode("docked"), onMaximize: () => setTestAgentWindowMode("maximized"), onRestore: () => setTestAgentWindowMode("docked"), onClose: () => setTestAgentOpen(false) }} />
+      </div>
+    </SolidDialog>}
+  </main>;
 }

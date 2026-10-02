@@ -60,6 +60,7 @@ import MqMessageKanbanQuickFilterHeaderAction from "../components/core/extension
 import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/extension/solid-core/mqMessage/MqMessageSelectedRecordsSummaryHeaderAction";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
 import { AgentRegistryCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
+import { AgentResourceCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
 import { MediaFileSizeFormViewWidget, MediaFileSizeListWidget } from "../components/core/extension/solid-core/media/fileSize/MediaFileSizeWidget";
 import { MediaRelativeUriFormViewWidget, MediaRelativeUriListWidget } from "../components/core/extension/solid-core/media/relativeUri/MediaRelativeUriPreview";
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
@@ -426,6 +427,7 @@ registerExtensionComponent("MqMessageSelectedRecordsSummaryHeaderAction", MqMess
 registerExtensionComponent("MqMessageKanbanSelectedRecordsSummaryHeaderAction", MqMessageSelectedRecordsSummaryHeaderAction, ExtensionComponentTypes.kanbanHeaderAction);
 registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.cardWidget);
 registerExtensionComponent("AgentRegistryCardWidget", AgentRegistryCardWidget, ExtensionComponentTypes.cardWidget);
+registerExtensionComponent("AgentResourceCardWidget", AgentResourceCardWidget, ExtensionComponentTypes.cardWidget);
 
 // Dashboard widgets (default first-party set)
 registerExtensionComponent("DefaultDashboardKpiWidget", DefaultDashboardKpiWidget, ExtensionComponentTypes.dashboardWidget);
