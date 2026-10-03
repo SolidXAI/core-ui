@@ -7611,3 +7611,45 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
     display: block;
   }
 }
+
+@media (max-width: 480px) {
+  .solid-auth-theme-wrapper.center {
+    box-sizing: border-box;
+    justify-items: center;
+    overflow-x: hidden;
+    padding: 14px !important;
+    width: 100%;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-center-layout {
+    width: 100% !important;
+    max-width: 388px !important;
+    min-height: auto;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-center-stack,
+  .solid-auth-theme-wrapper.center .auth-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+
+  .solid-auth-theme-wrapper.center .auth-container {
+    padding: 22px !important;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-brand {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-brand-logo img {
+    max-width: min(180px, 68vw);
+  }
+}
