@@ -9,8 +9,14 @@ export function AgentProcessNeedsRestartListWidget({ rowData }: SolidListFieldWi
   const [restartNeeded, setRestartNeeded] = useState<boolean | null>(null);
   const [managerError, setManagerError] = useState<string | null>(null);
   const processId = String(rowData?.processId ?? "");
+  const isReady = String(rowData?.status ?? "").toLowerCase() === "ready";
 
   useEffect(() => {
+    if (!isReady) {
+      setRestartNeeded(false);
+      setManagerError(null);
+      return;
+    }
     let alive = true;
     const load = () => {
       void listAgentHubProcesses(true).then((processes) => {
@@ -32,12 +38,12 @@ export function AgentProcessNeedsRestartListWidget({ rowData }: SolidListFieldWi
       window.clearInterval(refreshTimer);
       window.removeEventListener("agent-process-manager-updated", load);
     };
-  }, [processId]);
+  }, [isReady, processId]);
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-1" style={{ maxWidth: "28ch" }}>
       <span title={processId} style={{ maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{processId || "—"}</span>
-      {restartNeeded && (
+      {isReady && restartNeeded && (
         <span title="This process is running an older agent configuration." style={{
           display: "inline-flex", alignItems: "center", gap: ".25rem", borderRadius: 999,
           padding: ".12rem .45rem", color: "#92400e", background: "#fef3c7",

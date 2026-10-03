@@ -1,8 +1,9 @@
 import React from "react";
-import { AlertCircle, Clock3, Search } from "lucide-react";
+import { AlertCircle, Clock3, RefreshCw, Search } from "lucide-react";
 import { createSolidEntityApi } from "../../../../../redux/api/solidEntityApi";
 import { SolidAutocomplete, SolidInput } from "../../../../shad-cn-ui";
 import { AgentEventOutcomeListWidget, getAgentEventFailure } from "../agentEvent/list/AgentEventOutcomeListWidget";
+import "../../../../../routes/pages/admin/core/AgentToolRegistryEditorPage.css";
 
 type AgentOption = { id: number | string; name?: string; title?: string };
 type SessionRecord = {
@@ -40,18 +41,19 @@ function agentName(session: SessionRecord, agents: AgentOption[]): string {
   return "Unknown agent";
 }
 
-function sessionQuery(agentId: number | string): string {
-  return `offset=0&limit=1000&populate[0]=agent&sort[0]=startedAt%3Adesc&filters[agent][id][$eq]=${encodeURIComponent(String(agentId))}`;
+function sessionQuery(agentId: number | string, processId?: number): string {
+  const processFilter = processId == null ? "" : `&filters[process][id][$eq]=${encodeURIComponent(String(processId))}`;
+  return `offset=0&limit=1000&populate[0]=agent&sort[0]=startedAt%3Adesc&filters[agent][id][$eq]=${encodeURIComponent(String(agentId))}${processFilter}`;
 }
 
 function eventsQuery(sessionId: number): string {
   return `offset=0&limit=1000&sort[0]=createdAt%3Aasc&filters[session][id][$eq]=${encodeURIComponent(String(sessionId))}`;
 }
 
-type Props = { agents?: AgentOption[]; agentId?: number | string; agentLabel?: string };
+type Props = { agents?: AgentOption[]; agentId?: number | string; agentLabel?: string; processId?: number; processLabel?: string };
 const EMPTY_AGENTS: AgentOption[] = [];
 
-export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
+export function AgentSessionsPanel({ agents, agentId, agentLabel, processId, processLabel }: Props) {
   const linkedAgents = agents ?? EMPTY_AGENTS;
   const scopedAgents = React.useMemo(() => agentId != null
     ? [{ id: agentId, name: agentLabel ?? "Agent" }]
@@ -72,6 +74,8 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
   const [outcomeFilter, setOutcomeFilter] = React.useState("all");
   const [eventSearch, setEventSearch] = React.useState("");
   const [sessionSearch, setSessionSearch] = React.useState("");
+  const [sessionRefreshVersion, setSessionRefreshVersion] = React.useState(0);
+  const [eventRefreshVersion, setEventRefreshVersion] = React.useState(0);
   const agentOptions = React.useMemo(() => linkedAgents.map((agent) => ({
     id: String(agent.id),
     label: agent.name ?? agent.title ?? `Agent ${agent.id}`,
@@ -89,7 +93,7 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
     setIsLoadingSessions(true);
     setSessionsError(false);
     void Promise.all(requestedAgents.map(async (agent) => {
-      const result = await fetchSessions(sessionQuery(agent.id)).unwrap();
+      const result = await fetchSessions(sessionQuery(agent.id, processId), false).unwrap();
       return unwrapRecords(result).map((item) => ({
         ...item,
         agent: item.agent && typeof item.agent === "object" ? item.agent : agent,
@@ -109,7 +113,7 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
       }
     }).finally(() => alive && setIsLoadingSessions(false));
     return () => { alive = false; };
-  }, [agentId, fetchSessions, linkedAgentKey, scopedAgents, selectedAgent]);
+  }, [agentId, fetchSessions, linkedAgentKey, processId, scopedAgents, selectedAgent, sessionRefreshVersion]);
 
   React.useEffect(() => {
     let alive = true;
@@ -119,7 +123,7 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
     }
     setIsLoadingEvents(true);
     setEventsError(false);
-    void fetchEvents(eventsQuery(selectedSessionId)).unwrap().then((result: any) => {
+    void fetchEvents(eventsQuery(selectedSessionId), false).unwrap().then((result: any) => {
       if (alive) setEvents(unwrapRecords(result));
     }).catch(() => {
       if (alive) {
@@ -128,7 +132,7 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
       }
     }).finally(() => alive && setIsLoadingEvents(false));
     return () => { alive = false; };
-  }, [fetchEvents, selectedSessionId]);
+  }, [eventRefreshVersion, fetchEvents, selectedSessionId]);
 
   const eventTypes = React.useMemo(() => Array.from(new Set(events.map((event) => String(event.eventType ?? "")).filter(Boolean))).sort(), [events]);
   const visibleEvents = React.useMemo(() => {
@@ -155,8 +159,8 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
     <section className="agent-tool-editor__sessions" aria-label="Sessions and events">
       <aside className="agent-tool-editor__sessions-sidebar">
         <header className="agent-tool-editor__sessions-sidebar-head">
-          <div><div className="agent-tool-editor__sessions-heading"><h2>Sessions</h2><span>{visibleSessions.length}{visibleSessions.length !== sessions.length ? ` / ${sessions.length}` : ""}</span></div></div>
-          <p>{agentId != null ? "Browse activity for this agent." : "Browse activity across linked agents."}</p>
+          <div><div className="agent-tool-editor__sessions-heading"><h2>Sessions</h2><button type="button" className={`agent-tool-editor__refresh${isLoadingSessions ? " is-loading" : ""}`} aria-label="Refresh sessions" title="Refresh sessions" disabled={isLoadingSessions} onClick={() => setSessionRefreshVersion((version) => version + 1)}><RefreshCw size={13} /></button><span>{visibleSessions.length}{visibleSessions.length !== sessions.length ? ` / ${sessions.length}` : ""}</span></div></div>
+          <p>{processId != null ? `In ${processLabel ?? `process #${processId}`}.` : agentId != null ? "Browse activity for this agent." : "Browse activity across linked agents."}</p>
           {agentId == null && linkedAgents.length > 1 && <label className="agent-tool-editor__sessions-agent-filter"><span>Agent</span>
             <SolidAutocomplete
               value={selectedAgent ? [selectedAgent] : []}
@@ -176,7 +180,7 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
         <div className="agent-tool-editor__session-list" role="listbox" aria-label="Sessions">
           {isLoadingSessions ? <p className="agent-tool-editor__sessions-message">Loading sessions…</p>
             : sessionsError ? <p className="agent-tool-editor__sessions-message agent-tool-editor__sessions-message--error"><AlertCircle size={15} /> Could not load sessions.</p>
-              : sessions.length === 0 ? <p className="agent-tool-editor__sessions-message">No sessions found for linked agents.</p>
+              : sessions.length === 0 ? <p className="agent-tool-editor__sessions-message">{processId != null ? "No sessions assigned to this process. Older unassigned sessions remain in the Sessions tab." : "No sessions found for linked agents."}</p>
                 : visibleSessions.length === 0 ? <p className="agent-tool-editor__sessions-message">No sessions match this search.</p>
                 : visibleSessions.map((session) => {
                   const sessionLabel = session.sessionId ?? String(session.id);
@@ -205,7 +209,7 @@ export function AgentSessionsPanel({ agents, agentId, agentLabel }: Props) {
       <div className="agent-tool-editor__session-events">
         <header className="agent-tool-editor__events-head">
           <div className="agent-tool-editor__events-title">
-            <div><h2>Events</h2><p>{selectedSession ? `${selectedSession.sessionId ?? selectedSession.id} · ${agentName(selectedSession, scopedAgents)}` : "Select a session to inspect its events."}</p></div>
+            <div><div className="agent-tool-editor__heading-with-refresh"><h2>Events</h2><button type="button" className={`agent-tool-editor__refresh${isLoadingEvents ? " is-loading" : ""}`} aria-label="Refresh events" title="Refresh events" disabled={!selectedSessionId || isLoadingEvents} onClick={() => setEventRefreshVersion((version) => version + 1)}><RefreshCw size={13} /></button></div><p>{selectedSession ? `${selectedSession.sessionId ?? selectedSession.id} · ${agentName(selectedSession, scopedAgents)}` : "Select a session to inspect its events."}</p></div>
             <span>{visibleEvents.length}{visibleEvents.length !== events.length ? ` / ${events.length}` : ""}</span>
           </div>
           <div className="agent-tool-editor__event-filters">

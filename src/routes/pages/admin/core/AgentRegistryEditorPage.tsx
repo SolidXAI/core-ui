@@ -10,6 +10,7 @@ import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
 import { AgentSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
+import { AgentProcessesPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentProcessesPanel";
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
 import { ALLOWED_MODELS_BY_PROVIDER, type AllowedModelProvider } from "../../../../constants/allowed-ai-models";
@@ -491,8 +492,9 @@ export function AgentRegistryEditorPage() {
       render={(item, link) => <div className="agent-editor__secret"><strong>{item.displayName ?? item.name ?? item.key}</strong><span>{item.key}</span><p>{item.description}</p>
         <div className="agent-editor__secret-env"><span>Process environment</span><code>{secretEnvVarNames[item.id] ?? link?.envVarName ?? item.key ?? item.name}</code>
           <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={14} /></button></div></div>} /> },
+    ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...((record?.id ? [
-      ["processes", "Processes", record.agentProcesses], ["jobs", "Jobs", record.agentJobs],
+      ["jobs", "Jobs", record.agentJobs],
     ] : []) as [string, string, Item[]][]).map(([value, label, related]) => ({ value, label, content: <section className="agent-editor__section"><h2>{label}</h2>
       {items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
