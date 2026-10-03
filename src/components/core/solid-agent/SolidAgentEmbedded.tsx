@@ -37,7 +37,7 @@ type Props = SharedProps & (
     }
 );
 
-const AGENT_LABEL: Record<AgentRuntimeType, string> = { solidx: "SolidX Agent", agentHub: "SolidX Agent" };
+const AGENT_LABEL: Record<AgentRuntimeType, string> = { solidx: "SolidX Agent", agentHub: "AgentHub Agent" };
 
 /**
  * The agent chat rendered inside a page (a tab or form widget) instead of the floating window.

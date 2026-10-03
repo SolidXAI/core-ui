@@ -12,7 +12,7 @@ type Props = {
     /** Text to place in the box (e.g. a prefilled prompt); changing `seedKey` re-applies it. */
     seed?: string;
     seedKey?: number;
-    onSend: (text: string, attachments: AgentAttachment[]) => void;
+    onSend: (text: string, attachments: AgentAttachment[]) => void | Promise<void>;
     onStop: () => void;
 };
 
@@ -26,6 +26,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     const [attachments, setAttachments] = useState<AgentAttachment[]>([]);
     const [attachErrors, setAttachErrors] = useState<string[]>([]);
     const [dragging, setDragging] = useState(false);
+    const [sending, setSending] = useState(false);
     const ref = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,7 +58,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     }
 
     const addFiles = async (files: File[]) => {
-        if (!files.length || disabled) return;
+        if (!files.length || disabled || sending) return;
         const { added, errors } = await readAgentAttachments(files, attachments);
         if (added.length) setAttachments((prev) => [...prev, ...added]);
         setAttachErrors(errors);
@@ -68,15 +69,22 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
         setAttachErrors([]);
     };
 
-    const canSend = (!!text.trim() || attachments.length > 0) && !working && !disabled;
+    const canSend = (!!text.trim() || attachments.length > 0) && !working && !disabled && !sending;
 
-    const submit = () => {
+    const submit = async () => {
         if (!canSend) return;
-        onSend(text.trim(), attachments);
-        setText("");
-        setAttachments([]);
+        setSending(true);
         setAttachErrors([]);
-        requestAnimationFrame(autosize);
+        try {
+            await onSend(text.trim(), attachments);
+            setText("");
+            setAttachments([]);
+            requestAnimationFrame(autosize);
+        } catch (error) {
+            setAttachErrors([error instanceof Error ? error.message : "The message could not be sent."]);
+        } finally {
+            setSending(false);
+        }
     };
 
     const pickCommand = (cmd: AgentCommand) => {
@@ -113,7 +121,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
 
     const dropHandlers = {
         onDragOver: (event: React.DragEvent) => {
-            if (disabled || !event.dataTransfer?.types?.includes("Files")) return;
+            if (disabled || sending || !event.dataTransfer?.types?.includes("Files")) return;
             event.preventDefault();
             setDragging(true);
         },
@@ -121,7 +129,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
             if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false);
         },
         onDrop: (event: React.DragEvent) => {
-            if (disabled) return;
+            if (disabled || sending) return;
             event.preventDefault();
             setDragging(false);
             void addFiles(Array.from(event.dataTransfer?.files ?? []));
@@ -183,7 +191,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
                 className={styles.textarea}
                 rows={1}
                 value={text}
-                disabled={disabled}
+                disabled={disabled || sending}
                 aria-label="Message the SolidX Agent"
                 placeholder={dragging ? "Drop files to attach" : placeholder ?? "Ask the agent…"}
                 onChange={(event) => {
@@ -211,7 +219,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
                     className={styles.iconBtn}
                     aria-label="Attach files"
                     title={`Attach files (up to ${MAX_AGENT_ATTACHMENTS}: images or text files)`}
-                    disabled={disabled || attachments.length >= MAX_AGENT_ATTACHMENTS}
+                    disabled={disabled || sending || attachments.length >= MAX_AGENT_ATTACHMENTS}
                     onClick={() => fileInputRef.current?.click()}
                 >
                     <Paperclip size={16} />

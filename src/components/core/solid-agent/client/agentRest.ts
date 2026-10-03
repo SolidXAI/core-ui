@@ -1,4 +1,5 @@
 import { clearAgentAuth, loadAgentAuth } from "./agentAuth";
+import type { AgentUploadedAttachment } from "../types";
 
 export const HISTORY_PAGE_SIZE = 50;
 
@@ -50,4 +51,32 @@ export function fetchAgentConfigVersionStatus(agentUrl: string) {
 
 export function deleteSession(agentUrl: string, sessionId: string) {
     return agentFetch<unknown>(agentUrl, `/api/agent/sessions/${encodeURIComponent(sessionId)}`, { method: "DELETE" });
+}
+
+/** Upload files through Agent Hub, which forwards them to SolidX media storage with the caller's API key. */
+export async function uploadAgentHubAttachments(agentUrl: string, files: File[]): Promise<AgentUploadedAttachment[]> {
+    const auth = await loadAgentAuth(agentUrl);
+    if (!auth) throw new Error("Sign in to the agent before uploading files.");
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+    const response = await fetch(`${auth.httpUrl.replace(/\/$/, "")}/api/agent/attachments`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${auth.agentToken}` },
+        body: formData,
+    });
+    if (response.status === 401) clearAgentAuth(agentUrl);
+    if (!response.ok) {
+        let message = "File upload failed.";
+        try {
+            const body = await response.json();
+            message = body?.detail ?? body?.message ?? message;
+            if (Array.isArray(message)) message = message.join(", ");
+        } catch {
+            // Keep a useful generic error if the runtime did not return JSON.
+        }
+        throw new Error(String(message));
+    }
+    const body = await response.json();
+    if (!Array.isArray(body?.attachments)) throw new Error("The agent returned an invalid file upload response.");
+    return body.attachments as AgentUploadedAttachment[];
 }

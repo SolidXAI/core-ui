@@ -39,6 +39,12 @@ const DEFAULT_SUGGESTIONS = [
     "Explain what this screen does",
 ];
 
+const AGENT_HUB_DEFAULT_SUGGESTIONS = [
+    "What can you help me with?",
+    "What tools can you use?",
+    "Summarize your capabilities",
+];
+
 function formatDate(iso: string | null) {
     if (!iso) return "";
     const date = new Date(iso);
@@ -57,7 +63,7 @@ export function SolidAgentChat({
     embedded = false,
     // SDK prefill goes through the shared "solidx" conversation only.
     handlesPrefill = !embedded && agentRuntime === "solidx",
-    suggestions = DEFAULT_SUGGESTIONS,
+    suggestions,
     windowControls,
 }: Props) {
     const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl);
@@ -65,6 +71,7 @@ export function SolidAgentChat({
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
     const signedInAs = agentAuth.auth?.user?.email ?? agentAuth.auth?.user?.username;
+    const emptyStateSuggestions = suggestions ?? (agentRuntime === "agentHub" ? AGENT_HUB_DEFAULT_SUGGESTIONS : DEFAULT_SUGGESTIONS);
 
     const [showHistory, setShowHistory] = useState(false);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
@@ -132,11 +139,13 @@ export function SolidAgentChat({
         <div className={styles.empty}>
             <div className={styles.emptyMark}><Sparkles size={24} /></div>
             <div>
-                <h2 className={styles.emptyTitle}>How can I help?</h2>
-                <p className={styles.emptyText}>Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you.</p>
+                <h2 className={styles.emptyTitle}>{agentRuntime === "agentHub" ? `Start a conversation with ${title}` : "How can I help?"}</h2>
+                <p className={styles.emptyText}>{agentRuntime === "agentHub"
+                    ? "Ask this agent for help with its configured capabilities. It can use the tools and knowledge available to it."
+                    : "Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you."}</p>
             </div>
             <div className={styles.suggestions}>
-                {suggestions.map((text) => (
+                {emptyStateSuggestions.map((text) => (
                     <button key={text} type="button" className={styles.suggestion} onClick={() => send(text)}>
                         {text}
                     </button>

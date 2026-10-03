@@ -44,6 +44,22 @@
   gap: 0.5rem;
 }
 
+.agent-skill-editor__heading-with-refresh,
+.agent-skill-editor__refresh {
+  display: flex;
+  align-items: center;
+}
+
+.agent-skill-editor__heading-with-refresh { gap: 0.3rem; }
+.agent-skill-editor__refresh { width: 1.25rem; height: 1.25rem; justify-content: center; padding: 0; border: 0; border-radius: 0.25rem; background: transparent; color: var(--text-color-secondary, var(--muted-foreground)); cursor: pointer; }
+.agent-skill-editor__refresh:hover:not(:disabled),
+.agent-skill-editor__refresh:focus-visible { color: var(--primary-color, var(--primary)); background: color-mix(in srgb, var(--primary-color, var(--primary)) 9%, transparent); }
+.agent-skill-editor__refresh:focus-visible { outline: 2px solid var(--primary-color, var(--primary)); outline-offset: 1px; }
+.agent-skill-editor__refresh:disabled { cursor: default; opacity: 0.55; }
+.agent-skill-editor__refresh.is-loading svg { animation: agent-skill-editor-refresh-spin 0.8s linear infinite; }
+@keyframes agent-skill-editor-refresh-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .agent-skill-editor__refresh.is-loading svg { animation: none; } }
+
 .agent-skill-editor__tabs {
   overflow: hidden;
   border: 1px solid var(--surface-border, var(--border));

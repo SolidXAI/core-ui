@@ -90,6 +90,7 @@ export type AgentAttachmentPayload = {
 
 /** What the thread shows for an attachment (history only has name/type/size). */
 export type AgentAttachmentMeta = {
+    mediaId?: number;
     name: string;
     mimeType: string;
     size: number;
@@ -99,7 +100,8 @@ export type AgentAttachmentMeta = {
     url?: string;
 };
 
-export type AgentAttachment = { payload: AgentAttachmentPayload; meta: AgentAttachmentMeta };
+export type AgentAttachment = { payload: AgentAttachmentPayload; meta: AgentAttachmentMeta; file: File };
+export type AgentUploadedAttachment = { id: number; name: string; mimeType: string; size: number };
 
 export type AgentAction =
     | { action: "start_session" }
@@ -110,7 +112,7 @@ export type AgentAction =
           content: string;
           context?: AgentContext;
           widget_reply?: WidgetReply | null;
-          attachments?: AgentAttachmentPayload[];
+          attachments?: AgentAttachmentPayload[] | AgentUploadedAttachment[];
       }
     | { action: "cancel"; session_id: string }
     | { action: "end_session"; session_id: string };

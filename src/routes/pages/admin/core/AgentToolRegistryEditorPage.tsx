@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, RefreshCw, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -7,7 +7,7 @@ import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentToolSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import { AgentRegistryCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
-import { SolidButton, SolidCodeEditor, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import "./AgentToolRegistryEditorPage.css";
 
 const SharedAgentRegistryCard = AgentRegistryCardWidget as React.ComponentType<{ rowData: Record<string, any> }>;
@@ -85,7 +85,7 @@ export function AgentToolRegistryEditorPage() {
   const dispatch = useDispatch();
   const entityApi = React.useMemo(() => createSolidEntityApi("agentToolRegistry"), []);
   const { useCreateSolidEntityMutation, useGetSolidEntityByIdQuery, useUpdateSolidEntityMutation } = entityApi;
-  const { data: response, isLoading, refetch } = useGetSolidEntityByIdQuery(
+  const { data: response, isLoading, isFetching, refetch } = useGetSolidEntityByIdQuery(
     { id, qs: "populate[0]=agentTools&populate[1]=agentTools.agentRegistry" },
     { skip: !id || id === "new" },
   );
@@ -102,15 +102,25 @@ export function AgentToolRegistryEditorPage() {
   const [tagDraft, setTagDraft] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
+  const [confirmRefresh, setConfirmRefresh] = React.useState(false);
+  const baseline = React.useRef("");
+
+  const currentForm = () => JSON.stringify({ name, iconName, description, type, sourceCode, tags, tagDraft });
 
   React.useEffect(() => {
+    const nextTags = parseTags(record?.tags);
     setName(record?.name ?? "");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setType(record?.type ?? "custom");
     setSourceCode(record?.sourceCode ?? "");
-    setTags(parseTags(record?.tags));
+    setTags(nextTags);
+    setTagDraft("");
+    baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", type: record?.type ?? "custom", sourceCode: record?.sourceCode ?? "", tags: nextTags, tagDraft: "" });
   }, [record]);
+
+  const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
+  const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
 
   const addTag = () => {
     const next = tagDraft.trim();
@@ -244,10 +254,14 @@ export function AgentToolRegistryEditorPage() {
   ];
 
   return <main className="agent-tool-editor">
-    <header className="agent-tool-editor__header"><div><p>Agent Hub / Tool Registry</p><h1>{record ? "Edit Tool" : "Create Tool"}</h1></div><div className="agent-tool-editor__actions">
+    <header className="agent-tool-editor__header"><div><p>Agent Hub / Tool Registry</p><div className="agent-tool-editor__heading-with-refresh"><h1>{record ? "Edit Tool" : "Create Tool"}</h1>{record?.id && <button type="button" className={`agent-tool-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh tool" title="Refresh tool" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div></div><div className="agent-tool-editor__actions">
       <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
       <SolidButton loading={isCreating || isSaving} onClick={() => void save()}>Save Tool</SolidButton>
     </div></header>
+    <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
+      footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
+      <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest tool content.</p></SolidDialogBody>
+    </SolidDialog>
     {isLoading ? <div className="agent-tool-editor__loading">Loading tool…</div> : record?.id ? (
       <AgentRegistryAuditPanel modelSingularName="agentToolRegistry" recordId={record.id} refreshVersion={auditRefreshVersion} modelUserKey={record.name}>
         <SolidTabGroup tabs={tabs} value={activeTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />

@@ -2,6 +2,14 @@
 .agent-editor__header,.agent-editor__actions,.agent-editor__section-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
 .agent-editor__header p,.agent-editor__section p,.agent-editor__field small { margin:.25rem 0; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.85rem; }
 .agent-editor__header h1 { margin:0; font-size:1.5rem; }
+.agent-editor__heading-with-refresh { display:flex; align-items:center; gap:.3rem; }
+.agent-editor__refresh { display:grid; width:1.25rem; height:1.25rem; place-items:center; padding:0; border:0; border-radius:.25rem; background:transparent; color:var(--text-color-secondary,var(--muted-foreground)); cursor:pointer; }
+.agent-editor__refresh:hover:not(:disabled),.agent-editor__refresh:focus-visible { color:var(--primary-color,var(--primary)); background:color-mix(in srgb,var(--primary-color,var(--primary)) 9%,transparent); }
+.agent-editor__refresh:focus-visible { outline:2px solid var(--primary-color,var(--primary)); outline-offset:1px; }
+.agent-editor__refresh:disabled { cursor:default; opacity:.55; }
+.agent-editor__refresh.is-loading svg { animation:agent-editor-refresh-spin .8s linear infinite; }
+@keyframes agent-editor-refresh-spin { to { transform:rotate(360deg); } }
+@media(prefers-reduced-motion:reduce) { .agent-editor__refresh.is-loading svg { animation:none; } }
 .agent-editor__actions { justify-content:flex-end; }
 .agent-editor__tabs { display:flex; flex:1 1 auto; flex-direction:column; min-height:0; overflow:hidden; border:1px solid var(--surface-border,var(--border)); border-radius:.75rem; background:var(--surface-card,var(--card)); }
 .agent-editor__tab-list { padding:.4rem .6rem 0; border-bottom:1px solid var(--surface-border,var(--border)); }

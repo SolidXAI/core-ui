@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, RefreshCw, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -8,6 +8,8 @@ import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import {
   SolidButton,
   SolidCodeEditor,
+  SolidDialog,
+  SolidDialogBody,
   SolidIconPicker,
   SolidInput,
   SolidTabGroup,
@@ -119,7 +121,7 @@ export function AgentSkillRegistryEditorPage() {
     useUpdateSolidEntityMutation,
   } = entityApi;
 
-  const { data: response, isLoading, refetch } = useGetSolidEntityByIdQuery(
+  const { data: response, isLoading, isFetching, refetch } = useGetSolidEntityByIdQuery(
     {
       id,
       qs: "populate[0]=agentSkills&populate[1]=agentSkills.agentRegistry",
@@ -139,14 +141,23 @@ export function AgentSkillRegistryEditorPage() {
   const [tagDraft, setTagDraft] = React.useState("");
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
+  const [confirmRefresh, setConfirmRefresh] = React.useState(false);
+  const baseline = React.useRef("");
+  const currentForm = () => JSON.stringify({ name, iconName, description, body, tags, tagDraft });
 
   React.useEffect(() => {
+    const nextTags = parseTags(record?.tags);
     setName(record?.name ?? "");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setBody(record?.body ?? "");
-    setTags(parseTags(record?.tags));
+    setTags(nextTags);
+    setTagDraft("");
+    baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", body: record?.body ?? "", tags: nextTags, tagDraft: "" });
   }, [record]);
+
+  const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
+  const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
 
   const addTag = () => {
     const nextTag = tagDraft.trim();
@@ -372,7 +383,7 @@ export function AgentSkillRegistryEditorPage() {
       <header className="agent-skill-editor__header">
         <div>
           <p>Agent Hub / Skill Registry</p>
-          <h1>{record ? "Edit Skill" : "Create Skill"}</h1>
+          <div className="agent-skill-editor__heading-with-refresh"><h1>{record ? "Edit Skill" : "Create Skill"}</h1>{record?.id && <button type="button" className={`agent-skill-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh skill" title="Refresh skill" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div>
         </div>
         <div className="agent-skill-editor__actions">
           <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>
@@ -383,6 +394,11 @@ export function AgentSkillRegistryEditorPage() {
           </SolidButton>
         </div>
       </header>
+
+      <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
+        footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
+        <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest skill content.</p></SolidDialogBody>
+      </SolidDialog>
 
       {isLoading ? (
         <div className="agent-skill-editor__loading">Loading skill…</div>

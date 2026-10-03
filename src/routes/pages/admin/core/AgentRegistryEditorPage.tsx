@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronDown, ExternalLink, FlaskConical, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ExternalLink, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -162,6 +162,24 @@ function recordFrom(value: any): any {
 
 function items(value: any): any[] { return Array.isArray(value) ? value : value ? [value] : []; }
 
+function agentFormFromRecord(record: Agent) {
+  const skills = items(record.agentSkills);
+  const tools = items(record.agentTools);
+  const secrets = items(record.agentSecrets);
+  return {
+    name: record.name ?? "", title: record.title ?? "", description: record.description ?? "", iconName: record.iconName ?? "",
+    inputs: parseInputs(record.requiredInputs), reasoningModelKey: record.reasoningModelKey ?? "", fastModelKey: record.fastModelKey ?? "",
+    systemPrompt: record.systemPrompt ?? "", stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
+    costLimit: Number(record.costLimit ?? 3), skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
+    toolIds: tools.map((link) => link.agentToolRegistry?.id).filter(Boolean),
+    roleIds: items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean),
+    secretIds: secrets.map((link) => link.secret?.id).filter(Boolean),
+    alwaysIncludeValues: Object.fromEntries(skills.map((link) => [link.agentSkillRegistry?.id, link.alwaysInclude !== false]).filter(([key]) => key)),
+    requiresApprovalValues: Object.fromEntries(tools.map((link) => [link.agentToolRegistry?.id, link.requiresApproval === true]).filter(([key]) => key)),
+    secretEnvVarNames: Object.fromEntries(secrets.map((link) => [link.secret?.id, link.envVarName ?? link.secret?.key ?? link.secret?.name ?? ""]).filter(([key]) => key)),
+  };
+}
+
 function parseInputs(value: unknown): Input[] {
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
@@ -224,7 +242,7 @@ export function AgentRegistryEditorPage() {
   const { id = "new" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data: response, isLoading, isError, refetch } = entityApi.useGetSolidEntityByIdQuery({ id, qs: populate }, { skip: id === "new" });
+  const { data: response, isLoading, isFetching, isError, refetch } = entityApi.useGetSolidEntityByIdQuery({ id, qs: populate }, { skip: id === "new" });
   const { data: settings, isError: settingsError } = useGetSolidSettingsQuery(undefined);
   const skills = useCatalog(skillApi);
   const tools = useCatalog(toolApi);
@@ -270,9 +288,16 @@ export function AgentRegistryEditorPage() {
   const [secretEnvVarError, setSecretEnvVarError] = React.useState("");
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [auditVersion, setAuditVersion] = React.useState(0);
+  const [confirmRefresh, setConfirmRefresh] = React.useState(false);
+  const baseline = React.useRef("");
+
+  const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
+    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), skillIds, toolIds, roleIds, secretIds,
+    alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
   React.useEffect(() => {
     if (!record) return;
+    baseline.current = JSON.stringify(agentFormFromRecord(record));
     setName(record.name ?? ""); setTitle(record.title ?? ""); setDescription(record.description ?? "");
     setIconName(record.iconName ?? ""); setInputs(parseInputs(record.requiredInputs));
     setReasoningModelKey(record.reasoningModelKey ?? ""); setFastModelKey(record.fastModelKey ?? "");
@@ -286,6 +311,9 @@ export function AgentRegistryEditorPage() {
     setRequiresApprovalValues(Object.fromEntries(items(record.agentTools).map((link) => [link.agentToolRegistry?.id, link.requiresApproval === true]).filter(([key]) => key)));
     setSecretEnvVarNames(Object.fromEntries(items(record.agentSecrets).map((link) => [link.secret?.id, link.envVarName ?? link.secret?.key ?? link.secret?.name ?? ""]).filter(([key]) => key)));
   }, [record?.id, response]);
+
+  const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
+  const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
 
   React.useEffect(() => {
     const refresh = () => { skills.refetch(); tools.refetch(); };
@@ -501,11 +529,16 @@ export function AgentRegistryEditorPage() {
     ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
   ];
   const content = <SolidTabGroup tabs={tabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
-  return <main className="agent-editor"><header className="agent-editor__header"><div><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1></div><div className="agent-editor__actions">
+  return <main className="agent-editor"><header className="agent-editor__header"><div className="agent-editor__heading-with-refresh"><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1>{record?.id && <button type="button" className={`agent-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh agent" title="Refresh agent" disabled={isFetching || updating} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
     {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={() => { setTestAgentWindowMode("maximized"); setTestAgentOpen(true); }}>Test Agent</SolidButton>}
     <SolidButton loading={creating || updating} disabled={isLoading || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
-  </div></header>{isLoading ? <div className="agent-editor__empty">Loading agent…</div> : isError || (id !== "new" && !record?.id) ?
+  </div></header>
+    <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
+      footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
+      <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest agent content.</p></SolidDialogBody>
+    </SolidDialog>
+    {isLoading ? <div className="agent-editor__empty">Loading agent…</div> : isError || (id !== "new" && !record?.id) ?
     <div className="agent-editor__empty">This agent could not be loaded.</div> : record?.id ?
     <AgentRegistryAuditPanel modelSingularName="agentRegistry" recordId={record.id} refreshVersion={auditVersion} modelUserKey={record.name}>{content}</AgentRegistryAuditPanel> : content}
     <SolidDialog open={Boolean(pendingSecret)} onOpenChange={(open) => { if (!open) { setPendingSecret(null); setSecretEnvVarError(""); } }}
