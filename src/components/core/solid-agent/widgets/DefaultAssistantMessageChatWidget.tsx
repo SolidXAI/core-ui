@@ -11,7 +11,7 @@ export const DefaultAssistantMessageChatWidget = ({ eventData, live, timestamp }
     const content = String(eventData.content ?? "");
     return (
         <div className={styles.BubbleGroup}>
-            <div className={`${styles.Bubble} ${styles.BubbleAssistant}`}>
+            <div className={`${styles.Bubble} ${styles.BubbleAssistant} ${live ? styles.BubbleStreaming : ""}`}>
                 <SolidAgentMarkdown text={content} />
                 {live && <span className={styles.StreamingCursor} />}
             </div>

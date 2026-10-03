@@ -5,7 +5,7 @@
 .AiTurnGroup {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
     /* max-width: 800px; */
     width: 100%;
 }
@@ -13,16 +13,105 @@
 .AiTurnContent {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 3px;
     flex: 1;
     min-width: 0;
+}
+
+/* ── Per-turn activity disclosure ── */
+.ActivityGroup {
+    width: 100%;
+    max-width: 760px;
+    min-width: 0;
+}
+
+.ActivityTimerOnly {
+    display: contents;
+}
+
+.ActivitySummary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 24px;
+    padding: 2px 6px;
+    border: 0;
+    background: transparent;
+    color: var(--solid-agent-muted-fg);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.ActivitySummary:hover,
+.ActivitySummary:focus-visible {
+    color: var(--solid-agent-fg);
+}
+
+.ActivitySummary:hover {
+    background: color-mix(in srgb, var(--solid-agent-primary) 6%, transparent);
+}
+
+.ActivitySummary:focus-visible {
+    outline: 2px solid var(--solid-agent-primary);
+    outline-offset: 2px;
+    border-radius: 5px;
+}
+
+.ActivitySummaryText {
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.ActivitySpinner,
+.ActivityComplete {
+    flex: 0 0 auto;
+}
+
+.ActivitySpinner {
+    color: var(--solid-agent-primary);
+    animation: activitySpin .9s linear infinite;
+}
+
+.ActivityComplete {
+    color: var(--solid-agent-success, #16a34a);
+}
+
+.ActivityChevron {
+    flex: 0 0 auto;
+    color: var(--solid-agent-muted);
+    transition: transform .18s ease;
+}
+
+.ActivityChevronOpen {
+    transform: rotate(180deg);
+}
+
+.ActivityDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 2px 0 3px 7px;
+    padding: 2px 0 2px 9px;
+    border-left: 1px solid var(--solid-agent-border);
+}
+
+@keyframes activitySpin {
+    to { transform: rotate(360deg); }
 }
 
 /* ── Message rows ── */
 .Row {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
+    gap: 8px;
     max-width: 800px;
     width: 100%;
 }
@@ -33,6 +122,10 @@
     margin-left: auto;
 }
 
+.RowUser .BubbleGroup {
+    max-width: min(88%, 680px);
+}
+
 .RowAssistant {
     flex-direction: row;
     align-self: flex-start;
@@ -40,9 +133,9 @@
 
 /* ── Avatar ── */
 .Avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
     background: var(--solid-agent-accent);
     border: 1px solid var(--solid-agent-border);
     display: flex;
@@ -54,48 +147,67 @@
 }
 
 .AvatarAi {
-    background: var(--solid-agent-accent);
-    border: 1px solid var(--solid-agent-border);
+    background: transparent;
+    border: 0;
     box-shadow: none;
 }
 
 .AvatarUser {
     background: var(--solid-agent-fg);
     color: var(--solid-agent-page);
+    display: none;
 }
 
 /* ── Bubble group ── */
 .BubbleGroup {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     min-width: 0;
     max-width: calc(100%);
 }
 
 .Bubble {
-    border-radius: 16px;
-    padding: 11px 15px;
-    line-height: 1.65;
+    border-radius: 14px;
+    padding: 8px 12px;
+    line-height: 1.55;
     word-break: break-word;
     position: relative;
 }
 
 .BubbleUser {
     background: var(--solid-agent-fg);
-    border: 1px solid var(--solid-agent-fg);
-    border-bottom-right-radius: 4px;
+    border: 1px solid transparent;
+    border-bottom-right-radius: 6px;
     color: var(--solid-agent-page);
 }
 
 .BubbleAssistant {
-    background: var(--solid-agent-bg);
-    border: 1px solid var(--solid-agent-border);
+    background: transparent;
+    border: 0;
     color: var(--solid-agent-fg);
+    padding: 0;
+}
+
+.BubbleStreaming .MarkdownRoot > p,
+.BubbleStreaming .MarkdownRoot > ul,
+.BubbleStreaming .MarkdownRoot > ol,
+.BubbleStreaming .MarkdownRoot > blockquote,
+.BubbleStreaming .MarkdownRoot > h1,
+.BubbleStreaming .MarkdownRoot > h2,
+.BubbleStreaming .MarkdownRoot > h3 {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(105deg, var(--solid-agent-fg) 0%, var(--solid-agent-fg) 38%, color-mix(in srgb, var(--solid-agent-primary) 58%, white) 50%, var(--solid-agent-fg) 62%, var(--solid-agent-fg) 100%);
+    background-size: 240% 100%;
+    background-position: 100% 0;
+    background-clip: text;
+    -webkit-background-clip: text;
+    animation: responseShimmer 2.8s ease-in-out infinite;
 }
 
 .UserText {
-    font-size: 14px;
+    font-size: 13px;
     margin: 0;
     white-space: pre-wrap;
 }
@@ -149,27 +261,11 @@
     border-color: var(--solid-agent-fg);
 }
 
-/* ── Bounce animation (thinking dots) ── */
-@keyframes bounce {
-
-    0%,
-    60%,
-    100% {
-        transform: translateY(0);
-        opacity: 0.55;
-    }
-
-    30% {
-        transform: translateY(-5px);
-        opacity: 1;
-    }
-}
-
 /* ── Markdown, inline code, code blocks ── */
 .MarkdownRoot {
     font-size: inherit;
     font-family: inherit;
-    line-height: 1.65;
+    line-height: 1.55;
     color: inherit;
 }
 
@@ -182,7 +278,7 @@
 }
 
 .MarkdownRoot p {
-    margin: 0 0 8px;
+    margin: 0 0 6px;
 }
 
 .MarkdownRoot p:last-child {
@@ -193,7 +289,7 @@
 .MarkdownRoot h2,
 .MarkdownRoot h3 {
     font-weight: 600;
-    margin: 16px 0 4px;
+    margin: 12px 0 4px;
     color: inherit;
     line-height: 1.3;
 }
@@ -370,9 +466,11 @@
 
 /* ── Tool card ── */
 .ToolCard {
-    border-radius: 8px;
-    border: 1px solid var(--solid-agent-border);
-    overflow: hidden;
+    border: 0;
+    border-left: 2px solid transparent;
+    border-bottom: 1px solid color-mix(in srgb, var(--solid-agent-border) 65%, transparent);
+    border-radius: 0;
+    overflow: visible;
     width: 100%;
     max-width: 100%;
     transition: border-color 0.15s, background 0.15s, opacity 0.15s;
@@ -380,14 +478,13 @@
 }
 
 .ToolCardRunning {
-    border-color: color-mix(in srgb, var(--solid-agent-fg) 15%, transparent);
-    background: color-mix(in srgb, var(--solid-agent-fg) 2%, transparent);
+    border-left-color: var(--solid-agent-primary);
+    background: transparent;
 }
 
 .ToolCardDone {
-    border-color: var(--solid-agent-border);
     background: transparent;
-    opacity: 0.85;
+    opacity: 0.92;
 }
 
 .ToolCardDone:hover {
@@ -395,13 +492,13 @@
 }
 
 .ToolCardWarning {
-    border-color: rgba(245, 158, 11, 0.5);
-    background: rgba(245, 158, 11, 0.04);
+    border-left-color: rgb(245, 158, 11);
+    background: transparent;
 }
 
 .ToolCardError {
-    border-color: rgba(239, 68, 68, 0.5);
-    background: rgba(239, 68, 68, 0.04);
+    border-left-color: rgb(239, 68, 68);
+    background: transparent;
 }
 
 .ToolCardHeader {
@@ -444,8 +541,11 @@
     font-size: 13px;
     font-weight: 500;
     color: var(--solid-agent-fg);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
-    flex-shrink: 0;
+    flex: 0 1 auto;
 }
 
 .ToolCardDesc {
@@ -481,11 +581,11 @@
 
 .ToolCardProgress {
     border-top: 1px solid var(--solid-agent-border);
-    padding: 6px 12px 7px;
+    padding: 5px 8px 6px;
     display: flex;
     flex-direction: column;
     gap: 3px;
-    background: var(--solid-agent-accent);
+    background: transparent;
 }
 
 .ToolProgressItem {
@@ -523,8 +623,8 @@
 /* ── Tool output preview ── */
 .ToolCardOutput {
     border-top: 1px solid var(--solid-agent-border);
-    padding: 8px 12px;
-    background: var(--solid-agent-accent);
+    padding: 7px 8px;
+    background: transparent;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -566,40 +666,56 @@
 .ThinkingBubble {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border-radius: 14px;
-    border-bottom-left-radius: 4px;
-    background: var(--solid-agent-bg);
-    border: 1px solid var(--solid-agent-border);
+    gap: 6px;
+    padding: 2px 6px;
+    background: transparent;
+    border: 0;
     width: fit-content;
-}
-
-.ThinkingDots {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-
-.ThinkingDot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--solid-agent-fg);
-    animation: bounce 1.2s infinite;
-}
-
-.ThinkingDot:nth-child(2) {
-    animation-delay: 0.15s;
-}
-
-.ThinkingDot:nth-child(3) {
-    animation-delay: 0.3s;
 }
 
 .ThinkingLabel {
     font-size: 12px;
+    line-height: 1;
     color: var(--solid-agent-muted-fg);
+    background-image: linear-gradient(100deg, var(--solid-agent-muted-fg) 0%, var(--solid-agent-muted-fg) 35%, var(--solid-agent-primary) 50%, var(--solid-agent-muted-fg) 65%, var(--solid-agent-muted-fg) 100%);
+    background-size: 220% 100%;
+    background-position: 100% 0;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: responseShimmer 2.4s ease-in-out infinite;
+}
+
+.ThinkingSparkle {
+    position: relative;
+    top: 1px;
+    color: var(--solid-agent-primary);
+    animation: sparklePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes responseShimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: -140% 0; }
+}
+
+@keyframes sparklePulse {
+    0%, 100% { opacity: .55; transform: scale(.92); }
+    50% { opacity: 1; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ActivitySpinner,
+    .ThinkingLabel,
+    .ThinkingSparkle,
+    .BubbleStreaming .MarkdownRoot > p,
+    .BubbleStreaming .MarkdownRoot > ul,
+    .BubbleStreaming .MarkdownRoot > ol,
+    .BubbleStreaming .MarkdownRoot > blockquote,
+    .BubbleStreaming .MarkdownRoot > h1,
+    .BubbleStreaming .MarkdownRoot > h2,
+    .BubbleStreaming .MarkdownRoot > h3 {
+        animation: none;
+    }
 }
 
 /* ── Streaming cursor ── */
@@ -673,10 +789,10 @@
 .ToolCardHeaderBtn {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     width: 100%;
-    padding: 8px 12px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 12px;
     flex-wrap: nowrap;
     min-width: 0;
     background: none;
@@ -705,6 +821,7 @@
 
 .ToolCardExpandable {
     border-top: 1px solid var(--solid-agent-border);
+    margin-left: 8px;
 }
 
 /* ── Spinner (running tool / progress step) ── */

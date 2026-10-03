@@ -1,18 +1,15 @@
+import { Sparkles } from "lucide-react";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 
 /**
- * Default widget for an active `AgentStarted` / `StepStarted`: three bouncing dots with
- * "Thinking…". Rendered by the thread only while the agent is thinking.
+ * Default widget for an active `AgentStarted` / `StepStarted`: a compact shimmer status,
+ * rendered by the thread only while the agent is thinking.
  */
 export const DefaultThinkingChatWidget = (_props: SolidChatWidgetProps) => {
     return (
         <div className={styles.ThinkingBubble} role="status">
-            <div className={styles.ThinkingDots}>
-                <span className={styles.ThinkingDot} />
-                <span className={styles.ThinkingDot} />
-                <span className={styles.ThinkingDot} />
-            </div>
+            <Sparkles size={14} className={styles.ThinkingSparkle} aria-hidden="true" />
             <span className={styles.ThinkingLabel}>Thinking…</span>
         </div>
     );

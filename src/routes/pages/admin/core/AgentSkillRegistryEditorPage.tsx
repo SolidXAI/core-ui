@@ -382,7 +382,6 @@ export function AgentSkillRegistryEditorPage() {
     <main className="agent-skill-editor">
       <header className="agent-skill-editor__header">
         <div>
-          <p>Agent Hub / Skill Registry</p>
           <div className="agent-skill-editor__heading-with-refresh"><h1>{record ? "Edit Skill" : "Create Skill"}</h1>{record?.id && <button type="button" className={`agent-skill-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh skill" title="Refresh skill" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div>
         </div>
         <div className="agent-skill-editor__actions">

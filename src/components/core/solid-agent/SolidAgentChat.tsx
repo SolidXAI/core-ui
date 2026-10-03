@@ -289,6 +289,7 @@ export function SolidAgentChat({
                     <AgentThread
                         items={agent.items}
                         thinking={agent.working && agent.thinking}
+                        working={agent.working}
                         hasMore={agent.hasMoreHistory}
                         context={agent.context ?? undefined}
                         emptyState={empty}

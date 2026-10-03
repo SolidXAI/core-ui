@@ -86,7 +86,7 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
             >
                 <StatusIcon status={status} />
                 <ToolIcon size={12} className={styles.ToolCardToolIcon} />
-                <span className={styles.ToolCardName}>{toolDisplayName(toolName, args)}</span>
+                <span className={styles.ToolCardName}>{live ? `Invoking ${toolDisplayName(toolName, args)}…` : toolDisplayName(toolName, args)}</span>
                 {eventData.summary && <span className={styles.ToolCardDesc} title={eventData.summary}>{eventData.summary}</span>}
                 <span className={styles.ToolCardBadge}>{toolCategory(toolName)}</span>
                 {eventData.duration_ms != null && <span className={styles.ToolCardDuration}>{formatDuration(eventData.duration_ms)}</span>}

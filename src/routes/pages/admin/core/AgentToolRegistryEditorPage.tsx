@@ -256,7 +256,7 @@ export function AgentToolRegistryEditorPage() {
   ];
 
   return <main className="agent-tool-editor">
-    <header className="agent-tool-editor__header"><div><p>Agent Hub / Tool Registry</p><div className="agent-tool-editor__heading-with-refresh"><h1>{record ? "Edit Tool" : "Create Tool"}</h1>{record?.id && <button type="button" className={`agent-tool-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh tool" title="Refresh tool" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div></div><div className="agent-tool-editor__actions">
+    <header className="agent-tool-editor__header"><div><div className="agent-tool-editor__heading-with-refresh"><h1>{record ? "Edit Tool" : "Create Tool"}</h1>{record?.id && <button type="button" className={`agent-tool-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh tool" title="Refresh tool" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div></div><div className="agent-tool-editor__actions">
       <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
       <SolidButton loading={isCreating || isSaving} onClick={() => void save()}>Save Tool</SolidButton>
     </div></header>
