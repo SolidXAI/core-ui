@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
-import { deleteSession, fetchAgentConfigVersionStatus, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
+import { deleteSession, fetchAgentConfigVersionStatus, fetchAgentModelAssignments, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
 import type { AgentAttachment, AgentMode, AgentRuntimeType } from "./types";
@@ -11,6 +11,8 @@ import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
 import { AgentSignIn } from "./AgentSignIn";
 import { signOutOfAgent } from "./client/agentAuth";
+import { AgentModelIndicator } from "./AgentModelIndicator";
+import type { AgentModelAssignments } from "./types";
 
 type Props = {
     agentUrl: string;
@@ -77,6 +79,19 @@ export function SolidAgentChat({
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
+    const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
+
+    useEffect(() => {
+        if (!signedIn) {
+            setModelAssignments(null);
+            return;
+        }
+        let alive = true;
+        fetchAgentModelAssignments(agentUrl).then((models) => {
+            if (alive) setModelAssignments(models);
+        });
+        return () => { alive = false; };
+    }, [agentUrl, signedIn]);
 
     useEffect(() => {
         if (agentRuntime !== "agentHub" || !signedIn) {
@@ -291,6 +306,7 @@ export function SolidAgentChat({
                     seedKey={seed?.key}
                     onSend={sendWithAttachments}
                     onStop={() => runtime?.cancel()}
+                    modelIndicator={<AgentModelIndicator assignments={modelAssignments} />}
                 />
                 </>
             )}

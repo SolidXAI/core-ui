@@ -341,7 +341,7 @@ export function AgentSkillRegistryEditorPage() {
                 setFieldErrors((current) => ({ ...current, body: "" }));
               }}
               language="markdown"
-              fontSize={12}
+              fontSize={11}
               height="max(32rem, calc(100dvh - 18rem))"
               className={`agent-skill-editor__code${fieldErrors.body ? " agent-skill-editor__code--invalid" : ""}`}
             />

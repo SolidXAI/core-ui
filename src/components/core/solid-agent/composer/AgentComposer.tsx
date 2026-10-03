@@ -14,13 +14,14 @@ type Props = {
     seedKey?: number;
     onSend: (text: string, attachments: AgentAttachment[]) => void | Promise<void>;
     onStop: () => void;
+    modelIndicator?: React.ReactNode;
 };
 
 /**
  * Message box: Enter sends, Shift+Enter adds a line, "/" at the start lists the agent's commands.
  * Files can be attached with the paperclip, dropped onto the box, or pasted.
  */
-export function AgentComposer({ working, disabled, placeholder, commands, seed, seedKey, onSend, onStop }: Props) {
+export function AgentComposer({ working, disabled, placeholder, commands, seed, seedKey, onSend, onStop, modelIndicator }: Props) {
     const [text, setText] = useState("");
     const [active, setActive] = useState(0);
     const [attachments, setAttachments] = useState<AgentAttachment[]>([]);
@@ -224,6 +225,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
                 >
                     <Paperclip size={16} />
                 </button>
+                {modelIndicator}
                 {working ? (
                     <button type="button" className={styles.stopBtn} onClick={onStop} aria-label="Stop the agent">
                         <Square size={10} fill="currentColor" /> Stop

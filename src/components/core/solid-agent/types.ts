@@ -24,6 +24,8 @@ export type AgentMode = "bubble" | "compact" | "docked" | "maximized";
  * launcher) or "agentHub" (setting solidxAgentHubBackendUrl).
  */
 export type AgentRuntimeType = "solidx" | "agentHub";
+export type AgentModelAssignment = { provider: string; model: string } | null;
+export type AgentModelAssignments = { reasoning: AgentModelAssignment; fast: AgentModelAssignment };
 /** @deprecated Use AgentRuntimeType. */
 export type AgentType = AgentRuntimeType;
 

@@ -148,7 +148,9 @@ export function AgentToolRegistryEditorPage() {
       name: name.trim(), iconName: iconName || null, description: description.trim(), type,
       sourceCode, tags: JSON.stringify(tags),
       ...(type === "custom" ? { checksum: await sha256Hex(sourceCode) } : {}),
-      ...(nextStatus ? { status: nextStatus } : record?.status === "load_failed" ? { status: "active" } : {}),
+      // Status is required by the agentToolRegistry metadata, including partial
+      // updates. Preserve the current lifecycle state for ordinary saves.
+      status: nextStatus ?? (record?.status === "load_failed" ? "active" : record?.status ?? "active"),
       ...((nextStatus === "active" || (!nextStatus && record?.status === "load_failed")) ? { lastLoadError: null } : {}),
     };
     try {
@@ -243,7 +245,7 @@ export function AgentToolRegistryEditorPage() {
     { value: "tool", label: "Tool", content: <div className="agent-tool-editor__tool">
       <section className="agent-tool-editor__panel">
         <header><h2>Tool source code <b>*</b></h2><p>Write the tool's Python code here.</p></header>
-        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" fontSize={12} height="max(32rem, calc(100dvh - 18rem))" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
+        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" fontSize={11} height="max(32rem, calc(100dvh - 18rem))" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
         {fieldErrors.sourceCode && <small className="agent-tool-editor__field-error agent-tool-editor__code-error">{fieldErrors.sourceCode}</small>}
       </section>
     </div> },

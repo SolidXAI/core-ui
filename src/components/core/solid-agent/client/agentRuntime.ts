@@ -12,7 +12,7 @@ import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
 import { clearAllAgentAuth } from "./agentAuth";
-import { fetchSessionHistory, uploadAgentHubAttachments } from "./agentRest";
+import { fetchSessionHistory, uploadAgentAttachments } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
 import { agentIdOf } from "./agentUrls";
 
@@ -75,36 +75,29 @@ export class AgentRuntime {
     }
 
     /**
-     * Sends a user message. Agent Hub files are uploaded first and their SolidX media IDs are
-     * sent on the socket; the SolidX runtime keeps the existing inline attachment format.
+     * Uploads files into SolidX media storage first, then sends their IDs with the socket message.
      */
     async sendMessage(text: string, context?: AgentContext, attachments: AgentAttachment[] = []) {
         const content = text.trim();
         if (!content && !attachments.length) return;
-        const uploaded = this.agentRuntime === "agentHub" && attachments.length
-            ? await uploadAgentHubAttachments(this.agentUrl, attachments.map((item) => item.file))
+        const uploaded = attachments.length
+            ? await uploadAgentAttachments(this.agentUrl, attachments.map((item) => item.file))
             : [];
-        if (this.agentRuntime === "agentHub" && uploaded.length !== attachments.length) {
+        if (uploaded.length !== attachments.length) {
             throw new Error("SolidX did not confirm every uploaded file. Please retry.");
         }
         if (context) this.lastContext = context;
-        const displayAttachments = this.agentRuntime === "agentHub"
-            ? attachments.map((item, index) => ({
-                  ...item.meta,
-                  ...(uploaded[index] ? { mediaId: uploaded[index].id } : {}),
-              }))
-            : attachments.map((item) => item.meta);
+        const displayAttachments = attachments.map((item, index) => ({
+            ...item.meta,
+            ...(uploaded[index] ? { mediaId: uploaded[index].id } : {}),
+        }));
         this.dispatch(agentUserMessageAdded({ text: content, attachments: displayAttachments }));
         this.socket.send({
             action: "message",
             session_id: this.socket.currentSessionId ?? "",
             content,
             context: context ?? this.lastContext,
-            ...(attachments.length && this.agentRuntime === "agentHub"
-                ? { attachments: uploaded }
-                : attachments.length
-                  ? { attachments: attachments.map((item) => item.payload) }
-                  : {}),
+            ...(attachments.length ? { attachments: uploaded } : {}),
         });
     }
 

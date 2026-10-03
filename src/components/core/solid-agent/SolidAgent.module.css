@@ -237,6 +237,23 @@
 
 /* ── Composer ────────────────────────────────────────────────── */
 .composer { flex: 0 0 auto; padding: 12px; border-top: 1px solid var(--agent-border); display: flex; flex-direction: column; gap: 8px; }
+.modelInfo { position: relative; flex: 0 0 auto; align-self: flex-end; margin: 0 12px 8px; color: var(--agent-muted); }
+.modelInfoInline { align-self: center; margin: 0; }
+.modelInfoSummary { display: flex; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid var(--agent-border); border-radius: 8px; background: var(--agent-page); color: var(--agent-muted); cursor: pointer; list-style: none; font-size: 11px; font-weight: 600; transition: border-color .15s, color .15s, background .15s; }
+.modelInfoSummary::-webkit-details-marker { display: none; }
+.modelInfoSummary:hover, .modelInfo[open] .modelInfoSummary { border-color: var(--agent-primary); background: var(--agent-tint); color: var(--agent-fg); }
+.modelInfoChevron { transition: transform .15s; }
+.modelInfo[open] .modelInfoChevron { transform: rotate(180deg); }
+.modelInfoMenu { position: absolute; z-index: 20; left: 0; bottom: calc(100% + 10px); width: 280px; max-width: min(320px, calc(100vw - 32px)); padding: 6px; border: 1px solid var(--agent-border); border-radius: 12px; background: var(--agent-bg); box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
+.modelInfoHeading { display: flex; flex-direction: column; gap: 3px; padding: 10px 10px 9px; border-bottom: 1px solid var(--agent-border); }
+.modelInfoHeading strong { color: var(--agent-fg); font-size: 12px; font-weight: 650; }
+.modelInfoHeading span { color: var(--agent-muted); font-size: 10.5px; }
+.modelInfoRow { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 10px; }
+.modelInfoRow + .modelInfoRow { border-top: 1px solid var(--agent-border); }
+.modelInfoRole { color: var(--agent-muted); font-size: 10px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.modelInfoModel { max-width: 100%; overflow-wrap: anywhere; color: var(--agent-fg); font-size: 11px; font-weight: 600; line-height: 1.4; }
+.modelInfoProvider { padding: 2px 6px; border-radius: 5px; background: var(--agent-page); color: var(--agent-muted); font-size: 10px; }
+.modelInfoUnavailable { color: var(--agent-muted); font-size: 11px; font-weight: 500; }
 .textarea {
   width: 100%;
   min-height: 44px;

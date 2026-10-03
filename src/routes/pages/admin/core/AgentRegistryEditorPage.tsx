@@ -492,7 +492,7 @@ export function AgentRegistryEditorPage() {
       </section>
     </div> },
     { value: "persona", label: "Persona", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div></div>
-      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" height="max(34rem, calc(100dvh - 18rem))" />
+      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"

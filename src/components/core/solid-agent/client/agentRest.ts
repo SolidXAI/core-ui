@@ -1,5 +1,6 @@
 import { clearAgentAuth, loadAgentAuth } from "./agentAuth";
 import type { AgentUploadedAttachment } from "../types";
+import type { AgentModelAssignments } from "../types";
 
 export const HISTORY_PAGE_SIZE = 50;
 
@@ -49,12 +50,17 @@ export function fetchAgentConfigVersionStatus(agentUrl: string) {
     return agentFetch<AgentConfigVersionStatus>(agentUrl, "/api/agent/config-version", { cache: "no-store" });
 }
 
+/** Model labels reported by the connected agent backend (never provider credentials). */
+export function fetchAgentModelAssignments(agentUrl: string) {
+    return agentFetch<AgentModelAssignments>(agentUrl, "/api/agent/models", { cache: "no-store" });
+}
+
 export function deleteSession(agentUrl: string, sessionId: string) {
     return agentFetch<unknown>(agentUrl, `/api/agent/sessions/${encodeURIComponent(sessionId)}`, { method: "DELETE" });
 }
 
-/** Upload files through Agent Hub, which forwards them to SolidX media storage with the caller's API key. */
-export async function uploadAgentHubAttachments(agentUrl: string, files: File[]): Promise<AgentUploadedAttachment[]> {
+/** Upload files through the agent runtime into SolidX media storage. */
+export async function uploadAgentAttachments(agentUrl: string, files: File[]): Promise<AgentUploadedAttachment[]> {
     const auth = await loadAgentAuth(agentUrl);
     if (!auth) throw new Error("Sign in to the agent before uploading files.");
     const formData = new FormData();

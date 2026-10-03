@@ -151,8 +151,10 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 const attachments = Array.isArray(eventData.attachments) ? eventData.attachments : [];
                 if (content || attachments.length) {
                     // agentEventId lets the UI fetch the stored attachment files (agentEvent media) later.
-                    const eventData = attachments.length ? { content, attachments, agentEventId: frame.id } : { content };
-                    state.items.push({ id: nextItemId("u"), at, eventType, eventData });
+                    const replayEventData = attachments.length
+                        ? { content, attachments, agentEventId: eventData.agentEventId ?? frame.id }
+                        : { content };
+                    state.items.push({ id: nextItemId("u"), at, eventType, eventData: replayEventData });
                 }
                 state.liveToolId = null;
             }
