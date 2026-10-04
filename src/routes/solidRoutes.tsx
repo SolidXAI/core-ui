@@ -43,6 +43,7 @@ import { StudioHomePage } from "./pages/studio/StudioHomePage";
 import { StudioLandingPage } from "./pages/studio/StudioLandingPage";
 import { _solidRegisterExtraRoutes } from "./SolidLayoutRegistry";
 import { SolidRouteMetadataBoundary } from "./SolidRouteMetadataBoundary";
+import { AgentEmbedPage } from "./pages/embed/AgentEmbedPage";
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
@@ -108,6 +109,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
   ];
 
   return [
+    { path: "/embed/agent/:agentId", element: <AgentEmbedPage /> },
     { path: "/error", element: pick("error", <ErrorPage />) },
     { path: "/not-found", element: pick("notFound", <NotFoundPage />) },
     {

@@ -703,3 +703,4 @@ export { NotFoundPage } from './routes/pages/NotFoundPage';
 export { handleAuthSuccess } from './adapters/auth/helper';
 
 export * from "./styles";
+export { AgentEmbedPage } from "./routes/pages/embed/AgentEmbedPage";

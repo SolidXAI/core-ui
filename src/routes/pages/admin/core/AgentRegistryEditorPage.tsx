@@ -16,6 +16,7 @@ import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidD
 import { ALLOWED_MODELS_BY_PROVIDER, type AllowedModelProvider } from "../../../../constants/allowed-ai-models";
 import { SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
+import { AgentEmbeddingPanel } from "../../../../components/core/solid-agent/embed/AgentEmbeddingPanel";
 import "./AgentRegistryEditorPage.css";
 
 type Item = { id: number; name?: string; title?: string; displayName?: string; description?: string; iconName?: string; key?: string; module?: { id?: number; displayName?: string }; [key: string]: any };
@@ -184,7 +185,7 @@ function parseInputs(value: unknown): Input[] {
   try {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     if (Array.isArray(parsed)) return parsed.map((input) => ({
-      name: String(input.name ?? ""), description: String(input.description ?? ""),
+      name: String(input.name ?? input.variableName ?? ""), description: String(input.description ?? ""),
       dataType: String(input.dataType ?? input.type ?? "string"),
     }));
     // Existing agent definitions may use a name-keyed object.
@@ -527,6 +528,9 @@ export function AgentRegistryEditorPage() {
       {items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
     ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
+    ...(record?.id ? [{ value: "embedding", label: "Embedding", content: <AgentEmbeddingPanel agentId={record.id}
+      fields={parseInputs(record.requiredInputs)} active={record.status === "active"}
+      hubUrl={String(getSettingsMap(settings).solidxAgentHubBackendUrl ?? "")} /> }] : []),
   ];
   const content = <SolidTabGroup tabs={tabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
   return <main className="agent-editor"><header className="agent-editor__header"><div className="agent-editor__heading-with-refresh"><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1>{record?.id && <button type="button" className={`agent-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh agent" title="Refresh agent" disabled={isFetching || updating} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div><div className="agent-editor__actions">

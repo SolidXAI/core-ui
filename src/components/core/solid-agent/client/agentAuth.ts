@@ -33,8 +33,37 @@ const STORAGE_PREFIX = "solidx.agent-session:";
 type Listener = () => void;
 const listeners = new Map<string, Set<Listener>>();
 
+// Embed credentials never enter browser storage or depend on a Solid admin login.
+const external = new Map<string, { auth: AgentAuth | null; renew: () => Promise<AgentAuth>; pending?: Promise<void> }>();
+
+export type AgentBootstrap = Pick<AgentAuth, "agentToken" | "wsUrl" | "httpUrl" | "user">;
+
+export function isExternalAgentAuth(agentUrl: string): boolean { return external.has(loginScope(agentUrl)); }
+
+export function registerExternalAgentAuth(agentUrl: string, renew: () => Promise<AgentAuth>) {
+    const scope = loginScope(agentUrl);
+    const entry = { auth: null as AgentAuth | null, renew };
+    external.set(scope, entry);
+    return {
+        setAuth(auth: AgentAuth) { entry.auth = auth; notify(agentUrl); },
+        dispose() { if (external.get(scope) === entry) { external.delete(scope); notify(agentUrl); } },
+    };
+}
+
+export async function renewExternalAgentAuth(agentUrl: string): Promise<void> {
+    const entry = external.get(loginScope(agentUrl));
+    if (!entry) return;
+    if (!entry.pending) {
+        entry.pending = entry.renew().then((auth) => {
+            if (external.get(loginScope(agentUrl)) === entry) { entry.auth = auth; notify(agentUrl); }
+        }).finally(() => { entry.pending = undefined; });
+    }
+    return entry.pending;
+}
+
 /** One login per backend and agent. */
 function loginScope(agentUrl: string) {
+    if (/[?&]embedInstance=/.test(agentUrl)) return agentUrl;
     const agentId = agentIdOf(agentUrl);
     return agentId === undefined ? toHttpBase(agentUrl) : `${toHttpBase(agentUrl)}?agentId=${agentId}`;
 }
@@ -54,6 +83,8 @@ async function currentSolidUserId(): Promise<string | null> {
 }
 
 function readStored(agentUrl: string): AgentAuth | null {
+    const embed = external.get(loginScope(agentUrl));
+    if (embed) return embed.auth;
     try {
         const raw = sessionStorage.getItem(storageKey(agentUrl));
         const parsed = raw ? (JSON.parse(raw) as AgentAuth) : null;
@@ -66,6 +97,8 @@ function readStored(agentUrl: string): AgentAuth | null {
 
 /** The stored login for this agent backend, if it belongs to the signed-in Solid user. */
 export async function loadAgentAuth(agentUrl: string): Promise<AgentAuth | null> {
+    const embed = external.get(loginScope(agentUrl));
+    if (embed) return embed.auth;
     const stored = readStored(agentUrl);
     if (!stored) return null;
     if (stored.solidUserId !== (await currentSolidUserId())) {
@@ -76,6 +109,13 @@ export async function loadAgentAuth(agentUrl: string): Promise<AgentAuth | null>
 }
 
 export function clearAgentAuth(agentUrl: string) {
+    const embed = external.get(loginScope(agentUrl));
+    if (embed) {
+        embed.auth = null;
+        notify(agentUrl);
+        void renewExternalAgentAuth(agentUrl).catch(() => { /* The embed route displays the failure and retry action. */ });
+        return;
+    }
     try {
         sessionStorage.removeItem(storageKey(agentUrl));
     } catch {

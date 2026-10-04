@@ -28,8 +28,10 @@ export class AgentSocket {
     /** False until the agent confirms the session (session_started) on the current socket. */
     private sessionReady = false;
     private checkingProcessAvailability = false;
+    private unacknowledgedMessage: AgentAction | null = null;
 
     private offAuthChange: () => void;
+    private readonly debugEmbed: boolean;
 
     constructor(
         private agentUrl: string,
@@ -37,6 +39,8 @@ export class AgentSocket {
         private checkProcessAvailability = false,
     ) {
         this.sessionId = initialSessionId;
+        this.debugEmbed = !checkProcessAvailability;
+        if (this.debugEmbed) console.info("[agent-embed][runtime] socket created", { endpoint: this.safeEndpoint(), hasInitialSession: !!initialSessionId });
         // Signing in opens the socket on the wsUrl it named; signing out (or the token expiring) closes it.
         this.offAuthChange = onAgentAuthChange(agentUrl, () => {
             if (this.closedByUser) return;
@@ -64,27 +68,33 @@ export class AgentSocket {
     }
 
     connect() {
+        if (this.closedByUser) return;
         const state = this.ws?.readyState;
         if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) return;
         this.closedByUser = false;
         const url = agentWsUrl(this.agentUrl);
         if (!url) {
+            if (this.debugEmbed) console.warn("[agent-embed][runtime] no WebSocket URL is available from auth yet");
             // Not signed in: the auth listener connects once sign-in names the wsUrl.
             this.setStatus("idle");
             return;
         }
         this.setStatus(this.attempt === 0 ? "connecting" : "reconnecting");
+        if (this.debugEmbed) console.info("[agent-embed][runtime] opening WebSocket", { endpoint: this.safeEndpoint(url), attempt: this.attempt + 1 });
 
         let ws: WebSocket;
         try {
             ws = new WebSocket(url);
-        } catch {
+        } catch (error) {
+            if (this.debugEmbed) console.error("[agent-embed][runtime] WebSocket construction failed", { name: error instanceof Error ? error.name : "unknown", message: error instanceof Error ? error.message : String(error) });
             this.scheduleReconnect();
             return;
         }
         this.ws = ws;
 
         ws.onopen = () => {
+            if (this.ws !== ws) return;
+            if (this.debugEmbed) console.info("[agent-embed][runtime] WebSocket open");
             this.attempt = 0;
             this.sessionReady = false;
             this.setStatus("open");
@@ -92,6 +102,7 @@ export class AgentSocket {
         };
 
         ws.onmessage = (message) => {
+            if (this.ws !== ws) return;
             let frame: AgentWireFrame;
             try {
                 frame = JSON.parse(message.data);
@@ -100,6 +111,7 @@ export class AgentSocket {
             }
             const eventType = frame.event_type ?? frame.type;
             const payload = frame.event_data ?? frame.data;
+            if (this.debugEmbed) console.info("[agent-embed][runtime] WebSocket frame", { eventType, hasSessionId: !!(frame.session_id ?? payload?.session_id), isError: eventType === "error" });
             if (eventType === "session_started") {
                 // After an agent restart the old session is gone and resume returns a new id.
                 this.sessionId = frame.session_id ?? payload?.session_id ?? null;
@@ -108,11 +120,16 @@ export class AgentSocket {
             } else if (eventType === "error" && /agent token/i.test(String(payload?.error ?? ""))) {
                 // The agent forgot the token (idle 30 min or restarted): sign in again.
                 this.sessionReady = false;
+                if (this.unacknowledgedMessage) this.queue.push(this.unacknowledgedMessage);
+                this.unacknowledgedMessage = null;
                 clearAgentAuth(this.agentUrl);
             } else if (eventType === "error" && !this.sessionReady) {
                 // Start/resume failed (e.g. auth); stop holding messages so their errors show.
                 this.sessionReady = true;
                 this.flushQueue();
+            }
+            if (eventType === "UserMessage" || eventType === "turn_complete" || eventType === "error") {
+                this.unacknowledgedMessage = null;
             }
             // Drop frames for a different session (e.g. a late event after a switch).
             const frameSession = frame.session_id ?? payload?.session_id;
@@ -120,7 +137,9 @@ export class AgentSocket {
             this.eventListeners.forEach((listener) => listener(frame));
         };
 
-        ws.onclose = () => {
+        ws.onclose = (event) => {
+            if (this.ws !== ws) return;
+            if (this.debugEmbed) console.warn("[agent-embed][runtime] WebSocket closed", { code: event.code, reason: event.reason, clean: event.wasClean });
             this.ws = null;
             this.sessionReady = false;
             if (this.closedByUser) {
@@ -131,12 +150,14 @@ export class AgentSocket {
         };
 
         ws.onerror = () => {
+            if (this.debugEmbed) console.error("[agent-embed][runtime] WebSocket error event");
             // onclose follows and handles the reconnect.
         };
     }
 
     /** Sends an action, or queues it until the socket and session are ready. */
     send(action: AgentAction) {
+        if (this.closedByUser) return;
         if (this.ws?.readyState === WebSocket.OPEN && this.sessionId && this.sessionReady) {
             void this.sendRaw(action);
         } else {
@@ -147,6 +168,7 @@ export class AgentSocket {
 
     /** Starts a fresh conversation (drops the current session id). */
     newSession() {
+        this.unacknowledgedMessage = null;
         this.sessionId = null;
         this.sessionReady = false;
         this.queue = [];
@@ -199,10 +221,13 @@ export class AgentSocket {
     private async sendRaw(action: AgentAction) {
         const agentToken = (await loadAgentAuth(this.agentUrl))?.agentToken;
         if (!agentToken || this.ws?.readyState !== WebSocket.OPEN) {
+            if (this.debugEmbed) console.warn("[agent-embed][runtime] skipped outbound frame", { action: action.action, hasAgentToken: !!agentToken, socketOpen: this.ws?.readyState === WebSocket.OPEN });
             if (action.action !== "start_session" && action.action !== "resume_session") this.queue.push(action);
             return;
         }
+        if (this.debugEmbed) console.info("[agent-embed][runtime] sending WebSocket action", { action: action.action });
         this.ws.send(JSON.stringify({ ...action, agentToken }));
+        if (action.action === "message") this.unacknowledgedMessage = action;
     }
 
     private scheduleReconnect() {
@@ -236,6 +261,16 @@ export class AgentSocket {
     }
 
     private setStatus(status: AgentConnection) {
+        if (this.debugEmbed) console.info("[agent-embed][runtime] connection status", { status });
         this.statusListeners.forEach((listener) => listener(status));
+    }
+
+    private safeEndpoint(url = this.agentUrl) {
+        try {
+            const parsed = new URL(url);
+            return `${parsed.origin}${parsed.pathname}`;
+        } catch {
+            return "invalid-url";
+        }
     }
 }

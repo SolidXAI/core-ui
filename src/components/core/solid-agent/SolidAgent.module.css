@@ -131,6 +131,7 @@
   padding: 0 8px 0 14px;
   border-bottom: 1px solid var(--agent-border);
 }
+.externalEmbedHeader { padding-right: 52px; }
 .headerMark {
   position: relative;
   flex: 0 0 auto;

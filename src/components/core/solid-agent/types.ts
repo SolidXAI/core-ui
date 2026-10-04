@@ -113,6 +113,7 @@ export type AgentAction =
           session_id: string;
           content: string;
           context?: AgentContext;
+          inputs?: Record<string, unknown>;
           widget_reply?: WidgetReply | null;
           attachments?: AgentAttachmentPayload[] | AgentUploadedAttachment[];
       }

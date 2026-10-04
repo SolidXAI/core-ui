@@ -22,7 +22,7 @@ export type AgentChatBinding = {
  *   and its own runtime, opened on mount and closed on unmount. It never touches the
  *   launcher's conversation.
  */
-export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string): AgentChatBinding {
+export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string, externalEmbed = false): AgentChatBinding {
     const shared = agentRuntime === "solidx";
 
     const storeDispatch = useDispatch();
@@ -41,13 +41,13 @@ export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string): 
     const [localRuntime, setLocalRuntime] = useState<AgentRuntime | null>(null);
     useEffect(() => {
         if (shared) return;
-        const runtime = new AgentRuntime(agentUrl, localDispatch, () => localState.current, agentRuntime);
+        const runtime = new AgentRuntime(agentUrl, localDispatch, () => localState.current, agentRuntime, !externalEmbed);
         setLocalRuntime(runtime);
         return () => {
             runtime.dispose();
             setLocalRuntime(null);
         };
-    }, [shared, agentUrl, agentRuntime, localDispatch]);
+    }, [shared, agentUrl, agentRuntime, localDispatch, externalEmbed]);
 
     if (shared) {
         const runtime = ensureAgentRuntime(agentUrl, storeDispatch, () => (store.getState() as any).solidAgent);

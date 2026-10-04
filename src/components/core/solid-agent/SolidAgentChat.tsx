@@ -20,6 +20,9 @@ type Props = {
     /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
     agentRuntime?: AgentRuntimeType;
     inputContext?: AgentInputContext;
+    inputs?: Record<string, unknown>;
+    externalEmbed?: boolean;
+    onInputsLocked?: (locked: boolean) => void;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
     embedded?: boolean;
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
@@ -62,13 +65,16 @@ export function SolidAgentChat({
     title = "SolidX Agent",
     agentRuntime = "solidx",
     inputContext = {},
+    inputs,
+    externalEmbed = false,
+    onInputsLocked,
     embedded = false,
     // SDK prefill goes through the shared "solidx" conversation only.
     handlesPrefill = !embedded && agentRuntime === "solidx",
     suggestions,
     windowControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -137,10 +143,18 @@ export function SolidAgentChat({
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const windowMode = windowControls?.mode ?? agent.mode;
-    const send = useCallback((text: string) => runtime?.sendMessage(text, inputContext), [runtime, inputContext]);
+    const send = useCallback((text: string) => {
+        if (!text.trim() || !runtime) return;
+        onInputsLocked?.(true);
+        return runtime.sendMessage(text, inputContext, [], inputs);
+    }, [runtime, inputContext, inputs, onInputsLocked]);
     const sendWithAttachments = useCallback(
-        (text: string, attachments: AgentAttachment[]) => runtime?.sendMessage(text, inputContext, attachments),
-        [runtime, inputContext],
+        (text: string, attachments: AgentAttachment[]) => {
+            if ((!text.trim() && !attachments.length) || !runtime) return;
+            onInputsLocked?.(true);
+            return runtime.sendMessage(text, inputContext, attachments, inputs);
+        },
+        [runtime, inputContext, inputs, onInputsLocked],
     );
     const offline = agent.connection === "reconnecting" || agent.connection === "offline";
     const statusColor = agent.connection === "open" ? (agent.working ? "#eab308" : "#22c55e") : offline ? "#dc2626" : "#94a3b8";
@@ -171,7 +185,7 @@ export function SolidAgentChat({
 
     return (
         <>
-            <div className={styles.header}>
+            <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`}>
                 <div className={styles.headerMark}>
                     <Sparkles size={15} />
                     <span className={styles.statusDot} style={{ background: statusColor }} />
@@ -182,10 +196,10 @@ export function SolidAgentChat({
                 </div>
                 {signedIn && (
                     <>
-                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime?.newChat(); setShowHistory(false); }}>
+                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" disabled={agent.working} onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); }}>
                             <Plus size={16} />
                         </button>
-                        <button
+                        {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}
                             title="History"
@@ -194,8 +208,8 @@ export function SolidAgentChat({
                             onClick={() => setShowHistory((v) => !v)}
                         >
                             <History size={16} />
-                        </button>
-                        <button
+                        </button>}
+                        {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}
                             title={signedInAs ? `Sign out of the agent (${String(signedInAs)})` : "Sign out of the agent"}
@@ -203,7 +217,7 @@ export function SolidAgentChat({
                             onClick={() => { setShowHistory(false); void signOutOfAgent(agentUrl); }}
                         >
                             <LogOut size={15} />
-                        </button>
+                        </button>}
                     </>
                 )}
                 {(!embedded || windowControls) && (
@@ -233,7 +247,8 @@ export function SolidAgentChat({
                 <div style={{ flex: "1 1 auto" }} />
             ) : agentAuth.status === "signedOut" ? (
                 // The agent forgot the token (expired/restarted) if it already reported an auth error.
-                <AgentSignIn agentUrl={agentUrl} expired={!!agent.authError} />
+                externalEmbed ? <div className={styles.notice} role="status">Connecting to your agent…</div>
+                    : <AgentSignIn agentUrl={agentUrl} expired={!!agent.authError} />
             ) : (
                 <>
                 {offline && (

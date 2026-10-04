@@ -1,4 +1,4 @@
-import { clearAgentAuth, loadAgentAuth } from "./agentAuth";
+import { clearAgentAuth, loadAgentAuth, isExternalAgentAuth, renewExternalAgentAuth } from "./agentAuth";
 import type { AgentUploadedAttachment } from "../types";
 import type { AgentModelAssignments } from "../types";
 
@@ -20,7 +20,7 @@ export type AgentConfigVersionStatus = {
 };
 
 /** Calls the agent at the `httpUrl` named at sign-in, with `Authorization: Bearer <agentToken>`; null when signed out or on error. */
-async function agentFetch<T>(agentUrl: string, path: string, init: RequestInit = {}): Promise<T | null> {
+async function agentFetch<T>(agentUrl: string, path: string, init: RequestInit = {}, retried = false): Promise<T | null> {
     const auth = await loadAgentAuth(agentUrl);
     if (!auth) return null;
     const res = await fetch(`${auth.httpUrl.replace(/\/$/, "")}${path}`, {
@@ -28,7 +28,13 @@ async function agentFetch<T>(agentUrl: string, path: string, init: RequestInit =
         headers: { Authorization: `Bearer ${auth.agentToken}`, ...(init.headers ?? {}) },
     });
     // The agent forgot the token (idle 30 min or restarted): sign in again.
-    if (res.status === 401) clearAgentAuth(agentUrl);
+    if (res.status === 401) {
+        if ((await loadAgentAuth(agentUrl))?.agentToken === auth.agentToken) clearAgentAuth(agentUrl);
+        if (!retried && isExternalAgentAuth(agentUrl)) {
+            if (!(await loadAgentAuth(agentUrl))) await renewExternalAgentAuth(agentUrl);
+            return agentFetch<T>(agentUrl, path, init, true);
+        }
+    }
     if (!res.ok) return null;
     return res.status === 204 ? (null as T) : ((await res.json()) as T);
 }
@@ -60,7 +66,7 @@ export function deleteSession(agentUrl: string, sessionId: string) {
 }
 
 /** Upload files through the agent runtime into SolidX media storage. */
-export async function uploadAgentAttachments(agentUrl: string, files: File[]): Promise<AgentUploadedAttachment[]> {
+export async function uploadAgentAttachments(agentUrl: string, files: File[], retried = false): Promise<AgentUploadedAttachment[]> {
     const auth = await loadAgentAuth(agentUrl);
     if (!auth) throw new Error("Sign in to the agent before uploading files.");
     const formData = new FormData();
@@ -70,7 +76,13 @@ export async function uploadAgentAttachments(agentUrl: string, files: File[]): P
         headers: { Authorization: `Bearer ${auth.agentToken}` },
         body: formData,
     });
-    if (response.status === 401) clearAgentAuth(agentUrl);
+    if (response.status === 401) {
+        if ((await loadAgentAuth(agentUrl))?.agentToken === auth.agentToken) clearAgentAuth(agentUrl);
+        if (!retried && isExternalAgentAuth(agentUrl)) {
+            if (!(await loadAgentAuth(agentUrl))) await renewExternalAgentAuth(agentUrl);
+            return uploadAgentAttachments(agentUrl, files, true);
+        }
+    }
     if (!response.ok) {
         let message = "File upload failed.";
         try {

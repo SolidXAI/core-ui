@@ -64,9 +64,10 @@ export class AgentRuntime {
         private dispatch: Dispatch,
         private getState: GetAgentState,
         readonly agentRuntime: AgentRuntimeType = "solidx",
+        private persistSession = true,
     ) {
         this.sessionKey = sessionKey(agentRuntime, agentUrl);
-        this.socket = new AgentSocket(agentUrl, readSessionId(this.sessionKey), agentRuntime === "agentHub");
+        this.socket = new AgentSocket(agentUrl, persistSession ? readSessionId(this.sessionKey) : null, agentRuntime === "agentHub");
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => this.dispatch(agentConnectionChanged(status))),
@@ -77,7 +78,7 @@ export class AgentRuntime {
     /**
      * Uploads files into SolidX media storage first, then sends their IDs with the socket message.
      */
-    async sendMessage(text: string, context?: AgentContext, attachments: AgentAttachment[] = []) {
+    async sendMessage(text: string, context?: AgentContext, attachments: AgentAttachment[] = [], inputs?: Record<string, unknown>) {
         const content = text.trim();
         if (!content && !attachments.length) return;
         const uploaded = attachments.length
@@ -97,6 +98,7 @@ export class AgentRuntime {
             session_id: this.socket.currentSessionId ?? "",
             content,
             context: context ?? this.lastContext,
+            ...(this.agentRuntime === "agentHub" && inputs ? { inputs } : {}),
             ...(attachments.length ? { attachments: uploaded } : {}),
         });
     }
@@ -121,14 +123,14 @@ export class AgentRuntime {
     }
 
     newChat() {
-        writeSessionId(this.sessionKey, null);
+        if (this.persistSession) writeSessionId(this.sessionKey, null);
         this.lastContext = undefined;
         this.dispatch(agentThreadReset());
         this.socket.newSession();
     }
 
     resume(sessionId: string) {
-        writeSessionId(this.sessionKey, sessionId);
+        if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         this.dispatch(agentThreadReset());
         this.socket.resume(sessionId);
     }
@@ -150,7 +152,8 @@ export class AgentRuntime {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
             if (!result) return;
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
-            const items = await resolveAttachmentMedia(historyToItems(result.messages ?? []));
+            const rawItems = historyToItems(result.messages ?? []);
+            const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
             this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page }));
         } catch {
             // History is a convenience; the live session still works without it.
@@ -175,7 +178,7 @@ export class AgentRuntime {
     private emitSdkEvents(event: AgentChatEvent) {
         if (event.eventType === AgentEventTypes.sessionStarted) {
             const sessionId = event.frame.session_id ?? event.eventData.session_id ?? null;
-            writeSessionId(this.sessionKey, sessionId);
+            if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
             eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentRuntime });
             const state = this.getState();
             const historyId = event.frame.history_session_id ?? event.eventData.history_session_id ?? sessionId;

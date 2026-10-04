@@ -52,9 +52,6 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
     return groups;
 }
 
-/** Stand-in item so the thinking bubble is resolved through the registry like every other widget. */
-const THINKING_ITEM: AgentChatItem = { id: "agent-thinking", at: 0, eventType: AgentEventTypes.agentStarted, eventData: {}, live: true };
-
 function AgentActivityDisclosure({
     turnKey,
     items,
@@ -99,9 +96,7 @@ function AgentActivityDisclosure({
     const seconds = hasLiveTimer.current ? activeDuration : recordedDuration;
     const durationLabel = `${seconds}s`;
     const summary = working
-        ? toolCount
-          ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ${durationLabel} so far`
-          : `Working for ${durationLabel}`
+        ? `Working · ${toolCount ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ` : ""}${durationLabel}`
         : toolCount
           ? `${toolCount} tool${toolCount === 1 ? "" : "s"} called · took ${durationLabel}`
           : `Activity · took ${durationLabel}`;
@@ -111,7 +106,7 @@ function AgentActivityDisclosure({
         <section className={`${widgetStyles.ActivityGroup} ${showSummary ? "" : widgetStyles.ActivityTimerOnly}`} aria-label={showSummary ? "Agent activity" : undefined}>
             {showSummary && (
                 <>
-                    <button
+                    {detailItems.length > 0 ? <button
                         type="button"
                         className={widgetStyles.ActivitySummary}
                         aria-expanded={expanded}
@@ -123,7 +118,12 @@ function AgentActivityDisclosure({
                             : <CheckCircle2 size={15} className={widgetStyles.ActivityComplete} aria-hidden="true" />}
                         <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
                         <ChevronDown size={15} className={`${widgetStyles.ActivityChevron} ${expanded ? widgetStyles.ActivityChevronOpen : ""}`} aria-hidden="true" />
-                    </button>
+                    </button> : <div className={widgetStyles.ActivitySummary} role="status">
+                        {working
+                            ? <LoaderCircle size={15} className={widgetStyles.ActivitySpinner} aria-hidden="true" />
+                            : <CheckCircle2 size={15} className={widgetStyles.ActivityComplete} aria-hidden="true" />}
+                        <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
+                    </div>}
                     {expanded && (
                         <div id={panelId} className={widgetStyles.ActivityDetails}>
                             {detailItems.map(renderItem)}
@@ -154,7 +154,7 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
         }
         prevFirstId.current = firstId;
         prevHeight.current = el.scrollHeight;
-    }, [items, thinking]);
+    }, [items]);
 
     useEffect(() => {
         const el = scrollRef.current;
@@ -172,13 +172,14 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
     }
 
     const groups = groupItems(items);
-    // The thinking bubble belongs to the current agent turn (or starts one after a user message).
-    const last = groups[groups.length - 1];
-    if (thinking) {
-        if (last && last.kind === "agent") last.items = [...last.items, THINKING_ITEM];
-        else groups.push({ kind: "agent", key: "thinking-turn", items: [THINKING_ITEM] });
+    const lastGroup = groups[groups.length - 1];
+    if (working && (!lastGroup || lastGroup.kind === "user")) {
+        groups.push({
+            kind: "agent",
+            key: lastGroup?.kind === "user" ? `after-${lastGroup.item.id}` : "working-turn",
+            items: [],
+        });
     }
-
     const renderItem = (item: AgentChatItem) => (
         <SolidAgentChatItem key={item.id} item={item} agentContext={context} onReply={onReply} onPrompt={onPrompt} />
     );
@@ -194,36 +195,51 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
                 if (group.kind === "user") return renderItem(group.item);
 
                 const isCurrentTurn = working && group === groups[groups.length - 1];
-                const currentTool = isCurrentTurn
+                const latestTool = isCurrentTurn
                     ? [...group.items].reverse().find((item) => item.eventType === AgentEventTypes.toolCalling && item.live)
                     : undefined;
-                const showThinking = isCurrentTurn && thinking;
-                const currentActivity = currentTool ?? (showThinking ? THINKING_ITEM : undefined);
-                const activityItems = group.items.filter((item) => !isAssistantMessage(item) && item.id !== THINKING_ITEM.id);
-                const detailItems = activityItems.filter((item) => item !== currentTool);
+                const currentActivity = latestTool ?? (isCurrentTurn
+                    ? [...group.items].reverse().find((item) => item.eventType === AgentEventTypes.toolCalling)
+                    : undefined);
+                const activityItems = group.items.filter((item) => !isAssistantMessage(item));
+                const detailItems = activityItems.filter((item) => item !== currentActivity);
                 const activitySet = new Set(group.items.filter((item) => !isAssistantMessage(item)));
+                const showIdleThinkingStatus = isCurrentTurn && thinking && activityItems.length === 0;
                 let activityRendered = false;
-                const turnContent = group.items.flatMap((item) => {
-                    if (activitySet.has(item)) {
-                        if (activityRendered) return [];
-                        activityRendered = true;
-                        return [
-                            <AgentActivityDisclosure
-                                key={`activity-${group.key}`}
-                                turnKey={group.key}
-                                items={activityItems}
-                                detailItems={detailItems}
-                                working={isCurrentTurn}
-                                currentActivityId={currentActivity?.id}
-                                showSummary={detailItems.length > 0}
-                                renderItem={renderItem}
-                            />,
-                            ...(currentActivity ? [renderItem(currentActivity)] : []),
-                        ];
-                    }
-                    if (item === currentTool || item.id === THINKING_ITEM.id) return [];
-                    return [renderItem(item)];
-                });
+                const turnContent = [
+                    ...(showIdleThinkingStatus ? [
+                        <AgentActivityDisclosure
+                            key={`activity-${group.key}`}
+                            turnKey={group.key}
+                            items={activityItems}
+                            detailItems={detailItems}
+                            working={isCurrentTurn}
+                            showSummary
+                            renderItem={renderItem}
+                        />,
+                    ] : []),
+                    ...group.items.flatMap((item) => {
+                        if (activitySet.has(item)) {
+                            if (activityRendered) return [];
+                            activityRendered = true;
+                            return [
+                                <AgentActivityDisclosure
+                                    key={`activity-${group.key}`}
+                                    turnKey={group.key}
+                                    items={activityItems}
+                                    detailItems={detailItems}
+                                    working={isCurrentTurn}
+                                    currentActivityId={currentActivity?.id}
+                                    showSummary={detailItems.length > 0 || currentActivity !== undefined}
+                                    renderItem={renderItem}
+                                />,
+                                ...(currentActivity ? [renderItem(currentActivity)] : []),
+                            ];
+                        }
+                        if (item === currentActivity) return [];
+                        return [renderItem(item)];
+                    }),
+                ];
 
                 return (
                     <div key={group.key} className={widgetStyles.AiTurnGroup}>
