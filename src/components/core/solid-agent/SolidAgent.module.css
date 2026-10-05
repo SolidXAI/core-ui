@@ -32,6 +32,31 @@
   color: var(--agent-fg);
 }
 
+.inputDialogOverlay { z-index: 1300 !important; }
+.inputDialog {
+  z-index: 1301 !important;
+  --agent-primary: var(--solid-agent-primary, #722ed1);
+  --agent-bg: var(--solid-agent-bg, #fff);
+  --agent-page: var(--solid-agent-page, #f6f8fc);
+  --agent-fg: var(--solid-agent-fg, #0f172a);
+  --agent-muted: var(--solid-agent-muted, #64748b);
+  --agent-border: var(--solid-agent-border, #e2e8f0);
+  --agent-err: #dc2626;
+  --agent-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.inputDialogBody { max-height: min(70vh, 42rem); overflow: auto; }
+.inputForm { display: flex; flex-direction: column; gap: 1rem; }
+.inputForm > p { margin: 0; color: var(--agent-muted); font-size: 0.875rem; line-height: 1.5; }
+.inputFields { display: flex; flex-direction: column; gap: 0.85rem; }
+.inputField { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; }
+.inputField > span { display: flex; flex-direction: column; gap: 0.15rem; }
+.inputField small { color: var(--agent-muted); font-size: 0.75rem; font-weight: 400; }
+.inputField :global(.solid-input), .inputField select, .inputField textarea { width: 100%; min-height: 2.5rem; box-sizing: border-box; padding: 0.55rem 0.7rem; border: 1px solid var(--agent-border, #e2e8f0); border-radius: 0.5rem; background: var(--agent-bg, #fff); color: var(--agent-fg, #172033); font: inherit; font-weight: 400; }
+.inputField textarea { min-height: 5rem; resize: vertical; font-family: var(--agent-mono); font-size: 0.8rem; }
+.inputField :global(.solid-input):focus-visible, .inputField select:focus, .inputField textarea:focus { outline: 2px solid color-mix(in srgb, var(--agent-primary, #722ed1) 28%, transparent); border-color: var(--agent-primary, #722ed1); }
+.inputError { margin: 0; color: var(--agent-err); font-size: 0.82rem; }
+.inputActions { display: flex; justify-content: flex-end; gap: 0.6rem; padding-top: 0.25rem; }
+
 /* ── Launcher bubble ─────────────────────────────────────────── */
 .bubble {
   position: fixed;

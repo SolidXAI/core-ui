@@ -57,7 +57,8 @@
 .agent-editor__model-option:hover,.agent-editor__model-option.is-active { background:var(--surface-hover,#f2f3f4); }
 .agent-editor__model-option small { margin-top:.1rem; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.72rem; }
 .agent-editor__model-empty { padding:.8rem; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.85rem; }
-.agent-editor__test-dialog { gap:0; }
+.agent-editor__test-dialog-overlay { z-index:1200!important; }
+.agent-editor__test-dialog { z-index:1201!important; gap:0; }
 .agent-editor__test-dialog-body { flex:1 1 auto; min-height:0; overflow:hidden; }
 .agent-editor__test-chat { width:100%; height:100%!important; border:0!important; border-radius:0!important; }
 .agent-editor__persona { padding:0; overflow:hidden; }

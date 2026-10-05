@@ -315,6 +315,10 @@ export function AgentRegistryEditorPage() {
 
   const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
   const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
+  const openAgentTest = () => {
+    setTestAgentWindowMode("maximized");
+    setTestAgentOpen(true);
+  };
 
   React.useEffect(() => {
     const refresh = () => { skills.refetch(); tools.refetch(); };
@@ -535,7 +539,7 @@ export function AgentRegistryEditorPage() {
   const content = <SolidTabGroup tabs={tabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
   return <main className="agent-editor"><header className="agent-editor__header"><div className="agent-editor__heading-with-refresh"><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1>{record?.id && <button type="button" className={`agent-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh agent" title="Refresh agent" disabled={isFetching || updating} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
-    {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={() => { setTestAgentWindowMode("maximized"); setTestAgentOpen(true); }}>Test Agent</SolidButton>}
+    {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={openAgentTest}>Test Agent</SolidButton>}
     <SolidButton loading={creating || updating} disabled={isLoading || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
   </div></header>
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
@@ -558,6 +562,7 @@ export function AgentRegistryEditorPage() {
       onOpenChange={setTestAgentOpen}
       onHide={() => setTestAgentOpen(false)}
       showHeader={false}
+      overlayClassName="agent-editor__test-dialog-overlay"
       ariaLabel={`Test ${record.name ?? "SolidX Agent"}`}
       className="agent-editor__test-dialog"
       style={testAgentWindowMode === "maximized"
@@ -565,7 +570,7 @@ export function AgentRegistryEditorPage() {
         : { position: "fixed", top: 16, right: 16, bottom: 16, left: "auto", width: "min(28rem, calc(100vw - 32px))", maxWidth: "none", height: "auto", maxHeight: "none", transform: "none", borderRadius: 14, padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}
     >
       <div className="agent-editor__test-dialog-body">
-        <SolidAgentEmbedded agentRuntime="agentHub" agentId={record.id} title={record.name ?? "SolidX Agent"} height="100%" className="agent-editor__test-chat"
+        <SolidAgentEmbedded agentRuntime="agentHub" agentId={record.id} title={record.name ?? "SolidX Agent"} requiredInputs={parseInputs(record.requiredInputs)} height="100%" className="agent-editor__test-chat"
           windowControls={{ mode: testAgentWindowMode, onDock: () => setTestAgentWindowMode("docked"), onMaximize: () => setTestAgentWindowMode("maximized"), onRestore: () => setTestAgentWindowMode("docked"), onClose: () => setTestAgentOpen(false) }} />
       </div>
     </SolidDialog>}

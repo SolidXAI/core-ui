@@ -9,6 +9,13 @@ export type AgentEmbedBootstrap = AgentBootstrap & {
     requiredInputs: AgentInputDefinition[];
 };
 
+export class MissingAgentInputsError extends Error {
+    constructor(readonly inputNames: string[]) {
+        super(`Required inputs are missing: ${inputNames.join(", ")}`);
+        this.name = "MissingAgentInputsError";
+    }
+}
+
 export function validateBootstrap(value: unknown, agentId: number): AgentEmbedBootstrap {
     const body = value as AgentEmbedBootstrap;
     if (!body || body.embed !== true || body.agentId !== agentId || typeof body.agentToken !== "string" || !body.agentToken
@@ -22,14 +29,20 @@ export function validateBootstrap(value: unknown, agentId: number): AgentEmbedBo
     return body;
 }
 
-export function validateEmbedInputs(fields: AgentInputDefinition[], values: Record<string, unknown>): void {
-    if (!values || typeof values !== "object" || Array.isArray(values)) throw new Error("inputs must be an object.");
+export function validateEmbedInputs(fields: AgentInputDefinition[], suppliedValues?: Record<string, unknown>): void {
+    const values = suppliedValues ?? {};
+    if (typeof values !== "object" || Array.isArray(values)) throw new Error("inputs must be an object.");
     const names = new Set(fields.map((field) => field.name));
     for (const name of Object.keys(values)) if (!names.has(name)) throw new Error(`Unknown input: ${name}`);
+    const missing = fields
+        .filter(({ name }) => {
+            const value = values[name];
+            return value === undefined || value === null || (typeof value === "string" && !value.trim());
+        })
+        .map(({ name }) => name);
+    if (missing.length) throw new MissingAgentInputsError(missing);
     for (const field of fields) {
         const value = values[field.name];
-        if (value === undefined || value === null || (typeof value === "string" && !value.trim()))
-            throw new Error(`Provide the required input: ${field.name}`);
         let valid = false;
         switch (field.dataType) {
             case "string": valid = typeof value === "string"; break;

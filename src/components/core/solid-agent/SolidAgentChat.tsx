@@ -13,6 +13,10 @@ import { AgentSignIn } from "./AgentSignIn";
 import { signOutOfAgent } from "./client/agentAuth";
 import { AgentModelIndicator } from "./AgentModelIndicator";
 import type { AgentModelAssignments } from "./types";
+import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
+import { SolidButton } from "../../shad-cn-ui/SolidButton";
+import { SolidDialog, SolidDialogBody } from "../../shad-cn-ui/SolidDialog";
+import { SolidInput } from "../../shad-cn-ui/SolidInput";
 
 type Props = {
     agentUrl: string;
@@ -21,6 +25,7 @@ type Props = {
     agentRuntime?: AgentRuntimeType;
     inputContext?: AgentInputContext;
     inputs?: Record<string, unknown>;
+    requiredInputs?: AgentInputDefinition[];
     externalEmbed?: boolean;
     onInputsLocked?: (locked: boolean) => void;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
@@ -60,12 +65,53 @@ function formatDate(iso: string | null) {
     return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
+function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<string, string>): { values?: Record<string, unknown>; error?: string } {
+    const values: Record<string, unknown> = {};
+    for (const field of fields) {
+        const raw = rawValues[field.name] ?? "";
+        if (field.dataType === "boolean") {
+            if (raw !== "true" && raw !== "false") return { error: `Choose true or false for “${field.name}”.` };
+            values[field.name] = raw === "true";
+            continue;
+        }
+        if (!raw.trim()) return { error: `Enter a value for “${field.name}”.` };
+        if (field.dataType === "number" || field.dataType === "integer") {
+            const value = Number(raw);
+            if (!Number.isFinite(value) || (field.dataType === "integer" && !Number.isSafeInteger(value))) {
+                return { error: `Enter a valid ${field.dataType} for “${field.name}”.` };
+            }
+            values[field.name] = value;
+            continue;
+        }
+        if (field.dataType === "object" || field.dataType === "array") {
+            try {
+                const value: unknown = JSON.parse(raw);
+                if (field.dataType === "object" && (!value || typeof value !== "object" || Array.isArray(value))) throw new Error();
+                if (field.dataType === "array" && !Array.isArray(value)) throw new Error();
+                values[field.name] = value;
+            } catch {
+                return { error: `Enter valid JSON ${field.dataType === "array" ? "array" : "object"} for “${field.name}”.` };
+            }
+            continue;
+        }
+        if (field.dataType === "date" && (Number.isNaN(Date.parse(raw)) || new Date(raw).toISOString().slice(0, 10) !== raw)) {
+            return { error: `Enter a valid date for “${field.name}”.` };
+        }
+        if (field.dataType === "datetime" && Number.isNaN(Date.parse(raw))) {
+            return { error: `Enter a valid date and time for “${field.name}”.` };
+        }
+        values[field.name] = raw;
+    }
+    return { values };
+}
+
 export function SolidAgentChat({
     agentUrl,
     title = "SolidX Agent",
     agentRuntime = "solidx",
     inputContext = {},
     inputs,
+    requiredInputs = [],
     externalEmbed = false,
     onInputsLocked,
     embedded = false,
@@ -86,6 +132,22 @@ export function SolidAgentChat({
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
+    const [collectedInputs, setCollectedInputs] = useState<Record<string, unknown> | null>(null);
+    const [rawInputValues, setRawInputValues] = useState<Record<string, string>>({});
+    const [inputError, setInputError] = useState("");
+    const shouldPromptForInputs = !externalEmbed && agentRuntime === "agentHub" && signedIn
+        && requiredInputs.length > 0 && inputs === undefined && collectedInputs === null;
+    const messageInputs = inputs ?? collectedInputs ?? undefined;
+
+    const submitRequiredInputs = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const result = parseInputValues(requiredInputs, rawInputValues);
+        if (!result.values) {
+            setInputError(result.error ?? "Check the input values and try again.");
+            return;
+        }
+        setCollectedInputs(result.values);
+    };
 
     useEffect(() => {
         if (!signedIn) {
@@ -146,15 +208,15 @@ export function SolidAgentChat({
     const send = useCallback((text: string) => {
         if (!text.trim() || !runtime) return;
         onInputsLocked?.(true);
-        return runtime.sendMessage(text, inputContext, [], inputs);
-    }, [runtime, inputContext, inputs, onInputsLocked]);
+        return runtime.sendMessage(text, inputContext, [], messageInputs);
+    }, [runtime, inputContext, messageInputs, onInputsLocked]);
     const sendWithAttachments = useCallback(
         (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
             onInputsLocked?.(true);
-            return runtime.sendMessage(text, inputContext, attachments, inputs);
+            return runtime.sendMessage(text, inputContext, attachments, messageInputs);
         },
-        [runtime, inputContext, inputs, onInputsLocked],
+        [runtime, inputContext, messageInputs, onInputsLocked],
     );
     const offline = agent.connection === "reconnecting" || agent.connection === "offline";
     const statusColor = agent.connection === "open" ? (agent.working ? "#eab308" : "#22c55e") : offline ? "#dc2626" : "#94a3b8";
@@ -185,6 +247,53 @@ export function SolidAgentChat({
 
     return (
         <>
+            {shouldPromptForInputs && <SolidDialog
+                open
+                dismissible={!!windowControls}
+                onOpenChange={(open) => { if (!open) windowControls?.onClose(); }}
+                className={styles.inputDialog}
+                overlayClassName={styles.inputDialogOverlay}
+                header="Set up this test run"
+                ariaLabel={`Enter required inputs for ${title}`}
+                style={{ width: "min(34rem, 94vw)" }}
+            >
+                <SolidDialogBody className={styles.inputDialogBody}>
+                    <form className={styles.inputForm} autoComplete="off" onSubmit={submitRequiredInputs}>
+                        <p>Sign-in is complete. Enter the values this agent needs before starting the conversation.</p>
+                        <div className={styles.inputFields}>
+                            {requiredInputs.map((field, index) => {
+                                const id = `solid-agent-test-input-${index}`;
+                                const value = rawInputValues[field.name] ?? "";
+                                const update = (next: string) => {
+                                    setRawInputValues((current) => ({ ...current, [field.name]: next }));
+                                    setInputError("");
+                                };
+                                const inputType = field.dataType === "integer" || field.dataType === "number" ? "number"
+                                    : field.dataType === "datetime" ? "datetime-local"
+                                        : field.dataType === "date" ? "date" : "text";
+                                return <label className={styles.inputField} htmlFor={id} key={`${field.name}-${index}`}>
+                                    <span>{field.name}<small>{field.description || field.dataType}</small></span>
+                                    {field.dataType === "boolean" ? (
+                                        <select id={id} autoComplete="off" value={value} onChange={(event) => update(event.target.value)}>
+                                            <option value="">Choose a value</option><option value="true">True</option><option value="false">False</option>
+                                        </select>
+                                    ) : field.dataType === "object" || field.dataType === "array" ? (
+                                        <textarea id={id} autoComplete="off" value={value} onChange={(event) => update(event.target.value)} placeholder={field.dataType === "array" ? "[ ]" : "{ }"} rows={3} />
+                                    ) : (
+                                        <SolidInput id={id} type={inputType} step={field.dataType === "number" ? "any" : field.dataType === "integer" ? "1" : undefined}
+                                            autoComplete="off" value={value} onChange={(event) => update(event.target.value)} />
+                                    )}
+                                </label>;
+                            })}
+                        </div>
+                        {inputError && <p className={styles.inputError} role="alert">{inputError}</p>}
+                        <div className={styles.inputActions}>
+                            {windowControls && <SolidButton type="button" variant="secondary" onClick={() => windowControls.onClose()}>Cancel</SolidButton>}
+                            <SolidButton type="submit">Start test</SolidButton>
+                        </div>
+                    </form>
+                </SolidDialogBody>
+            </SolidDialog>}
             <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`}>
                 <div className={styles.headerMark}>
                     <Sparkles size={15} />
@@ -196,7 +305,7 @@ export function SolidAgentChat({
                 </div>
                 {signedIn && (
                     <>
-                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" disabled={agent.working} onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); }}>
+                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" disabled={agent.working} onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) { setCollectedInputs(null); setInputError(""); } }}>
                             <Plus size={16} />
                         </button>
                         {!externalEmbed && <button
