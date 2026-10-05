@@ -23,19 +23,24 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
     return <div className="agent-editor__stack">
         {!active && <p role="status" className="agent-editor__hint">Activate this agent before embedding it. Samples use the saved agent definition.</p>}
         <section className="agent-editor__section"><h2>1. Keep your API key on your server</h2>
-            <p>Store the key in SOLIDX_API_KEY. Your browser code receives an agent token; it never receives the API key.</p>
+            <p>Configure <code>AGENTHUB_API_KEY</code>, <code>AGENTHUB_AGENT_ID</code>, and <code>AGENTHUB_BACKEND_URL</code> on the server that hosts your app API. Never expose the API key or AgentHub runtime URL in browser code. The browser receives only the short-lived embed response through the SDK handshake.</p>
         </section>
         <section className="agent-editor__section"><h2>2. Create your token endpoint</h2>
-            <p>Keep the API key on your server and apply your application's access policy and rate limits. externalUserId is optional: when supplied, derive it on the server to isolate each user's sessions; omit it for anonymous embeds. Return the AgentHub response unchanged with Cache-Control: no-store.</p>
+            <p>Your app API accepts the SDK's token request, ignores any client-selected backend or API key, and uses the configured agent ID to call <code>/api/agent/api-keys/embedded/me</code> on AgentHub Runtime. Return the successful JSON response unchanged with <code>Cache-Control: no-store</code>; never cache or log credentials or tokens.</p>
+            <p>Anonymous embeds can expose this endpoint publicly, as in the demo. Add rate limiting at your API or gateway and use your app's authorization policy when chat access should require sign-in. <code>externalUserId</code> is optional: when the trusted auth layer supplies a stable user ID, send a namespaced value; omit it for anonymous visitors. The runtime manages chat sessions independently.</p>
             <SolidTabGroup tabs={[
+                { value: "python", label: "Python / FastAPI", content: code(samples.python, "python") },
+                { value: "nestjs", label: "NestJS", content: code(samples.nestjs, "typescript") },
                 { value: "express", label: "Express", content: code(samples.express, "javascript") },
                 { value: "java", label: "Java / Spring Boot", content: code(samples.java, "java") },
                 { value: "dotnet", label: ".NET / ASP.NET Core", content: code(samples.dotnet, "csharp") },
-            ]} value={backend} onValueChange={setBackend} extra={copyButton(backend, samples[backend as "express" | "java" | "dotnet"])} />
+            ]} value={backend} onValueChange={setBackend} extra={copyButton(backend, samples[backend as keyof typeof samples])} />
         </section>
         <section className="agent-editor__section"><h2>3. Embed the chat</h2>
-            <p>The SDK adds a launcher to your container and opens the hosted chat in a popover. It handles authentication and token renewal automatically. No SolidX npm dependency is required.</p>
-            <p>The hosted chat UI is selected by the SDK-serving API's <code>AGENT_EMBED_UI_URL</code> deployment setting.</p>
+            <p>Load the SDK from the public SDK URL shown below and mount it into a browser container. The SDK calls your app's <code>tokenEndpoint</code>, passes the response to the hosted chat in memory, and manages the iframe handshake and token renewal. No SolidX npm dependency is required.</p>
+            <p>Use a same-origin path such as <code>/api/agent-chat/token</code> when possible. If your app API has another origin, give <code>tokenEndpoint</code> its absolute URL and configure that API's CORS policy for the browser app origin.</p>
+            <p>The SDK-serving SolidX API selects the hosted chat UI from its server-side <code>AGENT_EMBED_UI_URL</code> setting. The consuming app does not supply an <code>embedUrl</code> or choose the iframe host. Keep the SDK script URL and the configured hosted UI origin aligned to the same SolidX deployment.</p>
+            <p>Pass the current page's required input values in <code>inputs</code> using the names and types in this agent's schema. These values provide task context; they are not authorization to access records. Enforce access to protected data in your own API/tools. For a logged-in app, use <code>getTokenHeaders</code> to send the app's normal bearer or CSRF header to your app API; do not send the AgentHub API key from the browser.</p>
             <SolidTabGroup tabs={[
                 { value: "javascript", label: "JavaScript", content: code(samples.javascript, "html") },
                 { value: "react", label: "React", content: code(samples.react, "javascript") },
@@ -45,9 +50,9 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
             {fields.length ? <table style={{ width: "100%", textAlign: "left" }}><thead><tr><th>Variable</th><th>Data type</th><th>Description</th></tr></thead>
                 <tbody>{fields.map((field) => <tr key={field.name}><td><code>{field.name}</code></td><td>{field.dataType}</td><td>{field.description}</td></tr>)}</tbody></table>
                 : <p>This agent has no required inputs.</p>}
-            <p>Replace sample values with your application's values. Inputs are fixed after the first message; start a new chat to change them. Input values describe the task and do not grant access to data.</p>
+            <p>Replace sample values with the current page's values and preserve each declared type. The SDK validates required inputs before the chat starts. Inputs are fixed after the first message; start a new chat to change them. They describe the task and do not grant access to data.</p>
         </section>
-        <section className="agent-editor__section"><h2>Hosting</h2><p>Serve the chat over HTTPS with this route available: <code>/embed/agent/{agentId}</code>. Configure the chat server's frame-ancestors policy for your integrating sites and AgentHub's AGENTHUB_CORS_ORIGINS for the hosted chat origin. Allow the SDK script and iframe in the third party's CSP.</p></section>
+        <section className="agent-editor__section"><h2>Hosting and deployment</h2><p>Make <code>/embed/agent/{agentId}</code> available on the hosted UI selected by <code>AGENT_EMBED_UI_URL</code>. Allow the consuming app origin in the hosted UI's frame-ancestors policy, the AgentHub Runtime origin in its CORS configuration, and the SDK/API/iframe origins in the consuming app's CSP. Use HTTPS for the consuming page, SDK, hosted UI, and runtime in production.</p></section>
         {copyError && <p role="alert">{copyError}</p>}
     </div>;
 }

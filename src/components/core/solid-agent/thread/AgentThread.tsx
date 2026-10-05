@@ -57,7 +57,6 @@ function AgentActivityDisclosure({
     items,
     detailItems,
     working,
-    currentActivityId,
     showSummary,
     renderItem,
 }: {
@@ -65,7 +64,6 @@ function AgentActivityDisclosure({
     items: AgentChatItem[];
     detailItems: AgentChatItem[];
     working: boolean;
-    currentActivityId?: string;
     showSummary: boolean;
     renderItem: (item: AgentChatItem) => React.ReactNode;
 }) {
@@ -83,10 +81,6 @@ function AgentActivityDisclosure({
         const timer = window.setInterval(() => setNow(Date.now()), 1000);
         return () => window.clearInterval(timer);
     }, [working]);
-
-    useLayoutEffect(() => {
-        setExpanded(false);
-    }, [currentActivityId]);
 
     const toolCount = items.filter((item) => item.eventType === AgentEventTypes.toolCalling).length;
     const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
@@ -229,7 +223,6 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
                                     items={activityItems}
                                     detailItems={detailItems}
                                     working={isCurrentTurn}
-                                    currentActivityId={currentActivity?.id}
                                     showSummary={detailItems.length > 0 || currentActivity !== undefined}
                                     renderItem={renderItem}
                                 />,

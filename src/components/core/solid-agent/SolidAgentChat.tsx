@@ -353,13 +353,24 @@ export function SolidAgentChat({
             </div>
 
             {agentAuth.status === "checking" ? (
-                <div style={{ flex: "1 1 auto" }} />
+                externalEmbed
+                    ? <div className={styles.embedWait} role="status" aria-live="polite"><div className={styles.embedWaitCard}><span className={styles.embedSpinner} aria-hidden="true" /><strong>Please wait</strong><span>Checking your connection</span></div></div>
+                    : <div style={{ flex: "1 1 auto" }} />
             ) : agentAuth.status === "signedOut" ? (
                 // The agent forgot the token (expired/restarted) if it already reported an auth error.
-                externalEmbed ? <div className={styles.notice} role="status">Connecting to your agent…</div>
+                externalEmbed ? <div className={styles.embedWait} role="status" aria-live="polite"><div className={styles.embedWaitCard}><span className={styles.embedSpinner} aria-hidden="true" /><strong>Please wait</strong><span>Connecting to your agent</span></div></div>
                     : <AgentSignIn agentUrl={agentUrl} expired={!!agent.authError} />
             ) : (
                 <>
+                {externalEmbed && agent.connection !== "open" && (
+                    <div className={styles.embedWait} role="status" aria-live="polite">
+                        <div className={styles.embedWaitCard}>
+                            <span className={styles.embedSpinner} aria-hidden="true" />
+                            <strong>Please wait</strong>
+                            <span>{offline ? "Reconnecting to your agent" : "Connecting to your agent"}</span>
+                        </div>
+                    </div>
+                )}
                 {offline && (
                     <div className={styles.banner} role="status">
                         <WifiOff size={14} /> Reconnecting to the agent… Your messages will be sent once it is back.

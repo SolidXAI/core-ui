@@ -17,6 +17,7 @@
 }
 
 .root {
+  position: relative;
   --agent-primary: var(--solid-agent-primary);
   --agent-bg: var(--solid-agent-bg);
   --agent-page: var(--solid-agent-page);
@@ -31,6 +32,46 @@
   font-size: 13.5px;
   color: var(--agent-fg);
 }
+
+.embedWait {
+  position: absolute;
+  z-index: 5;
+  inset: 54px 0 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  background: radial-gradient(ellipse at center, #edf5f0 0%, #f7f9f8 70%);
+  color: #1f302b;
+  text-align: center;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.embedWaitCard {
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 11px;
+  padding: 24px 30px;
+  border: 1px solid #e0e9e3;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 34px rgba(28, 55, 43, 0.08);
+  text-align: center;
+}
+.embedWaitCard strong { font-size: 13px; font-weight: 650; }
+.embedWaitCard > span:last-child { color: #718078; font-size: 12px; line-height: 1.45; }
+.embedSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #dce9e1;
+  border-top-color: #147a62;
+  border-radius: 50%;
+  animation: embedSpin 0.8s linear infinite;
+}
+@keyframes embedSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .embedSpinner { animation-duration: 1.8s; } }
 
 .inputDialogOverlay { z-index: 1300 !important; }
 .inputDialog {
@@ -156,7 +197,6 @@
   padding: 0 8px 0 14px;
   border-bottom: 1px solid var(--agent-border);
 }
-.externalEmbedHeader { padding-right: 52px; }
 .headerMark {
   position: relative;
   flex: 0 0 auto;
