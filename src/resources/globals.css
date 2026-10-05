@@ -4555,7 +4555,21 @@ li.header-li-px {
     min-height: 44px;
   }
 
+  .solid-saved-filter-item {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding-right: 18px;
+  }
+
+  .solid-saved-filter-main-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
   .solid-saved-filter-actions {
+    flex: 0 0 auto;
+    gap: 3px;
     opacity: 1;
   }
 
