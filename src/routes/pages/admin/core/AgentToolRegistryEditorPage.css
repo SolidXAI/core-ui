@@ -101,14 +101,19 @@
 .agent-tool-editor__event-filters { display:flex; align-items:flex-end; flex-wrap:wrap; gap:.55rem; }
 .agent-tool-editor__event-filters>label { display:flex; min-width:8rem; flex-direction:column; gap:.25rem; font-size:.68rem; font-weight:600; }
 .agent-tool-editor__event-filters select { min-height:2.1rem; padding:.35rem .55rem; border:1px solid var(--surface-border,var(--border)); border-radius:.45rem; color:inherit; background:var(--surface-ground,var(--background)); font:inherit; font-weight:400; }
-.agent-tool-editor__event-search { flex:1 1 12rem; }
+.agent-tool-editor__event-search { flex:1 1 10rem; max-width:14rem; }
 .agent-tool-editor__event-search-control { display:flex; min-height:2.1rem; align-items:center; gap:.35rem; padding:0 .5rem; border:1px solid var(--surface-border,var(--border)); border-radius:.45rem; color:var(--text-color-secondary,var(--muted-foreground)); background:var(--surface-ground,var(--background)); }
 .agent-tool-editor__event-search-control input { min-width:0; height:1.9rem; padding:0; border:0; outline:0; background:transparent; font-size:.75rem; }
+.agent-tool-editor__event-pagination { display:flex; flex:0 0 auto; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:.75rem; max-width:100%; min-height:2.1rem; margin-left:auto; }
+.agent-tool-editor__event-pagination .solid-paginator-report { white-space:nowrap; }
 .agent-tool-editor__events-table-wrap { flex:1; overflow:auto; }
 .agent-tool-editor__events-table { width:100%; border-collapse:collapse; font-size:.74rem; }
 .agent-tool-editor__events-table th { position:sticky; top:0; z-index:1; padding:.6rem .7rem; border-bottom:1px solid var(--surface-border,var(--border)); background:var(--surface-ground,var(--background)); color:var(--text-color-secondary,var(--muted-foreground)); text-align:left; font-size:.66rem; font-weight:700; white-space:nowrap; }
 .agent-tool-editor__events-table td { padding:.55rem .7rem; border-bottom:1px solid color-mix(in srgb,var(--surface-border,var(--border)) 70%,transparent); vertical-align:middle; white-space:nowrap; }
 .agent-tool-editor__events-table tbody tr:hover { background:color-mix(in srgb,var(--primary-color,var(--primary)) 3%,transparent); }
+.agent-tool-editor__event-row { cursor:pointer; }
+.agent-tool-editor__event-open { padding:0; border:0; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+.agent-tool-editor__event-open:focus-visible { outline:2px solid var(--primary-color,var(--primary)); outline-offset:3px; border-radius:.2rem; }
 .agent-tool-editor__events-table td:nth-child(2) { white-space:normal; }
 .agent-tool-editor__sessions-message { display:flex; align-items:center; justify-content:center; gap:.4rem; min-height:8rem; margin:0; padding:1rem; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.8rem; text-align:center; }
 .agent-tool-editor__sessions-message--error { color:#b91c1c; }

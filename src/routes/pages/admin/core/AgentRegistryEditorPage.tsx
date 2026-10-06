@@ -27,7 +27,6 @@ type Agent = Item & {
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
-  agentProcesses?: Item[]; agentSessions?: Item[]; agentJobs?: Item[];
 };
 type ProviderModelOption = { provider: AllowedModelProvider; model: string; value: string };
 
@@ -145,12 +144,41 @@ const agentSkillApi = createSolidEntityApi("agentSkill");
 const agentToolApi = createSolidEntityApi("agentTool");
 const agentRoleApi = createSolidEntityApi("agentRole");
 const agentSecretApi = createSolidEntityApi("agentSecret");
+const jobApi = createSolidEntityApi("agentJob");
 
-const populate = [
-  "agentSkills", "agentSkills.agentSkillRegistry", "agentTools", "agentTools.agentToolRegistry",
+const skillFields = ["id", "name", "iconName", "description", "tags"];
+const toolFields = [...skillFields, "type", "status", "lastLoadError"];
+
+function fieldsQuery(fields: string[]): string {
+  return fields.map((name) => `fields=${encodeURIComponent(name)}`).join("&");
+}
+
+const detailFields = [
+  "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
+  "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
+];
+
+const detailQuery = [
   "agentRoles", "agentRoles.roleMetadata", "agentSecrets", "agentSecrets.secret",
-  "agentProcesses", "agentSessions", "agentJobs",
-].map((name, index) => `populate[${index}]=${name}`).join("&");
+].map((name, index) => `populate[${index}]=${name}`).join("&") + "&" + fieldsQuery(detailFields);
+
+// Group by link ID to project summary columns without populating full registry records.
+function resourceLinksQuery(id: string, relation: string, registry: string, setting: string, fields: string[]): string {
+  return [
+    `filters[id][$eq]=${encodeURIComponent(id)}`,
+    `groupBy[0]=${relation}.id`, `groupBy[1]=${relation}.${setting}`,
+    ...fields.map((field, index) => `aggregates[${index}]=${relation}.${registry}.${field}:max`),
+  ].join("&");
+}
+
+function resourceLinksFrom(result: any, relation: string, registry: string, setting: string, fields: string[]): Link[] {
+  return items(result?.groupMeta).flatMap((group) => {
+    const [linkId, enabled] = String(group.groupValue ?? "").split("_");
+    const resource = Object.fromEntries(fields.map((field) => [field, group[`${relation}_${registry}_${field}_max`]]));
+    if (!Number(linkId) || !Number(resource.id)) return [];
+    return [{ id: Number(linkId), [registry]: { ...resource, id: Number(resource.id) }, [setting]: enabled === "true" || enabled === "1" }];
+  });
+}
 
 function recordFrom(value: any): any {
   let result = value;
@@ -243,10 +271,25 @@ export function AgentRegistryEditorPage() {
   const { id = "new" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data: response, isLoading, isFetching, isError, refetch } = entityApi.useGetSolidEntityByIdQuery({ id, qs: populate }, { skip: id === "new" });
+  const agentResult = entityApi.useGetSolidEntityByIdQuery({ id, qs: detailQuery }, { skip: id === "new" });
+  const skillLinks = entityApi.useGetSolidEntitiesQuery(
+    resourceLinksQuery(id, "agentSkills", "agentSkillRegistry", "alwaysInclude", skillFields), { skip: id === "new" });
+  const toolLinks = entityApi.useGetSolidEntitiesQuery(
+    resourceLinksQuery(id, "agentTools", "agentToolRegistry", "requiresApproval", toolFields), { skip: id === "new" });
+  const isLoading = agentResult.isLoading || skillLinks.isLoading || toolLinks.isLoading;
+  const isFetching = agentResult.isFetching || skillLinks.isFetching || toolLinks.isFetching;
+  const isError = agentResult.isError || skillLinks.isError || toolLinks.isError;
+  const response = React.useMemo(() => {
+    const agent = recordFrom(agentResult.currentData);
+    if (!agent || !skillLinks.currentData || !toolLinks.currentData) return undefined;
+    return { ...agent,
+      agentSkills: resourceLinksFrom(skillLinks.currentData, "agentSkills", "agentSkillRegistry", "alwaysInclude", skillFields),
+      agentTools: resourceLinksFrom(toolLinks.currentData, "agentTools", "agentToolRegistry", "requiresApproval", toolFields),
+    };
+  }, [agentResult.currentData, skillLinks.currentData, toolLinks.currentData]);
   const { data: settings, isError: settingsError } = useGetSolidSettingsQuery(undefined);
-  const skills = useCatalog(skillApi);
-  const tools = useCatalog(toolApi);
+  const skills = useCatalog(skillApi, `offset=0&limit=1000&${fieldsQuery(skillFields)}`);
+  const tools = useCatalog(toolApi, `offset=0&limit=1000&${fieldsQuery(toolFields)}`);
   const roles = useCatalog(roleApi, "offset=0&limit=1000&populate[0]=module");
   const secrets = useCatalog(secretApi, "offset=0&limit=1000&fields[0]=id&fields[1]=key&fields[2]=displayName&fields[3]=description");
   const [createAgent, { isLoading: creating }] = entityApi.useCreateSolidEntityMutation();
@@ -264,6 +307,13 @@ export function AgentRegistryEditorPage() {
   const [updateSecretLink] = agentSecretApi.useUpdateSolidEntityMutation();
   const record = recordFrom(response) as Agent | undefined;
   const [tab, setTab] = React.useState("basics");
+  const jobs = jobApi.useGetSolidEntitiesQuery(
+    `offset=0&limit=1000&filters[agent][id][$eq]=${encodeURIComponent(id)}&${fieldsQuery(["id", "status"])}`,
+    { skip: id === "new" || tab !== "jobs" });
+  const refetch = () => {
+    void agentResult.refetch(); void skillLinks.refetch(); void toolLinks.refetch();
+    if (tab === "jobs") void jobs.refetch();
+  };
   const [testAgentOpen, setTestAgentOpen] = React.useState(false);
   const [testAgentWindowMode, setTestAgentWindowMode] = React.useState<"docked" | "maximized">("maximized");
   const [name, setName] = React.useState("");
@@ -527,9 +577,11 @@ export function AgentRegistryEditorPage() {
           <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={14} /></button></div></div>} /> },
     ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...((record?.id ? [
-      ["jobs", "Jobs", record.agentJobs],
+      ["jobs", "Jobs", jobs.currentData?.records],
     ] : []) as [string, string, Item[]][]).map(([value, label, related]) => ({ value, label, content: <section className="agent-editor__section"><h2>{label}</h2>
-      {items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
+      {jobs.isLoading || jobs.isFetching ? <div className="agent-editor__empty">Loading jobs…</div>
+        : jobs.isError ? <div className="agent-editor__empty">Jobs could not be loaded.</div>
+        : items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
     ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...(record?.id ? [{ value: "embedding", label: "Embedding", content: <AgentEmbeddingPanel agentId={record.id}
@@ -540,7 +592,7 @@ export function AgentRegistryEditorPage() {
   return <main className="agent-editor"><header className="agent-editor__header"><div className="agent-editor__heading-with-refresh"><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1>{record?.id && <button type="button" className={`agent-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh agent" title="Refresh agent" disabled={isFetching || updating} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
     {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={openAgentTest}>Test Agent</SolidButton>}
-    <SolidButton loading={creating || updating} disabled={isLoading || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
+    <SolidButton loading={creating || updating} disabled={isLoading || isFetching || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
   </div></header>
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
       footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
