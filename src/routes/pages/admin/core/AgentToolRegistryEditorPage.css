@@ -121,3 +121,5 @@
 @media(max-width:900px) { .agent-tool-editor__fields { flex-direction:column; } }
 @media(max-width:900px) { .agent-tool-editor__sessions { height:auto; min-height:0; grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(24rem,1fr); max-height:none; } .agent-tool-editor__sessions-sidebar { max-height:18rem; border-right:0; border-bottom:1px solid var(--surface-border,var(--border)); } .agent-tool-editor__event-filters>label { flex:1 1 8rem; } }
 @media(max-width:600px) { .agent-tool-editor { padding:1rem; } .agent-tool-editor__header { align-items:flex-start; flex-direction:column; } .agent-tool-editor__actions { width:100%; } }
+fieldset.agent-tool-editor__general { min-width:0; margin:0; padding:0; border:0; }
+.agent-tool-editor__readonly-note { margin:0; padding:.75rem 1rem; border:1px solid var(--surface-border,var(--border)); border-radius:.5rem; color:var(--text-color-secondary,var(--muted-foreground)); background:var(--surface-ground,var(--background)); font-size:.875rem; }

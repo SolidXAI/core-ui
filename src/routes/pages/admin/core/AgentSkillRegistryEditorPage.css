@@ -274,3 +274,30 @@
     width: 100%;
   }
 }
+
+fieldset.agent-skill-editor__general {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.agent-skill-editor__field select {
+  min-height: 2.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--surface-border, var(--border));
+  border-radius: 0.5rem;
+  color: inherit;
+  background: var(--surface-ground, var(--background));
+  font: inherit;
+}
+
+.agent-skill-editor__readonly-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--surface-border, var(--border));
+  border-radius: 0.5rem;
+  color: var(--text-color-secondary, var(--muted-foreground));
+  background: var(--surface-ground, var(--background));
+  font-size: 0.875rem;
+}

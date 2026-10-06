@@ -119,6 +119,7 @@ export function AgentToolRegistryEditorPage() {
     baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", type: record?.type ?? "custom", sourceCode: record?.sourceCode ?? "", tags: nextTags, tagDraft: "" });
   }, [record]);
 
+  const isReadOnly = record?.type === "solidx";
   const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
   const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
 
@@ -197,7 +198,8 @@ export function AgentToolRegistryEditorPage() {
   }, [record?.agentTools]);
   const sessionAgents = React.useMemo(() => agents.filter((agent): agent is Agent & { id: number | string } => agent.id !== undefined && agent.id !== null), [agents]);
   const tabs = [
-    { value: "general", label: "General Info", content: <div className="agent-tool-editor__general">
+    { value: "general", label: "General Info", content: <fieldset className="agent-tool-editor__general" disabled={isReadOnly}>
+      {isReadOnly && <p className="agent-tool-editor__readonly-note">SolidX tools are seeded by the AgentHub runtime and cannot be edited.</p>}
       {record?.status && <section className={`agent-tool-editor__runtime-status${record.status === "load_failed" ? " agent-tool-editor__runtime-status--failed" : ""}`} role={record.status === "load_failed" ? "alert" : "status"}>
         <div className="agent-tool-editor__runtime-heading"><strong>Runtime status</strong><span>{record.status.replace(/[_-]+/g, " ")}</span></div>
         {record.status === "load_failed" ? <>
@@ -211,7 +213,7 @@ export function AgentToolRegistryEditorPage() {
         <label className="agent-tool-editor__field"><span>Description <b>*</b></span><SolidInput value={description} aria-invalid={Boolean(fieldErrors.description)} aria-describedby={fieldErrors.description ? "agent-tool-description-error" : undefined} className={fieldErrors.description ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setDescription(e.target.value); setFieldErrors((current) => ({ ...current, description: "" })); }} />{fieldErrors.description && <small id="agent-tool-description-error" className="agent-tool-editor__field-error">{fieldErrors.description}</small>}</label>
       </div>
       <label className="agent-tool-editor__field"><span>Tool type <b>*</b></span><select value={type} aria-invalid={Boolean(fieldErrors.type)} aria-describedby={fieldErrors.type ? "agent-tool-type-error" : undefined} className={fieldErrors.type ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setType(e.target.value); setFieldErrors((current) => ({ ...current, type: "" })); }}>
-        <option value="solidx">SolidX</option><option value="thirdparty">Third Party</option><option value="custom">Custom</option>
+        {isReadOnly && <option value="solidx">SolidX</option>}<option value="thirdparty">Third Party</option><option value="custom">Custom</option>
       </select>{fieldErrors.type && <small id="agent-tool-type-error" className="agent-tool-editor__field-error">{fieldErrors.type}</small>}</label>
       <div className="agent-tool-editor__field"><span>Tags <b>*</b></span><div className={`agent-tool-editor__tag-input${fieldErrors.tags ? " agent-tool-editor__tag-input--invalid" : ""}`}>
         {tags.map((tag, index) => <span className="agent-tool-editor__tag" key={`${tag}-${index}`}>{tag}<button type="button" aria-label={`Remove ${tag}`} onClick={() => setTags((current) => { const next = current.filter((_, i) => i !== index); if (next.length) setFieldErrors((errors) => ({ ...errors, tags: "" })); return next; })}><X size={13} /></button></span>)}
@@ -241,11 +243,11 @@ export function AgentToolRegistryEditorPage() {
         {record.status === "load_failed" && <small className="agent-tool-editor__workflow-hint">Fix the source or checksum first. Retrying saves the current tool configuration and clears the reported error; restart linked agent processes to load the updated tool.</small>}
         <small className="agent-tool-editor__workflow-hint">Changing stage saves the current tool configuration. Restart linked agent processes to apply the change.</small>
       </section>}
-    </div> },
+    </fieldset> },
     { value: "tool", label: "Tool", content: <div className="agent-tool-editor__tool">
       <section className="agent-tool-editor__panel">
         <header><h2>Tool source code <b>*</b></h2><p>Write the tool's Python code here.</p></header>
-        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" fontSize={11} height="max(32rem, calc(100dvh - 18rem))" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
+        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" readOnly={isReadOnly} fontSize={11} height="max(32rem, calc(100dvh - 18rem))" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
         {fieldErrors.sourceCode && <small className="agent-tool-editor__field-error agent-tool-editor__code-error">{fieldErrors.sourceCode}</small>}
       </section>
     </div> },
@@ -258,7 +260,7 @@ export function AgentToolRegistryEditorPage() {
   return <main className="agent-tool-editor">
     <header className="agent-tool-editor__header"><div><div className="agent-tool-editor__heading-with-refresh"><h1>{record ? "Edit Tool" : "Create Tool"}</h1>{record?.id && <button type="button" className={`agent-tool-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh tool" title="Refresh tool" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div></div><div className="agent-tool-editor__actions">
       <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
-      <SolidButton loading={isCreating || isSaving} onClick={() => void save()}>Save Tool</SolidButton>
+      {!isReadOnly && <SolidButton loading={isCreating || isSaving} onClick={() => void save()}>Save Tool</SolidButton>}
     </div></header>
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
       footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>

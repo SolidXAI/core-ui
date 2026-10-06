@@ -26,6 +26,7 @@ type AgentReference = {
 type SkillRecord = {
   id: number;
   name?: string;
+  type?: string;
   iconName?: string | null;
   description?: string;
   body?: string;
@@ -134,6 +135,7 @@ export function AgentSkillRegistryEditorPage() {
 
   const [activeTab, setActiveTab] = React.useState("general");
   const [name, setName] = React.useState("");
+  const [type, setType] = React.useState("custom");
   const [iconName, setIconName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [body, setBody] = React.useState("");
@@ -143,19 +145,21 @@ export function AgentSkillRegistryEditorPage() {
   const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
   const [confirmRefresh, setConfirmRefresh] = React.useState(false);
   const baseline = React.useRef("");
-  const currentForm = () => JSON.stringify({ name, iconName, description, body, tags, tagDraft });
+  const currentForm = () => JSON.stringify({ name, type, iconName, description, body, tags, tagDraft });
 
   React.useEffect(() => {
     const nextTags = parseTags(record?.tags);
     setName(record?.name ?? "");
+    setType(record?.type ?? "custom");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setBody(record?.body ?? "");
     setTags(nextTags);
     setTagDraft("");
-    baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", body: record?.body ?? "", tags: nextTags, tagDraft: "" });
+    baseline.current = JSON.stringify({ name: record?.name ?? "", type: record?.type ?? "custom", iconName: record?.iconName ?? "", description: record?.description ?? "", body: record?.body ?? "", tags: nextTags, tagDraft: "" });
   }, [record]);
 
+  const isReadOnly = record?.type === "solidx";
   const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
   const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
 
@@ -172,6 +176,7 @@ export function AgentSkillRegistryEditorPage() {
   const handleSave = async () => {
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) nextErrors.name = "Name is required.";
+    if (!type.trim()) nextErrors.type = "Skill type is required.";
     if (!description.trim()) nextErrors.description = "Description is required.";
     if (!body.trim()) nextErrors.body = "Skill instructions are required.";
     if (tags.length === 0) nextErrors.tags = "At least one tag is required.";
@@ -189,6 +194,7 @@ export function AgentSkillRegistryEditorPage() {
 
     const payload = {
       name: name.trim(),
+      type,
       iconName: iconName || null,
       description: description.trim(),
       body,
@@ -223,7 +229,7 @@ export function AgentSkillRegistryEditorPage() {
       const errorDetail = getSaveErrorMessage(error);
       const serverFieldErrors: Record<string, string> = {};
       if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
-        for (const field of ["name", "description", "body", "tags"]) {
+        for (const field of ["name", "type", "description", "body", "tags"]) {
           if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
           serverFieldErrors[field] = `${field === "body" ? "Skill instructions" : field[0].toUpperCase() + field.slice(1)} is required.`;
         }
@@ -246,7 +252,8 @@ export function AgentSkillRegistryEditorPage() {
       value: "general",
       label: "General Info",
       content: (
-        <div className="agent-skill-editor__general">
+        <fieldset className="agent-skill-editor__general" disabled={isReadOnly}>
+          {isReadOnly && <p className="agent-skill-editor__readonly-note">SolidX skills are seeded by the AgentHub runtime and cannot be edited.</p>}
           <div className="agent-skill-editor__fields">
             <label className="agent-skill-editor__field">
               <span>Name <b>*</b></span>
@@ -281,6 +288,24 @@ export function AgentSkillRegistryEditorPage() {
               {fieldErrors.description && <small id="agent-skill-description-error" className="agent-skill-editor__field-error">{fieldErrors.description}</small>}
             </label>
           </div>
+          <label className="agent-skill-editor__field">
+            <span>Skill type <b>*</b></span>
+            <select
+              value={type}
+              aria-invalid={Boolean(fieldErrors.type)}
+              aria-describedby={fieldErrors.type ? "agent-skill-type-error" : undefined}
+              className={fieldErrors.type ? "agent-skill-editor__input--invalid" : undefined}
+              onChange={(event) => {
+                setType(event.target.value);
+                setFieldErrors((current) => ({ ...current, type: "" }));
+              }}
+            >
+              {isReadOnly && <option value="solidx">SolidX</option>}
+              <option value="thirdparty">Third Party</option>
+              <option value="custom">Custom</option>
+            </select>
+            {fieldErrors.type && <small id="agent-skill-type-error" className="agent-skill-editor__field-error">{fieldErrors.type}</small>}
+          </label>
           <div className="agent-skill-editor__field">
             <span>Tags <b>*</b></span>
             <div className={`agent-skill-editor__tag-input${fieldErrors.tags ? " agent-skill-editor__tag-input--invalid" : ""}`}>
@@ -321,7 +346,7 @@ export function AgentSkillRegistryEditorPage() {
             {fieldErrors.tags && <small className="agent-skill-editor__field-error">{fieldErrors.tags}</small>}
             <small>Tags are saved as a JSON array.</small>
           </div>
-        </div>
+        </fieldset>
       ),
     },
     {
@@ -341,6 +366,7 @@ export function AgentSkillRegistryEditorPage() {
                 setFieldErrors((current) => ({ ...current, body: "" }));
               }}
               language="markdown"
+              readOnly={isReadOnly}
               fontSize={11}
               height="max(32rem, calc(100dvh - 18rem))"
               className={`agent-skill-editor__code${fieldErrors.body ? " agent-skill-editor__code--invalid" : ""}`}
@@ -388,9 +414,11 @@ export function AgentSkillRegistryEditorPage() {
           <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>
             Back
           </SolidButton>
-          <SolidButton loading={isCreating || isSaving} onClick={handleSave}>
-            Save Skill
-          </SolidButton>
+          {!isReadOnly && (
+            <SolidButton loading={isCreating || isSaving} onClick={handleSave}>
+              Save Skill
+            </SolidButton>
+          )}
         </div>
       </header>
 
