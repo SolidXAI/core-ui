@@ -44,11 +44,11 @@ export function useSession(): UseSessionResult {
       // route guards update immediately. During a page redirect, storage is
       // already cleared and the new page will check it, so updating this old
       // tree would briefly render the login screen before the redirect.
-      console.log(
-        payload?.redirecting
-          ? "[Auth] SessionCleared received; waiting for page redirect"
-          : "[Auth] SessionCleared listener received event"
-      );
+      // console.log(
+      //   payload?.redirecting
+      //     ? "[Auth] SessionCleared received; waiting for page redirect"
+      //     : "[Auth] SessionCleared listener received event"
+      // );
       if (payload?.redirecting) return;
       setData(null);
       setStatus("unauthenticated");

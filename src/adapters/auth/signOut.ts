@@ -21,7 +21,7 @@ export async function signOut(options: SignOutOptions = {}) {
       // still emitted, but the redirect flag tells mounted listeners to wait
       // for the new page instead of rendering the login screen once here.
       window.location.href = options.callbackUrl;
-      console.log("[Auth] SessionCleared emitted from admin logout");
+      // console.log("[Auth] SessionCleared emitted from admin logout");
       eventBus.emit<SessionClearedPayload>(AppEvents.SessionCleared, { redirecting: true });
       return;
     }
@@ -29,7 +29,7 @@ export async function signOut(options: SignOutOptions = {}) {
 
   // When there is no full-page redirect, mounted components must receive this
   // event so useSession can clear their in-memory user and status values.
-  console.log("[Auth] SessionCleared emitted from signOut");
+  // console.log("[Auth] SessionCleared emitted from signOut");
   eventBus.emit<SessionClearedPayload>(AppEvents.SessionCleared);
   return;
 }
