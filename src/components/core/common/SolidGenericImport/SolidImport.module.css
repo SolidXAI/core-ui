@@ -797,3 +797,69 @@
         padding-top: 0;
     }
 }
+
+@media (max-width: 480px) {
+    :global(.solid-import-dialog) {
+        width: calc(100vw - 20px) !important;
+        max-width: calc(100vw - 20px) !important;
+    }
+
+    :global(.solid-import-dialog-body) {
+        max-height: calc(100dvh - 150px);
+        overflow-x: hidden;
+        padding: 12px !important;
+    }
+
+    :global(.solid-import-shell),
+    :global(.solid-import-dropzone-shell),
+    :global(.solid-import-dropzone-copy),
+    :global(.solid-import-file-card) {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .SolidImportContextWrapper {
+        min-height: 0;
+        overflow-x: hidden;
+    }
+
+    :global(.solid-import-stepper) {
+        gap: 8px;
+    }
+
+    :global(.solid-import-stepper-item) {
+        min-height: 44px;
+        padding: 8px;
+    }
+
+    :global(.solid-import-dropzone-shell) {
+        min-height: auto;
+        padding: 18px 12px;
+    }
+
+    :global(.solid-import-dropzone-title) {
+        font-size: 14px;
+        line-height: 1.3;
+    }
+
+    :global(.solid-import-section-copy) {
+        overflow-wrap: anywhere;
+    }
+
+    :global(.solid-import-file-card) {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    :global(.solid-import-file-card-main) {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    :global(.solid-import-file-name),
+    :global(.solid-import-file-caption) {
+        overflow-wrap: anywhere;
+        white-space: normal;
+    }
+}
