@@ -4,6 +4,50 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.19-beta.1] - 2026-10-07
+
+### Added
+
+- add skill type selection and readonly note in AgentSkillRegistryEditorPage; enhance styling for general section in AgentToolRegistryEditorPage
+- enhance AgentSessionsPanel with event pagination and search functionality
+- implement input handling and error display for agent setup in embedded chat
+- add AgentEmbedPage for embedding agents in external applications
+- refine UI components and enhance agent activity display with improved styles and functionality
+- add AgentModelIndicator component and integrate model assignments into SolidAgentChat
+- enhance agent chat and registry editor with new features and UI improvements
+- add AgentProcessesPanel and integrate with AgentSessionsPanel for process management
+- add AgentProcessNeedsRestartListWidget and integrate agent process management actions
+- Refactor Agent Registry components and styles
+- Enhance Agent Registry with new Editor Page and CSS
+- enhance agent authentication and session management with agentId support
+- implement AgentRegistryAuditPanel for agent skill and tool registry editors with responsive design
+- add inputContext support to SolidAgent components for enhanced message handling
+- enhance agent skill and tool registry editor with validation and error handling
+- add agent skill and tool registry editor pages with routing
+- implement delete model dialog with preview and confirmation steps
+- add kanban card selection and filtering features
+
+### Fixed
+
+- prevent clear and remove actions in SolidAutocomplete when disabled or readOnly (#258)
+- remove height attribute from SolidAgentEmbedded component in agent skill and tool registry editor pages
+
+### Changed
+
+- rename AgentType to AgentRuntimeType and update related components for consistency
+- rename WorkflowSecretSuggestionRecord to SecretSuggestionRecord and update related references
+
+### Other
+
+- Refactor code structure for improved readability and maintainability
+- Enhance Agent Tool Registry Editor with runtime status and workflow management
+- solid agent interface changes
+- Agent Type changes for agent interface
+- Solid agent interface changes
+- onetomany filter issue fixed and applied filter label fixed (#254)
+- change password field toast added (#249)
+- Refactor code structure for improved readability and maintainability
+
 ## [0.1.19-beta.0] - 2026-09-28
 
 ### Added
