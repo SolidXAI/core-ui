@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { eventBus, AppEvents } from "../helpers/eventBus";
 import { usePathname } from "../hooks/usePathname";
-import { SolidStudio, PreviewModePersist } from "../components/layout/SolidAiStudioLayout";
+import { SolidStudio } from "../components/layout/SolidAiStudioLayout";
 import { useDispatch } from "react-redux";
 import { showToast } from "../redux/features/toastSlice";
 import { env } from "../adapters/env";
@@ -118,7 +118,6 @@ export function AppEventListener() {
   return (
     <>
       <SolidStudio />
-      <PreviewModePersist />
     </>
   );
 }

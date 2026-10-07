@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { exitStudioMode, setStudioView, type StudioView } from "../../redux/features/solidStudioSlice";
-import { showToast } from "../../redux/features/toastSlice";
 import { useSession } from "../../hooks/useSession";
-import { getSession, signOut } from "../../adapters/auth/index";
+import { signOut } from "../../adapters/auth/index";
 import { createPortal } from "react-dom";
 import { env } from "../../adapters/env";
-import { ERROR_MESSAGES } from "../../constants/error-messages";
+import { hasAnyRole } from "../../helpers/rolesHelper";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -16,13 +15,6 @@ const DotsIcon = () => (
     <circle cx="8" cy="3" r="1.3" />
     <circle cx="8" cy="8" r="1.3" />
     <circle cx="8" cy="13" r="1.3" />
-  </svg>
-);
-
-const PreviewIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M1 7s2.5-5 6-5 6 5 6 5-2.5 5-6 5-6-5-6-5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-    <circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.3" />
   </svg>
 );
 
@@ -60,20 +52,17 @@ const FrontendIcon = () => (
 // ── SolidStudio ────────────────────────────────────────────────────────────────
 // Single component that renders both the Studio header and the AI panel.
 // Mount this ONCE at the app root via AppEventListener.
-// When studio mode is off it renders nothing.
+// Visible to Admin users in dev environments.
 
 export function SolidStudio() {
   const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
   const studioView = useSelector((state: any) => state.solidStudio?.studioView ?? null) as StudioView;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { pathname, search } = useLocation();
-  const isPreviewMode = new URLSearchParams(search).get("preview") === "true" || (typeof sessionStorage !== "undefined" && sessionStorage.getItem("solid-preview") === "true");
-  const isPreviewable = pathname !== "/studio" && pathname !== "/landing";
   const { data, status } = useSession();
-  const isAuthenticated = status === "authenticated";
+  const isAdmin = hasAnyRole(data?.user?.roles, ["Admin"]);
+  const isDev = env("VITE_SOLIDX_ENV") === "dev";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isChatRedirecting, setIsChatRedirecting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close the 3-dot menu when clicking outside
@@ -95,7 +84,7 @@ export function SolidStudio() {
     }
   }, [status, isStudioMode, dispatch]);
 
-  if (!isStudioMode || !isAuthenticated || isPreviewMode) return null;
+  if (!isAdmin || !isDev) return null;
 
   const handleLogout = () => {
     setIsMenuOpen(false);
@@ -106,68 +95,6 @@ export function SolidStudio() {
   const handleViewSwitch = (view: StudioView) => {
     dispatch(setStudioView(view));
     navigate(view === "backend" ? "/admin" : "/landing");
-  };
-
-  const handleAiChatClick = async () => {
-    if (isChatRedirecting) return;
-
-    const aiUrl = env("VITE_SOLIDX_AI_URL");
-    if (!aiUrl) return;
-
-    setIsChatRedirecting(true);
-    try {
-      const session = await getSession();
-      const accessToken = session?.user?.accessToken || data?.user?.accessToken;
-      if (!accessToken) return;
-
-      const apiBaseUrl = env("API_URL", "http://localhost:8080").replace(/\/+$/, "");
-      const response = await fetch(`${apiBaseUrl}/api/iam/sso/code`, {
-        method: "POST",
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: "",
-      });
-
-      if (!response.ok) {
-        let detail = `Failed to fetch ssoCode (${response.status})`;
-        try {
-          const errorPayload = await response.json();
-          detail =
-            errorPayload?.message ||
-            errorPayload?.error?.message ||
-            errorPayload?.data?.message ||
-            detail;
-        } catch {
-          // no-op: keep default message
-        }
-        throw new Error(detail);
-      }
-
-      const payload = await response.json();
-      const ssoCode = payload?.ssoCode ?? payload?.data?.ssoCode;
-      if (!ssoCode) {
-        throw new Error("ssoCode missing in response");
-      }
-
-      const redirectUrl = new URL(aiUrl, window.location.origin);
-      redirectUrl.searchParams.set("ssoCode", String(ssoCode));
-      window.open(redirectUrl.toString(), "_blank");
-    } catch (error) {
-      const detail = error instanceof Error ? error.message : ERROR_MESSAGES.SOMETHING_WRONG;
-      dispatch(
-        showToast({
-          severity: "error",
-          summary: ERROR_MESSAGES.ERROR,
-          detail,
-          life: 4000,
-        })
-      );
-      console.error("Failed to open AI chat with ssoCode:", error);
-    } finally {
-      setIsChatRedirecting(false);
-    }
   };
 
   const studioUI = (
@@ -189,16 +116,6 @@ export function SolidStudio() {
         >
           <FrontendIcon />
         </button>
-        <button
-          type="button"
-          className="solid-studio-island-btn"
-          onClick={handleAiChatClick}
-          disabled={isChatRedirecting}
-          aria-busy={isChatRedirecting}
-          aria-label="AI chat"
-        >
-          <ChatIcon />
-        </button>
         <div className="solid-studio-island-menu" ref={menuRef}>
           <button
             type="button"
@@ -210,21 +127,6 @@ export function SolidStudio() {
           </button>
           {isMenuOpen && (
             <div className="solid-studio-island-dropdown">
-              {isPreviewable && (
-                <button
-                  type="button"
-                  className="solid-studio-island-dropdown-item"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    const params = new URLSearchParams(search);
-                    params.set("preview", "true");
-                    window.open(`${pathname}?${params.toString()}`, "_blank");
-                  }}
-                >
-                  <PreviewIcon />
-                  Preview page
-                </button>
-              )}
               <button
                 type="button"
                 className="solid-studio-island-dropdown-item danger"
@@ -241,37 +143,6 @@ export function SolidStudio() {
   );
 
   return typeof document !== "undefined" ? createPortal(studioUI, document.body) : null;
-}
-
-// ── PreviewModePersist ─────────────────────────────────────────────────────────
-// Mount once at the app root alongside SolidStudio.
-// sessionStorage is tab-scoped, so preview opened in a new tab stays isolated.
-// Closing the tab is the natural way to exit preview mode.
-
-const PREVIEW_KEY = "solid-preview";
-
-export function PreviewModePersist() {
-  const { pathname, search } = useLocation();
-  const navigate = useNavigate();
-
-  // Activate: when URL has ?preview=true, store it in sessionStorage for this tab
-  useEffect(() => {
-    const params = new URLSearchParams(search);
-    if (params.get("preview") === "true") {
-      sessionStorage.setItem(PREVIEW_KEY, "true");
-    }
-  }, [search]);
-
-  // Persist: re-inject ?preview=true on every navigation if it was set
-  useEffect(() => {
-    if (sessionStorage.getItem(PREVIEW_KEY) !== "true") return;
-    const params = new URLSearchParams(search);
-    if (params.get("preview") === "true") return;
-    params.set("preview", "true");
-    navigate({ pathname, search: `?${params.toString()}` }, { replace: true });
-  }, [pathname, search, navigate]);
-
-  return null;
 }
 
 // ── SolidStudioWrapper ─────────────────────────────────────────────────────────
