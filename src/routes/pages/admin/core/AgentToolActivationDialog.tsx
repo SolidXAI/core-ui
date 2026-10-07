@@ -1,9 +1,6 @@
 import React from "react";
 import { CheckCircle2, Circle, Loader2, ShieldCheck, XCircle } from "lucide-react";
-import axios from "axios";
-import { getSession } from "../../../../adapters/auth";
-import { getSettingsMap } from "../../../../helpers/settingsPayload";
-import { solidGet, solidPost } from "../../../../http/solidHttp";
+import { solidPost } from "../../../../http/solidHttp";
 import { SolidButton, SolidDialog, SolidDialogBody } from "../../../../components/shad-cn-ui";
 
 type Step = {
@@ -81,20 +78,10 @@ export function AgentToolActivationDialog({ open, toolId, checksum, toolName, on
       setConfig({ status: "running", message: "Checking configuration and required secrets…" });
       setInit({ status: "waiting", message: "Waiting for configuration to pass." });
       try {
-        const settingsResponse = await solidGet("/setting/wrapped", { signal: controller.signal });
-        const configuredUrl = getSettingsMap(settingsResponse.data).solidxAgentHubBackendUrl;
-        if (typeof configuredUrl !== "string" || !configuredUrl.trim()) throw new Error("Configure the Agent Hub runtime URL in settings first.");
-        const runtimeUrl = new URL(configuredUrl.trim());
-        if (!["http:", "https:"].includes(runtimeUrl.protocol) || runtimeUrl.username || runtimeUrl.password) {
-          throw new Error("The Agent Hub runtime URL must be an HTTP or HTTPS URL.");
-        }
-        const session = await getSession();
-        if (!session?.user?.accessToken) throw new Error("Sign in again to check this tool.");
-        const requestOptions = { signal: controller.signal, timeout: 60000,
-          headers: { Authorization: `Bearer ${session.user.accessToken}` } };
-        const checkUrl = `${runtimeUrl.toString().replace(/\/$/, "")}/api/tools/${toolId}/check`;
-        const configuration = unwrapReport(await axios.post(checkUrl, { checksum, phase: "config" }, requestOptions));
-        if (configuration.toolId !== toolId || configuration.checksum !== checksum) throw new Error("The runtime checked a different tool version.");
+        const requestOptions = { signal: controller.signal, timeout: 60000 };
+        const checkUrl = `/agent-tool-registry/${toolId}/check`;
+        const configuration = unwrapReport(await solidPost(checkUrl, { checksum, phase: "config" }, requestOptions));
+        if (configuration.toolId !== toolId || configuration.checksum !== checksum) throw new Error("The server checked a different tool version.");
         if (cancelled) return;
         setConfig(configuration.config);
         if (configuration.config.status !== "passed") {
@@ -103,8 +90,8 @@ export function AgentToolActivationDialog({ open, toolId, checksum, toolName, on
         }
         phase = "init";
         setInit({ status: "running", message: "Running the tool’s initialization check…" });
-        const initialization = unwrapReport(await axios.post(checkUrl, { checksum, phase: "init" }, requestOptions));
-        if (initialization.toolId !== toolId || initialization.checksum !== checksum) throw new Error("The runtime checked a different tool version.");
+        const initialization = unwrapReport(await solidPost(checkUrl, { checksum, phase: "init" }, requestOptions));
+        if (initialization.toolId !== toolId || initialization.checksum !== checksum) throw new Error("The server checked a different tool version.");
         if (cancelled) return;
         setConfig(initialization.config);
         setInit(initialization.init);
