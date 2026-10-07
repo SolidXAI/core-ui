@@ -137,25 +137,56 @@ export const SocialMediaLogin = ({
         )}
 
         {microsoftActiveDirectoryEnabled && (
-        <SolidButton
-          type="button"
-          variant="outline"
-          className="solid-auth-social-btn"
-          tabIndex={-1}
-          onClick={() => router.push(getOAuthConnectUrl("microsoft-active-directory"))}
-          aria-label="Login with Microsoft Active Directory"
-          title="Login with Microsoft Active Directory"
-        >
-          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <g transform="translate(2, 2)">
-              <rect width="9" height="9" x="0" y="0" fill="#f25022" />
-              <rect width="9" height="9" x="11" y="0" fill="#7fba00" />
-              <rect width="9" height="9" x="0" y="11" fill="#00a4ef" />
-              <rect width="9" height="9" x="11" y="11" fill="#ffb900" />
-            </g>
-          </svg>
-        </SolidButton>
-        )}
+  <SolidButton
+    type="button"
+    variant="outline"
+    className="solid-auth-social-btn"
+    tabIndex={-1}
+    onClick={() => router.push(getOAuthConnectUrl("microsoft-active-directory"))}
+    aria-label="Login with Microsoft Active Directory"
+    title="Work / Active Directory (Microsoft Entra)"
+  >
+    <svg viewBox="0 0 32 32" width="20" height="20" aria-hidden="true">
+      <defs>
+        {/* Right back fold */}
+        <linearGradient id="entra-grad-back" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0F4C81" />
+          <stop offset="100%" stopColor="#0B3663" />
+        </linearGradient>
+
+        {/* Center fold */}
+        <linearGradient id="entra-grad-mid" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0078D4" />
+          <stop offset="100%" stopColor="#005A9E" />
+        </linearGradient>
+
+        {/* Left front fold */}
+        <linearGradient id="entra-grad-front" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#50E6FF" />
+          <stop offset="100%" stopColor="#0094F0" />
+        </linearGradient>
+      </defs>
+
+      {/* Back Layer */}
+      <path
+        d="M17 6.5C17 4 19.5 2 22.5 3.5 25.5 5 27 7.5 27 11v11c0 3-2.5 5.5-5.5 5.5h-5.5L17 6.5z"
+        fill="url(#entra-grad-back)"
+      />
+
+      {/* Middle Layer */}
+      <path
+        d="M10 6C10 3 13 1 16 2.5 19 4 20.5 6.5 20.5 10v12c0 3.5-2.5 6-6 6H9.5L10 6z"
+        fill="url(#entra-grad-mid)"
+      />
+
+      {/* Front Layer */}
+      <path
+        d="M4.5 10.5C4.5 7 7.5 4.5 10.5 5.5 13.5 6.5 14.5 9 14.5 12v9c0 3-2 5-5 5H4.5v-15.5z"
+        fill="url(#entra-grad-front)"
+      />
+    </svg>
+  </SolidButton>
+)}
       </div>
     </div>
   );
