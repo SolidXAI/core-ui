@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.20-beta.0] - 2026-10-08
+
+### Added
+
+- Enhance Agent Registry Editor with resource preview and tag management
+- add AgentToolActivationDialog for tool activation checks and status updates; enhance AgentToolRegistryEditorPage with activation logic
+
+### Changed
+
+- streamline tool activation checks by replacing axios with solidPost and simplifying URL handling
+- remove unused imports and components from AdminHeaderActions and SolidAiStudioLayout; simplify Studio visibility logic
+
 ## [0.1.19] - 2026-10-08
 
 ### Added
