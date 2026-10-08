@@ -42,6 +42,7 @@ import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePa
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
+import type { SolidListRowActionEvent } from "../../../types/list-row-action";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
   getFilterObjectFromLocalStorage,
@@ -536,11 +537,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [
     triggerRecoverSolidEntities,
     {
-      data: recoverByData,
       isLoading: recoverByIsLoading,
       error: recoverError,
       isError: recoverIsError,
-      isSuccess: recoverByIsSuccess,
     },
   ] = useRecoverSolidEntityMutation();
 
@@ -576,20 +575,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   }, [solidEntityListViewData]);
 
-  const [
-    deleteSolidSingleEntiry,
-    { isSuccess: isDeleteSolidSingleEntitySuccess },
-  ] = useDeleteSolidEntityMutation();
+  const [deleteSolidSingleEntiry] = useDeleteSolidEntityMutation();
 
   // Delete mutation
   const [
     deleteManySolidEntities,
     {
       isLoading: isSolidEntitiesDeleted,
-      isSuccess: isDeleteSolidEntitiesSucess,
-      isError: isSolidEntitiesDeleteError,
-      error: SolidEntitiesDeleteError,
-      data: DeletedSolidEntities,
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
 
@@ -649,10 +641,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       setQueryDataLoaded(true);
     }
   }, [
-    isDeleteSolidEntitiesSucess,
-    isDeleteSolidSingleEntitySuccess,
-    recoverByIdIsSuccess,
-    recoverByIsSuccess,
     solidListViewMetaData,
     solidListViewLayout
   ]);
@@ -1069,19 +1057,62 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const [deleteEntity, setDeleteEntity] = useState(false);
+  const [pendingConfirmedRowAction, setPendingConfirmedRowAction] = useState<any>(null);
 
-  // Recover functions
-  const recoverById = (id: any) => {
-    triggerRecoverSolidEntitiesById(id);
+  const handleRowActionClick = (button: any, rowData: any) => {
+    const event: SolidListRowActionEvent = {
+      params,
+      rowData,
+      solidListViewMetaData: solidListViewMetaData?.data,
+    };
+    if (button?.attrs?.confirmMessage) {
+      setPendingConfirmedRowAction({ attrs: button.attrs, event });
+      return;
+    }
+    handleCustomButtonClick(button.attrs, event);
   };
 
-  const recoverAll = () => {
+  const confirmCustomRowAction = async () => {
+    if (!pendingConfirmedRowAction) return;
+    const { attrs, event } = pendingConfirmedRowAction;
+    setPendingConfirmedRowAction(null);
+    try {
+      await Promise.resolve(handleCustomButtonClick(attrs, event));
+      dispatch(showToast({
+        severity: "success",
+        summary: attrs.successSummary || "Action completed",
+        detail: attrs.successMessage || `${attrs.label || "Action"} completed successfully.`,
+        life: 4000,
+      }));
+      await setQueryString();
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Action failed",
+        detail: error?.response?.data?.message || error?.response?.data?.error || error?.message || "The action could not be completed.",
+        life: 5000,
+      }));
+    }
+  };
+
+  // Recover functions
+  const recoverById = async (id: any) => {
+    await triggerRecoverSolidEntitiesById(id).unwrap();
+    await setQueryString();
+  };
+
+  const recoverAll = async () => {
     let recoverList: any = [];
     selectedRecoverRecords.forEach((element: any) => {
       recoverList.push(element.id);
     });
-    triggerRecoverSolidEntities(recoverList);
-    setRecoverDialogVisible(false);
+    try {
+      await triggerRecoverSolidEntities(recoverList).unwrap();
+      setRecoverDialogVisible(false);
+      await setQueryString();
+    } catch {
+      setRecoverDialogVisible(false);
+    }
   };
 
   useEffect(() => {
@@ -1118,20 +1149,19 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   // handle bulk deletion
-  const deleteBulk = () => {
+  const deleteBulk = async () => {
     let deleteList: any = [];
     selectedRecords.forEach((element: any) => {
       deleteList.push(element.id);
     });
-    deleteManySolidEntities(deleteList)
-      .unwrap()
-      .then(() => {
-        dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
-        setDialogVisible(false);
-      })
-      .catch((error) => {
-        dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
-      });
+    try {
+      await deleteManySolidEntities(deleteList).unwrap();
+      dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
+      setDialogVisible(false);
+      await setQueryString();
+    } catch (error: any) {
+      dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
+    }
   };
 
   // handle closing of the delete dialog...
@@ -1343,6 +1373,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
         dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.ENTITY_DELETE, life: 3000 }));
+        await setQueryString();
       } else {
         dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: response?.error?.data?.error }));
       }
@@ -1625,6 +1656,24 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     sortMode="single"
                     paginatorTemplate="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
                     currentPageReportTemplate="{first} - {last} of {totalRecords}"
+                    paginatorLeft={params.embeded !== true ? (
+                      <div className="solid-list-selection-status" aria-live="polite">
+                        <span>{selectedRecords.length + selectedRecoverRecords.length} selected</span>
+                        {selectedRecords.length + selectedRecoverRecords.length > 0 && (
+                          <button
+                            type="button"
+                            className="solid-list-selection-clear"
+                            onClick={() => {
+                              setSelectedRecords([]);
+                              setSelectedRecoverRecords([]);
+                            }}
+                            aria-label="Clear selected rows"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                    ) : null}
                     onRowClick={(e) => {
                       const rowData = e.data;
 
@@ -1643,8 +1692,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       if (params.embeded === true) {
                         params.handleEditClickForEmbeddedView(rowData?.id);
                       } else {
+                        const effectiveViewMode = hasUpdatePermission ? recordClickFormMode : "view";
                         storeCurrentModelViewContext();
-                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${recordClickFormMode}&${buildEditNavigationQueryString(rowData)}`);
+                        router.push(`${editBaseUrl}/${rowData?.id}?viewMode=${effectiveViewMode}&${buildEditNavigationQueryString(rowData)}`);
                       }
                     }
                     }
@@ -1682,6 +1732,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                               body={(rowData) => {
                                 return (
                                   (() => {
+                                    const allowedRowStates = button?.attrs?.visibleWhenFieldIn;
+                                    const currentRowState = rowData?.[button?.attrs?.visibleWhenField];
+                                    if (Array.isArray(allowedRowStates) && allowedRowStates.length > 0 &&
+                                      currentRowState !== undefined && currentRowState !== null && currentRowState !== "" &&
+                                      !allowedRowStates.includes(String(currentRowState))) return null;
                                     const presentation = resolveButtonPresentation(button?.attrs);
                                     if (!presentation.showIcon && !presentation.showLabel) return null;
                                     return (
@@ -1700,13 +1755,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         size="small"
                                         variant="ghost"
                                         onClick={() => {
-                                          const event = {
-                                            params,
-                                            rowData: rowData,
-                                            solidListViewMetaData:
-                                              solidListViewMetaData?.data,
-                                          };
-                                          handleCustomButtonClick(button.attrs, event);
+                                          handleRowActionClick(button, rowData);
                                         }}
                                       />
                                     );
@@ -1864,6 +1913,16 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           )}
         </div>
       </div>
+      <SolidConfirmDialog
+        open={Boolean(pendingConfirmedRowAction)}
+        onCancel={() => setPendingConfirmedRowAction(null)}
+        onConfirm={() => void confirmCustomRowAction()}
+        title={pendingConfirmedRowAction?.attrs?.confirmTitle || "Confirm action"}
+        message={<p className="solid-shadcn-dialog-text">{pendingConfirmedRowAction?.attrs?.confirmMessage}</p>}
+        confirmLabel={pendingConfirmedRowAction?.attrs?.confirmLabel || "Confirm"}
+        cancelLabel="Cancel"
+        className="solid-shadcn-confirm-dialog"
+      />
       <SolidConfirmDialog
         open={isDialogVisible}
         onCancel={onDeleteClose}

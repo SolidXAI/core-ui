@@ -55,7 +55,7 @@ export const fieldsApi = createApi({
         // }),
         deletefield: builder.mutation({
             query: (id) => ({
-                url: `/field/${id}`,
+                url: `/field-metadata/${id}`,
                 method: 'DELETE',
             }),
         }),
@@ -83,4 +83,4 @@ export const {
     useCreatefieldMutation,
     useDeletefieldMutation,
     useResolveS3UrlMutation
-} = fieldsApi  
+} = fieldsApi

@@ -1,5 +1,8 @@
 import './styles';
 
+export { ALLOWED_MODELS_BY_PROVIDER, getAllowedModelIdsForProvider } from './constants/allowed-ai-models';
+export type { AllowedModelProvider, AllowedModelsByProvider } from './constants/allowed-ai-models';
+
 export { AutoCompleteField } from './components/common/AutoCompleteField';
 export { CancelButton, SolidCancelButton } from './components/common/CancelButton';
 // export * from './components/common/CodeEditor';
@@ -79,6 +82,11 @@ export * from './components/core/list/listViewRegistry';
 export * from './components/core/tree/treeViewRegistry';
 export { SolidListViewColumn, getNumberOfInputs } from './components/core/list/SolidListViewColumn';
 export type { SolidListViewColumnParams } from './components/core/list/SolidListViewColumn';
+export type {
+    SolidListRowActionEvent,
+    SolidListRowActionProps,
+    SolidKanbanCardActionProps,
+} from './types/list-row-action';
 
 // export * from './components/core/list/SolidListingHeader';
 export { SolidManyToOneFilterElement } from './components/core/list/SolidManyToOneFilterElement';
@@ -109,7 +117,7 @@ export { getFileTypeIconTone, SolidFileTypeIcon } from './helpers/fileTypeIcon';
 export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
-export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export { getExtensionComponent, registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
 export { QueueSlaHeatmapWidget } from './components/core/dashboard/widgets/QueueSlaHeatmapWidget';
 export {
     WorkflowFlowCanvas,
@@ -230,13 +238,13 @@ export {
 export {
     modelsApi,
     useCreatemodelMutation,
-    useDeleteMultipleModelsMutation,
-    useDeletemodelMutation,
+    useApplyDeleteModelMutation,
     useGenerateCodeForModelMutation,
     useGetModelsQuery,
     useGetmodelByIdQuery,
     useLazyGetModelsQuery,
     useLazyGetmodelByIdQuery,
+    usePreviewDeleteModelMutation,
     useUpdatemodelMutation
 } from './redux/api/modelApi';
 
@@ -554,6 +562,8 @@ export {
   SolidRichTextEditor,
   SolidLightbox,
   SolidIcon,
+  SolidIconPicker,
+  type SolidIconPickerProps,
   type SolidIconName,
   type SolidIconMeta,
   parseSolidIconMeta,
@@ -569,6 +579,28 @@ export { closePopup, openPopup } from './redux/features/popupSlice';
 export { default as toastReducer } from './redux/features/toastSlice';
 export { showToast, clearToast } from './redux/features/toastSlice';
 export type { ToastMessage, ToastSeverity } from './redux/features/toastSlice';
+
+// SolidX Agent chat (floating launcher, embedded chat, SDK, chat widgets).
+export { solidAgent, SOLID_AGENT_EVENTS } from './components/core/solid-agent/sdk/solidAgent';
+export type { SolidAgentEventName, SolidAgentEventPayloads } from './components/core/solid-agent/sdk/solidAgent';
+export { SolidAgentEmbedded } from './components/core/solid-agent/SolidAgentEmbedded';
+export type { AgentInputContext } from './components/core/solid-agent/useAdminInputContext';
+export { SolidAgentMount } from './components/core/solid-agent/SolidAgentMount';
+export { SolidAgentMarkdown, SolidAgentCopyButton } from './components/core/solid-agent/SolidAgentMarkdown';
+export { SolidAgentChatItem, getDefaultChatWidgetName } from './components/core/solid-agent/thread/SolidAgentChatItem';
+export { getChatWidgetData } from './components/core/solid-agent/widgets/chatWidgetUtils';
+export { disposeAgentRuntime } from './components/core/solid-agent/client/agentRuntime';
+export { signInWithApiKey, clearAgentAuth, clearAllAgentAuth } from './components/core/solid-agent/client/agentAuth';
+export { default as agentReducer } from './redux/features/agentSlice';
+export { AgentEventTypes } from './components/core/solid-agent/types';
+export type {
+    AgentChatItem,
+    AgentContext,
+    AgentMode,
+    AgentRuntimeType,
+    AgentType,
+    SolidAgentOpenOptions,
+} from './components/core/solid-agent/types';
 export { default as themeReducer } from './redux/features/themeSlice';
 export { default as userReducer } from './redux/features/userSlice';
 export { default as useSolidPopup } from './redux/hooks/useSolidPopup';
@@ -597,6 +629,8 @@ export type {
     SolidLoadForm,
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
+    SolidChatterMessageWidgetProps,
+    SolidChatWidgetProps,
     SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidBeforeListDataLoad,
@@ -669,3 +703,4 @@ export { NotFoundPage } from './routes/pages/NotFoundPage';
 export { handleAuthSuccess } from './adapters/auth/helper';
 
 export * from "./styles";
+export { AgentEmbedPage } from "./routes/pages/embed/AgentEmbedPage";

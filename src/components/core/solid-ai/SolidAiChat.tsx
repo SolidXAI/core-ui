@@ -38,7 +38,7 @@ interface Message {
 interface SessionSummary {
     session_id: string;
     status: string;
-    total_steps: number;
+    totalSteps: number;
     created_at: string | null;
     preview: string;
 }
@@ -975,7 +975,7 @@ export const SolidAiChat: React.FC = () => {
                                                 <span className={styles.SessionItemPreview}>{s.preview || "New conversation"}</span>
                                                 <span className={styles.SessionItemMeta}>
                                                     {formatSessionDate(s.created_at)}
-                                                    {s.total_steps > 0 && ` · ${s.total_steps} turn${s.total_steps !== 1 ? "s" : ""}`}
+                                                    {s.totalSteps > 0 && ` · ${s.totalSteps} turn${s.totalSteps !== 1 ? "s" : ""}`}
                                                 </span>
                                             </div>
                                             <button

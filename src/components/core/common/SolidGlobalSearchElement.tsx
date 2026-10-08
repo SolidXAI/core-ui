@@ -27,6 +27,7 @@ import {
     SolidDialogTitle,
 } from "../../shad-cn-ui/SolidDialog";
 
+const savedFiltersEntityApi = createSolidEntityApi("savedFilters");
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -191,12 +192,13 @@ const transformRulesToFilters = (input: any, viewData: any) => {
 
 
             const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
-            const isManyToMany = fieldMeta?.type === 'relation' && fieldMeta?.relationType === 'many-to-many';
+            const isToManyRelation = fieldMeta?.type === 'relation'
+                && ['one-to-many', 'many-to-many'].includes(fieldMeta?.relationType);
 
 
             let transformedRule;
-            if (isManyToMany) {
-                // For many-to-many relations, always use array format for $in/$notIn
+            if (isToManyRelation) {
+                // Collection relations must be filtered through a related scalar field.
                 transformedRule = {
                     [rule.fieldName]: {
                         id: {
@@ -487,8 +489,8 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, activeSavedF
                             className="solid-saved-filter-icon-btn is-danger"
                             onMouseDown={(e) => {
                                 e.preventDefault();
-                                setSavedFilterTobeDeleted(savedfilter.id),
-                                    setIsDeleteSQDialogVisible(true);
+                                setSavedFilterTobeDeleted(savedfilter);
+                                setIsDeleteSQDialogVisible(true);
                             }}
                             aria-label={`Delete ${savedfilter.name}`}
                         >
@@ -695,7 +697,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [showSavedFilterComponent, setShowSavedFilterComponent] = useState<boolean>(false);
 
 
-    const [savedFilterTobeDeleted, setSavedFilterTobeDeleted] = useState<any>();
+    const [savedFilterTobeDeleted, setSavedFilterTobeDeleted] = useState<any | null>(null);
     const [isDeleteSQDialogVisible, setIsDeleteSQDialogVisible] = useState<boolean>(false);
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
     const [showOverlay, setShowOverlay] = useState(false);
@@ -767,14 +769,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         [allAvailableSavedFilters]
     );
 
-    const entityApi = createSolidEntityApi("savedFilters");
     const {
         useCreateSolidEntityMutation,
         useDeleteSolidEntityMutation,
         useGetSolidEntityByIdQuery,
         useUpdateSolidEntityMutation,
         useLazyGetSolidEntitiesQuery
-    } = entityApi;
+    } = savedFiltersEntityApi;
 
     const [
         createEntity,
@@ -1497,8 +1498,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     };
 
     const deleteSavedFilter = async () => {
+        if (!savedFilterTobeDeleted?.id) {
+            setIsDeleteSQDialogVisible(false);
+            setSavedFilterTobeDeleted(null);
+            return;
+        }
+
         try {
-            await deleteEntity(savedFilterTobeDeleted).unwrap();
+            await deleteEntity(savedFilterTobeDeleted?.id).unwrap();
             dispatch(showToast({
                 severity: "success",
                 summary: ERROR_MESSAGES.DELETED,
@@ -1506,9 +1513,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             }));
 
             if (allowMultipleSavedFilters) {
-                const nextItems = activeSavedFilters.filter((item: any) => String(item.data?.id) !== String(savedFilterTobeDeleted));
+                const nextItems = activeSavedFilters.filter((item: any) => String(item.data?.id) !== String(savedFilterTobeDeleted?.id));
                 setActiveSavedFilters(nextItems);
-                if (String(savedFilterTobeDeleted) === String(currentSavedFilterData?.id)) {
+                if (String(savedFilterTobeDeleted?.id) === String(currentSavedFilterData?.id)) {
                     setCurrentSavedFilterData(null);
                     setCurrentSavedFilterQuery(null);
                     setCurrentSavedFilterVariables({});
@@ -1516,10 +1523,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 persistActiveSavedFilters(nextItems);
                 setHasSearched(true);
                 setRefreshKey((prev) => prev + 1);
-            } else if (String(savedFilterTobeDeleted) === String(currentSavedFilterData?.id)) {
+            } else if (String(savedFilterTobeDeleted?.id) === String(currentSavedFilterData?.id)) {
                 removeSavedFilter();
             }
             setIsDeleteSQDialogVisible(false);
+            setSavedFilterTobeDeleted(null);
             setTimeout(() => {
                 setSavedFilterFetchDataRefreshKey(prev => prev + 1)
             }, 500)
@@ -2706,11 +2714,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </SolidDialogBody>
                 </SolidDialog>
 
-                <SolidDialog open={isDeleteSQDialogVisible} onOpenChange={setIsDeleteSQDialogVisible} className="solid-confirm-dialog" style={{ width: "min(420px, calc(100vw - 2rem))" }}>
+                <SolidDialog
+                    open={isDeleteSQDialogVisible}
+                    onOpenChange={(open) => {
+                        setIsDeleteSQDialogVisible(open);
+                        if (!open) {
+                            setSavedFilterTobeDeleted(null);
+                        }
+                    }}
+                    className="solid-confirm-dialog"
+                    style={{ width: "min(420px, calc(100vw - 2rem))" }}
+                >
                     <SolidDialogHeader>
                         <div>
                             <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
-                            <SolidDialogDescription>Are you sure you want to delete the {currentSavedFilterData?.name} saved query?</SolidDialogDescription>
+                            <SolidDialogDescription>Are you sure you want to delete the {savedFilterTobeDeleted?.name} saved query?</SolidDialogDescription>
                         </div>
                         <SolidDialogClose />
                     </SolidDialogHeader>
@@ -2720,7 +2738,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             <Check size={14} />
                             Yes
                         </SolidButton>
-                        <SolidButton variant="outline" size="sm" onClick={() => setIsDeleteSQDialogVisible(false)}>
+                        <SolidButton
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                setIsDeleteSQDialogVisible(false);
+                                setSavedFilterTobeDeleted(null);
+                            }}
+                        >
                             <X size={14} />
                             No
                         </SolidButton>
