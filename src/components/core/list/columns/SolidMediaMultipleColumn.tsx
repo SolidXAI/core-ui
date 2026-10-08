@@ -140,6 +140,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
         size: file.fileSize,
         id: file.id,
         fileUrl: file?._full_url,
+        mimeType: file?.mimeType,
         previewKind: getMediaPreviewKind({
             url: file?._full_url,
             fileName: file?.originalFileName,
@@ -160,7 +161,8 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
             setLightboxUrls?.([{
                 src: file.fileUrl,
                 downloadUrl: file.fileUrl,
-                type: file.previewKind === "video" ? "video" : undefined
+                type: file.previewKind === "video" ? "video" : undefined,
+                mimeType: file.mimeType,
             }]);
             setOpenLightbox?.(true);
             return;

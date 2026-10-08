@@ -146,7 +146,7 @@ export const SolidLightbox = ({
         >
           <source
             src={currentSlide.src}
-            type={currentSlide.mimeType || "video/mp4"}
+            type={currentSlide.mimeType || undefined}
           />
           Your browser does not support the video tag.
         </video>

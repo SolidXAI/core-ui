@@ -1389,8 +1389,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         if (!src) {
           return null;
         }
-        const mediaType = getMediaTypeFromUrl(src);
-        const slide: SolidLightboxSlide = { src };
+        const mediaType = item?.type || getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src, mimeType: item?.mimeType };
         if (mediaType !== "image") {
           slide.type = mediaType;
         }

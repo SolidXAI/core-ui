@@ -145,6 +145,7 @@ export const DefaultMediaSingleListWidget = ({
         return {
             fileUrl,
             fileName: file?.originalFileName,
+            mimeType: file?.mimeType,
             previewKind,
             opensInLightbox: isLightboxMediaKind(previewKind),
             lightboxType: previewKind === "video" ? "video" : undefined,
@@ -166,7 +167,8 @@ export const DefaultMediaSingleListWidget = ({
                     setLightboxUrls([{
                         src: firstFile.fileUrl,
                         downloadUrl: firstFile.fileUrl,
-                        type: firstFile.lightboxType
+                        type: firstFile.lightboxType,
+                        mimeType: firstFile.mimeType,
                     }]);
                     setOpenLightbox(true);
                     return;

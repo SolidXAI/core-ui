@@ -2,7 +2,7 @@
 const imageExtensions = ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff", "heic", "heif"];
 // These extensions are supported by the media metadata and should open in the video lightbox
 // when the stored MIME type is missing or generic.
-const videoExtensions = ["mp4", "webm", "ogg", "mov", "m4v", "3g2", "mpeg", "mpg", "mkv", "avi"];
+const videoExtensions = ["mp4", "webm", "ogg", "mov", "m4v", "3gp", "3g2", "mpeg", "mpg", "mkv", "avi"];
 const audioExtensions = ["mp3", "wav", "ogg", "aac", "m4a", "flac", "webm"];
 
 export type MediaKind = "image" | "video" | "audio";
