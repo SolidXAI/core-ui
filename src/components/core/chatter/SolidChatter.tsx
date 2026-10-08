@@ -54,13 +54,13 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 setRefreshChatterMessage(false);
             }
         }
-    }, [refreshChatterMessage]);
+    }, [refreshChatterMessage, id]);
 
     useEffect(() => {
         if (id !== 'new') {
             fetchData();
         }
-    }, [filters, limit]);
+    }, [filters, limit, id, modelSingularName]);
 
     const handleTabClick = (tab: 'email-message' | 'log') => {
         setActiveTab(tab);
