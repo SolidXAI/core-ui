@@ -2848,7 +2848,7 @@ textarea {
 .solid-auth-center-stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--solid-auth-brand-form-gap);
 }
 
 .solid-auth-center-details {
@@ -3249,7 +3249,7 @@ textarea {
 .solid-auth-theme-wrapper.left .solid-auth-form-pane .solid-auth-brand,
 .solid-auth-theme-wrapper.right .solid-auth-form-pane .solid-auth-brand {
   align-self: flex-start;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
 }
 
 .solid-auth-theme-wrapper .solid-auth-image-pane {
@@ -3288,6 +3288,7 @@ textarea {
 /* Auth theme contract (driven by the global app theme mode) */
 .solid-auth-theme-wrapper {
   --solid-surface-base: #020204;
+  --solid-auth-brand-form-gap: 24px;
   --solid-surface-pane: #020204;
   --solid-surface-image: #27272a;
   --solid-surface-card: #111113;
@@ -7440,7 +7441,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 24px;
+  gap: var(--solid-auth-brand-form-gap);
   padding: clamp(28px, 4vh, 40px) 0;
 }
 
@@ -7595,7 +7596,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 20px;
+    gap: var(--solid-auth-brand-form-gap);
     padding: 0;
   }
 
