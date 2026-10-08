@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronDown, ExternalLink, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, Ellipsis, ExternalLink, Eye, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -8,14 +8,16 @@ import { useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
 import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
 import { AgentSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import { AgentProcessesPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentProcessesPanel";
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
 import { ALLOWED_MODELS_BY_PROVIDER, type AllowedModelProvider } from "../../../../constants/allowed-ai-models";
-import { SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuTrigger, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
+import { SolidAgentMarkdown } from "../../../../components/core/solid-agent/SolidAgentMarkdown";
 import { AgentEmbeddingPanel } from "../../../../components/core/solid-agent/embed/AgentEmbeddingPanel";
 import "./AgentRegistryEditorPage.css";
 
@@ -27,6 +29,7 @@ type Agent = Item & {
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
+  tags?: AgentHubTag[];
 };
 type ProviderModelOption = { provider: AllowedModelProvider; model: string; value: string };
 
@@ -146,7 +149,7 @@ const agentRoleApi = createSolidEntityApi("agentRole");
 const agentSecretApi = createSolidEntityApi("agentSecret");
 const jobApi = createSolidEntityApi("agentJob");
 
-const skillFields = ["id", "name", "iconName", "description", "tags"];
+const skillFields = ["id", "name", "iconName", "description"];
 const toolFields = [...skillFields, "type", "status", "lastLoadError"];
 
 function fieldsQuery(fields: string[]): string {
@@ -159,7 +162,7 @@ const detailFields = [
 ];
 
 const detailQuery = [
-  "agentRoles", "agentRoles.roleMetadata", "agentSecrets", "agentSecrets.secret",
+  "agentRoles", "agentRoles.roleMetadata", "agentSecrets", "agentSecrets.secret", "tags",
 ].map((name, index) => `populate[${index}]=${name}`).join("&") + "&" + fieldsQuery(detailFields);
 
 // Group by link ID to project summary columns without populating full registry records.
@@ -199,7 +202,7 @@ function agentFormFromRecord(record: Agent) {
     name: record.name ?? "", title: record.title ?? "", description: record.description ?? "", iconName: record.iconName ?? "",
     inputs: parseInputs(record.requiredInputs), reasoningModelKey: record.reasoningModelKey ?? "", fastModelKey: record.fastModelKey ?? "",
     systemPrompt: record.systemPrompt ?? "", stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
-    costLimit: Number(record.costLimit ?? 3), skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
+    costLimit: Number(record.costLimit ?? 3), tags: agentHubTagsFrom(record.tags), skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
     toolIds: tools.map((link) => link.agentToolRegistry?.id).filter(Boolean),
     roleIds: items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean),
     secretIds: secrets.map((link) => link.secret?.id).filter(Boolean),
@@ -235,12 +238,34 @@ function useCatalog(api: typeof skillApi, query = "offset=0&limit=1000") {
   return { records: items(data?.records) as Item[], isLoading, refetch };
 }
 
-function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor }: {
+function ResourcePreviewDialog({ item, kind, onClose }: { item: Item; kind: "skill" | "tool"; onClose: () => void }) {
+  const api = kind === "skill" ? skillApi : toolApi;
+  const field = kind === "skill" ? "body" : "sourceCode";
+  const { currentData, isFetching, isError, refetch } = api.useGetSolidEntityByIdQuery(
+    { id: item.id, qs: fieldsQuery(["id", field]) }, { refetchOnMountOrArgChange: true });
+  const record = recordFrom(currentData);
+  const content = record?.[field] ?? "";
+
+  return <SolidDialog open onOpenChange={(open) => { if (!open) onClose(); }} header={item.name ?? `View ${kind}`}
+    style={{ width: "min(64rem, 94vw)", maxWidth: "94vw" }}>
+    <SolidDialogBody className="agent-editor__resource-preview-body">
+      {isFetching ? <div className="agent-editor__empty" role="status">Loading {kind}…</div>
+        : isError || !record ? <div className="agent-editor__empty"><p role="alert">This {kind} could not be loaded.</p><SolidButton variant="secondary" onClick={() => void refetch()}>Retry</SolidButton></div>
+        : !content ? <div className="agent-editor__empty">No {kind === "skill" ? "skill body" : "source code"} available.</div>
+        : kind === "skill" ? <SolidAgentMarkdown text={content} />
+        : <SolidCodeEditor value={content} language="python" readOnly fontSize={12} height="min(65vh, 42rem)" />}
+    </SolidDialogBody>
+  </SolidDialog>;
+}
+
+function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor }: {
   label: string; description: string; options: Item[]; selected: Item[];
   onAdd: (id: number) => void; onRemove: (id: number) => void; createUrl?: string;
   render: (item: Item, link?: Link) => React.ReactNode;
   renderSettings?: (item: Item, link?: Link) => React.ReactNode;
   linkFor?: (id: number) => Link | undefined;
+  onView?: (item: Item) => void;
+  editUrlFor?: (item: Item) => string;
 }) {
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
@@ -262,7 +287,14 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
     {selected.length ? <div className="agent-editor__cards">{selected.map((item) => <div className="agent-editor__linked-card" key={item.id}>
       <div className="agent-editor__card-content">{render(item, linkFor?.(item.id))}</div>
       {renderSettings?.(item, linkFor?.(item.id))}
-      <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>
+      {onView && editUrlFor ? <SolidDropdownMenu>
+        <SolidDropdownMenuTrigger asChild><button type="button" className="agent-editor__resource-menu-trigger" aria-label={`Actions for ${item.name ?? item.displayName ?? item.key}`}><Ellipsis size={18} /></button></SolidDropdownMenuTrigger>
+        <SolidDropdownMenuContent className="agent-editor__resource-menu">
+          <SolidDropdownMenuItem onSelect={() => onView(item)}><Eye size={16} /> View</SolidDropdownMenuItem>
+          <SolidDropdownMenuItem asChild><a href={editUrlFor(item)} target="_blank" rel="noopener noreferrer"><Pencil size={16} /> Edit</a></SolidDropdownMenuItem>
+          <SolidDropdownMenuItem className="agent-editor__resource-delete" onSelect={() => onRemove(item.id)}><Trash2 size={16} /> Delete</SolidDropdownMenuItem>
+        </SolidDropdownMenuContent>
+      </SolidDropdownMenu> : <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>}
     </div>)}</div> : <div className="agent-editor__empty">No {label.toLowerCase()} linked yet.</div>}
   </section>;
 }
@@ -288,8 +320,8 @@ export function AgentRegistryEditorPage() {
     };
   }, [agentResult.currentData, skillLinks.currentData, toolLinks.currentData]);
   const { data: settings, isError: settingsError } = useGetSolidSettingsQuery(undefined);
-  const skills = useCatalog(skillApi, `offset=0&limit=1000&${fieldsQuery(skillFields)}`);
-  const tools = useCatalog(toolApi, `offset=0&limit=1000&${fieldsQuery(toolFields)}`);
+  const skills = useCatalog(skillApi, `offset=0&limit=1000&populate[0]=tags&${fieldsQuery(skillFields)}`);
+  const tools = useCatalog(toolApi, `offset=0&limit=1000&populate[0]=tags&${fieldsQuery(toolFields)}`);
   const roles = useCatalog(roleApi, "offset=0&limit=1000&populate[0]=module");
   const secrets = useCatalog(secretApi, "offset=0&limit=1000&fields[0]=id&fields[1]=key&fields[2]=displayName&fields[3]=description");
   const [createAgent, { isLoading: creating }] = entityApi.useCreateSolidEntityMutation();
@@ -315,6 +347,7 @@ export function AgentRegistryEditorPage() {
     if (tab === "jobs") void jobs.refetch();
   };
   const [testAgentOpen, setTestAgentOpen] = React.useState(false);
+  const [preview, setPreview] = React.useState<{ item: Item; kind: "skill" | "tool" } | null>(null);
   const [testAgentWindowMode, setTestAgentWindowMode] = React.useState<"docked" | "maximized">("maximized");
   const [name, setName] = React.useState("");
   const [title, setTitle] = React.useState("");
@@ -327,6 +360,8 @@ export function AgentRegistryEditorPage() {
   const [stepLimit, setStepLimit] = React.useState(100);
   const [turnStepLimit, setTurnStepLimit] = React.useState(20);
   const [costLimit, setCostLimit] = React.useState(3);
+  const [tags, setTags] = React.useState<AgentHubTag[]>([]);
+  const [creatingTag, setCreatingTag] = React.useState(false);
   const [skillIds, setSkillIds] = React.useState<number[]>([]);
   const [toolIds, setToolIds] = React.useState<number[]>([]);
   const [roleIds, setRoleIds] = React.useState<number[]>([]);
@@ -343,7 +378,7 @@ export function AgentRegistryEditorPage() {
   const baseline = React.useRef("");
 
   const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
-    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), skillIds, toolIds, roleIds, secretIds,
+    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, skillIds, toolIds, roleIds, secretIds,
     alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
   React.useEffect(() => {
@@ -354,6 +389,7 @@ export function AgentRegistryEditorPage() {
     setReasoningModelKey(record.reasoningModelKey ?? ""); setFastModelKey(record.fastModelKey ?? "");
     setSystemPrompt(record.systemPrompt ?? ""); setStepLimit(record.stepLimit ?? 100);
     setTurnStepLimit(record.turnStepLimit ?? 20); setCostLimit(Number(record.costLimit ?? 3));
+    setTags(agentHubTagsFrom(record.tags));
     setSkillIds(items(record.agentSkills).map((link) => link.agentSkillRegistry?.id).filter(Boolean));
     setToolIds(items(record.agentTools).map((link) => link.agentToolRegistry?.id).filter(Boolean));
     setRoleIds(items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean));
@@ -413,6 +449,7 @@ export function AgentRegistryEditorPage() {
   };
 
   const save = async (nextStatus?: "draft" | "active" | "disabled") => {
+    if (creatingTag) return;
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Name is required.";
     if (!title.trim()) next.title = "Title is required.";
@@ -433,6 +470,7 @@ export function AgentRegistryEditorPage() {
       requiredInputs: JSON.stringify(inputs.map((input) => ({ ...input, name: input.name.trim(), description: input.description.trim() }))),
       reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
+      ...agentHubTagsPayload(tags),
       status: nextStatus ?? record?.status ?? "draft",
     };
     let newlyCreatedId: number | undefined;
@@ -507,6 +545,7 @@ export function AgentRegistryEditorPage() {
       <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
       </div>
+      <AgentHubTagsField value={tags} onChange={setTags} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Required inputs</h2><p>Define the variables people must provide when starting this agent.</p></div>
         {inputs.length > 0 && <SolidButton type="button" variant="secondary" size="small" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string" }])}><Plus size={15} /> Add input</SolidButton>}
       </div>
@@ -551,12 +590,14 @@ export function AgentRegistryEditorPage() {
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
+      onView={(item) => setPreview({ item, kind: "skill" })} editUrlFor={(item) => `/admin/core/solid-core/agent-skill-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentSkills, "agentSkillRegistry", id)}
       render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Always include", alwaysIncludeValues[item.id] ?? true,
           (checked) => setAlwaysIncludeValues((current) => ({ ...current, [item.id]: checked })), "Add the full skill to the agent prompt. Turn off to load it on demand.")}</div>} /> },
     { value: "tools", label: "Tools", content: <LinkPicker label="Tools" description="Tools available to this agent." options={tools.records} selected={linked(toolIds, tools.records, items(record?.agentTools).map((link) => link.agentToolRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setToolIds, id)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
+      onView={(item) => setPreview({ item, kind: "tool" })} editUrlFor={(item) => `/admin/core/solid-core/agent-tool-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentTools, "agentToolRegistry", id)}
       render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Require approval", requiresApprovalValues[item.id] ?? false,
@@ -592,8 +633,9 @@ export function AgentRegistryEditorPage() {
   return <main className="agent-editor"><header className="agent-editor__header"><div className="agent-editor__heading-with-refresh"><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1>{record?.id && <button type="button" className={`agent-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh agent" title="Refresh agent" disabled={isFetching || updating} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
     {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={openAgentTest}>Test Agent</SolidButton>}
-    <SolidButton loading={creating || updating} disabled={isLoading || isFetching || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
+    <SolidButton loading={creating || updating} disabled={creatingTag || isLoading || isFetching || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
   </div></header>
+    {preview && <ResourcePreviewDialog item={preview.item} kind={preview.kind} onClose={() => setPreview(null)} />}
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
       footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
       <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest agent content.</p></SolidDialogBody>

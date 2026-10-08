@@ -1,11 +1,12 @@
 import React from "react";
-import { ArrowLeft, Plus, RefreshCw, X } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { solidPatch } from "../../../../http/solidHttp";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
 import { AgentToolActivationDialog } from "./AgentToolActivationDialog";
 import { AgentToolSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import { AgentRegistryCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
@@ -21,7 +22,7 @@ type ToolRecord = {
   name?: string;
   iconName?: string | null;
   description?: string;
-  tags?: unknown;
+  tags?: AgentHubTag[];
   type?: string;
   status?: string | null;
   lastLoadError?: string | null;
@@ -39,17 +40,6 @@ function extractEntityRecord(response: unknown): Record<string, any> | undefined
     candidate = value.data;
   }
   return candidate && typeof candidate === "object" ? candidate as Record<string, any> : undefined;
-}
-
-function parseTags(value: unknown): string[] {
-  if (Array.isArray(value)) return value.map(String).map((tag) => tag.trim()).filter(Boolean);
-  if (typeof value !== "string" || !value.trim()) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.map(String).map((tag) => tag.trim()).filter(Boolean) : [];
-  } catch {
-    return value === "{}" ? [] : value.split(",").map((tag) => tag.trim()).filter(Boolean);
-  }
 }
 
 async function sha256Hex(value: string): Promise<string> {
@@ -89,7 +79,7 @@ export function AgentToolRegistryEditorPage() {
   const entityApi = React.useMemo(() => createSolidEntityApi("agentToolRegistry"), []);
   const { useCreateSolidEntityMutation, useGetSolidEntityByIdQuery, useUpdateSolidEntityMutation } = entityApi;
   const { data: response, isLoading, isFetching, refetch } = useGetSolidEntityByIdQuery(
-    { id, qs: "populate[0]=agentTools&populate[1]=agentTools.agentRegistry" },
+    { id, qs: "populate[0]=agentTools&populate[1]=agentTools.agentRegistry&populate[2]=tags" },
     { skip: !id || id === "new" },
   );
   const [createTool, { isLoading: isCreating }] = useCreateSolidEntityMutation();
@@ -101,8 +91,8 @@ export function AgentToolRegistryEditorPage() {
   const [description, setDescription] = React.useState("");
   const [type, setType] = React.useState("custom");
   const [sourceCode, setSourceCode] = React.useState("");
-  const [tags, setTags] = React.useState<string[]>([]);
-  const [tagDraft, setTagDraft] = React.useState("");
+  const [tags, setTags] = React.useState<AgentHubTag[]>([]);
+  const [creatingTag, setCreatingTag] = React.useState(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
   const [confirmRefresh, setConfirmRefresh] = React.useState(false);
@@ -111,37 +101,28 @@ export function AgentToolRegistryEditorPage() {
   const preparingActivation = React.useRef(false);
   const baseline = React.useRef("");
 
-  const currentForm = () => JSON.stringify({ name, iconName, description, type, sourceCode, tags, tagDraft });
+  const currentForm = () => JSON.stringify({ name, iconName, description, type, sourceCode, tags });
 
   React.useEffect(() => {
-    const nextTags = parseTags(record?.tags);
+    const nextTags = agentHubTagsFrom(record?.tags);
     setName(record?.name ?? "");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setType(record?.type ?? "custom");
     setSourceCode(record?.sourceCode ?? "");
     setTags(nextTags);
-    setTagDraft("");
-    baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", type: record?.type ?? "custom", sourceCode: record?.sourceCode ?? "", tags: nextTags, tagDraft: "" });
+    baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", type: record?.type ?? "custom", sourceCode: record?.sourceCode ?? "", tags: nextTags });
   }, [record]);
 
   const isReadOnly = record?.type === "solidx";
   const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
   const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
 
-  const addTag = () => {
-    const next = tagDraft.trim();
-    if (!next) return;
-    if (!tags.some((tag) => tag.toLowerCase() === next.toLowerCase())) setTags((current) => [...current, next]);
-    setTagDraft("");
-    setFieldErrors((current) => ({ ...current, tags: "" }));
-  };
-
   const save = async (nextStatus?: "inactive") => {
+    if (creatingTag) return;
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) nextErrors.name = "Name is required.";
     if (!description.trim()) nextErrors.description = "Description is required.";
-    if (tags.length === 0) nextErrors.tags = "At least one tag is required.";
     if (!type.trim()) nextErrors.type = "Tool type is required.";
     if (!sourceCode.trim()) nextErrors.sourceCode = "Tool source code is required.";
 
@@ -153,7 +134,7 @@ export function AgentToolRegistryEditorPage() {
     }
     const payload = {
       name: name.trim(), iconName: iconName || null, description: description.trim(), type,
-      sourceCode, tags: JSON.stringify(tags),
+      sourceCode, ...agentHubTagsPayload(tags),
       ...(["custom", "thirdparty"].includes(type) ? { checksum: await sha256Hex(sourceCode) } : {}),
       status: nextStatus ?? (record && (sourceCode !== record.sourceCode || name.trim() !== record.name || type !== record.type)
         ? "inactive" : record?.status ?? "inactive"),
@@ -175,7 +156,7 @@ export function AgentToolRegistryEditorPage() {
       const errorDetail = getSaveErrorMessage(error);
       const serverFieldErrors: Record<string, string> = {};
       if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
-        for (const field of ["name", "description", "tags", "type", "sourceCode"]) {
+        for (const field of ["name", "description", "type", "sourceCode"]) {
           if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
           const label = field === "sourceCode" ? "Tool source code" : field[0].toUpperCase() + field.slice(1);
           serverFieldErrors[field] = `${label} is required.`;
@@ -238,11 +219,7 @@ export function AgentToolRegistryEditorPage() {
       <label className="agent-tool-editor__field"><span>Tool type <b>*</b></span><select value={type} aria-invalid={Boolean(fieldErrors.type)} aria-describedby={fieldErrors.type ? "agent-tool-type-error" : undefined} className={fieldErrors.type ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setType(e.target.value); setFieldErrors((current) => ({ ...current, type: "" })); }}>
         {isReadOnly && <option value="solidx">SolidX</option>}<option value="thirdparty">Third Party</option><option value="custom">Custom</option>
       </select>{fieldErrors.type && <small id="agent-tool-type-error" className="agent-tool-editor__field-error">{fieldErrors.type}</small>}</label>
-      <div className="agent-tool-editor__field"><span>Tags <b>*</b></span><div className={`agent-tool-editor__tag-input${fieldErrors.tags ? " agent-tool-editor__tag-input--invalid" : ""}`}>
-        {tags.map((tag, index) => <span className="agent-tool-editor__tag" key={`${tag}-${index}`}>{tag}<button type="button" aria-label={`Remove ${tag}`} onClick={() => setTags((current) => { const next = current.filter((_, i) => i !== index); if (next.length) setFieldErrors((errors) => ({ ...errors, tags: "" })); return next; })}><X size={13} /></button></span>)}
-        <input value={tagDraft} aria-label="Add a tag" placeholder="Type a tag and press Enter" onChange={(e) => setTagDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }} />
-        <SolidButton type="button" variant="secondary" size="small" onClick={addTag}><Plus size={14} /> Add</SolidButton>
-      </div>{fieldErrors.tags && <small className="agent-tool-editor__field-error">{fieldErrors.tags}</small>}<small>Tags are saved as a JSON array.</small></div>
+      <AgentHubTagsField value={tags} onChange={setTags} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
       {record?.id && <section className="agent-tool-editor__workflow" aria-labelledby="agent-tool-lifecycle-title">
         <div className="agent-tool-editor__workflow-head"><div><h2 id="agent-tool-lifecycle-title">Tool lifecycle</h2><p>Configuration and initialization must pass before this tool can be activated.</p></div></div>
         <div className="agent-tool-editor__workflow-stages" aria-label={`Current tool stage: ${(record.status ?? "inactive").replace(/[_-]+/g, " ")}`}>
@@ -283,7 +260,7 @@ export function AgentToolRegistryEditorPage() {
   return <main className="agent-tool-editor">
     <header className="agent-tool-editor__header"><div><div className="agent-tool-editor__heading-with-refresh"><h1>{record ? "Edit Tool" : "Create Tool"}</h1>{record?.id && <button type="button" className={`agent-tool-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh tool" title="Refresh tool" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div></div><div className="agent-tool-editor__actions">
       <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
-      {!isReadOnly && <SolidButton disabled={activationOpen} loading={isCreating || isSaving} onClick={() => void save()}>Save Tool</SolidButton>}
+      {!isReadOnly && <SolidButton disabled={activationOpen || creatingTag} loading={isCreating || isSaving} onClick={() => void save()}>Save Tool</SolidButton>}
     </div></header>
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
       footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>

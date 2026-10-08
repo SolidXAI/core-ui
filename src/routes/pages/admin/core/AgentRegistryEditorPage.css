@@ -75,6 +75,13 @@
 .agent-editor__card-content { min-width:0; }
 .agent-editor__card-content>article { min-height:17rem; height:auto; }
 .agent-editor__linked-card>button { position:absolute; top:.3rem; right:.3rem; background:var(--surface-card,var(--card)); }
+.agent-editor__linked-card>.agent-editor__resource-menu-trigger { width:2rem; min-height:2rem; }
+.agent-editor__linked-card>.agent-editor__resource-menu-trigger:hover { color:var(--text-color,var(--foreground)); background:var(--surface-hover,#f2f3f4); }
+.agent-editor__resource-menu-trigger:focus-visible { outline:2px solid var(--primary-color,var(--primary)); outline-offset:1px; }
+.agent-editor__resource-menu .solid-dropdown-menu-item { gap:.5rem; }
+.agent-editor__resource-menu .agent-editor__resource-delete { color:#dc2626; }
+.agent-editor__resource-preview-body { min-height:0; max-height:72vh; overflow:auto; }
+.agent-editor__resource-preview-body img { max-width:100%; height:auto; }
 .agent-editor__secret { padding:1rem; }
 .agent-editor__secret span { display:block; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.8rem; }
 .agent-editor__link-settings { padding:.55rem .75rem .7rem; border-top:1px solid var(--surface-border,var(--border)); background:var(--surface-ground,var(--background)); }

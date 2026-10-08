@@ -1,10 +1,11 @@
 import React from "react";
-import { ArrowLeft, Plus, RefreshCw, X } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
 import {
   SolidButton,
   SolidCodeEditor,
@@ -30,7 +31,7 @@ type SkillRecord = {
   iconName?: string | null;
   description?: string;
   body?: string;
-  tags?: unknown;
+  tags?: AgentHubTag[];
   agentSkills?: AgentReference[] | AgentReference | null;
 };
 
@@ -43,25 +44,6 @@ function extractEntityRecord(response: unknown): Record<string, any> | undefined
     candidate = value.data;
   }
   return candidate && typeof candidate === "object" ? candidate as Record<string, any> : undefined;
-}
-
-function parseTags(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.map((tag) => String(tag).trim()).filter(Boolean);
-  }
-
-  if (typeof value !== "string" || !value.trim()) return [];
-
-  try {
-    const parsed = JSON.parse(value);
-    if (Array.isArray(parsed)) {
-      return parsed.map((tag) => String(tag).trim()).filter(Boolean);
-    }
-  } catch {
-    return value === "{}" ? [] : value.split(",").map((tag) => tag.trim()).filter(Boolean);
-  }
-
-  return [];
 }
 
 function formatErrorMessage(value: unknown): string | undefined {
@@ -125,7 +107,7 @@ export function AgentSkillRegistryEditorPage() {
   const { data: response, isLoading, isFetching, refetch } = useGetSolidEntityByIdQuery(
     {
       id,
-      qs: "populate[0]=agentSkills&populate[1]=agentSkills.agentRegistry",
+      qs: "populate[0]=agentSkills&populate[1]=agentSkills.agentRegistry&populate[2]=tags",
     },
     { skip: !id || id === "new" },
   );
@@ -139,47 +121,36 @@ export function AgentSkillRegistryEditorPage() {
   const [iconName, setIconName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [body, setBody] = React.useState("");
-  const [tags, setTags] = React.useState<string[]>([]);
-  const [tagDraft, setTagDraft] = React.useState("");
+  const [tags, setTags] = React.useState<AgentHubTag[]>([]);
+  const [creatingTag, setCreatingTag] = React.useState(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
   const [confirmRefresh, setConfirmRefresh] = React.useState(false);
   const baseline = React.useRef("");
-  const currentForm = () => JSON.stringify({ name, type, iconName, description, body, tags, tagDraft });
+  const currentForm = () => JSON.stringify({ name, type, iconName, description, body, tags });
 
   React.useEffect(() => {
-    const nextTags = parseTags(record?.tags);
+    const nextTags = agentHubTagsFrom(record?.tags);
     setName(record?.name ?? "");
     setType(record?.type ?? "custom");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setBody(record?.body ?? "");
     setTags(nextTags);
-    setTagDraft("");
-    baseline.current = JSON.stringify({ name: record?.name ?? "", type: record?.type ?? "custom", iconName: record?.iconName ?? "", description: record?.description ?? "", body: record?.body ?? "", tags: nextTags, tagDraft: "" });
+    baseline.current = JSON.stringify({ name: record?.name ?? "", type: record?.type ?? "custom", iconName: record?.iconName ?? "", description: record?.description ?? "", body: record?.body ?? "", tags: nextTags });
   }, [record]);
 
   const isReadOnly = record?.type === "solidx";
   const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
   const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
 
-  const addTag = () => {
-    const nextTag = tagDraft.trim();
-    if (!nextTag) return;
-    if (!tags.some((tag) => tag.toLowerCase() === nextTag.toLowerCase())) {
-      setTags((current) => [...current, nextTag]);
-    }
-    setTagDraft("");
-    setFieldErrors((current) => ({ ...current, tags: "" }));
-  };
-
   const handleSave = async () => {
+    if (creatingTag) return;
     const nextErrors: Record<string, string> = {};
     if (!name.trim()) nextErrors.name = "Name is required.";
     if (!type.trim()) nextErrors.type = "Skill type is required.";
     if (!description.trim()) nextErrors.description = "Description is required.";
     if (!body.trim()) nextErrors.body = "Skill instructions are required.";
-    if (tags.length === 0) nextErrors.tags = "At least one tag is required.";
 
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -198,7 +169,7 @@ export function AgentSkillRegistryEditorPage() {
       iconName: iconName || null,
       description: description.trim(),
       body,
-      tags: JSON.stringify(tags),
+      ...agentHubTagsPayload(tags),
     };
 
     try {
@@ -229,14 +200,14 @@ export function AgentSkillRegistryEditorPage() {
       const errorDetail = getSaveErrorMessage(error);
       const serverFieldErrors: Record<string, string> = {};
       if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
-        for (const field of ["name", "type", "description", "body", "tags"]) {
+        for (const field of ["name", "type", "description", "body"]) {
           if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
           serverFieldErrors[field] = `${field === "body" ? "Skill instructions" : field[0].toUpperCase() + field.slice(1)} is required.`;
         }
       }
       if (Object.keys(serverFieldErrors).length > 0) {
         setFieldErrors(serverFieldErrors);
-        setActiveTab(serverFieldErrors.body || serverFieldErrors.tags ? "skill" : "general");
+        setActiveTab(serverFieldErrors.body ? "skill" : "general");
       }
       dispatch(showToast({
         severity: "error",
@@ -306,46 +277,7 @@ export function AgentSkillRegistryEditorPage() {
             </select>
             {fieldErrors.type && <small id="agent-skill-type-error" className="agent-skill-editor__field-error">{fieldErrors.type}</small>}
           </label>
-          <div className="agent-skill-editor__field">
-            <span>Tags <b>*</b></span>
-            <div className={`agent-skill-editor__tag-input${fieldErrors.tags ? " agent-skill-editor__tag-input--invalid" : ""}`}>
-              {tags.map((tag, index) => (
-                <span className="agent-skill-editor__tag" key={`${tag}-${index}`}>
-                  {tag}
-                  <button
-                    type="button"
-                    aria-label={`Remove ${tag}`}
-                    onClick={() => {
-                      setTags((current) => {
-                        const nextTags = current.filter((_, tagIndex) => tagIndex !== index);
-                        if (nextTags.length > 0) setFieldErrors((errors) => ({ ...errors, tags: "" }));
-                        return nextTags;
-                      });
-                    }}
-                  >
-                    <X size={13} />
-                  </button>
-                </span>
-              ))}
-              <input
-                value={tagDraft}
-                aria-label="Add a tag"
-                placeholder="Type a tag and press Enter"
-                onChange={(event) => setTagDraft(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    addTag();
-                  }
-                }}
-              />
-              <SolidButton type="button" variant="secondary" size="small" onClick={addTag}>
-                <Plus size={14} /> Add
-              </SolidButton>
-            </div>
-            {fieldErrors.tags && <small className="agent-skill-editor__field-error">{fieldErrors.tags}</small>}
-            <small>Tags are saved as a JSON array.</small>
-          </div>
+          <AgentHubTagsField value={tags} onChange={setTags} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
         </fieldset>
       ),
     },
@@ -415,7 +347,7 @@ export function AgentSkillRegistryEditorPage() {
             Back
           </SolidButton>
           {!isReadOnly && (
-            <SolidButton loading={isCreating || isSaving} onClick={handleSave}>
+            <SolidButton loading={isCreating || isSaving} disabled={creatingTag} onClick={handleSave}>
               Save Skill
             </SolidButton>
           )}
