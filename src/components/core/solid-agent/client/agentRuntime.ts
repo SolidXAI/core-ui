@@ -1,4 +1,5 @@
 import { eventBus } from "../../../../helpers/eventBus";
+import { getAgentChatWidgetCatalog } from "../../../../helpers/registry";
 import {
     agentConnectionChanged,
     agentEventReceived,
@@ -67,7 +68,8 @@ export class AgentRuntime {
         private persistSession = true,
     ) {
         this.sessionKey = sessionKey(agentRuntime, agentUrl);
-        this.socket = new AgentSocket(agentUrl, persistSession ? readSessionId(this.sessionKey) : null, agentRuntime === "agentHub");
+        this.socket = new AgentSocket(agentUrl, persistSession ? readSessionId(this.sessionKey) : null, agentRuntime === "agentHub",
+            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog() : []);
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => this.dispatch(agentConnectionChanged(status))),

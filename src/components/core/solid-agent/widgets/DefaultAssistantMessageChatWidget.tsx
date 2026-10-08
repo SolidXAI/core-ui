@@ -22,3 +22,7 @@ export const DefaultAssistantMessageChatWidget = ({ eventData, live, timestamp }
         </div>
     );
 };
+
+Object.assign(DefaultAssistantMessageChatWidget, { getExtensionMetadata: () => ({
+    chatInteraction: { role: "event-renderer", agentSelectable: false },
+}) });

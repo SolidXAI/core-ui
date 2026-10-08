@@ -28,3 +28,23 @@ export const SolidGalleryChatWidget = ({ eventData }: SolidChatWidgetProps) => {
         </>
     );
 };
+
+Object.assign(SolidGalleryChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: {
+        name: "gallery",
+        description: "Show a grid of images with captions.",
+        propsSchema: {
+            type: "object",
+            properties: {
+                images: {
+                    type: "array",
+                    items: { anyOf: [
+                        { type: "string" },
+                        { type: "object", properties: { src: { type: "string" }, alt: { type: "string" } }, required: ["src"] },
+                    ] },
+                },
+            },
+            required: ["images"],
+        },
+    },
+}) });

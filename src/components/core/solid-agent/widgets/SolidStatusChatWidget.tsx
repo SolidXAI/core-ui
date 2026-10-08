@@ -38,3 +38,7 @@ export const SolidStatusChatWidget = ({ eventData, sendPrompt }: SolidChatWidget
         </div>
     );
 };
+
+Object.assign(SolidStatusChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "status", description: "Show the outcome of one operation with a status, title, and detail.", propsSchema: { type: "object", properties: { tone: { type: "string", enum: ["success", "warning", "error", "info"] }, title: { type: "string" }, message: { type: "string" }, action: { type: "object", properties: { label: { type: "string" }, prompt: { type: "string" } }, required: ["label", "prompt"] } } } },
+}) });

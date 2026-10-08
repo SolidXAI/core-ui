@@ -29,3 +29,7 @@ export const SolidToolActivityChatWidget = ({ eventData }: SolidChatWidgetProps)
         </div>
     );
 };
+
+Object.assign(SolidToolActivityChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "tool-activity", description: "Summarize tool calls and their results.", propsSchema: { type: "object", properties: { title: { type: "string" }, tools: { type: "array", items: { type: "object", properties: { name: { type: "string" }, summary: { type: "string" }, status: { type: "string", enum: ["running", "done", "error"] }, duration_ms: { type: "number" } }, required: ["name"] } } } } },
+}) });

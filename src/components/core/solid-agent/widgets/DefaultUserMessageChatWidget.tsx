@@ -75,3 +75,7 @@ export const DefaultUserMessageChatWidget = ({ eventData, timestamp }: SolidChat
         </div>
     );
 };
+
+Object.assign(DefaultUserMessageChatWidget, { getExtensionMetadata: () => ({
+    chatInteraction: { role: "event-renderer", agentSelectable: false },
+}) });
