@@ -13,7 +13,7 @@ function cx(...parts: Array<string | false | undefined>) {
 
 export function SolidMessage({ severity = "info", text, children, className }: SolidMessageProps) {
   return (
-    <div className={cx("solid-message", `solid-message-${severity}`, className)} role="status">
+    <div className={cx("solid-message", `solid-message-${severity}`, className)} role={severity === "error" ? "alert" : "status"}>
       {text ?? children}
     </div>
   );
