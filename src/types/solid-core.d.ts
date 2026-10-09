@@ -332,6 +332,17 @@ export type SolidFormFieldWidgetProps = {
     fieldContext?: SolidFieldProps;
 }
 
+/** The original chatter API record, including its unmodified JSON messageBody string. */
+export type SolidChatterMessageWidgetProps = {
+    chatterMessage: {
+        id: number;
+        messageType: string;
+        messageSubType: string;
+        messageBody: string | null;
+        [key: string]: unknown;
+    };
+};
+
 /**
  * Props of a SolidX Agent chat widget (ExtensionComponentTypes.chatInteractionWidget).
  * Resolved from `event_data.widget`, or from the default widget for `eventType`.

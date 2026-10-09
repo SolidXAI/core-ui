@@ -15,3 +15,7 @@ export const DefaultUnknownChatWidget = (props: SolidChatWidgetProps) => {
         </div>
     );
 };
+
+Object.assign(DefaultUnknownChatWidget, { getExtensionMetadata: () => ({
+    chatInteraction: { role: "event-renderer", agentSelectable: false },
+}) });

@@ -99,12 +99,14 @@ export async function readAgentAttachments(files: File[], existing: AgentAttachm
                 added.push({
                     payload: { name: file.name, mimeType: kind.mimeType, size: file.size, encoding: "base64", content: dataUrl.slice(dataUrl.indexOf(",") + 1) },
                     meta: { name: file.name, mimeType: kind.mimeType, size: file.size, previewUrl: dataUrl },
+                    file,
                 });
             } else {
                 const text = await readAs(file, "text");
                 added.push({
                     payload: { name: file.name, mimeType: kind.mimeType, size: file.size, encoding: "text", content: text },
                     meta: { name: file.name, mimeType: kind.mimeType, size: file.size },
+                    file,
                 });
             }
             count += 1;

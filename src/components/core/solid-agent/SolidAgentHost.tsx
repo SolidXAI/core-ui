@@ -5,23 +5,27 @@ import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentOpenRequested, type AgentState } from "../../../redux/features/agentSlice";
 import { SolidAgentChat } from "./SolidAgentChat";
 import { useAgentAvailability } from "./useAgentAvailability";
+import { useAdminInputContext } from "./useAdminInputContext";
+import type { AgentMode } from "./types";
 
 const PREFS_KEY = "solid-agent.window";
 const MIN_DOCK = 360;
 const MAX_DOCK = 720;
+type WindowPrefs = { dockWidth: number; open?: boolean; mode?: Exclude<AgentMode, "bubble"> };
 
-function readPrefs(): { dockWidth: number } {
+function readPrefs(): WindowPrefs {
     try {
         const parsed = JSON.parse(localStorage.getItem(PREFS_KEY) ?? "{}");
-        return { dockWidth: Number(parsed.dockWidth) || 420 };
+        const mode = ["compact", "docked", "maximized"].includes(parsed.mode) ? parsed.mode as WindowPrefs["mode"] : undefined;
+        return { dockWidth: Number(parsed.dockWidth) || 420, open: parsed.open === true, mode };
     } catch {
         return { dockWidth: 420 };
     }
 }
 
-function writePrefs(prefs: { dockWidth: number }) {
+function writePrefs(prefs: Partial<WindowPrefs>) {
     try {
-        localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+        localStorage.setItem(PREFS_KEY, JSON.stringify({ ...readPrefs(), ...prefs }));
     } catch {
         // ignore
     }
@@ -30,20 +34,46 @@ function writePrefs(prefs: { dockWidth: number }) {
 /**
  * The single mount point of the SolidX Agent in the admin shell (rendered by AdminLayout).
  * Shows the floating bubble and the chat window; hidden unless the `solidAgentEnabled` setting
- * is on, `solidAgentUrl` is set and the user has agent:invoke. Ctrl/Cmd+J toggles the window,
+ * is on, `solidxAgentBackendUrl` is set and the user has agent:invoke. Ctrl/Cmd+J toggles the window,
  * Esc inside it minimizes back to the bubble.
  */
 export default function SolidAgentHost() {
     const dispatch = useDispatch();
     const { ready, enabled, agentUrl, canUse } = useAgentAvailability();
+    const inputContext = useAdminInputContext();
     const agent = useSelector((state: any) => state.solidAgent as AgentState | undefined);
     const [dockWidth, setDockWidth] = useState(() => readPrefs().dockWidth);
+    const prefsHydrated = useRef(false);
+    const skipNextPrefsWrite = useRef(false);
     const windowRef = useRef<HTMLDivElement>(null);
     const openerRef = useRef<Element | null>(null);
 
     const available = ready && enabled && canUse && !!agentUrl && !!agent;
     const mode = agent?.mode ?? "bubble";
     const isOpen = available && mode !== "bubble";
+
+    // Restore the last visible presentation after the host has verified this user's access.
+    useEffect(() => {
+        if (!ready || !available || prefsHydrated.current) return;
+        prefsHydrated.current = true;
+        const prefs = readPrefs();
+        if (prefs.open && prefs.mode) {
+            if (mode !== prefs.mode) skipNextPrefsWrite.current = true;
+            dispatch(agentModeChanged(prefs.mode));
+        }
+    }, [ready, available, dispatch, mode]);
+
+    // Keep visibility and presentation in localStorage. When closed, retain the last mode so
+    // the preference still records how the window had been presented.
+    useEffect(() => {
+        if (!prefsHydrated.current || !available) return;
+        if (skipNextPrefsWrite.current) {
+            skipNextPrefsWrite.current = false;
+            return;
+        }
+        if (mode !== "bubble") writePrefs({ open: true, mode });
+        else writePrefs({ open: false });
+    }, [available, mode]);
 
     const toggle = useCallback(() => {
         if (!available) return;
@@ -121,7 +151,7 @@ export default function SolidAgentHost() {
                     }}
                 >
                     {mode === "docked" && <div className={styles.resizeHandle} onPointerDown={startResize} aria-hidden="true" />}
-                    <SolidAgentChat agentUrl={agentUrl} />
+                    <SolidAgentChat agentUrl={agentUrl} inputContext={inputContext} />
                 </div>
             ) : (
                 <button type="button" className={styles.bubble} onClick={toggle} aria-label="Open the SolidX Agent (Ctrl+J)" title="SolidX Agent (Ctrl+J)">

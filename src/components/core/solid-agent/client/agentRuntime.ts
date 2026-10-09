@@ -1,4 +1,5 @@
 import { eventBus } from "../../../../helpers/eventBus";
+import { getAgentChatWidgetCatalog } from "../../../../helpers/registry";
 import {
     agentConnectionChanged,
     agentEventReceived,
@@ -9,34 +10,42 @@ import {
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, normalizeAgentFrame } from "../agentEvents";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
-import { AgentEventTypes, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
+import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
-import { fetchSessionHistory } from "./agentRest";
+import { clearAllAgentAuth } from "./agentAuth";
+import { fetchSessionHistory, uploadAgentAttachments } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
+import { agentIdOf } from "./agentUrls";
 
 /**
- * The one live connection to the agent, shared by the floating window and any embedded chat.
- * Owns the AgentSocket, normalises frames to `{ eventType, eventData }`, batches LlmToken
+ * A live connection to one agent backend. The "solidx" runtime is shared by the floating window and
+ * any embedded chat of that type (ensureAgentRuntime); other types get their own runtime per
+ * embedded chat (see useAgentChat). Owns the AgentSocket, normalises frames to `{ eventType, eventData }`, batches LlmToken
  * deltas to one dispatch per animation frame, loads history on session start, and emits the
  * public SDK events on the event bus.
  */
 
-const SESSION_KEY = "solid-agent.session_id";
-
 type Dispatch = (action: any) => any;
 type GetAgentState = () => AgentState | undefined;
 
-function readSessionId(): string | null {
+/** Keep the original SolidX storage key; Agent Hub keeps one per agent (its agent URL names the agent). */
+function sessionKey(agentRuntime: AgentRuntimeType, agentUrl: string) {
+    if (agentRuntime === "solidx") return "solid-agent.session_id";
+    const agentId = agentIdOf(agentUrl);
+    return agentId === undefined ? `solid-agent.${agentRuntime}.session_id` : `solid-agent.${agentRuntime}.${agentId}.session_id`;
+}
+
+function readSessionId(key: string): string | null {
     try {
-        return localStorage.getItem(SESSION_KEY);
+        return localStorage.getItem(key);
     } catch {
         return null;
     }
 }
 
-function writeSessionId(id: string | null) {
+function writeSessionId(key: string, id: string | null) {
     try {
-        id ? localStorage.setItem(SESSION_KEY, id) : localStorage.removeItem(SESSION_KEY);
+        id ? localStorage.setItem(key, id) : localStorage.removeItem(key);
     } catch {
         // Storage blocked (private mode); the session just won't survive a reload.
     }
@@ -49,8 +58,18 @@ export class AgentRuntime {
     private unsubscribers: Array<() => void> = [];
     private lastContext: AgentContext | undefined;
 
-    constructor(readonly agentUrl: string, private dispatch: Dispatch, private getState: GetAgentState) {
-        this.socket = new AgentSocket(agentUrl, readSessionId());
+    private readonly sessionKey: string;
+
+    constructor(
+        readonly agentUrl: string,
+        private dispatch: Dispatch,
+        private getState: GetAgentState,
+        readonly agentRuntime: AgentRuntimeType = "solidx",
+        private persistSession = true,
+    ) {
+        this.sessionKey = sessionKey(agentRuntime, agentUrl);
+        this.socket = new AgentSocket(agentUrl, persistSession ? readSessionId(this.sessionKey) : null, agentRuntime === "agentHub",
+            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog() : []);
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => this.dispatch(agentConnectionChanged(status))),
@@ -59,20 +78,30 @@ export class AgentRuntime {
     }
 
     /**
-     * Sends a user message. `context` is page context (module, model, record) for the agent;
-     * `attachments` are files read in the browser (see agentAttachments.ts), sent inline.
+     * Uploads files into SolidX media storage first, then sends their IDs with the socket message.
      */
-    sendMessage(text: string, context?: AgentContext, attachments: AgentAttachment[] = []) {
+    async sendMessage(text: string, context?: AgentContext, attachments: AgentAttachment[] = [], inputs?: Record<string, unknown>) {
         const content = text.trim();
         if (!content && !attachments.length) return;
+        const uploaded = attachments.length
+            ? await uploadAgentAttachments(this.agentUrl, attachments.map((item) => item.file))
+            : [];
+        if (uploaded.length !== attachments.length) {
+            throw new Error("SolidX did not confirm every uploaded file. Please retry.");
+        }
         if (context) this.lastContext = context;
-        this.dispatch(agentUserMessageAdded({ text: content, attachments: attachments.map((item) => item.meta) }));
+        const displayAttachments = attachments.map((item, index) => ({
+            ...item.meta,
+            ...(uploaded[index] ? { mediaId: uploaded[index].id } : {}),
+        }));
+        this.dispatch(agentUserMessageAdded({ text: content, attachments: displayAttachments }));
         this.socket.send({
             action: "message",
             session_id: this.socket.currentSessionId ?? "",
             content,
             context: context ?? this.lastContext,
-            ...(attachments.length ? { attachments: attachments.map((item) => item.payload) } : {}),
+            ...(this.agentRuntime === "agentHub" && inputs ? { inputs } : {}),
+            ...(attachments.length ? { attachments: uploaded } : {}),
         });
     }
 
@@ -87,7 +116,7 @@ export class AgentRuntime {
             context: this.lastContext,
             widget_reply: { widgetId, value },
         });
-        eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value });
+        eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value, agentType: this.agentRuntime });
     }
 
     cancel() {
@@ -96,14 +125,14 @@ export class AgentRuntime {
     }
 
     newChat() {
-        writeSessionId(null);
+        if (this.persistSession) writeSessionId(this.sessionKey, null);
         this.lastContext = undefined;
         this.dispatch(agentThreadReset());
         this.socket.newSession();
     }
 
     resume(sessionId: string) {
-        writeSessionId(sessionId);
+        if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         this.dispatch(agentThreadReset());
         this.socket.resume(sessionId);
     }
@@ -125,7 +154,8 @@ export class AgentRuntime {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
             if (!result) return;
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
-            const items = await resolveAttachmentMedia(historyToItems(result.messages ?? []));
+            const rawItems = historyToItems(result.messages ?? []);
+            const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
             this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page }));
         } catch {
             // History is a convenience; the live session still works without it.
@@ -150,14 +180,15 @@ export class AgentRuntime {
     private emitSdkEvents(event: AgentChatEvent) {
         if (event.eventType === AgentEventTypes.sessionStarted) {
             const sessionId = event.frame.session_id ?? event.eventData.session_id ?? null;
-            writeSessionId(sessionId);
-            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId });
+            if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
+            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentRuntime });
             const state = this.getState();
             const historyId = event.frame.history_session_id ?? event.eventData.history_session_id ?? sessionId;
             if (state && state.items.length === 0 && historyId) void this.loadHistory(historyId, 1);
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             eventBus.emit(SOLID_AGENT_EVENTS.turnComplete, {
                 sessionId: this.socket.currentSessionId,
+                agentType: this.agentRuntime,
                 content: event.eventData.content ?? event.frame.content,
             });
         }
@@ -177,7 +208,7 @@ export class AgentRuntime {
 
 let runtime: AgentRuntime | null = null;
 
-/** Returns the shared runtime, creating (or re-pointing) it for `agentUrl`. */
+/** Returns the shared "solidx" runtime, creating (or re-pointing) it for `agentUrl`. */
 export function ensureAgentRuntime(agentUrl: string, dispatch: Dispatch, getState: GetAgentState): AgentRuntime {
     if (runtime && runtime.agentUrl === agentUrl) return runtime;
     runtime?.dispose();
@@ -189,8 +220,9 @@ export function getAgentRuntime(): AgentRuntime | null {
     return runtime;
 }
 
-/** Closes the connection (e.g. on logout). */
+/** Closes the connection and forgets this tab's agent logins (e.g. on logout). */
 export function disposeAgentRuntime() {
     runtime?.dispose();
     runtime = null;
+    clearAllAgentAuth();
 }

@@ -1,3 +1,5 @@
+import type { AgentChatWidgetMetadata } from "../../../types/extension-registry";
+
 /**
  * Shared types for the SolidX Agent chat (launcher, window, thread).
  *
@@ -18,6 +20,16 @@ export type AgentContext = {
 };
 
 export type AgentMode = "bubble" | "compact" | "docked" | "maximized";
+
+/**
+ * Which agent backend a chat talks to: "solidx" (setting solidxAgentBackendUrl; the floating
+ * launcher) or "agentHub" (setting solidxAgentHubBackendUrl).
+ */
+export type AgentRuntimeType = "solidx" | "agentHub";
+export type AgentModelAssignment = { provider: string; model: string } | null;
+export type AgentModelAssignments = { reasoning: AgentModelAssignment; fast: AgentModelAssignment };
+/** @deprecated Use AgentRuntimeType. */
+export type AgentType = AgentRuntimeType;
 
 export type AgentConnection = "idle" | "connecting" | "open" | "reconnecting" | "offline";
 
@@ -82,6 +94,7 @@ export type AgentAttachmentPayload = {
 
 /** What the thread shows for an attachment (history only has name/type/size). */
 export type AgentAttachmentMeta = {
+    mediaId?: number;
     name: string;
     mimeType: string;
     size: number;
@@ -91,18 +104,20 @@ export type AgentAttachmentMeta = {
     url?: string;
 };
 
-export type AgentAttachment = { payload: AgentAttachmentPayload; meta: AgentAttachmentMeta };
+export type AgentAttachment = { payload: AgentAttachmentPayload; meta: AgentAttachmentMeta; file: File };
+export type AgentUploadedAttachment = { id: number; name: string; mimeType: string; size: number };
 
 export type AgentAction =
-    | { action: "start_session" }
-    | { action: "resume_session"; session_id: string }
+    | { action: "start_session"; widget_catalog?: AgentChatWidgetMetadata[] }
+    | { action: "resume_session"; session_id: string; widget_catalog?: AgentChatWidgetMetadata[] }
     | {
           action: "message";
           session_id: string;
           content: string;
           context?: AgentContext;
+          inputs?: Record<string, unknown>;
           widget_reply?: WidgetReply | null;
-          attachments?: AgentAttachmentPayload[];
+          attachments?: AgentAttachmentPayload[] | AgentUploadedAttachment[];
       }
     | { action: "cancel"; session_id: string }
     | { action: "end_session"; session_id: string };

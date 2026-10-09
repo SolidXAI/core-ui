@@ -6,6 +6,8 @@ import {
   registerExtensionFunction,
 } from "../helpers/registry";
 import type {
+  ExtensionComponentAdditionalMetadata,
+  ExtensionComponentMetadataProvider,
   ExtensionComponentType,
   ExtensionFunctionType,
 } from "../types/extension-registry";
@@ -18,10 +20,11 @@ export type SolidUiModuleRoutes = {
 
 export type SolidUiExtensionComponent = {
   name: string;
-  component: ComponentType<any>;
+  component: ComponentType<any> & ExtensionComponentMetadataProvider;
   type: ExtensionComponentType;
   aliases?: string[];
   fieldType?: string;
+  metadata?: ExtensionComponentAdditionalMetadata;
 };
 
 export type SolidUiExtensionFunction = {
@@ -107,6 +110,7 @@ export function registerSolidUiModuleExtensions(modules: SolidUiModule[]): void 
         extensionComponent.type,
         extensionComponent.aliases,
         extensionComponent.fieldType,
+        extensionComponent.metadata,
       );
     });
 
