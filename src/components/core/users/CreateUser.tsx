@@ -52,7 +52,7 @@ const CreateUser = ({ data, params }: any) => {
     },
   ] = useUpdateUserMutation();
 
-  const [deleteUser, { isLoading: isUserDeleting, isSuccess: isDeleteUserSuccess }] = useDeleteUserMutation();
+  const [deleteUser, { isLoading: isUserDeleting, error: userDeleteError }] = useDeleteUserMutation();
 
   useEffect(() => {
     if (data?.roles) {
@@ -183,13 +183,17 @@ const CreateUser = ({ data, params }: any) => {
 
     if (userCreateError) handleError(userCreateError);
     if (userUpdateError) handleError(userUpdateError);
-  }, [dispatch, userCreateError, userUpdateError]);
+    if (userDeleteError) handleError(userDeleteError);
+  }, [dispatch, userCreateError, userUpdateError, userDeleteError]);
 
-  useEffect(() => {
-    if (isDeleteUserSuccess) {
+  const handleDeleteUser = async () => {
+    try {
+      await deleteUser(data.id).unwrap();
       router.back();
+    } catch {
+      // error shown via userDeleteError effect
     }
-  }, [isDeleteUserSuccess, router]);
+  };
 
   const isEditMode = params.id !== "new";
   const isSaving = isLoading || isUserUpdating;
@@ -248,7 +252,7 @@ const CreateUser = ({ data, params }: any) => {
                   type="button"
                   variant="destructive"
                   loading={isUserDeleting}
-                  onClick={() => deleteUser(data.id)}
+                  onClick={handleDeleteUser}
                 >
                   Delete
                 </SolidButton>
