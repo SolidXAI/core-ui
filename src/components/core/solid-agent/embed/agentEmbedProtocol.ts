@@ -1,7 +1,7 @@
 import type { AgentBootstrap } from "../client/agentAuth";
 
 export const EMBED_CHANNEL = "solidx-agent-embed";
-export type AgentInputDefinition = { name: string; description: string; dataType: string };
+export type AgentInputDefinition = { name: string; description: string; dataType: string; defaultValue?: unknown; optional?: boolean };
 export type AgentEmbedBootstrap = AgentBootstrap & {
     embed: true;
     agentId: number;
@@ -35,9 +35,9 @@ export function validateEmbedInputs(fields: AgentInputDefinition[], suppliedValu
     const names = new Set(fields.map((field) => field.name));
     for (const name of Object.keys(values)) if (!names.has(name)) throw new Error(`Unknown input: ${name}`);
     const missing = fields
-        .filter(({ name }) => {
-            const value = values[name];
-            return value === undefined || value === null || (typeof value === "string" && !value.trim());
+    .filter(({ name, optional, defaultValue }) => {
+        const value = values[name];
+            return !optional && defaultValue == null && (value === undefined || value === null || (typeof value === "string" && !value.trim()));
         })
         .map(({ name }) => name);
     if (missing.length) throw new MissingAgentInputsError(missing);

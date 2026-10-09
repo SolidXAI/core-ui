@@ -23,7 +23,7 @@ import "./AgentRegistryEditorPage.css";
 
 type Item = { id: number; name?: string; title?: string; displayName?: string; description?: string; iconName?: string; key?: string; module?: { id?: number; displayName?: string }; [key: string]: any };
 type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; roleMetadata?: Item; secret?: Item; envVarName?: string; alwaysInclude?: boolean; requiresApproval?: boolean };
-type Input = { name: string; description: string; dataType: string };
+type Input = { name: string; description: string; dataType: string; defaultValue?: unknown; optional: boolean };
 type Agent = Item & {
   configVersion?: number;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
@@ -217,15 +217,39 @@ function parseInputs(value: unknown): Input[] {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     if (Array.isArray(parsed)) return parsed.map((input) => ({
       name: String(input.name ?? input.variableName ?? ""), description: String(input.description ?? ""),
-      dataType: String(input.dataType ?? input.type ?? "string"),
+      dataType: String(input.dataType ?? input.type ?? "string"), defaultValue: input.defaultValue ?? null,
+      optional: input.optional === true,
     }));
     // Existing agent definitions may use a name-keyed object.
     if (parsed && typeof parsed === "object") return Object.entries(parsed).map(([name, definition]: [string, any]) => ({
       name, description: String(definition?.description ?? ""),
-      dataType: String(definition?.dataType ?? definition?.type ?? "string"),
+      dataType: String(definition?.dataType ?? definition?.type ?? "string"), defaultValue: definition?.defaultValue ?? null,
+      optional: definition?.optional === true,
     }));
   } catch { /* Keep malformed historical values from crashing the editor. */ }
   return [];
+}
+
+function parseDefaultValue(raw: string, dataType: string): unknown {
+  if (dataType === "string" || dataType === "date" || dataType === "datetime") return raw;
+  if (dataType === "boolean") {
+    if (raw !== "true" && raw !== "false") throw new Error(`Default value must be true or false for ${dataType}.`);
+    return raw === "true";
+  }
+  if (dataType === "number" || dataType === "integer") {
+    const value = Number(raw);
+    if (!Number.isFinite(value) || (dataType === "integer" && !Number.isSafeInteger(value))) throw new Error(`Default value must be a valid ${dataType}.`);
+    return value;
+  }
+  const value = JSON.parse(raw);
+  if (dataType === "array" && !Array.isArray(value)) throw new Error("Default value must be a JSON array.");
+  if (dataType === "object" && (!value || typeof value !== "object" || Array.isArray(value))) throw new Error("Default value must be a JSON object.");
+  return value;
+}
+
+function formatDefaultValue(value: unknown): string {
+  if (value == null) return "";
+  return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 function apiError(error: any): string {
@@ -269,12 +293,16 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
 }) {
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const showAssociatedCount = label === "Skills" || label === "Tools";
   const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id)
     && `${item.name ?? item.displayName ?? item.key ?? ""} ${item.description ?? ""}`.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
   return <section className="agent-editor__section">
     <div className="agent-editor__section-head"><div><h2>{label}</h2><p>{description}</p></div>
       {createUrl && <a href={createUrl} target="_blank" rel="noopener noreferrer" className="agent-editor__new-link">Create {label === "Skills" ? "skill" : "tool"} <ExternalLink size={14} /></a>}
     </div>
+    {showAssociatedCount && <div className="agent-editor__linked-count" role="status">
+      {selected.length} {label.toLowerCase()} associated
+    </div>}
     <div className="agent-editor__picker">
       <SolidInput value={search} placeholder={`Search and add ${label.toLowerCase()}…`} aria-label={`Search ${label.toLowerCase()}`}
         onFocus={() => setOpen(true)} onChange={(event) => { setSearch(event.target.value); setOpen(true); }} />
@@ -465,9 +493,19 @@ export function AgentRegistryEditorPage() {
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(next).join(" ") }));
       return;
     }
+    let normalizedInputs: Input[];
+    try {
+      normalizedInputs = inputs.map((input) => ({ ...input, name: input.name.trim(), description: input.description.trim(),
+        defaultValue: input.defaultValue === "" || input.defaultValue == null ? null : parseDefaultValue(String(input.defaultValue), input.dataType) }));
+    } catch (error) {
+      next.inputs = error instanceof Error ? error.message : "Check the default input values.";
+      setErrors(next);
+      setTab("basics");
+      return;
+    }
     const payload = {
       name: name.trim(), title: title.trim(), description: description.trim(), iconName,
-      requiredInputs: JSON.stringify(inputs.map((input) => ({ ...input, name: input.name.trim(), description: input.description.trim() }))),
+      requiredInputs: JSON.stringify(normalizedInputs),
       reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
       ...agentHubTagsPayload(tags),
@@ -546,16 +584,18 @@ export function AgentRegistryEditorPage() {
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
-      <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Required inputs</h2><p>Define the variables people must provide when starting this agent.</p></div>
-        {inputs.length > 0 && <SolidButton type="button" variant="secondary" size="small" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string" }])}><Plus size={15} /> Add input</SolidButton>}
+      <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
+        {inputs.length > 0 && <SolidButton type="button" variant="secondary" size="small" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add input</SolidButton>}
       </div>
-      {!inputs.length ? <div className="agent-editor__empty">This agent has no required inputs. <button type="button" onClick={() => setInputs([{ name: "", description: "", dataType: "string" }])}><Plus size={15} /> Add an input variable</button></div>
+      {!inputs.length ? <div className="agent-editor__empty">This agent has no inputs. <button type="button" onClick={() => setInputs([{ name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add an input variable</button></div>
         : <div className="agent-editor__inputs">{inputs.map((input, index) => <div className="agent-editor__input-row" key={index}>
           <SolidInput aria-label={`Input ${index + 1} name`} placeholder="Variable name" value={input.name} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, name: event.target.value } : item))} />
           <SolidInput aria-label={`Input ${index + 1} description`} placeholder="Description" value={input.description} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, description: event.target.value } : item))} />
+          <SolidInput aria-label={`Input ${index + 1} default value`} placeholder="Default value" value={formatDefaultValue(input.defaultValue)} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, defaultValue: event.target.value } : item))} />
           <select aria-label={`Input ${index + 1} data type`} value={input.dataType} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, dataType: event.target.value } : item))}>
             {["string", "number", "integer", "boolean", "date", "datetime", "object", "array"].map((type) => <option key={type} value={type}>{type}</option>)}
           </select>
+          <label className="agent-editor__input-optional"><input type="checkbox" checked={input.optional} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, optional: event.target.checked } : item))} /> Optional</label>
           <button type="button" aria-label={`Remove input ${index + 1}`} onClick={() => setInputs((current) => current.filter((_, i) => i !== index))}><Trash2 size={17} /></button>
         </div>)}</div>}
       {errors.inputs && <small className="agent-editor__error">{errors.inputs}</small>}</section>
