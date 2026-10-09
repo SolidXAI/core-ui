@@ -67,6 +67,7 @@
     "pluralize": "^8.0.0",
     "qs": "^6.13.0",
     "quill": "^2.0.3",
+    "react-diff-viewer-continued": "^3.2.6",
     "react-grid-layout": "^2.2.2",
     "react-range": "^1.10.0",
     "react-resizable": "^3.1.3",
