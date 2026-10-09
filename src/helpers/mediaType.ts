@@ -47,6 +47,18 @@ const getMediaKind = ({ url, fileName, mimeType }: { url?: string; fileName?: st
   return null;
 };
 
+export const getMediaFileName = (file?: any): string => {
+  const explicitName = file?.name || file?.originalFileName || file?.fileName || file?.filename;
+  if (explicitName) {
+    return String(explicitName);
+  }
+
+  const url = file?._full_url || file?.fileUrl || file?.url;
+  const cleanUrl = String(url || "").split("?")[0];
+  const basename = cleanUrl.split("/").pop();
+  return basename || "Uploaded file";
+};
+
 export const getMediaPreviewKind = ({ url, fileName, mimeType}: { url?: string; fileName?: string; mimeType?: string; }): MediaPreviewKind => {
   return getMediaKind({ url, fileName, mimeType }) ?? "file";
 };
