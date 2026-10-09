@@ -815,10 +815,14 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         populateMedia: toPopulateMedia,
         populateGroup: true,
         filters: {
-          [groupByFieldName]: {
-            $in: [groupByField],
-          },
-          ...filters
+          $and: [
+            {
+              [groupByFieldName]: {
+                $in: [groupByField],
+              },
+            },
+            ...(filters?.$and ?? [filters]),
+          ],
         },
         sort: DEFAULT_RECORD_SORT,
       });
@@ -934,6 +938,10 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
     // Add the updated item to the destination
     destinationRecords.splice(destination.index, 0, updatedItem);
+
+    //Updates totalRecords on drag
+    sourceGroup.groupData.meta.totalRecords = Math.max(0,sourceGroup.groupData.meta.totalRecords - 1);
+    destinationGroup.groupData.meta.totalRecords += 1;
 
     // Update the group data
     sourceGroup.groupData.records = sourceRecords;

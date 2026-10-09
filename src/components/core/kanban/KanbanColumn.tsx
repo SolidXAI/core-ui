@@ -47,10 +47,11 @@ interface KanbanColumnProps {
   selectedRecords?: GroupData[];
   onToggleLaneSelection?: (records: GroupData[], selected: boolean) => void;
   onCardSelectionChange?: (record: GroupData, selected: boolean) => void;
+  onBeforeNavigate?: () => void;
 }
 
 // @ts-ignore
-const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction, showArchived, params, handleCustomButtonClick, selectionEnabled = false, selectedRecords = [], onToggleLaneSelection, onCardSelectionChange }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction, showArchived, params, handleCustomButtonClick, selectionEnabled = false, selectedRecords = [], onToggleLaneSelection, onCardSelectionChange, onBeforeNavigate }: KanbanColumnProps) => {
   const selectableRecords = useMemo(
     () => groupData.filter((record: any) => record?.id != null && record?.deletedAt == null),
     [groupData]
@@ -140,7 +141,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
             >
               {groupData.map((data, index) => (
                 // @ts-ignore
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled || Boolean(data?.deletedAt)} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} recordClickAction={recordClickAction} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} onDelete={onDelete} onRecover={onRecover} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick} selectionEnabled={selectionEnabled} selected={selectedIds.has(String(data?.id))} onSelectionChange={onCardSelectionChange} />
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled || Boolean(data?.deletedAt)} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} recordClickAction={recordClickAction} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} onDelete={onDelete} onRecover={onRecover} showArchived={showArchived} params={params} handleCustomButtonClick={handleCustomButtonClick} onBeforeNavigate={onBeforeNavigate} selectionEnabled={selectionEnabled} selected={selectedIds.has(String(data?.id))} onSelectionChange={onCardSelectionChange} />
               ))}
               {asCompatibleReactNode(provided.placeholder)}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&
