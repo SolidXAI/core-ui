@@ -43,13 +43,15 @@ interface KanbanCardProps {
   selectionEnabled?: boolean;
   selected?: boolean;
   onSelectionChange?: (record: Data, selected: boolean) => void;
+  onBeforeNavigate?: () => void;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived, params, handleCustomButtonClick, selectionEnabled = false, selected = false, onSelectionChange }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived, params, handleCustomButtonClick, selectionEnabled = false, selected = false, onSelectionChange, onBeforeNavigate }) => {
   const router = useRouter()
   const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
 
   const persistReturnView = () => {
+    onBeforeNavigate?.();
     storeCurrentModelViewContext();
   };
 

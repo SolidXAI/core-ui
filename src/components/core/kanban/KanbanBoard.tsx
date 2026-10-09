@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
 import KanbanColumn from "./KanbanColumn";
 import { getExtensionComponent } from "../../../helpers/registry";
@@ -31,6 +31,11 @@ const findKanbanCardNode = (nodes: any[] = []): any => {
 
 export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCount, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, onDelete, onRecover, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction, showArchived, params, handleCustomButtonClick, enableCardSelection, selectedRecords, onCardSelectionChange, onToggleLaneSelection }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const restoredScrollKeyRef = useRef<string | null>(null);
+    const pendingScrollFrameRef = useRef<number | null>(null);
+    const restoreScrollFrameRef = useRef<number | null>(null);
+    const navigationStartedRef = useRef(false);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
     const cardNode = findKanbanCardNode(solidKanbanViewMetaData?.solidView?.layout?.children || []);
@@ -49,6 +54,127 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
             ? { type: "missing_widget", cardWidget }
             : null;
 
+    // Keep the board's horizontal and vertical position while opening a card and
+    // returning to the Kanban route. Session storage scopes it to this browser tab
+    // and the complete route, so filters/views do not leak into another board.
+    const scrollStorageKey = typeof window === "undefined"
+        ? null
+        : `solidx:kanban-scroll:${window.location.pathname}${window.location.search}`;
+
+    const saveScrollPosition = useCallback(() => {
+        const scrollContainer = scrollContainerRef.current;
+        if (!scrollContainer || !scrollStorageKey) return;
+
+        try {
+            window.sessionStorage.setItem(scrollStorageKey, JSON.stringify({
+                top: scrollContainer.scrollTop,
+                left: scrollContainer.scrollLeft,
+            }));
+        } catch {
+            // Ignore unavailable session storage.
+        }
+    }, [scrollStorageKey]);
+
+    const handleBeforeNavigate = useCallback(() => {
+        // Card navigation can reset the board before React runs the effect
+        // cleanup. Capture the position synchronously before pushing the form URL.
+        navigationStartedRef.current = true;
+        saveScrollPosition();
+    }, [saveScrollPosition]);
+
+    useEffect(() => {
+        const scrollContainer = scrollContainerRef.current;
+        if (!scrollContainer || !scrollStorageKey || !kanbanViewData?.length) return;
+
+        navigationStartedRef.current = false;
+
+        let savedPosition: { top: number; left: number } | null = null;
+        try {
+            const parsedPosition = JSON.parse(window.sessionStorage.getItem(scrollStorageKey) || "null");
+            if (parsedPosition) {
+                const top = Number(parsedPosition.top);
+                const left = Number(parsedPosition.left);
+                if (Number.isFinite(top) && Number.isFinite(left)) {
+                    savedPosition = { top, left };
+                }
+            }
+        } catch {
+            // Ignore unavailable or malformed session storage entries.
+        }
+
+        const restorePosition = () => {
+            if (restoredScrollKeyRef.current === scrollStorageKey) return true;
+            if (!savedPosition) {
+                restoredScrollKeyRef.current = scrollStorageKey;
+                return true;
+            }
+
+            const contentReady = savedPosition.top <= 0 ||
+                scrollContainer.scrollHeight >= savedPosition.top + scrollContainer.clientHeight;
+            scrollContainer.scrollLeft = savedPosition.left;
+            scrollContainer.scrollTop = contentReady
+                ? savedPosition.top
+                : Math.max(0, scrollContainer.scrollHeight - scrollContainer.clientHeight);
+
+            if (contentReady) {
+                restoredScrollKeyRef.current = scrollStorageKey;
+            }
+            return contentReady;
+        };
+
+        restorePosition();
+        let restoreAttempts = 0;
+        const retryRestore = () => {
+            if (restorePosition() || restoreAttempts++ >= 120) {
+                if (restoredScrollKeyRef.current !== scrollStorageKey) {
+                    restoredScrollKeyRef.current = scrollStorageKey;
+                }
+                return;
+            }
+            restoreScrollFrameRef.current = window.requestAnimationFrame(retryRestore);
+        };
+        restoreScrollFrameRef.current = window.requestAnimationFrame(retryRestore);
+
+        const resizeObserver = typeof ResizeObserver !== "undefined"
+            ? new ResizeObserver(() => {
+                if (restoredScrollKeyRef.current !== scrollStorageKey) {
+                    restorePosition();
+                }
+            })
+            : null;
+        resizeObserver?.observe(scrollContainer);
+        const scrollContent = scrollContainer.querySelector(".solid-kanban-board-scroll-context");
+        if (scrollContent) resizeObserver?.observe(scrollContent);
+
+        const handleScroll = () => {
+            // Do not persist an intermediate clamped position while the board
+            // is still waiting for all cards/lanes to be laid out.
+            if (restoredScrollKeyRef.current !== scrollStorageKey) return;
+            if (pendingScrollFrameRef.current !== null) return;
+            pendingScrollFrameRef.current = window.requestAnimationFrame(() => {
+                pendingScrollFrameRef.current = null;
+                saveScrollPosition();
+            });
+        };
+
+        scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+        return () => {
+            if (restoreScrollFrameRef.current !== null) {
+                window.cancelAnimationFrame(restoreScrollFrameRef.current);
+                restoreScrollFrameRef.current = null;
+            }
+            if (pendingScrollFrameRef.current !== null) {
+                window.cancelAnimationFrame(pendingScrollFrameRef.current);
+                pendingScrollFrameRef.current = null;
+            }
+            if (!navigationStartedRef.current && restoredScrollKeyRef.current === scrollStorageKey) {
+                saveScrollPosition();
+            }
+            resizeObserver?.disconnect();
+            scrollContainer.removeEventListener("scroll", handleScroll);
+        };
+    }, [kanbanViewData?.length, scrollStorageKey, saveScrollPosition]);
+
     // Toggle fold (not yet implemented)
     const toggleFold = (status: string): void => {
         setFoldedStates((prevFoldedStates) => ({
@@ -60,7 +186,7 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
     // Render the Kanban board
     return (
         //@ts-ignore
-        <div className="solid-kanban-board-wrapper">
+        <div ref={scrollContainerRef} className="solid-kanban-board-wrapper">
             {kanbanCardConfigurationIssue ? (
                 <div className="solid-kanban-config-placeholder-container">
                     <div className="solid-kanban-config-placeholder-panel">
@@ -155,6 +281,7 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
                                 recordClickAction={recordClickAction}
                                 cardNode={cardNode}
                                 DynamicCardWidget={DynamicCardWidget}
+                                onBeforeNavigate={handleBeforeNavigate}
                                 showArchived={showArchived}
                                 params={params}
                                 handleCustomButtonClick={handleCustomButtonClick}
