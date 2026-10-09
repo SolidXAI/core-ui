@@ -1109,6 +1109,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     try {
       await triggerRecoverSolidEntities(recoverList).unwrap();
       setRecoverDialogVisible(false);
+      setSelectedRecords([]);
+      setSelectedRecoverRecords([]);
       await setQueryString();
     } catch {
       setRecoverDialogVisible(false);
@@ -1158,6 +1160,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       await deleteManySolidEntities(deleteList).unwrap();
       dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
       setDialogVisible(false);
+      setSelectedRecords([]);
+      setSelectedRecoverRecords([]);
       await setQueryString();
     } catch (error: any) {
       dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
