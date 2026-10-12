@@ -23,7 +23,6 @@ const FILE_TYPE_ICON_MAP: Record<string, FileTypeIconTone> = {
     pptx: { bg: "#EA580C", corner: "#FDBA74" },
     zip: { bg: "#7C3AED", corner: "#C4B5FD" },
     rar: { bg: "#7C3AED", corner: "#C4B5FD" },
-    "7z": { bg: "#7C3AED", corner: "#C4B5FD" },
     webm: { bg: "#4F46E5", corner: "#A5B4FC" },
     ogg: { bg: "#DB2777", corner: "#F9A8D4" },
     wav: { bg: "#DB2777", corner: "#F9A8D4" }
@@ -46,6 +45,8 @@ export const getFileTypeIconTone = (fileUrl: string, fileName?: string) => {
 
 export const SolidFileTypeIcon = ({ fileUrl, fileName, size = 24, className }: { fileUrl: string; fileName?: string; size?: number; className?: string }) => {
     const icon = getFileTypeIconTone(fileUrl, fileName);
+    const extension = getFileExtension(fileName, fileUrl);
+    const extensionLabel = (extension || "file").slice(0,4).toUpperCase();
 
     return (
         <svg
@@ -67,6 +68,18 @@ export const SolidFileTypeIcon = ({ fileUrl, fileName, size = 24, className }: {
             />
             <path d="M9.5 12.25h9.5M9.5 15.25h12" stroke="rgba(255,255,255,0.42)" strokeWidth="1.4" strokeLinecap="round" />
             <rect x="7.5" y="18" width="17" height="7.5" rx="1.5" fill="rgba(255,255,255,0.2)" />
+            <text
+                x="16"
+                y="23.35"
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.92)"
+                fontFamily="Arial, sans-serif"
+                fontSize="5.2"
+                fontWeight="700"
+                letterSpacing="0.15"
+            >
+                {extensionLabel}
+            </text>
         </svg>
     );
 };
