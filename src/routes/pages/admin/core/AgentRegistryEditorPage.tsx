@@ -40,7 +40,7 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 const BUILT_IN_PROVIDER_TYPES = ["openai", "anthropic"];
 
-type AiProviderConfig = { type?: string; apiKey?: unknown };
+type AiProviderConfig = { type?: string; apiKey?: unknown; region?: string };
 type AiModelConfig = { providerId?: string; model?: string };
 
 /**
@@ -106,10 +106,11 @@ function SearchableSelect({ value, options, placeholder, disabled, onChange }: {
   />;
 }
 
-function ModelPicker({ value, options, providers, onChange }: {
+function ModelPicker({ value, options, providers, providerConfig, onChange }: {
   value: string;
   options: ProviderModelOption[];
   providers: { label: string; value: string }[];
+  providerConfig: Record<string, AiProviderConfig>;
   onChange: (value: string) => void;
 }) {
   const separator = value.indexOf(":");
@@ -123,6 +124,8 @@ function ModelPicker({ value, options, providers, onChange }: {
     <div className="agent-editor__field"><span>Provider *</span>
       <SearchableSelect value={provider} options={providers} placeholder="Select provider"
         onChange={(next) => { setOtherSelected(false); onChange(`${next}:`); }} />
+      {providerConfig[provider]?.type === "bedrock" && providerConfig[provider]?.region &&
+        <small><em>Region: {providerConfig[provider].region}</em></small>}
     </div>
     <div className="agent-editor__field"><span>Model *</span>
       <SearchableSelect value={showOther ? OTHER_MODEL : model}
@@ -609,7 +612,7 @@ export function AgentRegistryEditorPage() {
       {errors.inputs && <small className="agent-editor__error">{errors.inputs}</small>}</section>
       <section className="agent-editor__section agent-editor__models"><h2>Models</h2><p>Choose a configured provider and model for each role. Select Other to enter a model ID manually.</p><div className="agent-editor__grid">
         {([["Reasoning model", reasoningModelKey, setReasoningModelKey, "reasoningModelKey"], ["Fast model", fastModelKey, setFastModelKey, "fastModelKey"]] as const).map(([label, value, setter, key]) =>
-          <div className="agent-editor__field" key={key}><span>{label}</span><ModelPicker value={value} options={modelOptions} providers={providerOptions} onChange={setter} />
+          <div className="agent-editor__field" key={key}><span>{label}</span><ModelPicker value={value} options={modelOptions} providers={providerOptions} providerConfig={aiConfig.providers ?? {}} onChange={setter} />
             {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</div>)}
       </div>{settingsError ? <p className="agent-editor__hint">Settings could not be loaded. Try refreshing this page.</p>
         : !providerOptions.length && <p className="agent-editor__hint">No enabled providers are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
