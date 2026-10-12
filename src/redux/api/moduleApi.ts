@@ -192,6 +192,13 @@ export const modulesApi = createApi({
             }),
             transformResponse: (response: any) => response?.data ?? response,
         }),
+        restoreModulePackageImport: builder.mutation({
+            query: ({ transactionKey }) => ({
+                url: `/module-packages/import/${transactionKey}/restore`,
+                method: 'POST',
+            }),
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
         dismissModulePackageImport: builder.mutation({
             query: ({ transactionKey }) => ({
                 url: `/module-packages/import/${transactionKey}/dismiss`,
@@ -200,9 +207,11 @@ export const modulesApi = createApi({
             transformResponse: (response: any) => response?.data ?? response,
         }),
         exportModulePackage: builder.mutation({
-            query: ({ moduleName }) => ({
+            // bump: 'none' | 'patch' | 'minor' | 'major'; version sets an explicit (e.g. initial) version.
+            query: ({ moduleName, bump, version }: { moduleName: string; bump?: string; version?: string }) => ({
                 url: `/module-packages/export/${moduleName}`,
-                method: 'GET',
+                method: 'POST',
+                body: { bump: bump ?? 'none', ...(version ? { version } : {}) },
                 responseHandler: async (response) => response.blob(),
                 cache: 'no-store',
             }),
@@ -247,6 +256,7 @@ export const {
     useClearModulePackageRuntimeMutation,
     useRunModulePackageBuildMutation,
     useRunModulePackageSeedMutation,
+    useRestoreModulePackageImportMutation,
     useDismissModulePackageImportMutation,
     useExportModulePackageMutation,
 } = modulesApi
