@@ -67,11 +67,11 @@ const MediaPreview = ({
         if (previewKind === "audio") {
             return (
                 <div
-                    className="flex items-center justify-center rounded bg-gray-100 shadow-md"
-                    style={{ width: 40, height: 40 }}
+                    className="flex items-center justify-center rounded shadow-md"
+                    style={{ width: 40, height: 40, background: "color-mix(in srgb, var(--muted) 18%, var(--card) 82%)" }}
                     onClick={handleClick}
                 >
-                    <Volume2 size={18} className="text-gray-600" />
+                    <Volume2 size={18} style={{ color: "var(--muted-foreground)" }} />
                 </div>
             );
         }

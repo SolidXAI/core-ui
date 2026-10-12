@@ -22,7 +22,7 @@ export const FileReaderExt = ({ fileDetails }: { fileDetails: any }) => {
     }
 
     if (previewKind === "audio") {
-        return <div aria-label={fileName} style={{ width: 40, height: 40, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, background: "#f3f4f6" }}><Volume2 size={18} className="text-gray-600" /></div>;
+        return <div aria-label={fileName} style={{ width: 40, height: 40, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, background: "color-mix(in srgb, var(--muted) 18%, var(--card) 82%)" }}><Volume2 size={18} style={{ color: "var(--muted-foreground)" }} /></div>;
     }
 
     return (
