@@ -1,6 +1,5 @@
 import React from "react";
-import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronDown, Ellipsis, ExternalLink, Eye, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -15,8 +14,8 @@ import { AgentSessionsPanel } from "../../../../components/core/extension/solid-
 import { AgentProcessesPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentProcessesPanel";
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
-import { ALLOWED_MODELS_BY_PROVIDER, type AllowedModelProvider } from "../../../../constants/allowed-ai-models";
-import { SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuTrigger, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { getModelsDevModels, useModelsDevCatalog } from "../../../../hooks/useModelsDevModels";
+import { SolidAutocomplete, SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuTrigger, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
 import { SolidAgentMarkdown } from "../../../../components/core/solid-agent/SolidAgentMarkdown";
 import { AgentEmbeddingPanel } from "../../../../components/core/solid-agent/embed/AgentEmbeddingPanel";
@@ -32,110 +31,110 @@ type Agent = Item & {
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
   tags?: AgentHubTag[];
 };
-type ProviderModelOption = { provider: AllowedModelProvider; model: string; value: string };
+type ProviderModelOption = { provider: string; providerLabel: string; model: string; value: string; note?: string };
 
-const PROVIDER_LABELS: Record<AllowedModelProvider, string> = {
+const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
   openai: "OpenAI",
   openrouter: "OpenRouter",
 };
+const BUILT_IN_PROVIDER_TYPES = ["openai", "anthropic"];
 
-function ModelPicker({ value, options, placeholder, onChange }: {
+type AiProviderConfig = { type?: string; apiKey?: unknown };
+type AiModelConfig = { providerId?: string; model?: string };
+
+/**
+ * Build picker options from the AI settings: every provider with an API key, its models from
+ * models.dev, plus the models chosen in settings and any already-saved values for this agent.
+ */
+function buildModelOptions(
+  providers: Record<string, AiProviderConfig>,
+  settingsModels: Record<string, AiModelConfig | undefined>,
+  catalog: Parameters<typeof getModelsDevModels>[0],
+  savedValues: string[],
+): ProviderModelOption[] {
+  const enabled = Object.entries(providers)
+    .filter(([, entry]) => typeof entry?.apiKey === "string" && entry.apiKey.trim().length > 0);
+  const options: ProviderModelOption[] = [];
+  const seen = new Set<string>();
+  const add = (provider: string, model: string, note?: string) => {
+    const value = `${provider}:${model}`;
+    if (!model || seen.has(value)) return;
+    seen.add(value);
+    options.push({ provider, providerLabel: PROVIDER_LABELS[provider] ?? provider, model, value, note });
+  };
+  for (const [provider, entry] of enabled) {
+    for (const [role, config] of Object.entries(settingsModels)) {
+      if (config?.providerId === provider && config.model) add(provider, config.model, `${role} model in AI settings`);
+    }
+    for (const value of savedValues) {
+      if (value.startsWith(`${provider}:`)) add(provider, value.slice(provider.length + 1), "currently saved");
+    }
+    const type = entry.type && BUILT_IN_PROVIDER_TYPES.includes(entry.type) ? entry.type : undefined;
+    for (const model of getModelsDevModels(catalog, [provider, type])) add(provider, model.id);
+  }
+  return options;
+}
+
+const OTHER_MODEL = "__other_model__";
+
+function SearchableSelect({ value, options, placeholder, disabled, onChange }: {
   value: string;
-  options: ProviderModelOption[];
+  options: { label: string; value: string }[];
   placeholder: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
 }) {
-  const rootRef = React.useRef<HTMLDivElement>(null);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-  const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
-  const selected = options.find((option) => option.value === value);
-  const filtered = options.filter((option) =>
-    `${PROVIDER_LABELS[option.provider]} ${option.model}`.toLowerCase().includes(query.trim().toLowerCase()));
-  const groups = (Object.keys(ALLOWED_MODELS_BY_PROVIDER) as AllowedModelProvider[])
-    .map((provider) => ({ provider, options: filtered.filter((option) => option.provider === provider) }))
-    .filter((group) => group.options.length > 0);
+  const selectedLabel = options.find((option) => option.value === value)?.label;
+  const selected = React.useMemo(() => selectedLabel ? { label: selectedLabel, value } : null, [selectedLabel, value]);
+  const suggestions = options.filter((option) =>
+    `${option.label} ${option.value}`.toLowerCase().includes(query.trim().toLowerCase()));
 
-  React.useEffect(() => {
-    if (!open) return;
-    const positionMenu = () => {
-      const bounds = rootRef.current?.getBoundingClientRect();
-      if (!bounds) return;
-      const gap = 6;
-      const maxMenuHeight = Math.min(288, window.innerHeight - 24);
-      const spaceBelow = window.innerHeight - bounds.bottom - gap - 12;
-      const spaceAbove = bounds.top - gap - 12;
-      const openAbove = spaceBelow < Math.min(220, maxMenuHeight) && spaceAbove > spaceBelow;
-      const availableHeight = Math.max(120, Math.min(maxMenuHeight, openAbove ? spaceAbove : spaceBelow));
-      setMenuStyle({
-        position: "fixed",
-        left: bounds.left,
-        width: bounds.width,
-        maxHeight: availableHeight,
-        ...(openAbove
-          ? { bottom: window.innerHeight - bounds.top + gap }
-          : { top: bounds.bottom + gap }),
-      });
-    };
-    positionMenu();
-    window.addEventListener("resize", positionMenu);
-    window.addEventListener("scroll", positionMenu, true);
-    const handleOutsideClick = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      window.removeEventListener("resize", positionMenu);
-      window.removeEventListener("scroll", positionMenu, true);
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [open]);
+  return <SolidAutocomplete
+    className="solid-standard-autocomplete w-full"
+    value={selected}
+    suggestions={suggestions}
+    completeMethod={({ query: next }) => setQuery(next)}
+    onChange={(event) => onChange(event.value?.value ?? "")}
+    field="label"
+    placeholder={placeholder}
+    disabled={disabled}
+    dropdown
+    forceSelection
+    portal
+  />;
+}
 
-  const choose = (option: ProviderModelOption) => {
-    onChange(option.value);
-    setQuery("");
-    setOpen(false);
-  };
-  let flatIndex = -1;
+function ModelPicker({ value, options, providers, onChange }: {
+  value: string;
+  options: ProviderModelOption[];
+  providers: { label: string; value: string }[];
+  onChange: (value: string) => void;
+}) {
+  const separator = value.indexOf(":");
+  const provider = separator < 0 ? "" : value.slice(0, separator);
+  const model = separator < 0 ? "" : value.slice(separator + 1);
+  const availableModels = options.filter((option) => option.provider === provider);
+  const [otherSelected, setOtherSelected] = React.useState(false);
+  const showOther = !!provider && (otherSelected || (!!model && !availableModels.some((option) => option.model === model)));
 
-  return <div className="agent-editor__model-picker" ref={rootRef}>
-    <div className="agent-editor__model-control">
-      <input
-        role="combobox"
-        aria-expanded={open}
-        aria-autocomplete="list"
-        aria-label={placeholder}
-        placeholder={selected ? `${PROVIDER_LABELS[selected.provider]} / ${selected.model}` : value || placeholder}
-        value={open ? query : ""}
-        onFocus={() => { setQuery(""); setActiveIndex(0); setOpen(true); }}
-        onChange={(event) => { setQuery(event.target.value); setActiveIndex(0); setOpen(true); }}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") { setOpen(false); setQuery(""); }
-          if (event.key === "ArrowDown") { event.preventDefault(); setOpen(true); setActiveIndex((index) => Math.min(index + 1, filtered.length - 1)); }
-          if (event.key === "ArrowUp") { event.preventDefault(); setActiveIndex((index) => Math.max(index - 1, 0)); }
-          if (event.key === "Enter" && open && filtered[activeIndex]) { event.preventDefault(); choose(filtered[activeIndex]); }
-        }}
-      />
-      <button type="button" aria-label={open ? "Close model options" : "Show model options"} onMouseDown={(event) => event.preventDefault()} onClick={() => { setOpen((current) => !current); setQuery(""); }}><ChevronDown size={16} /></button>
+  return <div className="agent-editor__stack">
+    <div className="agent-editor__field"><span>Provider *</span>
+      <SearchableSelect value={provider} options={providers} placeholder="Select provider"
+        onChange={(next) => { setOtherSelected(false); onChange(`${next}:`); }} />
     </div>
-    {open && createPortal(<div ref={menuRef} className="agent-editor__model-menu" style={menuStyle} role="listbox">
-      {!groups.length ? <div className="agent-editor__model-empty">{options.length ? "No matching models." : "No enabled providers. Add an API key in AI Settings."}</div>
-        : groups.map((group) => <section className="agent-editor__model-group" key={group.provider}>
-          <h3>{PROVIDER_LABELS[group.provider]}</h3>
-          {group.options.map((option) => {
-            flatIndex += 1;
-            const index = flatIndex;
-            return <button type="button" role="option" aria-selected={option.value === value} className={`agent-editor__model-option${index === activeIndex ? " is-active" : ""}`}
-              key={option.value} onMouseDown={(event) => event.preventDefault()} onMouseEnter={() => setActiveIndex(index)} onClick={() => choose(option)}>
-              <span>{option.model}</span><small>{option.provider}:{option.model}</small>
-            </button>;
-          })}
-        </section>)}
-    </div>, document.body)}
+    <div className="agent-editor__field"><span>Model *</span>
+      <SearchableSelect value={showOther ? OTHER_MODEL : model}
+        options={[...availableModels.map((option) => ({ label: option.model, value: option.model })), { label: "Other", value: OTHER_MODEL }]}
+        placeholder="Select model" disabled={!provider}
+        onChange={(next) => {
+          setOtherSelected(next === OTHER_MODEL);
+          onChange(`${provider}:${next === OTHER_MODEL ? "" : next}`);
+        }} />
+      {showOther && <SolidInput className="w-full" aria-label="Custom model ID" placeholder="Enter model ID" value={model}
+        onChange={(event) => onChange(`${provider}:${event.target.value}`)} />}
+    </div>
   </div>;
 }
 
@@ -442,18 +441,26 @@ export function AgentRegistryEditorPage() {
   }, [skills.refetch, tools.refetch]);
 
   const configValue = getSettingsMap(settings).solidXGenAiCodeBuilderConfig;
-  let enabledProviders: Record<string, { apiKey?: unknown }> = {};
+  let aiConfig: { providers?: Record<string, AiProviderConfig>; models?: { default?: AiModelConfig; main?: AiModelConfig; fast?: AiModelConfig } } = {};
   try {
-    const config = typeof configValue === "string" ? JSON.parse(configValue) : configValue;
-    enabledProviders = config?.providers ?? {};
+    aiConfig = (typeof configValue === "string" ? JSON.parse(configValue) : configValue) ?? {};
   } catch { /* Invalid configuration has no enabled providers. */ }
-  const modelOptions = (Object.keys(ALLOWED_MODELS_BY_PROVIDER) as AllowedModelProvider[])
-    .filter((provider) => typeof enabledProviders[provider]?.apiKey === "string" && (enabledProviders[provider].apiKey as string).trim().length > 0)
-    .flatMap((provider) => ALLOWED_MODELS_BY_PROVIDER[provider].map((model) => ({
-      provider,
-      model,
-      value: `${provider}:${model}`,
-    })));
+  const { catalog: modelsCatalog } = useModelsDevCatalog();
+  const savedModelKeys = [record?.reasoningModelKey, record?.fastModelKey].filter((key): key is string => !!key);
+  const modelOptions = buildModelOptions(
+    aiConfig.providers ?? {},
+    { Reasoning: aiConfig.models?.default ?? aiConfig.models?.main, Fast: aiConfig.models?.fast },
+    modelsCatalog,
+    savedModelKeys,
+  );
+  const providerOptions = Object.entries(aiConfig.providers ?? {})
+    .filter(([, entry]) => typeof entry?.apiKey === "string" && entry.apiKey.trim().length > 0)
+    .map(([provider]) => ({ label: modelsCatalog?.[provider]?.name ?? PROVIDER_LABELS[provider] ?? provider, value: provider }));
+  const isValidModelKey = (value: string) => {
+    const separator = value.indexOf(":");
+    return separator > 0 && providerOptions.some((provider) => provider.value === value.slice(0, separator)) &&
+      !!value.slice(separator + 1).trim();
+  };
   const toggle = (setter: React.Dispatch<React.SetStateAction<number[]>>, value: number) =>
     setter((current) => current.includes(value) ? current.filter((id) => id !== value) : [...current, value]);
 
@@ -483,8 +490,8 @@ export function AgentRegistryEditorPage() {
     if (!name.trim()) next.name = "Name is required.";
     if (!title.trim()) next.title = "Title is required.";
     if (!systemPrompt.trim()) next.systemPrompt = "Persona instructions are required.";
-    if (!modelOptions.some((option) => option.value === reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
-    if (!modelOptions.some((option) => option.value === fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
+    if (!isValidModelKey(reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
+    if (!isValidModelKey(fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
     if (inputs.some((input) => !input.name.trim() || !input.dataType)) next.inputs = "Each input needs a name and data type.";
     if (new Set(inputs.map((input) => input.name.trim().toLowerCase())).size !== inputs.length) next.inputs = "Input names must be unique.";
     if (stepLimit < 1 || turnStepLimit < 1 || costLimit < 0) next.limits = "Step limits must be positive and cost limit cannot be negative.";
@@ -600,12 +607,12 @@ export function AgentRegistryEditorPage() {
           <button type="button" aria-label={`Remove input ${index + 1}`} onClick={() => setInputs((current) => current.filter((_, i) => i !== index))}><Trash2 size={17} /></button>
         </div>)}</div>}
       {errors.inputs && <small className="agent-editor__error">{errors.inputs}</small>}</section>
-      <section className="agent-editor__section"><h2>Models</h2><p>Choose any configured provider and model pair for each role. Both lists use the models enabled in AI settings.</p><div className="agent-editor__grid">
+      <section className="agent-editor__section agent-editor__models"><h2>Models</h2><p>Choose a configured provider and model for each role. Select Other to enter a model ID manually.</p><div className="agent-editor__grid">
         {([["Reasoning model", reasoningModelKey, setReasoningModelKey, "reasoningModelKey"], ["Fast model", fastModelKey, setFastModelKey, "fastModelKey"]] as const).map(([label, value, setter, key]) =>
-          <label className="agent-editor__field" key={key}><span>{label} *</span><ModelPicker value={value} options={modelOptions} placeholder="Search providers and models…" onChange={(next) => setter(next)} />
-            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</label>)}
+          <div className="agent-editor__field" key={key}><span>{label}</span><ModelPicker value={value} options={modelOptions} providers={providerOptions} onChange={setter} />
+            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</div>)}
       </div>{settingsError ? <p className="agent-editor__hint">Settings could not be loaded. Try refreshing this page.</p>
-        : !modelOptions.length && <p className="agent-editor__hint">No configured models are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
+        : !providerOptions.length && <p className="agent-editor__hint">No enabled providers are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
       <section className="agent-editor__section agent-editor__workflow" aria-labelledby="agent-lifecycle-title">
         <div className="agent-editor__section-head"><div><h2 id="agent-lifecycle-title">Agent lifecycle</h2><p>Track this agent through its available stages. Select a stage to update its status.</p></div><div className="agent-editor__workflow-meta">{record?.configVersion != null && <span className="agent-editor__config-version" aria-label={`Configuration version ${record.configVersion}`}>Config v{record.configVersion}</span>}<SolidWorkflowStatusPill label={agentStatus} /></div></div>
         <div className="agent-editor__workflow-stages" aria-label={`Current agent stage: ${agentStatus}`}>
