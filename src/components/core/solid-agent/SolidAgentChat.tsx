@@ -313,7 +313,7 @@ export function SolidAgentChat({
                         <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" disabled={agent.working} onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) { setCollectedInputs(null); setInputError(""); } }}>
                             <Plus size={16} />
                         </button>
-                        {!externalEmbed && <button
+                        <button
                             type="button"
                             className={styles.iconBtn}
                             title="History"
@@ -322,7 +322,7 @@ export function SolidAgentChat({
                             onClick={() => setShowHistory((v) => !v)}
                         >
                             <History size={16} />
-                        </button>}
+                        </button>
                         {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}

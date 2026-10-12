@@ -7,7 +7,7 @@ import { formatChatTime } from "./chatWidgetUtils";
  * Default widget for `LlmComplete` / streamed `LlmToken` / `TurnCompleteEvent` text: the agent's
  * reply as markdown in a bordered bubble, with a blinking cursor while it streams.
  */
-export const DefaultAssistantMessageChatWidget = ({ eventData, live, timestamp }: SolidChatWidgetProps) => {
+export const DefaultAssistantMessageChatWidget = ({ eventData, live, timestamp, showMessageMeta = true }: SolidChatWidgetProps) => {
     const content = String(eventData.content ?? "");
     return (
         <div className={styles.BubbleGroup}>
@@ -15,10 +15,12 @@ export const DefaultAssistantMessageChatWidget = ({ eventData, live, timestamp }
                 <SolidAgentMarkdown text={content} />
                 {live && <span className={styles.StreamingCursor} />}
             </div>
-            <div className={`${styles.BubbleMeta} ${styles.BubbleMetaAssistant}`}>
-                <span className={styles.Timestamp}>{formatChatTime(timestamp)}</span>
-                <SolidAgentMessageCopyButton text={content} />
-            </div>
+            {showMessageMeta && (
+                <div className={`${styles.BubbleMeta} ${styles.BubbleMetaAssistant}`}>
+                    <span className={styles.Timestamp}>{formatChatTime(timestamp)}</span>
+                    <SolidAgentMessageCopyButton text={content} />
+                </div>
+            )}
         </div>
     );
 };

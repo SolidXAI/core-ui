@@ -41,24 +41,14 @@
 .agent-editor__empty { padding:2rem 1rem; border:1px dashed var(--surface-border,var(--border)); border-radius:.65rem; text-align:center; color:var(--text-color-secondary,var(--muted-foreground)); }
 .agent-editor__empty button,.agent-editor__new-link { display:inline-flex; align-items:center; gap:.35rem; margin-left:.3rem; border:0; background:none; color:var(--primary-color,var(--primary)); cursor:pointer; text-decoration:none; font:inherit; font-weight:600; }
 .agent-editor__inputs { display:flex; flex-direction:column; gap:.55rem; }
-.agent-editor__input-row { display:grid; grid-template-columns:1fr 1.5fr 1fr 8rem 7rem 2.5rem; gap:.5rem; align-items:center; }
+.agent-editor__input-row { display:grid; grid-template-columns:1fr 1.5fr 1fr 8rem 7rem 2.5rem; gap:.5rem; align-items:center; padding:.75rem; border:1px solid var(--surface-border,var(--border)); border-radius:.6rem; }
 .agent-editor__input-optional { display:flex; align-items:center; gap:.35rem; font-size:.8rem; white-space:nowrap; }
 .agent-editor__input-row>button,.agent-editor__linked-card>button { display:grid; place-items:center; min-height:2.5rem; border:0; border-radius:.4rem; background:transparent; color:var(--text-color-secondary,var(--muted-foreground)); cursor:pointer; }
 .agent-editor__input-row>button:hover,.agent-editor__linked-card>button:hover { color:#dc2626; }
 .agent-editor__error { color:#dc2626!important; }
 .agent-editor__hint { color:var(--text-color-secondary,var(--muted-foreground)); }
-.agent-editor__model-picker { position:relative; width:100%; min-width:0; font-weight:400; }
-.agent-editor__model-control { display:flex; align-items:center; min-height:2.5rem; border:1px solid var(--surface-border,var(--border)); border-radius:.5rem; background:var(--surface-ground,var(--background)); }
-.agent-editor__model-control:focus-within { outline:2px solid color-mix(in srgb,var(--primary-color,var(--primary)) 35%,transparent); outline-offset:1px; }
-.agent-editor__model-control input { width:100%; min-width:0; padding:.55rem .7rem; border:0; outline:0; background:transparent; color:inherit; font:inherit; }
-.agent-editor__model-control input::placeholder { color:var(--text-color,var(--foreground)); opacity:1; }
-.agent-editor__model-control>button { display:grid; place-items:center; width:2.5rem; height:2.4rem; flex:0 0 auto; border:0; background:transparent; color:var(--text-color-secondary,var(--muted-foreground)); cursor:pointer; }
-.agent-editor__model-menu { z-index:1000; overflow:auto; padding:.35rem; border:1px solid var(--surface-border,var(--border)); border-radius:.6rem; background:var(--surface-card,var(--card)); box-shadow:0 10px 26px #0002; }
-.agent-editor__model-group h3 { position:sticky; top:-.35rem; z-index:1; margin:0; padding:.45rem .6rem; border-bottom:1px solid var(--surface-border,var(--border)); background:var(--surface-card,var(--card)); color:var(--text-color-secondary,var(--muted-foreground)); font-size:.72rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
-.agent-editor__model-option { display:flex; flex-direction:column; align-items:flex-start; width:calc(100% - .55rem); margin-left:.55rem; padding:.48rem .6rem; border:0; border-radius:.35rem; background:transparent; color:inherit; text-align:left; cursor:pointer; font:inherit; }
-.agent-editor__model-option:hover,.agent-editor__model-option.is-active { background:var(--surface-hover,#f2f3f4); }
-.agent-editor__model-option small { margin-top:.1rem; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.72rem; }
-.agent-editor__model-empty { padding:.8rem; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.85rem; }
+.agent-editor__models .solid-autocomplete,.agent-editor__models .solid-input { font-weight:400; }
+.agent-editor__models .agent-editor__field>.solid-input { margin-top:.25rem; }
 .agent-editor__test-dialog-overlay { z-index:1200!important; }
 .agent-editor__test-dialog { z-index:1201!important; gap:0; }
 .agent-editor__test-dialog-body { flex:1 1 auto; min-height:0; overflow:hidden; }
