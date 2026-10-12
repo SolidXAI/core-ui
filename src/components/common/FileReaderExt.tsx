@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Volume2 } from "lucide-react";
 import { SolidFileTypeIcon } from '../../helpers/fileTypeIcon';
-import { getMediaFileName, getMediaPreviewKind } from '../../helpers/mediaType';
+import { getMediaPreviewKind } from '../../helpers/mediaType';
 
 export const FileReaderExt = ({ fileDetails }: { fileDetails: any }) => {
     const [isPreviewBroken, setIsPreviewBroken] = useState(false);
     const fileUrl = fileDetails?.fileUrl || fileDetails?._full_url;
-    const fileName = getMediaFileName(fileDetails);
+    const fileName = fileDetails?.name || fileDetails?.originalFileName || "Uploaded file";
     const previewKind = getMediaPreviewKind({
         url: fileUrl,
         fileName,

@@ -8,7 +8,7 @@ import { getExtensionComponent } from '../../../../helpers/registry';
 import { FileReaderExt } from '../../../../components/common/FileReaderExt';
 import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle, SolidIcon } from "../../../shad-cn-ui";
 import { SolidFileTypeIcon } from '../../../../helpers/fileTypeIcon';
-import { getMediaFileName, getMediaPreviewKind, isLightboxMediaKind, type MediaPreviewKind } from '../../../../helpers/mediaType';
+import { getMediaPreviewKind, isLightboxMediaKind, type MediaPreviewKind } from '../../../../helpers/mediaType';
 import { openMediaInNewTab } from '../../../../helpers/mediaUrl';
 import { downloadMediaFile } from '../../../../helpers/downloadMediaFile';
 import styles from "../../form/fields/solidFields.module.css";
@@ -135,7 +135,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
     const isArchivedRecord = rowData?.deletedAt !== null && rowData?.deletedAt !== undefined;
 
     const fullrecord = rowData._media[fieldMetadata.name]?.map((file: any) => ({
-        name: getMediaFileName(file),
+        name: file.originalFileName,
         type: file.mimeType,
         size: file.fileSize,
         id: file.id,
@@ -171,7 +171,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
     const renderMediaFileCard = (file: any, className = "") => (
         <div className={`${styles.mediaAttachmentCard} ${className}`.trim()}>
-            <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+            <div className={`${styles.mediaAttachmentRow} flex items-center gap-2`}>
                 <FileReaderExt fileDetails={file} />
                 <div className={`${styles.mediaAttachmentMeta} w-full`}>
                     <div className="flex items-start justify-between gap-4">

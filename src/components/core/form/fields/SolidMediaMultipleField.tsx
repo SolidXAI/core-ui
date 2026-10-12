@@ -24,7 +24,7 @@ import getAcceptedFileTypes, { getAllowedMediaExtensionsErrorMessage } from "../
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { openMediaInNewTab } from "../../../../helpers/mediaUrl";
-import { getMediaFileName, getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
+import { getMediaPreviewKind, isLightboxMediaKind } from "../../../../helpers/mediaType";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
@@ -209,7 +209,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     const fileUrl = URL.createObjectURL(file);
                     objectUrls.push(fileUrl);
                     return {
-                        name: getMediaFileName(file),
+                        name: file.name,
                         type: file.type,
                         size: file.size,
                         mediaId: null,
@@ -224,7 +224,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 }
 
                 return {
-                    name: getMediaFileName(file),
+                    name: file.originalFileName,
                     type: file.mimeType,
                     size: file.fileSize,
                     mediaId: getPersistedMediaId(file),
@@ -412,7 +412,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             </div>
             {fileDetails.length > 0 &&
                 <div className={`${styles.mediaAttachmentCard} mt-4`}>
-                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                    <div className={`${styles.mediaAttachmentRow} flex items-center gap-2`}>
                         <FileReaderExt fileDetails={fileDetails[0]} />
                         <div className={`${styles.mediaAttachmentMeta} w-full`}>
                             <div className="flex items-start justify-between gap-4">
@@ -486,7 +486,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         return (
                             <div key={fileId} className={index === fileDetails.length - 1 ? "" : "mb-3"}>
                                 <div className={styles.mediaAttachmentCard}>
-                                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                                    <div className={`${styles.mediaAttachmentRow} flex items-center gap-2`}>
                                         <FileReaderExt fileDetails={file} />
                                         <div className={`${styles.mediaAttachmentMeta} w-full`}>
                                             <div className="flex items-start justify-between gap-4">
@@ -592,7 +592,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                     const fileUrl = URL.createObjectURL(file);
                     objectUrls.push(fileUrl);
                     return {
-                        name: getMediaFileName(file),
+                        name: file.name,
                         type: file.type,
                         size: file.size,
                         id: `${file.name}-${file.size}`,
@@ -606,7 +606,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                 }
 
                 return {
-                    name: getMediaFileName(file),
+                    name: file.originalFileName,
                     type: file.mimeType,
                     size: file.fileSize,
                     id: file.id,
@@ -646,7 +646,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
 
     const renderMediaFileCard = (file: { name: string; type: string; size: number; id: number | string; fileUrl: string }, className = "") => (
         <div className={`${styles.mediaAttachmentCard} ${className}`.trim()}>
-            <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+            <div className={`${styles.mediaAttachmentRow} flex items-center gap-2`}>
                 <FileReaderExt fileDetails={file} />
                 <div className={`${styles.mediaAttachmentMeta} w-full`}>
                     <div className="flex items-start justify-between gap-4">
