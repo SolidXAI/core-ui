@@ -178,6 +178,73 @@ export const resolveRetainedModelViewRoute = (target: string): string => {
   return storedRoute || target;
 };
 
+
+const MENU_CONTEXT_KEYS = ["menuItemId", "menuItemName", "actionId", "actionName"] as const;
+const MODEL_ROUTE_REGEX = /^\/admin\/core\/[^/]+\/[^/]+\/(?:list|tree|kanban|card|form)(?:\/|$)/;
+const MODEL_KEY_REGEX = /^(\/admin\/core\/[^/]+\/[^/]+)/;
+
+const getModelRouteKey = (pathname: string): string | null =>
+  pathname.match(MODEL_KEY_REGEX)?.[1] || null;
+
+// Forms may not contain menu IDs yet. Use the current URL first, then the
+// last model view saved before opening the form as a backwards-compatible fallback.
+export const getMenuContextForActiveRoute = (
+  currentPathname: string,
+  currentSearchParams: URLSearchParams,
+): URLSearchParams => {
+  if (currentSearchParams.has("menuItemId") || currentSearchParams.has("actionId")) {
+    return currentSearchParams;
+  }
+
+  if (typeof window === "undefined") return currentSearchParams;
+
+  try {
+    const storedViewUrl = window.sessionStorage.getItem("fromViewUrl");
+    if (!storedViewUrl) return currentSearchParams;
+
+    const storedUrl = new URL(storedViewUrl, window.location.origin);
+    const storedRoute = parseModelViewRoute(storedUrl.href);
+    const currentModelKey = getModelRouteKey(currentPathname);
+    const storedModelKey = getModelRouteKey(storedUrl.pathname);
+
+    if (!storedRoute || !currentModelKey || currentModelKey !== storedModelKey) {
+      return currentSearchParams;
+    }
+
+    return storedUrl.searchParams;
+  } catch {
+    return currentSearchParams;
+  }
+};
+
+// Copy menu identity between routes belonging to the same model. This keeps
+// active sidebar state in the URL for new navigation while preserving legacy forms.
+export const preserveModelMenuContext = (target: string): string => {
+  if (typeof window === "undefined" || !target || target.startsWith("#")) return target;
+
+  try {
+    const currentUrl = new URL(window.location.href);
+    const targetUrl = new URL(target, currentUrl.href);
+    const currentModelKey = getModelRouteKey(currentUrl.pathname);
+    const targetModelKey = getModelRouteKey(targetUrl.pathname);
+
+    if (!MODEL_ROUTE_REGEX.test(currentUrl.pathname) || !MODEL_ROUTE_REGEX.test(targetUrl.pathname) || !currentModelKey || currentModelKey !== targetModelKey) {
+      return target;
+    }
+
+    const context = getMenuContextForActiveRoute(currentUrl.pathname, currentUrl.searchParams);
+    MENU_CONTEXT_KEYS.forEach((key) => {
+      if (!targetUrl.searchParams.has(key) && context.has(key)) {
+        targetUrl.searchParams.set(key, context.get(key) || "");
+      }
+    });
+
+    return targetUrl.pathname + targetUrl.search + targetUrl.hash;
+  } catch {
+    return target;
+  }
+};
+
 // Keep short-lived "back to previous view" state in sessionStorage and also
 // refresh the longer-lived localStorage route retention in one call.
 export const storeCurrentModelViewContext = (target?: string) => {
