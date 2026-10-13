@@ -210,9 +210,9 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
                 if (group.kind === "user") return renderItem(group.item);
 
                 const isCurrentTurn = working && group === groups[groups.length - 1];
-                const assistantCopyText = group.items.map(assistantCopyContent)
-                    .filter(Boolean)
-                    .join("\n\n");
+                const assistantCopyText = [...group.items].reverse()
+                    .map(assistantCopyContent)
+                    .find((content) => content !== null && content.length > 0);
                 const turnContent: React.ReactNode[] = [];
                 let activityItems: AgentChatItem[] = [];
                 const flushActivity = (isLatest: boolean) => {
