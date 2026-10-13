@@ -146,7 +146,7 @@ const agentRoleApi = createSolidEntityApi("agentRole");
 const agentSecretApi = createSolidEntityApi("agentSecret");
 const jobApi = createSolidEntityApi("agentJob");
 
-const skillFields = ["id", "name", "iconName", "description", "tags"];
+const skillFields = ["id", "name", "iconName", "description"];
 const toolFields = [...skillFields, "type", "status", "lastLoadError"];
 
 function fieldsQuery(fields: string[]): string {
@@ -288,8 +288,8 @@ export function AgentRegistryEditorPage() {
     };
   }, [agentResult.currentData, skillLinks.currentData, toolLinks.currentData]);
   const { data: settings, isError: settingsError } = useGetSolidSettingsQuery(undefined);
-  const skills = useCatalog(skillApi, `offset=0&limit=1000&${fieldsQuery(skillFields)}`);
-  const tools = useCatalog(toolApi, `offset=0&limit=1000&${fieldsQuery(toolFields)}`);
+  const skills = useCatalog(skillApi, `offset=0&limit=1000&populate[0]=tags&${fieldsQuery(skillFields)}`);
+  const tools = useCatalog(toolApi, `offset=0&limit=1000&populate[0]=tags&${fieldsQuery(toolFields)}`);
   const roles = useCatalog(roleApi, "offset=0&limit=1000&populate[0]=module");
   const secrets = useCatalog(secretApi, "offset=0&limit=1000&fields[0]=id&fields[1]=key&fields[2]=displayName&fields[3]=description");
   const [createAgent, { isLoading: creating }] = entityApi.useCreateSolidEntityMutation();
