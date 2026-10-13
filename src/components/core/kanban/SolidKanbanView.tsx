@@ -400,6 +400,85 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   const pathname = usePathname();
   const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
   const solidSettingsMap = getSettingsMap(solidSettingsData);
+  const kanbanPaginationStorageKey = typeof window === "undefined"
+    ? null
+    : `solidx:kanban-pagination:${window.location.pathname}${window.location.search}:${params.modelName}:${user?.id || "anonymous"}:${groupByFieldName || ""}:${recordsInSwimlane}:${JSON.stringify({ filters: filters || {}, showArchived })}`;
+
+  const readPersistedKanbanPages = () => {
+    if (!kanbanPaginationStorageKey) return {};
+
+    try {
+      const storedPages = JSON.parse(window.sessionStorage.getItem(kanbanPaginationStorageKey) || "{}");
+      return storedPages && typeof storedPages === "object" ? storedPages : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const persistKanbanPage = (groupName: string, page: number) => {
+    if (!kanbanPaginationStorageKey) return;
+
+    try {
+      const storedPages = readPersistedKanbanPages();
+      storedPages[groupName] = Math.max(1, page);
+      window.sessionStorage.setItem(kanbanPaginationStorageKey, JSON.stringify(storedPages));
+    } catch {
+      // Ignore unavailable session storage.
+    }
+  };
+
+  const restorePersistedKanbanPages = async (groupRecords: any[]) => {
+    const storedPages = readPersistedKanbanPages();
+    const groupsToRestore = (groupRecords || []).filter((group: any) => {
+      const targetPage = Number(storedPages[group?.groupName] || 1);
+      return targetPage > 1 && group?.groupData?.records?.length;
+    });
+
+    if (!groupsToRestore.length) return groupRecords || [];
+
+    const restoredGroups = await Promise.all(groupsToRestore.map(async (group: any) => {
+      const targetPage = Number(storedPages[group.groupName]);
+      const pageSize = group.groupData?.meta?.perPage || recordsInSwimlane;
+      const queryData = applyArchivedQueryState({
+        offset: pageSize,
+        limit: pageSize * (targetPage - 1),
+        populate: toPopulate,
+        populateMedia: toPopulateMedia,
+        filters: {
+          $and: [
+            { [groupByFieldName]: { $in: [group.groupName] } },
+            ...(filters?.$and ?? [filters]),
+          ],
+        },
+        sort: DEFAULT_RECORD_SORT,
+      });
+
+      const response: any = await triggerGetSolidEntities(qs.stringify(queryData, { encodeValuesOnly: true }));
+      const additionalRecords = response?.data?.records || [];
+      const existingIds = new Set((group.groupData.records || []).map((record: any) => String(record?.id)));
+      const mergedRecords = [
+        ...(group.groupData.records || []),
+        ...additionalRecords.filter((record: any) => !existingIds.has(String(record?.id))),
+      ];
+
+      return {
+        ...group,
+        groupData: {
+          ...group.groupData,
+          records: mergedRecords,
+          meta: {
+            ...group.groupData.meta,
+            currentPage: targetPage,
+            prevPage: targetPage > 1 ? targetPage - 1 : null,
+            nextPage: targetPage + 1,
+          },
+        },
+      };
+    }));
+
+    const restoredByName = new Map(restoredGroups.map((group: any) => [String(group.groupName), group]));
+    return (groupRecords || []).map((group: any) => restoredByName.get(String(group.groupName)) || group);
+  };
   // @ts-ignore
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   const recordClickAction = resolveRecordClickAction(solidSettingsMap, {
@@ -697,7 +776,8 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       ).unwrap();
 
       setServerSwimLaneCount(response?.meta?.totalRecords || 0);
-      setRawKanbanGroupRecords(response?.groupRecords || []);
+      const restoredGroupRecords = await restorePersistedKanbanPages(response?.groupRecords || []);
+      setRawKanbanGroupRecords(restoredGroupRecords);
       setSelectedRecords([]);
     } catch (error: any) {
       dispatch(showToast({
@@ -885,6 +965,8 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
       const updatedData = mergeData(kanbanViewData, newRecords, groupByField);
       setKanbanViewData(updatedData);
+      const updatedGroup = updatedData.find((group: any) => group.groupName === groupByField);
+      persistKanbanPage(groupByField, updatedGroup?.groupData?.meta?.currentPage || 1);
       setRawKanbanGroupRecords((previousGroups: any[]) => {
         const existingGroups = Array.isArray(previousGroups) ? previousGroups : [];
         return updatedData
