@@ -1,6 +1,5 @@
 import { clearAgentAuth, loadAgentAuth, isExternalAgentAuth, renewExternalAgentAuth } from "./agentAuth";
-import type { AgentUploadedAttachment } from "../types";
-import type { AgentModelAssignments } from "../types";
+import type { AgentUploadedAttachment, AgentModelAssignments, AgentProviderInfo, ProviderModelInfo } from "../types";
 
 export const HISTORY_PAGE_SIZE = 50;
 
@@ -17,6 +16,12 @@ export type AgentConfigVersionStatus = {
     processConfigVersion: number;
     latestConfigVersion: number;
     stale: boolean;
+};
+
+export type ProviderModelsResponse = {
+    provider: string;
+    default_model?: string;
+    models: ProviderModelInfo[];
 };
 
 /** Calls the agent at the `httpUrl` named at sign-in, with `Authorization: Bearer <agentToken>`; null when signed out or on error. */
@@ -57,8 +62,110 @@ export function fetchAgentConfigVersionStatus(agentUrl: string) {
 }
 
 /** Model labels reported by the connected agent backend (never provider credentials). */
-export function fetchAgentModelAssignments(agentUrl: string) {
-    return agentFetch<AgentModelAssignments>(agentUrl, "/api/agent/models", { cache: "no-store" });
+export async function fetchAgentModelAssignments(agentUrl: string): Promise<AgentModelAssignments | null> {
+    try {
+        const auth = await loadAgentAuth(agentUrl);
+        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
+        const headers: Record<string, string> = {};
+        if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
+        const res = await fetch(`${baseUrl}/api/agent/models`, { headers, cache: "no-store" });
+        if (!res.ok) return null;
+        return ((await res.json()) as AgentModelAssignments) ?? null;
+    } catch {
+        return null;
+    }
+}
+
+const providersMemoryCache = new Map<string, AgentProviderInfo[]>();
+const modelsMemoryCache = new Map<string, ProviderModelsResponse>();
+
+/** Synchronously returns cached providers from memory or session storage to avoid layout buffering on remount. */
+export function getCachedAgentProviders(agentUrl: string): AgentProviderInfo[] {
+    const mem = providersMemoryCache.get(agentUrl);
+    if (mem && mem.length > 0) return mem;
+    try {
+        const stored = sessionStorage.getItem(`solid-agent.cached-providers.${agentUrl}`);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                providersMemoryCache.set(agentUrl, parsed);
+                return parsed;
+            }
+        }
+    } catch {
+        // ignore storage errors
+    }
+    return [];
+}
+
+/** Synchronously returns cached provider models from memory or session storage. */
+export function getCachedProviderModels(agentUrl: string, providerId: string): ProviderModelsResponse | null {
+    const key = `${agentUrl}::${providerId}`;
+    const mem = modelsMemoryCache.get(key);
+    if (mem) return mem;
+    try {
+        const stored = sessionStorage.getItem(`solid-agent.cached-models.${key}`);
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed && typeof parsed === "object") {
+                modelsMemoryCache.set(key, parsed);
+                return parsed;
+            }
+        }
+    } catch {
+        // ignore
+    }
+    return null;
+}
+
+/** List installed execution providers (both native SolidX and CLI agents). */
+export async function fetchAgentProviders(agentUrl: string): Promise<AgentProviderInfo[]> {
+    try {
+        const auth = await loadAgentAuth(agentUrl);
+        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
+        const headers: Record<string, string> = {};
+        if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
+        const res = await fetch(`${baseUrl}/api/agent/providers`, { headers });
+        if (!res.ok) return getCachedAgentProviders(agentUrl);
+        const data = await res.json();
+        const list = Array.isArray(data?.providers) ? data.providers : [];
+        if (list.length > 0) {
+            providersMemoryCache.set(agentUrl, list);
+            try {
+                sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
+            } catch {
+                // ignore
+            }
+        }
+        return list;
+    } catch {
+        return getCachedAgentProviders(agentUrl);
+    }
+}
+
+/** Return model catalog for a specific provider. */
+export async function fetchProviderModels(agentUrl: string, providerId: string): Promise<ProviderModelsResponse | null> {
+    const key = `${agentUrl}::${providerId}`;
+    try {
+        const auth = await loadAgentAuth(agentUrl);
+        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
+        const headers: Record<string, string> = {};
+        if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
+        const res = await fetch(`${baseUrl}/api/agent/providers/${encodeURIComponent(providerId)}/models`, { headers });
+        if (!res.ok) return getCachedProviderModels(agentUrl, providerId);
+        const data = (await res.json()) as ProviderModelsResponse;
+        if (data && typeof data === "object") {
+            modelsMemoryCache.set(key, data);
+            try {
+                sessionStorage.setItem(`solid-agent.cached-models.${key}`, JSON.stringify(data));
+            } catch {
+                // ignore
+            }
+        }
+        return data;
+    } catch {
+        return getCachedProviderModels(agentUrl, providerId);
+    }
 }
 
 export function deleteSession(agentUrl: string, sessionId: string) {

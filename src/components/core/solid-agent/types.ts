@@ -29,6 +29,37 @@ export type AgentModelAssignments = { reasoning: AgentModelAssignment; fast: Age
 /** @deprecated Use AgentRuntimeType. */
 export type AgentType = AgentRuntimeType;
 
+export interface AgentProviderInfo {
+    id: string;
+    name: string;
+    installed: boolean;
+    version?: string;
+    default_model?: string;
+}
+
+export interface ReasoningEffortInfo {
+    id: string;
+    name: string;
+    description?: string;
+}
+
+export interface SpeedTierInfo {
+    id: string;
+    name: string;
+    description?: string;
+}
+
+export interface ProviderModelInfo {
+    id: string;
+    name: string;
+    is_default?: boolean;
+    description?: string;
+    reasoning_efforts?: ReasoningEffortInfo[];
+    default_reasoning?: string;
+    speed_tiers?: SpeedTierInfo[];
+    default_speed?: string;
+}
+
 export type AgentConnection = "idle" | "connecting" | "open" | "reconnecting" | "offline";
 
 /** A slash command advertised by the agent in `session_started`. */
@@ -59,8 +90,10 @@ export type AgentChatEvent = {
 export const AgentEventTypes = {
     sessionStarted: "session_started",
     sessionEnded: "session_ended",
+    sessionUpdated: "session_updated",
     userMessage: "UserMessage",
     agentStarted: "AgentStarted",
+    agentThinking: "AgentThinking",
     stepStarted: "StepStarted",
     stepComplete: "StepComplete",
     llmToken: "LlmToken",
@@ -105,10 +138,18 @@ export type AgentAttachmentMeta = {
 export type AgentAttachment = { payload: AgentAttachmentPayload; meta: AgentAttachmentMeta; file: File };
 export type AgentUploadedAttachment = { id: number; name: string; mimeType: string; size: number };
 
+export type AgentSessionOptions = {
+    thinking?: boolean;
+    fast?: boolean;
+    reasoning?: string;
+    speed?: string;
+};
+
 export type AgentAction =
-    | { action: "start_session" }
-    | { action: "resume_session"; session_id: string }
-    | {
+    | ({ action: "start_session"; provider?: string; model?: string } & AgentSessionOptions)
+    | ({ action: "resume_session"; session_id: string; provider?: string; model?: string } & AgentSessionOptions)
+    | ({ action: "update_session"; session_id: string; provider?: string; model?: string } & AgentSessionOptions)
+    | ({
           action: "message";
           session_id: string;
           content: string;
@@ -116,7 +157,9 @@ export type AgentAction =
           inputs?: Record<string, unknown>;
           widget_reply?: WidgetReply | null;
           attachments?: AgentAttachmentPayload[] | AgentUploadedAttachment[];
-      }
+          provider?: string;
+          model?: string;
+      } & AgentSessionOptions)
     | { action: "cancel"; session_id: string }
     | { action: "end_session"; session_id: string };
 

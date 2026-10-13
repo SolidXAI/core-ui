@@ -1,11 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
-import { deleteSession, fetchAgentConfigVersionStatus, fetchAgentModelAssignments, fetchSessionList, type AgentSessionSummary } from "./client/agentRest";
+import {
+    deleteSession,
+    fetchAgentConfigVersionStatus,
+    fetchAgentModelAssignments,
+    fetchAgentProviders,
+    fetchProviderModels,
+    fetchSessionList,
+    getCachedAgentProviders,
+    getCachedProviderModels,
+    type AgentSessionSummary,
+} from "./client/agentRest";
+import {
+    getStoredFast,
+    getStoredModel,
+    getStoredProvider,
+    getStoredReasoning,
+    getStoredSpeed,
+    getStoredThinking,
+    setStoredSessionOptions,
+} from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
-import type { AgentAttachment, AgentMode, AgentRuntimeType } from "./types";
+import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
@@ -132,12 +151,70 @@ export function SolidAgentChat({
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
+    const [providers, setProviders] = useState<AgentProviderInfo[]>(() => getCachedAgentProviders(agentUrl));
+    const [loadingProviders, setLoadingProviders] = useState<boolean>(() => getCachedAgentProviders(agentUrl).length === 0);
+    const [selectedProvider, setSelectedProvider] = useState<string>(() => getStoredProvider());
+    const [models, setModels] = useState<ProviderModelInfo[]>(() => {
+        const cached = getCachedProviderModels(agentUrl, getStoredProvider());
+        return cached?.models || [];
+    });
+    const [selectedModel, setSelectedModel] = useState<string>(() => getStoredModel(getStoredProvider()) || "");
+    const [isThinking, setIsThinking] = useState<boolean>(() => getStoredThinking(getStoredProvider()));
+    const [selectedReasoning, setSelectedReasoning] = useState<string>(() => getStoredReasoning(getStoredProvider()) || "");
+    const [isFast, setIsFast] = useState<boolean>(() => getStoredFast(getStoredProvider()));
+    const [selectedSpeed, setSelectedSpeed] = useState<string>(() => getStoredSpeed(getStoredProvider()) || "standard");
+    const [showProviderMenu, setShowProviderMenu] = useState(false);
+    const providerMenuRef = useRef<HTMLDivElement>(null);
     const [collectedInputs, setCollectedInputs] = useState<Record<string, unknown> | null>(null);
     const [rawInputValues, setRawInputValues] = useState<Record<string, string>>({});
     const [inputError, setInputError] = useState("");
     const shouldPromptForInputs = !externalEmbed && agentRuntime === "agentHub" && signedIn
         && requiredInputs.length > 0 && inputs === undefined && collectedInputs === null;
     const messageInputs = inputs ?? collectedInputs ?? undefined;
+
+    const activeModelInfo = useMemo(() => {
+        return models.find((m) => m.id === selectedModel) || (models.length > 0 ? models[0] : null);
+    }, [models, selectedModel]);
+
+    // Synchronize reasoning and speed options when model or provider changes
+    useEffect(() => {
+        if (!activeModelInfo) return;
+
+        const validEfforts = activeModelInfo.reasoning_efforts || [];
+        if (validEfforts.length > 0) {
+            const savedReasoning = getStoredReasoning(selectedProvider);
+            const matched = validEfforts.find((r) => r.id === savedReasoning);
+            const nextReasoning = matched ? matched.id : (activeModelInfo.default_reasoning || validEfforts[0].id);
+            setSelectedReasoning(nextReasoning);
+            setIsThinking(true);
+            setStoredSessionOptions(selectedProvider, { reasoning: nextReasoning, thinking: true });
+        } else {
+            const savedThinking = getStoredThinking(selectedProvider);
+            const thinkActive = selectedProvider === "opencode" || activeModelInfo.id.includes("thinking") || savedThinking;
+            setIsThinking(thinkActive);
+        }
+
+        const isCodexOrCursor = selectedProvider === "codex" || selectedProvider === "cursor";
+        const validSpeedTiers = (activeModelInfo.speed_tiers && activeModelInfo.speed_tiers.length > 0)
+            ? activeModelInfo.speed_tiers
+            : (isCodexOrCursor ? [{ id: "standard", name: "Standard" }, { id: "fast", name: "Fast" }] : []);
+
+        if (validSpeedTiers.length > 0) {
+            const savedSpeed = getStoredSpeed(selectedProvider);
+            const matchedSpeed = validSpeedTiers.find((s) => s.id === savedSpeed);
+            let nextSpeed = matchedSpeed ? matchedSpeed.id : (activeModelInfo.default_speed || "standard");
+            if (selectedProvider === "cursor" && activeModelInfo.id.endsWith("-fast")) {
+                nextSpeed = "fast";
+            }
+            setSelectedSpeed(nextSpeed);
+            const fastActive = nextSpeed === "fast";
+            setIsFast(fastActive);
+            setStoredSessionOptions(selectedProvider, { speed: nextSpeed, fast: fastActive });
+        } else {
+            setSelectedSpeed("standard");
+            setIsFast(false);
+        }
+    }, [activeModelInfo, selectedProvider]);
 
     const submitRequiredInputs = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -150,16 +227,191 @@ export function SolidAgentChat({
     };
 
     useEffect(() => {
-        if (!signedIn) {
-            setModelAssignments(null);
-            return;
-        }
         let alive = true;
         fetchAgentModelAssignments(agentUrl).then((models) => {
             if (alive) setModelAssignments(models);
         });
         return () => { alive = false; };
     }, [agentUrl, signedIn]);
+
+    useEffect(() => {
+        let alive = true;
+        if (providers.length === 0) {
+            setLoadingProviders(true);
+        }
+        fetchAgentProviders(agentUrl).then((list) => {
+            if (!alive) return;
+            const installed = (list || []).filter((p) => p.installed);
+            setProviders(installed);
+            if (installed.length > 0) {
+                const current = getStoredProvider();
+                const matched = installed.find((p) => p.id === current);
+                if (!matched) {
+                    setSelectedProvider(installed[0].id);
+                }
+            }
+        }).catch(() => {
+            if (alive && providers.length === 0) setProviders([]);
+        }).finally(() => {
+            if (alive) setLoadingProviders(false);
+        });
+        return () => { alive = false; };
+    }, [agentUrl, signedIn]);
+
+    useEffect(() => {
+        if (!selectedProvider) return;
+        let alive = true;
+        fetchProviderModels(agentUrl, selectedProvider).then((res) => {
+            if (!alive) return;
+            const nextModels = res?.models || [];
+            if (nextModels.length > 0) {
+                setModels(nextModels);
+            }
+            const savedModel = getStoredModel(selectedProvider);
+            const matchedModel = nextModels.find((m) => m.id === savedModel);
+            const targetModel = matchedModel ? matchedModel.id : (res?.default_model || nextModels[0]?.id || "");
+            if (targetModel) {
+                setSelectedModel(targetModel);
+            }
+        });
+        return () => { alive = false; };
+    }, [agentUrl, signedIn, selectedProvider]);
+
+    useEffect(() => {
+        if (!showProviderMenu) return;
+        const handleOutside = (e: MouseEvent) => {
+            if (providerMenuRef.current && !providerMenuRef.current.contains(e.target as Node)) {
+                setShowProviderMenu(false);
+            }
+        };
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setShowProviderMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleOutside);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", handleOutside);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [showProviderMenu]);
+
+    const handleSelectProvider = (providerId: string) => {
+        setSelectedProvider(providerId);
+        setShowProviderMenu(false);
+        fetchProviderModels(agentUrl, providerId).then((res) => {
+            const nextModels = res?.models || [];
+            setModels(nextModels);
+            const targetModel = res?.default_model || nextModels[0]?.id || "";
+            setSelectedModel(targetModel);
+            const nextThinking = getStoredThinking(providerId);
+            const nextReasoning = getStoredReasoning(providerId) ?? undefined;
+            const nextFast = getStoredFast(providerId);
+            const nextSpeed = getStoredSpeed(providerId) ?? undefined;
+            setIsThinking(nextThinking);
+            setSelectedReasoning(nextReasoning ?? "");
+            setIsFast(nextFast);
+            setSelectedSpeed(nextSpeed ?? "standard");
+            runtime?.newChat(providerId, targetModel, {
+                thinking: nextThinking,
+                reasoning: nextReasoning,
+                fast: nextFast,
+                speed: nextSpeed,
+            });
+            setShowHistory(false);
+            onInputsLocked?.(false);
+            if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) {
+                setCollectedInputs(null);
+                setInputError("");
+            }
+        });
+    };
+
+    const handleStartNewChat = () => {
+        runtime?.newChat(selectedProvider, selectedModel, {
+            thinking: isThinking,
+            reasoning: selectedReasoning,
+            fast: isFast,
+            speed: selectedSpeed,
+        });
+        setShowHistory(false);
+        setShowProviderMenu(false);
+        onInputsLocked?.(false);
+        if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) {
+            setCollectedInputs(null);
+            setInputError("");
+        }
+    };
+
+    const handleModelChange = (modelId: string) => {
+        setSelectedModel(modelId);
+        runtime?.updateModel(modelId, selectedProvider, {
+            thinking: isThinking,
+            reasoning: selectedReasoning,
+            fast: isFast,
+            speed: selectedSpeed,
+        });
+    };
+
+    const handleReasoningChange = (newReasoning: string) => {
+        const thinkingBool = Boolean(newReasoning && newReasoning !== "none" && newReasoning !== "off");
+        setSelectedReasoning(newReasoning);
+        setIsThinking(thinkingBool);
+        setStoredSessionOptions(selectedProvider, { reasoning: newReasoning, thinking: thinkingBool });
+        runtime?.updateSessionOptions({
+            reasoning: newReasoning,
+            thinking: thinkingBool,
+            speed: selectedSpeed,
+            fast: isFast,
+        });
+    };
+
+    const handleThinkingToggle = () => {
+        const nextThinking = !isThinking;
+        setIsThinking(nextThinking);
+        setStoredSessionOptions(selectedProvider, { thinking: nextThinking });
+        runtime?.updateSessionOptions({
+            thinking: nextThinking,
+            reasoning: nextThinking ? (selectedReasoning || undefined) : undefined,
+            speed: selectedSpeed,
+            fast: isFast,
+        });
+    };
+
+    const handleSpeedChange = (newSpeed: string) => {
+        const fastBool = newSpeed === "fast";
+        setSelectedSpeed(newSpeed);
+        setIsFast(fastBool);
+        setStoredSessionOptions(selectedProvider, { speed: newSpeed, fast: fastBool });
+
+        let targetModel = selectedModel;
+        if (selectedProvider === "cursor" && models.length > 0) {
+            if (fastBool && !selectedModel.endsWith("-fast")) {
+                const cand = `${selectedModel}-fast`;
+                if (models.some((m) => m.id === cand)) targetModel = cand;
+            } else if (!fastBool && selectedModel.endsWith("-fast")) {
+                const cand = selectedModel.slice(0, -5);
+                if (models.some((m) => m.id === cand)) targetModel = cand;
+            }
+        }
+
+        if (targetModel !== selectedModel) {
+            handleModelChange(targetModel);
+        } else {
+            runtime?.updateSessionOptions({
+                speed: newSpeed,
+                fast: fastBool,
+                thinking: isThinking,
+                reasoning: selectedReasoning,
+            });
+        }
+    };
+
+    const handleFastToggle = () => {
+        const nextSpeed = isFast ? "standard" : "fast";
+        handleSpeedChange(nextSpeed);
+    };
 
     useEffect(() => {
         if (agentRuntime !== "agentHub" || !signedIn) {
@@ -226,6 +478,9 @@ export function SolidAgentChat({
         : agent.connection === "connecting" ? "Connecting…"
         : offline ? "Reconnecting…" : "Idle";
 
+    const activeProviderObj = providers.find((p) => p.id === selectedProvider);
+    const providerDisplayName = activeProviderObj?.name || (selectedProvider ? selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1) : "");
+
     const empty = (
         <div className={styles.empty}>
             <div className={styles.emptyMark}><Sparkles size={24} /></div>
@@ -234,6 +489,11 @@ export function SolidAgentChat({
                 <p className={styles.emptyText}>{agentRuntime === "agentHub"
                     ? "Ask this agent for help with its configured capabilities. It can use the tools and knowledge available to it."
                     : "Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you."}</p>
+                {providerDisplayName && (
+                    <div className={styles.emptyProviderBadge}>
+                        Using <strong>{providerDisplayName}</strong>
+                    </div>
+                )}
             </div>
             <div className={styles.suggestions}>
                 {emptyStateSuggestions.map((text) => (
@@ -301,13 +561,79 @@ export function SolidAgentChat({
                 </div>
                 <div className={styles.headerTitle}>
                     <strong>{title}</strong>
-                    <span className={styles.headerSub}>{statusText}</span>
+                    <span className={styles.headerSub}>
+                        {signedIn && providerDisplayName && (
+                            <span className={styles.headerProviderTag} title={`Active Provider: ${providerDisplayName}`}>
+                                {providerDisplayName}
+                            </span>
+                        )}
+                        <span className={styles.headerStatusText}>{statusText}</span>
+                    </span>
                 </div>
                 {signedIn && (
                     <>
-                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" disabled={agent.working} onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) { setCollectedInputs(null); setInputError(""); } }}>
-                            <Plus size={16} />
-                        </button>
+                        <div className={styles.newChatSplit} ref={providerMenuRef}>
+                            <button
+                                type="button"
+                                className={styles.splitActionBtn}
+                                title={`New chat (${providers.find((p) => p.id === selectedProvider)?.name || "SolidX"})`}
+                                aria-label="New chat"
+                                disabled={agent.working}
+                                onClick={handleStartNewChat}
+                            >
+                                <Plus size={15} />
+                            </button>
+                            <span className={styles.splitDivider} />
+                            <button
+                                type="button"
+                                className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
+                                title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                aria-label="Select AI execution provider"
+                                aria-expanded={showProviderMenu}
+                                disabled={agent.working}
+                                onClick={() => setShowProviderMenu((prev) => !prev)}
+                            >
+                                {loadingProviders ? (
+                                    <Loader2 size={12} className={styles.spinIcon} />
+                                ) : (
+                                    <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
+                                )}
+                            </button>
+                            {showProviderMenu && (
+                                <div className={styles.providerDropdown} role="menu">
+                                    <div className={styles.providerDropdownHeader}>
+                                        <strong>Select AI Provider</strong>
+                                        <span>Switch execution provider</span>
+                                    </div>
+                                    {loadingProviders ? (
+                                        <div className={styles.providerLoadingItem}>
+                                            <Loader2 size={13} className={styles.spinIcon} />
+                                            <span>Loading providers...</span>
+                                        </div>
+                                    ) : (
+                                        <div className={styles.providerList}>
+                                            {providers.map((p) => {
+                                                const isSelected = p.id === selectedProvider;
+                                                return (
+                                                    <button
+                                                        key={p.id}
+                                                        type="button"
+                                                        className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
+                                                        onClick={() => handleSelectProvider(p.id)}
+                                                    >
+                                                        <div className={styles.providerItemMeta}>
+                                                            <span className={styles.providerItemName}>{p.name}</span>
+                                                            {p.version && <span className={styles.providerItemVersion}>v{p.version}</span>}
+                                                        </div>
+                                                        {isSelected && <Check size={14} className={styles.providerCheck} />}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}
@@ -396,7 +722,12 @@ export function SolidAgentChat({
                                     type="button"
                                     className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
                                     onClick={() => {
-                                        runtime?.resume(session.session_id);
+                                        runtime?.resume(session.session_id, selectedProvider, selectedModel, {
+                                            thinking: isThinking,
+                                            reasoning: selectedReasoning,
+                                            fast: isFast,
+                                            speed: selectedSpeed,
+                                        });
                                         setShowHistory(false);
                                     }}
                                 >
@@ -442,7 +773,25 @@ export function SolidAgentChat({
                     seedKey={seed?.key}
                     onSend={sendWithAttachments}
                     onStop={() => runtime?.cancel()}
-                    modelIndicator={<AgentModelIndicator assignments={modelAssignments} />}
+                    modelIndicator={
+                        <AgentModelIndicator
+                            assignments={modelAssignments}
+                            activeProvider={selectedProvider}
+                            activeModel={selectedModel}
+                            providers={providers}
+                            models={models}
+                            onModelSelect={handleModelChange}
+                            disabled={agent.working}
+                            isThinking={isThinking}
+                            isFast={isFast}
+                            selectedReasoning={selectedReasoning}
+                            selectedSpeed={selectedSpeed}
+                            onThinkingToggle={handleThinkingToggle}
+                            onFastToggle={handleFastToggle}
+                            onReasoningSelect={handleReasoningChange}
+                            onSpeedSelect={handleSpeedChange}
+                        />
+                    }
                 />
                 </>
             )}

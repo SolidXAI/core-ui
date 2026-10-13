@@ -27,6 +27,7 @@ export const getDefaultChatWidgetName = (eventType: string): string => {
             return "DefaultNoticeChatWidget";
         case AgentEventTypes.agentStarted:
         case AgentEventTypes.stepStarted:
+        case AgentEventTypes.agentThinking:
             return "DefaultThinkingChatWidget";
         default:
             return "DefaultUnknownChatWidget";

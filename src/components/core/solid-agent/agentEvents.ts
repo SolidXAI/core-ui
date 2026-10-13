@@ -1,4 +1,6 @@
 import { describeToolArgs, isLlmMetadata, parseToolResult } from "./agentFormat";
+import { parseWidgetContent, isSameAssistantContent } from "./thread/inlineWidget";
+export { isSameAssistantContent };
 import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentWireFrame } from "./types";
 
 /**
@@ -82,6 +84,7 @@ function lastAssistantText(state: AgentThreadState): string | undefined {
     return undefined;
 }
 
+
 function pushAssistantText(state: AgentThreadState, content: string, at: number) {
     freezeLiveTool(state);
     state.items.push({ id: nextItemId("llm"), at, eventType: AgentEventTypes.llmComplete, eventData: { content } });
@@ -141,6 +144,13 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             break;
         }
 
+        case AgentEventTypes.sessionUpdated: {
+            const sessionId = frame.session_id ?? eventData.session_id ?? null;
+            if (sessionId) state.sessionId = sessionId;
+            state.authError = null;
+            break;
+        }
+
         case AgentEventTypes.sessionEnded:
             state.sessionId = null;
             break;
@@ -157,14 +167,19 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                     state.items.push({ id: nextItemId("u"), at, eventType, eventData: replayEventData });
                 }
                 state.liveToolId = null;
+                state.turnStreamed = false;
             }
             break;
 
         case AgentEventTypes.agentStarted:
         case AgentEventTypes.stepStarted:
+        case AgentEventTypes.agentThinking:
             if (!replay) {
                 state.working = true;
                 if (!state.liveToolId) state.thinking = true;
+            }
+            if (eventType === AgentEventTypes.agentStarted) {
+                state.turnStreamed = false;
             }
             break;
 
@@ -241,19 +256,25 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             const streamed = findItem(state, state.streamingId);
             stopStreaming(state);
             if (!content || isLlmMetadata(content)) break;
-            if (streamed) streamed.eventData = { ...streamed.eventData, content }; // authoritative final text
-            else if (lastAssistantText(state) !== content) pushAssistantText(state, content, at);
+            if (streamed) {
+                streamed.eventData = { ...streamed.eventData, content }; // authoritative final text
+            } else if (!isSameAssistantContent(lastAssistantText(state), content)) {
+                pushAssistantText(state, content, at);
+            }
             break;
         }
 
         case AgentEventTypes.turnComplete:
         case AgentEventTypes.turnCompleteLegacy: {
             const content: string = eventData.content ?? frame.content ?? "";
-            if (content && !state.turnStreamed && !isLlmMetadata(content) && lastAssistantText(state) !== content) {
+            const streamed = findItem(state, state.streamingId);
+            if (streamed && content && !isLlmMetadata(content)) {
+                streamed.eventData = { ...streamed.eventData, content };
+            } else if (content && !state.turnStreamed && !isLlmMetadata(content) && !isSameAssistantContent(lastAssistantText(state), content)) {
                 pushAssistantText(state, content, at);
             }
             endTurn(state);
-            state.turnStreamed = false;
+            state.turnStreamed = true;
             break;
         }
 

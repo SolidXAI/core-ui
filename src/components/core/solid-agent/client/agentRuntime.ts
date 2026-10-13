@@ -7,9 +7,9 @@ import {
     agentUserMessageAdded,
     type AgentState,
 } from "../../../../redux/features/agentSlice";
-import { historyToItems, normalizeAgentFrame } from "../agentEvents";
+import { historyToItems, isSameAssistantContent, normalizeAgentFrame } from "../agentEvents";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
-import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentWireFrame } from "../types";
+import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentSessionOptions, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
 import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory, uploadAgentAttachments } from "./agentRest";
@@ -50,6 +50,83 @@ function writeSessionId(key: string, id: string | null) {
     }
 }
 
+export function getStoredProvider(): string {
+    try {
+        return localStorage.getItem("solid-agent.provider") || "solidx";
+    } catch {
+        return "solidx";
+    }
+}
+
+export function getStoredModel(provider: string): string | null {
+    try {
+        return localStorage.getItem(`solid-agent.model.${provider}`);
+    } catch {
+        return null;
+    }
+}
+
+export function setStoredProviderAndModel(provider: string, model?: string) {
+    try {
+        localStorage.setItem("solid-agent.provider", provider);
+        if (model) localStorage.setItem(`solid-agent.model.${provider}`, model);
+    } catch {
+        // Storage blocked
+    }
+}
+
+export function getStoredThinking(provider: string): boolean {
+    try {
+        const saved = localStorage.getItem(`solid-agent.thinking.${provider}`);
+        return saved === "true";
+    } catch {
+        return false;
+    }
+}
+
+export function getStoredReasoning(provider: string): string | null {
+    try {
+        return localStorage.getItem(`solid-agent.reasoning.${provider}`);
+    } catch {
+        return null;
+    }
+}
+
+export function getStoredFast(provider: string): boolean {
+    try {
+        const saved = localStorage.getItem(`solid-agent.fast.${provider}`);
+        return saved === "true";
+    } catch {
+        return false;
+    }
+}
+
+export function getStoredSpeed(provider: string): string | null {
+    try {
+        return localStorage.getItem(`solid-agent.speed.${provider}`);
+    } catch {
+        return null;
+    }
+}
+
+export function setStoredSessionOptions(
+    provider: string,
+    opts: { thinking?: boolean; reasoning?: string | null; fast?: boolean; speed?: string | null },
+) {
+    try {
+        if (opts.thinking !== undefined) localStorage.setItem(`solid-agent.thinking.${provider}`, String(opts.thinking));
+        if (opts.reasoning !== undefined) {
+            opts.reasoning ? localStorage.setItem(`solid-agent.reasoning.${provider}`, opts.reasoning) : localStorage.removeItem(`solid-agent.reasoning.${provider}`);
+        }
+        if (opts.fast !== undefined) localStorage.setItem(`solid-agent.fast.${provider}`, String(opts.fast));
+        if (opts.speed !== undefined) {
+            opts.speed ? localStorage.setItem(`solid-agent.speed.${provider}`, opts.speed) : localStorage.removeItem(`solid-agent.speed.${provider}`);
+        }
+    } catch {
+        // Storage blocked
+    }
+}
+
 export class AgentRuntime {
     readonly socket: AgentSocket;
     private pendingDelta = "";
@@ -67,12 +144,33 @@ export class AgentRuntime {
         private persistSession = true,
     ) {
         this.sessionKey = sessionKey(agentRuntime, agentUrl);
-        this.socket = new AgentSocket(agentUrl, persistSession ? readSessionId(this.sessionKey) : null, agentRuntime === "agentHub");
+        const initialProvider = getStoredProvider();
+        const initialModel = getStoredModel(initialProvider);
+        const initialOptions: AgentSessionOptions = {
+            thinking: getStoredThinking(initialProvider),
+            reasoning: getStoredReasoning(initialProvider) ?? undefined,
+            fast: getStoredFast(initialProvider),
+            speed: getStoredSpeed(initialProvider) ?? undefined,
+        };
+        this.socket = new AgentSocket(
+            agentUrl,
+            persistSession ? readSessionId(this.sessionKey) : null,
+            agentRuntime === "agentHub",
+            initialProvider,
+            initialModel,
+            initialOptions,
+        );
+        this.socket.setOnSessionExpired(() => {
+            if (this.persistSession) writeSessionId(this.sessionKey, null);
+            this.dispatch(agentThreadReset());
+        });
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
-            this.socket.onStatus((status) => this.dispatch(agentConnectionChanged(status))),
+            this.socket.onStatus((status) => {
+                queueMicrotask(() => this.dispatch(agentConnectionChanged(status)));
+            }),
         );
-        this.socket.connect();
+        queueMicrotask(() => this.socket.connect());
     }
 
     /**
@@ -122,17 +220,34 @@ export class AgentRuntime {
         if (sessionId) this.socket.send({ action: "cancel", session_id: sessionId });
     }
 
-    newChat() {
+    newChat(provider?: string, model?: string, opts?: AgentSessionOptions) {
         if (this.persistSession) writeSessionId(this.sessionKey, null);
+        if (provider) setStoredProviderAndModel(provider, model);
+        if (provider && opts) setStoredSessionOptions(provider, opts);
         this.lastContext = undefined;
         this.dispatch(agentThreadReset());
-        this.socket.newSession();
+        this.socket.newSession({ ...(provider ? { provider, model } : {}), ...(opts || {}) });
     }
 
-    resume(sessionId: string) {
+    updateModel(model: string, provider?: string, opts?: AgentSessionOptions) {
+        const activeProvider = provider ?? this.socket.currentProvider ?? getStoredProvider();
+        setStoredProviderAndModel(activeProvider, model);
+        if (opts) setStoredSessionOptions(activeProvider, opts);
+        this.socket.updateSession({ provider: activeProvider, model, ...(opts || {}) });
+    }
+
+    updateSessionOptions(opts: AgentSessionOptions) {
+        const activeProvider = this.socket.currentProvider ?? getStoredProvider();
+        setStoredSessionOptions(activeProvider, opts);
+        this.socket.updateSession(opts);
+    }
+
+    resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions) {
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
+        if (provider) setStoredProviderAndModel(provider, model);
+        if (provider && opts) setStoredSessionOptions(provider, opts);
         this.dispatch(agentThreadReset());
-        this.socket.resume(sessionId);
+        this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
     }
 
     async loadOlder() {
@@ -175,19 +290,37 @@ export class AgentRuntime {
         this.emitSdkEvents(event);
     }
 
+    private lastTurnCompleteContent: string | null = null;
+    private lastTurnCompleteTime = 0;
+
     private emitSdkEvents(event: AgentChatEvent) {
-        if (event.eventType === AgentEventTypes.sessionStarted) {
+        if (event.eventType === AgentEventTypes.userMessage || event.eventType === AgentEventTypes.agentStarted) {
+            this.lastTurnCompleteContent = null;
+            this.lastTurnCompleteTime = 0;
+        } else if (event.eventType === AgentEventTypes.sessionStarted || event.eventType === AgentEventTypes.sessionUpdated) {
             const sessionId = event.frame.session_id ?? event.eventData.session_id ?? null;
-            if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
-            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentRuntime });
+            const provider = event.frame.provider ?? event.eventData.provider ?? this.socket.currentProvider;
+            const model = event.frame.model ?? event.eventData.model ?? this.socket.currentModel;
+            if (this.persistSession && sessionId) writeSessionId(this.sessionKey, sessionId);
+            if (provider) setStoredProviderAndModel(provider, model ?? undefined);
+            eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentRuntime, provider, model });
             const state = this.getState();
             const historyId = event.frame.history_session_id ?? event.eventData.history_session_id ?? sessionId;
-            if (state && state.items.length === 0 && historyId) void this.loadHistory(historyId, 1);
+            if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
+                void this.loadHistory(historyId, 1);
+            }
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
+            const content = event.eventData.content ?? event.frame.content;
+            const now = Date.now();
+            if (now - this.lastTurnCompleteTime < 1500 && isSameAssistantContent(this.lastTurnCompleteContent ?? undefined, typeof content === "string" ? content : undefined)) {
+                return;
+            }
+            this.lastTurnCompleteTime = now;
+            this.lastTurnCompleteContent = typeof content === "string" ? content : null;
             eventBus.emit(SOLID_AGENT_EVENTS.turnComplete, {
                 sessionId: this.socket.currentSessionId,
                 agentType: this.agentRuntime,
-                content: event.eventData.content ?? event.frame.content,
+                content,
             });
         }
     }
