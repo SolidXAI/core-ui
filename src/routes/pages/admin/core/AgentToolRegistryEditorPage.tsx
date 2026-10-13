@@ -7,6 +7,7 @@ import { showToast } from "../../../../redux/features/toastSlice";
 import { solidPatch } from "../../../../http/solidHttp";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
+import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
 import { AgentToolActivationDialog } from "./AgentToolActivationDialog";
 import { AgentToolSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import { AgentRegistryCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
@@ -23,6 +24,7 @@ type ToolRecord = {
   iconName?: string | null;
   description?: string;
   tags?: AgentHubTag[];
+  module?: AgentHubModule | null;
   type?: string;
   status?: string | null;
   lastLoadError?: string | null;
@@ -79,7 +81,7 @@ export function AgentToolRegistryEditorPage() {
   const entityApi = React.useMemo(() => createSolidEntityApi("agentToolRegistry"), []);
   const { useCreateSolidEntityMutation, useGetSolidEntityByIdQuery, useUpdateSolidEntityMutation } = entityApi;
   const { data: response, isLoading, isFetching, refetch } = useGetSolidEntityByIdQuery(
-    { id, qs: "populate[0]=agentTools&populate[1]=agentTools.agentRegistry&populate[2]=tags" },
+    { id, qs: "populate[0]=agentTools&populate[1]=agentTools.agentRegistry&populate[2]=tags&populate[3]=module" },
     { skip: !id || id === "new" },
   );
   const [createTool, { isLoading: isCreating }] = useCreateSolidEntityMutation();
@@ -92,6 +94,7 @@ export function AgentToolRegistryEditorPage() {
   const [type, setType] = React.useState("custom");
   const [sourceCode, setSourceCode] = React.useState("");
   const [tags, setTags] = React.useState<AgentHubTag[]>([]);
+  const [module, setModule] = React.useState<AgentHubModule | null>(null);
   const [creatingTag, setCreatingTag] = React.useState(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
@@ -101,17 +104,19 @@ export function AgentToolRegistryEditorPage() {
   const preparingActivation = React.useRef(false);
   const baseline = React.useRef("");
 
-  const currentForm = () => JSON.stringify({ name, iconName, description, type, sourceCode, tags });
+  const currentForm = () => JSON.stringify({ name, iconName, description, type, sourceCode, tags, moduleId: module?.id ?? null });
 
   React.useEffect(() => {
     const nextTags = agentHubTagsFrom(record?.tags);
+    const nextModule = agentHubModuleFrom(record?.module);
     setName(record?.name ?? "");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setType(record?.type ?? "custom");
     setSourceCode(record?.sourceCode ?? "");
     setTags(nextTags);
-    baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", type: record?.type ?? "custom", sourceCode: record?.sourceCode ?? "", tags: nextTags });
+    setModule(nextModule);
+    baseline.current = JSON.stringify({ name: record?.name ?? "", iconName: record?.iconName ?? "", description: record?.description ?? "", type: record?.type ?? "custom", sourceCode: record?.sourceCode ?? "", tags: nextTags, moduleId: nextModule?.id ?? null });
   }, [record]);
 
   const isReadOnly = record?.type === "solidx";
@@ -134,7 +139,7 @@ export function AgentToolRegistryEditorPage() {
     }
     const payload = {
       name: name.trim(), iconName: iconName || null, description: description.trim(), type,
-      sourceCode, ...agentHubTagsPayload(tags),
+      sourceCode, ...agentHubTagsPayload(tags), ...agentHubModulePayload(module),
       ...(["custom", "thirdparty"].includes(type) ? { checksum: await sha256Hex(sourceCode) } : {}),
       status: nextStatus ?? (record && (sourceCode !== record.sourceCode || name.trim() !== record.name || type !== record.type)
         ? "inactive" : record?.status ?? "inactive"),
@@ -202,7 +207,7 @@ export function AgentToolRegistryEditorPage() {
   const sessionAgents = React.useMemo(() => agents.filter((agent): agent is Agent & { id: number | string } => agent.id !== undefined && agent.id !== null), [agents]);
   const tabs = [
     { value: "general", label: "General Info", content: <fieldset className="agent-tool-editor__general" disabled={isReadOnly}>
-      {isReadOnly && <p className="agent-tool-editor__readonly-note">SolidX tools are seeded by the AgentHub runtime and cannot be edited.</p>}
+      {isReadOnly && <p className="agent-tool-editor__readonly-note">SolidX tools cannot be edited.</p>}
       {record?.status && <section className={`agent-tool-editor__runtime-status${record.status === "load_failed" ? " agent-tool-editor__runtime-status--failed" : ""}`} role={record.status === "load_failed" ? "alert" : "status"}>
         <div className="agent-tool-editor__runtime-heading"><strong>Runtime status</strong><span>{record.status.replace(/[_-]+/g, " ")}</span></div>
         {record.status === "load_failed" ? <>
@@ -219,6 +224,7 @@ export function AgentToolRegistryEditorPage() {
       <label className="agent-tool-editor__field"><span>Tool type <b>*</b></span><select value={type} aria-invalid={Boolean(fieldErrors.type)} aria-describedby={fieldErrors.type ? "agent-tool-type-error" : undefined} className={fieldErrors.type ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setType(e.target.value); setFieldErrors((current) => ({ ...current, type: "" })); }}>
         {isReadOnly && <option value="solidx">SolidX</option>}<option value="thirdparty">Third Party</option><option value="custom">Custom</option>
       </select>{fieldErrors.type && <small id="agent-tool-type-error" className="agent-tool-editor__field-error">{fieldErrors.type}</small>}</label>
+      <AgentHubModuleField className="agent-tool-editor__field" value={module} onChange={setModule} disabled={isReadOnly || isCreating || isSaving} clearable={!record?.module} />
       <AgentHubTagsField value={tags} onChange={setTags} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
       {record?.id && <section className="agent-tool-editor__workflow" aria-labelledby="agent-tool-lifecycle-title">
         <div className="agent-tool-editor__workflow-head"><div><h2 id="agent-tool-lifecycle-title">Tool lifecycle</h2><p>Configuration and initialization must pass before this tool can be activated.</p></div></div>

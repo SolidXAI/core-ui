@@ -9,6 +9,7 @@ import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentPersonaHistory } from "./AgentPersonaHistory";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
+import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
 import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
 import { AgentSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import { AgentProcessesPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentProcessesPanel";
@@ -165,7 +166,7 @@ const detailFields = [
 ];
 
 const detailQuery = [
-  "agentRoles", "agentRoles.roleMetadata", "agentSecrets", "agentSecrets.secret", "tags",
+  "agentRoles", "agentRoles.roleMetadata", "agentSecrets", "agentSecrets.secret", "tags", "module",
 ].map((name, index) => `populate[${index}]=${name}`).join("&") + "&" + fieldsQuery(detailFields);
 
 // Group by link ID to project summary columns without populating full registry records.
@@ -205,7 +206,7 @@ function agentFormFromRecord(record: Agent) {
     name: record.name ?? "", title: record.title ?? "", description: record.description ?? "", iconName: record.iconName ?? "",
     inputs: parseInputs(record.requiredInputs), reasoningModelKey: record.reasoningModelKey ?? "", fastModelKey: record.fastModelKey ?? "",
     systemPrompt: record.systemPrompt ?? "", stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
-    costLimit: Number(record.costLimit ?? 3), tags: agentHubTagsFrom(record.tags), skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
+    costLimit: Number(record.costLimit ?? 3), tags: agentHubTagsFrom(record.tags), moduleId: agentHubModuleFrom(record.module)?.id ?? null, skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
     toolIds: tools.map((link) => link.agentToolRegistry?.id).filter(Boolean),
     roleIds: items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean),
     secretIds: secrets.map((link) => link.secret?.id).filter(Boolean),
@@ -392,6 +393,7 @@ export function AgentRegistryEditorPage() {
   const [turnStepLimit, setTurnStepLimit] = React.useState(20);
   const [costLimit, setCostLimit] = React.useState(3);
   const [tags, setTags] = React.useState<AgentHubTag[]>([]);
+  const [module, setModule] = React.useState<AgentHubModule | null>(null);
   const [creatingTag, setCreatingTag] = React.useState(false);
   const [skillIds, setSkillIds] = React.useState<number[]>([]);
   const [toolIds, setToolIds] = React.useState<number[]>([]);
@@ -409,7 +411,7 @@ export function AgentRegistryEditorPage() {
   const baseline = React.useRef("");
 
   const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
-    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, skillIds, toolIds, roleIds, secretIds,
+    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
     alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
   React.useEffect(() => {
@@ -421,6 +423,7 @@ export function AgentRegistryEditorPage() {
     setSystemPrompt(record.systemPrompt ?? ""); setStepLimit(record.stepLimit ?? 100);
     setTurnStepLimit(record.turnStepLimit ?? 20); setCostLimit(Number(record.costLimit ?? 3));
     setTags(agentHubTagsFrom(record.tags));
+    setModule(agentHubModuleFrom(record.module));
     setSkillIds(items(record.agentSkills).map((link) => link.agentSkillRegistry?.id).filter(Boolean));
     setToolIds(items(record.agentTools).map((link) => link.agentToolRegistry?.id).filter(Boolean));
     setRoleIds(items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean));
@@ -520,6 +523,7 @@ export function AgentRegistryEditorPage() {
       reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
       ...agentHubTagsPayload(tags),
+      ...agentHubModulePayload(module),
       status: nextStatus ?? record?.status ?? "draft",
     };
     let newlyCreatedId: number | undefined;
@@ -593,6 +597,7 @@ export function AgentRegistryEditorPage() {
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
       <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
+        <AgentHubModuleField className="agent-editor__field" value={module} onChange={setModule} disabled={creating || updating || isLoading || isFetching || isError} clearable={!record?.module} />
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
