@@ -36,6 +36,8 @@ import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidDialog, SolidDialogBody } from "../../shad-cn-ui/SolidDialog";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
+import { eventBus } from "../../../helpers/eventBus";
+import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
 
 type Props = {
     agentUrl: string;
@@ -344,6 +346,53 @@ export function SolidAgentChat({
         }
     };
 
+    const getProviderBadgeLabel = useCallback((providerId?: string) => {
+        if (!providerId) return "";
+        const matched = providers.find((p) => p.id.toLowerCase() === providerId.toLowerCase());
+        if (matched?.name) return matched.name;
+        return providerId.charAt(0).toUpperCase() + providerId.slice(1);
+    }, [providers]);
+
+    const handleResumeSession = async (session: AgentSessionSummary) => {
+        const targetProvider = session.provider || selectedProvider;
+        const targetModel = session.model || selectedModel;
+
+        if (targetProvider && targetProvider !== selectedProvider) {
+            setSelectedProvider(targetProvider);
+        }
+
+        let targetModels = models;
+        if (targetProvider && targetProvider !== selectedProvider) {
+            const res = await fetchProviderModels(agentUrl, targetProvider);
+            targetModels = res?.models || [];
+            if (targetModels.length > 0) {
+                setModels(targetModels);
+            }
+        }
+
+        const resolvedModel = targetModel || targetModels[0]?.id || "";
+        if (resolvedModel) {
+            setSelectedModel(resolvedModel);
+        }
+
+        const nextThinking = getStoredThinking(targetProvider);
+        const nextReasoning = getStoredReasoning(targetProvider) ?? undefined;
+        const nextFast = getStoredFast(targetProvider);
+        const nextSpeed = getStoredSpeed(targetProvider) ?? undefined;
+        setIsThinking(nextThinking);
+        setSelectedReasoning(nextReasoning ?? "");
+        setIsFast(nextFast);
+        setSelectedSpeed(nextSpeed ?? "standard");
+
+        runtime?.resume(session.session_id, targetProvider, resolvedModel, {
+            thinking: nextThinking,
+            reasoning: nextReasoning,
+            fast: nextFast,
+            speed: nextSpeed,
+        });
+        setShowHistory(false);
+    };
+
     const handleModelChange = (modelId: string) => {
         setSelectedModel(modelId);
         runtime?.updateModel(modelId, selectedProvider, {
@@ -454,6 +503,27 @@ export function SolidAgentChat({
             alive = false;
         };
     }, [showHistory, agentUrl, signedIn]);
+
+    useEffect(() => {
+        return eventBus.on(SOLID_AGENT_EVENTS.sessionChanged, (payload) => {
+            if (!payload) return;
+            if (payload.provider && payload.provider !== selectedProvider) {
+                setSelectedProvider(payload.provider);
+                fetchProviderModels(agentUrl, payload.provider).then((res) => {
+                    const nextModels = res?.models || [];
+                    if (nextModels.length > 0) setModels(nextModels);
+                    if (payload.model) {
+                        setSelectedModel(payload.model);
+                    } else {
+                        const fallback = res?.default_model || nextModels[0]?.id || "";
+                        if (fallback) setSelectedModel(fallback);
+                    }
+                });
+            } else if (payload.model && payload.model !== selectedModel) {
+                setSelectedModel(payload.model);
+            }
+        });
+    }, [agentUrl, selectedProvider, selectedModel]);
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const windowMode = windowControls?.mode ?? agent.mode;
@@ -721,17 +791,17 @@ export function SolidAgentChat({
                                 <button
                                     type="button"
                                     className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
-                                    onClick={() => {
-                                        runtime?.resume(session.session_id, selectedProvider, selectedModel, {
-                                            thinking: isThinking,
-                                            reasoning: selectedReasoning,
-                                            fast: isFast,
-                                            speed: selectedSpeed,
-                                        });
-                                        setShowHistory(false);
-                                    }}
+                                    onClick={() => void handleResumeSession(session)}
                                 >
                                     <span className={styles.historyPreview}>{session.preview || "New conversation"}</span>
+                                    {session.provider && (
+                                        <span
+                                            className={styles.providerBadge}
+                                            title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
+                                        >
+                                            {getProviderBadgeLabel(session.provider)}
+                                        </span>
+                                    )}
                                     <span className={styles.historyDate}>{formatDate(session.created_at)}</span>
                                 </button>
                                 <button

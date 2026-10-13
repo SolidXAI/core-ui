@@ -146,9 +146,9 @@ export type AgentSessionOptions = {
 };
 
 export type AgentAction =
-    | ({ action: "start_session"; provider?: string; model?: string } & AgentSessionOptions)
-    | ({ action: "resume_session"; session_id: string; provider?: string; model?: string } & AgentSessionOptions)
-    | ({ action: "update_session"; session_id: string; provider?: string; model?: string } & AgentSessionOptions)
+    | ({ action: "start_session"; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
+    | ({ action: "resume_session"; session_id: string; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
+    | ({ action: "update_session"; session_id: string; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
     | ({
           action: "message";
           session_id: string;

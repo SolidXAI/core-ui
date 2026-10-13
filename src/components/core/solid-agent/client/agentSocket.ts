@@ -1,4 +1,4 @@
-import type { AgentAction, AgentConnection, AgentSessionOptions, AgentWireFrame } from "../types";
+import type { AgentAction, AgentConnection, AgentRuntimeType, AgentSessionOptions, AgentWireFrame } from "../types";
 import { agentWsUrl, clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
 
 /**
@@ -59,10 +59,19 @@ export class AgentSocket {
         });
     }
 
+    get runtime(): AgentRuntimeType {
+        return this.checkProcessAvailability ? "agentHub" : "solidx";
+    }
+
     private openSession() {
         const provider = this.provider ?? undefined;
         const model = this.model ?? undefined;
-        void this.sendRaw(this.sessionId ? { action: "resume_session", session_id: this.sessionId, provider, model, ...this.sessionOptions } : { action: "start_session", provider, model, ...this.sessionOptions });
+        const runtime = this.runtime;
+        void this.sendRaw(
+            this.sessionId
+                ? { action: "resume_session", session_id: this.sessionId, provider, model, runtime, ...this.sessionOptions }
+                : { action: "start_session", provider, model, runtime, ...this.sessionOptions }
+        );
     }
 
     get currentSessionId() {
@@ -183,6 +192,7 @@ export class AgentSocket {
                     action: "start_session",
                     provider,
                     model,
+                    runtime: this.runtime,
                     ...this.sessionOptions,
                 });
                 return;
@@ -249,6 +259,7 @@ export class AgentSocket {
             action: "start_session",
             provider: this.provider ?? undefined,
             model: this.model ?? undefined,
+            runtime: this.runtime,
             ...this.sessionOptions,
         };
         if (this.ws?.readyState === WebSocket.OPEN) void this.sendRaw(payload);
@@ -267,6 +278,7 @@ export class AgentSocket {
                 session_id: this.sessionId,
                 provider: this.provider ?? undefined,
                 model: this.model ?? undefined,
+                runtime: this.runtime,
                 ...this.sessionOptions,
             });
         }
@@ -288,6 +300,7 @@ export class AgentSocket {
                 session_id: sessionId,
                 provider: this.provider ?? undefined,
                 model: this.model ?? undefined,
+                runtime: this.runtime,
                 ...this.sessionOptions,
             });
         } else {

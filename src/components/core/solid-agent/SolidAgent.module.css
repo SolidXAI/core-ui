@@ -434,6 +434,8 @@
   background: var(--agent-tint);
   color: var(--agent-primary);
   border: 1px solid color-mix(in srgb, var(--agent-primary) 25%, transparent);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .banner {

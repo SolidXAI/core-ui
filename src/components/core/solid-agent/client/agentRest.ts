@@ -1,5 +1,5 @@
 import { clearAgentAuth, loadAgentAuth, isExternalAgentAuth, renewExternalAgentAuth } from "./agentAuth";
-import type { AgentUploadedAttachment, AgentModelAssignments, AgentProviderInfo, ProviderModelInfo } from "../types";
+import type { AgentUploadedAttachment, AgentModelAssignments, AgentProviderInfo, ProviderModelInfo, AgentRuntimeType } from "../types";
 
 export const HISTORY_PAGE_SIZE = 50;
 
@@ -9,6 +9,9 @@ export type AgentSessionSummary = {
     totalSteps: number;
     created_at: string | null;
     preview: string;
+    provider?: string;
+    model?: string;
+    runtime?: AgentRuntimeType;
 };
 
 export type AgentHistoryPage = { messages: any[]; has_more: boolean };
