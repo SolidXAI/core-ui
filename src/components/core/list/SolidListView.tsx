@@ -1180,6 +1180,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
+  const lightboxBeforeCloseCallbackRef = useRef<(() => void) | null>(null);
+
+  const setListLightboxOpen = (open: boolean, onBeforeClose?: () => void) => {
+    lightboxBeforeCloseCallbackRef.current = onBeforeClose ?? null;
+    setOpenLightbox(open);
+  };
 
   // Render columns dynamically based on metadata
   const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
@@ -1218,7 +1224,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             fieldMetadata,
             column,
             setLightboxUrls,
-            setOpenLightbox,
+            setOpenLightbox: setListLightboxOpen,
             embeded: params.embeded,
             recordClickAction: recordClickFormMode
           });
@@ -1231,7 +1237,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           fieldMetadata,
           column,
           setLightboxUrls,
-          setOpenLightbox,
+          setOpenLightbox: setListLightboxOpen,
           embeded: params.embeded,
           recordClickAction: recordClickFormMode
         });
@@ -2011,6 +2017,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         <SolidLightbox
           open={openLightbox}
           slides={lightboxSlides}
+          onBeforeClose={() => {
+            lightboxBeforeCloseCallbackRef.current?.();
+            lightboxBeforeCloseCallbackRef.current = null;
+          }}
           onClose={() => setOpenLightbox(false)}
         />
       )}
