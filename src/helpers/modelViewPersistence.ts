@@ -179,7 +179,12 @@ export const resolveRetainedModelViewRoute = (target: string): string => {
 };
 
 
-const MENU_CONTEXT_KEYS = ["menuItemId", "menuItemName", "actionId", "actionName"] as const;
+const SIDEBAR_CONTEXT_KEYS = ["menuItemId", "menuItemName"] as const;
+const MODEL_VIEW_CONTEXT_KEYS = [
+  ...SIDEBAR_CONTEXT_KEYS,
+  "actionId",
+  "actionName",
+] as const;
 const MODEL_ROUTE_REGEX = /^\/admin\/core\/[^/]+\/[^/]+\/(?:list|tree|kanban|card|form)(?:\/|$)/;
 const MODEL_KEY_REGEX = /^(\/admin\/core\/[^/]+\/[^/]+)/;
 
@@ -227,13 +232,20 @@ export const preserveModelMenuContext = (target: string): string => {
     const targetUrl = new URL(target, currentUrl.href);
     const currentModelKey = getModelRouteKey(currentUrl.pathname);
     const targetModelKey = getModelRouteKey(targetUrl.pathname);
+    const isFormRoute = /\/admin\/core\/[^/]+\/[^/]+\/form(?:\/|$)/.test(targetUrl.pathname);
 
     if (!MODEL_ROUTE_REGEX.test(currentUrl.pathname) || !MODEL_ROUTE_REGEX.test(targetUrl.pathname) || !currentModelKey || currentModelKey !== targetModelKey) {
       return target;
     }
 
+    if (isFormRoute) {
+      targetUrl.searchParams.delete("actionId");
+    }
+
     const context = getMenuContextForActiveRoute(currentUrl.pathname, currentUrl.searchParams);
-    MENU_CONTEXT_KEYS.forEach((key) => {
+    const keysToCopy = isFormRoute ? SIDEBAR_CONTEXT_KEYS : MODEL_VIEW_CONTEXT_KEYS;
+
+    keysToCopy.forEach((key) => {
       if (!targetUrl.searchParams.has(key) && context.has(key)) {
         targetUrl.searchParams.set(key, context.get(key) || "");
       }

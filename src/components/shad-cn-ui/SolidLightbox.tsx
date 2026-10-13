@@ -16,6 +16,7 @@ export interface SolidLightboxSlide {
 export interface SolidLightboxProps {
   slides: SolidLightboxSlide[];
   open: boolean;
+  onBeforeClose?: () => void;
   onClose: () => void;
   viewerOptions?: Viewer.Options;
 }
@@ -23,6 +24,7 @@ export interface SolidLightboxProps {
 export const SolidLightbox = ({
   slides,
   open,
+  onBeforeClose,
   onClose,
   viewerOptions,
 }: SolidLightboxProps) => {
@@ -83,6 +85,10 @@ export const SolidLightbox = ({
         reset: 1,
       },
       ...viewerOptions,
+      hide: (event) => {
+        viewerOptions?.hide?.(event);
+        onBeforeClose?.();
+      },
     });
 
     viewerRef.current.show();
@@ -201,7 +207,14 @@ export const SolidLightbox = ({
 
   return (
     <div style={overlayStyles}>
-      <button style={closeButtonStyles} onClick={onClose} aria-label="Close">
+      <button
+        style={closeButtonStyles}
+        onClick={() => {
+          onBeforeClose?.();
+          onClose();
+        }}
+        aria-label="Close"
+      >
         ×
       </button>
       {showNav && (
