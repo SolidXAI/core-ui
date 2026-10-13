@@ -192,6 +192,10 @@ export const modulesApi = createApi({
             }),
             transformResponse: (response: any) => response?.data ?? response,
         }),
+        getLatestModulePackageBackup: builder.query({
+            query: ({ moduleName }) => `/module-packages/backups/latest?moduleName=${encodeURIComponent(moduleName)}`,
+            transformResponse: (response: any) => response?.data ?? response ?? null,
+        }),
         restoreModulePackageImport: builder.mutation({
             query: ({ transactionKey }) => ({
                 url: `/module-packages/import/${transactionKey}/restore`,
@@ -256,6 +260,7 @@ export const {
     useClearModulePackageRuntimeMutation,
     useRunModulePackageBuildMutation,
     useRunModulePackageSeedMutation,
+    useLazyGetLatestModulePackageBackupQuery,
     useRestoreModulePackageImportMutation,
     useDismissModulePackageImportMutation,
     useExportModulePackageMutation,

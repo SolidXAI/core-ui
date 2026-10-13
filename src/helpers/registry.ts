@@ -11,6 +11,7 @@ import GenerateModuleCodeRowAction from "../components/core/extension/solid-core
 import { ClearModulePackageRuntimeHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ClearModulePackageRuntimeHeaderAction";
 import ExportModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/ExportModulePackageRowAction";
 import UpdateModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/UpdateModulePackageRowAction";
+import RestoreModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/RestoreModulePackageRowAction";
 import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
@@ -448,6 +449,7 @@ registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAct
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("ExportModulePackageRowAction", ExportModulePackageRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("UpdateModulePackageRowAction", UpdateModulePackageRowAction, ExtensionComponentTypes.listRowAction);
+registerExtensionComponent("RestoreModulePackageRowAction", RestoreModulePackageRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, ExtensionComponentTypes.listRowAction);
 

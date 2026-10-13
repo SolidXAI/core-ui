@@ -292,7 +292,6 @@ export function ModulePackageImportContent({
   const [previewResponse, setPreviewResponse] = useState<any | null>(null);
   const [transactionKey, setTransactionKey] = useState<string | null>(null);
   const [overwriteExisting, setOverwriteExisting] = useState(false);
-  const [approveUpdate, setApproveUpdate] = useState(false);
   const [acknowledgeVersionChange, setAcknowledgeVersionChange] = useState(false);
   const [pruneOnSeed, setPruneOnSeed] = useState(false);
   const [showAllFiles, setShowAllFiles] = useState(false);
@@ -352,7 +351,8 @@ export function ModulePackageImportContent({
   const incomingVersion = previewResponse?.incomingVersion ?? previewResponse?.preview?.incomingVersion ?? null;
   const versionComparison = previewResponse?.versionComparison ?? previewResponse?.preview?.versionComparison ?? null;
   const requiresVersionAcknowledgement = Boolean(previewResponse?.preview?.requiresVersionAcknowledgement);
-  const isUpdateApproved = !isUpdate || (approveUpdate && (!requiresVersionAcknowledgement || acknowledgeVersionChange));
+  // Clicking the Update button approves the shown version; risky updates also need an explicit acknowledgement.
+  const isUpdateApproved = !isUpdate || !requiresVersionAcknowledgement || acknowledgeVersionChange;
   const backup = previewResponse?.backup ?? null;
 
   const canImport = steps.preview.status !== "pending" && isArchiveValid && isUpdateApproved && steps.import.status !== "success" && !isProcessing && !isPreviewing;
@@ -410,7 +410,6 @@ export function ModulePackageImportContent({
       setPreviewResponse(response);
       setTransactionKey(response?.transactionKey ?? null);
       setOverwriteExisting(false);
-      setApproveUpdate(false);
       setAcknowledgeVersionChange(false);
       setShowAllFiles(false);
       setFinalSummary(null);
@@ -704,21 +703,12 @@ export function ModulePackageImportContent({
           <span className="solid-module-package-version__value">{formatVersionLabel(incomingVersion)}</span>
           <span className={`solid-module-package-version__badge is-${comparison.tone}`}>{comparison.label}</span>
         </div>
-        {isArchiveValid ? (
-          <>
-            <SolidCheckbox
-              checked={approveUpdate}
-              onChange={(event) => setApproveUpdate(event.currentTarget.checked)}
-              label={`Replace ${packageModuleName} ${formatVersionLabel(installedVersion)} with ${formatVersionLabel(incomingVersion)}`}
-            />
-            {requiresVersionAcknowledgement ? (
-              <SolidCheckbox
-                checked={acknowledgeVersionChange}
-                onChange={(event) => setAcknowledgeVersionChange(event.currentTarget.checked)}
-                label={acknowledgementLabel}
-              />
-            ) : null}
-          </>
+        {isArchiveValid && requiresVersionAcknowledgement ? (
+          <SolidCheckbox
+            checked={acknowledgeVersionChange}
+            onChange={(event) => setAcknowledgeVersionChange(event.currentTarget.checked)}
+            label={acknowledgementLabel}
+          />
         ) : null}
       </div>
     );
@@ -816,7 +806,6 @@ export function ModulePackageImportContent({
                 setPreviewResponse(null);
                 setTransactionKey(null);
                 setOverwriteExisting(false);
-                setApproveUpdate(false);
                 setAcknowledgeVersionChange(false);
                 setFinalSummary(null);
                 setSelectedStep("preview");
