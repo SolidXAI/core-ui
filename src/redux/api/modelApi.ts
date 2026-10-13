@@ -4,6 +4,7 @@ import { baseQueryWithAuth } from './fetchBaseQuery';
 export const modelsApi = createApi({
     reducerPath: 'modelApi',
     baseQuery: baseQueryWithAuth,
+    tagTypes: ['ModelMetadata'],
     endpoints: (builder) => ({
         getModels: builder.query({
             query: (qs) => {
@@ -17,7 +18,8 @@ export const modelsApi = createApi({
                     records: response.data.records,
                     meta: response.data.meta
                 }
-            }
+            },
+            providesTags: ['ModelMetadata']
         }),
         getmodelById: builder.query({
             query: (id) => `/model-metadata/${id}?populate[0]=fields&populate[1]=module&&populate[2]=fields.mediaStorageProvider&populate[3]=parentModel`,
@@ -36,6 +38,14 @@ export const modelsApi = createApi({
                 body: model
             }),
         }),
+        previewDeleteModel: builder.mutation({
+            query: (id) => ({ url: `/model-metadata/${id}/delete-preview`, method: 'POST' }),
+            transformResponse: (response: any) => response.data,
+        }),
+        applyDeleteModel: builder.mutation({
+            query: ({ id, planHash }) => ({ url: `/model-metadata/${id}/delete-confirmed`, method: 'POST', body: { planHash } }),
+            invalidatesTags: ['ModelMetadata'],
+        }),
        
         updatemodel: builder.mutation({
             query: ({ id, data }) => ({
@@ -51,19 +61,6 @@ export const modelsApi = createApi({
         //         body:data
         //     }),
         // }),
-        deleteMultipleModels: builder.mutation({
-            query: (data) => ({
-                url: `/model-metadata/bulk/`,
-                method: 'DELETE',
-                body:data
-            }),
-        }),
-        deletemodel: builder.mutation({
-            query: (id) => ({
-                url: `/model-metadata/${id}`,
-                method: 'DELETE',
-            }),
-        }),
         updateUserKey: builder.mutation({
             query: (data) => ({
                 url: `/model-metadata/update-user-key`,
@@ -77,4 +74,4 @@ export const modelsApi = createApi({
     })
 })
 
-export const { useGetModelsQuery,useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useGetmodelByIdQuery, useCreatemodelMutation,useGenerateCodeForModelMutation,useUpdatemodelMutation, useDeleteMultipleModelsMutation ,useDeletemodelMutation, useUpdateUserKeyMutation,useLazyNavigationQuery } = modelsApi  
+export const { useGetModelsQuery,useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useGetmodelByIdQuery, useCreatemodelMutation,useGenerateCodeForModelMutation,useUpdatemodelMutation, usePreviewDeleteModelMutation, useApplyDeleteModelMutation, useUpdateUserKeyMutation,useLazyNavigationQuery } = modelsApi

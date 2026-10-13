@@ -66,6 +66,7 @@ export type SolidFormViewProps = {
     modelName: string;
     id: string;
     embeded: boolean;
+    viewMode?: "view" | "edit";
     handlePopupClose?: any,
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
@@ -624,7 +625,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
-    const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
+    const [viewMode, setViewMode] = useState<"view" | "edit">(params.viewMode ?? (params.embeded === true ? "edit" : "view"));
     const [createMode, setCreateMode] = useState<boolean>(false);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
@@ -758,7 +759,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
 
     useEffect(() => {
-        const mode = searchParams.get('viewMode');
+        const mode = params.viewMode ?? searchParams.get('viewMode');
         const locale = searchParams.get('locale');
         const defaultEntityLocaleIdn = searchParams.get('defaultEntityLocaleId');
         if (params.id === 'new' && !locale) {
@@ -781,7 +782,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         } else {
             setViewMode('view'); // Default to 'view' if no valid mode is provided
         }
-    }, [searchParams, params.id]);
+    }, [searchParams, params.id, params.viewMode]);
 
     // function that updates view mode 
     const updateViewMode = (newMode: "view" | "edit") => {
@@ -1065,6 +1066,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 else {
                     // updateEntity({ id: +params.id, data: formData });
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    // The audit event is produced by the entity update. Refresh the chatter
+                    // directly from this save path so the panel does not depend on mutation
+                    // status transitions to notice the new audit message.
+                    setRefreshChatterMessage(true);
                     // Keep the current screen in sync with the normalized payload returned by the API
                     // so toggling view/edit after save does not continue showing stale pre-save values.
                     if (result?.data) {

@@ -27,6 +27,7 @@ import {
     SolidDialogTitle,
 } from "../../shad-cn-ui/SolidDialog";
 
+const savedFiltersEntityApi = createSolidEntityApi("savedFilters");
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -191,12 +192,13 @@ const transformRulesToFilters = (input: any, viewData: any) => {
 
 
             const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
-            const isManyToMany = fieldMeta?.type === 'relation' && fieldMeta?.relationType === 'many-to-many';
+            const isToManyRelation = fieldMeta?.type === 'relation'
+                && ['one-to-many', 'many-to-many'].includes(fieldMeta?.relationType);
 
 
             let transformedRule;
-            if (isManyToMany) {
-                // For many-to-many relations, always use array format for $in/$notIn
+            if (isToManyRelation) {
+                // Collection relations must be filtered through a related scalar field.
                 transformedRule = {
                     [rule.fieldName]: {
                         id: {
@@ -767,14 +769,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         [allAvailableSavedFilters]
     );
 
-    const entityApi = createSolidEntityApi("savedFilters");
     const {
         useCreateSolidEntityMutation,
         useDeleteSolidEntityMutation,
         useGetSolidEntityByIdQuery,
         useUpdateSolidEntityMutation,
         useLazyGetSolidEntitiesQuery
-    } = entityApi;
+    } = savedFiltersEntityApi;
 
     const [
         createEntity,

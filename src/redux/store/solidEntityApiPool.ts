@@ -120,6 +120,12 @@ function evictIfNeeded(nextEntityName: string) {
 
 export function setSolidEntityApiStore(store: SolidEntityApiStore) {
   activeStore = store;
+  // Entity APIs created while route modules were imported predate the store.
+  // Install them before the Provider mounts so their hooks have a reducer and
+  // middleware on the first render.
+  for (const entry of Array.from(pool.values())) {
+    ensureSolidEntityApiRegistered(entry.entityName, entry.api);
+  }
 }
 
 export function getSolidStoreDispatch() {

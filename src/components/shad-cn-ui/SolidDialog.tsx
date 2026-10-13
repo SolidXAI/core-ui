@@ -7,6 +7,7 @@ type SolidDialogProps = {
   onOpenChange?: (open: boolean) => void;
   children?: React.ReactNode;
   className?: string;
+  ariaLabel?: string;
   contentClassName?: string;
   overlayClassName?: string;
   style?: React.CSSProperties;
@@ -70,6 +71,7 @@ export function SolidDialog({
   onOpenChange,
   children,
   className,
+  ariaLabel,
   contentClassName,
   overlayClassName,
   style,
@@ -94,6 +96,7 @@ export function SolidDialog({
         <Dialog.Overlay className={cx("solid-radix-dialog-overlay", overlayClassName)} />
         <Dialog.Content
           className={cx("solid-radix-dialog-content", className, contentClassName)}
+          aria-label={ariaLabel}
           style={style ?? contentStyle}
           onEscapeKeyDown={(event: any) => {
             if (!dismissible) event.preventDefault();

@@ -117,7 +117,7 @@ type WorkflowDefinitionDsl = {
   metadata?: Record<string, any>;
 };
 
-type WorkflowSecretSuggestionRecord = {
+type SecretSuggestionRecord = {
   id?: number;
   key?: string;
   displayName?: string;
@@ -1772,7 +1772,7 @@ function buildWorkflowExpressionSuggestions(
   definition: WorkflowDefinitionDsl,
   nodeTypes: WorkflowNodeMetadataResponse[],
   currentNodeId: string,
-  workflowSecrets: WorkflowSecretSuggestionRecord[] = [],
+  secrets: SecretSuggestionRecord[] = [],
 ): WorkflowExpressionSuggestion[] {
   const nodeTypesByType = new Map(nodeTypes.map((nodeType) => [nodeType.type, nodeType]));
   const suggestions: WorkflowExpressionSuggestion[] = [];
@@ -1822,7 +1822,7 @@ function buildWorkflowExpressionSuggestions(
     );
   });
 
-  workflowSecrets
+  secrets
     .filter((secret) => String(secret.status ?? "active") === "active")
     .forEach((secret) => {
       const key = String(secret.key ?? "").trim();
@@ -2131,8 +2131,8 @@ export function WorkflowDefinitionEditorPage() {
     () => createSolidEntityApi("workflowStepExecution"),
     [],
   );
-  const workflowSecretApi = React.useMemo(
-    () => createSolidEntityApi("workflowSecret"),
+  const secretApi = React.useMemo(
+    () => createSolidEntityApi("secret"),
     [],
   );
   const {
@@ -2150,8 +2150,8 @@ export function WorkflowDefinitionEditorPage() {
     useLazyGetSolidEntitiesQuery: useLazyGetWorkflowStepExecutionsQuery,
   } = workflowStepExecutionApi;
   const {
-    useGetSolidEntitiesQuery: useGetWorkflowSecretsQuery,
-  } = workflowSecretApi;
+    useGetSolidEntitiesQuery: useGetSecretsQuery,
+  } = secretApi;
 
   const workflowDefinitionId = params.id ?? "";
 
@@ -2182,7 +2182,7 @@ export function WorkflowDefinitionEditorPage() {
   const { data: moduleMetadataResponse } = useGetmodulesQuery(
     "offset=0&limit=100&sort[0]=displayName%3Aasc",
   );
-  const { data: workflowSecretsResponse } = useGetWorkflowSecretsQuery(
+  const { data: secretsResponse } = useGetSecretsQuery(
     "offset=0&limit=1000&fields[0]=id&fields[1]=key&fields[2]=displayName&fields[3]=description&fields[4]=valueType&fields[5]=status&filters[status][$eq]=active&sort[0]=key%3Aasc",
   );
 
@@ -2203,9 +2203,9 @@ export function WorkflowDefinitionEditorPage() {
     () => moduleRecords.filter(isWorkflowModuleSelectable),
     [moduleRecords],
   );
-  const workflowSecretRecords = React.useMemo(
-    () => ((workflowSecretsResponse?.records ?? []) as WorkflowSecretSuggestionRecord[]),
-    [workflowSecretsResponse?.records],
+  const secretRecords = React.useMemo(
+    () => ((secretsResponse?.records ?? []) as SecretSuggestionRecord[]),
+    [secretsResponse?.records],
   );
 
   const [workflowKey, setWorkflowKey] = React.useState("");
@@ -2466,10 +2466,10 @@ export function WorkflowDefinitionEditorPage() {
             definitionDraft,
             nodeTypes,
             selectedNodeId,
-            workflowSecretRecords,
+            secretRecords,
           )
         : [],
-    [definitionDraft, nodeTypes, selectedNodeId, workflowSecretRecords],
+    [definitionDraft, nodeTypes, selectedNodeId, secretRecords],
   );
 
   const addNodeExpressionSuggestions = React.useMemo(
@@ -2482,10 +2482,10 @@ export function WorkflowDefinitionEditorPage() {
               definitionDraft.nodes,
               pendingInsertTarget,
             ),
-            workflowSecretRecords,
+            secretRecords,
           )
         : [],
-    [definitionDraft, nodeTypes, pendingInsertTarget, workflowSecretRecords],
+    [definitionDraft, nodeTypes, pendingInsertTarget, secretRecords],
   );
 
   const validateWorkflowIdentity = React.useCallback(() => {

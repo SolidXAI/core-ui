@@ -4,11 +4,14 @@ import { RolePermissionsManyToManyFieldWidget } from "../components/core/extensi
 import { CustomHtml } from "../components/core/form/widgets/CustomHtml";
 import React from "react";
 import { SolidShortTextFieldImageListWidget } from "../components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
+import { SolidIconNameListViewWidget } from "../components/core/list/widgets/SolidIconNameListViewWidget";
 import { SolidShortTextAvatarWidget } from "../components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "../components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "../components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
 import { ClearModulePackageRuntimeHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ClearModulePackageRuntimeHeaderAction";
 import ExportModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/ExportModulePackageRowAction";
+import UpdateModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/UpdateModulePackageRowAction";
+import RestoreModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/RestoreModulePackageRowAction";
 import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
@@ -44,6 +47,8 @@ import { SolidManyToManyRelationAvatarListWidget } from "../components/core/list
 import { SolidManyToOneRelationAvatarListWidget } from "../components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
 import { PillWidget } from "../components/core/list/widgets/PillWidget";
 import { SolidUserBlockedStatusListWidget } from "../components/core/list/widgets/SolidUserBlockedStatusListWidget";
+import { AgentProcessNeedsRestartListWidget } from "../components/core/list/widgets/AgentProcessNeedsRestartListWidget";
+import { restartAgentHubProcessRowAction, stopAgentHubProcessRowAction } from "../components/core/solid-agent/processes/agentHubProcessApi";
 import { SolidShortTextFieldAvatarWidget } from "../components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "../components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
 import { DefaultTimeFormEditWidget, DefaultTimeFormViewWidget } from "../components/core/form/fields/SolidTimeField";
@@ -58,6 +63,9 @@ import MqMessageDetailsKanbanCardAction from "../components/core/extension/solid
 import MqMessageKanbanQuickFilterHeaderAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanQuickFilterHeaderAction";
 import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/extension/solid-core/mqMessage/MqMessageSelectedRecordsSummaryHeaderAction";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
+import { AgentRegistryCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
+import { AgentResourceCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
+import { AgentEventOutcomeListWidget } from "../components/core/extension/solid-core/agentEvent/list/AgentEventOutcomeListWidget";
 import { MediaFileSizeFormViewWidget, MediaFileSizeListWidget } from "../components/core/extension/solid-core/media/fileSize/MediaFileSizeWidget";
 import { MediaRelativeUriFormViewWidget, MediaRelativeUriListWidget } from "../components/core/extension/solid-core/media/relativeUri/MediaRelativeUriPreview";
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
@@ -79,18 +87,41 @@ import { QueueSlaHeatmapWidget } from "../components/core/dashboard/widgets/Queu
 import {
     ExtensionComponentTypes,
     ExtensionFunctionTypes,
+    type AgentChatWidgetMetadata,
+    type ExtensionComponentAdditionalMetadata,
+    type ExtensionComponentMetadataProvider,
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "../types/extension-registry";
 
 import { scheduleFrequencyOnFieldChangeHandler } from "../components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
 import { MetadataExplorerFormWidget } from "../components/core/extension/solid-core/metadata/MetadataExplorerFormWidget";
+import { DefaultUserMessageChatWidget } from "../components/core/solid-agent/widgets/DefaultUserMessageChatWidget";
+import { DefaultAssistantMessageChatWidget } from "../components/core/solid-agent/widgets/DefaultAssistantMessageChatWidget";
+import { DefaultToolCallChatWidget } from "../components/core/solid-agent/widgets/DefaultToolCallChatWidget";
+import { DefaultErrorChatWidget } from "../components/core/solid-agent/widgets/DefaultErrorChatWidget";
+import { DefaultNoticeChatWidget } from "../components/core/solid-agent/widgets/DefaultNoticeChatWidget";
+import { DefaultUnknownChatWidget } from "../components/core/solid-agent/widgets/DefaultUnknownChatWidget";
+import { DefaultThinkingChatWidget } from "../components/core/solid-agent/widgets/DefaultThinkingChatWidget";
+import { SolidMarkdownChatWidget } from "../components/core/solid-agent/widgets/SolidMarkdownChatWidget";
+import { SolidQuestionChatWidget } from "../components/core/solid-agent/widgets/SolidQuestionChatWidget";
+import { SolidChecklistChatWidget } from "../components/core/solid-agent/widgets/SolidChecklistChatWidget";
+import { SolidDiffListChatWidget } from "../components/core/solid-agent/widgets/SolidDiffListChatWidget";
+import { SolidCodeChatWidget } from "../components/core/solid-agent/widgets/SolidCodeChatWidget";
+import { SolidJsonChatWidget } from "../components/core/solid-agent/widgets/SolidJsonChatWidget";
+import { SolidTableChatWidget } from "../components/core/solid-agent/widgets/SolidTableChatWidget";
+import { SolidGalleryChatWidget } from "../components/core/solid-agent/widgets/SolidGalleryChatWidget";
+import { SolidProgressChatWidget } from "../components/core/solid-agent/widgets/SolidProgressChatWidget";
+import { SolidStatusChatWidget } from "../components/core/solid-agent/widgets/SolidStatusChatWidget";
+import { SolidLinkCardChatWidget } from "../components/core/solid-agent/widgets/SolidLinkCardChatWidget";
+import { SolidToolActivityChatWidget } from "../components/core/solid-agent/widgets/SolidToolActivityChatWidget";
 
 
 type ExtensionComponentMetadata = {
-    component: React.ComponentType<any>;
+    component: React.ComponentType<any> & ExtensionComponentMetadataProvider;
     type: ExtensionComponentType;
     fieldType: string;
+    extensionMetadata: ExtensionComponentAdditionalMetadata;
 }
 
 type ExtensionFunctionMetadata = {
@@ -108,11 +139,12 @@ const extensionRegistry: ExtensionRegistry = {
     functions: {},
 };
 
-export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, type: ExtensionComponentType = ExtensionComponentTypes.formFieldViewWidget, aliases: string[] = [], fieldType: string = '') => {
-    extensionRegistry.components[name] = { 'component': component, 'type': type, 'fieldType': fieldType };
+export const registerExtensionComponent = (name: string, component: React.ComponentType<any> & ExtensionComponentMetadataProvider, type: ExtensionComponentType = ExtensionComponentTypes.formFieldViewWidget, aliases: string[] = [], fieldType: string = '', extensionMetadata: ExtensionComponentAdditionalMetadata = {}) => {
+    const metadata = { component, type, fieldType, extensionMetadata };
+    extensionRegistry.components[name] = metadata;
     for (let i = 0; i < aliases.length; i++) {
         const alias = aliases[i];
-        extensionRegistry.components[alias] = { 'component': component, 'type': type, 'fieldType': fieldType };
+        extensionRegistry.components[alias] = metadata;
     }
 };
 
@@ -120,23 +152,67 @@ export const registerExtensionFunction = (name: string, fn: (...args: any[]) => 
     extensionRegistry.functions[name] = { fn, type };
 };
 
-export const getExtensionComponent = (name: string): React.ComponentType<any> | null => {
-    if (extensionRegistry.components[name]) {
-        return extensionRegistry.components[name].component;
-    }
+export function getExtensionComponent(name: string): React.ComponentType<any> | null;
+export function getExtensionComponent(name: string, type: ExtensionComponentType): React.ComponentType<any> | null;
+export function getExtensionComponent(name: string, type?: ExtensionComponentType): React.ComponentType<any> | null {
+    const registered = extensionRegistry.components[name];
+    return registered && (!type || registered.type === type) ? registered.component : null;
+}
 
-    return null;
+/** Merge metadata declared at registration with optional metadata returned by the component itself. */
+export function getExtensionComponentMetadata(name: string): ExtensionComponentAdditionalMetadata | null {
+    const registered = extensionRegistry.components[name];
+    if (!registered) return null;
+
+    const provider = registered.component.getExtensionMetadata;
+    if (typeof provider !== "function") return { ...registered.extensionMetadata };
+
+    try {
+        const dynamicMetadata = provider.call(registered.component);
+        if (!dynamicMetadata || typeof dynamicMetadata !== "object" || Array.isArray(dynamicMetadata)) {
+            return { ...registered.extensionMetadata };
+        }
+        const merged = { ...registered.extensionMetadata };
+        Object.entries(dynamicMetadata).forEach(([key, value]) => {
+            const declared = merged[key];
+            merged[key] = declared && typeof declared === "object" && !Array.isArray(declared) &&
+                value && typeof value === "object" && !Array.isArray(value)
+                ? { ...declared, ...value }
+                : value;
+        });
+        return merged;
+    } catch (error) {
+        // Metadata is optional: a broken or absent hook must never prevent registry bootstrap.
+        console.warn(`Could not read dynamic metadata for extension component "${name}"`, error);
+        return { ...registered.extensionMetadata };
+    }
+}
+
+/** Names of every registered component of `type` (and `fieldType`, when given). Aliases are included. */
+export const getExtensionComponents = (type: ExtensionComponentType, fieldType: string = ''): string[] => {
+    return Object.entries(extensionRegistry.components)
+        .filter(([, meta]) => meta.type === type && (!fieldType || meta.fieldType === fieldType))
+        .map(([name]) => name);
 };
 
-export const getExtensionComponents = (type: ExtensionComponentType, fieldType: string = ''): string[] | [] => {
-    // TODO: iterate over all registered extensionComponents to fetch a list of componnents matching the type & fieldType (optional)
-    // if (extensionRegistry.components[name]) {
-    //     return extensionRegistry.components[name].component;
-    // }
+/** Discover agent-facing metadata from chat widgets that opt in through their metadata hook. */
+export const getAgentChatWidgetCatalog = (): AgentChatWidgetMetadata[] => {
+    const seenComponents = new Set<ExtensionComponentMetadata>();
+    const widgets: AgentChatWidgetMetadata[] = [];
 
-    // return null;
+    Object.entries(extensionRegistry.components).forEach(([name, registered]) => {
+        if (registered.type !== ExtensionComponentTypes.chatInteractionWidget || seenComponents.has(registered)) return;
+        seenComponents.add(registered);
 
-    return [];
+        const metadata = getExtensionComponentMetadata(name);
+        const widget = metadata?.agentWidget as AgentChatWidgetMetadata | undefined;
+        if (!widget || typeof widget.name !== "string" || !widget.name ||
+            typeof widget.description !== "string" || !widget.description ||
+            !widget.propsSchema || widget.propsSchema.type !== "object") return;
+        widgets.push(structuredClone(widget));
+    });
+
+    return widgets;
 };
 
 export const getExtensionFunction = (name: string) => {
@@ -147,6 +223,7 @@ export const getExtensionFunction = (name: string) => {
 // 1. list view columns field widget 
 // - shortText
 registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("SolidIconNameListViewWidget", SolidIconNameListViewWidget, ExtensionComponentTypes.listFieldWidget);
 
 // - shortText (image list)
 registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextFieldImageListWidget, ExtensionComponentTypes.listFieldWidget);
@@ -180,6 +257,7 @@ registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelation
 
 // - users status
 registerExtensionComponent("SolidUserBlockedStatusListWidget", SolidUserBlockedStatusListWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("AgentProcessNeedsRestartListWidget", AgentProcessNeedsRestartListWidget, ExtensionComponentTypes.listFieldWidget);
 
 // - generic selection/status pill
 registerExtensionComponent("PillWidget", PillWidget, ExtensionComponentTypes.listFieldWidget);
@@ -195,6 +273,7 @@ registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", S
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("MediaRelativeUriListWidget", MediaRelativeUriListWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("MediaFileSizeListWidget", MediaFileSizeListWidget, ExtensionComponentTypes.listFieldWidget);
+registerExtensionComponent("AgentEventOutcomeListWidget", AgentEventOutcomeListWidget, ExtensionComponentTypes.listFieldWidget);
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);
@@ -369,6 +448,8 @@ registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRela
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("ExportModulePackageRowAction", ExportModulePackageRowAction, ExtensionComponentTypes.listRowAction);
+registerExtensionComponent("UpdateModulePackageRowAction", UpdateModulePackageRowAction, ExtensionComponentTypes.listRowAction);
+registerExtensionComponent("RestoreModulePackageRowAction", RestoreModulePackageRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, ExtensionComponentTypes.listRowAction);
 
@@ -408,6 +489,8 @@ registerExtensionComponent("MqMessageKanbanQuickFilterHeaderAction", MqMessageKa
 registerExtensionComponent("MqMessageSelectedRecordsSummaryHeaderAction", MqMessageSelectedRecordsSummaryHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("MqMessageKanbanSelectedRecordsSummaryHeaderAction", MqMessageSelectedRecordsSummaryHeaderAction, ExtensionComponentTypes.kanbanHeaderAction);
 registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.cardWidget);
+registerExtensionComponent("AgentRegistryCardWidget", AgentRegistryCardWidget, ExtensionComponentTypes.cardWidget);
+registerExtensionComponent("AgentResourceCardWidget", AgentResourceCardWidget, ExtensionComponentTypes.cardWidget);
 
 // Dashboard widgets (default first-party set)
 registerExtensionComponent("DefaultDashboardKpiWidget", DefaultDashboardKpiWidget, ExtensionComponentTypes.dashboardWidget);
@@ -434,3 +517,28 @@ registerExtensionFunction("mqMessageOnFormLoadHandler", mqMessageOnFormLoadHandl
 
 
 registerExtensionFunction("scheduleFrequencyOnFieldChangeHandler", scheduleFrequencyOnFieldChangeHandler, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("stopAgentHubProcessRowAction", stopAgentHubProcessRowAction, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("restartAgentHubProcessRowAction", restartAgentHubProcessRowAction, ExtensionFunctionTypes.onFieldChange);
+
+// SolidX Agent chat widgets.
+// Defaults render an event by its event_type when event_data.widget is absent (see SolidAgentChatItem).
+registerExtensionComponent("DefaultUserMessageChatWidget", DefaultUserMessageChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultAssistantMessageChatWidget", DefaultAssistantMessageChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultToolCallChatWidget", DefaultToolCallChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultErrorChatWidget", DefaultErrorChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["error"]);
+registerExtensionComponent("DefaultNoticeChatWidget", DefaultNoticeChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultThinkingChatWidget", DefaultThinkingChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultUnknownChatWidget", DefaultUnknownChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+// Named widgets, chosen by event_data.widget (full name or the short alias).
+registerExtensionComponent("SolidMarkdownChatWidget", SolidMarkdownChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["markdown"]);
+registerExtensionComponent("SolidQuestionChatWidget", SolidQuestionChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["question"]);
+registerExtensionComponent("SolidChecklistChatWidget", SolidChecklistChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["checklist"]);
+registerExtensionComponent("SolidDiffListChatWidget", SolidDiffListChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["diff-list"]);
+registerExtensionComponent("SolidCodeChatWidget", SolidCodeChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["code"]);
+registerExtensionComponent("SolidJsonChatWidget", SolidJsonChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["json"]);
+registerExtensionComponent("SolidTableChatWidget", SolidTableChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["table"]);
+registerExtensionComponent("SolidGalleryChatWidget", SolidGalleryChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["gallery"]);
+registerExtensionComponent("SolidProgressChatWidget", SolidProgressChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["progress"]);
+registerExtensionComponent("SolidStatusChatWidget", SolidStatusChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["status"]);
+registerExtensionComponent("SolidLinkCardChatWidget", SolidLinkCardChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["link-card"]);
+registerExtensionComponent("SolidToolActivityChatWidget", SolidToolActivityChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["tool-activity"]);

@@ -52,3 +52,4 @@ export { SolidCodeEditor } from "./SolidCodeEditor";
 export { SolidRichTextEditor } from "./SolidRichTextEditor";
 export { SolidLightbox } from "./SolidLightbox";
 export { SolidIcon, type SolidIconName, type SolidIconMeta,parseSolidIconMeta, normalizeSolidIconName } from "./SolidIcon";
+export { SolidIconPicker, type SolidIconPickerProps } from "./SolidIconPicker";

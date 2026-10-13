@@ -1,11 +1,4 @@
 import { ReactNode, useContext, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-// import { usePathname } from "../../hooks/usePathname";
-import { useRouter } from "../../hooks/useRouter";
-import { useSession } from "../../hooks/useSession";
-import { env } from "../../adapters/env";
-import { hasAnyRole } from "../../helpers/rolesHelper";
-import { enterStudioMode } from "../../redux/features/solidStudioSlice";
 import { LayoutContext } from "./context/layoutcontext";
 import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
 import { useGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
@@ -43,32 +36,13 @@ const ThemeToggleIcon = () => (
 
 export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActionsProps) => {
   // const pathname = usePathname();
-  const router = useRouter();
-  const dispatch = useDispatch();
-  const { data: session } = useSession();
   const { toggleThemeMode, themeMode } = useContext(LayoutContext);
   const { data: solidSettingsData } = useGetSolidSettingsQuery(undefined);
-  const user = session?.user;
-  const isAdmin = hasAnyRole(user?.roles, ["Admin"]);
-  const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
-  const isDev = env("VITE_SOLIDX_ENV") === "dev";
   const settingsMap = useMemo(() => getSettingsMap(solidSettingsData), [solidSettingsData]);
   const showThemeToggle = settingsMap?.showThemeToggle === true || settingsMap?.showThemeToggle === "true";
   // const showBack = /\/admin\/core\/[^/]+\/[^/]+\/form\/[^/]+/.test(pathname);
 
   const actions: AdminAction[] = [
-    ...(isAdmin && isDev && !isStudioMode
-      ? [{
-        key: "studio",
-        label: "Studio",
-        onClick: () => {
-          dispatch(enterStudioMode());
-          router.push("/studio");
-        },
-        title: "Enter SolidX Studio",
-        icon: <StudioSparkleIcon />,
-      }]
-      : []),
     ...(showThemeToggle
       ? [{
         key: "theme",
@@ -115,22 +89,6 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
     <div className={`solid-admin-header-actions max-md:hidden lg:flex ${className}`.trim()}>
       <BackendReconnectIndicator />
       {actions.map((action) => {
-        if (action.key === "studio") {
-          return (
-            <button
-              key={action.key}
-              type="button"
-              className="solid-studio-trigger-btn"
-              onClick={action.onClick}
-              title={action.title}
-              aria-label={action.title}
-            >
-              {action.icon}
-              <span className="solid-studio-trigger-label">{action.label}</span>
-            </button>
-          );
-        }
-
         if (action.key === "theme") {
           return (
             <button

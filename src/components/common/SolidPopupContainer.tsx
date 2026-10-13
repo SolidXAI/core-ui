@@ -14,7 +14,8 @@ const SolidPopupContainer = () => {
   if (!isOpen) return null;
 
   const DynamicComponent = getExtensionComponent(event?.action);
-  const popupWidth = event?.popupWidth ? event.popupWidth : "50vw";
+  const isDeleteModelDialog = event?.action === "DeleteModelRowAction";
+  const popupWidth = event?.popupWidth ? event.popupWidth : isDeleteModelDialog ? "min(960px, calc(100vw - 32px))" : "50vw";
   const popupBody = event?.body ?? event?.message;
 
   const handleButtonClick = async (button: PopupButton) => {
@@ -38,7 +39,7 @@ const SolidPopupContainer = () => {
       }}
       dismissible={isClosable}
       showHeader={false}
-      className="solid-popup-dialog solid-common-dialog"
+      className={`solid-popup-dialog solid-common-dialog${isDeleteModelDialog ? " solid-delete-model-dialog" : ""}`}
       overlayClassName="solid-popup-backdrop"
       style={{ width: popupWidth }}
     >

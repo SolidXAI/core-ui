@@ -739,10 +739,29 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   // clickable link allowing one to open the detail / form view.
 
   // handle bulk deletion
-  const deleteBulk = () => {
+  const deleteBulk = async () => {
     const deleteList = recordsToDelete.map((element: any) => element.id);
-    deleteManySolidEntities(deleteList);
-    setDialogVisible(false);
+    if (deleteList.length === 0) return;
+
+    try {
+      const response: any = await deleteManySolidEntities(deleteList).unwrap();
+      dispatch(showToast({
+        severity: "success",
+        summary: "Deleted",
+        detail: response?.data?.message || ERROR_MESSAGES.RECORD_DELETE,
+        life: 3000,
+      }));
+      setDialogVisible(false);
+      setRecordsToDelete([]);
+      await loadKanbanBoard(filters);
+    } catch (error: any) {
+      dispatch(showToast({
+        severity: "error",
+        summary: "Delete Failed",
+        detail: error?.data?.message || error?.message || ERROR_MESSAGES.SOMETHING_WRONG,
+        life: 4000,
+      }));
+    }
   };
 
   // handle closing of the delete dialog...

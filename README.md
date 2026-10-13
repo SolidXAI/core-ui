@@ -110,6 +110,25 @@ A complete set of primitives built on Radix UI, PrimeReact, and Bootstrap, inclu
 
 - `SolidChatter` — per-record messaging thread and activity feed component, mirroring the backend Chatter feature
 
+Custom messages whose `messageSubType` is neither `custom`, `note`, nor `task` can use a registered chatter widget. Register the component under the exact subtype name:
+
+```tsx
+import {
+  ExtensionComponentTypes,
+  registerExtensionComponent,
+  type SolidChatterMessageWidgetProps,
+} from '@solidxai/core-ui';
+
+const ApprovalMessage = ({ chatterMessage }: SolidChatterMessageWidgetProps) => {
+  const payload = JSON.parse(chatterMessage.messageBody ?? '{}');
+  return <div>{payload.title}</div>;
+};
+
+registerExtensionComponent('ApprovalMessage', ApprovalMessage, ExtensionComponentTypes.chatterMessageWidget);
+```
+
+The chatter post API sets `messageType` to `custom`; provide `messageSubType: ApprovalMessage` and a JSON string in `messageBody`. The widget receives the original chatter API record. An unregistered subtype displays the JSON as formatted plain text inside the normal chatter card.
+
 
 ## Installation
 
