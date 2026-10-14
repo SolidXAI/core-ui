@@ -495,6 +495,7 @@ export function AgentRegistryEditorPage() {
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Name is required.";
     if (!title.trim()) next.title = "Title is required.";
+    if (!module) next.module = "Module is required. Select a module before saving this agent.";
     if (!systemPrompt.trim()) next.systemPrompt = "Persona instructions are required.";
     if (!isValidModelKey(reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
     if (!isValidModelKey(fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
@@ -597,7 +598,7 @@ export function AgentRegistryEditorPage() {
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
       <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
-        <AgentHubModuleField className="agent-editor__field" value={module} onChange={setModule} disabled={creating || updating || isLoading || isFetching || isError} clearable={!record?.module} />
+        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError} clearable={false} required error={errors.module} />
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
@@ -643,7 +644,7 @@ export function AgentRegistryEditorPage() {
     </div> },
     { value: "persona", label: "Persona", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div>
       {record?.id && <AgentPersonaHistory agentId={record.id} savedPrompt={record.systemPrompt ?? ""} refreshVersion={auditVersion} />}</div>
-      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
+      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"

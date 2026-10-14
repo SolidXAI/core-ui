@@ -29,7 +29,7 @@ export const DefaultUserMessageChatWidget = ({ eventData, timestamp }: SolidChat
             <div className={styles.BubbleGroup}>
                 {namespaces.length > 0 && (
                     <details className={styles.MessageContext}>
-                        <summary>Screen context</summary>
+                        <summary>Message context</summary>
                         <div className={styles.MessageContextDetails}>
                             {namespaces.map(([namespace, contribution]) => (
                                 <section key={namespace}>

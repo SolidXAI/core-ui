@@ -156,6 +156,7 @@ export function AgentSkillRegistryEditorPage() {
     if (!type.trim()) nextErrors.type = "Skill type is required.";
     if (!description.trim()) nextErrors.description = "Description is required.";
     if (!body.trim()) nextErrors.body = "Skill instructions are required.";
+    if (!module) nextErrors.module = "Module is required. Select a module before saving this skill.";
 
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -206,9 +207,10 @@ export function AgentSkillRegistryEditorPage() {
       const errorDetail = getSaveErrorMessage(error);
       const serverFieldErrors: Record<string, string> = {};
       if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
-        for (const field of ["name", "type", "description", "body"]) {
+        for (const field of ["name", "type", "description", "body", "module"]) {
           if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
-          serverFieldErrors[field] = `${field === "body" ? "Skill instructions" : field[0].toUpperCase() + field.slice(1)} is required.`;
+          const label = field === "body" ? "Skill instructions" : field === "module" ? "Module" : field[0].toUpperCase() + field.slice(1);
+          serverFieldErrors[field] = `${label} is required.`;
         }
       }
       if (Object.keys(serverFieldErrors).length > 0) {
@@ -283,7 +285,7 @@ export function AgentSkillRegistryEditorPage() {
             </select>
             {fieldErrors.type && <small id="agent-skill-type-error" className="agent-skill-editor__field-error">{fieldErrors.type}</small>}
           </label>
-          <AgentHubModuleField className="agent-skill-editor__field" value={module} onChange={setModule} disabled={isReadOnly || isCreating || isSaving} clearable={!record?.module} />
+          <AgentHubModuleField className="agent-skill-editor__field" value={module} onChange={(value) => { setModule(value); setFieldErrors((current) => ({ ...current, module: "" })); }} disabled={isReadOnly || isCreating || isSaving} clearable={false} required error={fieldErrors.module} />
           <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
         </fieldset>
       ),
@@ -305,6 +307,7 @@ export function AgentSkillRegistryEditorPage() {
                 setFieldErrors((current) => ({ ...current, body: "" }));
               }}
               language="markdown"
+              wordWrap="on"
               readOnly={isReadOnly}
               fontSize={11}
               height="max(32rem, calc(100dvh - 18rem))"

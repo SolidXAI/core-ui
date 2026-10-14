@@ -130,6 +130,7 @@ export function AgentToolRegistryEditorPage() {
     if (!description.trim()) nextErrors.description = "Description is required.";
     if (!type.trim()) nextErrors.type = "Tool type is required.";
     if (!sourceCode.trim()) nextErrors.sourceCode = "Tool source code is required.";
+    if (!module) nextErrors.module = "Module is required. Select a module before saving this tool.";
 
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -161,9 +162,9 @@ export function AgentToolRegistryEditorPage() {
       const errorDetail = getSaveErrorMessage(error);
       const serverFieldErrors: Record<string, string> = {};
       if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
-        for (const field of ["name", "description", "type", "sourceCode"]) {
+        for (const field of ["name", "description", "type", "sourceCode", "module"]) {
           if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
-          const label = field === "sourceCode" ? "Tool source code" : field[0].toUpperCase() + field.slice(1);
+          const label = field === "sourceCode" ? "Tool source code" : field === "module" ? "Module" : field[0].toUpperCase() + field.slice(1);
           serverFieldErrors[field] = `${label} is required.`;
         }
       }
@@ -224,7 +225,7 @@ export function AgentToolRegistryEditorPage() {
       <label className="agent-tool-editor__field"><span>Tool type <b>*</b></span><select value={type} aria-invalid={Boolean(fieldErrors.type)} aria-describedby={fieldErrors.type ? "agent-tool-type-error" : undefined} className={fieldErrors.type ? "agent-tool-editor__input--invalid" : undefined} onChange={(e) => { setType(e.target.value); setFieldErrors((current) => ({ ...current, type: "" })); }}>
         {isReadOnly && <option value="solidx">SolidX</option>}<option value="thirdparty">Third Party</option><option value="custom">Custom</option>
       </select>{fieldErrors.type && <small id="agent-tool-type-error" className="agent-tool-editor__field-error">{fieldErrors.type}</small>}</label>
-      <AgentHubModuleField className="agent-tool-editor__field" value={module} onChange={setModule} disabled={isReadOnly || isCreating || isSaving} clearable={!record?.module} />
+      <AgentHubModuleField className="agent-tool-editor__field" value={module} onChange={(value) => { setModule(value); setFieldErrors((current) => ({ ...current, module: "" })); }} disabled={isReadOnly || isCreating || isSaving} clearable={false} required error={fieldErrors.module} />
       <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
       {record?.id && <section className="agent-tool-editor__workflow" aria-labelledby="agent-tool-lifecycle-title">
         <div className="agent-tool-editor__workflow-head"><div><h2 id="agent-tool-lifecycle-title">Tool lifecycle</h2><p>Configuration and initialization must pass before this tool can be activated.</p></div></div>
@@ -253,7 +254,7 @@ export function AgentToolRegistryEditorPage() {
     { value: "tool", label: "Tool", content: <div className="agent-tool-editor__tool">
       <section className="agent-tool-editor__panel">
         <header><h2>Tool source code <b>*</b></h2><p>Write the tool's Python code here.</p></header>
-        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" readOnly={isReadOnly} fontSize={11} height="max(32rem, calc(100dvh - 18rem))" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
+        <SolidCodeEditor value={sourceCode} onChange={(value) => { setSourceCode(value ?? ""); setFieldErrors((current) => ({ ...current, sourceCode: "" })); }} language="python" wordWrap="on" readOnly={isReadOnly} fontSize={11} height="max(32rem, calc(100dvh - 18rem))" className={`agent-tool-editor__code${fieldErrors.sourceCode ? " agent-tool-editor__code--invalid" : ""}`} />
         {fieldErrors.sourceCode && <small className="agent-tool-editor__field-error agent-tool-editor__code-error">{fieldErrors.sourceCode}</small>}
       </section>
     </div> },
