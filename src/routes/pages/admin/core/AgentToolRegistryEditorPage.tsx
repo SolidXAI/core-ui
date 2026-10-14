@@ -225,7 +225,7 @@ export function AgentToolRegistryEditorPage() {
         {isReadOnly && <option value="solidx">SolidX</option>}<option value="thirdparty">Third Party</option><option value="custom">Custom</option>
       </select>{fieldErrors.type && <small id="agent-tool-type-error" className="agent-tool-editor__field-error">{fieldErrors.type}</small>}</label>
       <AgentHubModuleField className="agent-tool-editor__field" value={module} onChange={setModule} disabled={isReadOnly || isCreating || isSaving} clearable={!record?.module} />
-      <AgentHubTagsField value={tags} onChange={setTags} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
+      <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
       {record?.id && <section className="agent-tool-editor__workflow" aria-labelledby="agent-tool-lifecycle-title">
         <div className="agent-tool-editor__workflow-head"><div><h2 id="agent-tool-lifecycle-title">Tool lifecycle</h2><p>Configuration and initialization must pass before this tool can be activated.</p></div></div>
         <div className="agent-tool-editor__workflow-stages" aria-label={`Current tool stage: ${(record.status ?? "inactive").replace(/[_-]+/g, " ")}`}>

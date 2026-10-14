@@ -485,7 +485,7 @@ export function AgentRegistryEditorPage() {
       }
       const existing = links.find((link) => (link as any)[field]?.id === targetId);
       if (existing && Object.entries(values).some(([key, value]) => (existing as any)[key] !== value)) {
-        await update({ id: existing.id, data: values }).unwrap();
+        await update({ id: existing.id, data: { agentRegistryId: agentId, [`${field}Id`]: targetId, ...values } }).unwrap();
       }
     }
   };
@@ -599,7 +599,7 @@ export function AgentRegistryEditorPage() {
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
         <AgentHubModuleField className="agent-editor__field" value={module} onChange={setModule} disabled={creating || updating || isLoading || isFetching || isError} clearable={!record?.module} />
       </div>
-      <AgentHubTagsField value={tags} onChange={setTags} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
+      <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
         {inputs.length > 0 && <SolidButton type="button" variant="secondary" size="small" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add input</SolidButton>}
       </div>

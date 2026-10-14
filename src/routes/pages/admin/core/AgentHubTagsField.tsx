@@ -2,6 +2,7 @@ import React from "react";
 import { Plus, Search, X } from "lucide-react";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { SolidButton } from "../../../../components/shad-cn-ui/SolidButton";
+import type { AgentHubModule } from "./AgentHubModuleField";
 import "./AgentHubTagsField.css";
 
 export type AgentHubTag = { id: number; name: string };
@@ -23,9 +24,10 @@ export function agentHubTagsPayload(tags: AgentHubTag[]) {
 
 const tagApi = createSolidEntityApi("agentHubTag");
 
-export function AgentHubTagsField({ value, onChange, disabled = false, onBusyChange }: {
+export function AgentHubTagsField({ value, onChange, module, disabled = false, onBusyChange }: {
   value: AgentHubTag[];
   onChange: (tags: AgentHubTag[]) => void;
+  module: AgentHubModule | null;
   disabled?: boolean;
   onBusyChange?: (busy: boolean) => void;
 }) {
@@ -43,7 +45,7 @@ export function AgentHubTagsField({ value, onChange, disabled = false, onBusyCha
   const exact = [...catalog, ...value].find((tag) => tag.name.toLowerCase() === name.toLowerCase());
   const options = catalog.filter((tag) => !value.some((selected) => selected.id === tag.id)
     && tag.name.toLowerCase().includes(name.toLowerCase())).sort((a, b) => a.name.localeCompare(b.name));
-  const canCreate = Boolean(name && !exact && !isFetching && !isError);
+  const canCreate = Boolean(name && module && !exact && !isFetching && !isError);
 
   const select = (tag: AgentHubTag) => {
     if (!value.some((selected) => selected.id === tag.id)) onChange([...value, tag]);
@@ -60,7 +62,7 @@ export function AgentHubTagsField({ value, onChange, disabled = false, onBusyCha
     setError("");
     onBusyChange?.(true);
     try {
-      let result = await createTag({ name }).unwrap();
+      let result = await createTag({ name, moduleId: module?.id }).unwrap();
       for (let depth = 0; depth < 3 && result && !result.id; depth += 1) result = result.data;
       const created = agentHubTagsFrom([result])[0];
       if (!created) throw new Error("The tag could not be loaded. Search for it again.");
@@ -116,7 +118,7 @@ export function AgentHubTagsField({ value, onChange, disabled = false, onBusyCha
             type="button" role="option" aria-selected={false} disabled={isCreating}
             className={activeIndex === index ? "is-active" : undefined}
             onMouseDown={(event) => event.preventDefault()} onClick={() => select(tag)}>{tag.name}<Plus size={14} /></button>)
-            : !isError && <div className="agent-hub-tags__empty">{exact ? "Tag already selected." : canCreate ? `Create “${name}” to add it.` : "No tags available. Type a name to create one."}</div>}
+            : !isError && <div className="agent-hub-tags__empty">{exact ? "Tag already selected." : !module ? "Select a module before creating a tag." : canCreate ? `Create “${name}” to add it.` : "No tags available. Type a name to create one."}</div>}
       </div>}
       {error && <small className="agent-hub-tags__error" role="alert">{error}</small>}
       <small className="agent-hub-tags__hint">Tags are shared across agents, skills, and tools.</small>

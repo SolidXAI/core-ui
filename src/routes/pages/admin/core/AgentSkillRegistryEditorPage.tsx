@@ -284,7 +284,7 @@ export function AgentSkillRegistryEditorPage() {
             {fieldErrors.type && <small id="agent-skill-type-error" className="agent-skill-editor__field-error">{fieldErrors.type}</small>}
           </label>
           <AgentHubModuleField className="agent-skill-editor__field" value={module} onChange={setModule} disabled={isReadOnly || isCreating || isSaving} clearable={!record?.module} />
-          <AgentHubTagsField value={tags} onChange={setTags} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
+          <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
         </fieldset>
       ),
     },
