@@ -11,6 +11,7 @@ import { onBeforeUserMessageSend } from "./client/beforeUserMessageSend";
 import { onAgentPublicEvent } from "./client/agentPublicEvents";
 import type { AgentMessageContext, AgentMode } from "./types";
 import { buildAdminCustomPath, buildAdminDashboardPath, buildAdminModelViewPath, buildAdminRecordFormPath } from "../../../helpers/routePaths";
+import { requestAdminViewRefresh } from "../../../helpers/adminViewRefresh";
 
 const PREFS_KEY = "solid-agent.window";
 const MIN_DOCK = 360;
@@ -81,9 +82,21 @@ export default function SolidAgentHost() {
             if (event !== "onAgentNavigationRequested" || source !== "solidx") return;
             if (payload.schemaVersion !== 1 || payload.kind !== "navigation" || payload.domain !== "solidx.admin") return;
 
-            const { moduleName, modelName, viewName, recordId, dashboardName, customRoute } = payload.payload;
+            const { operation, scope, moduleName, modelName, viewName, recordId, dashboardName, customRoute } = payload.payload;
             if (typeof moduleName !== "string" || typeof viewName !== "string") return;
             if (!/^[A-Za-z0-9_-]+$/.test(moduleName.trim())) return;
+            if (operation === "refresh") {
+                if (typeof modelName !== "string" || !/^[A-Za-z0-9_-]+$/.test(modelName.trim())) return;
+                if (scope === "collection" && ["list", "tree", "kanban", "card"].includes(viewName)) {
+                    requestAdminViewRefresh({ moduleName, modelName, viewName: viewName as "list" | "tree" | "kanban" | "card", scope });
+                } else if (scope === "record" && viewName === "form" && (typeof recordId === "string" || typeof recordId === "number")) {
+                    const refreshRecordId = String(recordId);
+                    if (!/^[A-Za-z0-9_-]+$/.test(refreshRecordId)) return;
+                    requestAdminViewRefresh({ moduleName, modelName, viewName, scope, recordId: refreshRecordId });
+                }
+                return;
+            }
+            if (operation !== undefined && operation !== "navigate") return;
             let path = "";
             if (viewName === "dashboard" && typeof dashboardName === "string") {
                 path = buildAdminDashboardPath({ moduleName, dashboardName });
