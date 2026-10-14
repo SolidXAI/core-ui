@@ -29,7 +29,7 @@ type Props = {
     requiredInputs?: AgentInputDefinition[];
     externalEmbed?: boolean;
     onInputsLocked?: (locked: boolean) => void;
-    beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext>;
+    beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext | AgentInputContext | undefined>;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
     embedded?: boolean;
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */

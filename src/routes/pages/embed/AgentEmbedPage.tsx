@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import agentReducer from "../../../redux/features/agentSlice";
 import { SolidAgentEmbedded } from "../../../components/core/solid-agent/SolidAgentEmbedded";
+import { onAgentPublicEvent, type AgentPublicEvent } from "../../../components/core/solid-agent/client/agentPublicEvents";
 import { registerExternalAgentAuth, renewExternalAgentAuth, type AgentAuth } from "../../../components/core/solid-agent/client/agentAuth";
 import { EMBED_CHANNEL, EMBED_PUBLIC_PROTOCOL_VERSION, MissingAgentInputsError, validateBootstrap, validateEmbedInputs, validateMessageContext, type AgentEmbedBootstrap, type BeforeUserMessageSendRequest, type EmbedMessageContext } from "../../../components/core/solid-agent/embed/agentEmbedProtocol";
 import styles from "./AgentEmbedPage.module.css";
@@ -54,10 +55,9 @@ export function AgentEmbedPage() {
         });
     }, [send]);
 
-    const relayRuntimeEvent = React.useCallback((event: Event) => {
-        const detail = (event as CustomEvent<{ event: string; payload: Record<string, unknown> }>).detail;
-        if (!detail || typeof detail.event !== "string" || !detail.payload || typeof detail.payload !== "object") return;
-        send("public_event", { protocolVersion: EMBED_PUBLIC_PROTOCOL_VERSION, event: detail.event, payload: detail.payload });
+    const relayRuntimeEvent = React.useCallback((notification: AgentPublicEvent) => {
+        send("public_event", { protocolVersion: EMBED_PUBLIC_PROTOCOL_VERSION,
+            event: notification.event, payload: notification.payload });
     }, [send]);
 
     useEffect(() => {
@@ -164,7 +164,7 @@ export function AgentEmbedPage() {
             }
         };
         window.addEventListener("message", receive);
-        window.addEventListener("solid-agent-embed:public-event", relayRuntimeEvent);
+        const unsubscribePublicEvents = onAgentPublicEvent(relayRuntimeEvent);
         const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") send("close"); };
         window.addEventListener("keydown", onKey);
         send("ready", { protocolVersion: EMBED_PUBLIC_PROTOCOL_VERSION,
@@ -177,7 +177,7 @@ export function AgentEmbedPage() {
         return () => {
             disposed = true;
             window.removeEventListener("message", receive);
-            window.removeEventListener("solid-agent-embed:public-event", relayRuntimeEvent);
+            unsubscribePublicEvents();
             window.removeEventListener("keydown", onKey);
             if (pending) { clearTimeout(pending.timer); pending.reject(new Error("Embed closed.")); pending = null; }
             contextRequests.current.forEach((request) => request.reject(new Error("Embed closed.")));

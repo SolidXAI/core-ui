@@ -10,6 +10,8 @@ import {
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, normalizeAgentFrame } from "../agentEvents";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
+import { emitBeforeUserMessageSend, type BeforeUserMessageSendContribution } from "./beforeUserMessageSend";
+import { emitAgentPublicEvent, type AgentPublicEventName, type AgentPublicEventPayloads } from "./agentPublicEvents";
 import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentMessageContext, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
 import { clearAllAgentAuth } from "./agentAuth";
@@ -97,7 +99,7 @@ export class AgentRuntime {
         context?: AgentContext,
         attachments: AgentAttachment[] = [],
         inputs?: Record<string, unknown>,
-        beforeSend?: (request: { text: string; source: "composer" | "sdk" | "prefill" | "widget"; attachments: Array<{ name: string; mimeType: string; size: number }> }, signal: AbortSignal) => Promise<AgentMessageContext>,
+        beforeSend?: (request: { text: string; source: "composer" | "sdk" | "prefill" | "widget"; attachments: Array<{ name: string; mimeType: string; size: number }> }, signal: AbortSignal) => Promise<AgentMessageContext | AgentContext | undefined>,
         source: "composer" | "sdk" | "prefill" | "widget" = "composer",
         widgetReply?: { widgetId: string; value: unknown },
     ) {
@@ -106,12 +108,29 @@ export class AgentRuntime {
         const controller = new AbortController();
         this.preparationControllers.add(controller);
         let messageContext: AgentMessageContext | undefined;
+        let contributedInputContext: AgentContext | undefined;
         try {
-            messageContext = beforeSend ? await beforeSend({
+            const request = {
                 text: content,
                 source,
                 attachments: attachments.map(({ meta }) => ({ name: meta.name, mimeType: meta.mimeType, size: meta.size })),
-            }, controller.signal) : undefined;
+            };
+            const contributions: BeforeUserMessageSendContribution[] = this.agentRuntime === "solidx"
+                ? await emitBeforeUserMessageSend(request, controller.signal)
+                : [];
+            if (beforeSend) contributions.push(await beforeSend(request, controller.signal));
+            for (const contribution of contributions) {
+                if (contribution && typeof contribution === "object" && "schemaVersion" in contribution
+                    && contribution.schemaVersion === 1 && "namespaces" in contribution) {
+                    const incoming = contribution as AgentMessageContext;
+                    messageContext = {
+                        schemaVersion: 1,
+                        namespaces: { ...(messageContext?.namespaces ?? {}), ...incoming.namespaces },
+                    };
+                } else if (contribution && typeof contribution === "object") {
+                    contributedInputContext = { ...(contributedInputContext ?? {}), ...contribution };
+                }
+            }
         } catch (error) {
             this.publish("onUserMessageFailed", { stage: "context", code: "context_preparation_failed", retryable: true });
             throw error;
@@ -140,8 +159,10 @@ export class AgentRuntime {
             session_id: this.socket.currentSessionId ?? "",
             content,
             source,
-            context: context ?? this.lastContext,
-            ...(this.agentRuntime === "agentHub" && messageContext ? { message_context: messageContext } : {}),
+            context: contributedInputContext
+                ? { ...(context ?? this.lastContext ?? {}), ...contributedInputContext }
+                : context ?? this.lastContext,
+            ...(messageContext ? { message_context: messageContext } : {}),
             ...(this.agentRuntime === "agentHub" && inputs ? { inputs } : {}),
             ...(attachments.length ? { attachments: uploaded } : {}),
             ...(widgetReply ? { widget_reply: widgetReply } : {}),
@@ -269,9 +290,8 @@ export class AgentRuntime {
         this.emitSdkEvents(event);
     }
 
-    private publish(event: string, payload: Record<string, unknown>) {
-        if (typeof window === "undefined") return;
-        window.dispatchEvent(new CustomEvent("solid-agent-embed:public-event", { detail: { event, payload } }));
+    private publish<E extends AgentPublicEventName>(event: E, payload: AgentPublicEventPayloads[E]) {
+        emitAgentPublicEvent(event, payload, this.agentRuntime);
     }
 
     private emitSdkEvents(event: AgentChatEvent) {

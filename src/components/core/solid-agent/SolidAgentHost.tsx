@@ -6,11 +6,14 @@ import { agentModeChanged, agentOpenRequested, type AgentState } from "../../../
 import { SolidAgentChat } from "./SolidAgentChat";
 import { useAgentAvailability } from "./useAgentAvailability";
 import { useAdminInputContext } from "./useAdminInputContext";
-import type { AgentMode } from "./types";
+import { onBeforeUserMessageSend } from "./client/beforeUserMessageSend";
+import { onAgentPublicEvent } from "./client/agentPublicEvents";
+import type { AgentMessageContext, AgentMode } from "./types";
 
 const PREFS_KEY = "solid-agent.window";
 const MIN_DOCK = 360;
 const MAX_DOCK = 720;
+const _DEBUG_AGENT_EVENTS = true;
 type WindowPrefs = { dockWidth: number; open?: boolean; mode?: Exclude<AgentMode, "bubble"> };
 
 function readPrefs(): WindowPrefs {
@@ -41,12 +44,40 @@ export default function SolidAgentHost() {
     const dispatch = useDispatch();
     const { ready, enabled, agentUrl, canUse } = useAgentAvailability();
     const inputContext = useAdminInputContext();
+    const inputContextRef = useRef(inputContext);
+    inputContextRef.current = inputContext;
     const agent = useSelector((state: any) => state.solidAgent as AgentState | undefined);
     const [dockWidth, setDockWidth] = useState(() => readPrefs().dockWidth);
     const prefsHydrated = useRef(false);
     const skipNextPrefsWrite = useRef(false);
     const windowRef = useRef<HTMLDivElement>(null);
     const openerRef = useRef<Element | null>(null);
+
+    useEffect(() => onBeforeUserMessageSend((_request, signal) => {
+        if (signal.aborted) throw new Error("Message preparation was cancelled.");
+        const context = inputContextRef.current;
+        if (Object.keys(context).length === 0) return undefined;
+        const summary = [context.moduleName, context.modelName, context.viewName, context.modelId]
+            .filter((value) => value !== undefined && value !== null && value !== "")
+            .join(" · ");
+        const contribution: AgentMessageContext = {
+            schemaVersion: 1,
+            namespaces: {
+                "solidx.admin": {
+                    context: context as AgentMessageContext["namespaces"][string]["context"],
+                    revision: JSON.stringify(context),
+                    ...(summary ? { displaySummary: summary } : {}),
+                },
+            },
+        };
+        return contribution;
+    }), []);
+    useEffect(() => {
+        if (!_DEBUG_AGENT_EVENTS) return;
+        return onAgentPublicEvent(({ event, payload, agentType: source }) => {
+            if (source === "solidx") console.log(`[SolidAgentHost] ${event}`, payload);
+        });
+    }, []);
 
     const available = ready && enabled && canUse && !!agentUrl && !!agent;
     const mode = agent?.mode ?? "bubble";
@@ -151,7 +182,7 @@ export default function SolidAgentHost() {
                     }}
                 >
                     {mode === "docked" && <div className={styles.resizeHandle} onPointerDown={startResize} aria-hidden="true" />}
-                    <SolidAgentChat agentUrl={agentUrl} inputContext={inputContext} />
+                    <SolidAgentChat agentUrl={agentUrl} />
                 </div>
             ) : (
                 <button type="button" className={styles.bubble} onClick={toggle} aria-label="Open the SolidX Agent (Ctrl+J)" title="SolidX Agent (Ctrl+J)">
