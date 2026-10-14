@@ -26,3 +26,7 @@ export const DefaultErrorChatWidget = ({ eventData, sendPrompt }: SolidChatWidge
         </div>
     );
 };
+
+Object.assign(DefaultErrorChatWidget, { getExtensionMetadata: () => ({
+    chatInteraction: { role: "event-renderer", agentSelectable: false },
+}) });

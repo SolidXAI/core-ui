@@ -13,9 +13,13 @@
 .AiTurnContent {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
     flex: 1;
     min-width: 0;
+}
+
+.AiTurnContent > .BubbleGroup ~ .BubbleGroup {
+    margin-top: 8px;
 }
 
 /* ── Per-turn activity disclosure ── */
@@ -232,6 +236,10 @@
 
 .BubbleMetaAssistant {
     flex-direction: row;
+}
+
+.TurnMeta {
+    margin-top: 4px;
 }
 
 .Timestamp {

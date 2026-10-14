@@ -3425,6 +3425,36 @@ li.header-li-px {
   color: color-mix(in srgb, var(--foreground) 80%, transparent);
 }
 
+.solid-export-module-version {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.solid-export-module-version__label,
+.solid-export-module-version__copy {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+.solid-export-module-version__copy code {
+  font-family: var(--font-mono, "SFMono-Regular", Consolas, monospace);
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.solid-generate-code-popup__panel > .solid-export-module-version__copy {
+  margin-top: 8px;
+}
+
+.solid-export-module-version__error {
+  margin: 0;
+  font-size: 11px;
+  color: color-mix(in srgb, #dc2626 80%, var(--foreground));
+}
+
 .solid-generate-code-popup__notice {
   display: flex;
   align-items: flex-start;

@@ -55,3 +55,7 @@ export const SolidChecklistChatWidget = ({ eventData, final, reply }: SolidChatW
         </div>
     );
 };
+
+Object.assign(SolidChecklistChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "checklist", description: "Present several items the user can tick or confirm.", propsSchema: { type: "object", properties: { title: { type: "string" }, items: { type: "array", items: { type: "object", properties: { id: { type: "string" }, label: { type: "string" }, checked: { type: "boolean" }, description: { type: "string" } }, required: ["label"] } }, submitLabel: { type: "string" } } } },
+}) });

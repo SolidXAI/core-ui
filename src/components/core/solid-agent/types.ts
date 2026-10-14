@@ -1,3 +1,5 @@
+import type { AgentChatWidgetMetadata } from "../../../types/extension-registry";
+
 /**
  * Shared types for the SolidX Agent chat (launcher, window, thread).
  *
@@ -146,8 +148,8 @@ export type AgentSessionOptions = {
 };
 
 export type AgentAction =
-    | ({ action: "start_session"; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
-    | ({ action: "resume_session"; session_id: string; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
+    | ({ action: "start_session"; widget_catalog?: AgentChatWidgetMetadata[]; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
+    | ({ action: "resume_session"; session_id: string; widget_catalog?: AgentChatWidgetMetadata[]; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
     | ({ action: "update_session"; session_id: string; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
     | ({
           action: "message";

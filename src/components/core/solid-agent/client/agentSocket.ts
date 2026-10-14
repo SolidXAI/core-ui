@@ -1,4 +1,5 @@
 import type { AgentAction, AgentConnection, AgentRuntimeType, AgentSessionOptions, AgentWireFrame } from "../types";
+import type { AgentChatWidgetMetadata } from "../../../../types/extension-registry";
 import { agentWsUrl, clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
 
 /**
@@ -44,6 +45,7 @@ export class AgentSocket {
         initialProvider: string | null = null,
         initialModel: string | null = null,
         initialOptions?: AgentSessionOptions,
+        private widgetCatalog: AgentChatWidgetMetadata[] = [],
     ) {
         this.sessionId = initialSessionId;
         this.provider = initialProvider;

@@ -3,14 +3,9 @@ import { SolidMaterialSymbol } from "../../../../../common/SolidMaterialSymbol";
 import styles from "./AgentRegistryCardWidget.module.css";
 
 function toTags(value: unknown): string[] {
-  if (Array.isArray(value)) return value.map(String).map((tag) => tag.trim()).filter(Boolean);
-  if (typeof value !== "string" || !value.trim()) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.map(String).map((tag) => tag.trim()).filter(Boolean) : [];
-  } catch {
-    return value === "{}" ? [] : value.split(",").map((tag) => tag.trim()).filter(Boolean);
-  }
+  if (!Array.isArray(value)) return [];
+  return value.map((tag) => typeof tag === "object" && tag ? tag.name : tag)
+    .filter((name): name is string => typeof name === "string").map((name) => name.trim()).filter(Boolean);
 }
 
 /** Compact shared card renderer for agent skill and tool records. */

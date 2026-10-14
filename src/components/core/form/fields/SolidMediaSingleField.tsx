@@ -422,7 +422,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 }
                 {fileDetails && (
                     <div className={`${styles.mediaAttachmentCard} mt-4`}>
-                        <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                        <div className={`${styles.mediaAttachmentRow} flex items-center gap-2`}>
                             <FileReaderExt fileDetails={fileDetails} />
                             <div className={`${styles.mediaAttachmentMeta} w-full`}>
                                 <div className="flex items-start justify-between gap-4">
@@ -597,7 +597,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
 
             {fileDetails && (
                 <div className={`${styles.mediaAttachmentCard} ${styles.mediaAttachmentCardView} mt-4`}>
-                    <div className={`${styles.mediaAttachmentRow} flex items-center md:gap-2`}>
+                    <div className={`${styles.mediaAttachmentRow} flex items-center gap-2`}>
                         <FileReaderExt fileDetails={fileDetails} />
                         <div className={`${styles.mediaAttachmentMeta} w-full`}>
                             <div className="flex items-start justify-between gap-4">

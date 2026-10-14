@@ -76,6 +76,7 @@ export class SolidChatWidgetErrorBoundary extends React.Component<ErrorBoundaryP
 type SolidAgentChatItemProps = {
     item: AgentChatItem;
     agentContext?: AgentContext;
+    showMessageMeta?: boolean;
     onReply: (widgetId: string, widget: string, value: unknown) => void;
     onPrompt: (text: string) => void;
 };
@@ -87,7 +88,7 @@ type SolidAgentChatItemProps = {
  * through the extension registry, so a UI module can register new chat widgets or override a
  * default by registering the same name.
  */
-export const SolidAgentChatItem = ({ item, agentContext, onReply, onPrompt }: SolidAgentChatItemProps) => {
+export const SolidAgentChatItem = ({ item, agentContext, showMessageMeta, onReply, onPrompt }: SolidAgentChatItemProps) => {
     const isText = !item.widget && TEXT_EVENT_TYPES.has(item.eventType);
     const content = item.eventData?.content;
     const inline = useMemo(() => (isText ? parseWidgetContent(content) : null), [isText, content]);
@@ -104,6 +105,7 @@ export const SolidAgentChatItem = ({ item, agentContext, onReply, onPrompt }: So
         live: !!item.live,
         final: !!item.final,
         timestamp: item.at,
+        showMessageMeta,
         reply: (value: unknown) => onReply(widgetId, widgetName, value),
         sendPrompt: onPrompt,
         agentContext,

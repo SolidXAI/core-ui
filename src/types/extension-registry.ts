@@ -26,6 +26,21 @@ export const ExtensionComponentTypes = {
 export type ExtensionComponentType =
     (typeof ExtensionComponentTypes)[keyof typeof ExtensionComponentTypes];
 
+/** Agent-facing contract for a chat widget that can be selected in a final response. */
+export type AgentChatWidgetMetadata = {
+    name: string;
+    description: string;
+    propsSchema: Record<string, unknown>;
+};
+
+/** Optional metadata shared by extension registration and the component's dynamic metadata hook. */
+export type ExtensionComponentAdditionalMetadata = Record<string, unknown>;
+
+/** Components may expose metadata without making the hook mandatory for existing extensions. */
+export type ExtensionComponentMetadataProvider = {
+    getExtensionMetadata?: () => ExtensionComponentAdditionalMetadata;
+};
+
 export const ExtensionFunctionTypes = {
     onFieldChange: "onFieldChange",
     onFieldBlur: "onFieldBlur",

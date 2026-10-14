@@ -1066,6 +1066,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 else {
                     // updateEntity({ id: +params.id, data: formData });
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    // The audit event is produced by the entity update. Refresh the chatter
+                    // directly from this save path so the panel does not depend on mutation
+                    // status transitions to notice the new audit message.
+                    setRefreshChatterMessage(true);
                     // Keep the current screen in sync with the normalized payload returned by the API
                     // so toggling view/edit after save does not continue showing stale pre-save values.
                     if (result?.data) {

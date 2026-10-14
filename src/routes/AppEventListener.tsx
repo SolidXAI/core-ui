@@ -117,7 +117,7 @@ export function AppEventListener() {
 
   return (
     <>
-      <SolidStudio />
+      {window.self === window.top && !pathname.startsWith("/embed/agent/") && <SolidStudio />}
     </>
   );
 }

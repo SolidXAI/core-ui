@@ -6,7 +6,6 @@ import { useSession } from "../../hooks/useSession";
 import { signOut } from "../../adapters/auth/index";
 import { createPortal } from "react-dom";
 import { env } from "../../adapters/env";
-import { hasAnyRole } from "../../helpers/rolesHelper";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -52,7 +51,7 @@ const FrontendIcon = () => (
 // ── SolidStudio ────────────────────────────────────────────────────────────────
 // Single component that renders both the Studio header and the AI panel.
 // Mount this ONCE at the app root via AppEventListener.
-// Visible to Admin users in dev environments.
+// Visible only to the "sa" user in dev environments.
 
 export function SolidStudio() {
   const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
@@ -60,7 +59,7 @@ export function SolidStudio() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { data, status } = useSession();
-  const isAdmin = hasAnyRole(data?.user?.roles, ["Admin"]);
+  const isStudioUser = data?.user?.username === "sa";
   const isDev = env("VITE_SOLIDX_ENV") === "dev";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -84,7 +83,7 @@ export function SolidStudio() {
     }
   }, [status, isStudioMode, dispatch]);
 
-  if (!isAdmin || !isDev) return null;
+  if (!isStudioUser || !isDev) return null;
 
   const handleLogout = () => {
     setIsMenuOpen(false);

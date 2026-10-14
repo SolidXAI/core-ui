@@ -90,6 +90,7 @@ function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<stri
     const values: Record<string, unknown> = {};
     for (const field of fields) {
         const raw = rawValues[field.name] ?? "";
+        if (!raw.trim() && (field.optional || field.defaultValue !== null && field.defaultValue !== undefined)) continue;
         if (field.dataType === "boolean") {
             if (raw !== "true" && raw !== "false") return { error: `Choose true or false for “${field.name}”.` };
             values[field.name] = raw === "true";
@@ -170,6 +171,10 @@ export function SolidAgentChat({
     const [collectedInputs, setCollectedInputs] = useState<Record<string, unknown> | null>(null);
     const [rawInputValues, setRawInputValues] = useState<Record<string, string>>({});
     const [inputError, setInputError] = useState("");
+    useEffect(() => {
+        setRawInputValues(Object.fromEntries(requiredInputs.map((field) => [field.name,
+            field.defaultValue === null || field.defaultValue === undefined ? "" : typeof field.defaultValue === "string" ? field.defaultValue : JSON.stringify(field.defaultValue)])));
+    }, [requiredInputs]);
     const shouldPromptForInputs = !externalEmbed && agentRuntime === "agentHub" && signedIn
         && requiredInputs.length > 0 && inputs === undefined && collectedInputs === null;
     const messageInputs = inputs ?? collectedInputs ?? undefined;
@@ -584,7 +589,7 @@ export function SolidAgentChat({
                 className={styles.inputDialog}
                 overlayClassName={styles.inputDialogOverlay}
                 header="Set up this test run"
-                ariaLabel={`Enter required inputs for ${title}`}
+                ariaLabel={`Enter inputs for ${title}`}
                 style={{ width: "min(34rem, 94vw)" }}
             >
                 <SolidDialogBody className={styles.inputDialogBody}>
@@ -602,7 +607,7 @@ export function SolidAgentChat({
                                     : field.dataType === "datetime" ? "datetime-local"
                                         : field.dataType === "date" ? "date" : "text";
                                 return <label className={styles.inputField} htmlFor={id} key={`${field.name}-${index}`}>
-                                    <span>{field.name}<small>{field.description || field.dataType}</small></span>
+                                    <span>{field.name}<small>{field.description || field.dataType}{field.optional ? " · optional" : ""}</small></span>
                                     {field.dataType === "boolean" ? (
                                         <select id={id} autoComplete="off" value={value} onChange={(event) => update(event.target.value)}>
                                             <option value="">Choose a value</option><option value="true">True</option><option value="false">False</option>
@@ -704,7 +709,7 @@ export function SolidAgentChat({
                                 </div>
                             )}
                         </div>
-                        {!externalEmbed && <button
+                        <button
                             type="button"
                             className={styles.iconBtn}
                             title="History"
@@ -713,7 +718,7 @@ export function SolidAgentChat({
                             onClick={() => setShowHistory((v) => !v)}
                         >
                             <History size={16} />
-                        </button>}
+                        </button>
                         {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}

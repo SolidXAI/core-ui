@@ -12,7 +12,7 @@ type ModuleImportListHeaderActionProps = {
   autoResume?: boolean;
 };
 
-function refreshMatchingListViews(moduleName = "solid-core", modelName = "moduleMetadata") {
+export function refreshMatchingListViews(moduleName = "solid-core", modelName = "moduleMetadata") {
   const prefix = `page:${moduleName}:${modelName}:`;
 
   getRegisteredListViewIds()

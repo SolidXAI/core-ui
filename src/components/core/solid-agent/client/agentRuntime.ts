@@ -1,4 +1,5 @@
 import { eventBus } from "../../../../helpers/eventBus";
+import { getAgentChatWidgetCatalog } from "../../../../helpers/registry";
 import {
     agentConnectionChanged,
     agentEventReceived,
@@ -133,6 +134,10 @@ export class AgentRuntime {
     private frame: number | null = null;
     private unsubscribers: Array<() => void> = [];
     private lastContext: AgentContext | undefined;
+    private historySessionId: string | null = null;
+    private historyGeneration = 0;
+    private loadingHistoryPages = new Map<string, number>();
+    private loadedHistoryPages = new Set<string>();
 
     private readonly sessionKey: string;
 
@@ -156,6 +161,7 @@ export class AgentRuntime {
             agentUrl,
             persistSession ? readSessionId(this.sessionKey) : null,
             agentRuntime === "agentHub",
+            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog() : [],
             initialProvider,
             initialModel,
             initialOptions,
@@ -221,6 +227,7 @@ export class AgentRuntime {
     }
 
     newChat(provider?: string, model?: string, opts?: AgentSessionOptions) {
+        this.resetHistoryLoads();
         if (this.persistSession) writeSessionId(this.sessionKey, null);
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
@@ -243,6 +250,7 @@ export class AgentRuntime {
     }
 
     resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions) {
+        this.resetHistoryLoads();
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
@@ -256,22 +264,38 @@ export class AgentRuntime {
         await this.loadHistory(state.historySessionId, state.historyPage + 1);
     }
 
+    private resetHistoryLoads() {
+        this.historyGeneration += 1;
+        this.historySessionId = null;
+        this.loadingHistoryPages.clear();
+        this.loadedHistoryPages.clear();
+    }
+
     dispose() {
+        this.resetHistoryLoads();
         this.unsubscribers.forEach((off) => off());
         if (this.frame != null) cancelAnimationFrame(this.frame);
         this.socket.close();
     }
 
     private async loadHistory(historySessionId: string, page: number) {
+        const key = `${historySessionId}:${page}`;
+        if (this.loadingHistoryPages.has(key) || this.loadedHistoryPages.has(key)) return;
+        const generation = this.historyGeneration;
+        this.loadingHistoryPages.set(key, generation);
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
             if (!result) return;
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
             const rawItems = historyToItems(result.messages ?? []);
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
+            if (generation !== this.historyGeneration || this.getState()?.historySessionId !== historySessionId) return;
             this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page }));
+            this.loadedHistoryPages.add(key);
         } catch {
             // History is a convenience; the live session still works without it.
+        } finally {
+            if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
         }
     }
 
@@ -306,6 +330,10 @@ export class AgentRuntime {
             eventBus.emit(SOLID_AGENT_EVENTS.sessionChanged, { sessionId, agentType: this.agentRuntime, provider, model });
             const state = this.getState();
             const historyId = event.frame.history_session_id ?? event.eventData.history_session_id ?? sessionId;
+            if (historyId !== this.historySessionId) {
+                this.resetHistoryLoads();
+                this.historySessionId = historyId;
+            }
             if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
                 void this.loadHistory(historyId, 1);
             }

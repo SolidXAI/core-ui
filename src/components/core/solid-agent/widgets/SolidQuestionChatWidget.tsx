@@ -67,3 +67,7 @@ export const SolidQuestionChatWidget = ({ eventData, final, reply }: SolidChatWi
         </div>
     );
 };
+
+Object.assign(SolidQuestionChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "question", description: "Ask the user a single or multiple choice question.", propsSchema: { type: "object", properties: { question: { type: "string" }, hint: { type: "string" }, options: { type: "array", items: { anyOf: [{ type: "string" }, { type: "object", properties: { label: { type: "string" }, value: {} }, required: ["label"] }] } }, multiple: { type: "boolean" } } } },
+}) });

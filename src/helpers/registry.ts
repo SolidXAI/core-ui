@@ -10,6 +10,8 @@ import GenerateModelCodeRowAction from "../components/core/extension/solid-core/
 import GenerateModuleCodeRowAction from "../components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
 import { ClearModulePackageRuntimeHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ClearModulePackageRuntimeHeaderAction";
 import ExportModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/ExportModulePackageRowAction";
+import UpdateModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/UpdateModulePackageRowAction";
+import RestoreModulePackageRowAction from "../components/core/extension/solid-core/moduleMetadata/list/RestoreModulePackageRowAction";
 import { ModuleImportListHeaderAction } from "../components/core/extension/solid-core/moduleMetadata/list/ModuleImportListHeaderAction";
 import moduleMetadataListOnLoad from "../components/core/extension/solid-core/moduleMetadata/list/moduleMetadataListOnLoad";
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "../components/core/form/fields/SolidBooleanField";
@@ -85,6 +87,9 @@ import { QueueSlaHeatmapWidget } from "../components/core/dashboard/widgets/Queu
 import {
     ExtensionComponentTypes,
     ExtensionFunctionTypes,
+    type AgentChatWidgetMetadata,
+    type ExtensionComponentAdditionalMetadata,
+    type ExtensionComponentMetadataProvider,
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "../types/extension-registry";
@@ -113,9 +118,10 @@ import { SolidToolActivityChatWidget } from "../components/core/solid-agent/widg
 
 
 type ExtensionComponentMetadata = {
-    component: React.ComponentType<any>;
+    component: React.ComponentType<any> & ExtensionComponentMetadataProvider;
     type: ExtensionComponentType;
     fieldType: string;
+    extensionMetadata: ExtensionComponentAdditionalMetadata;
 }
 
 type ExtensionFunctionMetadata = {
@@ -133,11 +139,12 @@ const extensionRegistry: ExtensionRegistry = {
     functions: {},
 };
 
-export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, type: ExtensionComponentType = ExtensionComponentTypes.formFieldViewWidget, aliases: string[] = [], fieldType: string = '') => {
-    extensionRegistry.components[name] = { 'component': component, 'type': type, 'fieldType': fieldType };
+export const registerExtensionComponent = (name: string, component: React.ComponentType<any> & ExtensionComponentMetadataProvider, type: ExtensionComponentType = ExtensionComponentTypes.formFieldViewWidget, aliases: string[] = [], fieldType: string = '', extensionMetadata: ExtensionComponentAdditionalMetadata = {}) => {
+    const metadata = { component, type, fieldType, extensionMetadata };
+    extensionRegistry.components[name] = metadata;
     for (let i = 0; i < aliases.length; i++) {
         const alias = aliases[i];
-        extensionRegistry.components[alias] = { 'component': component, 'type': type, 'fieldType': fieldType };
+        extensionRegistry.components[alias] = metadata;
     }
 };
 
@@ -152,11 +159,60 @@ export function getExtensionComponent(name: string, type?: ExtensionComponentTyp
     return registered && (!type || registered.type === type) ? registered.component : null;
 }
 
+/** Merge metadata declared at registration with optional metadata returned by the component itself. */
+export function getExtensionComponentMetadata(name: string): ExtensionComponentAdditionalMetadata | null {
+    const registered = extensionRegistry.components[name];
+    if (!registered) return null;
+
+    const provider = registered.component.getExtensionMetadata;
+    if (typeof provider !== "function") return { ...registered.extensionMetadata };
+
+    try {
+        const dynamicMetadata = provider.call(registered.component);
+        if (!dynamicMetadata || typeof dynamicMetadata !== "object" || Array.isArray(dynamicMetadata)) {
+            return { ...registered.extensionMetadata };
+        }
+        const merged = { ...registered.extensionMetadata };
+        Object.entries(dynamicMetadata).forEach(([key, value]) => {
+            const declared = merged[key];
+            merged[key] = declared && typeof declared === "object" && !Array.isArray(declared) &&
+                value && typeof value === "object" && !Array.isArray(value)
+                ? { ...declared, ...value }
+                : value;
+        });
+        return merged;
+    } catch (error) {
+        // Metadata is optional: a broken or absent hook must never prevent registry bootstrap.
+        console.warn(`Could not read dynamic metadata for extension component "${name}"`, error);
+        return { ...registered.extensionMetadata };
+    }
+}
+
 /** Names of every registered component of `type` (and `fieldType`, when given). Aliases are included. */
 export const getExtensionComponents = (type: ExtensionComponentType, fieldType: string = ''): string[] => {
     return Object.entries(extensionRegistry.components)
         .filter(([, meta]) => meta.type === type && (!fieldType || meta.fieldType === fieldType))
         .map(([name]) => name);
+};
+
+/** Discover agent-facing metadata from chat widgets that opt in through their metadata hook. */
+export const getAgentChatWidgetCatalog = (): AgentChatWidgetMetadata[] => {
+    const seenComponents = new Set<ExtensionComponentMetadata>();
+    const widgets: AgentChatWidgetMetadata[] = [];
+
+    Object.entries(extensionRegistry.components).forEach(([name, registered]) => {
+        if (registered.type !== ExtensionComponentTypes.chatInteractionWidget || seenComponents.has(registered)) return;
+        seenComponents.add(registered);
+
+        const metadata = getExtensionComponentMetadata(name);
+        const widget = metadata?.agentWidget as AgentChatWidgetMetadata | undefined;
+        if (!widget || typeof widget.name !== "string" || !widget.name ||
+            typeof widget.description !== "string" || !widget.description ||
+            !widget.propsSchema || widget.propsSchema.type !== "object") return;
+        widgets.push(structuredClone(widget));
+    });
+
+    return widgets;
 };
 
 export const getExtensionFunction = (name: string) => {
@@ -392,6 +448,8 @@ registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRela
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("ExportModulePackageRowAction", ExportModulePackageRowAction, ExtensionComponentTypes.listRowAction);
+registerExtensionComponent("UpdateModulePackageRowAction", UpdateModulePackageRowAction, ExtensionComponentTypes.listRowAction);
+registerExtensionComponent("RestoreModulePackageRowAction", RestoreModulePackageRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, ExtensionComponentTypes.listRowAction);
 registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, ExtensionComponentTypes.listRowAction);
 
