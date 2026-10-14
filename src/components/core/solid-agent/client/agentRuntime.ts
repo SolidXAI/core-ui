@@ -161,10 +161,10 @@ export class AgentRuntime {
             agentUrl,
             persistSession ? readSessionId(this.sessionKey) : null,
             agentRuntime === "agentHub",
-            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog() : [],
             initialProvider,
             initialModel,
             initialOptions,
+            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog() : [],
         );
         this.socket.setOnSessionExpired(() => {
             if (this.persistSession) writeSessionId(this.sessionKey, null);
