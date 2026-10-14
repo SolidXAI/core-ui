@@ -9,6 +9,7 @@ import {
     type AgentState,
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, normalizeAgentFrame } from "../agentEvents";
+import { parseWidgetContent } from "../thread/inlineWidget";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { emitBeforeUserMessageSend, type BeforeUserMessageSendContribution } from "./beforeUserMessageSend";
 import { emitAgentPublicEvent, type AgentPublicEventName, type AgentPublicEventPayloads } from "./agentPublicEvents";
@@ -264,6 +265,20 @@ export class AgentRuntime {
         }
         else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             this.publish("onAgentResponseCompleted", { sessionId: this.socket.currentSessionId });
+            const completedContent = event.eventData.content ?? event.frame.content;
+            const inline = parseWidgetContent(completedContent);
+            if (inline?.widget === "navigation-intent" && inline.data.schemaVersion === 1
+                && inline.data.kind === "navigation" && typeof inline.data.domain === "string"
+                && inline.data.payload && typeof inline.data.payload === "object" && !Array.isArray(inline.data.payload)) {
+                this.publish("onAgentNavigationRequested", {
+                    schemaVersion: 1,
+                    kind: "navigation",
+                    domain: inline.data.domain,
+                    payload: inline.data.payload as Record<string, unknown>,
+                    ...(typeof inline.data.message === "string" ? { message: inline.data.message } : {}),
+                    sessionId: this.socket.currentSessionId,
+                });
+            }
             this.publish("onAgentTurnCompleted", { sessionId: this.socket.currentSessionId, outcome: "completed" });
         } else if (event.eventType === AgentEventTypes.agentError || event.eventType === AgentEventTypes.error) {
             this.publish("onError", { stage: "runtime", code: "agent_error", retryable: false });

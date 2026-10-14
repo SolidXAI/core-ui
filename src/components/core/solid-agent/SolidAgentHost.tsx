@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentOpenRequested, type AgentState } from "../../../redux/features/agentSlice";
@@ -9,6 +10,7 @@ import { useAdminInputContext } from "./useAdminInputContext";
 import { onBeforeUserMessageSend } from "./client/beforeUserMessageSend";
 import { onAgentPublicEvent } from "./client/agentPublicEvents";
 import type { AgentMessageContext, AgentMode } from "./types";
+import { buildAdminCustomPath, buildAdminDashboardPath, buildAdminModelViewPath, buildAdminRecordFormPath } from "../../../helpers/routePaths";
 
 const PREFS_KEY = "solid-agent.window";
 const MIN_DOCK = 360;
@@ -42,6 +44,7 @@ function writePrefs(prefs: Partial<WindowPrefs>) {
  */
 export default function SolidAgentHost() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { ready, enabled, agentUrl, canUse } = useAgentAvailability();
     const inputContext = useAdminInputContext();
     const inputContextRef = useRef(inputContext);
@@ -73,11 +76,31 @@ export default function SolidAgentHost() {
         return contribution;
     }), []);
     useEffect(() => {
-        if (!_DEBUG_AGENT_EVENTS) return;
         return onAgentPublicEvent(({ event, payload, agentType: source }) => {
-            if (source === "solidx") console.log(`[SolidAgentHost] ${event}`, payload);
+            if (_DEBUG_AGENT_EVENTS && source === "solidx") console.log(`[SolidAgentHost] ${event}`, payload);
+            if (event !== "onAgentNavigationRequested" || source !== "solidx") return;
+            if (payload.schemaVersion !== 1 || payload.kind !== "navigation" || payload.domain !== "solidx.admin") return;
+
+            const { moduleName, modelName, viewName, recordId, dashboardName, customRoute } = payload.payload;
+            if (typeof moduleName !== "string" || typeof viewName !== "string") return;
+            if (!/^[A-Za-z0-9_-]+$/.test(moduleName.trim())) return;
+            let path = "";
+            if (viewName === "dashboard" && typeof dashboardName === "string") {
+                path = buildAdminDashboardPath({ moduleName, dashboardName });
+            } else if (viewName === "custom" && typeof customRoute === "string") {
+                path = buildAdminCustomPath(customRoute);
+            } else if (["list", "tree", "kanban", "card"].includes(viewName) && typeof modelName === "string") {
+                path = buildAdminModelViewPath({ moduleName, modelName, viewName });
+            } else if (viewName === "form" && typeof modelName === "string"
+                && /^[A-Za-z0-9_-]+$/.test(modelName.trim())
+                && (typeof recordId === "string" || typeof recordId === "number")) {
+                const recordKey = String(recordId);
+                if (!/^[A-Za-z0-9_-]+$/.test(recordKey)) return;
+                path = buildAdminRecordFormPath({ moduleName, modelName, recordId: recordKey, viewMode: "view" });
+            }
+            if (path) navigate(path);
         });
-    }, []);
+    }, [navigate]);
 
     const available = ready && enabled && canUse && !!agentUrl && !!agent;
     const mode = agent?.mode ?? "bubble";

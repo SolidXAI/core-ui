@@ -14,6 +14,14 @@ export type AgentPublicEventPayloads = {
     onAgentResponseStarted: { sessionId: string | null };
     onAgentResponseCompleted: { sessionId: string | null };
     onAgentTurnCompleted: { sessionId: string | null; outcome: "completed" };
+    onAgentNavigationRequested: {
+        schemaVersion: 1;
+        kind: string;
+        domain: string;
+        payload: Record<string, unknown>;
+        message?: string;
+        sessionId: string | null;
+    };
     onError: { stage: "runtime"; code: string; retryable: boolean };
     onHumanInputRequested: { sessionId: string | null; requestId: unknown; displayPayload?: string };
     onApprovalRequested: { sessionId: string | null; requestId: unknown; displayPayload?: string };

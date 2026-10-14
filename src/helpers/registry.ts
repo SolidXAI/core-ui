@@ -114,6 +114,7 @@ import { SolidGalleryChatWidget } from "../components/core/solid-agent/widgets/S
 import { SolidProgressChatWidget } from "../components/core/solid-agent/widgets/SolidProgressChatWidget";
 import { SolidStatusChatWidget } from "../components/core/solid-agent/widgets/SolidStatusChatWidget";
 import { SolidLinkCardChatWidget } from "../components/core/solid-agent/widgets/SolidLinkCardChatWidget";
+import { SolidNavigationIntentChatWidget } from "../components/core/solid-agent/widgets/SolidNavigationIntentChatWidget";
 import { SolidToolActivityChatWidget } from "../components/core/solid-agent/widgets/SolidToolActivityChatWidget";
 
 
@@ -541,4 +542,5 @@ registerExtensionComponent("SolidGalleryChatWidget", SolidGalleryChatWidget, Ext
 registerExtensionComponent("SolidProgressChatWidget", SolidProgressChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["progress"]);
 registerExtensionComponent("SolidStatusChatWidget", SolidStatusChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["status"]);
 registerExtensionComponent("SolidLinkCardChatWidget", SolidLinkCardChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["link-card"]);
+registerExtensionComponent("SolidNavigationIntentChatWidget", SolidNavigationIntentChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["navigation-intent"]);
 registerExtensionComponent("SolidToolActivityChatWidget", SolidToolActivityChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["tool-activity"]);
