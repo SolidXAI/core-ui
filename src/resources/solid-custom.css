@@ -981,7 +981,7 @@ textarea {
 
 .solid-toast-viewport {
   position: fixed;
-  top: 10px;
+  top: 12px;
   left: 50%;
   transform: translateX(-50%);
   z-index: calc(var(--z-overlay) + 6);
@@ -991,6 +991,7 @@ textarea {
   gap: 10px;
   width: calc(100vw - 24px);
   max-width: 100%;
+  padding: 0 4px 4px;
   pointer-events: none;
 }
 
@@ -999,7 +1000,7 @@ textarea {
   align-items: flex-start;
   gap: 10px;
   width: min(420px, 100%);
-  padding: 12px;
+  padding: 4px 6px 6px;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
   background: linear-gradient(180deg, color-mix(in srgb, var(--card) 97%, white 3%), var(--card));
@@ -3875,6 +3876,20 @@ textarea {
 
 .solid-tree-toolbar .custom-filter-button:hover {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+.solid-list-toolbar .custom-filter-button {
+  right: 4px;
+  padding: 0;
+}
+
+.solid-list-toolbar .solid-global-search-element input {
+  padding-right: 42px;
+}
+
+.solid-list-toolbar .solid-global-search-chip-list:has(> li:not(.solid-global-search-input-item)) {
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .solid-tree-toolbar .solid-btn.solid-icon-button {
