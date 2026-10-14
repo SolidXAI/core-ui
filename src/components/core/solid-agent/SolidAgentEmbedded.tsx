@@ -6,6 +6,7 @@ import type { AgentRuntimeType } from "./types";
 import { withAgentId } from "./client/agentUrls";
 import { useAdminInputContext, type AgentInputContext } from "./useAdminInputContext";
 import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
+import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/agentEmbedProtocol";
 
 type SharedProps = {
     title?: string;
@@ -16,7 +17,11 @@ type SharedProps = {
     /** AgentHub input schema; used by the admin test surface when no values were supplied. */
     requiredInputs?: AgentInputDefinition[];
     /** External bootstrap: the standalone route registers credentials for this private URL. */
-    externalEmbed?: { agentUrl: string; onInputsLocked?: (locked: boolean) => void };
+    externalEmbed?: {
+        agentUrl: string;
+        onInputsLocked?: (locked: boolean) => void;
+        beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext>;
+    };
     /** Container height; the chat fills it. */
     height?: number | string;
     suggestions?: string[];
@@ -81,6 +86,7 @@ export function SolidAgentEmbedded(props: Props) {
             {/* key: switching type remounts the chat onto the other backend's conversation. */}
             <SolidAgentChat key={agentUrl} agentUrl={agentUrl} agentRuntime={agentRuntime} title={title} inputContext={inputContext}
                 inputs={props.inputs} requiredInputs={props.requiredInputs} externalEmbed={!!props.externalEmbed} onInputsLocked={props.externalEmbed?.onInputsLocked}
+                beforeSend={props.externalEmbed?.beforeSend}
                 embedded suggestions={suggestions} windowControls={windowControls} />
         </div>
     );
