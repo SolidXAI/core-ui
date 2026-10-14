@@ -1,4 +1,5 @@
 import type { AgentAction, AgentConnection, AgentWireFrame } from "../types";
+import type { AgentChatWidgetMetadata } from "../../../../types/extension-registry";
 import { agentWsUrl, clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onAgentAuthChange } from "./agentAuth";
 
 /**
@@ -37,6 +38,7 @@ export class AgentSocket {
         private agentUrl: string,
         private initialSessionId: string | null = null,
         private checkProcessAvailability = false,
+        private widgetCatalog: AgentChatWidgetMetadata[] = [],
     ) {
         this.sessionId = initialSessionId;
         this.debugEmbed = !checkProcessAvailability;
@@ -50,7 +52,16 @@ export class AgentSocket {
     }
 
     private openSession() {
-        void this.sendRaw(this.sessionId ? { action: "resume_session", session_id: this.sessionId } : { action: "start_session" });
+        void this.sendRaw(this.sessionId ? this.resumeSessionAction(this.sessionId) : this.startSessionAction());
+    }
+
+    private startSessionAction(): AgentAction {
+        return { action: "start_session", ...(this.widgetCatalog.length ? { widget_catalog: this.widgetCatalog } : {}) };
+    }
+
+    private resumeSessionAction(sessionId: string): AgentAction {
+        return { action: "resume_session", session_id: sessionId,
+            ...(this.widgetCatalog.length ? { widget_catalog: this.widgetCatalog } : {}) };
     }
 
     get currentSessionId() {
@@ -172,7 +183,7 @@ export class AgentSocket {
         this.sessionId = null;
         this.sessionReady = false;
         this.queue = [];
-        if (this.ws?.readyState === WebSocket.OPEN) void this.sendRaw({ action: "start_session" });
+        if (this.ws?.readyState === WebSocket.OPEN) void this.sendRaw(this.startSessionAction());
         else this.connect();
     }
 
@@ -180,7 +191,7 @@ export class AgentSocket {
     resume(sessionId: string) {
         this.sessionId = sessionId;
         this.sessionReady = false;
-        if (this.ws?.readyState === WebSocket.OPEN) void this.sendRaw({ action: "resume_session", session_id: sessionId });
+        if (this.ws?.readyState === WebSocket.OPEN) void this.sendRaw(this.resumeSessionAction(sessionId));
         else this.connect();
     }
 

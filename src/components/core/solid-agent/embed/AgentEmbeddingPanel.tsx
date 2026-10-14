@@ -46,11 +46,11 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
                 { value: "react", label: "React", content: code(samples.react, "javascript") },
             ]} value={tab} onValueChange={setTab} extra={copyButton(tab, tab === "javascript" ? samples.javascript : samples.react)} />
         </section>
-        <section className="agent-editor__section"><h2>Required inputs</h2>
-            {fields.length ? <table style={{ width: "100%", textAlign: "left" }}><thead><tr><th>Variable</th><th>Data type</th><th>Description</th></tr></thead>
-                <tbody>{fields.map((field) => <tr key={field.name}><td><code>{field.name}</code></td><td>{field.dataType}</td><td>{field.description}</td></tr>)}</tbody></table>
-                : <p>This agent has no required inputs.</p>}
-            <p>Replace sample values with the current page's values and preserve each declared type. The SDK validates required inputs before the chat starts. Inputs are fixed after the first message; start a new chat to change them. They describe the task and do not grant access to data.</p>
+        <section className="agent-editor__section"><h2>Inputs</h2>
+            {fields.length ? <table style={{ width: "100%", textAlign: "left" }}><thead><tr><th>Variable</th><th>Data type</th><th>Description</th><th>Default value</th><th>Optional</th></tr></thead>
+                <tbody>{fields.map((field) => <tr key={field.name}><td><code>{field.name}</code></td><td>{field.dataType}</td><td>{field.description}</td><td>{field.defaultValue == null ? "—" : typeof field.defaultValue === "string" ? field.defaultValue : JSON.stringify(field.defaultValue)}</td><td>{field.optional ? "Yes" : "No"}</td></tr>)}</tbody></table>
+                : <p>This agent has no inputs.</p>}
+            <p>Replace sample values with the current page's values and preserve each declared type. Default values are used when an input is omitted; optional inputs may be omitted without a default. Inputs are fixed after the first message; start a new chat to change them. They describe the task and do not grant access to data.</p>
         </section>
         <section className="agent-editor__section"><h2>Hosting and deployment</h2><p>Make <code>/embed/agent/{agentId}</code> available on the hosted UI selected by <code>AGENT_EMBED_UI_URL</code>. Allow the consuming app origin in the hosted UI's frame-ancestors policy, the AgentHub Runtime origin in its CORS configuration, and the SDK/API/iframe origins in the consuming app's CSP. Use HTTPS for the consuming page, SDK, hosted UI, and runtime in production.</p></section>
         {copyError && <p role="alert">{copyError}</p>}

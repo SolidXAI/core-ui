@@ -19,3 +19,7 @@ export const SolidJsonChatWidget = ({ eventData }: SolidChatWidgetProps) => {
         </div>
     );
 };
+
+Object.assign(SolidJsonChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "json", description: "Show a raw JSON value in a collapsible, copyable viewer.", propsSchema: { type: "object", properties: { title: { type: "string" }, data: {} }, required: ["data"] } },
+}) });

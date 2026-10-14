@@ -79,3 +79,7 @@ export const SolidDiffListChatWidget = ({ eventData }: SolidChatWidgetProps) => 
         </div>
     );
 };
+
+Object.assign(SolidDiffListChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "diff-list", description: "Show file diffs, collapsible by file.", propsSchema: { type: "object", properties: { title: { type: "string" }, files: { type: "array", items: { type: "object", properties: { path: { type: "string" }, diff: { type: "string" }, additions: { type: "number" }, deletions: { type: "number" } }, required: ["path"] } } } } },
+}) });

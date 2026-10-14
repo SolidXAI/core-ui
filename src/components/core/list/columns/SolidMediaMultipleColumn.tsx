@@ -156,13 +156,16 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
         if (isArchivedRecord) return;
 
         if (isLightboxMediaKind(file?.previewKind)) {
+            const restoreMediaList = isShowAllFiles
+                ? () => setShowAllFiles(true)
+                : undefined;
             setShowAllFiles(false);
             setLightboxUrls?.([{
                 src: file.fileUrl,
                 downloadUrl: file.fileUrl,
                 type: file.previewKind === "video" ? "video" : undefined
             }]);
-            setOpenLightbox?.(true);
+            setOpenLightbox?.(true, restoreMediaList);
             return;
         }
 

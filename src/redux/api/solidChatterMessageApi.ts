@@ -41,8 +41,16 @@ export const solidChatterMessageApi = createApi({
             query: (qs) => {
                 return `/chatter-message/mentionable-users?${qs}`
             },
+        }),
+        getArchivedChatterMessages: builder.query({
+            query: (queryString) => `/chatter-message-archive?${queryString}`,
+            transformResponse: (response: any) => response?.data ?? response,
+        }),
+        getArchivedChatterMessage: builder.query({
+            query: (id) => `/chatter-message-archive/${id}`,
+            transformResponse: (response: any) => response?.data ?? response,
         })
     })
 });
 
-export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, usePostChatterMessageMutation, usePatchChatterMessageMutation, useUpdateChatterNoteMessageMutation, useLazyGetMentionableUsersQuery } = solidChatterMessageApi;
+export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, usePostChatterMessageMutation, usePatchChatterMessageMutation, useUpdateChatterNoteMessageMutation, useLazyGetMentionableUsersQuery, useGetArchivedChatterMessagesQuery, useLazyGetArchivedChatterMessageQuery } = solidChatterMessageApi;

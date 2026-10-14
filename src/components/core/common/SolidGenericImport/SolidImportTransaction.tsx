@@ -130,6 +130,9 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
 
     const visibleMappingEntries = Object.entries(fieldMapping).filter(([header]) => visibleHeaders.includes(header));
     const mappedEntries = visibleMappingEntries.filter(([, fieldName]) => typeof fieldName === "string" && fieldName.trim() !== "");
+    const unmappedVisibleEntries = visibleMappingEntries.filter(
+        ([, fieldName]) => typeof fieldName !== "string" || fieldName.trim() === ""
+    );
     const mappedFieldCounts = mappedEntries.reduce<Record<string, number>>((acc, [, fieldName]) => {
         const normalizedFieldName = fieldName.trim();
         acc[normalizedFieldName] = (acc[normalizedFieldName] ?? 0) + 1;
@@ -143,8 +146,6 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
         (field: any) => !mappedFieldCounts[field.name]
     );
     const totalImportableFieldCount = importableFields.length;
-    const mappedImportableFieldCount = Object.keys(mappedFieldCounts).length;
-    const unmappedImportableFieldCount = Math.max(totalImportableFieldCount - mappedImportableFieldCount, 0);
 
     const handleImportTransaction = async () => {
         if (mappedEntries.length === 0) {
@@ -152,6 +153,15 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                 severity: "error",
                 summary: ERROR_MESSAGES.IMPORT_ERROR,
                 detail: ERROR_MESSAGES.IMPORT_NO_MATCHED_COLUMNS,
+            }));
+            return;
+        }
+
+        if (unmappedVisibleEntries.length > 0) {
+            dispatch(showToast({
+                severity: "error",
+                summary: ERROR_MESSAGES.IMPORT_ERROR,
+                detail: ERROR_MESSAGES.IMPORT_UNMAPPED_COLUMNS,
             }));
             return;
         }
@@ -167,16 +177,6 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
 
         if (missingRequiredFields.length > 0) {
             const errorDetail = ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_MESSAGE(missingRequiredFields.length);
-            dispatch(showToast({
-                severity: "error",
-                summary: ERROR_MESSAGES.IMPORT_ERROR,
-                detail: errorDetail,
-            }));
-            return;
-        }
-
-        if (unmappedImportableFieldCount > 0) {
-            const errorDetail = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_MESSAGE(unmappedImportableFieldCount);
             dispatch(showToast({
                 severity: "error",
                 summary: ERROR_MESSAGES.IMPORT_ERROR,
@@ -235,18 +235,18 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
     let mappingWarningTitle: string | null = null;
 
     if (visibleSampleRecords.length > 0) {
-        if (duplicateMappedFieldNames.length > 0) {
+        if (autoMappedCount === 0 && mappedEntries.length === 0) {
+            mappingWarningTitle = ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_TITLE;
+            mappingWarningMessage = ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_MESSAGE;
+        } else if (unmappedVisibleEntries.length > 0) {
+            mappingWarningTitle = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_TITLE;
+            mappingWarningMessage = ERROR_MESSAGES.IMPORT_UNMAPPED_COLUMNS;
+        } else if (duplicateMappedFieldNames.length > 0) {
             mappingWarningTitle = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_TITLE;
             mappingWarningMessage = ERROR_MESSAGES.IMPORT_DUPLICATE_FIELD_MAPPING;
         } else if (missingRequiredFields.length > 0) {
             mappingWarningTitle = ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_TITLE;
             mappingWarningMessage = ERROR_MESSAGES.IMPORT_REQUIRED_FIELD_MAPPING_MESSAGE(missingRequiredFields.length);
-        } else if (autoMappedCount === 0 && mappedImportableFieldCount === 0) {
-            mappingWarningTitle = ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_TITLE;
-            mappingWarningMessage = ERROR_MESSAGES.IMPORT_TEMPLATE_MISMATCH_MESSAGE;
-        } else if (unmappedImportableFieldCount > 0) {
-            mappingWarningTitle = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_TITLE;
-            mappingWarningMessage = ERROR_MESSAGES.IMPORT_MAPPING_INCOMPLETE_MESSAGE(unmappedImportableFieldCount);
         }
     }
 

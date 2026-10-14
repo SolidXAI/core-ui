@@ -31,3 +31,7 @@ export const SolidLinkCardChatWidget = ({ eventData }: SolidChatWidgetProps) => 
         </button>
     );
 };
+
+Object.assign(SolidLinkCardChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "link-card", description: "Show a link with a title and description.", propsSchema: { type: "object", properties: { title: { type: "string" }, subtitle: { type: "string" }, route: { type: "string" }, url: { type: "string" } } } },
+}) });

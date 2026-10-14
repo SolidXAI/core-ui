@@ -358,6 +358,8 @@ export type SolidChatWidgetProps = {
     live: boolean;
     /** When the event arrived (epoch ms); shown as the message time. */
     timestamp: number;
+    /** Whether to show time and copy controls for an assistant message. */
+    showMessageMeta?: boolean;
     /** A final widget is read-only. */
     final: boolean;
     /** Answers this widget; sent to the agent as `widget_reply` (and as text). */

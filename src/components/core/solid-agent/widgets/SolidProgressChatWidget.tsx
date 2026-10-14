@@ -40,3 +40,7 @@ export const SolidProgressChatWidget = ({ eventData }: SolidChatWidgetProps) => 
         </div>
     );
 };
+
+Object.assign(SolidProgressChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "progress", description: "Show steps and their status for multi-step work.", propsSchema: { type: "object", properties: { title: { type: "string" }, percent: { type: "number" }, steps: { type: "array", items: { type: "object", properties: { label: { type: "string" }, status: { type: "string", enum: ["pending", "running", "done", "error"] } }, required: ["label"] } } } } },
+}) });

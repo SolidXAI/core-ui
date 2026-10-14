@@ -71,14 +71,14 @@ export const AdminTopHeader = () => {
     return ["Admin"];
   }, [actionId, actionResponse, pathname, searchParams]);
 
-  const showBack = /\/admin\/core\/[^/]+\/[^/]+\/form\/[^/]+/.test(pathname);
+  const showBack = /\/admin\/core\/[^/]+\/[^/]+\/(?:form|editor)\/[^/]+/.test(pathname);
 
   const triggerSidebar = () => {
     window.dispatchEvent(new CustomEvent(SIDEBAR_TOGGLE_EVENT));
   };
 
   const handleBreadcrumbClick = (crumbIndex: number) => {
-    // When on a form view, clicking the model name (second crumb) should navigate back to list
+    // When on a form or custom editor view, clicking the model name (second crumb) should navigate back to list
     // Index 1 is the model name in a breadcrumb like: Module > Model > Action
     if (crumbIndex === 1 && showBack) {
       const segments = pathname.split("/").filter(Boolean);

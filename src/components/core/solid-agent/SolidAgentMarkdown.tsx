@@ -14,10 +14,24 @@ export function safeHref(href?: string): string | undefined {
 
 async function copyText(text: string, done: () => void) {
     try {
+        if (!navigator.clipboard?.writeText) throw new Error("Clipboard API unavailable");
         await navigator.clipboard.writeText(text);
         done();
     } catch {
-        // Clipboard blocked; the text stays selectable.
+        // Clipboard access may be blocked in an embedded chat.
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            if (document.execCommand("copy")) done();
+        } catch {
+            // The message remains selectable if the host blocks copying entirely.
+        } finally {
+            textarea.remove();
+        }
     }
 }
 
