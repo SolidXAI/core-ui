@@ -4572,7 +4572,7 @@ li.header-li-px {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
-    padding-right: 18px;
+    padding-right: 0;
   }
 
   .solid-saved-filter-main-wrap {
@@ -4588,6 +4588,12 @@ li.header-li-px {
 
   .solid-search-overlay-option-description {
     -webkit-line-clamp: 2;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  .solid-list-toolbar .solid-saved-filter-actions {
+    opacity: 1;
   }
 }
 

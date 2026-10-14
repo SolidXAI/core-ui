@@ -3825,7 +3825,8 @@ textarea {
 @media (min-width: 768px) and (max-width: 991px) {
   .solid-list-toolbar .solid-custom-filter-wrapper,
   .solid-list-toolbar .solid-global-search-element,
-  .solid-list-toolbar .solid-global-search-element-wrapper {
+  .solid-list-toolbar .solid-global-search-element-wrapper,
+  .solid-list-toolbar .solid-search-overlay-panel {
     width: 100%;
     min-width: 0;
   }
