@@ -22,6 +22,10 @@ export type AgentModelIndicatorProps = {
     onSpeedSelect?: (speedId: string) => void;
 };
 
+const REASONING_PROVIDERS = new Set(["antigravity", "opencode", "claude", "copilot"]);
+const SPEED_PROVIDERS = new Set(["codex", "cursor"]);
+const SPEED_EXCLUDED_PROVIDERS = new Set(["antigravity"]);
+
 export function AgentModelIndicator({
     assignments,
     activeProvider = "solidx",
@@ -83,21 +87,23 @@ export function AgentModelIndicator({
     const hasCliModels = models && models.length > 0;
     const hasAssignments = assignments && (assignments.fast || assignments.reasoning);
 
+    const isNativeProvider = !activeProvider || activeProvider === "solidx";
+
     const reasoningEfforts = activeModelInfo?.reasoning_efforts || [];
     const hasReasoningSupport =
-        reasoningEfforts.length > 0 ||
-        activeProvider === "opencode" ||
-        activeProvider === "claude" ||
-        activeProvider === "copilot" ||
-        (activeModel?.includes("thinking") ?? false) ||
-        assignments?.reasoning != null;
+        !isNativeProvider &&
+        (reasoningEfforts.length > 0 ||
+            Boolean(activeModelInfo?.supports_thinking) ||
+            REASONING_PROVIDERS.has(activeProvider) ||
+            (activeModel?.includes("thinking") ?? false));
 
     const speedTiers = activeModelInfo?.speed_tiers || [];
     const hasSpeedSupport =
-        activeProvider === "codex" ||
-        activeProvider === "cursor" ||
-        speedTiers.length > 0 ||
-        assignments?.fast != null;
+        !isNativeProvider &&
+        !SPEED_EXCLUDED_PROVIDERS.has(activeProvider) &&
+        (speedTiers.length > 0 ||
+            Boolean(activeModelInfo?.supports_fast) ||
+            SPEED_PROVIDERS.has(activeProvider));
 
     if (!hasCliModels && !hasAssignments && providers.length <= 1 && !hasReasoningSupport && !hasSpeedSupport) {
         return null;

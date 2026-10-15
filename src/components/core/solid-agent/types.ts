@@ -58,8 +58,10 @@ export interface ProviderModelInfo {
     description?: string;
     reasoning_efforts?: ReasoningEffortInfo[];
     default_reasoning?: string;
+    supports_thinking?: boolean;
     speed_tiers?: SpeedTierInfo[];
     default_speed?: string;
+    supports_fast?: boolean;
 }
 
 export type AgentConnection = "idle" | "connecting" | "open" | "reconnecting" | "offline";
