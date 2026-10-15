@@ -14,6 +14,13 @@ const TOOL_DISPLAY_NAMES: Record<string, string> = {
     content_crud: "Content CRUD",
     filesystem_tool: "File System",
     bash: "Run Command",
+    view_file: "View File",
+    edit_file: "Edit File",
+    write_file: "Write File",
+    read_file: "Read File",
+    list_widgets: "List Widgets",
+    list_dir: "List Directory",
+    run_command: "Run Command",
 };
 
 const FILESYSTEM_ACTIONS: Record<string, string> = { read: "Read", write: "Write", edit: "Edit", search: "Search" };

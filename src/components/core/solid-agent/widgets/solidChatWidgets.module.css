@@ -13,19 +13,16 @@
 .AiTurnContent {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
     flex: 1;
     min-width: 0;
-}
-
-.AiTurnContent > .BubbleGroup ~ .BubbleGroup {
-    margin-top: 8px;
 }
 
 /* ── Per-turn activity disclosure ── */
 .ActivityGroup {
     width: 100%;
     min-width: 0;
+    margin: 0;
 }
 
 .ActivityTimerOnly {
@@ -33,39 +30,38 @@
 }
 
 .ActivitySummary {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    width: 100%;
+    gap: 6px;
+    width: auto;
+    max-width: 100%;
     min-height: 24px;
-    padding: 2px 6px;
+    padding: 3px 6px;
+    margin-left: -6px;
     border: 0;
     background: transparent;
     color: var(--solid-agent-muted-fg);
     text-align: left;
     font: inherit;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 6px;
     transition: background-color .15s ease, color .15s ease;
+    user-select: none;
 }
 
 .ActivitySummary:hover,
 .ActivitySummary:focus-visible {
     color: var(--solid-agent-fg);
-}
-
-.ActivitySummary:hover {
-    background: color-mix(in srgb, var(--solid-agent-primary) 6%, transparent);
+    background: color-mix(in srgb, var(--solid-agent-fg) 6%, transparent);
 }
 
 .ActivitySummary:focus-visible {
-    outline: 2px solid var(--solid-agent-primary);
-    outline-offset: 2px;
-    border-radius: 5px;
+    outline: 2px solid color-mix(in srgb, var(--solid-agent-fg) 25%, transparent);
+    outline-offset: 1px;
 }
 
 .ActivitySummaryText {
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
     color: inherit;
     font-size: 12px;
@@ -79,12 +75,12 @@
 }
 
 .ActivitySpinner {
-    color: var(--solid-agent-primary);
+    color: var(--solid-agent-muted-fg);
     animation: activitySpin .9s linear infinite;
 }
 
 .ActivityComplete {
-    color: var(--solid-agent-success, #16a34a);
+    color: var(--solid-agent-fg);
 }
 
 .ActivityChevron {
@@ -94,16 +90,16 @@
 }
 
 .ActivityChevronOpen {
-    transform: rotate(180deg);
+    transform: rotate(90deg);
 }
 
 .ActivityDetails {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    margin: 2px 0 3px 7px;
-    padding: 2px 0 2px 9px;
-    border-left: 1px solid var(--solid-agent-border);
+    gap: 3px;
+    margin: 4px 0 4px 6px;
+    padding: 2px 0 2px 10px;
+    border-left: 1.5px solid color-mix(in srgb, var(--solid-agent-border) 60%, transparent);
 }
 
 @keyframes activitySpin {
@@ -474,37 +470,27 @@
 /* ── Tool card ── */
 .ToolCard {
     border: 0;
-    border-left: 2px solid transparent;
-    border-bottom: 1px solid color-mix(in srgb, var(--solid-agent-border) 65%, transparent);
-    border-radius: 0;
+    border-radius: 6px;
     overflow: visible;
     width: 100%;
     max-width: 100%;
-    transition: border-color 0.15s, background 0.15s, opacity 0.15s;
-    font-size: 13px;
+    transition: background 0.12s ease;
+    font-size: 12.5px;
 }
 
 .ToolCardRunning {
-    border-left-color: var(--solid-agent-primary);
     background: transparent;
 }
 
 .ToolCardDone {
     background: transparent;
-    opacity: 0.92;
-}
-
-.ToolCardDone:hover {
-    opacity: 1;
 }
 
 .ToolCardWarning {
-    border-left-color: rgb(245, 158, 11);
     background: transparent;
 }
 
 .ToolCardError {
-    border-left-color: rgb(239, 68, 68);
     background: transparent;
 }
 
@@ -512,8 +498,8 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 12px;
-    font-size: 13px;
+    padding: 6px 8px;
+    font-size: 12px;
     flex-wrap: nowrap;
     min-width: 0;
 }
@@ -537,53 +523,33 @@
     color: rgb(239, 68, 68);
 }
 
-.ToolCardToolIcon {
-    font-size: 12px;
-    color: var(--solid-agent-muted-fg);
-    flex-shrink: 0;
-}
-
 .ToolCardName {
     font-family: inherit;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 550;
     color: var(--solid-agent-fg);
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    flex-shrink: 0;
     white-space: nowrap;
-    flex: 0 1 auto;
 }
 
 .ToolCardDesc {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--solid-agent-muted-fg);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
-    flex: 1;
-    max-width: 300px;
-}
-
-.ToolCardBadge {
-    font-size: 10px;
-    color: var(--solid-agent-muted-fg);
-    border: 1px solid var(--solid-agent-border);
-    border-radius: 4px;
-    padding: 1px 6px;
-    line-height: 17px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-left: auto;
+    flex: 1 1 0;
 }
 
 .ToolCardDuration {
     font-size: 11px;
     font-variant-numeric: tabular-nums;
-    color: var(--solid-agent-muted-fg);
+    color: var(--solid-agent-muted);
     white-space: nowrap;
     flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 6px;
 }
 
 .ToolCardProgress {
@@ -798,26 +764,36 @@
     align-items: center;
     gap: 7px;
     width: 100%;
-    padding: 6px 8px;
+    padding: 4px 6px;
     font-size: 12px;
     flex-wrap: nowrap;
     min-width: 0;
-    background: none;
-    border: none;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
     cursor: pointer;
     text-align: left;
     font-family: inherit;
     color: inherit;
+    transition: background 0.12s ease;
+}
+
+.ToolCardHeaderBtn:hover {
+    background: color-mix(in srgb, var(--solid-agent-fg) 5%, transparent);
 }
 
 .ToolCardHeaderBtn:not([data-expandable="true"]) {
     cursor: default;
 }
 
+.ToolCardHeaderBtn:not([data-expandable="true"]):hover {
+    background: transparent;
+}
+
 .ToolCardChevron {
     font-size: 11px;
-    color: var(--solid-agent-muted-fg);
-    transition: transform 0.2s;
+    color: var(--solid-agent-muted);
+    transition: transform 0.18s ease;
     flex-shrink: 0;
     margin-left: 2px;
 }
@@ -827,8 +803,11 @@
 }
 
 .ToolCardExpandable {
-    border-top: 1px solid var(--solid-agent-border);
-    margin-left: 8px;
+    margin: 4px 0 6px 10px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--solid-agent-fg) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--solid-agent-border) 40%, transparent);
 }
 
 /* ── Spinner (running tool / progress step) ── */
