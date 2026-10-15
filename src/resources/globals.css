@@ -4400,7 +4400,7 @@ li.header-li-px {
 .solid-saved-filter-item:hover .solid-saved-filter-actions,
 .solid-saved-filter-item:focus-within .solid-saved-filter-actions,
 .solid-saved-filter-item:has(.solid-saved-filter-main.is-active) .solid-saved-filter-actions {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 .solid-saved-filter-icon-btn {
