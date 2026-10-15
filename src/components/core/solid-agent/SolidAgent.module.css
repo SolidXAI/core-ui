@@ -568,6 +568,25 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
 }
 .modelInfoHeading { display: flex; flex-direction: column; gap: 3px; padding: 8px 10px; border-bottom: 1px solid var(--agent-border); }
+.modelInfoHeadingRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.modelVisionBadge {
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, #06b6d4 15%, transparent);
+  color: #06b6d4;
+  letter-spacing: 0.02em;
+}
+.modelNonVisionBadge {
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  background: var(--agent-tint);
+  color: var(--agent-muted);
+  letter-spacing: 0.02em;
+}
 .modelInfoHeading strong { color: var(--agent-fg); font-size: 12px; font-weight: 650; }
 .modelInfoRow { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 10px; }
 .modelInfoRow + .modelInfoRow { border-top: 1px solid var(--agent-border); }
@@ -779,7 +798,35 @@
   gap: 2px;
   max-height: 240px;
   overflow-y: auto;
-  padding: 4px 0;
+  padding: 0 0 4px 0;
+}
+.modelCategoryGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.modelCategoryHeading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--agent-muted);
+  background: var(--agent-bg);
+  padding: 6px 10px 4px;
+  border-bottom: 1px solid var(--agent-border);
+}
+.modelVisionTag {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, #06b6d4 12%, transparent);
+  color: #06b6d4;
+  font-weight: 600;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
 }
 .modelSelectItem {
   display: flex;

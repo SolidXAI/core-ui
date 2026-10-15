@@ -56,6 +56,16 @@ export interface ProviderModelInfo {
     name: string;
     is_default?: boolean;
     description?: string;
+    supports_vision?: boolean;
+    supports_image?: boolean;
+    supports_images?: boolean;
+    capabilities?: {
+        input?: {
+            image?: boolean;
+            [key: string]: any;
+        };
+        [key: string]: any;
+    };
     reasoning_efforts?: ReasoningEffortInfo[];
     default_reasoning?: string;
     supports_thinking?: boolean;
