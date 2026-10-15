@@ -89,9 +89,16 @@ export function AgentModelIndicator({
 
     const isNativeProvider = !activeProvider || activeProvider === "solidx";
 
+    const effectiveModelId = activeModel || activeModelInfo?.id || (models.length === 0 ? "auto" : "");
+    const isAutoModel =
+        effectiveModelId.toLowerCase() === "auto" ||
+        activeModelInfo?.name?.toLowerCase() === "auto" ||
+        summaryLabel.toLowerCase() === "auto";
+
     const reasoningEfforts = activeModelInfo?.reasoning_efforts || [];
     const hasReasoningSupport =
         !isNativeProvider &&
+        !isAutoModel &&
         (reasoningEfforts.length > 0 ||
             Boolean(activeModelInfo?.supports_thinking) ||
             REASONING_PROVIDERS.has(activeProvider) ||
@@ -100,6 +107,7 @@ export function AgentModelIndicator({
     const speedTiers = activeModelInfo?.speed_tiers || [];
     const hasSpeedSupport =
         !isNativeProvider &&
+        !isAutoModel &&
         !SPEED_EXCLUDED_PROVIDERS.has(activeProvider) &&
         (speedTiers.length > 0 ||
             Boolean(activeModelInfo?.supports_fast) ||
