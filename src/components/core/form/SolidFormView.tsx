@@ -93,6 +93,8 @@ interface ErrorResponseData {
     };
 }
 
+const RESTORE_CONFLICT_MESSAGE = "A record with the same details already exists. Update or delete the active record before restoring this one.";
+
 const LAYOUT_CLASSNAME_MAPPER: Record<string, string> = {
     grid: "flex flex-wrap",
     formgrid: "flex-wrap",
@@ -954,7 +956,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
 
             const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
-            dispatch(showToast({ severity: 'error', summary: 'Error', detail }));
+            const isRestoreConflict = detail === RESTORE_CONFLICT_MESSAGE;
+
+            dispatch(showToast({
+                severity: 'error',
+                summary: isRestoreConflict ? 'Cannot restore record' : 'Error',
+                detail: isRestoreConflict ? RESTORE_CONFLICT_MESSAGE : detail
+            }));
         };
 
         // Check and handle errors from each API operation
