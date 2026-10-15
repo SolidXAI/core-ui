@@ -4591,12 +4591,6 @@ li.header-li-px {
   }
 }
 
-@media (min-width: 768px) {
-  .solid-list-toolbar .solid-saved-filter-actions {
-    opacity: 1;
-  }
-}
-
 .solid-standard-autocomplete .p-inputtext {
   border-right: none;
 }
