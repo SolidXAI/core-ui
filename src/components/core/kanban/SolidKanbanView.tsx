@@ -252,7 +252,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   const {
     useDeleteMultipleSolidEntitiesMutation,
     useLazyGetSolidEntitiesQuery,
-    useLazyRecoverSolidEntityByIdQuery,
+    useRecoverSolidEntityByIdMutation,
     usePatchUpdateSolidEntityMutation
   } = entityApi;
 
@@ -411,7 +411,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
-  const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useLazyRecoverSolidEntityByIdQuery();
+  const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useRecoverSolidEntityByIdMutation();
 
   // Delete mutation 
   const [
