@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.21-beta.0] - 2026-10-15
+
+### Added
+
+- implement admin view refresh handling across various components
+- add navigation intent handling and routing support in SolidAgent components
+- implement beforeSend contributions and public event handling in SolidAgent components
+- add module validation and error handling in various editor pages; enhance styling for AgentHubModuleField
+- enhance message context handling and add beforeSend support in SolidAgent components
+- pass module prop to AgentHubTagsField in multiple editor pages
+- add AgentHubModuleField component and integrate module selection in agent, skill, and tool registry editor pages
+- enhance ArchivedChatterMessagesPage with advanced filtering and improved UI
+
+### Fixed
+
+- update SDK version in AgentEmbeddingPanel to v4
+- show thumbnails and typed file icons in uploaded (#255)
+
+### Other
+
+- changed duplicate microsoft icon (#250)
+- WIP fixed mobile responsive issues (#256)
+- Refactor code structure for improved readability and maintainability
+
 ## [0.1.20] - 2026-10-14
 
 ### Added
