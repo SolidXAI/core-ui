@@ -3,7 +3,7 @@ import { SolidChatter } from '../chatter/SolidChatter';
 import SolidLocale from './SolidLocale';
 import './solid-locale.css';
 import { SolidTabGroup } from '../../shad-cn-ui';
-// import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper'; // moved to SolidX Studio panel
+// import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 interface Props {
   solidFormViewMetaData: any;
   id: string;

@@ -38,10 +38,7 @@ export type SolidRouteKey =
   | "settings"
   | "authLayout"
   | "adminLayout"
-  | "authGuard"
-  | "adminGuard"
-  | "studioHome"
-  | "landing";
+  | "authGuard";
 
 export type SolidRoutesOptions = {
   extraAuthRoutes?: RouteObject[];

@@ -147,19 +147,6 @@ export const AdminTopHeader = () => {
         </nav>
 
         {/* <div className="solid-admin-header-actions">
-          {isAdmin && isDev && !isStudioMode && (
-            <button
-              type="button"
-              className="solid-studio-trigger-btn"
-              onClick={() => { dispatch(enterStudioMode()); router.push("/studio"); }}
-              title="Enter SolidX Studio"
-              aria-label="Enter SolidX Studio"
-            >
-              <StudioSparkleIcon />
-              <span className="solid-studio-trigger-label">Studio</span>
-            </button>
-          )}
-
           {isDarkModeEnabled && (
             <button
               type="button"

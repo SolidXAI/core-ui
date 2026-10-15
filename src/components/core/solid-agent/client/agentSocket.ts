@@ -25,6 +25,9 @@ export class AgentSocket {
     private eventListeners = new Set<EventListener>();
     private statusListeners = new Set<StatusListener>();
     private sessionId: string | null = null;
+    /** Sessions this chat moved away from. A reply still running in one of them keeps streaming on
+     *  this socket; its frames must not land in the new conversation. */
+    private leftSessions = new Set<string>();
     /** False until the agent confirms the session (session_started) on the current socket. */
     private sessionReady = false;
     private checkingProcessAvailability = false;
@@ -128,12 +131,15 @@ export class AgentSocket {
                 this.sessionReady = true;
                 this.flushQueue();
             }
+            // Drop frames for a different session (e.g. a late event after a switch), including the
+            // gap before the new session is confirmed.
+            const frameSession = frame.session_id ?? payload?.session_id;
+            if (eventType !== "session_started" && frameSession) {
+                if (this.sessionId ? frameSession !== this.sessionId : this.leftSessions.has(frameSession)) return;
+            }
             if (eventType === "UserMessage" || eventType === "turn_complete" || eventType === "error") {
                 this.unacknowledgedMessage = null;
             }
-            // Drop frames for a different session (e.g. a late event after a switch).
-            const frameSession = frame.session_id ?? payload?.session_id;
-            if (eventType !== "session_started" && frameSession && this.sessionId && frameSession !== this.sessionId) return;
             this.eventListeners.forEach((listener) => listener(frame));
         };
 
@@ -169,6 +175,7 @@ export class AgentSocket {
     /** Starts a fresh conversation (drops the current session id). */
     newSession() {
         this.unacknowledgedMessage = null;
+        if (this.sessionId) this.leftSessions.add(this.sessionId);
         this.sessionId = null;
         this.sessionReady = false;
         this.queue = [];
@@ -178,6 +185,8 @@ export class AgentSocket {
 
     /** Switches to an existing conversation. */
     resume(sessionId: string) {
+        if (this.sessionId && this.sessionId !== sessionId) this.leftSessions.add(this.sessionId);
+        this.leftSessions.delete(sessionId);
         this.sessionId = sessionId;
         this.sessionReady = false;
         if (this.ws?.readyState === WebSocket.OPEN) void this.sendRaw({ action: "resume_session", session_id: sessionId });

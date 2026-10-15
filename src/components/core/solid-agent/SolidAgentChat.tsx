@@ -125,12 +125,18 @@ export function SolidAgentChat({
     // SDK requests: solidAgent.open({ prompt, autoSend, context }).
     useEffect(() => {
         if (!handlesPrefill || !agent.prefill || !runtime) return;
-        const { prompt, autoSend, context, nonce } = agent.prefill;
+        const { prompt, autoSend, newSession, context, nonce } = agent.prefill;
+        // An auto-sent prompt waits for the agent sign-in instead of going out unauthenticated.
+        if (autoSend && !signedIn) return;
         dispatch(agentPrefillConsumed());
         setShowHistory(false);
-        if (autoSend) runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) });
+        if (newSession) {
+            runtime.newChat();
+            onInputsLocked?.(false);
+        }
+        if (autoSend) void runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) });
         else setSeed({ text: prompt, key: nonce });
-    }, [agent.prefill, handlesPrefill, dispatch, runtime, inputContext]);
+    }, [agent.prefill, signedIn, handlesPrefill, dispatch, runtime, inputContext, onInputsLocked]);
 
     useEffect(() => {
         if (!showHistory || !signedIn) return;
@@ -196,7 +202,7 @@ export function SolidAgentChat({
                 </div>
                 {signedIn && (
                     <>
-                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" disabled={agent.working} onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); }}>
+                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); }}>
                             <Plus size={16} />
                         </button>
                         {!externalEmbed && <button

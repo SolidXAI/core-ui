@@ -420,6 +420,8 @@
 .optionOn { border-color: var(--agent-primary); background: var(--agent-tint); }
 .checkRow { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; cursor: pointer; }
 .checkRow input { margin-top: 2px; accent-color: var(--agent-primary); }
+.saView { flex: 0 0 auto; padding: 0; border: 0; background: none; color: var(--agent-primary); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.saView:hover { text-decoration: none; }
 .mono { font-family: var(--agent-mono); font-size: 11.5px; }
 .pre {
   margin: 0;

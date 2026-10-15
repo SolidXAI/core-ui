@@ -2,8 +2,13 @@ import { env } from "../../adapters/env";
 import { useContext } from "react";
 import SolidLogoDark from '../../resources/images/solidx-logo/solidx-logo-dark.png'
 import SolidLogoLight from '../../resources/images/solidx-logo/solidx-logo-light.png'
-import { ChatIcon } from "../layout/SolidAiStudioLayout";
 import { LayoutContext } from "../layout/context/layoutcontext";
+
+const ChatIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
 
 export const SolidAdmin = () => {
   const layoutContext = useContext(LayoutContext);
