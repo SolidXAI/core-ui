@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Brain, Check, ChevronLeft, ChevronRight, ChevronUp, Zap } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Brain, Check, ChevronLeft, ChevronRight, ChevronUp, Search, X, Zap } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import type { AgentModelAssignment, AgentModelAssignments, AgentProviderInfo, ProviderModelInfo } from "./types";
 
@@ -76,10 +76,12 @@ export function AgentModelIndicator({
     onSpeedSelect,
 }: AgentModelIndicatorProps) {
     const detailsRef = useRef<HTMLDetailsElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const [modelOpen, setModelOpen] = useState(false);
     const [effortSubmenuOpen, setEffortSubmenuOpen] = useState(false);
     const [viewMode, setViewMode] = useState<"models" | "reasoning">("models");
     const [canFitFlyout, setCanFitFlyout] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const evaluateSpace = () => {
         if (!detailsRef.current) return;
@@ -106,6 +108,7 @@ export function AgentModelIndicator({
                 setModelOpen(false);
                 setEffortSubmenuOpen(false);
                 setViewMode("models");
+                setSearchQuery("");
                 if (detailsRef.current) detailsRef.current.open = false;
             }
         };
@@ -142,7 +145,35 @@ export function AgentModelIndicator({
         activeModelInfo?.name?.toLowerCase() === "auto" ||
         rawModelLabel.toLowerCase() === "auto";
 
+    const isOffEffort = (r?: { id?: string; name?: string }) => {
+        if (!r) return false;
+        const id = (r.id || "").toLowerCase().trim();
+        const name = (r.name || "").toLowerCase().trim();
+        return (
+            id === "off" ||
+            id === "none" ||
+            id === "disabled" ||
+            id === "false" ||
+            id === "0" ||
+            name === "off" ||
+            name === "none" ||
+            name === "disabled"
+        );
+    };
+
     const reasoningEfforts = activeModelInfo?.reasoning_efforts || [];
+    const providerOffEffort = reasoningEfforts.find(isOffEffort);
+    const offEffortId = providerOffEffort?.id || "none";
+    const nonOffEfforts = useMemo(
+        () => reasoningEfforts.filter((r) => !isOffEffort(r)),
+        [reasoningEfforts]
+    );
+
+    const isOffActive =
+        !isThinking ||
+        !selectedReasoning ||
+        isOffEffort({ id: selectedReasoning, name: selectedReasoning });
+
     const hasReasoningSupport =
         !isNativeProvider &&
         !isAutoModel &&
@@ -165,7 +196,20 @@ export function AgentModelIndicator({
     }
 
     const activeEffortObj = reasoningEfforts.find((r) => r.id === selectedReasoning);
-    const effortName = activeEffortObj?.name || (selectedReasoning && selectedReasoning !== "none" ? selectedReasoning : "");
+    const effortName =
+        activeEffortObj && !isOffEffort(activeEffortObj)
+            ? activeEffortObj.name
+            : selectedReasoning && !isOffEffort({ id: selectedReasoning, name: selectedReasoning })
+            ? selectedReasoning
+            : "";
+
+    const filteredModels = useMemo(() => {
+        if (!searchQuery.trim()) return models;
+        const q = searchQuery.toLowerCase().trim();
+        return models.filter((m) =>
+            (m.name || m.id).toLowerCase().includes(q)
+        );
+    }, [models, searchQuery]);
 
     return (
         <div className={styles.composerControlsGroup}>
@@ -179,8 +223,12 @@ export function AgentModelIndicator({
                     if (!isOpen) {
                         setEffortSubmenuOpen(false);
                         setViewMode("models");
+                        setSearchQuery("");
                     } else {
                         evaluateSpace();
+                        if (hasCliModels && models.length > 5) {
+                            setTimeout(() => searchInputRef.current?.focus(), 50);
+                        }
                     }
                 }}
             >
@@ -190,7 +238,7 @@ export function AgentModelIndicator({
                     aria-label={rawModelLabel}
                 >
                     <span className={styles.modelInfoModelText}>{displayModelLabel}</span>
-                    {hasReasoningSupport && isThinking && (
+                    {hasReasoningSupport && isThinking && !isOffActive && (
                         <span className={styles.modelInfoEffortText}>
                             {effortName || "Thinking"}
                         </span>
@@ -219,9 +267,9 @@ export function AgentModelIndicator({
                             <div className={styles.effortSelectList}>
                                 <button
                                     type="button"
-                                    className={`${styles.modelSelectItem} ${!isThinking ? styles.modelSelectItemActive : ""}`}
+                                    className={`${styles.modelSelectItem} ${isOffActive ? styles.modelSelectItemActive : ""}`}
                                     onClick={() => {
-                                        onReasoningSelect?.("none");
+                                        onReasoningSelect?.(offEffortId);
                                         setViewMode("models");
                                         setModelOpen(false);
                                         if (detailsRef.current) detailsRef.current.open = false;
@@ -229,10 +277,10 @@ export function AgentModelIndicator({
                                     disabled={disabled}
                                 >
                                     <span>Off</span>
-                                    {!isThinking && <Check size={14} className={styles.modelCheckIcon} />}
+                                    {isOffActive && <Check size={14} className={styles.modelCheckIcon} />}
                                 </button>
-                                {reasoningEfforts.map((r) => {
-                                    const isSelected = isThinking && (selectedReasoning === r.id || (!selectedReasoning && r.id === activeModelInfo?.default_reasoning));
+                                {nonOffEfforts.map((r) => {
+                                    const isSelected = !isOffActive && (selectedReasoning === r.id || (!selectedReasoning && r.id === activeModelInfo?.default_reasoning));
                                     return (
                                         <button
                                             key={r.id}
@@ -258,35 +306,76 @@ export function AgentModelIndicator({
                         <>
                             <div className={styles.modelInfoHeading}>
                                 <strong>{activeProviderInfo ? activeProviderInfo.name : "Configured models"}</strong>
-                                <span>{hasCliModels ? "Switch active model" : "Used by this agent"}</span>
                             </div>
+
+                            {hasCliModels && models.length > 5 && (
+                                <div className={styles.modelSearchBox}>
+                                    <Search size={13} className={styles.modelSearchIcon} />
+                                    <input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        className={styles.modelSearchInput}
+                                        placeholder="Search models..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Escape") {
+                                                if (searchQuery) {
+                                                    e.stopPropagation();
+                                                    setSearchQuery("");
+                                                }
+                                            }
+                                        }}
+                                    />
+                                    {searchQuery && (
+                                        <button
+                                            type="button"
+                                            className={styles.modelSearchClear}
+                                            onClick={() => {
+                                                setSearchQuery("");
+                                                searchInputRef.current?.focus();
+                                            }}
+                                            aria-label="Clear search"
+                                        >
+                                            <X size={12} />
+                                        </button>
+                                    )}
+                                </div>
+                            )}
 
                             {hasCliModels ? (
                                 <div className={styles.modelSelectList}>
-                                    {models.map((m) => {
-                                        const isSelected = m.id === activeModel || (!activeModel && m.is_default);
-                                        return (
-                                            <button
-                                                key={m.id}
-                                                type="button"
-                                                className={`${styles.modelSelectItem} ${isSelected ? styles.modelSelectItemActive : ""}`}
-                                                onClick={() => {
-                                                    onModelSelect?.(m.id);
-                                                    setModelOpen(false);
-                                                    setEffortSubmenuOpen(false);
-                                                    if (detailsRef.current) detailsRef.current.open = false;
-                                                }}
-                                                disabled={disabled}
-                                                title={m.name || m.id}
-                                            >
-                                                <div className={styles.modelSelectItemName}>
-                                                    <span>{m.name || m.id}</span>
-                                                    {m.is_default && <span className={styles.modelDefaultTag}>default</span>}
-                                                </div>
-                                                {isSelected && <Check size={14} className={styles.modelCheckIcon} />}
-                                            </button>
-                                        );
-                                    })}
+                                    {filteredModels.length === 0 ? (
+                                        <div className={styles.modelSearchEmpty}>
+                                            No models matching "{searchQuery}"
+                                        </div>
+                                    ) : (
+                                        filteredModels.map((m) => {
+                                            const isSelected = m.id === activeModel || (!activeModel && m.is_default);
+                                            return (
+                                                <button
+                                                    key={m.id}
+                                                    type="button"
+                                                    className={`${styles.modelSelectItem} ${isSelected ? styles.modelSelectItemActive : ""}`}
+                                                    onClick={() => {
+                                                        onModelSelect?.(m.id);
+                                                        setModelOpen(false);
+                                                        setEffortSubmenuOpen(false);
+                                                        setSearchQuery("");
+                                                        if (detailsRef.current) detailsRef.current.open = false;
+                                                    }}
+                                                    disabled={disabled}
+                                                    title={m.name || m.id}
+                                                >
+                                                    <div className={styles.modelSelectItemName}>
+                                                        <span>{m.name || m.id}</span>
+                                                        {m.is_default && <span className={styles.modelDefaultTag}>default</span>}
+                                                    </div>
+                                                    {isSelected && <Check size={14} className={styles.modelCheckIcon} />}
+                                                </button>
+                                            );
+                                        })
+                                    )}
                                 </div>
                             ) : hasAssignments ? (
                                 <>
@@ -329,7 +418,7 @@ export function AgentModelIndicator({
                                                 </div>
                                                 <div className={styles.modelSubmenuRowRight}>
                                                     <span className={styles.modelSubmenuValue}>
-                                                        {isThinking ? (effortName || "On") : "Off"}
+                                                        {isThinking && !isOffActive ? (effortName || "On") : "Off"}
                                                     </span>
                                                     <ChevronRight size={12} className={styles.modelSubmenuChevron} />
                                                 </div>
@@ -340,13 +429,12 @@ export function AgentModelIndicator({
                                                 <div className={styles.modelSubmenu} role="menu">
                                                     <div className={styles.modelSubmenuHeading}>
                                                         <strong>Reasoning Effort</strong>
-                                                        <span>Control thinking depth</span>
                                                     </div>
                                                     <button
                                                         type="button"
-                                                        className={`${styles.modelSelectItem} ${!isThinking ? styles.modelSelectItemActive : ""}`}
+                                                        className={`${styles.modelSelectItem} ${isOffActive ? styles.modelSelectItemActive : ""}`}
                                                         onClick={() => {
-                                                            onReasoningSelect?.("none");
+                                                            onReasoningSelect?.(offEffortId);
                                                             setEffortSubmenuOpen(false);
                                                             setModelOpen(false);
                                                             if (detailsRef.current) detailsRef.current.open = false;
@@ -354,10 +442,10 @@ export function AgentModelIndicator({
                                                         disabled={disabled}
                                                     >
                                                         <span>Off</span>
-                                                        {!isThinking && <Check size={13} className={styles.modelCheckIcon} />}
+                                                        {isOffActive && <Check size={13} className={styles.modelCheckIcon} />}
                                                     </button>
-                                                    {reasoningEfforts.map((r) => {
-                                                        const isSelected = isThinking && (selectedReasoning === r.id || (!selectedReasoning && r.id === activeModelInfo?.default_reasoning));
+                                                    {nonOffEfforts.map((r) => {
+                                                        const isSelected = !isOffActive && (selectedReasoning === r.id || (!selectedReasoning && r.id === activeModelInfo?.default_reasoning));
                                                         return (
                                                             <button
                                                                 key={r.id}

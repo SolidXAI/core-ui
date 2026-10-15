@@ -409,7 +409,9 @@ export function SolidAgentChat({
     };
 
     const handleReasoningChange = (newReasoning: string) => {
-        const thinkingBool = Boolean(newReasoning && newReasoning !== "none" && newReasoning !== "off");
+        const val = (newReasoning || "").toLowerCase().trim();
+        const isOff = !newReasoning || val === "none" || val === "off" || val === "disabled" || val === "false" || val === "0";
+        const thinkingBool = !isOff;
         setSelectedReasoning(newReasoning);
         setIsThinking(thinkingBool);
         setStoredSessionOptions(selectedProvider, { reasoning: newReasoning, thinking: thinkingBool });
@@ -678,7 +680,6 @@ export function SolidAgentChat({
                                 <div className={styles.providerDropdown} role="menu">
                                     <div className={styles.providerDropdownHeader}>
                                         <strong>Select AI Provider</strong>
-                                        <span>Switch execution provider</span>
                                     </div>
                                     {loadingProviders ? (
                                         <div className={styles.providerLoadingItem}>
@@ -698,7 +699,6 @@ export function SolidAgentChat({
                                                     >
                                                         <div className={styles.providerItemMeta}>
                                                             <span className={styles.providerItemName}>{p.name}</span>
-                                                            {p.version && <span className={styles.providerItemVersion}>v{p.version}</span>}
                                                         </div>
                                                         {isSelected && <Check size={14} className={styles.providerCheck} />}
                                                     </button>
