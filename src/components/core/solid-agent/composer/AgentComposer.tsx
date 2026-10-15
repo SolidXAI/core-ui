@@ -94,6 +94,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     };
 
     const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.nativeEvent.isComposing) return;
         if (matches.length) {
             if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                 event.preventDefault();
@@ -160,81 +161,91 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
                 </div>
             )}
 
-            {attachments.length > 0 && (
-                <ul className={styles.attachmentTray} aria-label="Attached files">
-                    {attachments.map((item, index) => (
-                        <li key={`${item.meta.name}-${index}`} className={styles.attachmentChip}>
-                            {item.meta.previewUrl ? (
-                                <img className={styles.attachmentThumb} src={item.meta.previewUrl} alt="" />
-                            ) : (
-                                <span className={styles.attachmentIcon}><FileText size={14} /></span>
-                            )}
-                            <span className={styles.attachmentText}>
-                                <span className={styles.attachmentName} title={item.meta.name}>{item.meta.name}</span>
-                                <span className={styles.attachmentSize}>{formatFileSize(item.meta.size)}</span>
-                            </span>
-                            <button type="button" className={styles.attachmentRemove} aria-label={`Remove ${item.meta.name}`} onClick={() => removeAttachment(index)}>
-                                <X size={12} />
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
-
             {attachErrors.length > 0 && (
                 <div className={styles.attachmentErrors} role="alert">
                     {attachErrors.map((error) => <div key={error}>{error}</div>)}
                 </div>
             )}
 
-            <textarea
-                ref={ref}
-                className={styles.textarea}
-                rows={1}
-                value={text}
-                disabled={disabled || sending}
-                aria-label="Message the SolidX Agent"
-                placeholder={dragging ? "Drop files to attach" : placeholder ?? "Ask the agent…"}
-                onChange={(event) => {
-                    setText(event.target.value);
-                    setActive(0);
-                    autosize();
+            <div
+                className={styles.composerBox}
+                onClick={(e) => {
+                    const tag = (e.target as HTMLElement).tagName;
+                    if (tag !== "BUTTON" && tag !== "SUMMARY" && tag !== "INPUT" && tag !== "IMG") {
+                        ref.current?.focus();
+                    }
                 }}
-                onKeyDown={onKeyDown}
-                onPaste={onPaste}
-            />
-            <div className={styles.composerRow}>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept={AGENT_ATTACHMENT_ACCEPT}
-                    hidden
-                    onChange={(event) => {
-                        void addFiles(Array.from(event.target.files ?? []));
-                        event.target.value = "";
-                    }}
-                />
-                <button
-                    type="button"
-                    className={styles.iconBtn}
-                    aria-label="Attach files"
-                    title={`Attach files (up to ${MAX_AGENT_ATTACHMENTS}: images or text files)`}
-                    disabled={disabled || sending || attachments.length >= MAX_AGENT_ATTACHMENTS}
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <Paperclip size={16} />
-                </button>
-                {modelIndicator}
-                {working ? (
-                    <button type="button" className={styles.stopBtn} onClick={onStop} aria-label="Stop the agent">
-                        <Square size={10} fill="currentColor" /> Stop
-                    </button>
-                ) : (
-                    <button type="button" className={styles.sendBtn} onClick={submit} disabled={!canSend} aria-label="Send">
-                        <ArrowUp size={16} />
-                    </button>
+            >
+                {attachments.length > 0 && (
+                    <ul className={styles.attachmentTray} aria-label="Attached files">
+                        {attachments.map((item, index) => (
+                            <li key={`${item.meta.name}-${index}`} className={styles.attachmentChip}>
+                                {item.meta.previewUrl ? (
+                                    <img className={styles.attachmentThumb} src={item.meta.previewUrl} alt="" />
+                                ) : (
+                                    <span className={styles.attachmentIcon}><FileText size={14} /></span>
+                                )}
+                                <span className={styles.attachmentText}>
+                                    <span className={styles.attachmentName} title={item.meta.name}>{item.meta.name}</span>
+                                    <span className={styles.attachmentSize}>{formatFileSize(item.meta.size)}</span>
+                                </span>
+                                <button type="button" className={styles.attachmentRemove} aria-label={`Remove ${item.meta.name}`} onClick={() => removeAttachment(index)}>
+                                    <X size={12} />
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
                 )}
+
+                <textarea
+                    ref={ref}
+                    className={styles.textarea}
+                    rows={1}
+                    value={text}
+                    disabled={disabled || sending}
+                    aria-label="Message the SolidX Agent"
+                    placeholder={dragging ? "Drop files to attach" : placeholder ?? "Ask the agent…"}
+                    onChange={(event) => {
+                        setText(event.target.value);
+                        setActive(0);
+                        autosize();
+                    }}
+                    onKeyDown={onKeyDown}
+                    onPaste={onPaste}
+                />
+                <div className={styles.composerRow}>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept={AGENT_ATTACHMENT_ACCEPT}
+                        hidden
+                        onChange={(event) => {
+                            void addFiles(Array.from(event.target.files ?? []));
+                            event.target.value = "";
+                        }}
+                    />
+                    <button
+                        type="button"
+                        className={styles.iconBtn}
+                        aria-label="Attach files"
+                        title={`Attach files (up to ${MAX_AGENT_ATTACHMENTS}: images or text files)`}
+                        disabled={disabled || sending || attachments.length >= MAX_AGENT_ATTACHMENTS}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <Paperclip size={16} />
+                    </button>
+                    {modelIndicator}
+                    {working ? (
+                        <button type="button" className={styles.stopBtn} onClick={onStop} aria-label="Stop the agent">
+                            <Square size={10} fill="currentColor" /> Stop
+                        </button>
+                    ) : (
+                        <button type="button" className={styles.sendBtn} onClick={submit} disabled={!canSend} aria-label="Send">
+                            <ArrowUp size={16} />
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
