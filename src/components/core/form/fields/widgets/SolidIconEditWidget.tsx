@@ -263,7 +263,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                             </div>
                         </div>
 
-                        <div className="w-1/4 px-0 pt-0 hidden lg:flex">
+                        <div className="w-1/4 px-0 pt-0 max-lg:hidden lg:flex">
                             <div className="p-4 lg:p-6">
                                 <p className="font-medium">Selected Icon</p>
                                 {selectedIcon && (

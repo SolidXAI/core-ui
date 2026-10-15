@@ -2005,7 +2005,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                     type="button"
                     size="sm"
                     variant="secondary"
-                    className="hidden lg:flex"
+                    className="max-lg:hidden lg:flex"
                     onClick={() => setRecoverDialogVisible(true)}
                     leftIcon={<RotateCcw size={14} />}
                   >
