@@ -24,11 +24,17 @@ export type AgentModelIndicatorProps = {
 
 const REASONING_PROVIDERS = new Set(["antigravity", "opencode", "claude", "copilot"]);
 
+const NON_VISION_TOKENS = ["big-pickle", "nemotron", "deepseek-r1", "o1-mini", "cohere-code", "inkling"];
+
 export const isVisionModel = (m: ProviderModelInfo): boolean => {
     if (typeof m.supports_vision === "boolean") return m.supports_vision;
     if (typeof m.supports_image === "boolean") return m.supports_image;
     if (typeof m.supports_images === "boolean") return m.supports_images;
     if (typeof m.capabilities?.input?.image === "boolean") return m.capabilities.input.image;
+    const lowered = (m.id || "").toLowerCase();
+    if (NON_VISION_TOKENS.some((tok) => lowered.includes(tok))) {
+        return false;
+    }
     return true;
 };
 const SPEED_PROVIDERS = new Set(["codex", "cursor"]);
@@ -392,6 +398,7 @@ export function AgentModelIndicator({
                                                 >
                                                     <div className={styles.modelSelectItemName}>
                                                         <span>{m.name || m.id}</span>
+                                                        {isVisionModel(m) && <span className={styles.modelVisionTag}>vision</span>}
                                                         {m.is_default && <span className={styles.modelDefaultTag}>default</span>}
                                                     </div>
                                                     {isSelected && <Check size={14} className={styles.modelCheckIcon} />}
