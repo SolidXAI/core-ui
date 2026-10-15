@@ -981,7 +981,7 @@ textarea {
 
 .solid-toast-viewport {
   position: fixed;
-  top: 12px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   z-index: calc(var(--z-overlay) + 6);
@@ -991,7 +991,6 @@ textarea {
   gap: 10px;
   width: calc(100vw - 24px);
   max-width: 100%;
-  padding: 0 4px 4px;
   pointer-events: none;
 }
 
@@ -1000,7 +999,7 @@ textarea {
   align-items: flex-start;
   gap: 10px;
   width: min(420px, 100%);
-  padding: 4px 6px 6px;
+  padding: 12px;
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
   background: linear-gradient(180deg, color-mix(in srgb, var(--card) 97%, white 3%), var(--card));
