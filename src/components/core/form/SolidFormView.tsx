@@ -60,12 +60,15 @@ import {
     SolidDialogTitle
 } from "../../shad-cn-ui/SolidDialog";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { eventBus } from "../../../helpers/eventBus";
+import { ADMIN_VIEW_REFRESH_REQUESTED, isMatchingAdminViewRefresh, type AdminViewRefreshRequest } from "../../../helpers/adminViewRefresh";
 
 export type SolidFormViewProps = {
     moduleName: string;
     modelName: string;
     id: string;
     embeded: boolean;
+    viewMode?: "view" | "edit";
     handlePopupClose?: any,
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
@@ -624,7 +627,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
-    const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
+    const [viewMode, setViewMode] = useState<"view" | "edit">(params.viewMode ?? (params.embeded === true ? "edit" : "view"));
     const [createMode, setCreateMode] = useState<boolean>(false);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
@@ -758,7 +761,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
 
     useEffect(() => {
-        const mode = searchParams.get('viewMode');
+        const mode = params.viewMode ?? searchParams.get('viewMode');
         const locale = searchParams.get('locale');
         const defaultEntityLocaleIdn = searchParams.get('defaultEntityLocaleId');
         if (params.id === 'new' && !locale) {
@@ -781,7 +784,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         } else {
             setViewMode('view'); // Default to 'view' if no valid mode is provided
         }
-    }, [searchParams, params.id]);
+    }, [searchParams, params.id, params.viewMode]);
 
     // function that updates view mode 
     const updateViewMode = (newMode: "view" | "edit") => {
@@ -1065,6 +1068,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 else {
                     // updateEntity({ id: +params.id, data: formData });
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    // The audit event is produced by the entity update. Refresh the chatter
+                    // directly from this save path so the panel does not depend on mutation
+                    // status transitions to notice the new audit message.
+                    setRefreshChatterMessage(true);
                     // Keep the current screen in sync with the normalized payload returned by the API
                     // so toggling view/edit after save does not continue showing stale pre-save values.
                     if (result?.data) {
@@ -1161,6 +1168,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
     } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, {
         skip: params.id === 'new'
     });
+    useEffect(() => eventBus.on<AdminViewRefreshRequest>(ADMIN_VIEW_REFRESH_REQUESTED, (request) => {
+        if (params.id === 'new') return;
+        if (isMatchingAdminViewRefresh(request, {
+            moduleName: params.moduleName,
+            modelName: params.modelName,
+            viewName: "form",
+            recordId: params.id,
+        })) {
+            void refetchSolidFormViewData();
+        }
+    }), [params.id, params.moduleName, params.modelName, refetchSolidFormViewData]);
     useEffect(() => {
         if (params.id !== 'new') {
             refetchSolidFormViewData()

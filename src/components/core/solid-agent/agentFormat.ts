@@ -43,7 +43,19 @@ export function toolDisplayName(name: string, args?: Record<string, unknown>): s
 }
 
 const truncate = (text: string, max = 80) => (text.length > max ? `${text.slice(0, max)}…` : text);
-const oneLine = (value: unknown) => String(value).trim().replace(/\n/g, " ");
+function oneLine(value: unknown): string {
+    let text: string;
+    if (typeof value === "string") {
+        text = value;
+    } else {
+        try {
+            text = JSON.stringify(value) ?? String(value);
+        } catch {
+            text = "[unserializable value]";
+        }
+    }
+    return text.trim().replace(/\s+/g, " ");
+}
 
 function humanizeCommand(cmd: string): string {
     const trimmed = cmd.trim();

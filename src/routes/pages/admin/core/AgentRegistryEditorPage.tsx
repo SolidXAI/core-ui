@@ -1,6 +1,5 @@
 import React from "react";
-import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronDown, ExternalLink, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -8,131 +7,138 @@ import { useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentPersonaHistory } from "./AgentPersonaHistory";
+import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
+import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
 import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
 import { AgentSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import { AgentProcessesPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentProcessesPanel";
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
-import { ALLOWED_MODELS_BY_PROVIDER, type AllowedModelProvider } from "../../../../constants/allowed-ai-models";
-import { SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
+import { getModelsDevModels, useModelsDevCatalog } from "../../../../hooks/useModelsDevModels";
+import { SolidAutocomplete, SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuTrigger, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
+import { SolidAgentMarkdown } from "../../../../components/core/solid-agent/SolidAgentMarkdown";
 import { AgentEmbeddingPanel } from "../../../../components/core/solid-agent/embed/AgentEmbeddingPanel";
 import "./AgentRegistryEditorPage.css";
 
 type Item = { id: number; name?: string; title?: string; displayName?: string; description?: string; iconName?: string; key?: string; module?: { id?: number; displayName?: string }; [key: string]: any };
 type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; roleMetadata?: Item; secret?: Item; envVarName?: string; alwaysInclude?: boolean; requiresApproval?: boolean };
-type Input = { name: string; description: string; dataType: string };
+type Input = { name: string; description: string; dataType: string; defaultValue?: unknown; optional: boolean };
 type Agent = Item & {
   configVersion?: number;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
-  agentProcesses?: Item[]; agentSessions?: Item[]; agentJobs?: Item[];
+  tags?: AgentHubTag[];
 };
-type ProviderModelOption = { provider: AllowedModelProvider; model: string; value: string };
+type ProviderModelOption = { provider: string; providerLabel: string; model: string; value: string; note?: string };
 
-const PROVIDER_LABELS: Record<AllowedModelProvider, string> = {
+const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",
   openai: "OpenAI",
   openrouter: "OpenRouter",
 };
+const BUILT_IN_PROVIDER_TYPES = ["openai", "anthropic"];
 
-function ModelPicker({ value, options, placeholder, onChange }: {
+type AiProviderConfig = { type?: string; apiKey?: unknown; region?: string };
+type AiModelConfig = { providerId?: string; model?: string };
+
+/**
+ * Build picker options from the AI settings: every provider with an API key, its models from
+ * models.dev, plus the models chosen in settings and any already-saved values for this agent.
+ */
+function buildModelOptions(
+  providers: Record<string, AiProviderConfig>,
+  settingsModels: Record<string, AiModelConfig | undefined>,
+  catalog: Parameters<typeof getModelsDevModels>[0],
+  savedValues: string[],
+): ProviderModelOption[] {
+  const enabled = Object.entries(providers)
+    .filter(([, entry]) => typeof entry?.apiKey === "string" && entry.apiKey.trim().length > 0);
+  const options: ProviderModelOption[] = [];
+  const seen = new Set<string>();
+  const add = (provider: string, model: string, note?: string) => {
+    const value = `${provider}:${model}`;
+    if (!model || seen.has(value)) return;
+    seen.add(value);
+    options.push({ provider, providerLabel: PROVIDER_LABELS[provider] ?? provider, model, value, note });
+  };
+  for (const [provider, entry] of enabled) {
+    for (const [role, config] of Object.entries(settingsModels)) {
+      if (config?.providerId === provider && config.model) add(provider, config.model, `${role} model in AI settings`);
+    }
+    for (const value of savedValues) {
+      if (value.startsWith(`${provider}:`)) add(provider, value.slice(provider.length + 1), "currently saved");
+    }
+    const type = entry.type && BUILT_IN_PROVIDER_TYPES.includes(entry.type) ? entry.type : undefined;
+    for (const model of getModelsDevModels(catalog, [provider, type])) add(provider, model.id);
+  }
+  return options;
+}
+
+const OTHER_MODEL = "__other_model__";
+
+function SearchableSelect({ value, options, placeholder, disabled, onChange }: {
   value: string;
-  options: ProviderModelOption[];
+  options: { label: string; value: string }[];
   placeholder: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
 }) {
-  const rootRef = React.useRef<HTMLDivElement>(null);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-  const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({});
-  const selected = options.find((option) => option.value === value);
-  const filtered = options.filter((option) =>
-    `${PROVIDER_LABELS[option.provider]} ${option.model}`.toLowerCase().includes(query.trim().toLowerCase()));
-  const groups = (Object.keys(ALLOWED_MODELS_BY_PROVIDER) as AllowedModelProvider[])
-    .map((provider) => ({ provider, options: filtered.filter((option) => option.provider === provider) }))
-    .filter((group) => group.options.length > 0);
+  const selectedLabel = options.find((option) => option.value === value)?.label;
+  const selected = React.useMemo(() => selectedLabel ? { label: selectedLabel, value } : null, [selectedLabel, value]);
+  const suggestions = options.filter((option) =>
+    `${option.label} ${option.value}`.toLowerCase().includes(query.trim().toLowerCase()));
 
-  React.useEffect(() => {
-    if (!open) return;
-    const positionMenu = () => {
-      const bounds = rootRef.current?.getBoundingClientRect();
-      if (!bounds) return;
-      const gap = 6;
-      const maxMenuHeight = Math.min(288, window.innerHeight - 24);
-      const spaceBelow = window.innerHeight - bounds.bottom - gap - 12;
-      const spaceAbove = bounds.top - gap - 12;
-      const openAbove = spaceBelow < Math.min(220, maxMenuHeight) && spaceAbove > spaceBelow;
-      const availableHeight = Math.max(120, Math.min(maxMenuHeight, openAbove ? spaceAbove : spaceBelow));
-      setMenuStyle({
-        position: "fixed",
-        left: bounds.left,
-        width: bounds.width,
-        maxHeight: availableHeight,
-        ...(openAbove
-          ? { bottom: window.innerHeight - bounds.top + gap }
-          : { top: bounds.bottom + gap }),
-      });
-    };
-    positionMenu();
-    window.addEventListener("resize", positionMenu);
-    window.addEventListener("scroll", positionMenu, true);
-    const handleOutsideClick = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      window.removeEventListener("resize", positionMenu);
-      window.removeEventListener("scroll", positionMenu, true);
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [open]);
+  return <SolidAutocomplete
+    className="solid-standard-autocomplete w-full"
+    value={selected}
+    suggestions={suggestions}
+    completeMethod={({ query: next }) => setQuery(next)}
+    onChange={(event) => onChange(event.value?.value ?? "")}
+    field="label"
+    placeholder={placeholder}
+    disabled={disabled}
+    dropdown
+    forceSelection
+    portal
+  />;
+}
 
-  const choose = (option: ProviderModelOption) => {
-    onChange(option.value);
-    setQuery("");
-    setOpen(false);
-  };
-  let flatIndex = -1;
+function ModelPicker({ value, options, providers, providerConfig, onChange }: {
+  value: string;
+  options: ProviderModelOption[];
+  providers: { label: string; value: string }[];
+  providerConfig: Record<string, AiProviderConfig>;
+  onChange: (value: string) => void;
+}) {
+  const separator = value.indexOf(":");
+  const provider = separator < 0 ? "" : value.slice(0, separator);
+  const model = separator < 0 ? "" : value.slice(separator + 1);
+  const availableModels = options.filter((option) => option.provider === provider);
+  const [otherSelected, setOtherSelected] = React.useState(false);
+  const showOther = !!provider && (otherSelected || (!!model && !availableModels.some((option) => option.model === model)));
 
-  return <div className="agent-editor__model-picker" ref={rootRef}>
-    <div className="agent-editor__model-control">
-      <input
-        role="combobox"
-        aria-expanded={open}
-        aria-autocomplete="list"
-        aria-label={placeholder}
-        placeholder={selected ? `${PROVIDER_LABELS[selected.provider]} / ${selected.model}` : value || placeholder}
-        value={open ? query : ""}
-        onFocus={() => { setQuery(""); setActiveIndex(0); setOpen(true); }}
-        onChange={(event) => { setQuery(event.target.value); setActiveIndex(0); setOpen(true); }}
-        onKeyDown={(event) => {
-          if (event.key === "Escape") { setOpen(false); setQuery(""); }
-          if (event.key === "ArrowDown") { event.preventDefault(); setOpen(true); setActiveIndex((index) => Math.min(index + 1, filtered.length - 1)); }
-          if (event.key === "ArrowUp") { event.preventDefault(); setActiveIndex((index) => Math.max(index - 1, 0)); }
-          if (event.key === "Enter" && open && filtered[activeIndex]) { event.preventDefault(); choose(filtered[activeIndex]); }
-        }}
-      />
-      <button type="button" aria-label={open ? "Close model options" : "Show model options"} onMouseDown={(event) => event.preventDefault()} onClick={() => { setOpen((current) => !current); setQuery(""); }}><ChevronDown size={16} /></button>
+  return <div className="agent-editor__stack">
+    <div className="agent-editor__field"><span>Provider *</span>
+      <SearchableSelect value={provider} options={providers} placeholder="Select provider"
+        onChange={(next) => { setOtherSelected(false); onChange(`${next}:`); }} />
+      {providerConfig[provider]?.type === "bedrock" && providerConfig[provider]?.region &&
+        <small><em>Region: {providerConfig[provider].region}</em></small>}
     </div>
-    {open && createPortal(<div ref={menuRef} className="agent-editor__model-menu" style={menuStyle} role="listbox">
-      {!groups.length ? <div className="agent-editor__model-empty">{options.length ? "No matching models." : "No enabled providers. Add an API key in AI Settings."}</div>
-        : groups.map((group) => <section className="agent-editor__model-group" key={group.provider}>
-          <h3>{PROVIDER_LABELS[group.provider]}</h3>
-          {group.options.map((option) => {
-            flatIndex += 1;
-            const index = flatIndex;
-            return <button type="button" role="option" aria-selected={option.value === value} className={`agent-editor__model-option${index === activeIndex ? " is-active" : ""}`}
-              key={option.value} onMouseDown={(event) => event.preventDefault()} onMouseEnter={() => setActiveIndex(index)} onClick={() => choose(option)}>
-              <span>{option.model}</span><small>{option.provider}:{option.model}</small>
-            </button>;
-          })}
-        </section>)}
-    </div>, document.body)}
+    <div className="agent-editor__field"><span>Model *</span>
+      <SearchableSelect value={showOther ? OTHER_MODEL : model}
+        options={[...availableModels.map((option) => ({ label: option.model, value: option.model })), { label: "Other", value: OTHER_MODEL }]}
+        placeholder="Select model" disabled={!provider}
+        onChange={(next) => {
+          setOtherSelected(next === OTHER_MODEL);
+          onChange(`${provider}:${next === OTHER_MODEL ? "" : next}`);
+        }} />
+      {showOther && <SolidInput className="w-full" aria-label="Custom model ID" placeholder="Enter model ID" value={model}
+        onChange={(event) => onChange(`${provider}:${event.target.value}`)} />}
+    </div>
   </div>;
 }
 
@@ -145,12 +151,41 @@ const agentSkillApi = createSolidEntityApi("agentSkill");
 const agentToolApi = createSolidEntityApi("agentTool");
 const agentRoleApi = createSolidEntityApi("agentRole");
 const agentSecretApi = createSolidEntityApi("agentSecret");
+const jobApi = createSolidEntityApi("agentJob");
 
-const populate = [
-  "agentSkills", "agentSkills.agentSkillRegistry", "agentTools", "agentTools.agentToolRegistry",
-  "agentRoles", "agentRoles.roleMetadata", "agentSecrets", "agentSecrets.secret",
-  "agentProcesses", "agentSessions", "agentJobs",
-].map((name, index) => `populate[${index}]=${name}`).join("&");
+const skillFields = ["id", "name", "iconName", "description"];
+const toolFields = [...skillFields, "type", "status", "lastLoadError"];
+
+function fieldsQuery(fields: string[]): string {
+  return fields.map((name) => `fields=${encodeURIComponent(name)}`).join("&");
+}
+
+const detailFields = [
+  "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
+  "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
+];
+
+const detailQuery = [
+  "agentRoles", "agentRoles.roleMetadata", "agentSecrets", "agentSecrets.secret", "tags", "module",
+].map((name, index) => `populate[${index}]=${name}`).join("&") + "&" + fieldsQuery(detailFields);
+
+// Group by link ID to project summary columns without populating full registry records.
+function resourceLinksQuery(id: string, relation: string, registry: string, setting: string, fields: string[]): string {
+  return [
+    `filters[id][$eq]=${encodeURIComponent(id)}`,
+    `groupBy[0]=${relation}.id`, `groupBy[1]=${relation}.${setting}`,
+    ...fields.map((field, index) => `aggregates[${index}]=${relation}.${registry}.${field}:max`),
+  ].join("&");
+}
+
+function resourceLinksFrom(result: any, relation: string, registry: string, setting: string, fields: string[]): Link[] {
+  return items(result?.groupMeta).flatMap((group) => {
+    const [linkId, enabled] = String(group.groupValue ?? "").split("_");
+    const resource = Object.fromEntries(fields.map((field) => [field, group[`${relation}_${registry}_${field}_max`]]));
+    if (!Number(linkId) || !Number(resource.id)) return [];
+    return [{ id: Number(linkId), [registry]: { ...resource, id: Number(resource.id) }, [setting]: enabled === "true" || enabled === "1" }];
+  });
+}
 
 function recordFrom(value: any): any {
   let result = value;
@@ -171,7 +206,7 @@ function agentFormFromRecord(record: Agent) {
     name: record.name ?? "", title: record.title ?? "", description: record.description ?? "", iconName: record.iconName ?? "",
     inputs: parseInputs(record.requiredInputs), reasoningModelKey: record.reasoningModelKey ?? "", fastModelKey: record.fastModelKey ?? "",
     systemPrompt: record.systemPrompt ?? "", stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
-    costLimit: Number(record.costLimit ?? 3), skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
+    costLimit: Number(record.costLimit ?? 3), tags: agentHubTagsFrom(record.tags), moduleId: agentHubModuleFrom(record.module)?.id ?? null, skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
     toolIds: tools.map((link) => link.agentToolRegistry?.id).filter(Boolean),
     roleIds: items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean),
     secretIds: secrets.map((link) => link.secret?.id).filter(Boolean),
@@ -186,15 +221,39 @@ function parseInputs(value: unknown): Input[] {
     const parsed = typeof value === "string" ? JSON.parse(value) : value;
     if (Array.isArray(parsed)) return parsed.map((input) => ({
       name: String(input.name ?? input.variableName ?? ""), description: String(input.description ?? ""),
-      dataType: String(input.dataType ?? input.type ?? "string"),
+      dataType: String(input.dataType ?? input.type ?? "string"), defaultValue: input.defaultValue ?? null,
+      optional: input.optional === true,
     }));
     // Existing agent definitions may use a name-keyed object.
     if (parsed && typeof parsed === "object") return Object.entries(parsed).map(([name, definition]: [string, any]) => ({
       name, description: String(definition?.description ?? ""),
-      dataType: String(definition?.dataType ?? definition?.type ?? "string"),
+      dataType: String(definition?.dataType ?? definition?.type ?? "string"), defaultValue: definition?.defaultValue ?? null,
+      optional: definition?.optional === true,
     }));
   } catch { /* Keep malformed historical values from crashing the editor. */ }
   return [];
+}
+
+function parseDefaultValue(raw: string, dataType: string): unknown {
+  if (dataType === "string" || dataType === "date" || dataType === "datetime") return raw;
+  if (dataType === "boolean") {
+    if (raw !== "true" && raw !== "false") throw new Error(`Default value must be true or false for ${dataType}.`);
+    return raw === "true";
+  }
+  if (dataType === "number" || dataType === "integer") {
+    const value = Number(raw);
+    if (!Number.isFinite(value) || (dataType === "integer" && !Number.isSafeInteger(value))) throw new Error(`Default value must be a valid ${dataType}.`);
+    return value;
+  }
+  const value = JSON.parse(raw);
+  if (dataType === "array" && !Array.isArray(value)) throw new Error("Default value must be a JSON array.");
+  if (dataType === "object" && (!value || typeof value !== "object" || Array.isArray(value))) throw new Error("Default value must be a JSON object.");
+  return value;
+}
+
+function formatDefaultValue(value: unknown): string {
+  if (value == null) return "";
+  return typeof value === "string" ? value : JSON.stringify(value);
 }
 
 function apiError(error: any): string {
@@ -207,21 +266,47 @@ function useCatalog(api: typeof skillApi, query = "offset=0&limit=1000") {
   return { records: items(data?.records) as Item[], isLoading, refetch };
 }
 
-function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor }: {
+function ResourcePreviewDialog({ item, kind, onClose }: { item: Item; kind: "skill" | "tool"; onClose: () => void }) {
+  const api = kind === "skill" ? skillApi : toolApi;
+  const field = kind === "skill" ? "body" : "sourceCode";
+  const { currentData, isFetching, isError, refetch } = api.useGetSolidEntityByIdQuery(
+    { id: item.id, qs: fieldsQuery(["id", field]) }, { refetchOnMountOrArgChange: true });
+  const record = recordFrom(currentData);
+  const content = record?.[field] ?? "";
+
+  return <SolidDialog open onOpenChange={(open) => { if (!open) onClose(); }} header={item.name ?? `View ${kind}`}
+    style={{ width: "min(64rem, 94vw)", maxWidth: "94vw" }}>
+    <SolidDialogBody className="agent-editor__resource-preview-body">
+      {isFetching ? <div className="agent-editor__empty" role="status">Loading {kind}…</div>
+        : isError || !record ? <div className="agent-editor__empty"><p role="alert">This {kind} could not be loaded.</p><SolidButton variant="secondary" onClick={() => void refetch()}>Retry</SolidButton></div>
+        : !content ? <div className="agent-editor__empty">No {kind === "skill" ? "skill body" : "source code"} available.</div>
+        : kind === "skill" ? <SolidAgentMarkdown text={content} />
+        : <SolidCodeEditor value={content} language="python" readOnly fontSize={12} height="min(65vh, 42rem)" />}
+    </SolidDialogBody>
+  </SolidDialog>;
+}
+
+function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor }: {
   label: string; description: string; options: Item[]; selected: Item[];
   onAdd: (id: number) => void; onRemove: (id: number) => void; createUrl?: string;
   render: (item: Item, link?: Link) => React.ReactNode;
   renderSettings?: (item: Item, link?: Link) => React.ReactNode;
   linkFor?: (id: number) => Link | undefined;
+  onView?: (item: Item) => void;
+  editUrlFor?: (item: Item) => string;
 }) {
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const showAssociatedCount = label === "Skills" || label === "Tools";
   const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id)
     && `${item.name ?? item.displayName ?? item.key ?? ""} ${item.description ?? ""}`.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
   return <section className="agent-editor__section">
     <div className="agent-editor__section-head"><div><h2>{label}</h2><p>{description}</p></div>
       {createUrl && <a href={createUrl} target="_blank" rel="noopener noreferrer" className="agent-editor__new-link">Create {label === "Skills" ? "skill" : "tool"} <ExternalLink size={14} /></a>}
     </div>
+    {showAssociatedCount && <div className="agent-editor__linked-count" role="status">
+      {selected.length} {label.toLowerCase()} associated
+    </div>}
     <div className="agent-editor__picker">
       <SolidInput value={search} placeholder={`Search and add ${label.toLowerCase()}…`} aria-label={`Search ${label.toLowerCase()}`}
         onFocus={() => setOpen(true)} onChange={(event) => { setSearch(event.target.value); setOpen(true); }} />
@@ -234,7 +319,14 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
     {selected.length ? <div className="agent-editor__cards">{selected.map((item) => <div className="agent-editor__linked-card" key={item.id}>
       <div className="agent-editor__card-content">{render(item, linkFor?.(item.id))}</div>
       {renderSettings?.(item, linkFor?.(item.id))}
-      <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>
+      {onView && editUrlFor ? <SolidDropdownMenu>
+        <SolidDropdownMenuTrigger asChild><button type="button" className="agent-editor__resource-menu-trigger" aria-label={`Actions for ${item.name ?? item.displayName ?? item.key}`}><Ellipsis size={18} /></button></SolidDropdownMenuTrigger>
+        <SolidDropdownMenuContent className="agent-editor__resource-menu">
+          <SolidDropdownMenuItem onSelect={() => onView(item)}><Eye size={16} /> View</SolidDropdownMenuItem>
+          <SolidDropdownMenuItem asChild><a href={editUrlFor(item)} target="_blank" rel="noopener noreferrer"><Pencil size={16} /> Edit</a></SolidDropdownMenuItem>
+          <SolidDropdownMenuItem className="agent-editor__resource-delete" onSelect={() => onRemove(item.id)}><Trash2 size={16} /> Delete</SolidDropdownMenuItem>
+        </SolidDropdownMenuContent>
+      </SolidDropdownMenu> : <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>}
     </div>)}</div> : <div className="agent-editor__empty">No {label.toLowerCase()} linked yet.</div>}
   </section>;
 }
@@ -243,10 +335,25 @@ export function AgentRegistryEditorPage() {
   const { id = "new" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { data: response, isLoading, isFetching, isError, refetch } = entityApi.useGetSolidEntityByIdQuery({ id, qs: populate }, { skip: id === "new" });
+  const agentResult = entityApi.useGetSolidEntityByIdQuery({ id, qs: detailQuery }, { skip: id === "new" });
+  const skillLinks = entityApi.useGetSolidEntitiesQuery(
+    resourceLinksQuery(id, "agentSkills", "agentSkillRegistry", "alwaysInclude", skillFields), { skip: id === "new" });
+  const toolLinks = entityApi.useGetSolidEntitiesQuery(
+    resourceLinksQuery(id, "agentTools", "agentToolRegistry", "requiresApproval", toolFields), { skip: id === "new" });
+  const isLoading = agentResult.isLoading || skillLinks.isLoading || toolLinks.isLoading;
+  const isFetching = agentResult.isFetching || skillLinks.isFetching || toolLinks.isFetching;
+  const isError = agentResult.isError || skillLinks.isError || toolLinks.isError;
+  const response = React.useMemo(() => {
+    const agent = recordFrom(agentResult.currentData);
+    if (!agent || !skillLinks.currentData || !toolLinks.currentData) return undefined;
+    return { ...agent,
+      agentSkills: resourceLinksFrom(skillLinks.currentData, "agentSkills", "agentSkillRegistry", "alwaysInclude", skillFields),
+      agentTools: resourceLinksFrom(toolLinks.currentData, "agentTools", "agentToolRegistry", "requiresApproval", toolFields),
+    };
+  }, [agentResult.currentData, skillLinks.currentData, toolLinks.currentData]);
   const { data: settings, isError: settingsError } = useGetSolidSettingsQuery(undefined);
-  const skills = useCatalog(skillApi);
-  const tools = useCatalog(toolApi);
+  const skills = useCatalog(skillApi, `offset=0&limit=1000&populate[0]=tags&${fieldsQuery(skillFields)}`);
+  const tools = useCatalog(toolApi, `offset=0&limit=1000&populate[0]=tags&${fieldsQuery(toolFields)}`);
   const roles = useCatalog(roleApi, "offset=0&limit=1000&populate[0]=module");
   const secrets = useCatalog(secretApi, "offset=0&limit=1000&fields[0]=id&fields[1]=key&fields[2]=displayName&fields[3]=description");
   const [createAgent, { isLoading: creating }] = entityApi.useCreateSolidEntityMutation();
@@ -264,7 +371,15 @@ export function AgentRegistryEditorPage() {
   const [updateSecretLink] = agentSecretApi.useUpdateSolidEntityMutation();
   const record = recordFrom(response) as Agent | undefined;
   const [tab, setTab] = React.useState("basics");
+  const jobs = jobApi.useGetSolidEntitiesQuery(
+    `offset=0&limit=1000&filters[agent][id][$eq]=${encodeURIComponent(id)}&${fieldsQuery(["id", "status"])}`,
+    { skip: id === "new" || tab !== "jobs" });
+  const refetch = () => {
+    void agentResult.refetch(); void skillLinks.refetch(); void toolLinks.refetch();
+    if (tab === "jobs") void jobs.refetch();
+  };
   const [testAgentOpen, setTestAgentOpen] = React.useState(false);
+  const [preview, setPreview] = React.useState<{ item: Item; kind: "skill" | "tool" } | null>(null);
   const [testAgentWindowMode, setTestAgentWindowMode] = React.useState<"docked" | "maximized">("maximized");
   const [name, setName] = React.useState("");
   const [title, setTitle] = React.useState("");
@@ -277,6 +392,9 @@ export function AgentRegistryEditorPage() {
   const [stepLimit, setStepLimit] = React.useState(100);
   const [turnStepLimit, setTurnStepLimit] = React.useState(20);
   const [costLimit, setCostLimit] = React.useState(3);
+  const [tags, setTags] = React.useState<AgentHubTag[]>([]);
+  const [module, setModule] = React.useState<AgentHubModule | null>(null);
+  const [creatingTag, setCreatingTag] = React.useState(false);
   const [skillIds, setSkillIds] = React.useState<number[]>([]);
   const [toolIds, setToolIds] = React.useState<number[]>([]);
   const [roleIds, setRoleIds] = React.useState<number[]>([]);
@@ -293,7 +411,7 @@ export function AgentRegistryEditorPage() {
   const baseline = React.useRef("");
 
   const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
-    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), skillIds, toolIds, roleIds, secretIds,
+    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
     alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
   React.useEffect(() => {
@@ -304,6 +422,8 @@ export function AgentRegistryEditorPage() {
     setReasoningModelKey(record.reasoningModelKey ?? ""); setFastModelKey(record.fastModelKey ?? "");
     setSystemPrompt(record.systemPrompt ?? ""); setStepLimit(record.stepLimit ?? 100);
     setTurnStepLimit(record.turnStepLimit ?? 20); setCostLimit(Number(record.costLimit ?? 3));
+    setTags(agentHubTagsFrom(record.tags));
+    setModule(agentHubModuleFrom(record.module));
     setSkillIds(items(record.agentSkills).map((link) => link.agentSkillRegistry?.id).filter(Boolean));
     setToolIds(items(record.agentTools).map((link) => link.agentToolRegistry?.id).filter(Boolean));
     setRoleIds(items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean));
@@ -315,6 +435,10 @@ export function AgentRegistryEditorPage() {
 
   const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
   const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
+  const openAgentTest = () => {
+    setTestAgentWindowMode("maximized");
+    setTestAgentOpen(true);
+  };
 
   React.useEffect(() => {
     const refresh = () => { skills.refetch(); tools.refetch(); };
@@ -323,18 +447,26 @@ export function AgentRegistryEditorPage() {
   }, [skills.refetch, tools.refetch]);
 
   const configValue = getSettingsMap(settings).solidXGenAiCodeBuilderConfig;
-  let enabledProviders: Record<string, { apiKey?: unknown }> = {};
+  let aiConfig: { providers?: Record<string, AiProviderConfig>; models?: { default?: AiModelConfig; main?: AiModelConfig; fast?: AiModelConfig } } = {};
   try {
-    const config = typeof configValue === "string" ? JSON.parse(configValue) : configValue;
-    enabledProviders = config?.providers ?? {};
+    aiConfig = (typeof configValue === "string" ? JSON.parse(configValue) : configValue) ?? {};
   } catch { /* Invalid configuration has no enabled providers. */ }
-  const modelOptions = (Object.keys(ALLOWED_MODELS_BY_PROVIDER) as AllowedModelProvider[])
-    .filter((provider) => typeof enabledProviders[provider]?.apiKey === "string" && (enabledProviders[provider].apiKey as string).trim().length > 0)
-    .flatMap((provider) => ALLOWED_MODELS_BY_PROVIDER[provider].map((model) => ({
-      provider,
-      model,
-      value: `${provider}:${model}`,
-    })));
+  const { catalog: modelsCatalog } = useModelsDevCatalog();
+  const savedModelKeys = [record?.reasoningModelKey, record?.fastModelKey].filter((key): key is string => !!key);
+  const modelOptions = buildModelOptions(
+    aiConfig.providers ?? {},
+    { Reasoning: aiConfig.models?.default ?? aiConfig.models?.main, Fast: aiConfig.models?.fast },
+    modelsCatalog,
+    savedModelKeys,
+  );
+  const providerOptions = Object.entries(aiConfig.providers ?? {})
+    .filter(([, entry]) => typeof entry?.apiKey === "string" && entry.apiKey.trim().length > 0)
+    .map(([provider]) => ({ label: modelsCatalog?.[provider]?.name ?? PROVIDER_LABELS[provider] ?? provider, value: provider }));
+  const isValidModelKey = (value: string) => {
+    const separator = value.indexOf(":");
+    return separator > 0 && providerOptions.some((provider) => provider.value === value.slice(0, separator)) &&
+      !!value.slice(separator + 1).trim();
+  };
   const toggle = (setter: React.Dispatch<React.SetStateAction<number[]>>, value: number) =>
     setter((current) => current.includes(value) ? current.filter((id) => id !== value) : [...current, value]);
 
@@ -353,18 +485,20 @@ export function AgentRegistryEditorPage() {
       }
       const existing = links.find((link) => (link as any)[field]?.id === targetId);
       if (existing && Object.entries(values).some(([key, value]) => (existing as any)[key] !== value)) {
-        await update({ id: existing.id, data: values }).unwrap();
+        await update({ id: existing.id, data: { agentRegistryId: agentId, [`${field}Id`]: targetId, ...values } }).unwrap();
       }
     }
   };
 
   const save = async (nextStatus?: "draft" | "active" | "disabled") => {
+    if (creatingTag) return;
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Name is required.";
     if (!title.trim()) next.title = "Title is required.";
+    if (!module) next.module = "Module is required. Select a module before saving this agent.";
     if (!systemPrompt.trim()) next.systemPrompt = "Persona instructions are required.";
-    if (!modelOptions.some((option) => option.value === reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
-    if (!modelOptions.some((option) => option.value === fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
+    if (!isValidModelKey(reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
+    if (!isValidModelKey(fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
     if (inputs.some((input) => !input.name.trim() || !input.dataType)) next.inputs = "Each input needs a name and data type.";
     if (new Set(inputs.map((input) => input.name.trim().toLowerCase())).size !== inputs.length) next.inputs = "Input names must be unique.";
     if (stepLimit < 1 || turnStepLimit < 1 || costLimit < 0) next.limits = "Step limits must be positive and cost limit cannot be negative.";
@@ -374,11 +508,23 @@ export function AgentRegistryEditorPage() {
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(next).join(" ") }));
       return;
     }
+    let normalizedInputs: Input[];
+    try {
+      normalizedInputs = inputs.map((input) => ({ ...input, name: input.name.trim(), description: input.description.trim(),
+        defaultValue: input.defaultValue === "" || input.defaultValue == null ? null : parseDefaultValue(String(input.defaultValue), input.dataType) }));
+    } catch (error) {
+      next.inputs = error instanceof Error ? error.message : "Check the default input values.";
+      setErrors(next);
+      setTab("basics");
+      return;
+    }
     const payload = {
       name: name.trim(), title: title.trim(), description: description.trim(), iconName,
-      requiredInputs: JSON.stringify(inputs.map((input) => ({ ...input, name: input.name.trim(), description: input.description.trim() }))),
+      requiredInputs: JSON.stringify(normalizedInputs),
       reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
+      ...agentHubTagsPayload(tags),
+      ...agentHubModulePayload(module),
       status: nextStatus ?? record?.status ?? "draft",
     };
     let newlyCreatedId: number | undefined;
@@ -452,26 +598,30 @@ export function AgentRegistryEditorPage() {
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
       <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
+        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError} clearable={false} required error={errors.module} />
       </div>
-      <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Required inputs</h2><p>Define the variables people must provide when starting this agent.</p></div>
-        {inputs.length > 0 && <SolidButton type="button" variant="secondary" size="small" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string" }])}><Plus size={15} /> Add input</SolidButton>}
+      <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
+      <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
+        {inputs.length > 0 && <SolidButton type="button" variant="secondary" size="small" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add input</SolidButton>}
       </div>
-      {!inputs.length ? <div className="agent-editor__empty">This agent has no required inputs. <button type="button" onClick={() => setInputs([{ name: "", description: "", dataType: "string" }])}><Plus size={15} /> Add an input variable</button></div>
+      {!inputs.length ? <div className="agent-editor__empty">This agent has no inputs. <button type="button" onClick={() => setInputs([{ name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add an input variable</button></div>
         : <div className="agent-editor__inputs">{inputs.map((input, index) => <div className="agent-editor__input-row" key={index}>
           <SolidInput aria-label={`Input ${index + 1} name`} placeholder="Variable name" value={input.name} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, name: event.target.value } : item))} />
           <SolidInput aria-label={`Input ${index + 1} description`} placeholder="Description" value={input.description} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, description: event.target.value } : item))} />
+          <SolidInput aria-label={`Input ${index + 1} default value`} placeholder="Default value" value={formatDefaultValue(input.defaultValue)} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, defaultValue: event.target.value } : item))} />
           <select aria-label={`Input ${index + 1} data type`} value={input.dataType} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, dataType: event.target.value } : item))}>
             {["string", "number", "integer", "boolean", "date", "datetime", "object", "array"].map((type) => <option key={type} value={type}>{type}</option>)}
           </select>
+          <label className="agent-editor__input-optional"><input type="checkbox" checked={input.optional} onChange={(event) => setInputs((current) => current.map((item, i) => i === index ? { ...item, optional: event.target.checked } : item))} /> Optional</label>
           <button type="button" aria-label={`Remove input ${index + 1}`} onClick={() => setInputs((current) => current.filter((_, i) => i !== index))}><Trash2 size={17} /></button>
         </div>)}</div>}
       {errors.inputs && <small className="agent-editor__error">{errors.inputs}</small>}</section>
-      <section className="agent-editor__section"><h2>Models</h2><p>Choose any configured provider and model pair for each role. Both lists use the models enabled in AI settings.</p><div className="agent-editor__grid">
+      <section className="agent-editor__section agent-editor__models"><h2>Models</h2><p>Choose a configured provider and model for each role. Select Other to enter a model ID manually.</p><div className="agent-editor__grid">
         {([["Reasoning model", reasoningModelKey, setReasoningModelKey, "reasoningModelKey"], ["Fast model", fastModelKey, setFastModelKey, "fastModelKey"]] as const).map(([label, value, setter, key]) =>
-          <label className="agent-editor__field" key={key}><span>{label} *</span><ModelPicker value={value} options={modelOptions} placeholder="Search providers and models…" onChange={(next) => setter(next)} />
-            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</label>)}
+          <div className="agent-editor__field" key={key}><span>{label}</span><ModelPicker value={value} options={modelOptions} providers={providerOptions} providerConfig={aiConfig.providers ?? {}} onChange={setter} />
+            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</div>)}
       </div>{settingsError ? <p className="agent-editor__hint">Settings could not be loaded. Try refreshing this page.</p>
-        : !modelOptions.length && <p className="agent-editor__hint">No configured models are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
+        : !providerOptions.length && <p className="agent-editor__hint">No enabled providers are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
       <section className="agent-editor__section agent-editor__workflow" aria-labelledby="agent-lifecycle-title">
         <div className="agent-editor__section-head"><div><h2 id="agent-lifecycle-title">Agent lifecycle</h2><p>Track this agent through its available stages. Select a stage to update its status.</p></div><div className="agent-editor__workflow-meta">{record?.configVersion != null && <span className="agent-editor__config-version" aria-label={`Configuration version ${record.configVersion}`}>Config v{record.configVersion}</span>}<SolidWorkflowStatusPill label={agentStatus} /></div></div>
         <div className="agent-editor__workflow-stages" aria-label={`Current agent stage: ${agentStatus}`}>
@@ -492,17 +642,20 @@ export function AgentRegistryEditorPage() {
         <small className="agent-editor__workflow-save-hint">Changing stage saves the current form and its linked skills, tools, roles, and secrets.</small>
       </section>
     </div> },
-    { value: "persona", label: "Persona", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div></div>
-      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
+    { value: "persona", label: "Persona", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div>
+      {record?.id && <AgentPersonaHistory agentId={record.id} savedPrompt={record.systemPrompt ?? ""} refreshVersion={auditVersion} />}</div>
+      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
+      onView={(item) => setPreview({ item, kind: "skill" })} editUrlFor={(item) => `/admin/core/solid-core/agent-skill-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentSkills, "agentSkillRegistry", id)}
       render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Always include", alwaysIncludeValues[item.id] ?? true,
           (checked) => setAlwaysIncludeValues((current) => ({ ...current, [item.id]: checked })), "Add the full skill to the agent prompt. Turn off to load it on demand.")}</div>} /> },
     { value: "tools", label: "Tools", content: <LinkPicker label="Tools" description="Tools available to this agent." options={tools.records} selected={linked(toolIds, tools.records, items(record?.agentTools).map((link) => link.agentToolRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setToolIds, id)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
+      onView={(item) => setPreview({ item, kind: "tool" })} editUrlFor={(item) => `/admin/core/solid-core/agent-tool-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentTools, "agentToolRegistry", id)}
       render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Require approval", requiresApprovalValues[item.id] ?? false,
@@ -523,9 +676,11 @@ export function AgentRegistryEditorPage() {
           <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={14} /></button></div></div>} /> },
     ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...((record?.id ? [
-      ["jobs", "Jobs", record.agentJobs],
+      ["jobs", "Jobs", jobs.currentData?.records],
     ] : []) as [string, string, Item[]][]).map(([value, label, related]) => ({ value, label, content: <section className="agent-editor__section"><h2>{label}</h2>
-      {items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
+      {jobs.isLoading || jobs.isFetching ? <div className="agent-editor__empty">Loading jobs…</div>
+        : jobs.isError ? <div className="agent-editor__empty">Jobs could not be loaded.</div>
+        : items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
     ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...(record?.id ? [{ value: "embedding", label: "Embedding", content: <AgentEmbeddingPanel agentId={record.id}
@@ -535,9 +690,10 @@ export function AgentRegistryEditorPage() {
   const content = <SolidTabGroup tabs={tabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
   return <main className="agent-editor"><header className="agent-editor__header"><div className="agent-editor__heading-with-refresh"><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1>{record?.id && <button type="button" className={`agent-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh agent" title="Refresh agent" disabled={isFetching || updating} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
-    {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={() => { setTestAgentWindowMode("maximized"); setTestAgentOpen(true); }}>Test Agent</SolidButton>}
-    <SolidButton loading={creating || updating} disabled={isLoading || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
+    {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={openAgentTest}>Test Agent</SolidButton>}
+    <SolidButton loading={creating || updating} disabled={creatingTag || isLoading || isFetching || isError || (id !== "new" && !record?.id)} onClick={() => void save()}>Save Agent</SolidButton>
   </div></header>
+    {preview && <ResourcePreviewDialog item={preview.item} kind={preview.kind} onClose={() => setPreview(null)} />}
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
       footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
       <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest agent content.</p></SolidDialogBody>
@@ -558,6 +714,7 @@ export function AgentRegistryEditorPage() {
       onOpenChange={setTestAgentOpen}
       onHide={() => setTestAgentOpen(false)}
       showHeader={false}
+      overlayClassName="agent-editor__test-dialog-overlay"
       ariaLabel={`Test ${record.name ?? "SolidX Agent"}`}
       className="agent-editor__test-dialog"
       style={testAgentWindowMode === "maximized"
@@ -565,7 +722,7 @@ export function AgentRegistryEditorPage() {
         : { position: "fixed", top: 16, right: 16, bottom: 16, left: "auto", width: "min(28rem, calc(100vw - 32px))", maxWidth: "none", height: "auto", maxHeight: "none", transform: "none", borderRadius: 14, padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}
     >
       <div className="agent-editor__test-dialog-body">
-        <SolidAgentEmbedded agentRuntime="agentHub" agentId={record.id} title={record.name ?? "SolidX Agent"} height="100%" className="agent-editor__test-chat"
+        <SolidAgentEmbedded agentRuntime="agentHub" agentId={record.id} title={record.name ?? "SolidX Agent"} requiredInputs={parseInputs(record.requiredInputs)} height="100%" className="agent-editor__test-chat"
           windowControls={{ mode: testAgentWindowMode, onDock: () => setTestAgentWindowMode("docked"), onMaximize: () => setTestAgentWindowMode("maximized"), onRestore: () => setTestAgentWindowMode("docked"), onClose: () => setTestAgentOpen(false) }} />
       </div>
     </SolidDialog>}

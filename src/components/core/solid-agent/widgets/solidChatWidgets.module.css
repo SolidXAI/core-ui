@@ -13,15 +13,18 @@
 .AiTurnContent {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 6px;
     flex: 1;
     min-width: 0;
+}
+
+.AiTurnContent > .BubbleGroup ~ .BubbleGroup {
+    margin-top: 8px;
 }
 
 /* ── Per-turn activity disclosure ── */
 .ActivityGroup {
     width: 100%;
-    max-width: 760px;
     min-width: 0;
 }
 
@@ -233,6 +236,10 @@
 
 .BubbleMetaAssistant {
     flex-direction: row;
+}
+
+.TurnMeta {
+    margin-top: 4px;
 }
 
 .Timestamp {
@@ -836,6 +843,45 @@
 }
 
 /* ── Attachments on a sent user message ── */
+.MessageContext {
+    align-self: flex-end;
+    max-width: min(88%, 680px);
+    color: var(--solid-agent-muted);
+    font-size: 11px;
+}
+
+.MessageContext summary {
+    cursor: pointer;
+    text-align: right;
+    user-select: none;
+}
+
+.MessageContextDetails {
+    margin-top: 4px;
+    padding: 8px 10px;
+    border: 1px solid var(--solid-agent-border);
+    border-radius: 8px;
+    background: var(--solid-agent-bg);
+    color: var(--solid-agent-fg);
+}
+
+.MessageContextDetails section + section {
+    margin-top: 6px;
+}
+
+.MessageContextDetails p {
+    margin: 2px 0 0;
+}
+
+.MessageContextDetails pre {
+    max-width: 100%;
+    max-height: 180px;
+    margin: 3px 0 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 .MessageAttachments {
     list-style: none;
     margin: 0;

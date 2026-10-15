@@ -53,3 +53,7 @@ export const SolidTableChatWidget = ({ eventData }: SolidChatWidgetProps) => {
         </div>
     );
 };
+
+Object.assign(SolidTableChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "table", description: "Show rows and columns for records, query results, or comparisons.", propsSchema: { type: "object", properties: { title: { type: "string" }, columns: { type: "array", items: { anyOf: [{ type: "string" }, { type: "object", properties: { key: { type: "string" }, label: { type: "string" } }, required: ["key"] }] } }, rows: { type: "array", items: { type: "object", additionalProperties: true } } } } },
+}) });

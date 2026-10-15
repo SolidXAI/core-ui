@@ -133,3 +133,7 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
         </div>
     );
 };
+
+Object.assign(DefaultToolCallChatWidget, { getExtensionMetadata: () => ({
+    chatInteraction: { role: "event-renderer", agentSelectable: false },
+}) });

@@ -14,3 +14,7 @@ export const DefaultThinkingChatWidget = (_props: SolidChatWidgetProps) => {
         </div>
     );
 };
+
+Object.assign(DefaultThinkingChatWidget, { getExtensionMetadata: () => ({
+    chatInteraction: { role: "event-renderer", agentSelectable: false },
+}) });

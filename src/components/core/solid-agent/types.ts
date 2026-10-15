@@ -1,3 +1,5 @@
+import type { AgentChatWidgetMetadata } from "../../../types/extension-registry";
+
 /**
  * Shared types for the SolidX Agent chat (launcher, window, thread).
  *
@@ -15,6 +17,12 @@ export type AgentContext = {
     recordId?: string | number;
     route?: string;
     [key: string]: unknown;
+};
+
+export type AgentJson = null | boolean | number | string | AgentJson[] | { [key: string]: AgentJson };
+export type AgentMessageContext = {
+    schemaVersion: 1;
+    namespaces: Record<string, { context: AgentJson; revision: string; displaySummary?: string }>;
 };
 
 export type AgentMode = "bubble" | "compact" | "docked" | "maximized";
@@ -106,13 +114,15 @@ export type AgentAttachment = { payload: AgentAttachmentPayload; meta: AgentAtta
 export type AgentUploadedAttachment = { id: number; name: string; mimeType: string; size: number };
 
 export type AgentAction =
-    | { action: "start_session" }
-    | { action: "resume_session"; session_id: string }
+    | { action: "start_session"; widget_catalog?: AgentChatWidgetMetadata[] }
+    | { action: "resume_session"; session_id: string; widget_catalog?: AgentChatWidgetMetadata[] }
     | {
           action: "message";
           session_id: string;
           content: string;
+          source?: "composer" | "sdk" | "prefill" | "widget";
           context?: AgentContext;
+          message_context?: AgentMessageContext;
           inputs?: Record<string, unknown>;
           widget_reply?: WidgetReply | null;
           attachments?: AgentAttachmentPayload[] | AgentUploadedAttachment[];

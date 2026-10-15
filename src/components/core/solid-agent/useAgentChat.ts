@@ -9,7 +9,7 @@ type Dispatch = (action: any) => any;
 export type AgentChatBinding = {
     agent: AgentState;
     dispatch: Dispatch;
-    /** Null only for an "agentHub" chat during its first render, before its connection opens. */
+    /** Null during the first render while the runtime is initialized after commit. */
     runtime: AgentRuntime | null;
 };
 
@@ -39,19 +39,23 @@ export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string, e
     }, []);
 
     const [localRuntime, setLocalRuntime] = useState<AgentRuntime | null>(null);
+    const [sharedRuntime, setSharedRuntime] = useState<AgentRuntime | null>(null);
     useEffect(() => {
-        if (shared) return;
+        if (shared) {
+            const runtime = ensureAgentRuntime(agentUrl, storeDispatch, () => (store.getState() as any).solidAgent);
+            setSharedRuntime(runtime);
+            return;
+        }
         const runtime = new AgentRuntime(agentUrl, localDispatch, () => localState.current, agentRuntime, !externalEmbed);
         setLocalRuntime(runtime);
         return () => {
             runtime.dispose();
             setLocalRuntime(null);
         };
-    }, [shared, agentUrl, agentRuntime, localDispatch, externalEmbed]);
+    }, [shared, agentUrl, agentRuntime, externalEmbed, localDispatch, store, storeDispatch]);
 
     if (shared) {
-        const runtime = ensureAgentRuntime(agentUrl, storeDispatch, () => (store.getState() as any).solidAgent);
-        return { agent: sharedState, dispatch: storeDispatch, runtime };
+        return { agent: sharedState, dispatch: storeDispatch, runtime: sharedRuntime?.agentUrl === agentUrl ? sharedRuntime : null };
     }
     return { agent: localState.current, dispatch: localDispatch, runtime: localRuntime };
 }

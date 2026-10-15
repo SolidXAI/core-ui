@@ -6,3 +6,7 @@ export const DefaultNoticeChatWidget = (props: SolidChatWidgetProps) => {
     const message = String(props.eventData.message ?? props.eventData.content ?? "Execution stopped by user.");
     return <DefaultAssistantMessageChatWidget {...props} live={false} eventData={{ content: message }} />;
 };
+
+Object.assign(DefaultNoticeChatWidget, { getExtensionMetadata: () => ({
+    chatInteraction: { role: "event-renderer", agentSelectable: false },
+}) });

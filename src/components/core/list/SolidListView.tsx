@@ -1109,6 +1109,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     try {
       await triggerRecoverSolidEntities(recoverList).unwrap();
       setRecoverDialogVisible(false);
+      setSelectedRecords([]);
+      setSelectedRecoverRecords([]);
       await setQueryString();
     } catch {
       setRecoverDialogVisible(false);
@@ -1158,6 +1160,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       await deleteManySolidEntities(deleteList).unwrap();
       dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
       setDialogVisible(false);
+      setSelectedRecords([]);
+      setSelectedRecoverRecords([]);
       await setQueryString();
     } catch (error: any) {
       dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
@@ -1176,6 +1180,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
+  const lightboxBeforeCloseCallbackRef = useRef<(() => void) | null>(null);
+
+  const setListLightboxOpen = (open: boolean, onBeforeClose?: () => void) => {
+    lightboxBeforeCloseCallbackRef.current = onBeforeClose ?? null;
+    setOpenLightbox(open);
+  };
 
   // Render columns dynamically based on metadata
   const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
@@ -1214,7 +1224,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             fieldMetadata,
             column,
             setLightboxUrls,
-            setOpenLightbox,
+            setOpenLightbox: setListLightboxOpen,
             embeded: params.embeded,
             recordClickAction: recordClickFormMode
           });
@@ -1227,7 +1237,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           fieldMetadata,
           column,
           setLightboxUrls,
-          setOpenLightbox,
+          setOpenLightbox: setListLightboxOpen,
           embeded: params.embeded,
           recordClickAction: recordClickFormMode
         });
@@ -2007,6 +2017,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         <SolidLightbox
           open={openLightbox}
           slides={lightboxSlides}
+          onBeforeClose={() => {
+            lightboxBeforeCloseCallbackRef.current?.();
+            lightboxBeforeCloseCallbackRef.current = null;
+          }}
           onClose={() => setOpenLightbox(false)}
         />
       )}

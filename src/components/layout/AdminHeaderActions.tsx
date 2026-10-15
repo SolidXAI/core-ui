@@ -1,5 +1,4 @@
 import { ReactNode, useContext, useMemo } from "react";
-// import { usePathname } from "../../hooks/usePathname";
 import { LayoutContext } from "./context/layoutcontext";
 import { BackendReconnectIndicator } from "../common/BackendReconnectIndicator";
 import { useGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";

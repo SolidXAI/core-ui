@@ -778,7 +778,7 @@ textarea {
 
 .solid-user-menu-trigger-name {
   font-size: 12.5px;
-  line-height: 1.1;
+  line-height: 1.2;
   font-weight: 650;
   white-space: nowrap;
   overflow: hidden;
@@ -787,8 +787,11 @@ textarea {
 
 .solid-user-menu-trigger-role {
   font-size: 10.5px;
-  line-height: 1.1;
+  line-height: 1.2;
   color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .solid-user-avatar {
@@ -2848,7 +2851,7 @@ textarea {
 .solid-auth-center-stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--solid-auth-brand-form-gap);
 }
 
 .solid-auth-center-details {
@@ -3249,7 +3252,7 @@ textarea {
 .solid-auth-theme-wrapper.left .solid-auth-form-pane .solid-auth-brand,
 .solid-auth-theme-wrapper.right .solid-auth-form-pane .solid-auth-brand {
   align-self: flex-start;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
 }
 
 .solid-auth-theme-wrapper .solid-auth-image-pane {
@@ -3288,6 +3291,7 @@ textarea {
 /* Auth theme contract (driven by the global app theme mode) */
 .solid-auth-theme-wrapper {
   --solid-surface-base: #020204;
+  --solid-auth-brand-form-gap: 24px;
   --solid-surface-pane: #020204;
   --solid-surface-image: #27272a;
   --solid-surface-card: #111113;
@@ -6717,7 +6721,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 24px;
+  gap: var(--solid-auth-brand-form-gap);
   padding: clamp(28px, 4vh, 40px) 0;
 }
 
@@ -6872,7 +6876,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 20px;
+    gap: var(--solid-auth-brand-form-gap);
     padding: 0;
   }
 
@@ -6886,5 +6890,47 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   .solid-auth-theme-wrapper.left .solid-auth-form-pane-content,
   .solid-auth-theme-wrapper.right .solid-auth-form-pane-content {
     display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .solid-auth-theme-wrapper.center {
+    box-sizing: border-box;
+    justify-items: center;
+    overflow-x: hidden;
+    padding: 14px !important;
+    width: 100%;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-center-layout {
+    width: 100% !important;
+    max-width: 388px !important;
+    min-height: auto;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-center-stack,
+  .solid-auth-theme-wrapper.center .auth-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+
+  .solid-auth-theme-wrapper.center .auth-container {
+    padding: 22px !important;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-brand {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-brand-logo img {
+    max-width: min(180px, 68vw);
   }
 }

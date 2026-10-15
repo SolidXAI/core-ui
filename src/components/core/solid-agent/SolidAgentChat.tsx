@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
@@ -13,6 +13,11 @@ import { AgentSignIn } from "./AgentSignIn";
 import { signOutOfAgent } from "./client/agentAuth";
 import { AgentModelIndicator } from "./AgentModelIndicator";
 import type { AgentModelAssignments } from "./types";
+import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
+import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/agentEmbedProtocol";
+import { SolidButton } from "../../shad-cn-ui/SolidButton";
+import { SolidDialog, SolidDialogBody } from "../../shad-cn-ui/SolidDialog";
+import { SolidInput } from "../../shad-cn-ui/SolidInput";
 
 type Props = {
     agentUrl: string;
@@ -21,8 +26,10 @@ type Props = {
     agentRuntime?: AgentRuntimeType;
     inputContext?: AgentInputContext;
     inputs?: Record<string, unknown>;
+    requiredInputs?: AgentInputDefinition[];
     externalEmbed?: boolean;
     onInputsLocked?: (locked: boolean) => void;
+    beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext | AgentInputContext | undefined>;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
     embedded?: boolean;
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
@@ -60,14 +67,57 @@ function formatDate(iso: string | null) {
     return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
+function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<string, string>): { values?: Record<string, unknown>; error?: string } {
+    const values: Record<string, unknown> = {};
+    for (const field of fields) {
+        const raw = rawValues[field.name] ?? "";
+        if (!raw.trim() && field.optional) continue;
+        if (field.dataType === "boolean") {
+            if (raw !== "true" && raw !== "false") return { error: `Choose true or false for “${field.name}”.` };
+            values[field.name] = raw === "true";
+            continue;
+        }
+        if (!raw.trim()) return { error: `Enter a value for “${field.name}”.` };
+        if (field.dataType === "number" || field.dataType === "integer") {
+            const value = Number(raw);
+            if (!Number.isFinite(value) || (field.dataType === "integer" && !Number.isSafeInteger(value))) {
+                return { error: `Enter a valid ${field.dataType} for “${field.name}”.` };
+            }
+            values[field.name] = value;
+            continue;
+        }
+        if (field.dataType === "object" || field.dataType === "array") {
+            try {
+                const value: unknown = JSON.parse(raw);
+                if (field.dataType === "object" && (!value || typeof value !== "object" || Array.isArray(value))) throw new Error();
+                if (field.dataType === "array" && !Array.isArray(value)) throw new Error();
+                values[field.name] = value;
+            } catch {
+                return { error: `Enter valid JSON ${field.dataType === "array" ? "array" : "object"} for “${field.name}”.` };
+            }
+            continue;
+        }
+        if (field.dataType === "date" && (Number.isNaN(Date.parse(raw)) || new Date(raw).toISOString().slice(0, 10) !== raw)) {
+            return { error: `Enter a valid date for “${field.name}”.` };
+        }
+        if (field.dataType === "datetime" && Number.isNaN(Date.parse(raw))) {
+            return { error: `Enter a valid date and time for “${field.name}”.` };
+        }
+        values[field.name] = raw;
+    }
+    return { values };
+}
+
 export function SolidAgentChat({
     agentUrl,
     title = "SolidX Agent",
     agentRuntime = "solidx",
     inputContext = {},
     inputs,
+    requiredInputs = [],
     externalEmbed = false,
     onInputsLocked,
+    beforeSend,
     embedded = false,
     // SDK prefill goes through the shared "solidx" conversation only.
     handlesPrefill = !embedded && agentRuntime === "solidx",
@@ -86,6 +136,39 @@ export function SolidAgentChat({
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
+    const [collectedInputs, setCollectedInputs] = useState<Record<string, unknown> | null>(null);
+    const [rawInputValues, setRawInputValues] = useState<Record<string, string>>({});
+    const [inputError, setInputError] = useState("");
+    const requiredInputsSignature = JSON.stringify(requiredInputs);
+    const inputAgentUrl = useRef(agentUrl);
+    useEffect(() => {
+        const definitions: AgentInputDefinition[] = JSON.parse(requiredInputsSignature);
+        setRawInputValues((current) => {
+            const agentChanged = inputAgentUrl.current !== agentUrl;
+            inputAgentUrl.current = agentUrl;
+            const next: Record<string, string> = {};
+            for (const field of definitions) {
+                const defaultValue = field.defaultValue === null || field.defaultValue === undefined
+                    ? ""
+                    : typeof field.defaultValue === "string" ? field.defaultValue : JSON.stringify(field.defaultValue);
+                next[field.name] = agentChanged ? defaultValue : current[field.name] ?? defaultValue;
+            }
+            return next;
+        });
+    }, [agentUrl, requiredInputsSignature]);
+    const shouldPromptForInputs = !externalEmbed && agentRuntime === "agentHub" && signedIn
+        && requiredInputs.length > 0 && inputs === undefined && collectedInputs === null;
+    const messageInputs = inputs ?? collectedInputs ?? undefined;
+
+    const submitRequiredInputs = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const result = parseInputValues(requiredInputs, rawInputValues);
+        if (!result.values) {
+            setInputError(result.error ?? "Check the input values and try again.");
+            return;
+        }
+        setCollectedInputs(result.values);
+    };
 
     useEffect(() => {
         if (!signedIn) {
@@ -134,9 +217,9 @@ export function SolidAgentChat({
             runtime.newChat();
             onInputsLocked?.(false);
         }
-        if (autoSend) void runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) });
+        if (autoSend) void runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) }, [], messageInputs, beforeSend, "prefill");
         else setSeed({ text: prompt, key: nonce });
-    }, [agent.prefill, signedIn, handlesPrefill, dispatch, runtime, inputContext, onInputsLocked]);
+    }, [agent.prefill, signedIn, handlesPrefill, dispatch, runtime, inputContext, onInputsLocked, messageInputs, beforeSend]);
 
     useEffect(() => {
         if (!showHistory || !signedIn) return;
@@ -149,19 +232,64 @@ export function SolidAgentChat({
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const windowMode = windowControls?.mode ?? agent.mode;
-    const send = useCallback((text: string) => {
+    const send = useCallback(async (text: string) => {
         if (!text.trim() || !runtime) return;
         onInputsLocked?.(true);
-        return runtime.sendMessage(text, inputContext, [], inputs);
-    }, [runtime, inputContext, inputs, onInputsLocked]);
+        try { return await runtime.sendMessage(text, inputContext, [], messageInputs, beforeSend, "widget"); }
+        catch (error) { onInputsLocked?.(false); throw error; }
+    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked]);
     const sendWithAttachments = useCallback(
-        (text: string, attachments: AgentAttachment[]) => {
+        async (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
             onInputsLocked?.(true);
-            return runtime.sendMessage(text, inputContext, attachments, inputs);
+            try { return await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer"); }
+            catch (error) { onInputsLocked?.(false); throw error; }
         },
-        [runtime, inputContext, inputs, onInputsLocked],
+        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
     );
+    useEffect(() => {
+        const onEmbedCommand = (event: Event) => {
+            event.preventDefault();
+            const detail = (event as CustomEvent<{ command: string; payload: Record<string, unknown>; respond: (result?: unknown, error?: unknown) => void }>).detail;
+            if (!detail || typeof detail.respond !== "function") return;
+            const run = async () => {
+                switch (detail.command) {
+                    case "sendMessage": {
+                        if (typeof detail.payload.text !== "string" || !runtime) throw new Error("Chat is not ready to send a message.");
+                        onInputsLocked?.(true);
+                        try {
+                            await runtime.sendMessage(detail.payload.text, inputContext, [], messageInputs, beforeSend,
+                                detail.payload.source === "prefill" ? "prefill" : "sdk");
+                        } catch (error) { onInputsLocked?.(false); throw error; }
+                        return { queued: true };
+                    }
+                    case "prefill": {
+                        if (typeof detail.payload.text !== "string") throw new Error("prefill requires text.");
+                        const autoSend = detail.payload.autoSend === true;
+                        if (autoSend) {
+                            if (!runtime) throw new Error("Chat is not ready to send a message.");
+                            try { await runtime.sendMessage(detail.payload.text, inputContext, [], messageInputs, beforeSend, "prefill"); }
+                            catch (error) { onInputsLocked?.(false); throw error; }
+                        } else setSeed({ text: detail.payload.text, key: Date.now() });
+                        return { queued: autoSend };
+                    }
+                    case "newChat":
+                        if (!runtime) throw new Error("Chat is not ready.");
+                        runtime.newChat(); setShowHistory(false); onInputsLocked?.(false); return { started: true };
+                    case "cancelTurn":
+                        runtime?.cancel(); return { requested: true };
+                    case "reconnect":
+                        runtime?.socket.connect(); return { requested: true };
+                    case "setContext":
+                        return { stored: true };
+                    default: throw new Error("Unsupported embed command.");
+                }
+            };
+            void run().then((result) => detail.respond(result)).catch((failure) => detail.respond(undefined, failure));
+        };
+        window.addEventListener("solid-agent-embed:command", onEmbedCommand);
+        return () => window.removeEventListener("solid-agent-embed:command", onEmbedCommand);
+    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked]);
     const offline = agent.connection === "reconnecting" || agent.connection === "offline";
     const statusColor = agent.connection === "open" ? (agent.working ? "#eab308" : "#22c55e") : offline ? "#dc2626" : "#94a3b8";
     const statusText =
@@ -191,6 +319,53 @@ export function SolidAgentChat({
 
     return (
         <>
+            {shouldPromptForInputs && <SolidDialog
+                open
+                dismissible={!!windowControls}
+                onOpenChange={(open) => { if (!open) windowControls?.onClose(); }}
+                className={styles.inputDialog}
+                overlayClassName={styles.inputDialogOverlay}
+                header="Set up this test run"
+                ariaLabel={`Enter inputs for ${title}`}
+                style={{ width: "min(34rem, 94vw)" }}
+            >
+                <SolidDialogBody className={styles.inputDialogBody}>
+                    <form className={styles.inputForm} autoComplete="off" onSubmit={submitRequiredInputs}>
+                        <p>Sign-in is complete. Enter the values this agent needs before starting the conversation. All inputs are required unless explicitly marked optional.</p>
+                        <div className={styles.inputFields}>
+                            {requiredInputs.map((field, index) => {
+                                const id = `solid-agent-test-input-${index}`;
+                                const value = rawInputValues[field.name] ?? "";
+                                const update = (next: string) => {
+                                    setRawInputValues((current) => ({ ...current, [field.name]: next }));
+                                    setInputError("");
+                                };
+                                const inputType = field.dataType === "integer" || field.dataType === "number" ? "number"
+                                    : field.dataType === "datetime" ? "datetime-local"
+                                        : field.dataType === "date" ? "date" : "text";
+                                return <label className={styles.inputField} htmlFor={id} key={`${field.name}-${index}`}>
+                                    <span>{field.name}<small>{field.description || field.dataType}{field.optional ? " · optional" : ""}</small></span>
+                                    {field.dataType === "boolean" ? (
+                                        <select id={id} autoComplete="off" value={value} onChange={(event) => update(event.target.value)}>
+                                            <option value="">Choose a value</option><option value="true">True</option><option value="false">False</option>
+                                        </select>
+                                    ) : field.dataType === "object" || field.dataType === "array" ? (
+                                        <textarea id={id} autoComplete="off" value={value} onChange={(event) => update(event.target.value)} placeholder={field.dataType === "array" ? "[ ]" : "{ }"} rows={3} />
+                                    ) : (
+                                        <SolidInput id={id} type={inputType} step={field.dataType === "number" ? "any" : field.dataType === "integer" ? "1" : undefined}
+                                            autoComplete="off" value={value} onChange={(event) => update(event.target.value)} />
+                                    )}
+                                </label>;
+                            })}
+                        </div>
+                        {inputError && <p className={styles.inputError} role="alert">{inputError}</p>}
+                        <div className={styles.inputActions}>
+                            {windowControls && <SolidButton type="button" variant="secondary" onClick={() => windowControls.onClose()}>Cancel</SolidButton>}
+                            <SolidButton type="submit">Start test</SolidButton>
+                        </div>
+                    </form>
+                </SolidDialogBody>
+            </SolidDialog>}
             <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`}>
                 <div className={styles.headerMark}>
                     <Sparkles size={15} />
@@ -202,10 +377,10 @@ export function SolidAgentChat({
                 </div>
                 {signedIn && (
                     <>
-                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); }}>
+                        <button type="button" className={styles.iconBtn} title="New chat" aria-label="New chat" onClick={() => { runtime?.newChat(); setShowHistory(false); onInputsLocked?.(false); if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) { setCollectedInputs(null); setInputError(""); } }}>
                             <Plus size={16} />
                         </button>
-                        {!externalEmbed && <button
+                        <button
                             type="button"
                             className={styles.iconBtn}
                             title="History"
@@ -214,7 +389,7 @@ export function SolidAgentChat({
                             onClick={() => setShowHistory((v) => !v)}
                         >
                             <History size={16} />
-                        </button>}
+                        </button>
                         {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}
@@ -250,13 +425,24 @@ export function SolidAgentChat({
             </div>
 
             {agentAuth.status === "checking" ? (
-                <div style={{ flex: "1 1 auto" }} />
+                externalEmbed
+                    ? <div className={styles.embedWait} role="status" aria-live="polite"><div className={styles.embedWaitCard}><span className={styles.embedSpinner} aria-hidden="true" /><strong>Please wait</strong><span>Checking your connection</span></div></div>
+                    : <div style={{ flex: "1 1 auto" }} />
             ) : agentAuth.status === "signedOut" ? (
                 // The agent forgot the token (expired/restarted) if it already reported an auth error.
-                externalEmbed ? <div className={styles.notice} role="status">Connecting to your agent…</div>
+                externalEmbed ? <div className={styles.embedWait} role="status" aria-live="polite"><div className={styles.embedWaitCard}><span className={styles.embedSpinner} aria-hidden="true" /><strong>Please wait</strong><span>Connecting to your agent</span></div></div>
                     : <AgentSignIn agentUrl={agentUrl} expired={!!agent.authError} />
             ) : (
                 <>
+                {externalEmbed && agent.connection !== "open" && (
+                    <div className={styles.embedWait} role="status" aria-live="polite">
+                        <div className={styles.embedWaitCard}>
+                            <span className={styles.embedSpinner} aria-hidden="true" />
+                            <strong>Please wait</strong>
+                            <span>{offline ? "Reconnecting to your agent" : "Connecting to your agent"}</span>
+                        </div>
+                    </div>
+                )}
                 {offline && (
                     <div className={styles.banner} role="status">
                         <WifiOff size={14} /> Reconnecting to the agent… Your messages will be sent once it is back.
@@ -315,7 +501,7 @@ export function SolidAgentChat({
                         context={agent.context ?? undefined}
                         emptyState={empty}
                         onLoadOlder={() => void runtime?.loadOlder()}
-                        onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value)}
+                        onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
                         onPrompt={send}
                     />
                 )}

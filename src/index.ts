@@ -117,7 +117,7 @@ export { getFileTypeIconTone, SolidFileTypeIcon } from './helpers/fileTypeIcon';
 export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
-export { getExtensionComponent, registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export { getAgentChatWidgetCatalog, getExtensionComponent, getExtensionComponentMetadata, getExtensionComponents, registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
 export { QueueSlaHeatmapWidget } from './components/core/dashboard/widgets/QueueSlaHeatmapWidget';
 export {
     WorkflowFlowCanvas,
@@ -134,6 +134,9 @@ export {
 export {
     ExtensionComponentTypes,
     ExtensionFunctionTypes,
+    type AgentChatWidgetMetadata,
+    type ExtensionComponentAdditionalMetadata,
+    type ExtensionComponentMetadataProvider,
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "./types/extension-registry";

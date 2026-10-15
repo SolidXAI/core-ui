@@ -17,3 +17,7 @@ export const SolidCodeChatWidget = ({ eventData }: SolidChatWidgetProps) => {
         </div>
     );
 };
+
+Object.assign(SolidCodeChatWidget, { getExtensionMetadata: () => ({
+    agentWidget: { name: "code", description: "Show a syntax highlighted code file or snippet.", propsSchema: { type: "object", properties: { code: { type: "string" }, language: { type: "string" }, filename: { type: "string" } }, required: ["code"] } },
+}) });

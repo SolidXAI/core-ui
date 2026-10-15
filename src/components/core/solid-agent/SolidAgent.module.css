@@ -17,6 +17,7 @@
 }
 
 .root {
+  position: relative;
   --agent-primary: var(--solid-agent-primary);
   --agent-bg: var(--solid-agent-bg);
   --agent-page: var(--solid-agent-page);
@@ -31,6 +32,71 @@
   font-size: 13.5px;
   color: var(--agent-fg);
 }
+
+.embedWait {
+  position: absolute;
+  z-index: 5;
+  inset: 54px 0 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  background: radial-gradient(ellipse at center, #edf5f0 0%, #f7f9f8 70%);
+  color: #1f302b;
+  text-align: center;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.embedWaitCard {
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 11px;
+  padding: 24px 30px;
+  border: 1px solid #e0e9e3;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 34px rgba(28, 55, 43, 0.08);
+  text-align: center;
+}
+.embedWaitCard strong { font-size: 13px; font-weight: 650; }
+.embedWaitCard > span:last-child { color: #718078; font-size: 12px; line-height: 1.45; }
+.embedSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #dce9e1;
+  border-top-color: #147a62;
+  border-radius: 50%;
+  animation: embedSpin 0.8s linear infinite;
+}
+@keyframes embedSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .embedSpinner { animation-duration: 1.8s; } }
+
+.inputDialogOverlay { z-index: 1300 !important; }
+.inputDialog {
+  z-index: 1301 !important;
+  --agent-primary: var(--solid-agent-primary, #722ed1);
+  --agent-bg: var(--solid-agent-bg, #fff);
+  --agent-page: var(--solid-agent-page, #f6f8fc);
+  --agent-fg: var(--solid-agent-fg, #0f172a);
+  --agent-muted: var(--solid-agent-muted, #64748b);
+  --agent-border: var(--solid-agent-border, #e2e8f0);
+  --agent-err: #dc2626;
+  --agent-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.inputDialogBody { max-height: min(70vh, 42rem); overflow: auto; }
+.inputForm { display: flex; flex-direction: column; gap: 1rem; }
+.inputForm > p { margin: 0; color: var(--agent-muted); font-size: 0.875rem; line-height: 1.5; }
+.inputFields { display: flex; flex-direction: column; gap: 0.85rem; }
+.inputField { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem; font-weight: 600; }
+.inputField > span { display: flex; flex-direction: column; gap: 0.15rem; }
+.inputField small { color: var(--agent-muted); font-size: 0.75rem; font-weight: 400; }
+.inputField :global(.solid-input), .inputField select, .inputField textarea { width: 100%; min-height: 2.5rem; box-sizing: border-box; padding: 0.55rem 0.7rem; border: 1px solid var(--agent-border, #e2e8f0); border-radius: 0.5rem; background: var(--agent-bg, #fff); color: var(--agent-fg, #172033); font: inherit; font-weight: 400; }
+.inputField textarea { min-height: 5rem; resize: vertical; font-family: var(--agent-mono); font-size: 0.8rem; }
+.inputField :global(.solid-input):focus-visible, .inputField select:focus, .inputField textarea:focus { outline: 2px solid color-mix(in srgb, var(--agent-primary, #722ed1) 28%, transparent); border-color: var(--agent-primary, #722ed1); }
+.inputError { margin: 0; color: var(--agent-err); font-size: 0.82rem; }
+.inputActions { display: flex; justify-content: flex-end; gap: 0.6rem; padding-top: 0.25rem; }
 
 /* ── Launcher bubble ─────────────────────────────────────────── */
 .bubble {
@@ -131,7 +197,6 @@
   padding: 0 8px 0 14px;
   border-bottom: 1px solid var(--agent-border);
 }
-.externalEmbedHeader { padding-right: 52px; }
 .headerMark {
   position: relative;
   flex: 0 0 auto;

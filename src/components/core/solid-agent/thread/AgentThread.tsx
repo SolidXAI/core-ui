@@ -4,7 +4,11 @@ import styles from "../SolidAgent.module.css";
 import widgetStyles from "../widgets/solidChatWidgets.module.css";
 import { SolidXAIIcon } from "../SolidXAIIcon";
 import { AgentEventTypes, type AgentChatItem, type AgentContext } from "../types";
+import { toolCategory } from "../agentFormat";
+import { SolidAgentMessageCopyButton } from "../SolidAgentMarkdown";
 import { SolidAgentChatItem } from "./SolidAgentChatItem";
+import { parseWidgetContent } from "./inlineWidget";
+import { formatChatTime } from "../widgets/chatWidgetUtils";
 
 type Props = {
     items: AgentChatItem[];
@@ -29,6 +33,23 @@ const ASSISTANT_MESSAGE_TYPES = new Set<string>([
 ]);
 
 const isAssistantMessage = (item: AgentChatItem) => !item.widget && ASSISTANT_MESSAGE_TYPES.has(item.eventType);
+const isVisibleCurrentTool = (item: AgentChatItem) =>
+    item.eventType === AgentEventTypes.toolCalling
+    && toolCategory(item.eventData?.tool_name ?? "") !== "Context";
+
+const assistantCopyContent = (item: AgentChatItem): string | null => {
+    if (item.widget === "markdown" || item.widget === "SolidMarkdownChatWidget") {
+        const data = item.eventData?.props ?? item.eventData;
+        return typeof (data?.text ?? data?.content) === "string" ? (data.text ?? data.content) : null;
+    }
+    if (!isAssistantMessage(item)) return null;
+    const inline = parseWidgetContent(item.eventData?.content);
+    if (inline) {
+        if (inline.widget !== "markdown" && inline.widget !== "SolidMarkdownChatWidget") return null;
+        return typeof (inline.data.text ?? inline.data.content) === "string" ? (inline.data.text ?? inline.data.content) : null;
+    }
+    return typeof item.eventData?.content === "string" ? item.eventData.content : null;
+};
 
 /** Consecutive agent items form one turn (one avatar); each user message stands alone. */
 function groupItems(items: AgentChatItem[]): ItemGroup[] {
@@ -57,7 +78,6 @@ function AgentActivityDisclosure({
     items,
     detailItems,
     working,
-    currentActivityId,
     showSummary,
     renderItem,
 }: {
@@ -65,7 +85,6 @@ function AgentActivityDisclosure({
     items: AgentChatItem[];
     detailItems: AgentChatItem[];
     working: boolean;
-    currentActivityId?: string;
     showSummary: boolean;
     renderItem: (item: AgentChatItem) => React.ReactNode;
 }) {
@@ -83,10 +102,6 @@ function AgentActivityDisclosure({
         const timer = window.setInterval(() => setNow(Date.now()), 1000);
         return () => window.clearInterval(timer);
     }, [working]);
-
-    useLayoutEffect(() => {
-        setExpanded(false);
-    }, [currentActivityId]);
 
     const toolCount = items.filter((item) => item.eventType === AgentEventTypes.toolCalling).length;
     const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
@@ -180,8 +195,8 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
             items: [],
         });
     }
-    const renderItem = (item: AgentChatItem) => (
-        <SolidAgentChatItem key={item.id} item={item} agentContext={context} onReply={onReply} onPrompt={onPrompt} />
+    const renderItem = (item: AgentChatItem, showMessageMeta?: boolean) => (
+        <SolidAgentChatItem key={item.id} item={item} agentContext={context} showMessageMeta={showMessageMeta} onReply={onReply} onPrompt={onPrompt} />
     );
 
     return (
@@ -195,51 +210,63 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
                 if (group.kind === "user") return renderItem(group.item);
 
                 const isCurrentTurn = working && group === groups[groups.length - 1];
-                const latestTool = isCurrentTurn
-                    ? [...group.items].reverse().find((item) => item.eventType === AgentEventTypes.toolCalling && item.live)
-                    : undefined;
-                const currentActivity = latestTool ?? (isCurrentTurn
-                    ? [...group.items].reverse().find((item) => item.eventType === AgentEventTypes.toolCalling)
-                    : undefined);
-                const activityItems = group.items.filter((item) => !isAssistantMessage(item));
-                const detailItems = activityItems.filter((item) => item !== currentActivity);
-                const activitySet = new Set(group.items.filter((item) => !isAssistantMessage(item)));
-                const showIdleThinkingStatus = isCurrentTurn && thinking && activityItems.length === 0;
-                let activityRendered = false;
-                const turnContent = [
-                    ...(showIdleThinkingStatus ? [
+                const assistantCopyText = [...group.items].reverse()
+                    .map(assistantCopyContent)
+                    .find((content) => content !== null && content.length > 0);
+                const turnContent: React.ReactNode[] = [];
+                let activityItems: AgentChatItem[] = [];
+                const flushActivity = (isLatest: boolean) => {
+                    if (!activityItems.length) return;
+                    const currentActivity = isCurrentTurn && isLatest
+                        ? [...activityItems].reverse().find((item) => isVisibleCurrentTool(item) && item.live)
+                            ?? [...activityItems].reverse().find(isVisibleCurrentTool)
+                        : undefined;
+                    const detailItems = activityItems.filter((item) => item !== currentActivity);
+                    const activityKey = `${group.key}-${activityItems[0].id}`;
+                    turnContent.push(
+                        <AgentActivityDisclosure
+                            key={`activity-${activityKey}`}
+                            turnKey={activityKey}
+                            items={activityItems}
+                            detailItems={detailItems}
+                            working={isCurrentTurn && isLatest}
+                            showSummary={detailItems.length > 0 || currentActivity !== undefined}
+                            renderItem={renderItem}
+                        />,
+                    );
+                    if (currentActivity) turnContent.push(renderItem(currentActivity));
+                    activityItems = [];
+                };
+                for (const item of group.items) {
+                    if (isAssistantMessage(item)) {
+                        flushActivity(false);
+                        turnContent.push(renderItem(item, false));
+                    } else {
+                        activityItems.push(item);
+                    }
+                }
+                flushActivity(true);
+                if (isCurrentTurn && thinking && group.items.length === 0) {
+                    turnContent.push(
                         <AgentActivityDisclosure
                             key={`activity-${group.key}`}
                             turnKey={group.key}
-                            items={activityItems}
-                            detailItems={detailItems}
-                            working={isCurrentTurn}
+                            items={[]}
+                            detailItems={[]}
+                            working
                             showSummary
                             renderItem={renderItem}
                         />,
-                    ] : []),
-                    ...group.items.flatMap((item) => {
-                        if (activitySet.has(item)) {
-                            if (activityRendered) return [];
-                            activityRendered = true;
-                            return [
-                                <AgentActivityDisclosure
-                                    key={`activity-${group.key}`}
-                                    turnKey={group.key}
-                                    items={activityItems}
-                                    detailItems={detailItems}
-                                    working={isCurrentTurn}
-                                    currentActivityId={currentActivity?.id}
-                                    showSummary={detailItems.length > 0 || currentActivity !== undefined}
-                                    renderItem={renderItem}
-                                />,
-                                ...(currentActivity ? [renderItem(currentActivity)] : []),
-                            ];
-                        }
-                        if (item === currentActivity) return [];
-                        return [renderItem(item)];
-                    }),
-                ];
+                    );
+                }
+                if (!isCurrentTurn && assistantCopyText) {
+                    turnContent.push(
+                        <div key={`meta-${group.key}`} className={`${widgetStyles.BubbleMeta} ${widgetStyles.BubbleMetaAssistant} ${widgetStyles.TurnMeta}`}>
+                            <span className={widgetStyles.Timestamp}>{formatChatTime(group.items[group.items.length - 1].at)}</span>
+                            <SolidAgentMessageCopyButton text={assistantCopyText} />
+                        </div>,
+                    );
+                }
 
                 return (
                     <div key={group.key} className={widgetStyles.AiTurnGroup}>
