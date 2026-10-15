@@ -23,6 +23,14 @@ export type AgentModelIndicatorProps = {
 };
 
 const REASONING_PROVIDERS = new Set(["antigravity", "opencode", "claude", "copilot"]);
+
+export const isVisionModel = (m: ProviderModelInfo): boolean => {
+    if (typeof m.supports_vision === "boolean") return m.supports_vision;
+    if (typeof m.supports_image === "boolean") return m.supports_image;
+    if (typeof m.supports_images === "boolean") return m.supports_images;
+    if (typeof m.capabilities?.input?.image === "boolean") return m.capabilities.input.image;
+    return true;
+};
 const SPEED_PROVIDERS = new Set(["codex", "cursor"]);
 const SPEED_EXCLUDED_PROVIDERS = new Set(["antigravity"]);
 
@@ -182,6 +190,14 @@ export function AgentModelIndicator({
             REASONING_PROVIDERS.has(activeProvider) ||
             (activeModel?.includes("thinking") ?? false));
 
+    const visionModels = useMemo(() => {
+        return models.filter((m) => isVisionModel(m));
+    }, [models]);
+
+    const nonVisionModels = useMemo(() => {
+        return models.filter((m) => !isVisionModel(m));
+    }, [models]);
+
     const speedTiers = activeModelInfo?.speed_tiers || [];
     const hasSpeedSupport =
         !isNativeProvider &&
@@ -305,7 +321,14 @@ export function AgentModelIndicator({
                         /* ── Main Models View ── */
                         <>
                             <div className={styles.modelInfoHeading}>
-                                <strong>{activeProviderInfo ? activeProviderInfo.name : "Configured models"}</strong>
+                                <div className={styles.modelInfoHeadingRow}>
+                                    <strong>{activeProviderInfo ? activeProviderInfo.name : "Configured models"}</strong>
+                                    {activeModelInfo && (
+                                        <span className={isVisionModel(activeModelInfo) ? styles.modelVisionBadge : styles.modelNonVisionBadge}>
+                                            {isVisionModel(activeModelInfo) ? "Vision" : "Text only"}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             {hasCliModels && models.length > 5 && (
