@@ -1166,23 +1166,24 @@
   cursor: not-allowed;
 }
 .stopBtn {
-  height: 28px;
-  padding: 0 10px;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   border: 0;
   border-radius: 999px;
   background: var(--agent-tint);
   color: var(--agent-primary);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, transform 0.12s ease;
 }
 .stopBtn:hover {
   background: color-mix(in srgb, var(--agent-primary) 18%, transparent);
+}
+.stopBtn:active {
+  transform: scale(0.94);
 }
 .popover {
   border: 1px solid var(--agent-border);

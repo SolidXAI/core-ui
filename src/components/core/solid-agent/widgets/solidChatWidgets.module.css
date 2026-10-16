@@ -96,7 +96,7 @@
 .ActivityDetails {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 1.5px;
     margin: 4px 0 4px 6px;
     padding: 2px 0 2px 10px;
     border-left: 1.5px solid color-mix(in srgb, var(--solid-agent-border) 60%, transparent);
@@ -526,8 +526,8 @@
 .ToolCardName {
     font-family: inherit;
     font-size: 12px;
-    font-weight: 550;
-    color: var(--solid-agent-fg);
+    font-weight: 400;
+    color: var(--solid-agent-muted-fg);
     flex-shrink: 0;
     white-space: nowrap;
 }
@@ -764,7 +764,7 @@
     align-items: center;
     gap: 7px;
     width: 100%;
-    padding: 4px 6px;
+    padding: 2px 6px;
     font-size: 12px;
     flex-wrap: nowrap;
     min-width: 0;
@@ -795,7 +795,7 @@
     color: var(--solid-agent-muted);
     transition: transform 0.18s ease;
     flex-shrink: 0;
-    margin-left: 2px;
+    margin-left: auto;
 }
 
 .ToolCardChevronOpen {

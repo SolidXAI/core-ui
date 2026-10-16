@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
-import { formatDuration, toolDisplayName } from "../agentFormat";
+import { toolDisplayName } from "../agentFormat";
 
 type ToolStatus = "running" | "success" | "warning" | "error";
 type ToolProgressStep = { label: string; status: "running" | "done"; duration_ms?: number };
@@ -50,7 +50,6 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
                 <StatusIcon status={status} />
                 <span className={styles.ToolCardName}>{live ? `Invoking ${toolDisplayName(toolName, args)}…` : toolDisplayName(toolName, args)}</span>
                 {eventData.summary && <span className={styles.ToolCardDesc} title={eventData.summary}>{eventData.summary}</span>}
-                {eventData.duration_ms != null && <span className={styles.ToolCardDuration}>{formatDuration(eventData.duration_ms)}</span>}
                 {expandable && <ChevronRight size={11} className={`${styles.ToolCardChevron} ${expanded ? styles.ToolCardChevronOpen : ""}`} />}
             </button>
 
@@ -61,9 +60,6 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
                         <div key={index} className={`${styles.ToolProgressItem} ${step.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
                             {step.status === "running" && <Loader2 size={10} className={styles.Spin} />}
                             <span className={styles.ToolProgressLabel}>{step.label}</span>
-                            {step.duration_ms != null && step.status === "done" && (
-                                <span className={styles.ToolProgressDuration}>{formatDuration(step.duration_ms)}</span>
-                            )}
                         </div>
                     ))}
                 </div>

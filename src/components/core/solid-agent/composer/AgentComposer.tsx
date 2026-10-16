@@ -259,8 +259,14 @@ export function AgentComposer({
                     )}
                     {modelIndicator}
                     {working ? (
-                        <button type="button" className={styles.stopBtn} onClick={onStop} aria-label="Stop the agent">
-                            <Square size={10} fill="currentColor" /> Stop
+                        <button
+                            type="button"
+                            className={styles.stopBtn}
+                            onClick={onStop}
+                            aria-label="Stop the agent"
+                            title="Stop the agent"
+                        >
+                            <Square size={12} fill="currentColor" />
                         </button>
                     ) : (
                         <button type="button" className={styles.sendBtn} onClick={submit} disabled={!canSend} aria-label="Send">
