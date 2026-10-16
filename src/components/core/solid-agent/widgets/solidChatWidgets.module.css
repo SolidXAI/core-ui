@@ -205,6 +205,12 @@
     animation: responseShimmer 2.8s ease-in-out infinite;
 }
 
+.BubbleStreaming .MarkdownRoot code,
+.BubbleStreaming .MarkdownRoot pre {
+    color: var(--solid-agent-fg);
+    -webkit-text-fill-color: var(--solid-agent-fg);
+}
+
 .UserText {
     font-size: 13px;
     margin: 0;
@@ -408,6 +414,7 @@
     font-size: 12.5px;
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
     color: var(--solid-agent-fg);
+    -webkit-text-fill-color: var(--solid-agent-fg);
 }
 
 /* ── Code block ── */

@@ -194,11 +194,18 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             const toolName = eventData.tool_name ?? frame.tool_name ?? "tool";
             const args = eventData.arguments ?? {};
             const id = nextItemId("tool");
+            const stashedProgress = (state as any).pendingProgress ?? [];
+            (state as any).pendingProgress = [];
             state.items.push({
                 id,
                 at,
                 eventType,
-                eventData: { tool_name: toolName, arguments: args, summary: describeToolArgs(args, toolName) },
+                eventData: {
+                    tool_name: toolName,
+                    arguments: args,
+                    summary: describeToolArgs(args, toolName),
+                    ...(stashedProgress.length ? { progress: stashedProgress } : {}),
+                },
                 live: !replay,
             });
             state.liveToolId = id;
@@ -207,14 +214,27 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         }
 
         case AgentEventTypes.toolProgress: {
-            const tool = findItem(state, state.liveToolId);
-            if (!tool) break;
+            let tool = findItem(state, state.liveToolId);
+            if (!tool) {
+                tool = [...state.items].reverse().find((it) => it.eventType === AgentEventTypes.toolCalling && it.live) ?? null;
+            }
             const label = eventData.label ?? "";
             const status = eventData.status === "success" || eventData.status === "done" ? "done" : "running";
+            const step = { label, status, duration_ms: eventData.duration_ms };
+
+            if (!tool) {
+                if (!(state as any).pendingProgress) (state as any).pendingProgress = [];
+                const pending: any[] = (state as any).pendingProgress;
+                const idx = pending.findIndex((s: any) => s.label === label);
+                if (idx >= 0) pending[idx] = step;
+                else pending.push(step);
+                break;
+            }
+
             const progress: any[] = tool.eventData.progress ?? [];
-            const index = progress.findIndex((step) => step.label === label);
-            const step = { label, status, duration_ms: eventData.duration_ms ?? progress[index]?.duration_ms };
-            tool.eventData = { ...tool.eventData, progress: index >= 0 ? progress.map((entry, i) => (i === index ? step : entry)) : [...progress, step] };
+            const index = progress.findIndex((s) => s.label === label);
+            const mergedStep = { label, status, duration_ms: eventData.duration_ms ?? progress[index]?.duration_ms };
+            tool.eventData = { ...tool.eventData, progress: index >= 0 ? progress.map((entry, i) => (i === index ? mergedStep : entry)) : [...progress, mergedStep] };
             break;
         }
 
