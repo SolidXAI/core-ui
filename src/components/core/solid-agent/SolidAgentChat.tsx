@@ -30,7 +30,7 @@ import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
 import { AgentSignIn } from "./AgentSignIn";
 import { signOutOfAgent } from "./client/agentAuth";
-import { AgentModelIndicator } from "./AgentModelIndicator";
+import { AgentModelIndicator, isVisionModel } from "./AgentModelIndicator";
 import type { AgentModelAssignments } from "./types";
 import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
@@ -182,6 +182,12 @@ export function SolidAgentChat({
     const activeModelInfo = useMemo(() => {
         return models.find((m) => m.id === selectedModel) || (models.length > 0 ? models[0] : null);
     }, [models, selectedModel]);
+
+    const canAttach = useMemo(() => {
+        if (activeModelInfo) return isVisionModel(activeModelInfo);
+        if (selectedModel) return isVisionModel(selectedModel);
+        return true;
+    }, [activeModelInfo, selectedModel]);
 
     // Synchronize reasoning and speed options when model or provider changes
     useEffect(() => {
@@ -558,6 +564,8 @@ export function SolidAgentChat({
     const activeProviderObj = providers.find((p) => p.id === selectedProvider);
     const providerDisplayName = activeProviderObj?.name || (selectedProvider ? selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1) : "");
 
+
+
     const empty = (
         <div className={styles.empty}>
             <div className={styles.emptyMark}><Sparkles size={24} /></div>
@@ -848,6 +856,7 @@ export function SolidAgentChat({
                     seedKey={seed?.key}
                     onSend={sendWithAttachments}
                     onStop={() => runtime?.cancel()}
+                    canAttach={canAttach}
                     modelIndicator={
                         <AgentModelIndicator
                             assignments={modelAssignments}

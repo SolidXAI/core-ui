@@ -15,13 +15,25 @@ type Props = {
     onSend: (text: string, attachments: AgentAttachment[]) => void | Promise<void>;
     onStop: () => void;
     modelIndicator?: React.ReactNode;
+    canAttach?: boolean;
 };
 
 /**
  * Message box: Enter sends, Shift+Enter adds a line, "/" at the start lists the agent's commands.
  * Files can be attached with the paperclip, dropped onto the box, or pasted.
  */
-export function AgentComposer({ working, disabled, placeholder, commands, seed, seedKey, onSend, onStop, modelIndicator }: Props) {
+export function AgentComposer({
+    working,
+    disabled,
+    placeholder,
+    commands,
+    seed,
+    seedKey,
+    onSend,
+    onStop,
+    modelIndicator,
+    canAttach = true,
+}: Props) {
     const [text, setText] = useState("");
     const [active, setActive] = useState(0);
     const [attachments, setAttachments] = useState<AgentAttachment[]>([]);
@@ -58,8 +70,15 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
         el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
     }
 
+    useEffect(() => {
+        if (!canAttach && attachments.length > 0) {
+            setAttachments([]);
+            setAttachErrors([]);
+        }
+    }, [canAttach]);
+
     const addFiles = async (files: File[]) => {
-        if (!files.length || disabled || sending) return;
+        if (!canAttach || !files.length || disabled || sending) return;
         const { added, errors } = await readAgentAttachments(files, attachments);
         if (added.length) setAttachments((prev) => [...prev, ...added]);
         setAttachErrors(errors);
@@ -114,6 +133,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     };
 
     const onPaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+        if (!canAttach) return;
         const files = Array.from(event.clipboardData?.files ?? []);
         if (files.length) {
             event.preventDefault();
@@ -123,7 +143,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
 
     const dropHandlers = {
         onDragOver: (event: React.DragEvent) => {
-            if (disabled || sending || !event.dataTransfer?.types?.includes("Files")) return;
+            if (!canAttach || disabled || sending || !event.dataTransfer?.types?.includes("Files")) return;
             event.preventDefault();
             setDragging(true);
         },
@@ -131,7 +151,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
             if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false);
         },
         onDrop: (event: React.DragEvent) => {
-            if (disabled || sending) return;
+            if (!canAttach || disabled || sending) return;
             event.preventDefault();
             setDragging(false);
             void addFiles(Array.from(event.dataTransfer?.files ?? []));
@@ -225,16 +245,18 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
                             event.target.value = "";
                         }}
                     />
-                    <button
-                        type="button"
-                        className={styles.iconBtn}
-                        aria-label="Attach files"
-                        title={`Attach files (up to ${MAX_AGENT_ATTACHMENTS}: images or text files)`}
-                        disabled={disabled || sending || attachments.length >= MAX_AGENT_ATTACHMENTS}
-                        onClick={() => fileInputRef.current?.click()}
-                    >
-                        <Paperclip size={16} />
-                    </button>
+                    {canAttach && (
+                        <button
+                            type="button"
+                            className={styles.iconBtn}
+                            aria-label="Attach files"
+                            title={`Attach files (up to ${MAX_AGENT_ATTACHMENTS}: images or text files)`}
+                            disabled={disabled || sending || attachments.length >= MAX_AGENT_ATTACHMENTS}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <Paperclip size={16} />
+                        </button>
+                    )}
                     {modelIndicator}
                     {working ? (
                         <button type="button" className={styles.stopBtn} onClick={onStop} aria-label="Stop the agent">

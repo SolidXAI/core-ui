@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronRight, LoaderCircle } from "lucide-react";
 import styles from "../SolidAgent.module.css";
 import widgetStyles from "../widgets/solidChatWidgets.module.css";
-import { SolidXAIIcon } from "../SolidXAIIcon";
+
 import { AgentEventTypes, type AgentChatItem, type AgentContext } from "../types";
 import { SolidAgentMessageCopyButton } from "../SolidAgentMarkdown";
 import { SolidAgentChatItem } from "./SolidAgentChatItem";
@@ -275,9 +275,6 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
 
                 return (
                     <div key={group.key} className={widgetStyles.AiTurnGroup}>
-                        <div className={`${widgetStyles.Avatar} ${widgetStyles.AvatarAi}`}>
-                            <SolidXAIIcon size={14} />
-                        </div>
                         <div className={widgetStyles.AiTurnContent}>{turnContent}</div>
                     </div>
                 );

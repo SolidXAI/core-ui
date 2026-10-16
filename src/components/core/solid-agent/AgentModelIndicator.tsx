@@ -26,7 +26,12 @@ const REASONING_PROVIDERS = new Set(["antigravity", "opencode", "claude", "copil
 
 const NON_VISION_TOKENS = ["big-pickle", "nemotron", "deepseek-r1", "o1-mini", "cohere-code", "inkling"];
 
-export const isVisionModel = (m: ProviderModelInfo): boolean => {
+export const isVisionModel = (m?: ProviderModelInfo | string | null): boolean => {
+    if (!m) return true;
+    if (typeof m === "string") {
+        const lowered = m.toLowerCase();
+        return !NON_VISION_TOKENS.some((tok) => lowered.includes(tok));
+    }
     if (typeof m.supports_vision === "boolean") return m.supports_vision;
     if (typeof m.supports_image === "boolean") return m.supports_image;
     if (typeof m.supports_images === "boolean") return m.supports_images;
@@ -327,14 +332,7 @@ export function AgentModelIndicator({
                         /* ── Main Models View ── */
                         <>
                             <div className={styles.modelInfoHeading}>
-                                <div className={styles.modelInfoHeadingRow}>
-                                    <strong>{activeProviderInfo ? activeProviderInfo.name : "Configured models"}</strong>
-                                    {activeModelInfo && (
-                                        <span className={isVisionModel(activeModelInfo) ? styles.modelVisionBadge : styles.modelNonVisionBadge}>
-                                            {isVisionModel(activeModelInfo) ? "Vision" : "Text only"}
-                                        </span>
-                                    )}
-                                </div>
+                                <strong>{activeProviderInfo ? activeProviderInfo.name : "Configured models"}</strong>
                             </div>
 
                             {hasCliModels && models.length > 5 && (
@@ -398,7 +396,6 @@ export function AgentModelIndicator({
                                                 >
                                                     <div className={styles.modelSelectItemName}>
                                                         <span>{m.name || m.id}</span>
-                                                        {isVisionModel(m) && <span className={styles.modelVisionTag}>vision</span>}
                                                         {m.is_default && <span className={styles.modelDefaultTag}>default</span>}
                                                     </div>
                                                     {isSelected && <Check size={14} className={styles.modelCheckIcon} />}
