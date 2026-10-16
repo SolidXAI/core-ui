@@ -1,0 +1,178 @@
+.root {
+  display: flex;
+  height: min(78vh, 760px);
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0.75rem 1rem 1rem !important;
+}
+
+.columns {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  gap: 0.75rem;
+  overflow: hidden;
+}
+
+.pane {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--surface-border, var(--border));
+  border-radius: 0.75rem;
+  background: var(--surface-card, var(--card));
+}
+
+.paneHeader {
+  flex: 0 0 auto;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid var(--surface-border, var(--border));
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 3%, var(--surface-card, var(--card)));
+}
+
+.identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.agentName {
+  overflow: hidden;
+  color: var(--text-color, var(--foreground));
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sessionId {
+  margin-top: 0.15rem;
+  overflow: hidden;
+  color: var(--text-color-secondary, var(--muted-foreground));
+  font-size: 0.67rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.versionBadge {
+  flex: 0 0 auto;
+  padding: 0.22rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--primary-color, var(--primary)) 25%, var(--surface-border, var(--border)));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 8%, var(--surface-card, var(--card)));
+  color: var(--primary-color, var(--primary));
+  font-size: 0.66rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.versionDetails {
+  box-sizing: border-box;
+  display: flex;
+  height: 4.5rem;
+  min-height: 4.5rem;
+  max-height: 4.5rem;
+  flex-direction: column;
+  gap: 0.12rem;
+  margin-top: 0.55rem;
+  overflow-y: auto;
+  padding: 0.45rem 0.6rem;
+  border-left: 3px solid var(--primary-color, var(--primary));
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 7%, var(--surface-ground, var(--background)));
+}
+
+.versionName {
+  color: var(--text-color, var(--foreground));
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+
+.versionDescription,
+.versionFallback {
+  color: var(--text-color-secondary, var(--muted-foreground));
+  font-size: 0.68rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
+.messages {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 1.5%, var(--surface-card, var(--card)));
+}
+
+.messageState {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: var(--text-color-secondary, var(--muted-foreground));
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.messageStateError {
+  color: #b91c1c;
+}
+
+
+.selectionEmpty {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 1.5rem;
+  border: 1px dashed var(--surface-border, var(--border));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 3%, var(--surface-ground, var(--background)));
+  color: var(--text-color-secondary, var(--muted-foreground));
+  text-align: center;
+}
+
+.selectionIcon {
+  display: grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 12%, transparent);
+  color: var(--primary-color, var(--primary));
+}
+
+.selectionTitle {
+  color: var(--text-color, var(--foreground));
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.selectionDescription {
+  max-width: 25rem;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}

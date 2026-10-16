@@ -1,8 +1,9 @@
 import React from "react";
-import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, GitBranch, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
+import { solidPost } from "../../../../http/solidHttp";
 import { useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
@@ -412,6 +413,11 @@ export function AgentRegistryEditorPage() {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [auditVersion, setAuditVersion] = React.useState(0);
   const [confirmRefresh, setConfirmRefresh] = React.useState(false);
+  const [activateDialogOpen, setActivateDialogOpen] = React.useState(false);
+  const [includeVersionDetails, setIncludeVersionDetails] = React.useState(false);
+  const [versionName, setVersionName] = React.useState("");
+  const [versionDescription, setVersionDescription] = React.useState("");
+  const [activating, setActivating] = React.useState(false);
   const baseline = React.useRef("");
 
   const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
@@ -494,8 +500,8 @@ export function AgentRegistryEditorPage() {
     }
   };
 
-  const save = async (nextStatus?: "draft" | "active" | "disabled") => {
-    if (creatingTag) return;
+  const save = async (nextStatus?: "draft" | "active" | "disabled", versionDetails: { name?: string; description?: string } = {}): Promise<boolean> => {
+    if (creatingTag) return false;
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Name is required.";
     if (!title.trim()) next.title = "Title is required.";
@@ -510,7 +516,7 @@ export function AgentRegistryEditorPage() {
     if (Object.keys(next).length) {
       setTab(next.systemPrompt ? "persona" : next.limits ? "policies" : "basics");
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(next).join(" ") }));
-      return;
+      return false;
     }
     let normalizedInputs: Input[];
     try {
@@ -520,7 +526,7 @@ export function AgentRegistryEditorPage() {
       next.inputs = error instanceof Error ? error.message : "Check the default input values.";
       setErrors(next);
       setTab("basics");
-      return;
+      return false;
     }
     const payload = {
       name: name.trim(), title: title.trim(), description: description.trim(), iconName,
@@ -529,10 +535,11 @@ export function AgentRegistryEditorPage() {
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
       ...agentHubTagsPayload(tags),
       ...agentHubModulePayload(module),
-      status: nextStatus ?? record?.status ?? "draft",
+      status: nextStatus === "active" ? record?.status ?? "draft" : nextStatus ?? "draft",
     };
     let newlyCreatedId: number | undefined;
     let scalarSaved = false;
+    let activationAttempted = false;
     try {
       const result = record?.id ? await updateAgent({ id: record.id, data: payload }).unwrap() : await createAgent(payload).unwrap();
       scalarSaved = true;
@@ -546,14 +553,20 @@ export function AgentRegistryEditorPage() {
       await syncLinks(savedId, record?.agentRoles, roleIds, "roleMetadata", createRoleLink, deleteRoleLink, undefined);
       await syncLinks(savedId, record?.agentSecrets, secretIds, "secret", createSecretLink, deleteSecretLink, updateSecretLink,
         (targetId) => ({ envVarName: secretEnvVarNames[targetId] ?? "" }));
-      dispatch(showToast({ severity: "success", summary: nextStatus ? "Agent status updated" : "Saved", detail: nextStatus ? `Agent moved to ${nextStatus}.` : "Agent and its associations saved." }));
+      if (nextStatus === "active") {
+        activationAttempted = true;
+        await solidPost(`/agent-registry/${savedId}/activate`, versionDetails);
+      }
+      dispatch(showToast({ severity: "success", summary: nextStatus === "active" ? "Agent activated" : nextStatus ? "Agent status updated" : "Saved", detail: nextStatus === "active" ? "A new config version was created and the agent was activated." : nextStatus ? `Agent moved to ${nextStatus}.` : "Agent and its associations saved." }));
       setAuditVersion((version) => version + 1);
       if (record?.id) refetch();
       else navigate(`/admin/core/solid-core/agent-registry/editor/${savedId}`, { replace: true });
+      return true;
     } catch (error) {
-      dispatch(showToast({ severity: "error", summary: scalarSaved ? "Agent saved; links incomplete" : "Save failed", detail: apiError(error) }));
+      dispatch(showToast({ severity: "error", summary: activationAttempted ? "Agent saved; activation failed" : scalarSaved ? "Agent saved; links incomplete" : "Save failed", detail: apiError(error) }));
       if (record?.id) refetch();
       else if (newlyCreatedId) navigate(`/admin/core/solid-core/agent-registry/editor/${newlyCreatedId}`, { replace: true });
+      return false;
     }
   };
 
@@ -636,7 +649,14 @@ export function AgentRegistryEditorPage() {
           ] as const).map(([value, label, description], index) => <React.Fragment key={value}>
             {index > 0 && <div className="agent-editor__workflow-connector" aria-hidden="true" />}
             <button type="button" className={`agent-editor__workflow-stage${agentStatus === value ? " is-current" : ""}`} aria-current={agentStatus === value ? "step" : undefined}
-              aria-pressed={agentStatus === value} disabled={creating || updating || agentStatus === value} onClick={() => void save(value)}>
+              aria-pressed={agentStatus === value} disabled={creating || updating || activating || agentStatus === value} onClick={() => {
+                if (value === "active") {
+                  setIncludeVersionDetails(false);
+                  setVersionName("");
+                  setVersionDescription("");
+                  setActivateDialogOpen(true);
+                } else void save(value);
+              }}>
               <span className="agent-editor__workflow-stage-mark">{index + 1}</span>
               <div className="agent-editor__workflow-stage-copy"><strong>{label}</strong><small>{description}</small><small className="agent-editor__workflow-stage-cta">{agentStatus === value ? "Current stage" : "Click to move to this stage"}</small></div>
               {agentStatus === value && <span className="agent-editor__workflow-current">Current</span>}
@@ -701,6 +721,28 @@ export function AgentRegistryEditorPage() {
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
       footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
       <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest agent content.</p></SolidDialogBody>
+    </SolidDialog>
+    <SolidDialog open={activateDialogOpen} onOpenChange={(open) => { if (!activating) setActivateDialogOpen(open); }} header="Activate agent with a new config version?" style={{ width: "min(34rem, 94vw)" }}
+      footer={<><SolidButton type="button" variant="secondary" disabled={activating} onClick={() => setActivateDialogOpen(false)}>Cancel</SolidButton><SolidButton type="button" loading={activating || creating || updating} disabled={creatingTag || creating || updating || activating} onClick={async () => {
+        setActivating(true);
+        const saved = await save("active", includeVersionDetails ? { name: versionName.trim(), description: versionDescription.trim() } : {});
+        setActivating(false);
+        if (saved) setActivateDialogOpen(false);
+      }}>Create version and activate</SolidButton></>}>
+      <SolidDialogBody><div className="agent-editor__activation-dialog">
+        <div className="agent-editor__activation-intro">
+          <span className="agent-editor__activation-icon"><GitBranch size={18} /></span>
+          <div><strong>A new config version will be created</strong><p>Activating saves this agent as the next version and makes it available to users.</p></div>
+        </div>
+        <label className={`agent-editor__version-details-toggle${includeVersionDetails ? " is-selected" : ""}`}>
+          <input type="checkbox" checked={includeVersionDetails} onChange={(event) => setIncludeVersionDetails(event.target.checked)} />
+          <span className="agent-editor__version-details-copy"><strong>Add a name and description</strong><small>Optional details help identify this version later.</small></span>
+        </label>
+        {includeVersionDetails && <div className="agent-editor__version-details-fields">
+          <label className="agent-editor__field"><span>Version name <small>Optional</small></span><SolidInput autoFocus placeholder="e.g. Updated support workflow" value={versionName} onChange={(event) => setVersionName(event.target.value)} /></label>
+          <label className="agent-editor__field"><span>Description <small>Optional</small></span><textarea placeholder="What changed in this version?" value={versionDescription} rows={3} onChange={(event) => setVersionDescription(event.target.value)} /></label>
+        </div>}
+      </div></SolidDialogBody>
     </SolidDialog>
     {isLoading ? <div className="agent-editor__empty">Loading agent…</div> : isError || (id !== "new" && !record?.id) ?
     <div className="agent-editor__empty">This agent could not be loaded.</div> : record?.id ?

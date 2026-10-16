@@ -1,0 +1,216 @@
+import React from "react";
+import qs from "qs";
+import { GitCompareArrows, MessageSquareText } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { createSolidEntityApi } from "../../../../../redux/api/solidEntityApi";
+import { closePopup } from "../../../../../redux/features/popupSlice";
+import { solidGet } from "../../../../../http/solidHttp";
+import { AgentThread } from "../../../solid-agent/thread/AgentThread";
+import { historyToItems } from "../../../solid-agent/agentEvents";
+import { resolveAttachmentMedia } from "../../../solid-agent/client/agentAttachmentMedia";
+import type { AgentChatItem } from "../../../solid-agent/types";
+import chatStyles from "../../../solid-agent/SolidAgent.module.css";
+import styles from "./AgentSessionComparisonHeaderAction.module.css";
+import {
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+} from "../../../../shad-cn-ui";
+
+type AgentSummary = { id?: number | string; name?: string; title?: string; displayName?: string } | number | string | null | undefined;
+type SessionRecord = {
+  id: number | string;
+  sessionId?: string;
+  agent?: AgentSummary;
+  configVersion?: number | string | null;
+};
+type SessionComparisonData = {
+  session: SessionRecord;
+  agentName: string;
+  versionName?: string;
+  versionDescription?: string;
+  items: AgentChatItem[];
+  loading: boolean;
+  error?: string;
+};
+
+const emptyRecords: SessionRecord[] = [];
+const noOp = () => undefined;
+const entities = (value: any) => Array.isArray(value?.records) ? value.records : [];
+
+async function fetchCoreSessionHistory(sessionId: number | string) {
+  const response = await solidGet(`/agent-session/${encodeURIComponent(String(sessionId))}/messages?page=1&page_size=50`);
+  let payload = response?.data;
+  for (let depth = 0; depth < 4 && payload; depth += 1) {
+    if (Array.isArray(payload.messages)) return payload;
+    payload = payload.data;
+  }
+  throw new Error("The session messages response was invalid.");
+}
+
+function agentDetails(agent: AgentSummary) {
+  if (agent && typeof agent === "object") {
+    return { id: agent.id, name: agent.name ?? agent.title ?? agent.displayName ?? "Agent" };
+  }
+  return { id: agent, name: "Agent" };
+}
+
+function configVersionQuery(agentId: number | string, versionNumber: number): string {
+  return qs.stringify({
+    offset: 0,
+    limit: 1,
+    fields: ["id", "name", "description", "versionNumber"],
+    filters: {
+      $and: [
+        { agentRegistry: { id: { $eq: agentId } } },
+        { versionNumber: { $eq: versionNumber } },
+      ],
+    },
+  });
+}
+
+function SessionMessages({ data }: { data: SessionComparisonData }) {
+  if (data.loading) return <div className={styles.messageState}>Loading session messages…</div>;
+  if (data.error) return <div className={`${styles.messageState} ${styles.messageStateError}`}>{data.error}</div>;
+  if (!data.items.length) return <div className={styles.messageState}><MessageSquareText size={21} /><p>No messages found for this session.</p></div>;
+
+  return (
+    <div className={`${chatStyles.root} ${styles.messages}`}>
+      <AgentThread
+        items={data.items}
+        thinking={false}
+        working={false}
+        hasMore={false}
+        onLoadOlder={noOp}
+        onReply={noOp}
+        onPrompt={noOp}
+      />
+    </div>
+  );
+}
+
+type Props = {
+  selectedRecords?: SessionRecord[];
+  solidListViewMetaData?: { selectedRows?: SessionRecord[] };
+};
+
+export default function AgentSessionComparisonHeaderAction({ selectedRecords, solidListViewMetaData }: Props) {
+  const dispatch = useDispatch();
+  const configVersionApi = React.useMemo(() => createSolidEntityApi("agentConfigVersion"), []);
+  const [fetchConfigVersions] = configVersionApi.useLazyGetSolidEntitiesQuery();
+  const [comparisonData, setComparisonData] = React.useState<SessionComparisonData[]>([]);
+  const sessions = Array.isArray(selectedRecords)
+    ? selectedRecords
+    : Array.isArray(solidListViewMetaData?.selectedRows) ? solidListViewMetaData?.selectedRows ?? emptyRecords : emptyRecords;
+  const sessionKey = sessions.map((session) => {
+    const agentId = agentDetails(session.agent).id;
+    return `${session.id}:${session.sessionId ?? ""}:${agentId ?? ""}:${session.configVersion ?? ""}`;
+  }).join(",");
+
+  React.useEffect(() => {
+    let alive = true;
+    if (!sessions.length || sessions.length > 2) {
+      setComparisonData([]);
+      return () => { alive = false; };
+    }
+
+    setComparisonData(sessions.map((session) => ({
+      session,
+      agentName: agentDetails(session.agent).name,
+      items: [],
+      loading: true,
+    })));
+
+    void Promise.all(sessions.map(async (session): Promise<SessionComparisonData> => {
+      const { id: agentId, name: nameFromSession } = agentDetails(session.agent);
+      const base: SessionComparisonData = {
+        session,
+        agentName: nameFromSession,
+        items: [],
+        loading: false,
+      };
+
+      const [historyResult, versionResult] = await Promise.allSettled([
+        fetchCoreSessionHistory(session.id),
+        agentId != null && Number(session.configVersion) > 0
+          ? fetchConfigVersions(configVersionQuery(agentId, Number(session.configVersion)), false).unwrap()
+          : Promise.resolve(null),
+      ]);
+
+      if (historyResult.status === "fulfilled") {
+        base.items = await resolveAttachmentMedia(historyToItems(historyResult.value.messages ?? []));
+      } else {
+        base.error = "Could not load messages for this session.";
+      }
+
+      if (versionResult.status === "fulfilled") {
+        const version = entities(versionResult.value)[0];
+        if (version) {
+          base.versionName = version.name ?? undefined;
+          base.versionDescription = version.description ?? undefined;
+        }
+      }
+      return base;
+    })).then((data) => {
+      if (alive) setComparisonData(data);
+    });
+
+    return () => { alive = false; };
+    // Trigger a fresh read when the selected session IDs or version metadata change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionKey]);
+
+  const invalidSelection = sessions.length > 2;
+  const displayedData = sessions.map((session) => comparisonData.find((item) => String(item.session.id) === String(session.id)) ?? ({
+    session,
+    agentName: agentDetails(session.agent).name,
+    items: [],
+    loading: true,
+  } as SessionComparisonData));
+
+  return (
+    <div className={styles.root}>
+      <SolidDialogHeader>
+        <SolidDialogTitle>Compare agent sessions</SolidDialogTitle>
+        <SolidDialogClose aria-label="Close" onClick={() => dispatch(closePopup())} />
+      </SolidDialogHeader>
+      <SolidDialogSeparator />
+      <SolidDialogBody className={styles.body}>
+        {!sessions.length || invalidSelection ? (
+          <div className={styles.selectionEmpty}>
+            <span className={styles.selectionIcon}><GitCompareArrows size={21} /></span>
+            <div className="space-y-1">
+              <h3 className={styles.selectionTitle}>{invalidSelection ? "Select up to two sessions" : "Choose sessions to compare"}</h3>
+              <p className={styles.selectionDescription}>Select a maximum of two sessions in the list to view their agent conversations here.</p>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.columns} style={{ gridTemplateColumns: `repeat(${sessions.length}, minmax(0, 1fr))` }}>
+            {displayedData.map((data) => (
+              <section key={String(data.session.id)} className={styles.pane}>
+                <header className={styles.paneHeader}>
+                  <div className={styles.identity}>
+                    <div className="min-w-0">
+                      <p className={styles.agentName}>{data.agentName}</p>
+                      <p className={styles.sessionId}>Session {data.session.sessionId ?? data.session.id}</p>
+                    </div>
+                    <span className={styles.versionBadge}>Config v{data.session.configVersion ?? "—"}</span>
+                  </div>
+                  <div className={styles.versionDetails}>
+                    {data.versionName && <p className={styles.versionName}>{data.versionName}</p>}
+                    {data.versionDescription
+                      ? <p className={styles.versionDescription}>{data.versionDescription}</p>
+                      : <p className={styles.versionFallback}>No version description available.</p>}
+                  </div>
+                </header>
+                <SessionMessages data={data} />
+              </section>
+            ))}
+          </div>
+        )}
+      </SolidDialogBody>
+    </div>
+  );
+}
