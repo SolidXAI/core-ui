@@ -1,5 +1,45 @@
 /** A widget the agent sent as its text reply: `{"widgetName": "...", "data": {...} | "<json>"}`. */
 export type InlineChatWidget = { widget: string; data: Record<string, any> };
+export type InlineChatWidgetState =
+    | { state: "widget"; value: InlineChatWidget }
+    | { state: "pending" }
+    | { state: "text" };
+
+const WIDGET_NAME_KEY = "widgetName";
+
+/**
+ * True while a streamed reply can still become a widget envelope. The agent
+ * protocol puts widgetName first, so this checks that key incrementally instead
+ * of treating every partial JSON object as a widget.
+ */
+function isPendingWidgetEnvelope(content: string): boolean {
+    let candidate = content.trimStart();
+    if (!candidate) return false;
+
+    if (candidate.startsWith("```")) {
+        const newline = candidate.indexOf("\n");
+        if (newline === -1) return "```json".startsWith(candidate.toLowerCase());
+        const fence = candidate.slice(0, newline).trim().toLowerCase();
+        if (fence !== "```" && fence !== "```json") return false;
+        candidate = candidate.slice(newline + 1).trimStart();
+    }
+
+    if (!candidate.startsWith("{")) return false;
+    const afterBrace = candidate.slice(1).trimStart();
+    if (!afterBrace) return true;
+    if (!afterBrace.startsWith('"')) return false;
+
+    const closingQuote = afterBrace.indexOf('"', 1);
+    if (closingQuote === -1) {
+        return WIDGET_NAME_KEY.startsWith(afterBrace.slice(1));
+    }
+
+    const firstKey = afterBrace.slice(1, closingQuote);
+    if (firstKey !== WIDGET_NAME_KEY) return false;
+
+    const afterKey = afterBrace.slice(closingQuote + 1).trimStart();
+    return afterKey === "" || afterKey.startsWith(":");
+}
 
 /** Returns the widget in a reply, or null when the reply is not that JSON (it then renders as text). */
 export function parseWidgetContent(content: unknown): InlineChatWidget | null {
@@ -95,6 +135,14 @@ export function parseWidgetContent(content: unknown): InlineChatWidget | null {
 
     if (!data || typeof data !== "object") return null;
     return { widget: widgetName, data };
+}
+
+/** Classifies live assistant content without exposing an incomplete JSON envelope as text. */
+export function classifyWidgetContent(content: unknown): InlineChatWidgetState {
+    const widget = parseWidgetContent(content);
+    if (widget) return { state: "widget", value: widget };
+    if (typeof content === "string" && isPendingWidgetEnvelope(content)) return { state: "pending" };
+    return { state: "text" };
 }
 
 /**

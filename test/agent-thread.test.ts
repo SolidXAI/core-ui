@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { isSameAssistantContent, parseWidgetContent } from "../src/components/core/solid-agent/thread/inlineWidget.ts";
+import { classifyWidgetContent, isSameAssistantContent, parseWidgetContent } from "../src/components/core/solid-agent/thread/inlineWidget.ts";
 
 // node --experimental-strip-types --test test/agent-thread.test.ts
 
@@ -91,6 +91,39 @@ describe("Agent Thread Helper Tests", () => {
                 widget: "status",
                 data: { tone: "error" },
             });
+        });
+    });
+
+    describe("classifyWidgetContent", () => {
+        it("keeps partial widget envelopes pending while they stream", () => {
+            for (const partial of [
+                "{",
+                '{"wid',
+                '{ "widgetName"',
+                '{"widgetName":"table","data":"{\\"rows\\":[',
+                "```json\n{\"widgetName\":\"table\"",
+            ]) {
+                assert.deepEqual(classifyWidgetContent(partial), { state: "pending" });
+            }
+        });
+
+        it("recognizes a complete widget envelope", () => {
+            const raw = JSON.stringify({ widgetName: "table", data: { rows: [{ id: 1 }] } });
+            assert.deepEqual(classifyWidgetContent(raw), {
+                state: "widget",
+                value: { widget: "table", data: { rows: [{ id: 1 }] } },
+            });
+        });
+
+        it("does not hide normal prose or unrelated JSON", () => {
+            assert.deepEqual(classifyWidgetContent("Working on it..."), { state: "text" });
+            assert.deepEqual(classifyWidgetContent('{"status":"ok"}'), { state: "text" });
+            assert.deepEqual(classifyWidgetContent('{"other'), { state: "text" });
+        });
+
+        it("leaves an invalid widget-like final reply available for text fallback", () => {
+            const invalid = '{"widgetName":"table"} trailing text';
+            assert.deepEqual(classifyWidgetContent(invalid), { state: "pending" });
         });
     });
 

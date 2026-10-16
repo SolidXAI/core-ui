@@ -3,9 +3,9 @@ import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import styles from "../SolidAgent.module.css";
 import { AgentEventTypes, type AgentChatItem, type AgentContext } from "../types";
-import { parseWidgetContent } from "./inlineWidget";
+import { classifyWidgetContent } from "./inlineWidget";
 
-export { parseWidgetContent, type InlineChatWidget } from "./inlineWidget";
+export { classifyWidgetContent, parseWidgetContent, type InlineChatWidget, type InlineChatWidgetState } from "./inlineWidget";
 
 /** Registry name of the widget that renders an event when `event_data.widget` is absent. */
 export const getDefaultChatWidgetName = (eventType: string): string => {
@@ -91,7 +91,15 @@ type SolidAgentChatItemProps = {
 export const SolidAgentChatItem = ({ item, agentContext, showMessageMeta, onReply, onPrompt }: SolidAgentChatItemProps) => {
     const isText = !item.widget && TEXT_EVENT_TYPES.has(item.eventType);
     const content = item.eventData?.content;
-    const inline = useMemo(() => (isText ? parseWidgetContent(content) : null), [isText, content]);
+    const inlineState = useMemo(
+        () => (isText ? classifyWidgetContent(content) : { state: "text" as const }),
+        [isText, content],
+    );
+    const inline = inlineState.state === "widget" ? inlineState.value : null;
+
+    // A widget envelope is not valid JSON until its closing delimiters arrive.
+    // Keep it out of the markdown fallback during that live-only interval.
+    if (item.live && inlineState.state === "pending") return null;
 
     const widgetName = item.widget ?? inline?.widget ?? getDefaultChatWidgetName(item.eventType);
     const DynamicWidget = getExtensionComponent(widgetName) ?? getExtensionComponent("DefaultUnknownChatWidget");
