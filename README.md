@@ -47,6 +47,7 @@ Complete auth UI with no extra wiring needed.
 ### Layouts & Navigation
 
 - `AdminLayout` / `Layout` — shell layouts with sidebar, header, and footer regions
+- `SolidAiStudioLayout` / `SolidStudio` — studio/configuration mode for admin users
 - `NavbarOne`, `NavbarTwo` — responsive top navigation bars
 - `AdminSidebar`, `UserSidebar` — collapsible sidebars
 - `GlobalSearch` — application-wide search component
@@ -91,6 +92,7 @@ A complete set of primitives built on Radix UI, PrimeReact, and Bootstrap, inclu
 - `StoreProvider` — wraps the app with the Redux store
 - `SolidThemeProvider` — theme context
 - `SolidToastProvider` — toast notification context
+- `SolidLayoutRegistryProvider` — layout registry context
 - `getSolidRoutes` — generates the full route tree from module metadata
 - `useSession`, `useRouter`, `usePathname`, `useSearchParams` — familiar routing hooks
 

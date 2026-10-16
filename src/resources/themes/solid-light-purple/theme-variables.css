@@ -37,9 +37,11 @@
   --sidebar-width: 272px;
   --sidebar-width-collapsed: 76px;
   --solid-sidebar-width: 272px;
+  --solid-studio-header-height: 0px;
   --shadow-soft: 0 12px 28px rgba(15, 23, 42, 0.1);
   --z-app: 1;
   --z-overlay: 1000;
+  --z-studio: 9999;
   --solid-danger: var(--destructive);
   --surface-a: #ffffff;
   --surface-b: #f9fafb;
