@@ -1094,8 +1094,8 @@ export const SolidAiChat: React.FC = () => {
                                                     status === "error" ? styles.ToolCardError :
                                                         styles.ToolCardDone;
 
-                                            const statusIcon: SolidIconMeta = status === "running"
-                                                ? { name: "si-spinner", spin: true }
+                                            const statusIcon: SolidIconMeta | null = status === "running"
+                                                ? null
                                                 : status === "warning"
                                                     ? { name: "si-exclamation-triangle" }
                                                     : status === "error"
@@ -1124,12 +1124,14 @@ export const SolidAiChat: React.FC = () => {
                                                         onClick={toggleExpand}
                                                         data-expandable={hasExpandable && status !== "running" ? "true" : undefined}
                                                     >
-                                                        <SolidIcon
-                                                            name={statusIcon.name}
-                                                            spin={statusIcon.spin}
-                                                            className={statusIconClass}
-                                                            aria-hidden
-                                                        />
+                                                        {statusIcon && (
+                                                            <SolidIcon
+                                                                name={statusIcon.name}
+                                                                spin={statusIcon.spin}
+                                                                className={statusIconClass}
+                                                                aria-hidden
+                                                            />
+                                                        )}
                                                         <SolidIcon
                                                             name={getToolIconName(msg.toolName ?? "")}
                                                             className={styles.ToolCardToolIcon}
@@ -1149,8 +1151,8 @@ export const SolidAiChat: React.FC = () => {
                                                             />
                                                         )}
                                                     </button>
-                                                    {/* Progress substeps: always visible */}
-                                                    {msg.toolProgress && msg.toolProgress.length > 0 && (
+                                                    {/* Progress substeps: visible only while running */}
+                                                    {status === "running" && msg.toolProgress && msg.toolProgress.length > 0 && (
                                                         <div className={styles.ToolCardProgress}>
                                                             {msg.toolProgress.map((p, i) => (
                                                                 <div key={i} className={`${styles.ToolProgressItem} ${p.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>

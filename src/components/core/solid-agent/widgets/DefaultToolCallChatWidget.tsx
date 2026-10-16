@@ -19,7 +19,6 @@ const CARD_CLASS: Record<ToolStatus, string> = {
 };
 
 function StatusIcon({ status }: { status: ToolStatus }) {
-    if (status === "running") return <Loader2 size={12} className={`${styles.ToolCardStatusIcon} ${styles.Spin}`} />;
     if (status === "error") return <XCircle size={12} className={styles.ToolCardStatusError} />;
     return null;
 }
@@ -37,6 +36,7 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
     const output: string | undefined = eventData.output_raw ?? eventData.output;
     const hasArgs = !!args && Object.keys(args).length > 0;
     const expandable = (hasArgs || !!output) && status !== "running";
+    const isRunning = live || status === "running";
 
     return (
         <div className={`${styles.ToolCard} ${CARD_CLASS[status] ?? styles.ToolCardDone}`}>
@@ -53,8 +53,8 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
                 {expandable && <ChevronRight size={11} className={`${styles.ToolCardChevron} ${expanded ? styles.ToolCardChevronOpen : ""}`} />}
             </button>
 
-            {/* Progress sub-steps: always visible */}
-            {progress.length > 0 && (
+            {/* Progress sub-steps: visible only while running */}
+            {isRunning && progress.length > 0 && (
                 <div className={styles.ToolCardProgress}>
                     {progress.map((step, index) => (
                         <div key={index} className={`${styles.ToolProgressItem} ${step.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
