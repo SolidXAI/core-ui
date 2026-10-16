@@ -45,8 +45,14 @@ export default function SolidAgentHost() {
     const [dockWidth, setDockWidth] = useState(() => readPrefs().dockWidth);
     const prefsHydrated = useRef(false);
     const skipNextPrefsWrite = useRef(false);
+    const lastDispatch = useRef(dispatch);
     const windowRef = useRef<HTMLDivElement>(null);
     const openerRef = useRef<Element | null>(null);
+
+    if (lastDispatch.current !== dispatch) {
+        lastDispatch.current = dispatch;
+        prefsHydrated.current = false;
+    }
 
     const available = ready && enabled && canUse && !!agentUrl && !!agent;
     const mode = agent?.mode ?? "bubble";

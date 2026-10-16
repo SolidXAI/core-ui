@@ -179,6 +179,15 @@ export class AgentRuntime {
         queueMicrotask(() => this.socket.connect());
     }
 
+    updateStore(dispatch: Dispatch, getState: GetAgentState) {
+        this.dispatch = dispatch;
+        this.getState = getState;
+        const state = getState();
+        if (state && state.items.length === 0 && this.historySessionId) {
+            void this.loadHistory(this.historySessionId, 1);
+        }
+    }
+
     /**
      * Uploads files into SolidX media storage first, then sends their IDs with the socket message.
      */
@@ -369,7 +378,10 @@ let runtime: AgentRuntime | null = null;
 
 /** Returns the shared "solidx" runtime, creating (or re-pointing) it for `agentUrl`. */
 export function ensureAgentRuntime(agentUrl: string, dispatch: Dispatch, getState: GetAgentState): AgentRuntime {
-    if (runtime && runtime.agentUrl === agentUrl) return runtime;
+    if (runtime && runtime.agentUrl === agentUrl) {
+        runtime.updateStore(dispatch, getState);
+        return runtime;
+    }
     runtime?.dispose();
     runtime = new AgentRuntime(agentUrl, dispatch, getState);
     return runtime;
