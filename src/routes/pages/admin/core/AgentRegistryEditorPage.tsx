@@ -16,6 +16,7 @@ import { AgentProcessesPanel } from "../../../../components/core/extension/solid
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
 import { getModelsDevModels, useModelsDevCatalog } from "../../../../hooks/useModelsDevModels";
+import { isOtherProvider } from "../../../../components/common/SolidSettings/LlmSettings/AiModelConfigTab";
 import { SolidAutocomplete, SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuTrigger, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
 import { SolidAgentMarkdown } from "../../../../components/core/solid-agent/SolidAgentMarkdown";
@@ -129,6 +130,8 @@ function ModelPicker({ value, options, providers, providerConfig, onChange }: {
         <small><em>Region: {providerConfig[provider].region}</em></small>}
     </div>
     <div className="agent-editor__field"><span>Model *</span>
+      {isOtherProvider(provider) ? <SolidInput className="w-full" aria-label="Model ID" placeholder="Enter model ID" value={model}
+        onChange={(event) => onChange(`${provider}:${event.target.value}`)} /> : <>
       <SearchableSelect value={showOther ? OTHER_MODEL : model}
         options={[...availableModels.map((option) => ({ label: option.model, value: option.model })), { label: "Other", value: OTHER_MODEL }]}
         placeholder="Select model" disabled={!provider}
@@ -138,6 +141,7 @@ function ModelPicker({ value, options, providers, providerConfig, onChange }: {
         }} />
       {showOther && <SolidInput className="w-full" aria-label="Custom model ID" placeholder="Enter model ID" value={model}
         onChange={(event) => onChange(`${provider}:${event.target.value}`)} />}
+      </>}
     </div>
   </div>;
 }
