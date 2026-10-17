@@ -1,6 +1,6 @@
 .root {
   display: flex;
-  height: min(78vh, 760px);
+  height: 100%;
   min-height: 0;
   flex-direction: column;
   overflow: hidden;

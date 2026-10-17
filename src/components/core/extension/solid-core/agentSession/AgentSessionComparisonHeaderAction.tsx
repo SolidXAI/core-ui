@@ -33,6 +33,9 @@ type SessionComparisonData = {
   versionDescription?: string;
   items: AgentChatItem[];
   loading: boolean;
+  page?: number;
+  hasMore?: boolean;
+  loadingOlder?: boolean;
   error?: string;
 };
 
@@ -40,8 +43,8 @@ const emptyRecords: SessionRecord[] = [];
 const noOp = () => undefined;
 const entities = (value: any) => Array.isArray(value?.records) ? value.records : [];
 
-async function fetchCoreSessionHistory(sessionId: number | string) {
-  const response = await solidGet(`/agent-session/${encodeURIComponent(String(sessionId))}/messages?page=1&page_size=50`);
+async function fetchCoreSessionHistory(sessionId: number | string, page = 1) {
+  const response = await solidGet(`/agent-session/${encodeURIComponent(String(sessionId))}/messages?page=${page}&page_size=50`);
   let payload = response?.data;
   for (let depth = 0; depth < 4 && payload; depth += 1) {
     if (Array.isArray(payload.messages)) return payload;
@@ -71,7 +74,7 @@ function configVersionQuery(agentId: number | string, versionNumber: number): st
   });
 }
 
-function SessionMessages({ data }: { data: SessionComparisonData }) {
+function SessionMessages({ data, onLoadOlder }: { data: SessionComparisonData; onLoadOlder: () => void }) {
   if (data.loading) return <div className={styles.messageState}>Loading session messages…</div>;
   if (data.error) return <div className={`${styles.messageState} ${styles.messageStateError}`}>{data.error}</div>;
   if (!data.items.length) return <div className={styles.messageState}><MessageSquareText size={21} /><p>No messages found for this session.</p></div>;
@@ -82,8 +85,9 @@ function SessionMessages({ data }: { data: SessionComparisonData }) {
         items={data.items}
         thinking={false}
         working={false}
-        hasMore={false}
-        onLoadOlder={noOp}
+        hasMore={data.hasMore ?? false}
+        loadingOlder={data.loadingOlder}
+        onLoadOlder={onLoadOlder}
         onReply={noOp}
         onPrompt={noOp}
       />
@@ -130,6 +134,7 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
         agentName: nameFromSession,
         items: [],
         loading: false,
+        page: 1,
       };
 
       const [historyResult, versionResult] = await Promise.allSettled([
@@ -141,6 +146,8 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
 
       if (historyResult.status === "fulfilled") {
         base.items = await resolveAttachmentMedia(historyToItems(historyResult.value.messages ?? []));
+        base.page = Number(historyResult.value.page) || 1;
+        base.hasMore = historyResult.value.has_more === true;
       } else {
         base.error = "Could not load messages for this session.";
       }
@@ -161,6 +168,36 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
     // Trigger a fresh read when the selected session IDs or version metadata change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionKey]);
+
+  const loadOlderMessages = React.useCallback(async (sessionId: number | string) => {
+    const current = comparisonData.find((item) => String(item.session.id) === String(sessionId));
+    if (!current || !current.hasMore || current.loadingOlder) return;
+    const nextPage = (current.page ?? 1) + 1;
+
+    setComparisonData((items) => items.map((item) =>
+      String(item.session.id) === String(sessionId) ? { ...item, loadingOlder: true } : item,
+    ));
+
+    try {
+      const history = await fetchCoreSessionHistory(sessionId, nextPage);
+      const olderItems = await resolveAttachmentMedia(historyToItems(history.messages ?? []));
+      setComparisonData((items) => items.map((item) =>
+        String(item.session.id) === String(sessionId)
+          ? {
+              ...item,
+              items: [...olderItems, ...item.items],
+              page: Number(history.page) || nextPage,
+              hasMore: history.has_more === true,
+              loadingOlder: false,
+            }
+          : item,
+      ));
+    } catch {
+      setComparisonData((items) => items.map((item) =>
+        String(item.session.id) === String(sessionId) ? { ...item, loadingOlder: false } : item,
+      ));
+    }
+  }, [comparisonData]);
 
   const invalidSelection = sessions.length > 2;
   const displayedData = sessions.map((session) => comparisonData.find((item) => String(item.session.id) === String(session.id)) ?? ({
@@ -205,7 +242,7 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
                       : <p className={styles.versionFallback}>No version description available.</p>}
                   </div>
                 </header>
-                <SessionMessages data={data} />
+                <SessionMessages data={data} onLoadOlder={() => void loadOlderMessages(data.session.id)} />
               </section>
             ))}
           </div>

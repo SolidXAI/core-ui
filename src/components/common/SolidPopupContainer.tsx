@@ -39,7 +39,7 @@ const SolidPopupContainer = () => {
       }}
       dismissible={isClosable}
       showHeader={false}
-      className={`solid-popup-dialog solid-common-dialog${isDeleteModelDialog ? " solid-delete-model-dialog" : ""}`}
+      className={`solid-popup-dialog solid-common-dialog${isDeleteModelDialog ? " solid-delete-model-dialog" : ""}${event?.popupClassName ? ` ${event.popupClassName}` : ""}`}
       overlayClassName="solid-popup-backdrop"
       style={{ width: popupWidth }}
     >

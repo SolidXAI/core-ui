@@ -15,6 +15,7 @@ type Props = {
     thinking: boolean;
     working?: boolean;
     hasMore: boolean;
+    loadingOlder?: boolean;
     context?: AgentContext;
     emptyState?: React.ReactNode;
     onLoadOlder: () => void;
@@ -151,7 +152,7 @@ function AgentActivityDisclosure({
 }
 
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
-export function AgentThread({ items, thinking, working = thinking, hasMore, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
+export function AgentThread({ items, thinking, working = thinking, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const pinned = useRef(true);
     const prevHeight = useRef(0);
@@ -202,8 +203,8 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, cont
     return (
         <div ref={scrollRef} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
             {hasMore && (
-                <button type="button" className={`${styles.btn} ${styles.loadMore}`} onClick={onLoadOlder}>
-                    Load earlier messages
+                <button type="button" className={`${styles.btn} ${styles.loadMore}`} onClick={onLoadOlder} disabled={loadingOlder}>
+                    {loadingOlder ? "Loading earlier messages…" : "Load earlier messages"}
                 </button>
             )}
             {groups.map((group) => {

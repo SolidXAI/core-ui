@@ -1404,6 +1404,16 @@ textarea {
   box-shadow: 0 18px 48px rgba(2, 6, 23, 0.35);
 }
 
+.solid-popup-dialog.solid-common-dialog.solid-agent-session-compare-popup {
+  width: 95vw !important;
+  max-width: 95vw !important;
+  height: 95vh !important;
+  max-height: 95vh !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .solid-popup-dialog.solid-delete-model-dialog.solid-radix-dialog-content {
   display: flex;
   flex-direction: column;
