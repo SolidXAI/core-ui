@@ -957,6 +957,12 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     // Update the group data
     sourceGroup.groupData.records = sourceRecords;
     destinationGroup.groupData.records = destinationRecords;
+    sourceGroup.groupData.meta.totalRecords = Math.max(
+      0,
+      Number(sourceGroup.groupData.meta.totalRecords || 0) - 1
+    );
+    destinationGroup.groupData.meta.totalRecords =
+      Number(destinationGroup.groupData.meta.totalRecords || 0) + 1;
 
     // Update the kanbanViewData state
     const oldkanbanViewData = structuredClone(kanbanViewData);
