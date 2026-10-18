@@ -12,8 +12,8 @@
 @media(prefers-reduced-motion:reduce) { .agent-editor__refresh.is-loading svg { animation:none; } }
 .agent-editor__actions { justify-content:flex-end; }
 .agent-editor__tabs { display:flex; flex:1 1 auto; flex-direction:column; min-height:0; overflow:hidden; border:1px solid var(--surface-border,var(--border)); border-radius:.75rem; background:var(--surface-card,var(--card)); }
-.agent-editor__tab-list { padding:.4rem .6rem 0; border-bottom:1px solid var(--surface-border,var(--border)); }
-.agent-editor__tab-panel { flex:1 1 auto; min-height:0; overflow:auto; padding:1.25rem; }
+.agent-editor__tab-list { flex:0 0 auto; padding:.4rem .6rem 0; border-bottom:1px solid var(--surface-border,var(--border)); }
+.agent-editor__tab-panel { flex:1 1 0; min-width:0; min-height:0; overflow:auto; padding:1.25rem; }
 .agent-editor__stack { display:flex; flex-direction:column; gap:1.25rem; }
 .agent-editor__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
 .agent-editor__field { display:flex; flex-direction:column; gap:.45rem; min-width:0; font-size:.875rem; font-weight:600; }
