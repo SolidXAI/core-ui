@@ -326,6 +326,22 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
               className="w-full"
             />
           </div>
+          {isEdit && (
+            <div
+              role="note"
+              style={{
+                padding: "0.625rem 0.75rem",
+                border: "1px solid var(--solid-info-border-color, rgba(147, 51, 234, 0.3))",
+                borderRadius: "0.5rem",
+                background: "var(--solid-info-bg, rgba(147, 51, 234, 0.1))",
+                color: "var(--solid-info-color, var(--solid-text-color, inherit))",
+                fontSize: "0.8125rem",
+                lineHeight: 1.4,
+              }}
+            >
+              Restart processes for all agents using this provider for the changes to take effect.
+            </div>
+          )}
         </div>
       </SolidDialogBody>
       <SolidDialogFooter>
