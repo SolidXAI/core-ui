@@ -339,7 +339,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
                 lineHeight: 1.4,
               }}
             >
-              Restart processes for all agents using this provider for the changes to take effect.
+              Restart all agents using this provider for changes to take effect.
             </div>
           )}
         </div>
