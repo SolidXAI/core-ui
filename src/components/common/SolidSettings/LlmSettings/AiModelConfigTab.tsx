@@ -264,7 +264,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
                   />
                   {isOtherSelected && (
                     <div className="flex items-center gap-1 mt-2">
-                      <span className="text-color-secondary">other(</span>
+                      <span className="text-color-secondary">other (</span>
                       <SolidInput
                         placeholder="e.g. Runpod"
                         value={otherProviderName}

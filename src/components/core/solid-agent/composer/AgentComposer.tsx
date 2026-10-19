@@ -42,8 +42,8 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     }, [seedKey]);
 
     useEffect(() => {
-        if (!disabled) ref.current?.focus();
-    }, [disabled]);
+        if (!disabled && !sending) ref.current?.focus();
+    }, [disabled, sending]);
 
     const slashQuery = text.startsWith("/") && !text.includes(" ") ? text.slice(1).toLowerCase() : null;
     const matches = useMemo(
