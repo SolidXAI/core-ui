@@ -575,6 +575,7 @@ export function SolidAgentChat({
 
     useEffect(() => {
         return eventBus.on(SOLID_AGENT_EVENTS.sessionChanged, (payload) => {
+            if (payload.agentType && payload.agentType !== agentRuntime) return;
             if (!payload) return;
             if (payload.provider && payload.provider !== selectedProvider) {
                 setSelectedProvider(payload.provider);

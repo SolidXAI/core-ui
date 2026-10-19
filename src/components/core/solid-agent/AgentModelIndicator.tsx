@@ -145,10 +145,10 @@ export function AgentModelIndicator({
     let rawModelLabel = "Models";
     if (activeProviderInfo && activeProviderInfo.id !== "solidx") {
         rawModelLabel = activeModelInfo ? activeModelInfo.name || activeModelInfo.id : activeProviderInfo.name;
-    } else if (activeModel) {
-        rawModelLabel = activeModel;
     } else if (assignments?.reasoning?.model) {
         rawModelLabel = assignments.reasoning.model;
+    } else if (activeModel) {
+        rawModelLabel = activeModel;
     }
 
     const displayModelLabel = formatSelectedModelLabel(rawModelLabel);

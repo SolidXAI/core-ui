@@ -225,13 +225,9 @@
   display: inline-flex;
   align-items: center;
   padding: 1px 5px;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--agent-fg) 8%, transparent);
-  border: 1px solid color-mix(in srgb, var(--agent-fg) 14%, transparent);
   color: var(--agent-muted);
   font-size: 10px;
   font-weight: 600;
-  line-height: 1.25;
   font-family: var(--agent-font-mono, monospace);
   letter-spacing: -0.2px;
   flex-shrink: 0;
