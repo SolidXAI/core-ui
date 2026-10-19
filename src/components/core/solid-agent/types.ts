@@ -72,6 +72,8 @@ export interface ProviderModelInfo {
     speed_tiers?: SpeedTierInfo[];
     default_speed?: string;
     supports_fast?: boolean;
+    context_window?: number;
+    max_output_tokens?: number;
 }
 
 export type AgentConnection = "idle" | "connecting" | "open" | "reconnecting" | "offline";

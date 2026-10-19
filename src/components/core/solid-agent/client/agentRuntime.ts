@@ -8,7 +8,7 @@ import {
     agentUserMessageAdded,
     type AgentState,
 } from "../../../../redux/features/agentSlice";
-import { historyToItems, isSameAssistantContent, normalizeAgentFrame } from "../agentEvents";
+import { historyToItems, historyToThreadState, isSameAssistantContent, normalizeAgentFrame } from "../agentEvents";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentSessionOptions, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
@@ -293,10 +293,19 @@ export class AgentRuntime {
             this.loadedHistoryPages.add(key);
             if (!result) return;
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
-            const rawItems = historyToItems(result.messages ?? []);
+            const historyState = historyToThreadState(result.messages ?? []);
+            const rawItems = historyState.items;
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
             if (generation !== this.historyGeneration || this.getState()?.historySessionId !== historySessionId) return;
-            this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page }));
+
+            const serverCost = typeof (result as any).total_cost === "number" ? (result as any).total_cost : undefined;
+            const serverTokens = typeof (result as any).total_input_tokens === "number" && typeof (result as any).total_output_tokens === "number"
+                ? (result as any).total_input_tokens + (result as any).total_output_tokens
+                : undefined;
+            const cost = serverCost ?? (historyState.cost > 0 ? historyState.cost : undefined);
+            const tokens = serverTokens ?? (historyState.tokens > 0 ? historyState.tokens : undefined);
+
+            this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page, cost, tokens }));
         } catch {
             // History is a convenience; the live session still works without it.
             this.loadedHistoryPages.add(key);

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -24,6 +24,7 @@ import {
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
+import { AgentContextPill } from "./composer/AgentContextPill";
 import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
@@ -36,14 +37,24 @@ import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidDialog, SolidDialogBody } from "../../shad-cn-ui/SolidDialog";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
+import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui/SolidTooltip";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
+
+function resolveModelContextLimit(modelId?: string, providerId?: string, declaredLimit?: number): number {
+    if (declaredLimit && declaredLimit > 0) return declaredLimit;
+    const id = (modelId || "").toLowerCase();
+    if (id.includes("gemini-1.5") || id.includes("gemini-2.0") || id.includes("gemini-exp")) return 1_000_000;
+    if (id.includes("claude-3-5") || id.includes("claude-3-7") || id.includes("claude-3-opus") || id.includes("claude-3-sonnet") || id.includes("claude-sonnet") || id.includes("claude-opus")) return 200_000;
+    if (id.includes("gpt-4o") || id.includes("o1") || id.includes("o3")) return 128_000;
+    if (id.includes("deepseek")) return 64_000;
+    return 200_000;
+}
 
 export function formatProviderName(raw?: string): string {
     if (!raw) return "";
     const trimmed = raw.trim();
     const lower = trimmed.toLowerCase();
-    if (lower.includes("native") || lower.includes("solidx")) return "Native";
     if (lower.includes("copilot")) return "Copilot";
     if (lower.includes("droid")) return "Droid";
     if (lower.includes("claude")) return "Claude";
@@ -216,6 +227,10 @@ export function SolidAgentChat({
         if (selectedModel) return isVisionModel(selectedModel);
         return true;
     }, [activeModelInfo, selectedModel]);
+
+    const resolvedContextLimit = useMemo(() => {
+        return resolveModelContextLimit(selectedModel, selectedProvider, activeModelInfo?.context_window);
+    }, [selectedModel, selectedProvider, activeModelInfo]);
 
     // Synchronize reasoning and speed options when model or provider changes
     useEffect(() => {
@@ -598,12 +613,32 @@ export function SolidAgentChat({
     const statusColor = agent.connection === "open" ? (agent.working ? "#eab308" : "#22c55e") : offline ? "#dc2626" : "#94a3b8";
     const statusText =
         agentAuth.status === "signedOut" ? "Sign in required"
-        : agent.connection === "open" ? (agent.working ? "Working…" : "Ready")
         : agent.connection === "connecting" ? "Connecting…"
-        : offline ? "Reconnecting…" : "Idle";
+        : offline ? "Reconnecting…" : "";
 
     const activeProviderObj = providers.find((p) => p.id === selectedProvider);
+    // const providerDisplayName = activeProviderObj?.name || (selectedProvider ? selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1) : "");
     const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
+
+
+    const activeSessionId = agent.historySessionId || agent.sessionId;
+    const isFullScreen = windowMode === "maximized";
+    const displaySessionId = activeSessionId
+        ? (isFullScreen ? activeSessionId : (activeSessionId.length > 12 ? activeSessionId.slice(0, 8) : activeSessionId))
+        : "";
+    const [copiedSession, setCopiedSession] = useState(false);
+    const handleCopySessionId = useCallback(() => {
+        if (!activeSessionId) return;
+        navigator.clipboard?.writeText(activeSessionId).then(() => {
+            setCopiedSession(true);
+            setTimeout(() => setCopiedSession(false), 2000);
+        }).catch(() => {
+            // ignore clipboard failure
+        });
+    }, [activeSessionId]);
+
+
+    // const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
 
     const empty = (
         <div className={styles.empty}>
@@ -698,7 +733,29 @@ export function SolidAgentChat({
                                 {providerDisplayName}
                             </span>
                         )}
-                        <span className={styles.headerStatusText}>{statusText}</span>
+                        {signedIn && activeSessionId && (
+                            <SolidTooltip delayDuration={150}>
+                                <SolidTooltipTrigger asChild>
+                                    <button
+                                        type="button"
+                                        className={styles.headerSessionTag}
+                                        onClick={handleCopySessionId}
+                                        aria-label={`Session ID: ${activeSessionId}. Click to copy`}
+                                    >
+                                        <span className={styles.headerSessionCode}>{displaySessionId}</span>
+                                        {copiedSession ? (
+                                            <Check size={11} className={`${styles.headerSessionIcon} ${styles.headerSessionIconCopied}`} />
+                                        ) : (
+                                            <Copy size={11} className={styles.headerSessionIcon} />
+                                        )}
+                                    </button>
+                                </SolidTooltipTrigger>
+                                <SolidTooltipContent side="bottom" align="start">
+                                    {copiedSession ? "Copied Session ID!" : `Session: ${activeSessionId} (Click to copy)`}
+                                </SolidTooltipContent>
+                            </SolidTooltip>
+                        )}
+                        {statusText && <span className={styles.headerStatusText}>{statusText}</span>}
                     </span>
                 </div>
                 {signedIn && (
@@ -933,6 +990,14 @@ export function SolidAgentChat({
                             onFastToggle={handleFastToggle}
                             onReasoningSelect={handleReasoningChange}
                             onSpeedSelect={handleSpeedChange}
+                        />
+                    }
+                    contextIndicator={
+                        <AgentContextPill
+                            cost={agent.cost}
+                            tokens={agent.tokens}
+                            contextLimit={resolvedContextLimit}
+                            disabled={agent.working}
                         />
                     }
                 />

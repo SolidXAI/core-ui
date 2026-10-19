@@ -261,6 +261,42 @@
   flex-shrink: 0;
   letter-spacing: 0.02em;
 }
+.headerSessionTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--agent-muted);
+  font-family: var(--agent-mono);
+  font-size: 10px;
+  line-height: 1.25;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+.headerSessionTag:hover {
+  background: var(--agent-tint);
+  color: var(--agent-primary);
+}
+.headerSessionPrefix {
+  opacity: 0.6;
+}
+.headerSessionCode {
+  letter-spacing: 0.02em;
+}
+.headerSessionIcon {
+  opacity: 0.6;
+  transition: opacity .15s;
+}
+.headerSessionTag:hover .headerSessionIcon {
+  opacity: 1;
+}
+.headerSessionIconCopied {
+  color: var(--agent-ok, #16a34a);
+}
 .headerStatusText {
   overflow: hidden;
   white-space: nowrap;
@@ -1402,3 +1438,86 @@
 }
 .signInBtn:disabled { opacity: 0.55; cursor: not-allowed; }
 .signInBtn .spinIcon { color: #fff; }
+
+/* ── Context / Usage Circular Pill ──────────────────────────── */
+.contextPillBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--agent-muted);
+  cursor: pointer;
+  transition: background .15s, color .15s, transform .1s;
+}
+.contextPillBtn:hover {
+  background: var(--agent-tint);
+  color: var(--agent-fg);
+}
+.contextPillBtn:focus-visible {
+  outline: 2px solid var(--agent-primary);
+  outline-offset: 1px;
+}
+.contextPillBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.contextPillSvg {
+  display: block;
+}
+.contextCircleTrack {
+  fill: color-mix(in srgb, var(--agent-muted) 6%, transparent);
+  stroke: color-mix(in srgb, var(--agent-muted) 45%, transparent);
+  transition: stroke .15s ease;
+}
+.contextPillBtn:hover .contextCircleTrack {
+  stroke: color-mix(in srgb, var(--agent-muted) 70%, transparent);
+}
+.contextCircleProgress {
+  fill: none;
+  stroke: var(--agent-primary);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s ease, stroke 0.2s ease;
+}
+.progressWarning {
+  stroke: var(--agent-warn, #b45309);
+}
+.progressDanger {
+  stroke: var(--agent-err, #dc2626);
+}
+.contextTooltipContent {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--agent-bg, #ffffff);
+  border: 1px solid var(--agent-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+.contextTooltipCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 130px;
+}
+.contextTooltipRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.contextTooltipLabel {
+  color: var(--agent-muted);
+  font-weight: 500;
+}
+.contextTooltipValue {
+  font-family: var(--agent-mono);
+  font-weight: 600;
+  color: var(--agent-fg);
+  text-align: right;
+}
+
