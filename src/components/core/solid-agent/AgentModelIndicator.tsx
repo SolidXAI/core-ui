@@ -218,9 +218,13 @@ export function AgentModelIndicator({
             Boolean(activeModelInfo?.supports_fast) ||
             SPEED_PROVIDERS.has(activeProvider));
 
-    if (!hasCliModels && !hasAssignments && providers.length <= 1 && !hasReasoningSupport && !hasSpeedSupport) {
-        return null;
-    }
+    const filteredModels = useMemo(() => {
+        if (!searchQuery.trim()) return models;
+        const q = searchQuery.toLowerCase().trim();
+        return models.filter((m) =>
+            (m.name || m.id).toLowerCase().includes(q)
+        );
+    }, [models, searchQuery]);
 
     const activeEffortObj = reasoningEfforts.find((r) => r.id === selectedReasoning);
     const effortName =
@@ -230,13 +234,9 @@ export function AgentModelIndicator({
             ? selectedReasoning
             : "";
 
-    const filteredModels = useMemo(() => {
-        if (!searchQuery.trim()) return models;
-        const q = searchQuery.toLowerCase().trim();
-        return models.filter((m) =>
-            (m.name || m.id).toLowerCase().includes(q)
-        );
-    }, [models, searchQuery]);
+    if (!hasCliModels && !hasAssignments && providers.length <= 1 && !hasReasoningSupport && !hasSpeedSupport) {
+        return null;
+    }
 
     return (
         <div className={styles.composerControlsGroup}>

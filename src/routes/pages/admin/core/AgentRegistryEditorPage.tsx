@@ -378,9 +378,37 @@ export function AgentRegistryEditorPage() {
     void agentResult.refetch(); void skillLinks.refetch(); void toolLinks.refetch();
     if (tab === "jobs") void jobs.refetch();
   };
-  const [testAgentOpen, setTestAgentOpen] = React.useState(false);
+
+  const TEST_AGENT_PREFS_KEY = "solid-agent.test-dialog";
+  const readTestAgentPrefs = (agentId?: string | number): { open: boolean; mode: "docked" | "maximized" } => {
+    try {
+      const raw = localStorage.getItem(`${TEST_AGENT_PREFS_KEY}.${agentId ?? "global"}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return {
+          open: parsed.open === true,
+          mode: parsed.mode === "maximized" ? "maximized" : "docked",
+        };
+      }
+    } catch {
+      // ignore
+    }
+    return { open: false, mode: "docked" };
+  };
+
+  const writeTestAgentPrefs = (agentId: string | number | undefined, prefs: Partial<{ open: boolean; mode: "docked" | "maximized" }>) => {
+    try {
+      const key = `${TEST_AGENT_PREFS_KEY}.${agentId ?? "global"}`;
+      const current = readTestAgentPrefs(agentId);
+      localStorage.setItem(key, JSON.stringify({ ...current, ...prefs }));
+    } catch {
+      // ignore
+    }
+  };
+
+  const [testAgentOpen, setTestAgentOpen] = React.useState(() => readTestAgentPrefs(id).open);
   const [preview, setPreview] = React.useState<{ item: Item; kind: "skill" | "tool" } | null>(null);
-  const [testAgentWindowMode, setTestAgentWindowMode] = React.useState<"docked" | "maximized">("maximized");
+  const [testAgentWindowMode, setTestAgentWindowMode] = React.useState<"docked" | "maximized">(() => readTestAgentPrefs(id).mode);
   const [name, setName] = React.useState("");
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -433,11 +461,21 @@ export function AgentRegistryEditorPage() {
     setSecretEnvVarNames(Object.fromEntries(items(record.agentSecrets).map((link) => [link.secret?.id, link.envVarName ?? link.secret?.key ?? link.secret?.name ?? ""]).filter(([key]) => key)));
   }, [record?.id, response]);
 
+  React.useEffect(() => {
+    if (!record?.id) return;
+    const prefs = readTestAgentPrefs(record.id);
+    if (prefs.open) {
+      setTestAgentOpen(true);
+      if (prefs.mode) setTestAgentWindowMode(prefs.mode);
+    }
+  }, [record?.id]);
+
   const isDirty = Boolean(record?.id) && currentForm() !== baseline.current;
   const requestRefresh = () => isDirty ? setConfirmRefresh(true) : void refetch();
   const openAgentTest = () => {
-    setTestAgentWindowMode("maximized");
+    setTestAgentWindowMode("docked");
     setTestAgentOpen(true);
+    writeTestAgentPrefs(record?.id ?? id, { open: true, mode: "docked" });
   };
 
   React.useEffect(() => {
@@ -710,8 +748,15 @@ export function AgentRegistryEditorPage() {
     </SolidDialog>
     {record?.id && <SolidDialog
       open={testAgentOpen}
-      onOpenChange={setTestAgentOpen}
-      onHide={() => setTestAgentOpen(false)}
+      dismissible={false}
+      onOpenChange={(open) => {
+        setTestAgentOpen(open);
+        writeTestAgentPrefs(record.id, { open });
+      }}
+      onHide={() => {
+        setTestAgentOpen(false);
+        writeTestAgentPrefs(record.id, { open: false });
+      }}
       showHeader={false}
       overlayClassName="agent-editor__test-dialog-overlay"
       ariaLabel={`Test ${record.name ?? "SolidX Agent"}`}
@@ -721,8 +766,14 @@ export function AgentRegistryEditorPage() {
         : { position: "fixed", top: 16, right: 16, bottom: 16, left: "auto", width: "min(28rem, calc(100vw - 32px))", maxWidth: "none", height: "auto", maxHeight: "none", transform: "none", borderRadius: 14, padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}
     >
       <div className="agent-editor__test-dialog-body">
-        <SolidAgentEmbedded agentRuntime="agentHub" agentId={record.id} title={record.name ?? "SolidX Agent"} requiredInputs={parseInputs(record.requiredInputs)} height="100%" className="agent-editor__test-chat"
-          windowControls={{ mode: testAgentWindowMode, onDock: () => setTestAgentWindowMode("docked"), onMaximize: () => setTestAgentWindowMode("maximized"), onRestore: () => setTestAgentWindowMode("docked"), onClose: () => setTestAgentOpen(false) }} />
+        <SolidAgentEmbedded agentRuntime="agentHub" agentId={record.id} agentVersion={record.configVersion} title={record.name ?? "SolidX Agent"} requiredInputs={parseInputs(record.requiredInputs)} height="100%" className="agent-editor__test-chat"
+          windowControls={{
+            mode: testAgentWindowMode,
+            onDock: () => { setTestAgentWindowMode("docked"); writeTestAgentPrefs(record.id, { mode: "docked" }); },
+            onMaximize: () => { setTestAgentWindowMode("maximized"); writeTestAgentPrefs(record.id, { mode: "maximized" }); },
+            onRestore: () => { setTestAgentWindowMode("docked"); writeTestAgentPrefs(record.id, { mode: "docked" }); },
+            onClose: () => { setTestAgentOpen(false); writeTestAgentPrefs(record.id, { open: false }); },
+          }} />
       </div>
     </SolidDialog>}
   </main>;

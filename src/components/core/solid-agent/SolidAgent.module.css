@@ -219,7 +219,24 @@
   border: 2px solid var(--agent-bg);
 }
 .headerTitle { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
+.headerTitleRow { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
 .headerTitle strong { font-size: 14px; }
+.headerVersionTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--agent-fg) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--agent-fg) 14%, transparent);
+  color: var(--agent-muted);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.25;
+  font-family: var(--agent-font-mono, monospace);
+  letter-spacing: -0.2px;
+  flex-shrink: 0;
+  user-select: none;
+}
 .headerSub {
   font-size: 11.5px;
   color: var(--agent-muted);

@@ -39,9 +39,22 @@ import { SolidInput } from "../../shad-cn-ui/SolidInput";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
 
+export function formatProviderName(raw?: string): string {
+    if (!raw) return "";
+    const trimmed = raw.trim();
+    const lower = trimmed.toLowerCase();
+    if (lower.includes("native") || lower.includes("solidx")) return "Native";
+    if (lower.includes("copilot")) return "Copilot";
+    if (lower.includes("droid")) return "Droid";
+    if (lower.includes("claude")) return "Claude";
+    return trimmed;
+}
+
 type Props = {
     agentUrl: string;
     title?: string;
+    /** AgentHub configuration version to display in the header. */
+    agentVersion?: number;
     /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
     agentRuntime?: AgentRuntimeType;
     inputContext?: AgentInputContext;
@@ -130,6 +143,7 @@ function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<stri
 export function SolidAgentChat({
     agentUrl,
     title = "SolidX Agent",
+    agentVersion,
     agentRuntime = "solidx",
     inputContext = {},
     inputs,
@@ -153,21 +167,35 @@ export function SolidAgentChat({
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
+    const [agentConfigVersion, setAgentConfigVersion] = useState<number | null>(() => agentVersion ?? null);
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
-    const [providers, setProviders] = useState<AgentProviderInfo[]>(() => getCachedAgentProviders(agentUrl));
-    const [loadingProviders, setLoadingProviders] = useState<boolean>(() => getCachedAgentProviders(agentUrl).length === 0);
-    const [selectedProvider, setSelectedProvider] = useState<string>(() => getStoredProvider());
+    const [providers, setProviders] = useState<AgentProviderInfo[]>(() => {
+        if (agentRuntime === "agentHub") {
+            return [{ id: "solidx", name: "Native", installed: true, version: "" }];
+        }
+        return getCachedAgentProviders(agentUrl);
+    });
+    const [loadingProviders, setLoadingProviders] = useState<boolean>(() => {
+        if (agentRuntime === "agentHub") return false;
+        return getCachedAgentProviders(agentUrl).length === 0;
+    });
+    const [selectedProvider, setSelectedProvider] = useState<string>(() => (agentRuntime === "agentHub" ? "solidx" : getStoredProvider()));
     const [models, setModels] = useState<ProviderModelInfo[]>(() => {
+        if (agentRuntime === "agentHub") return [];
         const cached = getCachedProviderModels(agentUrl, getStoredProvider());
         return cached?.models || [];
     });
-    const [selectedModel, setSelectedModel] = useState<string>(() => getStoredModel(getStoredProvider()) || "");
+    const [selectedModel, setSelectedModel] = useState<string>(() => (agentRuntime === "agentHub" ? "" : getStoredModel(getStoredProvider()) || ""));
     const [isThinking, setIsThinking] = useState<boolean>(() => getStoredThinking(getStoredProvider()));
     const [selectedReasoning, setSelectedReasoning] = useState<string>(() => getStoredReasoning(getStoredProvider()) || "");
     const [isFast, setIsFast] = useState<boolean>(() => getStoredFast(getStoredProvider()));
     const [selectedSpeed, setSelectedSpeed] = useState<string>(() => getStoredSpeed(getStoredProvider()) || "standard");
     const [showProviderMenu, setShowProviderMenu] = useState(false);
     const providerMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (agentVersion != null) setAgentConfigVersion(agentVersion);
+    }, [agentVersion]);
     const [collectedInputs, setCollectedInputs] = useState<Record<string, unknown> | null>(null);
     const [rawInputValues, setRawInputValues] = useState<Record<string, string>>({});
     const [inputError, setInputError] = useState("");
@@ -248,6 +276,12 @@ export function SolidAgentChat({
     }, [agentUrl, signedIn]);
 
     useEffect(() => {
+        if (agentRuntime === "agentHub") {
+            setProviders([{ id: "solidx", name: "Native", installed: true, version: "" }]);
+            setSelectedProvider("solidx");
+            setLoadingProviders(false);
+            return;
+        }
         let alive = true;
         if (providers.length === 0) {
             setLoadingProviders(true);
@@ -269,10 +303,10 @@ export function SolidAgentChat({
             if (alive) setLoadingProviders(false);
         });
         return () => { alive = false; };
-    }, [agentUrl, signedIn]);
+    }, [agentRuntime, agentUrl, signedIn]);
 
     useEffect(() => {
-        if (!selectedProvider) return;
+        if (!selectedProvider || agentRuntime === "agentHub") return;
         let alive = true;
         fetchProviderModels(agentUrl, selectedProvider).then((res) => {
             if (!alive) return;
@@ -288,7 +322,7 @@ export function SolidAgentChat({
             }
         });
         return () => { alive = false; };
-    }, [agentUrl, signedIn, selectedProvider]);
+    }, [agentRuntime, agentUrl, signedIn, selectedProvider]);
 
     useEffect(() => {
         if (!showProviderMenu) return;
@@ -485,7 +519,14 @@ export function SolidAgentChat({
         const refreshConfigStatus = async () => {
             try {
                 const status = await fetchAgentConfigVersionStatus(agentUrl);
-                if (alive && status) setStaleAgentConfig(status.stale);
+                if (alive && status) {
+                    setStaleAgentConfig(status.stale);
+                    if (typeof status.processConfigVersion === "number") {
+                        setAgentConfigVersion(status.processConfigVersion);
+                    } else if (typeof status.latestConfigVersion === "number") {
+                        setAgentConfigVersion(status.latestConfigVersion);
+                    }
+                }
             } catch {
                 // Keep the last known status when the agent is temporarily unreachable.
             }
@@ -562,9 +603,7 @@ export function SolidAgentChat({
         : offline ? "Reconnecting…" : "Idle";
 
     const activeProviderObj = providers.find((p) => p.id === selectedProvider);
-    const providerDisplayName = activeProviderObj?.name || (selectedProvider ? selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1) : "");
-
-
+    const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
 
     const empty = (
         <div className={styles.empty}>
@@ -574,7 +613,7 @@ export function SolidAgentChat({
                 <p className={styles.emptyText}>{agentRuntime === "agentHub"
                     ? "Ask this agent for help with its configured capabilities. It can use the tools and knowledge available to it."
                     : "Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you."}</p>
-                {providerDisplayName && (
+                {agentRuntime !== "agentHub" && providerDisplayName && (
                     <div className={styles.emptyProviderBadge}>
                         Using <strong>{providerDisplayName}</strong>
                     </div>
@@ -645,9 +684,16 @@ export function SolidAgentChat({
                     <span className={styles.statusDot} style={{ background: statusColor }} />
                 </div>
                 <div className={styles.headerTitle}>
-                    <strong>{title}</strong>
+                    <div className={styles.headerTitleRow}>
+                        <strong>{title}</strong>
+                        {agentRuntime === "agentHub" && agentConfigVersion != null && (
+                            <span className={styles.headerVersionTag} title={`Agent Version: v${agentConfigVersion}`}>
+                                v{agentConfigVersion}
+                            </span>
+                        )}
+                    </div>
                     <span className={styles.headerSub}>
-                        {signedIn && providerDisplayName && (
+                        {agentRuntime !== "agentHub" && signedIn && providerDisplayName && (
                             <span className={styles.headerProviderTag} title={`Active Provider: ${providerDisplayName}`}>
                                 {providerDisplayName}
                             </span>
@@ -657,66 +703,79 @@ export function SolidAgentChat({
                 </div>
                 {signedIn && (
                     <>
-                        <div className={styles.newChatSplit} ref={providerMenuRef}>
+                        {agentRuntime === "agentHub" || providers.length <= 1 ? (
                             <button
                                 type="button"
-                                className={styles.splitActionBtn}
-                                title={`New chat (${providers.find((p) => p.id === selectedProvider)?.name || "SolidX"})`}
+                                className={styles.iconBtn}
+                                title="New chat"
                                 aria-label="New chat"
                                 disabled={agent.working}
                                 onClick={handleStartNewChat}
                             >
-                                <Plus size={15} />
+                                <Plus size={16} />
                             </button>
-                            <span className={styles.splitDivider} />
-                            <button
-                                type="button"
-                                className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
-                                title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
-                                aria-label="Select AI execution provider"
-                                aria-expanded={showProviderMenu}
-                                disabled={agent.working}
-                                onClick={() => setShowProviderMenu((prev) => !prev)}
-                            >
-                                {loadingProviders ? (
-                                    <Loader2 size={12} className={styles.spinIcon} />
-                                ) : (
-                                    <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
-                                )}
-                            </button>
-                            {showProviderMenu && (
-                                <div className={styles.providerDropdown} role="menu">
-                                    <div className={styles.providerDropdownHeader}>
-                                        <strong>Select AI Provider</strong>
-                                    </div>
+                        ) : (
+                            <div className={styles.newChatSplit} ref={providerMenuRef}>
+                                <button
+                                    type="button"
+                                    className={styles.splitActionBtn}
+                                    title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
+                                    aria-label="New chat"
+                                    disabled={agent.working}
+                                    onClick={handleStartNewChat}
+                                >
+                                    <Plus size={15} />
+                                </button>
+                                <span className={styles.splitDivider} />
+                                <button
+                                    type="button"
+                                    className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
+                                    title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                    aria-label="Select AI execution provider"
+                                    aria-expanded={showProviderMenu}
+                                    disabled={agent.working}
+                                    onClick={() => setShowProviderMenu((prev) => !prev)}
+                                >
                                     {loadingProviders ? (
-                                        <div className={styles.providerLoadingItem}>
-                                            <Loader2 size={13} className={styles.spinIcon} />
-                                            <span>Loading providers...</span>
-                                        </div>
+                                        <Loader2 size={12} className={styles.spinIcon} />
                                     ) : (
-                                        <div className={styles.providerList}>
-                                            {providers.map((p) => {
-                                                const isSelected = p.id === selectedProvider;
-                                                return (
-                                                    <button
-                                                        key={p.id}
-                                                        type="button"
-                                                        className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
-                                                        onClick={() => handleSelectProvider(p.id)}
-                                                    >
-                                                        <div className={styles.providerItemMeta}>
-                                                            <span className={styles.providerItemName}>{p.name}</span>
-                                                        </div>
-                                                        {isSelected && <Check size={14} className={styles.providerCheck} />}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
+                                        <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
                                     )}
-                                </div>
-                            )}
-                        </div>
+                                </button>
+                                {showProviderMenu && (
+                                    <div className={styles.providerDropdown} role="menu">
+                                        <div className={styles.providerDropdownHeader}>
+                                            <strong>Select AI Provider</strong>
+                                        </div>
+                                        {loadingProviders ? (
+                                            <div className={styles.providerLoadingItem}>
+                                                <Loader2 size={13} className={styles.spinIcon} />
+                                                <span>Loading providers...</span>
+                                            </div>
+                                        ) : (
+                                            <div className={styles.providerList}>
+                                                {providers.map((p) => {
+                                                    const isSelected = p.id === selectedProvider;
+                                                    return (
+                                                        <button
+                                                            key={p.id}
+                                                            type="button"
+                                                            className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
+                                                            onClick={() => handleSelectProvider(p.id)}
+                                                        >
+                                                            <div className={styles.providerItemMeta}>
+                                                                <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
+                                                            </div>
+                                                            {isSelected && <Check size={14} className={styles.providerCheck} />}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <button
                             type="button"
                             className={styles.iconBtn}
