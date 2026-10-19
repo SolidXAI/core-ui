@@ -307,16 +307,41 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             }
             const costVal = eventData.total_cost ?? eventData.cost ?? frame.total_cost ?? frame.cost;
             if (typeof costVal === "number") state.cost = costVal;
-            const tokensVal = eventData.total_tokens ?? frame.total_tokens ?? (
-                (eventData.input_tokens != null && eventData.output_tokens != null)
-                    ? eventData.input_tokens + eventData.output_tokens
+            let inTok = eventData.input_tokens ?? frame.input_tokens;
+            let outTok = eventData.output_tokens ?? frame.output_tokens;
+            let totTok = eventData.total_tokens ?? frame.total_tokens ?? (
+                (inTok != null && outTok != null)
+                    ? inTok + outTok
                     : undefined
             );
-            if (typeof tokensVal === "number") state.tokens = tokensVal;
-            if (typeof eventData.input_tokens === "number") state.inputTokens = eventData.input_tokens;
-            if (typeof eventData.output_tokens === "number") state.outputTokens = eventData.output_tokens;
+
+            // Defensive self-healing for legacy sessions:
+            // In a valid single turn, prompt input_tokens is always <= turn_tokens / total_tokens.
+            // If input_tokens > total_tokens (and total_tokens > 0), the payload carried
+            // cumulative session input under input_tokens and single-turn tokens under total_tokens.
+            if (typeof inTok === "number" && typeof totTok === "number" && totTok > 0 && inTok > totTok) {
+                const turnTokens = typeof eventData.turn_tokens === "number" ? eventData.turn_tokens : totTok;
+                if (typeof outTok === "number" && turnTokens >= outTok) {
+                    inTok = turnTokens - outTok;
+                } else {
+                    inTok = turnTokens;
+                }
+            }
+
+            if (typeof totTok === "number") state.tokens = totTok;
+            if (typeof inTok === "number") state.inputTokens = inTok;
+            if (typeof outTok === "number") state.outputTokens = outTok;
             endTurn(state);
             state.turnStreamed = true;
+            break;
+        }
+
+        case "LlmRawResponse":
+        case "llm_raw_response": {
+            const inTok = eventData.input_tokens ?? frame.input_tokens;
+            const outTok = eventData.output_tokens ?? frame.output_tokens;
+            if (typeof inTok === "number") state.inputTokens = inTok;
+            if (typeof outTok === "number") state.outputTokens = outTok;
             break;
         }
 

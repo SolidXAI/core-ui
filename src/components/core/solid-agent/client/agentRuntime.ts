@@ -304,8 +304,18 @@ export class AgentRuntime {
                 : undefined;
             const cost = serverCost ?? (historyState.cost > 0 ? historyState.cost : undefined);
             const tokens = serverTokens ?? (historyState.tokens > 0 ? historyState.tokens : undefined);
+            const inputTokens = historyState.inputTokens > 0
+                ? historyState.inputTokens
+                : typeof (result as any).total_input_tokens === "number"
+                    ? (result as any).total_input_tokens
+                    : undefined;
+            const outputTokens = historyState.outputTokens > 0
+                ? historyState.outputTokens
+                : typeof (result as any).total_output_tokens === "number"
+                    ? (result as any).total_output_tokens
+                    : undefined;
 
-            this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page, cost, tokens }));
+            this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page, cost, tokens, inputTokens, outputTokens }));
         } catch {
             // History is a convenience; the live session still works without it.
             this.loadedHistoryPages.add(key);

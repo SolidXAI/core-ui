@@ -1466,12 +1466,12 @@
   display: block;
 }
 .contextCircleTrack {
-  fill: color-mix(in srgb, var(--agent-muted) 6%, transparent);
-  stroke: color-mix(in srgb, var(--agent-muted) 45%, transparent);
+  fill: color-mix(in srgb, var(--agent-muted) 8%, transparent);
+  stroke: color-mix(in srgb, var(--agent-muted) 60%, transparent);
   transition: stroke .15s ease;
 }
 .contextPillBtn:hover .contextCircleTrack {
-  stroke: color-mix(in srgb, var(--agent-muted) 70%, transparent);
+  stroke: color-mix(in srgb, var(--agent-muted) 85%, transparent);
 }
 .contextCircleProgress {
   fill: none;
@@ -1497,7 +1497,16 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  width: 130px;
+  min-width: 165px;
+}
+.contextTooltipWarn {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--agent-border);
+  font-size: 11px;
+  color: var(--agent-warn, #b45309);
+  line-height: 1.35;
+  font-weight: 500;
 }
 .contextTooltipRow {
   display: flex;

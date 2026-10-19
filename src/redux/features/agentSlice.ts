@@ -91,14 +91,16 @@ const agentSlice = createSlice({
         agentThreadReset(state) {
             Object.assign(state, createThreadState(), { commands: state.commands, hasMoreHistory: false, historyPage: 1 });
         },
-        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; cost?: number; tokens?: number }>) {
-            const { items, hasMore, page, cost, tokens } = action.payload;
+        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; cost?: number; tokens?: number; inputTokens?: number; outputTokens?: number }>) {
+            const { items, hasMore, page, cost, tokens, inputTokens, outputTokens } = action.payload;
             // History is always older than anything already in the thread.
             state.items = [...items, ...state.items];
             state.hasMoreHistory = hasMore;
             state.historyPage = page;
             if (typeof cost === "number") state.cost = cost;
             if (typeof tokens === "number") state.tokens = tokens;
+            if (typeof inputTokens === "number") state.inputTokens = inputTokens;
+            if (typeof outputTokens === "number") state.outputTokens = outputTokens;
         },
         agentEventReceived(state, action: PayloadAction<AgentChatEvent>) {
             applyAgentEvent(state, action.payload);

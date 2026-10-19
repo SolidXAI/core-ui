@@ -44,10 +44,28 @@ import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
 function resolveModelContextLimit(modelId?: string, providerId?: string, declaredLimit?: number): number {
     if (declaredLimit && declaredLimit > 0) return declaredLimit;
     const id = (modelId || "").toLowerCase();
-    if (id.includes("gemini-1.5") || id.includes("gemini-2.0") || id.includes("gemini-exp")) return 1_000_000;
-    if (id.includes("claude-3-5") || id.includes("claude-3-7") || id.includes("claude-3-opus") || id.includes("claude-3-sonnet") || id.includes("claude-sonnet") || id.includes("claude-opus")) return 200_000;
-    if (id.includes("gpt-4o") || id.includes("o1") || id.includes("o3")) return 128_000;
+    const prov = (providerId || "").toLowerCase();
+
+    // 1. Gemini / Antigravity long-context models
+    if (id.includes("gemini") || prov.includes("antigravity")) {
+        if (id.includes("1.5-pro") || id.includes("-pro")) return 2_000_000;
+        return 1_000_000;
+    }
+
+    // 2. Codex models (gpt-5.6-sol, gpt-6-astra, luna, terra, etc.)
+    if (prov.includes("codex") || id.includes("gpt-5") || id.includes("gpt-6") || id.includes("astra") || id.includes("sol") || id.includes("luna") || id.includes("terra")) {
+        return 272_000;
+    }
+
+    // 3. Claude models
+    if (id.includes("claude")) return 200_000;
+
+    // 4. OpenAI standard models
+    if (id.includes("o1") || id.includes("o3") || id.includes("o4") || id.includes("gpt-4o")) return 128_000;
+
+    // 5. DeepSeek models
     if (id.includes("deepseek")) return 64_000;
+
     return 200_000;
 }
 
@@ -996,7 +1014,8 @@ export function SolidAgentChat({
                     contextIndicator={
                         <AgentContextPill
                             cost={agent.cost}
-                            tokens={agent.tokens}
+                            contextTokens={agent.inputTokens}
+                            totalTokens={agent.tokens}
                             contextLimit={resolvedContextLimit}
                             disabled={agent.working}
                         />
