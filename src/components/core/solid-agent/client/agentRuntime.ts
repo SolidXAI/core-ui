@@ -182,10 +182,6 @@ export class AgentRuntime {
     updateStore(dispatch: Dispatch, getState: GetAgentState) {
         this.dispatch = dispatch;
         this.getState = getState;
-        const state = getState();
-        if (state && state.items.length === 0 && this.historySessionId) {
-            void this.loadHistory(this.historySessionId, 1);
-        }
     }
 
     /**
@@ -294,15 +290,16 @@ export class AgentRuntime {
         this.loadingHistoryPages.set(key, generation);
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
+            this.loadedHistoryPages.add(key);
             if (!result) return;
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
             const rawItems = historyToItems(result.messages ?? []);
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
             if (generation !== this.historyGeneration || this.getState()?.historySessionId !== historySessionId) return;
             this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page }));
-            this.loadedHistoryPages.add(key);
         } catch {
             // History is a convenience; the live session still works without it.
+            this.loadedHistoryPages.add(key);
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
         }

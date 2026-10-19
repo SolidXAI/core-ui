@@ -174,7 +174,7 @@ export function SolidAgentChat({
     useEffect(() => {
         setRawInputValues(Object.fromEntries(requiredInputs.map((field) => [field.name,
             field.defaultValue === null || field.defaultValue === undefined ? "" : typeof field.defaultValue === "string" ? field.defaultValue : JSON.stringify(field.defaultValue)])));
-    }, [requiredInputs]);
+    }, []);
     const shouldPromptForInputs = !externalEmbed && agentRuntime === "agentHub" && signedIn
         && requiredInputs.length > 0 && inputs === undefined && collectedInputs === null;
     const messageInputs = inputs ?? collectedInputs ?? undefined;
