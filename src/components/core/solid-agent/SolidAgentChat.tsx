@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -11,6 +11,8 @@ import {
     fetchSessionList,
     getCachedAgentProviders,
     getCachedProviderModels,
+    getStoredSessionTitles,
+    renameSession,
     type AgentSessionSummary,
 } from "./client/agentRest";
 import {
@@ -194,6 +196,9 @@ export function SolidAgentChat({
 
     const [showHistory, setShowHistory] = useState(false);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
+    const [historySearchQuery, setHistorySearchQuery] = useState("");
+    const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+    const [editingTitle, setEditingTitle] = useState("");
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
     const [agentConfigVersion, setAgentConfigVersion] = useState<number | null>(() => agentVersion ?? null);
@@ -469,7 +474,43 @@ export function SolidAgentChat({
             speed: nextSpeed,
         });
         setShowHistory(false);
+        setHistorySearchQuery("");
+        setEditingSessionId(null);
     };
+
+    const handleSaveRename = async (sessionId: string, newTitle: string) => {
+        const trimmed = newTitle.trim();
+        if (!trimmed) {
+            setEditingSessionId(null);
+            return;
+        }
+        setSessions((prev) =>
+            prev.map((s) => (s.session_id === sessionId ? { ...s, title: trimmed } : s))
+        );
+        setEditingSessionId(null);
+        await renameSession(agentUrl, sessionId, trimmed);
+    };
+
+    const filteredSessions = useMemo(() => {
+        const rawQ = historySearchQuery.trim().toLowerCase();
+        if (!rawQ) return sessions;
+        const cleanQ = rawQ.replace(/^(session[-_:]?|id[:=]?|#)/i, "").trim() || rawQ;
+        return sessions.filter((s) => {
+            const title = (s.title || s.preview || "").toLowerCase();
+            const sessionId = (s.session_id || "").toLowerCase();
+            const provider = (s.provider || "").toLowerCase();
+            const model = (s.model || "").toLowerCase();
+            const dateStr = s.created_at ? formatDate(s.created_at).toLowerCase() : "";
+            return (
+                title.includes(rawQ) ||
+                sessionId.includes(rawQ) ||
+                sessionId.includes(cleanQ) ||
+                provider.includes(rawQ) ||
+                model.includes(rawQ) ||
+                dateStr.includes(rawQ)
+            );
+        });
+    }, [sessions, historySearchQuery]);
 
     const handleModelChange = (modelId: string) => {
         setSelectedModel(modelId);
@@ -585,7 +626,15 @@ export function SolidAgentChat({
     useEffect(() => {
         if (!showHistory || !signedIn) return;
         let alive = true;
-        fetchSessionList(agentUrl).then((list) => alive && setSessions(list ?? []));
+        fetchSessionList(agentUrl).then((list) => {
+            if (!alive) return;
+            const storedTitles = getStoredSessionTitles(agentUrl);
+            const enriched = (list ?? []).map((s) => ({
+                ...s,
+                title: storedTitles[s.session_id] || s.title || s.preview || "New conversation",
+            }));
+            setSessions(enriched);
+        });
         return () => {
             alive = false;
         };
@@ -858,7 +907,15 @@ export function SolidAgentChat({
                             title="History"
                             aria-label="Chat history"
                             aria-pressed={showHistory}
-                            onClick={() => setShowHistory((v) => !v)}
+                            onClick={() => {
+                                setShowHistory((v) => {
+                                    if (!v) {
+                                        setHistorySearchQuery("");
+                                        setEditingSessionId(null);
+                                    }
+                                    return !v;
+                                });
+                            }}
                         >
                             <History size={16} />
                         </button>
@@ -867,7 +924,12 @@ export function SolidAgentChat({
                             className={styles.iconBtn}
                             title={signedInAs ? `Sign out of the agent (${String(signedInAs)})` : "Sign out of the agent"}
                             aria-label="Sign out of the agent"
-                            onClick={() => { setShowHistory(false); void signOutOfAgent(agentUrl); }}
+                            onClick={() => {
+                                setShowHistory(false);
+                                setHistorySearchQuery("");
+                                setEditingSessionId(null);
+                                void signOutOfAgent(agentUrl);
+                            }}
                         >
                             <LogOut size={15} />
                         </button>}
@@ -933,39 +995,130 @@ export function SolidAgentChat({
 
                 {showHistory ? (
                     <div className={styles.historyPanel} aria-label="Past conversations">
+                        {sessions.length > 0 && (
+                            <div className={styles.historySearchBox}>
+                                <Search size={13} className={styles.historySearchIcon} />
+                                <input
+                                    type="text"
+                                    className={styles.historySearchInput}
+                                    placeholder="Search by title, message, or session ID…"
+                                    value={historySearchQuery}
+                                    onChange={(e) => setHistorySearchQuery(e.target.value)}
+                                    aria-label="Search past conversations"
+                                />
+                                {historySearchQuery && (
+                                    <button
+                                        type="button"
+                                        className={styles.historySearchClear}
+                                        onClick={() => setHistorySearchQuery("")}
+                                        title="Clear search"
+                                        aria-label="Clear search"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        )}
                         {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
-                        {sessions.map((session) => (
-                            <div key={session.session_id} style={{ display: "flex", alignItems: "center" }}>
-                                <button
-                                    type="button"
-                                    className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
-                                    onClick={() => void handleResumeSession(session)}
-                                >
-                                    <span className={styles.historyPreview}>{session.preview || "New conversation"}</span>
-                                    {session.provider && (
-                                        <span
-                                            className={styles.providerBadge}
-                                            title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
+                        {sessions.length > 0 && filteredSessions.length === 0 && (
+                            <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
+                        )}
+                        {filteredSessions.map((session) => (
+                            <div key={session.session_id} className={styles.historyRow}>
+                                {editingSessionId === session.session_id ? (
+                                    <form
+                                        className={styles.historyRenameForm}
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            void handleSaveRename(session.session_id, editingTitle);
+                                        }}
+                                    >
+                                        <input
+                                            type="text"
+                                            className={styles.historyRenameInput}
+                                            value={editingTitle}
+                                            onChange={(e) => setEditingTitle(e.target.value)}
+                                            autoFocus
+                                            onFocus={(e) => e.target.select()}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Escape") {
+                                                    e.stopPropagation();
+                                                    setEditingSessionId(null);
+                                                }
+                                            }}
+                                            aria-label="Rename conversation"
+                                        />
+                                        <button
+                                            type="submit"
+                                            className={styles.iconBtn}
+                                            aria-label="Save title"
+                                            title="Save"
                                         >
-                                            {getProviderBadgeLabel(session.provider)}
-                                        </span>
-                                    )}
-                                    <span className={styles.historyDate}>{formatDate(session.created_at)}</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    className={styles.iconBtn}
-                                    aria-label="Delete conversation"
-                                    title="Delete"
-                                    onClick={async () => {
-                                        if (!window.confirm("Delete this conversation?")) return;
-                                        await deleteSession(agentUrl, session.session_id);
-                                        setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
-                                        if (session.session_id === agent.historySessionId) runtime?.newChat();
-                                    }}
-                                >
-                                    <Trash2 size={14} />
-                                </button>
+                                            <Check size={14} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.iconBtn}
+                                            aria-label="Cancel rename"
+                                            title="Cancel"
+                                            onClick={() => setEditingSessionId(null)}
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
+                                            onClick={() => void handleResumeSession(session)}
+                                            title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
+                                        >
+                                            <span className={styles.historyPreview}>
+                                                {session.title || session.preview || "New conversation"}
+                                            </span>
+                                            {session.provider && (
+                                                <span
+                                                    className={styles.providerBadge}
+                                                    title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
+                                                >
+                                                    {getProviderBadgeLabel(session.provider)}
+                                                </span>
+                                            )}
+                                            <span className={styles.historyDate}>{formatDate(session.created_at)}</span>
+                                        </button>
+                                        <div className={styles.historyActions}>
+                                            <button
+                                                type="button"
+                                                className={styles.iconBtn}
+                                                aria-label="Rename conversation"
+                                                title="Rename"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setEditingSessionId(session.session_id);
+                                                    setEditingTitle(session.title || session.preview || "New conversation");
+                                                }}
+                                            >
+                                                <Pencil size={13} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className={styles.iconBtn}
+                                                aria-label="Delete conversation"
+                                                title="Delete"
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    if (!window.confirm("Delete this conversation?")) return;
+                                                    await deleteSession(agentUrl, session.session_id);
+                                                    setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
+                                                    if (session.session_id === agent.historySessionId) runtime?.newChat();
+                                                }}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         ))}
                     </div>

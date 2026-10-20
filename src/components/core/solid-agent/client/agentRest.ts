@@ -9,6 +9,7 @@ export type AgentSessionSummary = {
     totalSteps: number;
     created_at: string | null;
     preview: string;
+    title?: string;
     provider?: string;
     model?: string;
     runtime?: AgentRuntimeType;
@@ -171,7 +172,63 @@ export async function fetchProviderModels(agentUrl: string, providerId: string):
     }
 }
 
+const SESSION_TITLES_STORAGE_KEY = "solid-agent.session-titles";
+
+export function getStoredSessionTitles(agentUrl: string): Record<string, string> {
+    try {
+        const raw = localStorage.getItem(`${SESSION_TITLES_STORAGE_KEY}.${agentUrl}`);
+        if (!raw) return {};
+        const parsed = JSON.parse(raw);
+        return typeof parsed === "object" && parsed !== null ? parsed : {};
+    } catch {
+        return {};
+    }
+}
+
+export function setStoredSessionTitle(agentUrl: string, sessionId: string, title: string): void {
+    try {
+        const titles = getStoredSessionTitles(agentUrl);
+        const trimmed = title.trim();
+        if (trimmed) {
+            titles[sessionId] = trimmed;
+        } else {
+            delete titles[sessionId];
+        }
+        localStorage.setItem(`${SESSION_TITLES_STORAGE_KEY}.${agentUrl}`, JSON.stringify(titles));
+    } catch {
+        // ignore storage errors
+    }
+}
+
+export async function renameSession(agentUrl: string, sessionId: string, title: string): Promise<boolean> {
+    const trimmed = title.trim();
+    setStoredSessionTitle(agentUrl, sessionId, trimmed);
+    try {
+        const res = await agentFetch<{ status: string; title: string }>(
+            agentUrl,
+            `/api/agent/sessions/${encodeURIComponent(sessionId)}`,
+            {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: trimmed }),
+            }
+        );
+        return !!res;
+    } catch {
+        return false;
+    }
+}
+
 export function deleteSession(agentUrl: string, sessionId: string) {
+    try {
+        const titles = getStoredSessionTitles(agentUrl);
+        if (sessionId in titles) {
+            delete titles[sessionId];
+            localStorage.setItem(`${SESSION_TITLES_STORAGE_KEY}.${agentUrl}`, JSON.stringify(titles));
+        }
+    } catch {
+        // ignore
+    }
     return agentFetch<unknown>(agentUrl, `/api/agent/sessions/${encodeURIComponent(sessionId)}`, { method: "DELETE" });
 }
 
