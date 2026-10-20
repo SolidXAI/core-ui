@@ -21,6 +21,7 @@ import { WorkflowDefinitionEditorPage } from "./pages/admin/core/WorkflowDefinit
 import { AgentSkillRegistryEditorPage } from "./pages/admin/core/AgentSkillRegistryEditorPage";
 import { AgentToolRegistryEditorPage } from "./pages/admin/core/AgentToolRegistryEditorPage";
 import { AgentRegistryEditorPage } from "./pages/admin/core/AgentRegistryEditorPage";
+import { AgentConfigComparisonPage } from "./pages/admin/core/AgentConfigComparisonPage";
 import { WorkflowExecutionDetailPage } from "./pages/admin/core/WorkflowExecutionDetailPage";
 import { MediaUploadPage } from "./pages/admin/core/MediaUploadPage";
 import { ArchivedChatterMessagesPage } from "./pages/admin/core/ArchivedChatterMessagesPage";
@@ -104,6 +105,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/solid-core/agent-skill-registry/editor/:id", element: <AgentSkillRegistryEditorPage />, handle: { title: "Agent Skill Registry Editor", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/agent-tool-registry/editor/:id", element: <AgentToolRegistryEditorPage />, handle: { title: "Agent Tool Registry Editor", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/agent-registry/editor/:id", element: <AgentRegistryEditorPage />, handle: { title: "Agent Registry Editor", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/agent-registry/editor/compare-config", element: <AgentConfigComparisonPage />, handle: { title: "Compare Agent Config Versions", manageDocumentMeta: true } },
     { path: "/admin/core/settings", element: pick("settings", <SettingsPage />), handle: { title: "Settings", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/datasources", element: <DatasourcesPage />, handle: { title: "Datasources", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/modules/:moduleId/datasource-introspection", element: <DatasourceIntrospectionPage />, handle: { title: "Datasource Introspection", manageDocumentMeta: true } },

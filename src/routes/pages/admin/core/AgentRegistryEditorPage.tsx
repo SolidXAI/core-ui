@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, GitBranch, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { solidPost } from "../../../../http/solidHttp";
 import { useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
@@ -9,6 +9,7 @@ import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentPersonaHistory } from "./AgentPersonaHistory";
+import { AgentConfigVersionsPanel } from "./AgentConfigVersionsPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
 import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
 import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
@@ -80,6 +81,9 @@ function buildModelOptions(
 }
 
 const OTHER_MODEL = "__other_model__";
+const ACTIVATION_WAIT_MS = 10_000;
+const activationWaitKey = (agentId: number | string) => `agent-activation-wait:${agentId}`;
+const savedActivationReadyAt = (agentId: number | string) => Number(sessionStorage.getItem(activationWaitKey(agentId))) || null;
 
 function SearchableSelect({ value, options, placeholder, disabled, onChange }: {
   value: string;
@@ -338,6 +342,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
 
 export function AgentRegistryEditorPage() {
   const { id = "new" } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const agentResult = entityApi.useGetSolidEntityByIdQuery({ id, qs: detailQuery }, { skip: id === "new" });
@@ -375,7 +380,7 @@ export function AgentRegistryEditorPage() {
   const [deleteSecretLink] = agentSecretApi.useDeleteSolidEntityMutation();
   const [updateSecretLink] = agentSecretApi.useUpdateSolidEntityMutation();
   const record = recordFrom(response) as Agent | undefined;
-  const [tab, setTab] = React.useState("basics");
+  const [tab, setTab] = React.useState(searchParams.get("tab") === "config-versions" ? "config-versions" : "basics");
   const jobs = jobApi.useGetSolidEntitiesQuery(
     `offset=0&limit=1000&filters[agent][id][$eq]=${encodeURIComponent(id)}&${fieldsQuery(["id", "status"])}`,
     { skip: id === "new" || tab !== "jobs" });
@@ -418,7 +423,34 @@ export function AgentRegistryEditorPage() {
   const [versionName, setVersionName] = React.useState("");
   const [versionDescription, setVersionDescription] = React.useState("");
   const [activating, setActivating] = React.useState(false);
+  const [activationReadyAt, setActivationReadyAt] = React.useState<number | null>(() => id === "new" ? null : savedActivationReadyAt(id));
+  const [countdownNow, setCountdownNow] = React.useState(Date.now());
   const baseline = React.useRef("");
+
+  React.useEffect(() => {
+    if (id === "new") {
+      setActivationReadyAt(null);
+      return;
+    }
+    const readyAt = savedActivationReadyAt(id);
+    setActivationReadyAt(readyAt !== null && readyAt > Date.now() ? readyAt : null);
+    if (readyAt !== null && readyAt <= Date.now()) sessionStorage.removeItem(activationWaitKey(id));
+  }, [id]);
+
+  React.useEffect(() => {
+    if (!activationReadyAt) return;
+    const tick = () => {
+      const now = Date.now();
+      setCountdownNow(now);
+      if (now >= activationReadyAt) {
+        sessionStorage.removeItem(activationWaitKey(id));
+        setActivationReadyAt(null);
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 100);
+    return () => window.clearInterval(timer);
+  }, [activationReadyAt, id]);
 
   const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
     stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
@@ -501,6 +533,7 @@ export function AgentRegistryEditorPage() {
   };
 
   const save = async (nextStatus?: "draft" | "active" | "disabled", versionDetails: { name?: string; description?: string } = {}): Promise<boolean> => {
+    if (nextStatus === "active" && activationReadyAt && Date.now() < activationReadyAt) return false;
     if (creatingTag) return false;
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Name is required.";
@@ -557,6 +590,15 @@ export function AgentRegistryEditorPage() {
         activationAttempted = true;
         await solidPost(`/agent-registry/${savedId}/activate`, versionDetails);
       }
+      if (!nextStatus || nextStatus === "draft") {
+        const readyAt = Date.now() + ACTIVATION_WAIT_MS;
+        sessionStorage.setItem(activationWaitKey(savedId), String(readyAt));
+        setCountdownNow(Date.now());
+        setActivationReadyAt(readyAt);
+      } else {
+        sessionStorage.removeItem(activationWaitKey(savedId));
+        setActivationReadyAt(null);
+      }
       dispatch(showToast({ severity: "success", summary: nextStatus === "active" ? "Agent activated" : nextStatus ? "Agent status updated" : "Saved", detail: nextStatus === "active" ? "A new config version was created and the agent was activated." : nextStatus ? `Agent moved to ${nextStatus}.` : "Agent and its associations saved." }));
       setAuditVersion((version) => version + 1);
       if (record?.id) refetch();
@@ -611,6 +653,9 @@ export function AgentRegistryEditorPage() {
   const linkSetting = (label: string, checked: boolean, onChange: (checked: boolean) => void, hint: string) =>
     <label className="agent-editor__link-setting"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span><strong>{label}</strong><small>{hint}</small></span></label>;
   const agentStatus = record?.status ?? "draft";
+  const activationRemainingMs = Math.max(0, (activationReadyAt ?? 0) - countdownNow);
+  const activationRemainingSeconds = Math.ceil(activationRemainingMs / 1000);
+  const activationWaiting = agentStatus === "draft" && activationRemainingSeconds > 0;
   const tabs = [
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
       <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
@@ -649,7 +694,7 @@ export function AgentRegistryEditorPage() {
           ] as const).map(([value, label, description], index) => <React.Fragment key={value}>
             {index > 0 && <div className="agent-editor__workflow-connector" aria-hidden="true" />}
             <button type="button" className={`agent-editor__workflow-stage${agentStatus === value ? " is-current" : ""}`} aria-current={agentStatus === value ? "step" : undefined}
-              aria-pressed={agentStatus === value} disabled={creating || updating || activating || agentStatus === value} onClick={() => {
+              aria-pressed={agentStatus === value} disabled={creating || updating || activating || agentStatus === value || (value === "active" && activationWaiting)} onClick={() => {
                 if (value === "active") {
                   setIncludeVersionDetails(false);
                   setVersionName("");
@@ -657,8 +702,11 @@ export function AgentRegistryEditorPage() {
                   setActivateDialogOpen(true);
                 } else void save(value);
               }}>
-              <span className="agent-editor__workflow-stage-mark">{index + 1}</span>
-              <div className="agent-editor__workflow-stage-copy"><strong>{label}</strong><small>{description}</small><small className="agent-editor__workflow-stage-cta">{agentStatus === value ? "Current stage" : "Click to move to this stage"}</small></div>
+              {value === "active" && activationWaiting ? <span className="agent-editor__activation-countdown" aria-label={`Active available in ${activationRemainingSeconds} seconds`}>
+                <svg viewBox="0 0 36 36" aria-hidden="true"><circle className="agent-editor__activation-countdown-track" cx="18" cy="18" r="15" /><circle className="agent-editor__activation-countdown-progress" cx="18" cy="18" r="15" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - activationRemainingMs / ACTIVATION_WAIT_MS * 100} /></svg>
+                <span>{activationRemainingSeconds}</span>
+              </span> : <span className="agent-editor__workflow-stage-mark">{index + 1}</span>}
+              <div className="agent-editor__workflow-stage-copy"><strong>{label}</strong><small>{description}</small><small className="agent-editor__workflow-stage-cta">{agentStatus === value ? "Current stage" : value === "active" && activationWaiting ? `Available in ${activationRemainingSeconds}s` : "Click to move to this stage"}</small></div>
               {agentStatus === value && <span className="agent-editor__workflow-current">Current</span>}
             </button>
           </React.Fragment>)}
@@ -698,6 +746,7 @@ export function AgentRegistryEditorPage() {
       render={(item, link) => <div className="agent-editor__secret"><strong>{item.displayName ?? item.name ?? item.key}</strong><span>{item.key}</span><p>{item.description}</p>
         <div className="agent-editor__secret-env"><span>Process environment</span><code>{secretEnvVarNames[item.id] ?? link?.envVarName ?? item.key ?? item.name}</code>
           <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={14} /></button></div></div>} /> },
+    ...(record?.id ? [{ value: "config-versions", label: "Config versions", content: <AgentConfigVersionsPanel agentId={record.id} active={tab === "config-versions"} /> }] : []),
     ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...((record?.id ? [
       ["jobs", "Jobs", jobs.currentData?.records],
@@ -723,7 +772,7 @@ export function AgentRegistryEditorPage() {
       <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest agent content.</p></SolidDialogBody>
     </SolidDialog>
     <SolidDialog open={activateDialogOpen} onOpenChange={(open) => { if (!activating) setActivateDialogOpen(open); }} header="Activate agent with a new config version?" style={{ width: "min(34rem, 94vw)" }}
-      footer={<><SolidButton type="button" variant="secondary" disabled={activating} onClick={() => setActivateDialogOpen(false)}>Cancel</SolidButton><SolidButton type="button" loading={activating || creating || updating} disabled={creatingTag || creating || updating || activating} onClick={async () => {
+      footer={<><SolidButton type="button" variant="secondary" disabled={activating} onClick={() => setActivateDialogOpen(false)}>Cancel</SolidButton><SolidButton type="button" loading={activating || creating || updating} disabled={creatingTag || creating || updating || activating || activationWaiting} onClick={async () => {
         setActivating(true);
         const saved = await save("active", includeVersionDetails ? { name: versionName.trim(), description: versionDescription.trim() } : {});
         setActivating(false);
