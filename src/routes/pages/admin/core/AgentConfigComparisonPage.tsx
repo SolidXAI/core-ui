@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, ArrowRight, Check, CircleHelp, Cpu, FileText, GitCompareArrows, Puzzle, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleHelp, Cpu, EqualNot, FileText, GitCompareArrows, Puzzle, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../../../components/shad-cn-ui";
@@ -23,7 +23,7 @@ function VersionHeader({ version, side }: { version: ConfigVersion; side: "Older
 
 type StatusMarkProps = { matched: boolean; label: string; interactive?: boolean } & React.ButtonHTMLAttributes<HTMLButtonElement>;
 const StatusMark = React.forwardRef<HTMLButtonElement, StatusMarkProps>(({ matched, label, interactive = true, className, ...rest }, ref) => {
-  const icon = matched ? <Check size={14} strokeWidth={2.75} /> : <X size={14} strokeWidth={2.75} />;
+  const icon = matched ? <Check size={14} strokeWidth={2.75} /> : <EqualNot size={14} strokeWidth={2.5} />;
   const classes = `config-compare__mark ${matched ? "is-matched" : "is-changed"}${className ? ` ${className}` : ""}`;
   if (matched || !interactive) return <span className={classes} role="img" aria-label={`${label}: ${matched ? "no differences" : "different"}`} title={matched ? "No differences" : "Different"}>{icon}</span>;
   return <button ref={ref} type="button" className={classes} aria-label={`${label}: view differences`} title={rest.disabled ? "Different" : "View differences"} {...rest}>{icon}</button>;
@@ -36,7 +36,7 @@ function SectionHeader({ icon, title, count, changes }: { icon: React.ReactNode;
     <h2>{title}</h2>
     {count !== undefined && <span className="config-compare__count">{count}</span>}
     <span className={`config-compare__section-status ${changes ? "is-changed" : "is-matched"}`} aria-label={changes ? `${changes} difference${changes === 1 ? "" : "s"}` : "No differences"}>
-      {changes ? <><X size={12} strokeWidth={3} />{changes}</> : <Check size={12} strokeWidth={3} />}
+      {changes ? <><EqualNot size={12} strokeWidth={2.75} />{changes}</> : <Check size={12} strokeWidth={3} />}
     </span>
   </header>;
 }

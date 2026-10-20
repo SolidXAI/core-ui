@@ -746,7 +746,6 @@ export function AgentRegistryEditorPage() {
       render={(item, link) => <div className="agent-editor__secret"><strong>{item.displayName ?? item.name ?? item.key}</strong><span>{item.key}</span><p>{item.description}</p>
         <div className="agent-editor__secret-env"><span>Process environment</span><code>{secretEnvVarNames[item.id] ?? link?.envVarName ?? item.key ?? item.name}</code>
           <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={14} /></button></div></div>} /> },
-    ...(record?.id ? [{ value: "config-versions", label: "Config versions", content: <AgentConfigVersionsPanel agentId={record.id} active={tab === "config-versions"} /> }] : []),
     ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...((record?.id ? [
       ["jobs", "Jobs", jobs.currentData?.records],
@@ -756,6 +755,7 @@ export function AgentRegistryEditorPage() {
         : items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
     ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
+    ...(record?.id ? [{ value: "config-versions", label: "Config versions", content: <AgentConfigVersionsPanel agentId={record.id} active={tab === "config-versions"} /> }] : []),
     ...(record?.id ? [{ value: "embedding", label: "Embedding", content: <AgentEmbeddingPanel agentId={record.id}
       fields={parseInputs(record.requiredInputs)} active={record.status === "active"}
       hubUrl={String(getSettingsMap(settings).solidxAgentHubBackendUrl ?? "")} /> }] : []),

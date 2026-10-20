@@ -17,8 +17,8 @@
 
 .columns {
   display: grid;
-  height: 100%;
   min-height: 0;
+  flex: 1 1 auto;
   gap: 0.75rem;
   overflow: hidden;
 }
@@ -36,31 +36,27 @@
 }
 
 .paneHeader {
+  display: flex;
   flex: 0 0 auto;
-  padding: 0.75rem 0.9rem;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
   border-bottom: 1px solid var(--surface-border, var(--border));
   background: color-mix(in srgb, var(--primary-color, var(--primary)) 3%, var(--surface-card, var(--card)));
 }
 
-.identity {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.agentName {
-  overflow: hidden;
-  color: var(--text-color, var(--foreground));
-  font-size: 0.84rem;
-  font-weight: 700;
-  text-overflow: ellipsis;
+.sessionDate {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--text-color-secondary, var(--muted-foreground));
+  font-size: 0.67rem;
   white-space: nowrap;
 }
 
 .sessionId {
-  margin-top: 0.15rem;
+  min-width: 0;
+  margin: 0;
   overflow: hidden;
   color: var(--text-color-secondary, var(--muted-foreground));
   font-size: 0.67rem;
@@ -70,43 +66,36 @@
 
 .versionBadge {
   flex: 0 0 auto;
-  padding: 0.22rem 0.55rem;
+  padding: 0.18rem 0.5rem;
   border: 1px solid color-mix(in srgb, var(--primary-color, var(--primary)) 25%, var(--surface-border, var(--border)));
   border-radius: 999px;
   background: color-mix(in srgb, var(--primary-color, var(--primary)) 8%, var(--surface-card, var(--card)));
   color: var(--primary-color, var(--primary));
+  cursor: help;
   font-size: 0.66rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
-.versionDetails {
-  box-sizing: border-box;
+.versionTooltip {
   display: flex;
-  height: 4.5rem;
-  min-height: 4.5rem;
-  max-height: 4.5rem;
+  max-width: 22rem;
+  max-height: 14rem;
   flex-direction: column;
-  gap: 0.12rem;
-  margin-top: 0.55rem;
+  gap: 0.15rem;
   overflow-y: auto;
-  padding: 0.45rem 0.6rem;
-  border-left: 3px solid var(--primary-color, var(--primary));
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--primary-color, var(--primary)) 7%, var(--surface-ground, var(--background)));
 }
 
 .versionName {
-  color: var(--text-color, var(--foreground));
   font-size: 0.74rem;
   font-weight: 650;
 }
 
 .versionDescription,
 .versionFallback {
-  color: var(--text-color-secondary, var(--muted-foreground));
   font-size: 0.68rem;
   line-height: 1.35;
+  opacity: 0.85;
   white-space: pre-wrap;
 }
 
