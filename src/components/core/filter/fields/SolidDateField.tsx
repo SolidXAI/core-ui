@@ -11,6 +11,8 @@ export const dateFilterMatchModeOptions = [
     { label: 'Greater Than', value: "$gt" },
     { label: 'Greater Than Or Equal', value: "$gte" },
     { label: 'Between', value: "$between" },
+    { label: 'This Week', value: "$thisWeek" },
+    { label: 'This Month', value: "$thisMonth" },
     { label: 'Is null', value: "$null" },
     { label: 'Is Not null', value: "$notNull" }
 
