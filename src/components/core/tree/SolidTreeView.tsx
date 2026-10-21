@@ -1974,19 +1974,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                     />
                   )}
 
-                {actionsAllowed.includes(`${permissionExpression(params.modelName, "delete")}`) &&
-                  solidTreeViewMetaData?.data?.solidView?.layout?.attrs.delete !== false &&
-                  selectedRecords.length > 0 && (
-                    <SolidButton
-                      type="button"
-                      label="Delete"
-                      size="sm"
-                      onClick={() => setDeleteRecordsDialogVisible(true)}
-                      className="small-button"
-                      severity="danger"
-                    />
-                  )}
-
                 <SolidButton
                   type="button"
                   size="sm"

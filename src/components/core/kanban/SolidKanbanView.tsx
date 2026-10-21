@@ -834,10 +834,14 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         populateMedia: toPopulateMedia,
         populateGroup: true,
         filters: {
-          [groupByFieldName]: {
-            $in: [groupByField],
-          },
-          ...filters
+          $and: [
+            {
+              [groupByFieldName]: {
+                $in: [groupByField],
+              },
+            },
+            ...(filters?.$and ?? [filters]),
+          ],
         },
         sort: DEFAULT_RECORD_SORT,
       });

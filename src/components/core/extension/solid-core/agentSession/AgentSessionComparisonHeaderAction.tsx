@@ -17,6 +17,9 @@ import {
   SolidDialogHeader,
   SolidDialogSeparator,
   SolidDialogTitle,
+  SolidTooltip,
+  SolidTooltipContent,
+  SolidTooltipTrigger,
 } from "../../../../shad-cn-ui";
 
 type AgentSummary = { id?: number | string; name?: string; title?: string; displayName?: string } | number | string | null | undefined;
@@ -25,6 +28,8 @@ type SessionRecord = {
   sessionId?: string;
   agent?: AgentSummary;
   configVersion?: number | string | null;
+  createdAt?: string | null;
+  startedAt?: string | null;
 };
 type SessionComparisonData = {
   session: SessionRecord;
@@ -44,7 +49,7 @@ const noOp = () => undefined;
 const entities = (value: any) => Array.isArray(value?.records) ? value.records : [];
 
 async function fetchCoreSessionHistory(sessionId: number | string, page = 1) {
-  const response = await solidGet(`/agent-session/${encodeURIComponent(String(sessionId))}/messages?page=${page}&page_size=50`);
+  const response = await solidGet(`/agent-session/${encodeURIComponent(String(sessionId))}/messages?page=${page}&page_size=500`);
   let payload = response?.data;
   for (let depth = 0; depth < 4 && payload; depth += 1) {
     if (Array.isArray(payload.messages)) return payload;
@@ -53,9 +58,16 @@ async function fetchCoreSessionHistory(sessionId: number | string, page = 1) {
   throw new Error("The session messages response was invalid.");
 }
 
+function formatSessionDate(session: SessionRecord) {
+  const value = session.createdAt ?? session.startedAt;
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
+
 function agentDetails(agent: AgentSummary) {
   if (agent && typeof agent === "object") {
-    return { id: agent.id, name: agent.name ?? agent.title ?? agent.displayName ?? "Agent" };
+    return { id: agent.id, name: agent.displayName ?? agent.name ?? agent.title ?? "Agent" };
   }
   return { id: agent, name: "Agent" };
 }
@@ -206,16 +218,18 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
     items: [],
     loading: true,
   } as SessionComparisonData));
+  const agentNames = Array.from(new Set(displayedData.map((data) => data.agentName)));
+  const showComparison = sessions.length > 0 && !invalidSelection;
 
   return (
     <div className={styles.root}>
       <SolidDialogHeader>
-        <SolidDialogTitle>Compare agent sessions</SolidDialogTitle>
+        <SolidDialogTitle>{showComparison ? `Compare ${agentNames.join(" vs ")}` : "Compare agent sessions"}</SolidDialogTitle>
         <SolidDialogClose aria-label="Close" onClick={() => dispatch(closePopup())} />
       </SolidDialogHeader>
       <SolidDialogSeparator />
       <SolidDialogBody className={styles.body}>
-        {!sessions.length || invalidSelection ? (
+        {!showComparison ? (
           <div className={styles.selectionEmpty}>
             <span className={styles.selectionIcon}><GitCompareArrows size={21} /></span>
             <div className="space-y-1">
@@ -225,26 +239,29 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
           </div>
         ) : (
           <div className={styles.columns} style={{ gridTemplateColumns: `repeat(${sessions.length}, minmax(0, 1fr))` }}>
-            {displayedData.map((data) => (
-              <section key={String(data.session.id)} className={styles.pane}>
-                <header className={styles.paneHeader}>
-                  <div className={styles.identity}>
-                    <div className="min-w-0">
-                      <p className={styles.agentName}>{data.agentName}</p>
-                      <p className={styles.sessionId}>Session {data.session.sessionId ?? data.session.id}</p>
-                    </div>
-                    <span className={styles.versionBadge}>Config v{data.session.configVersion ?? "—"}</span>
-                  </div>
-                  <div className={styles.versionDetails}>
-                    {data.versionName && <p className={styles.versionName}>{data.versionName}</p>}
-                    {data.versionDescription
-                      ? <p className={styles.versionDescription}>{data.versionDescription}</p>
-                      : <p className={styles.versionFallback}>No version description available.</p>}
-                  </div>
-                </header>
-                <SessionMessages data={data} onLoadOlder={() => void loadOlderMessages(data.session.id)} />
-              </section>
-            ))}
+            {displayedData.map((data) => {
+              const sessionDate = formatSessionDate(data.session);
+              return (
+                <section key={String(data.session.id)} className={styles.pane}>
+                  <header className={styles.paneHeader}>
+                    <SolidTooltip>
+                      <SolidTooltipTrigger asChild>
+                        <span className={styles.versionBadge} tabIndex={0}>Config v{data.session.configVersion ?? "—"}</span>
+                      </SolidTooltipTrigger>
+                      <SolidTooltipContent side="bottom" align="start" className={styles.versionTooltip}>
+                        {data.versionName && <p className={styles.versionName}>{data.versionName}</p>}
+                        {data.versionDescription
+                          ? <p className={styles.versionDescription}>{data.versionDescription}</p>
+                          : <p className={styles.versionFallback}>No version description available.</p>}
+                      </SolidTooltipContent>
+                    </SolidTooltip>
+                    <span className={styles.sessionId}>Session {data.session.sessionId ?? data.session.id}</span>
+                    {sessionDate && <span className={styles.sessionDate}>{sessionDate}</span>}
+                  </header>
+                  <SessionMessages data={data} onLoadOlder={() => void loadOlderMessages(data.session.id)} />
+                </section>
+              );
+            })}
           </div>
         )}
       </SolidDialogBody>
