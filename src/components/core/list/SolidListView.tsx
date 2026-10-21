@@ -1109,7 +1109,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       recoverList.push(element.id);
     });
     try {
-      await triggerRecoverSolidEntities(recoverList).unwrap();
+      const response = await triggerRecoverSolidEntities(recoverList).unwrap();
+      dispatch(showToast({
+        severity: "success",
+        summary: "Success",
+        detail: response?.data?.message,
+        life: 3000,
+      }));
       setRecoverDialogVisible(false);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
