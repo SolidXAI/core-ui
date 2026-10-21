@@ -871,6 +871,61 @@ textarea {
   text-overflow: ellipsis;
 }
 
+.solid-user-menu-role-row {
+  overflow: visible;
+  display: flex;
+  align-items: center;
+}
+
+.solid-user-menu-roles {
+  position: relative;
+  display: inline-flex;
+  margin-left: 4px;
+  overflow: visible;
+  outline: none;
+}
+
+.solid-user-menu-role-count {
+  color: var(--primary);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.solid-user-menu-roles:hover .solid-user-menu-role-count,
+.solid-user-menu-roles:focus .solid-user-menu-role-count {
+  text-decoration: underline;
+}
+
+.solid-user-menu-roles-list {
+  position: absolute;
+  z-index: 71;
+  top: 100%;
+  left: 0;
+  width: max-content;
+  max-width: 140px;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--popover, var(--card));
+  color: var(--popover-foreground, var(--card-foreground));
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.2);
+  white-space: normal;
+  line-height: 1.35;
+  transition: opacity 120ms ease;
+}
+
+.solid-user-menu-roles:hover .solid-user-menu-roles-list,
+.solid-user-menu-roles:focus .solid-user-menu-roles-list {
+  visibility: visible;
+  opacity: 1;
+}
+
 .solid-user-menu-sep {
   height: 1px;
   background: var(--border);
