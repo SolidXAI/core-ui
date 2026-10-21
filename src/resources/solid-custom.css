@@ -3890,6 +3890,21 @@ textarea {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
+@media (min-width: 768px) and (max-width: 991px) {
+  .solid-list-toolbar .solid-custom-filter-wrapper,
+  .solid-list-toolbar .solid-global-search-element,
+  .solid-list-toolbar .solid-global-search-element-wrapper,
+  .solid-list-toolbar .solid-search-overlay-panel {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .solid-list-toolbar .solid-global-search-input-item {
+    flex: 1 0 100%;
+    min-width: 0;
+  }
+}
+
 .solid-tree-toolbar .solid-global-search-element {
   height: 36px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
@@ -3930,6 +3945,20 @@ textarea {
 
 .solid-tree-toolbar .custom-filter-button:hover {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+.solid-list-toolbar .custom-filter-button {
+  right: 4px;
+  padding: 0;
+}
+
+.solid-list-toolbar .solid-global-search-element input {
+  padding-right: 42px;
+}
+
+.solid-list-toolbar .solid-global-search-chip-list:has(> li:not(.solid-global-search-input-item)) {
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .solid-tree-toolbar .solid-btn.solid-icon-button {

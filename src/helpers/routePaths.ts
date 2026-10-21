@@ -11,6 +11,33 @@ export const normalizeSolidListTreeKanbanActionPath = (currentPath: string, acti
   return `${normalizedBase.replace(/\/+$/, "")}/${actionTrimmed}`;
 };
 
+/** Build the optional record label query parameter from collection row data. */
+export const getRecordUserKeyQuery = (record: any, viewMetadata: any) => {
+  const data = viewMetadata?.data || viewMetadata;
+  const model = data?.solidView?.model;
+  const configuredUserKey = model?.userKeyField;
+  const userKeyFieldName = typeof configuredUserKey === "string"
+    ? configuredUserKey
+    : configuredUserKey?.name;
+  const metadataUserKeyFieldName = Object.entries(data?.solidFieldsMetadata || {})
+    .find(([, fieldMetadata]: [string, any]) => fieldMetadata?.isUserKey)?.[0];
+  const value = record?.[userKeyFieldName || metadataUserKeyFieldName];
+
+  return value === undefined || value === null || value === ""
+    ? ""
+    : `recordUserKey=${encodeURIComponent(String(value))}`;
+};
+
+export const getRecordActionQuery = (viewMetadata: any) => {
+  const data = viewMetadata?.data || viewMetadata;
+  const editAction = data?.solidView?.layout?.attrs?.editAction;
+  const params = new URLSearchParams();
+  if (editAction?.name) params.set("actionName", editAction.name);
+  if (editAction?.type) params.set("actionType", editAction.type);
+  if (editAction?.context) params.set("actionContext", editAction.context);
+  return params.toString();
+};
+
 export const buildAdminRecordFormPath = ({
   moduleName,
   modelName,

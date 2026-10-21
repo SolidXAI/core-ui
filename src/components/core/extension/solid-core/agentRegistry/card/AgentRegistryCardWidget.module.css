@@ -2,7 +2,8 @@
   position: relative;
   display: flex;
   min-width: 0;
-  height: 100%;
+  box-sizing: border-box;
+  height: 18rem;
   flex-direction: column;
   gap: 0.85rem;
   overflow: hidden;
@@ -13,6 +14,10 @@
   box-shadow: 0 2px 8px rgb(15 23 42 / 4%);
   color: var(--text-color, #172033);
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.card > * {
+  flex-shrink: 0;
 }
 
 .card::before {
@@ -62,7 +67,45 @@
   gap: 0.18rem;
 }
 
+.textContainer {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+}
+
+.ellipsis {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: help;
+}
+
+.textPopover {
+  position: fixed;
+  z-index: 10000;
+  box-sizing: border-box;
+  width: 360px;
+  max-width: calc(100vw - 16px);
+  overflow: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--surface-border, #dbe3ef);
+  border-radius: 0.5rem;
+  background: var(--surface-card, #fff);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 18%);
+  color: var(--text-color, #172033);
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .title {
+  display: block;
   margin: 0;
   overflow: hidden;
   font-size: 1rem;
@@ -89,6 +132,7 @@
   line-height: 1.4;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
 }
 
 .loadError {
