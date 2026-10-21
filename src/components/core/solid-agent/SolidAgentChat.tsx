@@ -33,6 +33,7 @@ import { useAgentAuth } from "./useAgentAuth";
 import { AgentSignIn } from "./AgentSignIn";
 import { signOutOfAgent } from "./client/agentAuth";
 import { AgentModelIndicator, isVisionModel } from "./AgentModelIndicator";
+import { AgentContextPill } from "./AgentContextPill";
 import type { AgentModelAssignments } from "./types";
 import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
 import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/agentEmbedProtocol";
@@ -1190,6 +1191,14 @@ export function SolidAgentChat({
                             onFastToggle={handleFastToggle}
                             onReasoningSelect={handleReasoningChange}
                             onSpeedSelect={handleSpeedChange}
+                        />
+                    }
+                    contextPill={
+                        <AgentContextPill
+                            usage={agent.usage}
+                            activeProvider={selectedProvider}
+                            modelName={selectedModel}
+                            disabled={agent.working}
                         />
                     }
                 />

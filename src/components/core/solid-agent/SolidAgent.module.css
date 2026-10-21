@@ -1615,3 +1615,78 @@
 }
 .signInBtn:disabled { opacity: 0.55; cursor: not-allowed; }
 .signInBtn .spinIcon { color: #fff; }
+
+/* ── Context & Token Pill (OpenCode style) ─────────────────────── */
+.contextPillContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+.contextPillBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--agent-primary) 12%, transparent);
+  cursor: pointer;
+  transition: background .15s, transform .15s;
+}
+.contextPillBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--agent-primary) 22%, transparent);
+  transform: scale(1.05);
+}
+.contextPillBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.contextRingSvg {
+  width: 18px;
+  height: 18px;
+  transform: rotate(-90deg);
+}
+.contextRingTrack {
+  stroke: color-mix(in srgb, var(--agent-primary) 22%, transparent);
+  fill: none;
+}
+.contextRingProgress {
+  stroke: var(--agent-primary);
+  fill: none;
+  transition: stroke-dashoffset .3s ease;
+}
+.contextPopoverContent {
+  background: #12151c !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 8px !important;
+  padding: 10px 14px !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+  min-width: 185px !important;
+  pointer-events: auto !important;
+  user-select: none;
+}
+.contextCardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+.contextCardLabel {
+  color: #f1f5f9;
+  font-weight: 400;
+}
+.contextCardValue {
+  color: #ffffff;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+

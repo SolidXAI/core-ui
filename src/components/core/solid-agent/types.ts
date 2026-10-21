@@ -82,6 +82,15 @@ export interface ProviderModelInfo {
 
 export type AgentConnection = "idle" | "connecting" | "open" | "reconnecting" | "offline";
 
+export interface AgentUsageStats {
+    totalCost: number;
+    totalInputTokens: number;
+    totalOutputTokens: number;
+    totalTokens: number;
+    contextTokens: number;
+    contextLimit: number;
+}
+
 /** A slash command advertised by the agent in `session_started`. */
 export type AgentCommand = { name: string; description?: string };
 

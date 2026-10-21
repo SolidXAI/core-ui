@@ -15,6 +15,7 @@ type Props = {
     onSend: (text: string, attachments: AgentAttachment[]) => void | Promise<void>;
     onStop: () => void;
     modelIndicator?: React.ReactNode;
+    contextPill?: React.ReactNode;
     canAttach?: boolean;
 };
 
@@ -32,6 +33,7 @@ export function AgentComposer({
     onSend,
     onStop,
     modelIndicator,
+    contextPill,
     canAttach = true,
 }: Props) {
     const [text, setText] = useState("");
@@ -258,6 +260,7 @@ export function AgentComposer({
                         </button>
                     )}
                     {modelIndicator}
+                    {contextPill}
                     {working ? (
                         <button
                             type="button"

@@ -361,7 +361,22 @@ export class AgentRuntime {
             const rawItems = historyToItems(result.messages ?? []);
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
             if (generation !== this.historyGeneration || this.getState()?.historySessionId !== historySessionId) return;
-            this.dispatch(agentHistoryLoaded({ items, hasMore: !!result.has_more, page }));
+            const sessionUsage = result.session_usage;
+            this.dispatch(agentHistoryLoaded({
+                items,
+                hasMore: !!result.has_more,
+                page,
+                ...(sessionUsage ? {
+                    usage: {
+                        totalCost: sessionUsage.total_cost ?? 0,
+                        totalInputTokens: sessionUsage.total_input_tokens ?? 0,
+                        totalOutputTokens: sessionUsage.total_output_tokens ?? 0,
+                        totalTokens: sessionUsage.total_tokens ?? 0,
+                        contextTokens: sessionUsage.total_input_tokens ?? 0,
+                        contextLimit: 0,
+                    },
+                } : {}),
+            }));
         } catch {
             // History is a convenience; the live session still works without it.
             this.loadedHistoryPages.add(key);

@@ -1,7 +1,7 @@
 import { describeToolArgs, isLlmMetadata, parseToolResult } from "./agentFormat";
 import { parseWidgetContent, isSameAssistantContent } from "./thread/inlineWidget";
 export { isSameAssistantContent };
-import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentWireFrame } from "./types";
+import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentUsageStats, type AgentWireFrame } from "./types";
 
 /**
  * Turns agent events into thread items. Used by agentSlice for live socket frames and by the
@@ -24,6 +24,7 @@ export type AgentThreadState = {
     liveToolId: string | null;
     streamingId: string | null;
     turnStreamed: boolean;
+    usage: AgentUsageStats | null;
 };
 
 export function createThreadState(): AgentThreadState {
@@ -38,6 +39,7 @@ export function createThreadState(): AgentThreadState {
         liveToolId: null,
         streamingId: null,
         turnStreamed: false,
+        usage: null,
     };
 }
 
@@ -140,6 +142,19 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             state.historySessionId = frame.history_session_id ?? eventData.history_session_id ?? sessionId;
             const commands = frame.commands ?? eventData.commands;
             if (Array.isArray(commands)) state.commands = commands;
+            const limit = frame.context_limit ?? eventData.context_limit ?? 0;
+            if (limit > 0) {
+                const inTok = frame.total_input_tokens ?? eventData.total_input_tokens ?? 0;
+                const outTok = frame.total_output_tokens ?? eventData.total_output_tokens ?? 0;
+                state.usage = {
+                    totalCost: frame.total_cost ?? eventData.total_cost ?? 0,
+                    totalInputTokens: inTok,
+                    totalOutputTokens: outTok,
+                    totalTokens: frame.total_tokens ?? eventData.total_tokens ?? (inTok + outTok),
+                    contextTokens: frame.context_tokens ?? eventData.context_tokens ?? 0,
+                    contextLimit: limit,
+                };
+            }
             state.authError = null;
             break;
         }
@@ -294,6 +309,19 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 streamed.eventData = { ...streamed.eventData, content };
             } else if (content && !state.turnStreamed && !isLlmMetadata(content) && !isSameAssistantContent(lastAssistantText(state), content)) {
                 pushAssistantText(state, content, at);
+            }
+            const limit = eventData.context_limit ?? frame.context_limit ?? state.usage?.contextLimit ?? 0;
+            if (limit > 0 || state.usage) {
+                const inTok = eventData.total_input_tokens ?? frame.total_input_tokens ?? state.usage?.totalInputTokens ?? 0;
+                const outTok = eventData.total_output_tokens ?? frame.total_output_tokens ?? state.usage?.totalOutputTokens ?? 0;
+                state.usage = {
+                    totalCost: eventData.total_cost ?? frame.total_cost ?? state.usage?.totalCost ?? 0,
+                    totalInputTokens: inTok,
+                    totalOutputTokens: outTok,
+                    totalTokens: eventData.total_tokens ?? frame.total_tokens ?? (inTok + outTok),
+                    contextTokens: eventData.context_tokens ?? frame.context_tokens ?? inTok,
+                    contextLimit: limit,
+                };
             }
             endTurn(state);
             state.turnStreamed = true;

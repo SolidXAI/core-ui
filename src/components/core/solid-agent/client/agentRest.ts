@@ -15,7 +15,7 @@ export type AgentSessionSummary = {
     runtime?: AgentRuntimeType;
 };
 
-export type AgentHistoryPage = { messages: any[]; has_more: boolean };
+export type AgentHistoryPage = { messages: any[]; has_more: boolean; session_usage?: Record<string, any> };
 export type AgentConfigVersionStatus = {
     processConfigVersion: number;
     latestConfigVersion: number;
