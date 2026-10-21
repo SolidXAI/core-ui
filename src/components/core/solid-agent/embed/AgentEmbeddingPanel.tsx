@@ -10,7 +10,7 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
     const [backend, setBackend] = useState("express");
     const [copied, setCopied] = useState("");
     const [copyError, setCopyError] = useState("");
-    const sdkUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL").replace(/\/$/, "")}/api/agent-embed/sdk.js?v=3`;
+    const sdkUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL").replace(/\/$/, "")}/api/agent-embed/sdk.js?v=4`;
     const samples = embedSamples(agentId, fields, sdkUrl, hubUrl || "https://agenthub.example.com");
     async function copy(key: string, code: string) {
         try { await navigator.clipboard.writeText(code); setCopied(key); setCopyError(""); }

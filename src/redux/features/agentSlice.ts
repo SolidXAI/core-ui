@@ -7,6 +7,7 @@ import {
     type AgentChatItem,
     type AgentConnection,
     type AgentContext,
+    type AgentMessageContext,
     type AgentMode,
     type SolidAgentOpenOptions,
 } from "../../components/core/solid-agent/types";
@@ -73,13 +74,17 @@ const agentSlice = createSlice({
                 state.thinking = false;
             }
         },
-        agentUserMessageAdded(state, action: PayloadAction<{ text: string; attachments?: AgentAttachmentMeta[] }>) {
-            const { text, attachments } = action.payload;
+        agentUserMessageAdded(state, action: PayloadAction<{ text: string; attachments?: AgentAttachmentMeta[]; messageContext?: AgentMessageContext }>) {
+            const { text, attachments, messageContext } = action.payload;
             state.items.push({
                 id: nextItemId("u"),
                 at: Date.now(),
                 eventType: AgentEventTypes.userMessage,
-                eventData: attachments?.length ? { content: text, attachments } : { content: text },
+                eventData: {
+                    content: text,
+                    ...(attachments?.length ? { attachments } : {}),
+                    ...(messageContext ? { message_context: messageContext } : {}),
+                },
             });
             state.working = true;
             state.thinking = true;

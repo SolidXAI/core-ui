@@ -60,6 +60,8 @@ import {
     SolidDialogTitle
 } from "../../shad-cn-ui/SolidDialog";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { eventBus } from "../../../helpers/eventBus";
+import { ADMIN_VIEW_REFRESH_REQUESTED, isMatchingAdminViewRefresh, type AdminViewRefreshRequest } from "../../../helpers/adminViewRefresh";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -1166,6 +1168,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
     } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, {
         skip: params.id === 'new'
     });
+    useEffect(() => eventBus.on<AdminViewRefreshRequest>(ADMIN_VIEW_REFRESH_REQUESTED, (request) => {
+        if (params.id === 'new') return;
+        if (isMatchingAdminViewRefresh(request, {
+            moduleName: params.moduleName,
+            modelName: params.modelName,
+            viewName: "form",
+            recordId: params.id,
+        })) {
+            void refetchSolidFormViewData();
+        }
+    }), [params.id, params.moduleName, params.modelName, refetchSolidFormViewData]);
     useEffect(() => {
         if (params.id !== 'new') {
             refetchSolidFormViewData()

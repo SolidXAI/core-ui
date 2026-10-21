@@ -16,6 +16,7 @@ const BACKOFF_MS = [1000, 2000, 4000, 8000, 15000];
 
 type EventListener = (frame: AgentWireFrame) => void;
 type StatusListener = (status: AgentConnection) => void;
+type SentListener = (action: AgentAction) => void;
 
 export class AgentSocket {
     private ws: WebSocket | null = null;
@@ -25,6 +26,7 @@ export class AgentSocket {
     private queue: AgentAction[] = [];
     private eventListeners = new Set<EventListener>();
     private statusListeners = new Set<StatusListener>();
+    private sentListeners = new Set<SentListener>();
     private sessionId: string | null = null;
     private provider: string | null = null;
     private model: string | null = null;
@@ -109,6 +111,11 @@ export class AgentSocket {
     onStatus(listener: StatusListener) {
         this.statusListeners.add(listener);
         return () => this.statusListeners.delete(listener);
+    }
+
+    onSent(listener: SentListener) {
+        this.sentListeners.add(listener);
+        return () => this.sentListeners.delete(listener);
     }
 
     connect() {
@@ -353,7 +360,10 @@ export class AgentSocket {
         }
         if (this.debugEmbed) console.info("[agent-embed][runtime] sending WebSocket action", { action: action.action });
         this.ws.send(JSON.stringify({ ...action, agentToken }));
-        if (action.action === "message") this.unacknowledgedMessage = action;
+        if (action.action === "message") {
+            this.unacknowledgedMessage = action;
+            this.sentListeners.forEach((listener) => listener(action));
+        }
     }
 
     private scheduleReconnect() {

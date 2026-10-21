@@ -35,6 +35,7 @@ import { signOutOfAgent } from "./client/agentAuth";
 import { AgentModelIndicator, isVisionModel } from "./AgentModelIndicator";
 import type { AgentModelAssignments } from "./types";
 import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
+import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/agentEmbedProtocol";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidDialog, SolidDialogBody } from "../../shad-cn-ui/SolidDialog";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
@@ -64,6 +65,7 @@ type Props = {
     requiredInputs?: AgentInputDefinition[];
     externalEmbed?: boolean;
     onInputsLocked?: (locked: boolean) => void;
+    beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext | AgentInputContext | undefined>;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
     embedded?: boolean;
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
@@ -105,7 +107,7 @@ function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<stri
     const values: Record<string, unknown> = {};
     for (const field of fields) {
         const raw = rawValues[field.name] ?? "";
-        if (!raw.trim() && (field.optional || field.defaultValue !== null && field.defaultValue !== undefined)) continue;
+        if (!raw.trim() && field.optional) continue;
         if (field.dataType === "boolean") {
             if (raw !== "true" && raw !== "false") return { error: `Choose true or false for “${field.name}”.` };
             values[field.name] = raw === "true";
@@ -152,6 +154,7 @@ export function SolidAgentChat({
     requiredInputs = [],
     externalEmbed = false,
     onInputsLocked,
+    beforeSend,
     embedded = false,
     // SDK prefill goes through the shared "solidx" conversation only.
     handlesPrefill = !embedded && agentRuntime === "solidx",
@@ -204,10 +207,23 @@ export function SolidAgentChat({
     const [collectedInputs, setCollectedInputs] = useState<Record<string, unknown> | null>(null);
     const [rawInputValues, setRawInputValues] = useState<Record<string, string>>({});
     const [inputError, setInputError] = useState("");
+    const requiredInputsSignature = JSON.stringify(requiredInputs);
+    const inputAgentUrl = useRef(agentUrl);
     useEffect(() => {
-        setRawInputValues(Object.fromEntries(requiredInputs.map((field) => [field.name,
-            field.defaultValue === null || field.defaultValue === undefined ? "" : typeof field.defaultValue === "string" ? field.defaultValue : JSON.stringify(field.defaultValue)])));
-    }, []);
+        const definitions: AgentInputDefinition[] = JSON.parse(requiredInputsSignature);
+        setRawInputValues((current) => {
+            const agentChanged = inputAgentUrl.current !== agentUrl;
+            inputAgentUrl.current = agentUrl;
+            const next: Record<string, string> = {};
+            for (const field of definitions) {
+                const defaultValue = field.defaultValue === null || field.defaultValue === undefined
+                    ? ""
+                    : typeof field.defaultValue === "string" ? field.defaultValue : JSON.stringify(field.defaultValue);
+                next[field.name] = agentChanged ? defaultValue : current[field.name] ?? defaultValue;
+            }
+            return next;
+        });
+    }, [agentUrl, requiredInputsSignature]);
     const shouldPromptForInputs = !externalEmbed && agentRuntime === "agentHub" && signedIn
         && requiredInputs.length > 0 && inputs === undefined && collectedInputs === null;
     const messageInputs = inputs ?? collectedInputs ?? undefined;
@@ -586,9 +602,9 @@ export function SolidAgentChat({
         const { prompt, autoSend, context, nonce } = agent.prefill;
         dispatch(agentPrefillConsumed());
         setShowHistory(false);
-        if (autoSend) runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) });
+        if (autoSend) runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) }, [], messageInputs, beforeSend, "prefill");
         else setSeed({ text: prompt, key: nonce });
-    }, [agent.prefill, handlesPrefill, dispatch, runtime, inputContext]);
+    }, [agent.prefill, handlesPrefill, dispatch, runtime, inputContext, messageInputs, beforeSend]);
 
     useEffect(() => {
         if (!showHistory || !signedIn) return;
@@ -631,19 +647,64 @@ export function SolidAgentChat({
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const windowMode = windowControls?.mode ?? agent.mode;
-    const send = useCallback((text: string) => {
+    const send = useCallback(async (text: string) => {
         if (!text.trim() || !runtime) return;
         onInputsLocked?.(true);
-        return runtime.sendMessage(text, inputContext, [], messageInputs);
-    }, [runtime, inputContext, messageInputs, onInputsLocked]);
+        try { return await runtime.sendMessage(text, inputContext, [], messageInputs, beforeSend, "widget"); }
+        catch (error) { onInputsLocked?.(false); throw error; }
+    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked]);
     const sendWithAttachments = useCallback(
-        (text: string, attachments: AgentAttachment[]) => {
+        async (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
             onInputsLocked?.(true);
-            return runtime.sendMessage(text, inputContext, attachments, messageInputs);
+            try { return await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer"); }
+            catch (error) { onInputsLocked?.(false); throw error; }
         },
-        [runtime, inputContext, messageInputs, onInputsLocked],
+        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
     );
+    useEffect(() => {
+        const onEmbedCommand = (event: Event) => {
+            event.preventDefault();
+            const detail = (event as CustomEvent<{ command: string; payload: Record<string, unknown>; respond: (result?: unknown, error?: unknown) => void }>).detail;
+            if (!detail || typeof detail.respond !== "function") return;
+            const run = async () => {
+                switch (detail.command) {
+                    case "sendMessage": {
+                        if (typeof detail.payload.text !== "string" || !runtime) throw new Error("Chat is not ready to send a message.");
+                        onInputsLocked?.(true);
+                        try {
+                            await runtime.sendMessage(detail.payload.text, inputContext, [], messageInputs, beforeSend,
+                                detail.payload.source === "prefill" ? "prefill" : "sdk");
+                        } catch (error) { onInputsLocked?.(false); throw error; }
+                        return { queued: true };
+                    }
+                    case "prefill": {
+                        if (typeof detail.payload.text !== "string") throw new Error("prefill requires text.");
+                        const autoSend = detail.payload.autoSend === true;
+                        if (autoSend) {
+                            if (!runtime) throw new Error("Chat is not ready to send a message.");
+                            try { await runtime.sendMessage(detail.payload.text, inputContext, [], messageInputs, beforeSend, "prefill"); }
+                            catch (error) { onInputsLocked?.(false); throw error; }
+                        } else setSeed({ text: detail.payload.text, key: Date.now() });
+                        return { queued: autoSend };
+                    }
+                    case "newChat":
+                        if (!runtime) throw new Error("Chat is not ready.");
+                        runtime.newChat(); setShowHistory(false); onInputsLocked?.(false); return { started: true };
+                    case "cancelTurn":
+                        runtime?.cancel(); return { requested: true };
+                    case "reconnect":
+                        runtime?.socket.connect(); return { requested: true };
+                    case "setContext":
+                        return { stored: true };
+                    default: throw new Error("Unsupported embed command.");
+                }
+            };
+            void run().then((result) => detail.respond(result)).catch((failure) => detail.respond(undefined, failure));
+        };
+        window.addEventListener("solid-agent-embed:command", onEmbedCommand);
+        return () => window.removeEventListener("solid-agent-embed:command", onEmbedCommand);
+    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked]);
     const offline = agent.connection === "reconnecting" || agent.connection === "offline";
     const statusColor = agent.connection === "open" ? (agent.working ? "#eab308" : "#22c55e") : offline ? "#dc2626" : "#94a3b8";
     const statusText =
@@ -713,7 +774,7 @@ export function SolidAgentChat({
             >
                 <SolidDialogBody className={styles.inputDialogBody}>
                     <form className={styles.inputForm} autoComplete="off" onSubmit={submitRequiredInputs}>
-                        <p>Sign-in is complete. Enter the values this agent needs before starting the conversation.</p>
+                        <p>Sign-in is complete. Enter the values this agent needs before starting the conversation. All inputs are required unless explicitly marked optional.</p>
                         <div className={styles.inputFields}>
                             {requiredInputs.map((field, index) => {
                                 const id = `solid-agent-test-input-${index}`;
@@ -1098,7 +1159,7 @@ export function SolidAgentChat({
                         context={agent.context ?? undefined}
                         emptyState={empty}
                         onLoadOlder={() => void runtime?.loadOlder()}
-                        onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value)}
+                        onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
                         onPrompt={send}
                     />
                 )}

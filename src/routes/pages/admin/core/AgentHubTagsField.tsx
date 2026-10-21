@@ -45,7 +45,7 @@ export function AgentHubTagsField({ value, onChange, module, disabled = false, o
   const exact = [...catalog, ...value].find((tag) => tag.name.toLowerCase() === name.toLowerCase());
   const options = catalog.filter((tag) => !value.some((selected) => selected.id === tag.id)
     && tag.name.toLowerCase().includes(name.toLowerCase())).sort((a, b) => a.name.localeCompare(b.name));
-  const canCreate = Boolean(name && module && !exact && !isFetching && !isError);
+  const canCreate = Boolean(name && !exact && !isFetching && !isError);
 
   const select = (tag: AgentHubTag) => {
     if (!value.some((selected) => selected.id === tag.id)) onChange([...value, tag]);
@@ -107,7 +107,9 @@ export function AgentHubTagsField({ value, onChange, module, disabled = false, o
             if (event.key === "Enter") { event.preventDefault(); if (open && options[activeIndex]) select(options[activeIndex]); else void add(); }
           }} />
         {name && <SolidButton variant="secondary" size="small" loading={isCreating}
-          disabled={!exact && !canCreate} onClick={() => void add()} leftIcon={<Plus size={14} />}>
+          disabled={!exact && !canCreate}
+          tooltip={isFetching ? "Wait for tag lookup to finish." : isError ? "Retry tag lookup before creating a tag." : undefined}
+          onClick={() => void add()} leftIcon={<Plus size={14} />}>
           {exact ? "Select" : "Create tag"}
         </SolidButton>}
       </div>
@@ -118,7 +120,7 @@ export function AgentHubTagsField({ value, onChange, module, disabled = false, o
             type="button" role="option" aria-selected={false} disabled={isCreating}
             className={activeIndex === index ? "is-active" : undefined}
             onMouseDown={(event) => event.preventDefault()} onClick={() => select(tag)}>{tag.name}<Plus size={14} /></button>)
-            : !isError && <div className="agent-hub-tags__empty">{exact ? "Tag already selected." : !module ? "Select a module before creating a tag." : canCreate ? `Create “${name}” to add it.` : "No tags available. Type a name to create one."}</div>}
+            : !isError && <div className="agent-hub-tags__empty">{exact ? "Tag already selected." : canCreate ? `Create “${name}” to add it.` : "No tags available. Type a name to create one."}</div>}
       </div>}
       {error && <small className="agent-hub-tags__error" role="alert">{error}</small>}
       <small className="agent-hub-tags__hint">Tags are shared across agents, skills, and tools.</small>

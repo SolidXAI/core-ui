@@ -1,13 +1,15 @@
 import React from "react";
-import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, GitBranch, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
+import { solidPost } from "../../../../http/solidHttp";
 import { useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentPersonaHistory } from "./AgentPersonaHistory";
+import { AgentConfigVersionsPanel } from "./AgentConfigVersionsPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
 import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
 import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
@@ -16,6 +18,7 @@ import { AgentProcessesPanel } from "../../../../components/core/extension/solid
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
 import { SolidWorkflowStatusPill } from "../../../../components/core/form/SolidDraftPublishWorkflow";
 import { getModelsDevModels, useModelsDevCatalog } from "../../../../hooks/useModelsDevModels";
+import { isOtherProvider } from "../../../../components/common/SolidSettings/LlmSettings/AiModelConfigTab";
 import { SolidAutocomplete, SolidButton, SolidCodeEditor, SolidDialog, SolidDialogBody, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuTrigger, SolidIconPicker, SolidInput, SolidTabGroup } from "../../../../components/shad-cn-ui";
 import { SolidAgentEmbedded } from "../../../../components/core/solid-agent/SolidAgentEmbedded";
 import { SolidAgentMarkdown } from "../../../../components/core/solid-agent/SolidAgentMarkdown";
@@ -78,6 +81,9 @@ function buildModelOptions(
 }
 
 const OTHER_MODEL = "__other_model__";
+const ACTIVATION_WAIT_MS = 10_000;
+const activationWaitKey = (agentId: number | string) => `agent-activation-wait:${agentId}`;
+const savedActivationReadyAt = (agentId: number | string) => Number(sessionStorage.getItem(activationWaitKey(agentId))) || null;
 
 function SearchableSelect({ value, options, placeholder, disabled, onChange }: {
   value: string;
@@ -129,6 +135,8 @@ function ModelPicker({ value, options, providers, providerConfig, onChange }: {
         <small><em>Region: {providerConfig[provider].region}</em></small>}
     </div>
     <div className="agent-editor__field"><span>Model *</span>
+      {isOtherProvider(provider) ? <SolidInput className="w-full" aria-label="Model ID" placeholder="Enter model ID" value={model}
+        onChange={(event) => onChange(`${provider}:${event.target.value}`)} /> : <>
       <SearchableSelect value={showOther ? OTHER_MODEL : model}
         options={[...availableModels.map((option) => ({ label: option.model, value: option.model })), { label: "Other", value: OTHER_MODEL }]}
         placeholder="Select model" disabled={!provider}
@@ -138,6 +146,7 @@ function ModelPicker({ value, options, providers, providerConfig, onChange }: {
         }} />
       {showOther && <SolidInput className="w-full" aria-label="Custom model ID" placeholder="Enter model ID" value={model}
         onChange={(event) => onChange(`${provider}:${event.target.value}`)} />}
+      </>}
     </div>
   </div>;
 }
@@ -333,6 +342,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
 
 export function AgentRegistryEditorPage() {
   const { id = "new" } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const agentResult = entityApi.useGetSolidEntityByIdQuery({ id, qs: detailQuery }, { skip: id === "new" });
@@ -370,7 +380,7 @@ export function AgentRegistryEditorPage() {
   const [deleteSecretLink] = agentSecretApi.useDeleteSolidEntityMutation();
   const [updateSecretLink] = agentSecretApi.useUpdateSolidEntityMutation();
   const record = recordFrom(response) as Agent | undefined;
-  const [tab, setTab] = React.useState("basics");
+  const [tab, setTab] = React.useState(searchParams.get("tab") === "config-versions" ? "config-versions" : "basics");
   const jobs = jobApi.useGetSolidEntitiesQuery(
     `offset=0&limit=1000&filters[agent][id][$eq]=${encodeURIComponent(id)}&${fieldsQuery(["id", "status"])}`,
     { skip: id === "new" || tab !== "jobs" });
@@ -436,7 +446,39 @@ export function AgentRegistryEditorPage() {
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [auditVersion, setAuditVersion] = React.useState(0);
   const [confirmRefresh, setConfirmRefresh] = React.useState(false);
+  const [activateDialogOpen, setActivateDialogOpen] = React.useState(false);
+  const [includeVersionDetails, setIncludeVersionDetails] = React.useState(false);
+  const [versionName, setVersionName] = React.useState("");
+  const [versionDescription, setVersionDescription] = React.useState("");
+  const [activating, setActivating] = React.useState(false);
+  const [activationReadyAt, setActivationReadyAt] = React.useState<number | null>(() => id === "new" ? null : savedActivationReadyAt(id));
+  const [countdownNow, setCountdownNow] = React.useState(Date.now());
   const baseline = React.useRef("");
+
+  React.useEffect(() => {
+    if (id === "new") {
+      setActivationReadyAt(null);
+      return;
+    }
+    const readyAt = savedActivationReadyAt(id);
+    setActivationReadyAt(readyAt !== null && readyAt > Date.now() ? readyAt : null);
+    if (readyAt !== null && readyAt <= Date.now()) sessionStorage.removeItem(activationWaitKey(id));
+  }, [id]);
+
+  React.useEffect(() => {
+    if (!activationReadyAt) return;
+    const tick = () => {
+      const now = Date.now();
+      setCountdownNow(now);
+      if (now >= activationReadyAt) {
+        sessionStorage.removeItem(activationWaitKey(id));
+        setActivationReadyAt(null);
+      }
+    };
+    tick();
+    const timer = window.setInterval(tick, 100);
+    return () => window.clearInterval(timer);
+  }, [activationReadyAt, id]);
 
   const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
     stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
@@ -528,11 +570,13 @@ export function AgentRegistryEditorPage() {
     }
   };
 
-  const save = async (nextStatus?: "draft" | "active" | "disabled") => {
-    if (creatingTag) return;
+  const save = async (nextStatus?: "draft" | "active" | "disabled", versionDetails: { name?: string; description?: string } = {}): Promise<boolean> => {
+    if (nextStatus === "active" && activationReadyAt && Date.now() < activationReadyAt) return false;
+    if (creatingTag) return false;
     const next: Record<string, string> = {};
     if (!name.trim()) next.name = "Name is required.";
     if (!title.trim()) next.title = "Title is required.";
+    if (!module) next.module = "Module is required. Select a module before saving this agent.";
     if (!systemPrompt.trim()) next.systemPrompt = "Persona instructions are required.";
     if (!isValidModelKey(reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
     if (!isValidModelKey(fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
@@ -543,7 +587,7 @@ export function AgentRegistryEditorPage() {
     if (Object.keys(next).length) {
       setTab(next.systemPrompt ? "persona" : next.limits ? "policies" : "basics");
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(next).join(" ") }));
-      return;
+      return false;
     }
     let normalizedInputs: Input[];
     try {
@@ -553,7 +597,7 @@ export function AgentRegistryEditorPage() {
       next.inputs = error instanceof Error ? error.message : "Check the default input values.";
       setErrors(next);
       setTab("basics");
-      return;
+      return false;
     }
     const payload = {
       name: name.trim(), title: title.trim(), description: description.trim(), iconName,
@@ -562,10 +606,11 @@ export function AgentRegistryEditorPage() {
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
       ...agentHubTagsPayload(tags),
       ...agentHubModulePayload(module),
-      status: nextStatus ?? record?.status ?? "draft",
+      status: nextStatus === "active" ? record?.status ?? "draft" : nextStatus ?? "draft",
     };
     let newlyCreatedId: number | undefined;
     let scalarSaved = false;
+    let activationAttempted = false;
     try {
       const result = record?.id ? await updateAgent({ id: record.id, data: payload }).unwrap() : await createAgent(payload).unwrap();
       scalarSaved = true;
@@ -579,14 +624,29 @@ export function AgentRegistryEditorPage() {
       await syncLinks(savedId, record?.agentRoles, roleIds, "roleMetadata", createRoleLink, deleteRoleLink, undefined);
       await syncLinks(savedId, record?.agentSecrets, secretIds, "secret", createSecretLink, deleteSecretLink, updateSecretLink,
         (targetId) => ({ envVarName: secretEnvVarNames[targetId] ?? "" }));
-      dispatch(showToast({ severity: "success", summary: nextStatus ? "Agent status updated" : "Saved", detail: nextStatus ? `Agent moved to ${nextStatus}.` : "Agent and its associations saved." }));
+      if (nextStatus === "active") {
+        activationAttempted = true;
+        await solidPost(`/agent-registry/${savedId}/activate`, versionDetails);
+      }
+      if (!nextStatus || nextStatus === "draft") {
+        const readyAt = Date.now() + ACTIVATION_WAIT_MS;
+        sessionStorage.setItem(activationWaitKey(savedId), String(readyAt));
+        setCountdownNow(Date.now());
+        setActivationReadyAt(readyAt);
+      } else {
+        sessionStorage.removeItem(activationWaitKey(savedId));
+        setActivationReadyAt(null);
+      }
+      dispatch(showToast({ severity: "success", summary: nextStatus === "active" ? "Agent activated" : nextStatus ? "Agent status updated" : "Saved", detail: nextStatus === "active" ? "A new config version was created and the agent was activated." : nextStatus ? `Agent moved to ${nextStatus}.` : "Agent and its associations saved." }));
       setAuditVersion((version) => version + 1);
       if (record?.id) refetch();
       else navigate(`/admin/core/solid-core/agent-registry/editor/${savedId}`, { replace: true });
+      return true;
     } catch (error) {
-      dispatch(showToast({ severity: "error", summary: scalarSaved ? "Agent saved; links incomplete" : "Save failed", detail: apiError(error) }));
+      dispatch(showToast({ severity: "error", summary: activationAttempted ? "Agent saved; activation failed" : scalarSaved ? "Agent saved; links incomplete" : "Save failed", detail: apiError(error) }));
       if (record?.id) refetch();
       else if (newlyCreatedId) navigate(`/admin/core/solid-core/agent-registry/editor/${newlyCreatedId}`, { replace: true });
+      return false;
     }
   };
 
@@ -631,11 +691,14 @@ export function AgentRegistryEditorPage() {
   const linkSetting = (label: string, checked: boolean, onChange: (checked: boolean) => void, hint: string) =>
     <label className="agent-editor__link-setting"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span><strong>{label}</strong><small>{hint}</small></span></label>;
   const agentStatus = record?.status ?? "draft";
+  const activationRemainingMs = Math.max(0, (activationReadyAt ?? 0) - countdownNow);
+  const activationRemainingSeconds = Math.ceil(activationRemainingMs / 1000);
+  const activationWaiting = agentStatus === "draft" && activationRemainingSeconds > 0;
   const tabs = [
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
       <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
-        <AgentHubModuleField className="agent-editor__field" value={module} onChange={setModule} disabled={creating || updating || isLoading || isFetching || isError} clearable={!record?.module} />
+        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError} clearable={false} required error={errors.module} />
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
@@ -669,9 +732,19 @@ export function AgentRegistryEditorPage() {
           ] as const).map(([value, label, description], index) => <React.Fragment key={value}>
             {index > 0 && <div className="agent-editor__workflow-connector" aria-hidden="true" />}
             <button type="button" className={`agent-editor__workflow-stage${agentStatus === value ? " is-current" : ""}`} aria-current={agentStatus === value ? "step" : undefined}
-              aria-pressed={agentStatus === value} disabled={creating || updating || agentStatus === value} onClick={() => void save(value)}>
-              <span className="agent-editor__workflow-stage-mark">{index + 1}</span>
-              <div className="agent-editor__workflow-stage-copy"><strong>{label}</strong><small>{description}</small><small className="agent-editor__workflow-stage-cta">{agentStatus === value ? "Current stage" : "Click to move to this stage"}</small></div>
+              aria-pressed={agentStatus === value} disabled={creating || updating || activating || agentStatus === value || (value === "active" && activationWaiting)} onClick={() => {
+                if (value === "active") {
+                  setIncludeVersionDetails(false);
+                  setVersionName("");
+                  setVersionDescription("");
+                  setActivateDialogOpen(true);
+                } else void save(value);
+              }}>
+              {value === "active" && activationWaiting ? <span className="agent-editor__activation-countdown" aria-label={`Active available in ${activationRemainingSeconds} seconds`}>
+                <svg viewBox="0 0 36 36" aria-hidden="true"><circle className="agent-editor__activation-countdown-track" cx="18" cy="18" r="15" /><circle className="agent-editor__activation-countdown-progress" cx="18" cy="18" r="15" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - activationRemainingMs / ACTIVATION_WAIT_MS * 100} /></svg>
+                <span>{activationRemainingSeconds}</span>
+              </span> : <span className="agent-editor__workflow-stage-mark">{index + 1}</span>}
+              <div className="agent-editor__workflow-stage-copy"><strong>{label}</strong><small>{description}</small><small className="agent-editor__workflow-stage-cta">{agentStatus === value ? "Current stage" : value === "active" && activationWaiting ? `Available in ${activationRemainingSeconds}s` : "Click to move to this stage"}</small></div>
               {agentStatus === value && <span className="agent-editor__workflow-current">Current</span>}
             </button>
           </React.Fragment>)}
@@ -681,7 +754,7 @@ export function AgentRegistryEditorPage() {
     </div> },
     { value: "persona", label: "Persona", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div>
       {record?.id && <AgentPersonaHistory agentId={record.id} savedPrompt={record.systemPrompt ?? ""} refreshVersion={auditVersion} />}</div>
-      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
+      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
@@ -720,6 +793,7 @@ export function AgentRegistryEditorPage() {
         : items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
     ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
+    ...(record?.id ? [{ value: "config-versions", label: "Config versions", content: <AgentConfigVersionsPanel agentId={record.id} active={tab === "config-versions"} /> }] : []),
     ...(record?.id ? [{ value: "embedding", label: "Embedding", content: <AgentEmbeddingPanel agentId={record.id}
       fields={parseInputs(record.requiredInputs)} active={record.status === "active"}
       hubUrl={String(getSettingsMap(settings).solidxAgentHubBackendUrl ?? "")} /> }] : []),
@@ -734,6 +808,28 @@ export function AgentRegistryEditorPage() {
     <SolidDialog open={confirmRefresh} onOpenChange={setConfirmRefresh} header="Discard unsaved changes?" style={{ width: "min(28rem, 94vw)" }}
       footer={<><SolidButton type="button" variant="secondary" onClick={() => setConfirmRefresh(false)}>Cancel</SolidButton><SolidButton type="button" disabled={isFetching} onClick={() => { setConfirmRefresh(false); void refetch(); }}>Refresh and discard</SolidButton></>}>
       <SolidDialogBody><p>You have unsaved changes. Refreshing will discard them and load the latest agent content.</p></SolidDialogBody>
+    </SolidDialog>
+    <SolidDialog open={activateDialogOpen} onOpenChange={(open) => { if (!activating) setActivateDialogOpen(open); }} header="Activate agent with a new config version?" style={{ width: "min(34rem, 94vw)" }}
+      footer={<><SolidButton type="button" variant="secondary" disabled={activating} onClick={() => setActivateDialogOpen(false)}>Cancel</SolidButton><SolidButton type="button" loading={activating || creating || updating} disabled={creatingTag || creating || updating || activating || activationWaiting} onClick={async () => {
+        setActivating(true);
+        const saved = await save("active", includeVersionDetails ? { name: versionName.trim(), description: versionDescription.trim() } : {});
+        setActivating(false);
+        if (saved) setActivateDialogOpen(false);
+      }}>Create version and activate</SolidButton></>}>
+      <SolidDialogBody><div className="agent-editor__activation-dialog">
+        <div className="agent-editor__activation-intro">
+          <span className="agent-editor__activation-icon"><GitBranch size={18} /></span>
+          <div><strong>A new config version will be created</strong><p>Activating saves this agent as the next version and makes it available to users.</p></div>
+        </div>
+        <label className={`agent-editor__version-details-toggle${includeVersionDetails ? " is-selected" : ""}`}>
+          <input type="checkbox" checked={includeVersionDetails} onChange={(event) => setIncludeVersionDetails(event.target.checked)} />
+          <span className="agent-editor__version-details-copy"><strong>Add a name and description</strong><small>Optional details help identify this version later.</small></span>
+        </label>
+        {includeVersionDetails && <div className="agent-editor__version-details-fields">
+          <label className="agent-editor__field"><span>Version name <small>Optional</small></span><SolidInput autoFocus placeholder="e.g. Updated support workflow" value={versionName} onChange={(event) => setVersionName(event.target.value)} /></label>
+          <label className="agent-editor__field"><span>Description <small>Optional</small></span><textarea placeholder="What changed in this version?" value={versionDescription} rows={3} onChange={(event) => setVersionDescription(event.target.value)} /></label>
+        </div>}
+      </div></SolidDialogBody>
     </SolidDialog>
     {isLoading ? <div className="agent-editor__empty">Loading agent…</div> : isError || (id !== "new" && !record?.id) ?
     <div className="agent-editor__empty">This agent could not be loaded.</div> : record?.id ?

@@ -62,6 +62,8 @@ import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/m
 import MqMessageDetailsKanbanCardAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageDetailsKanbanCardAction";
 import MqMessageKanbanQuickFilterHeaderAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanQuickFilterHeaderAction";
 import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/extension/solid-core/mqMessage/MqMessageSelectedRecordsSummaryHeaderAction";
+import AgentSessionComparisonHeaderAction from "../components/core/extension/solid-core/agentSession/AgentSessionComparisonHeaderAction";
+import { AgentSessionConfigVersionListWidget } from "../components/core/extension/solid-core/agentSession/AgentSessionConfigVersionListWidget";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
 import { AgentRegistryCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
 import { AgentResourceCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
@@ -114,6 +116,7 @@ import { SolidGalleryChatWidget } from "../components/core/solid-agent/widgets/S
 import { SolidProgressChatWidget } from "../components/core/solid-agent/widgets/SolidProgressChatWidget";
 import { SolidStatusChatWidget } from "../components/core/solid-agent/widgets/SolidStatusChatWidget";
 import { SolidLinkCardChatWidget } from "../components/core/solid-agent/widgets/SolidLinkCardChatWidget";
+import { SolidNavigationIntentChatWidget } from "../components/core/solid-agent/widgets/SolidNavigationIntentChatWidget";
 import { SolidToolActivityChatWidget } from "../components/core/solid-agent/widgets/SolidToolActivityChatWidget";
 
 
@@ -277,6 +280,8 @@ registerExtensionComponent("AgentEventOutcomeListWidget", AgentEventOutcomeListW
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("AgentSessionComparisonHeaderAction", AgentSessionComparisonHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("AgentSessionConfigVersionListWidget", AgentSessionConfigVersionListWidget, ExtensionComponentTypes.listFieldWidget);
 
 // ...
 
@@ -541,4 +546,5 @@ registerExtensionComponent("SolidGalleryChatWidget", SolidGalleryChatWidget, Ext
 registerExtensionComponent("SolidProgressChatWidget", SolidProgressChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["progress"]);
 registerExtensionComponent("SolidStatusChatWidget", SolidStatusChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["status"]);
 registerExtensionComponent("SolidLinkCardChatWidget", SolidLinkCardChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["link-card"]);
+registerExtensionComponent("SolidNavigationIntentChatWidget", SolidNavigationIntentChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["navigation-intent"]);
 registerExtensionComponent("SolidToolActivityChatWidget", SolidToolActivityChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["tool-activity"]);

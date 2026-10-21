@@ -9,8 +9,11 @@ import {
     type AgentState,
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, isSameAssistantContent, normalizeAgentFrame } from "../agentEvents";
+import { parseWidgetContent } from "../thread/inlineWidget";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
-import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentSessionOptions, type AgentWireFrame } from "../types";
+import { emitBeforeUserMessageSend, type BeforeUserMessageSendContribution } from "./beforeUserMessageSend";
+import { emitAgentPublicEvent, type AgentPublicEventName, type AgentPublicEventPayloads } from "./agentPublicEvents";
+import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentMessageContext, type AgentSessionOptions, type AgentWireFrame } from "../types";
 import { resolveAttachmentMedia } from "./agentAttachmentMedia";
 import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory, uploadAgentAttachments } from "./agentRest";
@@ -134,6 +137,9 @@ export class AgentRuntime {
     private frame: number | null = null;
     private unsubscribers: Array<() => void> = [];
     private lastContext: AgentContext | undefined;
+    private responseStarted = false;
+    private hadPriorSession = false;
+    private preparationControllers = new Set<AbortController>();
     private historySessionId: string | null = null;
     private historyGeneration = 0;
     private loadingHistoryPages = new Map<string, number>();
@@ -170,13 +176,18 @@ export class AgentRuntime {
             if (this.persistSession) writeSessionId(this.sessionKey, null);
             this.dispatch(agentThreadReset());
         });
+        this.hadPriorSession = !!this.socket.currentSessionId;
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => {
                 queueMicrotask(() => this.dispatch(agentConnectionChanged(status)));
             }),
+            this.socket.onStatus((status) => this.publish("onConnectionStateChanged", { state: status })),
+            this.socket.onSent((action) => {
+                if (action.action === "message") this.publish("onAfterUserMessageSend", { sessionId: action.session_id, source: action.source ?? "composer", deliveryStage: "sent" });
+            }),
         );
-        queueMicrotask(() => this.socket.connect());
+        this.socket.connect();
     }
 
     updateStore(dispatch: Dispatch, getState: GetAgentState) {
@@ -187,51 +198,102 @@ export class AgentRuntime {
     /**
      * Uploads files into SolidX media storage first, then sends their IDs with the socket message.
      */
-    async sendMessage(text: string, context?: AgentContext, attachments: AgentAttachment[] = [], inputs?: Record<string, unknown>) {
-        const content = text.trim();
-        if (!content && !attachments.length) return;
+    async sendMessage(
+        text: string,
+        context?: AgentContext,
+        attachments: AgentAttachment[] = [],
+        inputs?: Record<string, unknown>,
+        beforeSend?: (request: { text: string; source: "composer" | "sdk" | "prefill" | "widget"; attachments: Array<{ name: string; mimeType: string; size: number }> }, signal: AbortSignal) => Promise<AgentMessageContext | AgentContext | undefined>,
+        source: "composer" | "sdk" | "prefill" | "widget" = "composer",
+        widgetReply?: { widgetId: string; value: unknown },
+    ) {
+        const content = text;
+        if (!content.trim() && !attachments.length) return;
+        const controller = new AbortController();
+        this.preparationControllers.add(controller);
+        let messageContext: AgentMessageContext | undefined;
+        let contributedInputContext: AgentContext | undefined;
+        try {
+            const request = {
+                text: content,
+                source,
+                attachments: attachments.map(({ meta }) => ({ name: meta.name, mimeType: meta.mimeType, size: meta.size })),
+            };
+            const contributions: BeforeUserMessageSendContribution[] = this.agentRuntime === "solidx"
+                ? await emitBeforeUserMessageSend(request, controller.signal)
+                : [];
+            if (beforeSend) contributions.push(await beforeSend(request, controller.signal));
+            for (const contribution of contributions) {
+                if (contribution && typeof contribution === "object" && "schemaVersion" in contribution
+                    && contribution.schemaVersion === 1 && "namespaces" in contribution) {
+                    const incoming = contribution as AgentMessageContext;
+                    messageContext = {
+                        schemaVersion: 1,
+                        namespaces: { ...(messageContext?.namespaces ?? {}), ...incoming.namespaces },
+                    };
+                } else if (contribution && typeof contribution === "object") {
+                    contributedInputContext = { ...(contributedInputContext ?? {}), ...contribution };
+                }
+            }
+        } catch (error) {
+            this.publish("onUserMessageFailed", { stage: "context", code: "context_preparation_failed", retryable: true });
+            throw error;
+        } finally {
+            this.preparationControllers.delete(controller);
+        }
+        if (controller.signal.aborted) throw new Error("Message preparation was cancelled.");
         const uploaded = attachments.length
             ? await uploadAgentAttachments(this.agentUrl, attachments.map((item) => item.file))
             : [];
         if (uploaded.length !== attachments.length) {
+            this.publish("onUserMessageFailed", { stage: "upload", code: "attachment_upload_failed", retryable: true });
             throw new Error("SolidX did not confirm every uploaded file. Please retry.");
         }
+        this.publish("onUserMessageQueued", { source, hasAttachments: attachments.length > 0,
+            contextNamespaces: messageContext ? Object.keys(messageContext.namespaces) : [] });
+        this.responseStarted = false;
         if (context) this.lastContext = context;
         const displayAttachments = attachments.map((item, index) => ({
             ...item.meta,
             ...(uploaded[index] ? { mediaId: uploaded[index].id } : {}),
         }));
-        this.dispatch(agentUserMessageAdded({ text: content, attachments: displayAttachments }));
+        this.dispatch(agentUserMessageAdded({ text: content, attachments: displayAttachments, messageContext }));
         this.socket.send({
             action: "message",
             session_id: this.socket.currentSessionId ?? "",
             content,
-            context: context ?? this.lastContext,
+            source,
+            context: contributedInputContext
+                ? { ...(context ?? this.lastContext ?? {}), ...contributedInputContext }
+                : context ?? this.lastContext,
+            ...(messageContext ? { message_context: messageContext } : {}),
             ...(this.agentRuntime === "agentHub" && inputs ? { inputs } : {}),
             ...(attachments.length ? { attachments: uploaded } : {}),
+            ...(widgetReply ? { widget_reply: widgetReply } : {}),
         });
     }
 
     /** Answers a widget. Sent as text too, so agents without widget_reply support still understand it. */
-    replyToWidget(widgetId: string, widget: string, value: unknown) {
+    async replyToWidget(widgetId: string, widget: string, value: unknown,
+        beforeSend?: Parameters<AgentRuntime["sendMessage"]>[4]) {
         const text = typeof value === "string" ? value : Array.isArray(value) ? value.join(", ") : JSON.stringify(value);
-        this.dispatch(agentUserMessageAdded({ text }));
-        this.socket.send({
-            action: "message",
-            session_id: this.socket.currentSessionId ?? "",
-            content: text,
-            context: this.lastContext,
-            widget_reply: { widgetId, value },
-        });
+        await this.sendMessage(text, this.lastContext, [], undefined, beforeSend, "widget", { widgetId, value });
+        // The text message uses the shared preparation path. Keep the structured widget
+        // value as a separate event for consumers that handle widget replies.
         eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value, agentType: this.agentRuntime });
     }
 
     cancel() {
         const sessionId = this.socket.currentSessionId;
-        if (sessionId) this.socket.send({ action: "cancel", session_id: sessionId });
+        if (sessionId) {
+            this.publish("onCancelRequested", { sessionId });
+            this.socket.send({ action: "cancel", session_id: sessionId });
+        }
     }
 
     newChat(provider?: string, model?: string, opts?: AgentSessionOptions) {
+        this.publish("onNewChatRequested", { sessionId: this.socket.currentSessionId });
+        this.hadPriorSession = false;
         this.resetHistoryLoads();
         if (this.persistSession) writeSessionId(this.sessionKey, null);
         if (provider) setStoredProviderAndModel(provider, model);
@@ -255,6 +317,7 @@ export class AgentRuntime {
     }
 
     resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions) {
+        this.hadPriorSession = true;
         this.resetHistoryLoads();
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         if (provider) setStoredProviderAndModel(provider, model);
@@ -277,6 +340,8 @@ export class AgentRuntime {
     }
 
     dispose() {
+        this.preparationControllers.forEach((controller) => controller.abort());
+        this.preparationControllers.clear();
         this.resetHistoryLoads();
         this.unsubscribers.forEach((off) => off());
         if (this.frame != null) cancelAnimationFrame(this.frame);
@@ -307,6 +372,47 @@ export class AgentRuntime {
 
     private handleFrame(frame: AgentWireFrame) {
         const event = normalizeAgentFrame(frame);
+        if (event.eventType === AgentEventTypes.sessionStarted) {
+            const sessionId = frame.session_id ?? event.eventData.session_id ?? null;
+            this.publish(this.hadPriorSession ? "onSessionResumed" : "onSessionStarted", { sessionId });
+            this.hadPriorSession = true;
+        }
+        else if (event.eventType === AgentEventTypes.sessionEnded) this.publish("onSessionEnded", { sessionId: this.socket.currentSessionId, reason: event.eventData.reason ?? "ended" });
+        else if (event.eventType === AgentEventTypes.agentStarted) this.publish("onAgentTurnStarted", { sessionId: this.socket.currentSessionId });
+        else if ((event.eventType === AgentEventTypes.llmToken || event.eventType === AgentEventTypes.llmComplete)
+            && !event.eventData.widget && !this.responseStarted) {
+            this.responseStarted = true;
+            this.publish("onAgentResponseStarted", { sessionId: this.socket.currentSessionId });
+        }
+        else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
+            this.publish("onAgentResponseCompleted", { sessionId: this.socket.currentSessionId });
+            const completedContent = event.eventData.content ?? event.frame.content;
+            const inline = parseWidgetContent(completedContent);
+            if (inline?.widget === "navigation-intent" && inline.data.schemaVersion === 1
+                && inline.data.kind === "navigation" && typeof inline.data.domain === "string"
+                && inline.data.payload && typeof inline.data.payload === "object" && !Array.isArray(inline.data.payload)) {
+                this.publish("onAgentNavigationRequested", {
+                    schemaVersion: 1,
+                    kind: "navigation",
+                    domain: inline.data.domain,
+                    payload: inline.data.payload as Record<string, unknown>,
+                    ...(typeof inline.data.message === "string" ? { message: inline.data.message } : {}),
+                    sessionId: this.socket.currentSessionId,
+                });
+            }
+            this.publish("onAgentTurnCompleted", { sessionId: this.socket.currentSessionId, outcome: "completed" });
+        } else if (event.eventType === AgentEventTypes.agentError || event.eventType === AgentEventTypes.error) {
+            this.publish("onError", { stage: "runtime", code: "agent_error", retryable: false });
+        } else if (event.eventType === "HumanRequestCreated") {
+            const approval = event.eventData.kind === "approval";
+            this.publish(approval ? "onApprovalRequested" : "onHumanInputRequested", {
+                sessionId: this.socket.currentSessionId,
+                requestId: event.eventData.request_id,
+                ...(typeof event.eventData.question === "string" ? { displayPayload: event.eventData.question.slice(0, 1024) } : {}),
+            });
+        } else if (event.eventType === AgentEventTypes.executionCancelled || event.eventType === AgentEventTypes.executionCancelledLegacy) {
+            this.publish("onTurnCancelled", { sessionId: this.socket.currentSessionId });
+        }
 
         // Stream text is batched per animation frame unless it carries a widget of its own.
         if (event.eventType === AgentEventTypes.llmToken && !event.eventData.widget) {
@@ -318,6 +424,10 @@ export class AgentRuntime {
         this.flushTokens();
         this.dispatch(agentEventReceived(event));
         this.emitSdkEvents(event);
+    }
+
+    private publish<E extends AgentPublicEventName>(event: E, payload: AgentPublicEventPayloads[E]) {
+        emitAgentPublicEvent(event, payload, this.agentRuntime);
     }
 
     private lastTurnCompleteContent: string | null = null;
