@@ -587,11 +587,12 @@
 .bannerError { background: color-mix(in srgb, var(--agent-err) 10%, transparent); color: var(--agent-err); }
 
 /* ── History menu ────────────────────────────────────────────── */
-.historyPanel { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px; }
+.historyPanel { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px; }
 .historySearchBox {
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
   margin: 0 0 8px 0;
 }
 .historySearchInput {
@@ -641,6 +642,8 @@
 .historyRow {
   display: flex;
   align-items: center;
+  width: 100%;
+  min-width: 0;
   border-radius: 8px;
   transition: background 0.15s;
 }
@@ -648,13 +651,21 @@
   background: color-mix(in srgb, var(--agent-tint) 50%, transparent);
 }
 .historyActions {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 2px;
   padding-right: 4px;
 }
+.historyActions .iconBtn {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
 .historyRenameForm {
   flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -680,7 +691,8 @@
   box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--agent-primary) 25%, transparent);
 }
 .historyItem {
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -696,7 +708,7 @@
 .historyItem:hover { background: var(--agent-tint); }
 .historyItemActive { background: var(--agent-tint); font-weight: 600; }
 .historyPreview { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.historyDate { flex: 0 0 auto; font-size: 11px; color: var(--agent-muted); }
+.historyDate { flex: 0 0 auto; font-size: 11px; color: var(--agent-muted); white-space: nowrap; }
 
 /* ── Thread ──────────────────────────────────────────────────── */
 .thread {

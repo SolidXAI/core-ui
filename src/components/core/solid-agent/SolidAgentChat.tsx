@@ -367,6 +367,7 @@ export function SolidAgentChat({
     }, [showProviderMenu]);
 
     const handleSelectProvider = (providerId: string) => {
+        if (agent.working) return;
         setSelectedProvider(providerId);
         setShowProviderMenu(false);
         fetchProviderModels(agentUrl, providerId).then((res) => {
@@ -398,6 +399,7 @@ export function SolidAgentChat({
     };
 
     const handleStartNewChat = () => {
+        if (agent.working) return;
         runtime?.newChat(selectedProvider, selectedModel, {
             thinking: isThinking,
             reasoning: selectedReasoning,
@@ -421,6 +423,7 @@ export function SolidAgentChat({
     }, [providers]);
 
     const handleResumeSession = async (session: AgentSessionSummary) => {
+        if (agent.working) return;
         const targetProvider = session.provider || selectedProvider;
         const targetModel = session.model || selectedModel;
 
@@ -933,10 +936,12 @@ export function SolidAgentChat({
                         <button
                             type="button"
                             className={styles.iconBtn}
-                            title="History"
+                            title={agent.working ? "History unavailable while agent is responding" : "History"}
                             aria-label="Chat history"
                             aria-pressed={showHistory}
+                            disabled={agent.working}
                             onClick={() => {
+                                if (agent.working) return;
                                 setShowHistory((v) => {
                                     if (!v) {
                                         setHistorySearchQuery("");
@@ -1100,6 +1105,7 @@ export function SolidAgentChat({
                                         <button
                                             type="button"
                                             className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
+                                            disabled={agent.working}
                                             onClick={() => void handleResumeSession(session)}
                                             title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
                                         >
@@ -1122,8 +1128,10 @@ export function SolidAgentChat({
                                                 className={styles.iconBtn}
                                                 aria-label="Rename conversation"
                                                 title="Rename"
+                                                disabled={agent.working}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
+                                                    if (agent.working) return;
                                                     setEditingSessionId(session.session_id);
                                                     setEditingTitle(session.title || session.preview || "New conversation");
                                                 }}
@@ -1135,8 +1143,10 @@ export function SolidAgentChat({
                                                 className={styles.iconBtn}
                                                 aria-label="Delete conversation"
                                                 title="Delete"
+                                                disabled={agent.working}
                                                 onClick={async (e) => {
                                                     e.stopPropagation();
+                                                    if (agent.working) return;
                                                     if (!window.confirm("Delete this conversation?")) return;
                                                     await deleteSession(agentUrl, session.session_id);
                                                     setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
