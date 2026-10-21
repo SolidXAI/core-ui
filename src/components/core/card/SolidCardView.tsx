@@ -194,10 +194,10 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
     : [];
 
   const entityApi = createSolidEntityApi(params.modelName);
-  const { useDeleteSolidEntityMutation, useLazyGetSolidEntitiesQuery, useRecoverSolidEntityByIdMutation } = entityApi;
+  const { useDeleteSolidEntityMutation, useLazyGetSolidEntitiesQuery, useLazyRecoverSolidEntityByIdQuery } = entityApi;
   const [triggerGetSolidEntities, { data: solidEntityCardViewData }] = useLazyGetSolidEntitiesQuery();
   const [deleteSolidEntity, { isLoading: isDeletingRecord }] = useDeleteSolidEntityMutation();
-  const [triggerRecoverSolidEntityById, { isLoading: recoverByIdIsLoading }] = useRecoverSolidEntityByIdMutation();
+  const [triggerRecoverSolidEntityById, { isLoading: recoverByIdIsLoading }] = useLazyRecoverSolidEntityByIdQuery();
 
   const menuItemId = searchParams.get("menuItemId");
   const menuItemName = searchParams.get("menuItemName");

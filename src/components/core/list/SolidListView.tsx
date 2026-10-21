@@ -331,7 +331,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
     useUpdateSolidEntityMutation,
-    useRecoverSolidEntityByIdMutation,
+    useRecoverSolidEntityByIdQuery,
+    useLazyRecoverSolidEntityByIdQuery,
     useRecoverSolidEntityMutation,
   } = entityApi;
 
@@ -527,9 +528,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [
     triggerRecoverSolidEntitiesById,
     {
+      data: recoverByIdData,
       isLoading: recoverByIdIsLoading,
+      error: recoverByIdError,
+      isError: recoverByIdIsError,
+      isSuccess: recoverByIdIsSuccess,
     },
-  ] = useRecoverSolidEntityByIdMutation();
+  ] = useLazyRecoverSolidEntityByIdQuery();
 
   const [
     triggerRecoverSolidEntities,
@@ -1094,13 +1099,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   // Recover functions
   const recoverById = async (id: any) => {
-    try {
-      const response: any = await triggerRecoverSolidEntitiesById(id).unwrap();
-      dispatch(showToast({ severity: "success", summary: "Success", detail: response?.data?.message || "Record recovered successfully.", life: 3000 }));
-      await setQueryString();
-    } catch (error: any) {
-      showError(error);
-    }
+    await triggerRecoverSolidEntitiesById(id).unwrap();
+    await setQueryString();
   };
 
   const recoverAll = async () => {
@@ -1120,10 +1120,19 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   useEffect(() => {
+    if (recoverByIdIsSuccess && recoverByIdData) {
+      dispatch(showToast({ severity: "success", summary: "Success", detail: recoverByIdData.data.message, life: 3000 }));
+      return;
+    }
+    if (recoverByIdIsError && recoverByIdError) {
+      showError(recoverByIdError);
+      return;
+    }
+
     if (recoverIsError && recoverError) {
       showError(recoverError);
     }
-  }, [recoverIsError, recoverError]);
+  }, [recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
 
   const showError = async (error: any) => {
     const errorMessages = error?.data?.message;

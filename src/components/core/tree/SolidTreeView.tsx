@@ -245,7 +245,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
     useUpdateSolidEntityMutation,
-    useRecoverSolidEntityByIdMutation,
+    useRecoverSolidEntityByIdQuery,
+    useLazyRecoverSolidEntityByIdQuery,
     useRecoverSolidEntityMutation,
   } = entityApi;
 
@@ -254,9 +255,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [
     triggerRecoverSolidEntitiesById,
     {
+      data: recoverByIdData,
       isLoading: recoverByIdIsLoading,
+      error: recoverByIdError,
+      isError: recoverByIdIsError,
+      isSuccess: recoverByIdIsSuccess,
     },
-  ] = useRecoverSolidEntityByIdMutation();
+  ] = useLazyRecoverSolidEntityByIdQuery();
 
   const [
     triggerRecoverSolidEntities,
