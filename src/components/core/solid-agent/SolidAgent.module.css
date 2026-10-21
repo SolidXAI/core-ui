@@ -1639,64 +1639,99 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--agent-primary) 12%, transparent);
+  border-radius: 8px;
+  background: transparent;
   cursor: pointer;
-  transition: background .15s, transform .15s;
+  color: var(--agent-muted);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 .contextPillBtn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--agent-primary) 22%, transparent);
+  background: var(--agent-tint);
+  color: var(--agent-fg);
   transform: scale(1.05);
 }
+.contextPillBtn:focus-visible {
+  outline: 2px solid var(--agent-primary);
+  outline-offset: 1px;
+}
 .contextPillBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 .contextRingSvg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   transform: rotate(-90deg);
+  display: block;
+  flex-shrink: 0;
 }
 .contextRingTrack {
-  stroke: color-mix(in srgb, var(--agent-primary) 22%, transparent);
+  stroke: color-mix(in srgb, var(--agent-muted) 45%, transparent);
   fill: none;
 }
 .contextRingProgress {
   stroke: var(--agent-primary);
   fill: none;
-  transition: stroke-dashoffset .3s ease;
+  transition: stroke-dashoffset 0.35s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.2s ease;
+}
+.contextProgressWarn {
+  stroke: #f59e0b !important;
+}
+.contextProgressDanger {
+  stroke: #ef4444 !important;
 }
 .contextPopoverContent {
-  background: #12151c !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  border-radius: 8px !important;
-  padding: 10px 14px !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5) !important;
+  background: var(--surface-card, var(--agent-bg)) !important;
+  border: 1px solid var(--surface-border, var(--agent-border)) !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.1) !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 7px !important;
-  min-width: 185px !important;
+  gap: 8px !important;
+  min-width: 195px !important;
   pointer-events: auto !important;
   user-select: none;
+  color: var(--text-color, var(--agent-fg)) !important;
+}
+.contextPopoverBarTrack {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--agent-border);
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+.contextPopoverBarFill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--agent-primary);
+  transition: width 0.3s ease;
+}
+.contextPopoverBarWarn {
+  background: #f59e0b;
+}
+.contextPopoverBarDanger {
+  background: #ef4444;
 }
 .contextCardRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 18px;
   font-size: 12px;
   line-height: 1.35;
 }
 .contextCardLabel {
-  color: #f1f5f9;
-  font-weight: 400;
+  color: var(--agent-muted);
+  font-weight: 500;
 }
 .contextCardValue {
-  color: #ffffff;
+  color: var(--agent-fg);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: right;
