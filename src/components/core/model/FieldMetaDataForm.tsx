@@ -270,11 +270,13 @@ const triggerOperationOptions = [
   { label: "afterRemove", value: "after-delete" },
 ];
 
-const formatDisplayName = (value: string): string => {
-  return value
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+const formatDisplayName = (value?: string | null): string => {
+   return value
+     ? value
+         .split("-")
+         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+         .join(" ")
+     : "";
 };
 
 
@@ -348,7 +350,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
       : modelMetaData?.singularName
         ? {
           singularName: modelMetaData?.singularName,
-          displayName: modelMetaData?.displayName || formatDisplayName(modelMetaData.displayName),
+          displayName: modelMetaData?.displayName || formatDisplayName(modelMetaData.singularName),
         }
         : null,
     relationField: true,
@@ -825,7 +827,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     }),
     ...(currentFields.includes("computedFieldValueProviderCtxt") && {
       computedFieldValueProviderCtxt: Yup.string().required(
-        ERROR_MESSAGES.FIELD_REUQIRED('"Computed Field Value Provider Context Value')
+        ERROR_MESSAGES.FIELD_REUQIRED('Computed Field Value Provider Context Value')
       ).test(
         ERROR_MESSAGES.IS_VALID_JSON,
         ERROR_MESSAGES.COMPUTED_FIELD_VALIDATE_JSON,
