@@ -372,7 +372,7 @@ export class AgentRuntime {
                         totalInputTokens: sessionUsage.total_input_tokens ?? 0,
                         totalOutputTokens: sessionUsage.total_output_tokens ?? 0,
                         totalTokens: sessionUsage.total_tokens ?? 0,
-                        contextTokens: sessionUsage.total_input_tokens ?? 0,
+                        contextTokens: (sessionUsage as any).context_tokens ?? sessionUsage.total_input_tokens ?? 0,
                         contextLimit: 0,
                     },
                 } : {}),

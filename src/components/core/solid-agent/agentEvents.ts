@@ -329,12 +329,17 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             if (limit > 0 || state.usage) {
                 const inTok = eventData.total_input_tokens ?? frame.total_input_tokens ?? state.usage?.totalInputTokens ?? 0;
                 const outTok = eventData.total_output_tokens ?? frame.total_output_tokens ?? state.usage?.totalOutputTokens ?? 0;
+                const prevCtx = state.usage?.contextTokens ?? 0;
+                const rawCtx = eventData.context_tokens ?? frame.context_tokens;
+                const ctxTok = (rawCtx !== undefined && rawCtx !== null && rawCtx > 0)
+                    ? rawCtx
+                    : (prevCtx > 0 ? prevCtx : inTok);
                 state.usage = {
                     totalCost: eventData.total_cost ?? frame.total_cost ?? state.usage?.totalCost ?? 0,
                     totalInputTokens: inTok,
                     totalOutputTokens: outTok,
                     totalTokens: eventData.total_tokens ?? frame.total_tokens ?? (inTok + outTok),
-                    contextTokens: eventData.context_tokens ?? frame.context_tokens ?? inTok,
+                    contextTokens: ctxTok,
                     contextLimit: limit,
                 };
             }
