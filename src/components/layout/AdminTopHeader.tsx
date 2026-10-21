@@ -82,6 +82,11 @@ export const AdminTopHeader = () => {
   }, [actionId, actionResponse, pathname, searchParams]);
 
   const showBack = /\/admin\/core\/[^/]+\/[^/]+\/(?:form|editor)\/[^/]+/.test(pathname);
+  const recordUserKey = searchParams.get("recordUserKey");
+  const renderCrumbLabel = (crumb: string, index: number) => {
+    if (index !== 2 || !recordUserKey || !crumb.startsWith(recordUserKey)) return crumb;
+    return <><strong>{recordUserKey}</strong>{crumb.slice(recordUserKey.length)}</>;
+  };
 
   const triggerSidebar = () => {
     window.dispatchEvent(new CustomEvent(SIDEBAR_TOGGLE_EVENT));
@@ -147,10 +152,10 @@ export const AdminTopHeader = () => {
                   onClick={() => handleBreadcrumbClick(index)}
                   style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", textDecoration: "underline", fontFamily: 'inherit' }}
                 >
-                  {crumb}
+                  {renderCrumbLabel(crumb, index)}
                 </button>
               ) : (
-                <span className="solid-bread-crum-text-wrapper">{crumb}</span>
+                <span className="solid-bread-crum-text-wrapper">{renderCrumbLabel(crumb, index)}</span>
               )}
             </span>
           ))}
