@@ -3,10 +3,12 @@ import { useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { SolidCardView } from "../../../../components/core/card/SolidCardView";
 import type { SolidCardViewHandle } from "../../../../components/core/card/SolidCardView";
-import { registerCardView, unregisterCardView } from "../../../../components/core/card/cardViewRegistry";
+import { getCardView, registerCardView, unregisterCardView } from "../../../../components/core/card/cardViewRegistry";
 import { storeCurrentModelViewContext } from "../../../../helpers/modelViewPersistence";
 import { usePathname } from "../../../../hooks/usePathname";
 import { useSearchParams } from "../../../../hooks/useSearchParams";
+import { isMatchingAdminViewRefresh, ADMIN_VIEW_REFRESH_REQUESTED, type AdminViewRefreshRequest } from "../../../../helpers/adminViewRefresh";
+import { eventBus } from "../../../../helpers/eventBus";
 
 export function CardPage() {
   const params = useParams();
@@ -33,6 +35,12 @@ export function CardPage() {
     const currentUrl = search ? `${pathname}?${search}` : pathname;
     storeCurrentModelViewContext(currentUrl);
   }, [pathname, search]);
+
+  useEffect(() => eventBus.on<AdminViewRefreshRequest>(ADMIN_VIEW_REFRESH_REQUESTED, (request) => {
+    if (isMatchingAdminViewRefresh(request, { moduleName, modelName, viewName: "card" })) {
+      getCardView(cardId)?.refresh();
+    }
+  }), [cardId, moduleName, modelName]);
 
   return <SolidCardView ref={setCardRef} key={cardId} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }

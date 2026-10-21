@@ -19,6 +19,12 @@ export type AgentContext = {
     [key: string]: unknown;
 };
 
+export type AgentJson = null | boolean | number | string | AgentJson[] | { [key: string]: AgentJson };
+export type AgentMessageContext = {
+    schemaVersion: 1;
+    namespaces: Record<string, { context: AgentJson; revision: string; displaySummary?: string }>;
+};
+
 export type AgentMode = "bubble" | "compact" | "docked" | "maximized";
 
 /**
@@ -114,7 +120,9 @@ export type AgentAction =
           action: "message";
           session_id: string;
           content: string;
+          source?: "composer" | "sdk" | "prefill" | "widget";
           context?: AgentContext;
+          message_context?: AgentMessageContext;
           inputs?: Record<string, unknown>;
           widget_reply?: WidgetReply | null;
           attachments?: AgentAttachmentPayload[] | AgentUploadedAttachment[];

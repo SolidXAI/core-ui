@@ -4,6 +4,127 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.21-beta.0] - 2026-10-15
+
+### Added
+
+- implement admin view refresh handling across various components
+- add navigation intent handling and routing support in SolidAgent components
+- implement beforeSend contributions and public event handling in SolidAgent components
+- add module validation and error handling in various editor pages; enhance styling for AgentHubModuleField
+- enhance message context handling and add beforeSend support in SolidAgent components
+- pass module prop to AgentHubTagsField in multiple editor pages
+- add AgentHubModuleField component and integrate module selection in agent, skill, and tool registry editor pages
+- enhance ArchivedChatterMessagesPage with advanced filtering and improved UI
+
+### Fixed
+
+- update SDK version in AgentEmbeddingPanel to v4
+- show thumbnails and typed file icons in uploaded (#255)
+
+### Other
+
+- changed duplicate microsoft icon (#250)
+- WIP fixed mobile responsive issues (#256)
+- Refactor code structure for improved readability and maintainability
+
+## [0.1.20] - 2026-10-14
+
+### Added
+
+- add archived chatter messages functionality
+- Add message metadata display and copy functionality to chat components
+- Enhance AI model configuration with Bedrock support and searchable model selection
+- Add AgentPersonaHistory component for managing persona history and version comparison
+- Enhance agent input handling with optional fields and default values
+- Enhance agent chat widget functionality with dynamic metadata and registration improvements
+- Enable auto-refresh of chatter messages on form save (#266)
+- Enhance Agent Registry Editor with resource preview and tag management
+- add AgentToolActivationDialog for tool activation checks and status updates; enhance AgentToolRegistryEditorPage with activation logic
+
+### Fixed
+
+- Improve clipboard copy functionality and handle history loading in AgentRuntime
+- simplify button rendering logic for history button
+- update spacing for authentication forms using CSS variables (#264)
+- preserve menu context across model navigation (#253)
+
+### Changed
+
+- streamline tool activation checks by replacing axios with solidPost and simplifying URL handling
+- remove unused imports and components from AdminHeaderActions and SolidAiStudioLayout; simplify Studio visibility logic
+
+### Other
+
+- Fix/sidebar action menu focus (#272)
+- fix media list close on perview (#270)
+- Update solidx modules (#271)
+- User profile menu (#259)
+- error toast added for user delete on form view (#261)
+- check added for unmapped column (#262)
+- clear selection after bulk delete and recover (#263)
+- kanban view toast added after delete (#267)
+
+## [0.1.20-beta.1] - 2026-10-13
+
+### Added
+
+- add archived chatter messages functionality
+- Add message metadata display and copy functionality to chat components
+- Enhance AI model configuration with Bedrock support and searchable model selection
+- Add AgentPersonaHistory component for managing persona history and version comparison
+- Enhance agent input handling with optional fields and default values
+- Enhance agent chat widget functionality with dynamic metadata and registration improvements
+- Enable auto-refresh of chatter messages on form save (#266)
+
+### Fixed
+
+- Improve clipboard copy functionality and handle history loading in AgentRuntime
+- simplify button rendering logic for history button
+- update spacing for authentication forms using CSS variables (#264)
+- preserve menu context across model navigation (#253)
+
+### Other
+
+- Fix/sidebar action menu focus (#272)
+- fix media list close on perview (#270)
+- Update solidx modules (#271)
+- User profile menu (#259)
+- error toast added for user delete on form view (#261)
+- check added for unmapped column (#262)
+- clear selection after bulk delete and recover (#263)
+- kanban view toast added after delete (#267)
+
+## [0.1.20-beta.1] - 2026-10-13
+
+### Added
+
+- add archived chatter messages functionality
+- Add message metadata display and copy functionality to chat components
+- Enhance AI model configuration with Bedrock support and searchable model selection
+- Add AgentPersonaHistory component for managing persona history and version comparison
+- Enhance agent input handling with optional fields and default values
+- Enhance agent chat widget functionality with dynamic metadata and registration improvements
+- Enable auto-refresh of chatter messages on form save (#266)
+
+### Fixed
+
+- Improve clipboard copy functionality and handle history loading in AgentRuntime
+- simplify button rendering logic for history button
+- update spacing for authentication forms using CSS variables (#264)
+- preserve menu context across model navigation (#253)
+
+### Other
+
+- Fix/sidebar action menu focus (#272)
+- fix media list close on perview (#270)
+- Update solidx modules (#271)
+- User profile menu (#259)
+- error toast added for user delete on form view (#261)
+- check added for unmapped column (#262)
+- clear selection after bulk delete and recover (#263)
+- kanban view toast added after delete (#267)
+
 ## [0.1.20-beta.0] - 2026-10-08
 
 ### Added

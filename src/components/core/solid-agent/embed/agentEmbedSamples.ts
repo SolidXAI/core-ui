@@ -26,12 +26,26 @@ export function embedSamples(agentId: number, fields: AgentInputDefinition[], sd
   // Update context before the first message or after starting a new chat:
   // await chat.setInputs({ ... });
 </script>`,
+        inline: `<div id="agent-chat" style="width:420px;height:600px"></div>
+<script src=${JSON.stringify(sdkUrl).replace(/</g, "&lt;")}></script>
+<script>
+  // Your app owns this container's size, position, and visibility.
+  // Keep the same instance mounted when navigating within your app.
+  const chat = SolidAgentEmbed.mount({
+    mode: "inline",
+    container: "#agent-chat",
+    ${config}
+  });
+  chat.open();
+  // chat.close() hides the iframe without ending the chat.
+  // chat.destroy() removes the iframe when the user signs out.
+</script>`,
         react: `"use client";
 import { useEffect, useRef } from "react";
 
 type AgentEmbed = { destroy: () => void };
 type AgentEmbedSdk = { mount: (options: {
-  container: HTMLElement; agentId: number; tokenEndpoint: string;
+  container: HTMLElement; mode?: "popup" | "inline"; agentId: number; tokenEndpoint: string;
   inputs: Record<string, unknown>; label?: string; title?: string;
   getTokenHeaders?: () => Record<string, string>;
 }) => AgentEmbed };

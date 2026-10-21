@@ -1,16 +1,22 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentOpenRequested, type AgentState } from "../../../redux/features/agentSlice";
 import { SolidAgentChat } from "./SolidAgentChat";
 import { useAgentAvailability } from "./useAgentAvailability";
 import { useAdminInputContext } from "./useAdminInputContext";
-import type { AgentMode } from "./types";
+import { onBeforeUserMessageSend } from "./client/beforeUserMessageSend";
+import { onAgentPublicEvent } from "./client/agentPublicEvents";
+import type { AgentMessageContext, AgentMode } from "./types";
+import { buildAdminCustomPath, buildAdminDashboardPath, buildAdminModelViewPath, buildAdminRecordFormPath } from "../../../helpers/routePaths";
+import { requestAdminViewRefresh } from "../../../helpers/adminViewRefresh";
 
 const PREFS_KEY = "solid-agent.window";
 const MIN_DOCK = 360;
 const MAX_DOCK = 720;
+const _DEBUG_AGENT_EVENTS = true;
 type WindowPrefs = { dockWidth: number; open?: boolean; mode?: Exclude<AgentMode, "bubble"> };
 
 function readPrefs(): WindowPrefs {
@@ -39,14 +45,75 @@ function writePrefs(prefs: Partial<WindowPrefs>) {
  */
 export default function SolidAgentHost() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { ready, enabled, agentUrl, canUse } = useAgentAvailability();
     const inputContext = useAdminInputContext();
+    const inputContextRef = useRef(inputContext);
+    inputContextRef.current = inputContext;
     const agent = useSelector((state: any) => state.solidAgent as AgentState | undefined);
     const [dockWidth, setDockWidth] = useState(() => readPrefs().dockWidth);
     const prefsHydrated = useRef(false);
     const skipNextPrefsWrite = useRef(false);
     const windowRef = useRef<HTMLDivElement>(null);
     const openerRef = useRef<Element | null>(null);
+
+    useEffect(() => onBeforeUserMessageSend((_request, signal) => {
+        if (signal.aborted) throw new Error("Message preparation was cancelled.");
+        const context = inputContextRef.current;
+        if (Object.keys(context).length === 0) return undefined;
+        const summary = [context.moduleName, context.modelName, context.viewName, context.modelId]
+            .filter((value) => value !== undefined && value !== null && value !== "")
+            .join(" · ");
+        const contribution: AgentMessageContext = {
+            schemaVersion: 1,
+            namespaces: {
+                "solidx.admin": {
+                    context: context as AgentMessageContext["namespaces"][string]["context"],
+                    revision: JSON.stringify(context),
+                    ...(summary ? { displaySummary: summary } : {}),
+                },
+            },
+        };
+        return contribution;
+    }), []);
+    useEffect(() => {
+        return onAgentPublicEvent(({ event, payload, agentType: source }) => {
+            if (_DEBUG_AGENT_EVENTS && source === "solidx") console.log(`[SolidAgentHost] ${event}`, payload);
+            if (event !== "onAgentNavigationRequested" || source !== "solidx") return;
+            if (payload.schemaVersion !== 1 || payload.kind !== "navigation" || payload.domain !== "solidx.admin") return;
+
+            const { operation, scope, moduleName, modelName, viewName, recordId, dashboardName, customRoute } = payload.payload;
+            if (typeof moduleName !== "string" || typeof viewName !== "string") return;
+            if (!/^[A-Za-z0-9_-]+$/.test(moduleName.trim())) return;
+            if (operation === "refresh") {
+                if (typeof modelName !== "string" || !/^[A-Za-z0-9_-]+$/.test(modelName.trim())) return;
+                if (scope === "collection" && ["list", "tree", "kanban", "card"].includes(viewName)) {
+                    requestAdminViewRefresh({ moduleName, modelName, viewName: viewName as "list" | "tree" | "kanban" | "card", scope });
+                } else if (scope === "record" && viewName === "form" && (typeof recordId === "string" || typeof recordId === "number")) {
+                    const refreshRecordId = String(recordId);
+                    if (!/^[A-Za-z0-9_-]+$/.test(refreshRecordId)) return;
+                    requestAdminViewRefresh({ moduleName, modelName, viewName, scope, recordId: refreshRecordId });
+                }
+                return;
+            }
+            if (operation !== undefined && operation !== "navigate") return;
+            let path = "";
+            if (viewName === "dashboard" && typeof dashboardName === "string") {
+                path = buildAdminDashboardPath({ moduleName, dashboardName });
+            } else if (viewName === "custom" && typeof customRoute === "string") {
+                path = buildAdminCustomPath(customRoute);
+            } else if (["list", "tree", "kanban", "card"].includes(viewName) && typeof modelName === "string") {
+                path = buildAdminModelViewPath({ moduleName, modelName, viewName });
+            } else if (viewName === "form" && typeof modelName === "string"
+                && /^[A-Za-z0-9_-]+$/.test(modelName.trim())
+                && (typeof recordId === "string" || typeof recordId === "number")) {
+                const recordKey = String(recordId);
+                if (!/^[A-Za-z0-9_-]+$/.test(recordKey)) return;
+                path = buildAdminRecordFormPath({ moduleName, modelName, recordId: recordKey, viewMode: "view" });
+            }
+            if (path) navigate(path);
+        });
+    }, [navigate]);
 
     const available = ready && enabled && canUse && !!agentUrl && !!agent;
     const mode = agent?.mode ?? "bubble";
@@ -151,7 +218,7 @@ export default function SolidAgentHost() {
                     }}
                 >
                     {mode === "docked" && <div className={styles.resizeHandle} onPointerDown={startResize} aria-hidden="true" />}
-                    <SolidAgentChat agentUrl={agentUrl} inputContext={inputContext} />
+                    <SolidAgentChat agentUrl={agentUrl} />
                 </div>
             ) : (
                 <button type="button" className={styles.bubble} onClick={toggle} aria-label="Open the SolidX Agent (Ctrl+J)" title="SolidX Agent (Ctrl+J)">
