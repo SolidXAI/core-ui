@@ -174,6 +174,12 @@ export class AgentRuntime {
         );
         this.socket.setOnSessionExpired(() => {
             if (this.persistSession) writeSessionId(this.sessionKey, null);
+            if (this.frame != null) {
+                cancelAnimationFrame(this.frame);
+                this.frame = null;
+            }
+            this.pendingDelta = "";
+            this.responseStarted = false;
             this.dispatch(agentThreadReset());
         });
         this.hadPriorSession = !!this.socket.currentSessionId;
@@ -284,6 +290,11 @@ export class AgentRuntime {
     }
 
     cancel() {
+        if (this.frame != null) {
+            cancelAnimationFrame(this.frame);
+            this.frame = null;
+        }
+        this.pendingDelta = "";
         const sessionId = this.socket.currentSessionId;
         if (sessionId) {
             this.publish("onCancelRequested", { sessionId });
@@ -292,6 +303,12 @@ export class AgentRuntime {
     }
 
     newChat(provider?: string, model?: string, opts?: AgentSessionOptions) {
+        if (this.frame != null) {
+            cancelAnimationFrame(this.frame);
+            this.frame = null;
+        }
+        this.pendingDelta = "";
+        this.responseStarted = false;
         this.publish("onNewChatRequested", { sessionId: this.socket.currentSessionId });
         this.hadPriorSession = false;
         this.resetHistoryLoads();
@@ -317,6 +334,12 @@ export class AgentRuntime {
     }
 
     resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions) {
+        if (this.frame != null) {
+            cancelAnimationFrame(this.frame);
+            this.frame = null;
+        }
+        this.pendingDelta = "";
+        this.responseStarted = false;
         this.hadPriorSession = true;
         this.resetHistoryLoads();
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);

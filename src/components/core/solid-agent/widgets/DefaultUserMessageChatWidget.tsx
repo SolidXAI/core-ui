@@ -15,9 +15,6 @@ import { asArray, formatChatTime } from "./chatWidgetUtils";
 export const DefaultUserMessageChatWidget = ({ eventData, timestamp }: SolidChatWidgetProps) => {
     const content = String(eventData.content ?? "");
     const attachments = asArray<AgentAttachmentMeta>(eventData.attachments);
-    const namespaces = eventData.message_context?.namespaces && typeof eventData.message_context.namespaces === "object"
-        ? Object.entries(eventData.message_context.namespaces) as Array<[string, { displaySummary?: string; revision?: string; context?: unknown }]>
-        : [];
     const [zoom, setZoom] = useState<string | null>(null);
 
     return (
@@ -27,21 +24,6 @@ export const DefaultUserMessageChatWidget = ({ eventData, timestamp }: SolidChat
                 <User size={12} />
             </div>
             <div className={styles.BubbleGroup}>
-                {namespaces.length > 0 && (
-                    <details className={styles.MessageContext}>
-                        <summary>Message context</summary>
-                        <div className={styles.MessageContextDetails}>
-                            {namespaces.map(([namespace, contribution]) => (
-                                <section key={namespace}>
-                                    <strong>{namespace}</strong>
-                                    {contribution.displaySummary
-                                        ? <p>{contribution.displaySummary}</p>
-                                        : <pre>{JSON.stringify(contribution.context, null, 2)}</pre>}
-                                </section>
-                            ))}
-                        </div>
-                    </details>
-                )}
                 {attachments.length > 0 && (
                     <ul className={styles.MessageAttachments} aria-label="Attachments">
                         {attachments.map((file, index) => {

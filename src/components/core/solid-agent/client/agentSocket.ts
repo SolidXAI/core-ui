@@ -213,9 +213,13 @@ export class AgentSocket {
             if (eventType === "UserMessage" || eventType === "turn_complete" || eventType === "error") {
                 this.unacknowledgedMessage = null;
             }
-            // Drop frames for a different session (e.g. a late event after a switch).
+            // Drop frames for a different session (e.g. background session still running or after a switch).
             const frameSession = frame.session_id ?? payload?.session_id;
-            if (eventType !== "session_started" && frameSession && this.sessionId && frameSession !== this.sessionId) return;
+            if (eventType !== "session_started") {
+                if (frameSession && frameSession !== this.sessionId) return;
+                if (!frameSession && this.sessionId && eventType !== "error") return;
+                if (!this.sessionId && eventType !== "error") return;
+            }
             this.eventListeners.forEach((listener) => listener(frame));
         };
 
