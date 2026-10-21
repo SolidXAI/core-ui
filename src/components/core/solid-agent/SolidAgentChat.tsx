@@ -26,7 +26,6 @@ import {
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
-import { AgentContextPill } from "./composer/AgentContextPill";
 import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
@@ -42,34 +41,6 @@ import { SolidInput } from "../../shad-cn-ui/SolidInput";
 import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui/SolidTooltip";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
-
-function resolveModelContextLimit(modelId?: string, providerId?: string, declaredLimit?: number): number {
-    if (declaredLimit && declaredLimit > 0) return declaredLimit;
-    const id = (modelId || "").toLowerCase();
-    const prov = (providerId || "").toLowerCase();
-
-    // 1. Gemini / Antigravity long-context models
-    if (id.includes("gemini") || prov.includes("antigravity")) {
-        if (id.includes("1.5-pro") || id.includes("-pro")) return 2_000_000;
-        return 1_000_000;
-    }
-
-    // 2. Codex models (gpt-5.6-sol, gpt-6-astra, luna, terra, etc.)
-    if (prov.includes("codex") || id.includes("gpt-5") || id.includes("gpt-6") || id.includes("astra") || id.includes("sol") || id.includes("luna") || id.includes("terra")) {
-        return 272_000;
-    }
-
-    // 3. Claude models
-    if (id.includes("claude")) return 200_000;
-
-    // 4. OpenAI standard models
-    if (id.includes("o1") || id.includes("o3") || id.includes("o4") || id.includes("gpt-4o")) return 128_000;
-
-    // 5. DeepSeek models
-    if (id.includes("deepseek")) return 64_000;
-
-    return 200_000;
-}
 
 export function formatProviderName(raw?: string): string {
     if (!raw) return "";
@@ -250,10 +221,6 @@ export function SolidAgentChat({
         if (selectedModel) return isVisionModel(selectedModel);
         return true;
     }, [activeModelInfo, selectedModel]);
-
-    const resolvedContextLimit = useMemo(() => {
-        return resolveModelContextLimit(selectedModel, selectedProvider, activeModelInfo?.context_window);
-    }, [selectedModel, selectedProvider, activeModelInfo]);
 
     // Synchronize reasoning and speed options when model or provider changes
     useEffect(() => {
@@ -1162,15 +1129,6 @@ export function SolidAgentChat({
                             onFastToggle={handleFastToggle}
                             onReasoningSelect={handleReasoningChange}
                             onSpeedSelect={handleSpeedChange}
-                        />
-                    }
-                    contextIndicator={
-                        <AgentContextPill
-                            cost={agent.cost}
-                            contextTokens={agent.inputTokens}
-                            totalTokens={agent.tokens}
-                            contextLimit={resolvedContextLimit}
-                            disabled={agent.working}
                         />
                     }
                 />

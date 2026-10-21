@@ -24,10 +24,6 @@ export type AgentThreadState = {
     liveToolId: string | null;
     streamingId: string | null;
     turnStreamed: boolean;
-    cost: number;
-    tokens: number;
-    inputTokens: number;
-    outputTokens: number;
 };
 
 export function createThreadState(): AgentThreadState {
@@ -42,10 +38,6 @@ export function createThreadState(): AgentThreadState {
         liveToolId: null,
         streamingId: null,
         turnStreamed: false,
-        cost: 0,
-        tokens: 0,
-        inputTokens: 0,
-        outputTokens: 0,
     };
 }
 
@@ -146,10 +138,6 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             const sessionId = frame.session_id ?? eventData.session_id ?? null;
             state.sessionId = sessionId;
             state.historySessionId = frame.history_session_id ?? eventData.history_session_id ?? sessionId;
-            if (typeof frame.total_cost === "number") state.cost = frame.total_cost;
-            else if (typeof eventData.total_cost === "number") state.cost = eventData.total_cost;
-            if (typeof frame.total_tokens === "number") state.tokens = frame.total_tokens;
-            else if (typeof eventData.total_tokens === "number") state.tokens = eventData.total_tokens;
             const commands = frame.commands ?? eventData.commands;
             if (Array.isArray(commands)) state.commands = commands;
             state.authError = null;
@@ -305,43 +293,8 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             } else if (content && !state.turnStreamed && !isLlmMetadata(content) && !isSameAssistantContent(lastAssistantText(state), content)) {
                 pushAssistantText(state, content, at);
             }
-            const costVal = eventData.total_cost ?? eventData.cost ?? frame.total_cost ?? frame.cost;
-            if (typeof costVal === "number") state.cost = costVal;
-            let inTok = eventData.input_tokens ?? frame.input_tokens;
-            let outTok = eventData.output_tokens ?? frame.output_tokens;
-            let totTok = eventData.total_tokens ?? frame.total_tokens ?? (
-                (inTok != null && outTok != null)
-                    ? inTok + outTok
-                    : undefined
-            );
-
-            // Defensive self-healing for legacy sessions:
-            // In a valid single turn, prompt input_tokens is always <= turn_tokens / total_tokens.
-            // If input_tokens > total_tokens (and total_tokens > 0), the payload carried
-            // cumulative session input under input_tokens and single-turn tokens under total_tokens.
-            if (typeof inTok === "number" && typeof totTok === "number" && totTok > 0 && inTok > totTok) {
-                const turnTokens = typeof eventData.turn_tokens === "number" ? eventData.turn_tokens : totTok;
-                if (typeof outTok === "number" && turnTokens >= outTok) {
-                    inTok = turnTokens - outTok;
-                } else {
-                    inTok = turnTokens;
-                }
-            }
-
-            if (typeof totTok === "number") state.tokens = totTok;
-            if (typeof inTok === "number") state.inputTokens = inTok;
-            if (typeof outTok === "number") state.outputTokens = outTok;
             endTurn(state);
             state.turnStreamed = true;
-            break;
-        }
-
-        case "LlmRawResponse":
-        case "llm_raw_response": {
-            const inTok = eventData.input_tokens ?? frame.input_tokens;
-            const outTok = eventData.output_tokens ?? frame.output_tokens;
-            if (typeof inTok === "number") state.inputTokens = inTok;
-            if (typeof outTok === "number") state.outputTokens = outTok;
             break;
         }
 
@@ -366,8 +319,8 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
     }
 }
 
-/** Rebuilds thread state from stored session events (`/api/agent/sessions/{id}/messages`). */
-export function historyToThreadState(rows: any[]): AgentThreadState {
+/** Rebuilds thread items from stored session events (`/api/agent/sessions/{id}/messages`). */
+export function historyToItems(rows: any[]): AgentChatItem[] {
     const state = createThreadState();
     for (const row of rows) {
         const frame: AgentWireFrame = { ...row, event_type: row.event_type ?? (row.role === "user" ? AgentEventTypes.userMessage : row.role === "assistant" ? AgentEventTypes.llmComplete : "") };
@@ -376,10 +329,5 @@ export function historyToThreadState(rows: any[]): AgentThreadState {
     }
     freezeLiveTool(state);
     stopStreaming(state);
-    return state;
-}
-
-/** Rebuilds thread items from stored session events (`/api/agent/sessions/{id}/messages`). */
-export function historyToItems(rows: any[]): AgentChatItem[] {
-    return historyToThreadState(rows).items;
+    return state.items;
 }
