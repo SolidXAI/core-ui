@@ -62,6 +62,8 @@ import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/m
 import MqMessageDetailsKanbanCardAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageDetailsKanbanCardAction";
 import MqMessageKanbanQuickFilterHeaderAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanQuickFilterHeaderAction";
 import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/extension/solid-core/mqMessage/MqMessageSelectedRecordsSummaryHeaderAction";
+import AgentSessionComparisonHeaderAction from "../components/core/extension/solid-core/agentSession/AgentSessionComparisonHeaderAction";
+import { AgentSessionConfigVersionListWidget } from "../components/core/extension/solid-core/agentSession/AgentSessionConfigVersionListWidget";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
 import { AgentRegistryCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
 import { AgentResourceCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
@@ -278,6 +280,8 @@ registerExtensionComponent("AgentEventOutcomeListWidget", AgentEventOutcomeListW
 registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("AgentSessionComparisonHeaderAction", AgentSessionComparisonHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("AgentSessionConfigVersionListWidget", AgentSessionConfigVersionListWidget, ExtensionComponentTypes.listFieldWidget);
 
 // ...
 

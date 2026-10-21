@@ -38,7 +38,7 @@ import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/setti
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
-import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { getRecordUserKeyQuery, normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
@@ -283,6 +283,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const buildEditNavigationQueryString = (rowData: any) => {
     const queryParams = new URLSearchParams(editActionQueryParams);
+    const recordUserKeyQuery = getRecordUserKeyQuery(rowData, solidListViewMetaData);
+    new URLSearchParams(recordUserKeyQuery).forEach((value, key) => queryParams.set(key, value));
     if (internationalisationEnabled) {
       const resolvedLocale = rowData?.localeName || getResolvedListLocale();
       if (resolvedLocale) {
@@ -1107,7 +1109,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       recoverList.push(element.id);
     });
     try {
-      await triggerRecoverSolidEntities(recoverList).unwrap();
+      const response = await triggerRecoverSolidEntities(recoverList).unwrap();
+      dispatch(showToast({
+        severity: "success",
+        summary: "Success",
+        detail: response?.data?.message,
+        life: 3000,
+      }));
       setRecoverDialogVisible(false);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
