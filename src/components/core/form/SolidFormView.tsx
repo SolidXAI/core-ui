@@ -1014,6 +1014,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const solidWorkflowField = solidView?.layout?.attrs?.workflowField;
             const workflowFieldMetadata = solidFieldsMetadata?.[solidWorkflowField];
             if (params.id !== "new" && solidWorkflowField && workflowFieldMetadata && solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                const workflowFieldValue = solidWorkflowFieldValue !== "" && solidWorkflowFieldValue !== null && solidWorkflowFieldValue !== undefined
+                    ? solidWorkflowFieldValue
+                    : initialEntityData[solidWorkflowField];
                 const workflowFieldContext: SolidFieldProps = {
                     fieldMetadata: workflowFieldMetadata,
                     field: layoutFieldsObj[solidWorkflowField] ?? { attrs: { name: solidWorkflowField } },
@@ -1026,7 +1029,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData.delete(solidWorkflowField);
                     formData.delete(`${solidWorkflowField}Id`);
                     workflowSolidField.updateFormData(
-                        normalizeWorkflowFieldValueForFormData(solidWorkflowFieldValue, workflowFieldMetadata),
+                        normalizeWorkflowFieldValueForFormData(workflowFieldValue, workflowFieldMetadata),
                         formData
                     );
                 }
@@ -1166,7 +1169,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const formViewDataQs = qs.stringify({ populate: toPopulate, populateMedia: toPopulateMedia }, {
         encodeValuesOnly: true,
     });
-    const [initialEntityData, setInitialEntityData] = useState({});
+    const [initialEntityData, setInitialEntityData] = useState<Record<string, any>>({});
     const {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,

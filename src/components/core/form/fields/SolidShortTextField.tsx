@@ -8,6 +8,7 @@ import { SolidFieldTooltip } from "../../../../components/common/SolidFieldToolt
 import { useState } from "react";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { SolidInput, SolidPasswordInput } from "../../../shad-cn-ui";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 export class SolidShortTextField implements ISolidField {
 
@@ -238,7 +239,11 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
                 autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );
@@ -333,7 +338,11 @@ export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );
