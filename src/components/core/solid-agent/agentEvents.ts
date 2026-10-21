@@ -162,6 +162,21 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         case AgentEventTypes.sessionUpdated: {
             const sessionId = frame.session_id ?? eventData.session_id ?? null;
             if (sessionId) state.sessionId = sessionId;
+            const limit = frame.context_limit ?? eventData.context_limit ?? 0;
+            if (limit > 0) {
+                if (state.usage) {
+                    state.usage.contextLimit = limit;
+                } else {
+                    state.usage = {
+                        totalCost: 0,
+                        totalInputTokens: 0,
+                        totalOutputTokens: 0,
+                        totalTokens: 0,
+                        contextTokens: 0,
+                        contextLimit: limit,
+                    };
+                }
+            }
             state.authError = null;
             break;
         }

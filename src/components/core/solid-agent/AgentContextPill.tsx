@@ -46,8 +46,9 @@ export function AgentContextPill({
         };
     }, []);
 
-    // Only show pill for Solid Native. Hide completely if unmapped/unknown context limit.
-    if (activeProvider !== "solidx" || !usage?.contextLimit || usage.contextLimit <= 0) {
+    // Only show pill for supported providers (Solid Native, Pi). Hide completely if unmapped/unknown context limit.
+    const ALLOWED_PROVIDERS = new Set(["solidx", "pi"]);
+    if (!ALLOWED_PROVIDERS.has(activeProvider) || !usage?.contextLimit || usage.contextLimit <= 0) {
         return null;
     }
 
