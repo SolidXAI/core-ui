@@ -106,7 +106,7 @@ export function SolidAgentEmbedded(props: Props) {
             style={{ height, display: "flex", flexDirection: "column", border: "1px solid var(--solid-agent-border)", borderRadius: 12, overflow: "hidden", background: "var(--solid-agent-bg)" }}
         >
             {/* key: switching type remounts the chat onto the other backend's conversation. */}
-            <SolidAgentChat key={agentUrl} agentUrl={agentUrl!} agentRuntime={agentRuntime} title={title} agentVersion={props.agentVersion} inputContext={inputContext}
+                <SolidAgentChat key={agentUrl} agentUrl={agentUrl!!} agentRuntime={agentRuntime} title={title} agentVersion={props.agentVersion} inputContext={inputContext}
                 inputs={props.inputs} requiredInputs={props.requiredInputs} externalEmbed={!!props.externalEmbed} onInputsLocked={props.externalEmbed?.onInputsLocked}
                 beforeSend={props.externalEmbed?.beforeSend}
                 embedded suggestions={suggestions} windowControls={windowControls} />
