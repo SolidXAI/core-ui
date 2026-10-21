@@ -157,9 +157,11 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );
