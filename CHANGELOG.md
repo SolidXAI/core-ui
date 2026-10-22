@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.21-beta.2] - 2026-10-22
+
+### Added
+
+- enhance AgentSessionChatFormWidget with refresh functionality and improved styling
+- add AgentSessionChatFormWidget component for session chat interface
+
 ## [0.1.21-beta.1] - 2026-10-22
 
 ### Added
