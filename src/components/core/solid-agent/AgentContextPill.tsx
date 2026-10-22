@@ -46,8 +46,8 @@ export function AgentContextPill({
         };
     }, []);
 
-    // Only show pill for supported providers (Solid Native, Pi, Antigravity). Hide completely if unmapped/unknown context limit.
-    const ALLOWED_PROVIDERS = new Set(["solidx", "pi", "antigravity", "agy"]);
+    // Only show pill for supported providers (Solid Native, Pi, Antigravity, Claude). Hide completely if unmapped/unknown context limit.
+    const ALLOWED_PROVIDERS = new Set(["solidx", "pi", "antigravity", "agy", "claude"]);
     if (!ALLOWED_PROVIDERS.has(activeProvider) || !usage?.contextLimit || usage.contextLimit <= 0) {
         return null;
     }
