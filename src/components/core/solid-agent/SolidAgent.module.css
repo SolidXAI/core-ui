@@ -469,9 +469,10 @@
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
+  right: auto;
   z-index: 50;
-  width: 240px;
-  max-width: min(280px, calc(100vw - 32px));
+  width: 220px;
+  max-width: min(220px, calc(100vw - 32px));
   padding: 6px;
   border-radius: 12px;
   border: 1px solid var(--agent-border);
@@ -587,7 +588,7 @@
 .bannerError { background: color-mix(in srgb, var(--agent-err) 10%, transparent); color: var(--agent-err); }
 
 /* ── History menu ────────────────────────────────────────────── */
-.historyPanel { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px; }
+.historyPanel { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px 8px 60px 8px; }
 .historySearchBox {
   position: relative;
   display: flex;
@@ -640,6 +641,7 @@
   color: var(--agent-fg);
 }
 .historyRow {
+  position: relative;
   display: flex;
   align-items: center;
   width: 100%;
@@ -648,7 +650,13 @@
   transition: background 0.15s;
 }
 .historyRow:hover {
-  background: color-mix(in srgb, var(--agent-tint) 50%, transparent);
+  background: color-mix(in srgb, var(--agent-tint) 55%, transparent);
+}
+.historyRowActive {
+  background: var(--agent-tint);
+}
+.historyRowActive:hover {
+  background: var(--agent-tint);
 }
 .historyActions {
   flex: 0 0 auto;
@@ -696,7 +704,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 10px;
+  padding: 8px 10px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -705,10 +713,136 @@
   cursor: pointer;
   font: inherit;
 }
-.historyItem:hover { background: var(--agent-tint); }
-.historyItemActive { background: var(--agent-tint); font-weight: 600; }
-.historyPreview { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.historyDate { flex: 0 0 auto; font-size: 11px; color: var(--agent-muted); white-space: nowrap; }
+.historyItem:hover { background: transparent; }
+.historyItemActive .historyPreview { font-weight: 600; }
+.historyPreview {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  color: var(--agent-fg);
+}
+.historyProviderName {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--agent-muted);
+  background: transparent;
+  border: 0;
+  padding: 0 2px;
+  white-space: nowrap;
+  user-select: none;
+  opacity: 0.85;
+}
+.historyMenuWrap {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding-right: 4px;
+}
+.historyMenuTrigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--agent-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+.historyRow:hover .historyMenuTrigger,
+.historyMenuTriggerActive {
+  opacity: 1;
+}
+@media (hover: none) {
+  .historyMenuTrigger {
+    opacity: 0.7;
+  }
+}
+.historyMenuTrigger:hover,
+.historyMenuTriggerActive {
+  background: color-mix(in srgb, var(--agent-fg) 8%, transparent);
+  color: var(--agent-fg);
+}
+.historyMenuDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 60;
+  min-width: 140px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--agent-border);
+  background: var(--agent-bg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: historyMenuFadeIn 0.12s ease-out;
+}
+.historyMenuDropdownUp {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+@keyframes historyMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.historyMenuTime {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  color: var(--agent-muted);
+  border-bottom: 1px solid color-mix(in srgb, var(--agent-border) 60%, transparent);
+  margin-bottom: 2px;
+  user-select: none;
+  white-space: nowrap;
+}
+.historyMenuTimeIcon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.historyMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  color: var(--agent-fg);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+}
+.historyMenuItem:hover {
+  background: color-mix(in srgb, var(--agent-fg) 6%, transparent);
+  color: var(--agent-fg);
+}
+.historyMenuItemDanger {
+  color: var(--agent-muted);
+}
+.historyMenuItemDanger:hover {
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  color: #ef4444;
+}
 
 /* ── Thread ──────────────────────────────────────────────────── */
 .thread {

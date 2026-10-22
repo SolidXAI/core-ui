@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, Clock, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -104,6 +104,16 @@ function formatDate(iso: string | null) {
     return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
+function formatSessionTime(iso: string | null): string {
+    if (!iso) return "";
+    const date = new Date(iso);
+    const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+    if (days === 0) return `Today, ${timeStr}`;
+    if (days === 1) return `Yesterday, ${timeStr}`;
+    return `${date.toLocaleDateString([], { month: "short", day: "numeric" })}, ${timeStr}`;
+}
+
 function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<string, string>): { values?: Record<string, unknown>; error?: string } {
     const values: Record<string, unknown> = {};
     for (const field of fields) {
@@ -201,6 +211,10 @@ export function SolidAgentChat({
     const [selectedSpeed, setSelectedSpeed] = useState<string>(() => getStoredSpeed(getStoredProvider()) || "standard");
     const [showProviderMenu, setShowProviderMenu] = useState(false);
     const providerMenuRef = useRef<HTMLDivElement>(null);
+    const headerRef = useRef<HTMLDivElement>(null);
+    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+    const [menuSessionId, setMenuSessionId] = useState<string | null>(null);
+    const historyMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (agentVersion != null) setAgentConfigVersion(agentVersion);
@@ -346,6 +360,61 @@ export function SolidAgentChat({
         return () => { alive = false; };
     }, [agentRuntime, agentUrl, signedIn, selectedProvider]);
 
+    const updateDropdownPosition = useCallback(() => {
+        if (!providerMenuRef.current) return;
+        const btnRect = providerMenuRef.current.getBoundingClientRect();
+        const container = headerRef.current || providerMenuRef.current.closest(`.${styles.header}`) || document.body;
+        const containerRect = container.getBoundingClientRect();
+
+        const menuWidth = 220;
+        const padding = 8;
+
+        const boundaryLeft = Math.max(containerRect.left, 0);
+        const boundaryRight = Math.min(containerRect.right, window.innerWidth);
+        const maxAllowedWidth = Math.max(160, boundaryRight - boundaryLeft - padding * 2);
+        const effectiveWidth = Math.min(menuWidth, maxAllowedWidth);
+
+        // Start with natural alignment to the left of the button (offset = 0)
+        let leftOffset = 0;
+        const naturalLeft = btnRect.left;
+        const naturalRight = naturalLeft + effectiveWidth;
+
+        if (naturalRight > boundaryRight - padding) {
+            // Overflows right side of boundary, shift left so right edge fits comfortably
+            const overflow = naturalRight - (boundaryRight - padding);
+            leftOffset -= overflow;
+        }
+
+        // Check if after shifting left (or initially), it overflows left boundary
+        if (btnRect.left + leftOffset < boundaryLeft + padding) {
+            leftOffset = (boundaryLeft + padding) - btnRect.left;
+        }
+
+        setDropdownStyle({
+            left: `${Math.round(leftOffset)}px`,
+            right: "auto",
+            width: `${effectiveWidth}px`,
+            maxWidth: `${effectiveWidth}px`,
+        });
+    }, []);
+
+    useLayoutEffect(() => {
+        if (showProviderMenu) {
+            updateDropdownPosition();
+        }
+    }, [showProviderMenu, updateDropdownPosition]);
+
+    useEffect(() => {
+        if (!showProviderMenu) return;
+        updateDropdownPosition();
+        window.addEventListener("resize", updateDropdownPosition);
+        window.addEventListener("scroll", updateDropdownPosition, true);
+        return () => {
+            window.removeEventListener("resize", updateDropdownPosition);
+            window.removeEventListener("scroll", updateDropdownPosition, true);
+        };
+    }, [showProviderMenu, updateDropdownPosition]);
+
     useEffect(() => {
         if (!showProviderMenu) return;
         const handleOutside = (e: MouseEvent) => {
@@ -366,9 +435,30 @@ export function SolidAgentChat({
         };
     }, [showProviderMenu]);
 
+    useEffect(() => {
+        if (!menuSessionId) return;
+        const handleOutside = (e: MouseEvent) => {
+            if (historyMenuRef.current && !historyMenuRef.current.contains(e.target as Node)) {
+                setMenuSessionId(null);
+            }
+        };
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setMenuSessionId(null);
+            }
+        };
+        document.addEventListener("mousedown", handleOutside);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("mousedown", handleOutside);
+            document.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [menuSessionId]);
+
     const handleSelectProvider = (providerId: string) => {
         setSelectedProvider(providerId);
         setShowProviderMenu(false);
+        setMenuSessionId(null);
         fetchProviderModels(agentUrl, providerId).then((res) => {
             const nextModels = res?.models || [];
             setModels(nextModels);
@@ -406,6 +496,7 @@ export function SolidAgentChat({
         });
         setShowHistory(false);
         setShowProviderMenu(false);
+        setMenuSessionId(null);
         onInputsLocked?.(false);
         if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) {
             setCollectedInputs(null);
@@ -460,6 +551,7 @@ export function SolidAgentChat({
         setShowHistory(false);
         setHistorySearchQuery("");
         setEditingSessionId(null);
+        setMenuSessionId(null);
     };
 
     const handleSaveRename = async (sessionId: string, newTitle: string) => {
@@ -810,7 +902,7 @@ export function SolidAgentChat({
                     </form>
                 </SolidDialogBody>
             </SolidDialog>}
-            <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`}>
+            <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`} ref={headerRef}>
                 <div className={styles.headerMark}>
                     <Sparkles size={15} />
                     <span className={styles.statusDot} style={{ background: statusColor }} />
@@ -885,7 +977,13 @@ export function SolidAgentChat({
                                     title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
                                     aria-label="Select AI execution provider"
                                     aria-expanded={showProviderMenu}
-                                    onClick={() => setShowProviderMenu((prev) => !prev)}
+                                    onClick={() => {
+                                        setShowProviderMenu((prev) => {
+                                            const next = !prev;
+                                            if (next) updateDropdownPosition();
+                                            return next;
+                                        });
+                                    }}
                                 >
                                     {loadingProviders ? (
                                         <Loader2 size={12} className={styles.spinIcon} />
@@ -894,7 +992,7 @@ export function SolidAgentChat({
                                     )}
                                 </button>
                                 {showProviderMenu && (
-                                    <div className={styles.providerDropdown} role="menu">
+                                    <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
                                         <div className={styles.providerDropdownHeader}>
                                             <strong>Select AI Provider</strong>
                                         </div>
@@ -939,6 +1037,7 @@ export function SolidAgentChat({
                                         setHistorySearchQuery("");
                                         setEditingSessionId(null);
                                     }
+                                    setMenuSessionId(null);
                                     return !v;
                                 });
                             }}
@@ -954,6 +1053,7 @@ export function SolidAgentChat({
                                 setShowHistory(false);
                                 setHistorySearchQuery("");
                                 setEditingSessionId(null);
+                                setMenuSessionId(null);
                                 void signOutOfAgent(agentUrl);
                             }}
                         >
@@ -1049,104 +1149,143 @@ export function SolidAgentChat({
                         {sessions.length > 0 && filteredSessions.length === 0 && (
                             <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
                         )}
-                        {filteredSessions.map((session) => (
-                            <div key={session.session_id} className={styles.historyRow}>
-                                {editingSessionId === session.session_id ? (
-                                    <form
-                                        className={styles.historyRenameForm}
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            void handleSaveRename(session.session_id, editingTitle);
-                                        }}
-                                    >
-                                        <input
-                                            type="text"
-                                            className={styles.historyRenameInput}
-                                            value={editingTitle}
-                                            onChange={(e) => setEditingTitle(e.target.value)}
-                                            autoFocus
-                                            onFocus={(e) => e.target.select()}
-                                            onKeyDown={(e) => {
-                                                if (e.key === "Escape") {
-                                                    e.stopPropagation();
-                                                    setEditingSessionId(null);
-                                                }
+                        {filteredSessions.map((session, index) => {
+                            const isCurrentSession = session.session_id === agent.historySessionId;
+                            const isMenuOpen = menuSessionId === session.session_id;
+                            const isNearBottom = index >= filteredSessions.length - 2 && filteredSessions.length > 3;
+
+                            return (
+                                <div
+                                    key={session.session_id}
+                                    className={`${styles.historyRow} ${isCurrentSession ? styles.historyRowActive : ""}`}
+                                >
+                                    {editingSessionId === session.session_id ? (
+                                        <form
+                                            className={styles.historyRenameForm}
+                                            onSubmit={(e) => {
+                                                e.preventDefault();
+                                                void handleSaveRename(session.session_id, editingTitle);
                                             }}
-                                            aria-label="Rename conversation"
-                                        />
-                                        <button
-                                            type="submit"
-                                            className={styles.iconBtn}
-                                            aria-label="Save title"
-                                            title="Save"
                                         >
-                                            <Check size={14} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className={styles.iconBtn}
-                                            aria-label="Cancel rename"
-                                            title="Cancel"
-                                            onClick={() => setEditingSessionId(null)}
-                                        >
-                                            <X size={14} />
-                                        </button>
-                                    </form>
-                                ) : (
-                                    <>
-                                        <button
-                                            type="button"
-                                            className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
-                                            onClick={() => void handleResumeSession(session)}
-                                            title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
-                                        >
-                                            <span className={styles.historyPreview}>
-                                                {session.title || session.preview || "New conversation"}
-                                            </span>
-                                            {session.provider && (
-                                                <span
-                                                    className={styles.providerBadge}
-                                                    title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
-                                                >
-                                                    {getProviderBadgeLabel(session.provider)}
-                                                </span>
-                                            )}
-                                            <span className={styles.historyDate}>{formatDate(session.created_at)}</span>
-                                        </button>
-                                        <div className={styles.historyActions}>
-                                            <button
-                                                type="button"
-                                                className={styles.iconBtn}
+                                            <input
+                                                type="text"
+                                                className={styles.historyRenameInput}
+                                                value={editingTitle}
+                                                onChange={(e) => setEditingTitle(e.target.value)}
+                                                autoFocus
+                                                onFocus={(e) => e.target.select()}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Escape") {
+                                                        e.stopPropagation();
+                                                        setEditingSessionId(null);
+                                                    }
+                                                }}
                                                 aria-label="Rename conversation"
-                                                title="Rename"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setEditingSessionId(session.session_id);
-                                                    setEditingTitle(session.title || session.preview || "New conversation");
-                                                }}
+                                            />
+                                            <button
+                                                type="submit"
+                                                className={styles.iconBtn}
+                                                aria-label="Save title"
+                                                title="Save"
                                             >
-                                                <Pencil size={13} />
+                                                <Check size={14} />
                                             </button>
                                             <button
                                                 type="button"
                                                 className={styles.iconBtn}
-                                                aria-label="Delete conversation"
-                                                title="Delete"
-                                                onClick={async (e) => {
-                                                    e.stopPropagation();
-                                                    if (!window.confirm("Delete this conversation?")) return;
-                                                    await deleteSession(agentUrl, session.session_id);
-                                                    setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
-                                                    if (session.session_id === agent.historySessionId) runtime?.newChat();
-                                                }}
+                                                aria-label="Cancel rename"
+                                                title="Cancel"
+                                                onClick={() => setEditingSessionId(null)}
                                             >
-                                                <Trash2 size={14} />
+                                                <X size={14} />
                                             </button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        ))}
+                                        </form>
+                                    ) : (
+                                        <>
+                                            <button
+                                                type="button"
+                                                className={`${styles.historyItem} ${isCurrentSession ? styles.historyItemActive : ""}`}
+                                                onClick={() => void handleResumeSession(session)}
+                                                title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
+                                            >
+                                                <span className={styles.historyPreview}>
+                                                    {session.title || session.preview || "New conversation"}
+                                                </span>
+                                                {session.provider && (
+                                                    <span
+                                                        className={styles.historyProviderName}
+                                                        title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
+                                                    >
+                                                        {getProviderBadgeLabel(session.provider)}
+                                                    </span>
+                                                )}
+                                            </button>
+                                            <div
+                                                className={styles.historyMenuWrap}
+                                                ref={isMenuOpen ? historyMenuRef : undefined}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.historyMenuTrigger} ${isMenuOpen ? styles.historyMenuTriggerActive : ""}`}
+                                                    aria-label="Conversation options"
+                                                    title="Options"
+                                                    aria-expanded={isMenuOpen}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setMenuSessionId(isMenuOpen ? null : session.session_id);
+                                                    }}
+                                                >
+                                                    <MoreHorizontal size={14} />
+                                                </button>
+                                                {isMenuOpen && (
+                                                    <div
+                                                        className={`${styles.historyMenuDropdown} ${isNearBottom ? styles.historyMenuDropdownUp : ""}`}
+                                                        role="menu"
+                                                    >
+                                                        {session.created_at && (
+                                                            <div className={styles.historyMenuTime}>
+                                                                <Clock size={12} className={styles.historyMenuTimeIcon} />
+                                                                <span>{formatSessionTime(session.created_at)}</span>
+                                                            </div>
+                                                        )}
+                                                        <button
+                                                            type="button"
+                                                            className={styles.historyMenuItem}
+                                                            role="menuitem"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setMenuSessionId(null);
+                                                                setEditingSessionId(session.session_id);
+                                                                setEditingTitle(session.title || session.preview || "New conversation");
+                                                            }}
+                                                        >
+                                                            <Pencil size={13} />
+                                                            <span>Rename</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className={`${styles.historyMenuItem} ${styles.historyMenuItemDanger}`}
+                                                            role="menuitem"
+                                                            onClick={async (e) => {
+                                                                e.stopPropagation();
+                                                                setMenuSessionId(null);
+                                                                if (!window.confirm("Delete this conversation?")) return;
+                                                                await deleteSession(agentUrl, session.session_id);
+                                                                setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
+                                                                if (session.session_id === agent.historySessionId) runtime?.newChat();
+                                                            }}
+                                                        >
+                                                            <Trash2 size={13} />
+                                                            <span>Delete</span>
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 ) : (
                     <AgentThread
