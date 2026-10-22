@@ -721,7 +721,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 8px 4px 8px 10px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -748,7 +748,7 @@
   color: var(--agent-muted);
   background: transparent;
   border: 0;
-  padding: 0 2px;
+  padding: 0;
   white-space: nowrap;
   user-select: none;
   opacity: 0.85;
@@ -764,9 +764,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
   border: 0;
   background: transparent;
   color: var(--agent-muted);
