@@ -1074,12 +1074,8 @@ export function SolidAgentChat({
                         {filteredSessions.map((session) => (
                             <div key={session.session_id} className={styles.historyRow}>
                                 {editingSessionId === session.session_id ? (
-                                    <form
+                                    <div
                                         className={styles.historyRenameForm}
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            void handleSaveRename(session.session_id, editingTitle);
-                                        }}
                                     >
                                         <input
                                             type="text"
@@ -1089,6 +1085,10 @@ export function SolidAgentChat({
                                             autoFocus
                                             onFocus={(e) => e.target.select()}
                                             onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    void handleSaveRename(session.session_id, editingTitle);
+                                                }
                                                 if (e.key === "Escape") {
                                                     e.stopPropagation();
                                                     setEditingSessionId(null);
@@ -1097,10 +1097,11 @@ export function SolidAgentChat({
                                             aria-label="Rename conversation"
                                         />
                                         <button
-                                            type="submit"
+                                            type="button"
                                             className={styles.iconBtn}
                                             aria-label="Save title"
                                             title="Save"
+                                            onClick={() => void handleSaveRename(session.session_id, editingTitle)}
                                         >
                                             <Check size={14} />
                                         </button>
@@ -1113,7 +1114,7 @@ export function SolidAgentChat({
                                         >
                                             <X size={14} />
                                         </button>
-                                    </form>
+                                    </div>
                                 ) : (
                                     <>
                                         <button
