@@ -42,7 +42,7 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
             return 2;
         case '$thisWeek':
         case '$thisMonth':
-            return 0;
+            return 2;
         case '$in':
         case '$notIn':
             return null;
