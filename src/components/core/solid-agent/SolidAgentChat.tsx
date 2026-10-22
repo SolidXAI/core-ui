@@ -171,6 +171,7 @@ export function SolidAgentChat({
 
     const [showHistory, setShowHistory] = useState(false);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
+    const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
     const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState("");
@@ -397,13 +398,32 @@ export function SolidAgentChat({
         });
     };
 
-    const handleStartNewChat = () => {
-        runtime?.newChat(selectedProvider, selectedModel, {
-            thinking: isThinking,
-            reasoning: selectedReasoning,
-            fast: isFast,
-            speed: selectedSpeed,
-        });
+    const handleStartNewChat = async () => {
+        if (!runtime || startingNewChatRef.current) return;
+        startingNewChatRef.current = true;
+        try {
+            let latestSession: AgentSessionSummary | undefined;
+            if (agentRuntime === "agentHub") {
+                const latestSessions = await fetchSessionList(agentUrl);
+                if (latestSessions) {
+                    setSessions(latestSessions);
+                    latestSession = latestSessions[0];
+                }
+            }
+
+            if (latestSession?.has_user_message === false) {
+                runtime.resume(latestSession.session_id);
+            } else {
+                runtime.newChat(selectedProvider, selectedModel, {
+                    thinking: isThinking,
+                    reasoning: selectedReasoning,
+                    fast: isFast,
+                    speed: selectedSpeed,
+                });
+            }
+        } finally {
+            startingNewChatRef.current = false;
+        }
         setShowHistory(false);
         setShowProviderMenu(false);
         onInputsLocked?.(false);

@@ -1,0 +1,36 @@
+.root {
+  display: flex;
+  min-height: 28rem;
+  height: min(68vh, 54rem);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messages {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--surface-border, var(--border));
+  border-radius: 0.75rem;
+  background: var(--surface-card, var(--card));
+}
+
+.state {
+  display: flex;
+  min-height: 12rem;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--text-color-secondary, var(--muted-foreground));
+  text-align: center;
+}
+
+.state p {
+  margin: 0;
+}
+
+.error {
+  color: var(--destructive, #b91c1c);
+}

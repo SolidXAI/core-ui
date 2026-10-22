@@ -9,6 +9,7 @@ export type AgentSessionSummary = {
     totalSteps: number;
     created_at: string | null;
     preview: string;
+    has_user_message?: boolean;
     title?: string;
     provider?: string;
     model?: string;
