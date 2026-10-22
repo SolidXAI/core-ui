@@ -2,6 +2,7 @@ import React from "react";
 import { MessageSquareText, RefreshCw } from "lucide-react";
 import { solidGet } from "../../../../../http/solidHttp";
 import type { SolidFormWidgetProps } from "../../../../../types/solid-core";
+import { SolidCircularLoader } from "../../../common/SolidLoaders/SolidCircularLoader";
 import { AgentThread } from "../../../solid-agent/thread/AgentThread";
 import { historyToItems } from "../../../solid-agent/agentEvents";
 import { resolveAttachmentMedia } from "../../../solid-agent/client/agentAttachmentMedia";
@@ -102,7 +103,10 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
       {sessionId == null || sessionId === "" ? (
         <div className={styles.state}>Save the session to view its conversation.</div>
       ) : loading && items.length === 0 ? (
-        <div className={styles.state}>Loading session messages…</div>
+        <div className={styles.state} role="status" aria-live="polite">
+          <SolidCircularLoader />
+          <p>Loading this session’s conversation…</p>
+        </div>
       ) : error && items.length === 0 ? (
         <div className={`${styles.state} ${styles.error}`}>Could not load messages for this session.</div>
       ) : items.length === 0 ? (

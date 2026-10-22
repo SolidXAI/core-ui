@@ -65,6 +65,7 @@ type Props = {
     inputs?: Record<string, unknown>;
     requiredInputs?: AgentInputDefinition[];
     externalEmbed?: boolean;
+    sessionOwnerKey?: string;
     onInputsLocked?: (locked: boolean) => void;
     beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext | AgentInputContext | undefined>;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
@@ -154,6 +155,7 @@ export function SolidAgentChat({
     inputs,
     requiredInputs = [],
     externalEmbed = false,
+    sessionOwnerKey,
     onInputsLocked,
     beforeSend,
     embedded = false,
@@ -162,7 +164,7 @@ export function SolidAgentChat({
     suggestions,
     windowControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";

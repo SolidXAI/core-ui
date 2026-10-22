@@ -214,7 +214,9 @@ export function AgentEmbedPage() {
             </section>
         ) : null}
         {bootstrap ? <SolidAgentEmbedded agentRuntime="agentHub" agentId={agentId} title={bootstrap.title} inputs={inputs} height="100%"
-            externalEmbed={{ agentUrl, beforeSend, onInputsLocked: (value) => { locked.current = value; send("inputs_locked", { locked: value }); } }} />
+            externalEmbed={{ agentUrl,
+                sessionOwnerKey: String(bootstrap.user.id),
+                beforeSend, onInputsLocked: (value) => { locked.current = value; send("inputs_locked", { locked: value }); } }} />
             : !error && missingInputs.length === 0 && <div className={styles.loading} role="status" aria-live="polite">
                 <div className={styles.loadingCard}>
                     <span className={styles.spinner} aria-hidden="true" />

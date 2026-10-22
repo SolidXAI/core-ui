@@ -31,11 +31,12 @@ import { agentIdOf } from "./agentUrls";
 type Dispatch = (action: any) => any;
 type GetAgentState = () => AgentState | undefined;
 
-/** Keep the original SolidX storage key; Agent Hub keeps one per agent (its agent URL names the agent). */
-function sessionKey(agentRuntime: AgentRuntimeType, agentUrl: string) {
+/** Keep the original SolidX key; AgentHub embeds also scope saved sessions to their authenticated user. */
+function sessionKey(agentRuntime: AgentRuntimeType, agentUrl: string, ownerKey?: string) {
     if (agentRuntime === "solidx") return "solid-agent.session_id";
     const agentId = agentIdOf(agentUrl);
-    return agentId === undefined ? `solid-agent.${agentRuntime}.session_id` : `solid-agent.${agentRuntime}.${agentId}.session_id`;
+    const ownerSuffix = ownerKey ? `.${encodeURIComponent(ownerKey)}` : "";
+    return agentId === undefined ? `solid-agent.${agentRuntime}${ownerSuffix}.session_id` : `solid-agent.${agentRuntime}.${agentId}${ownerSuffix}.session_id`;
 }
 
 function readSessionId(key: string): string | null {
@@ -153,8 +154,9 @@ export class AgentRuntime {
         private getState: GetAgentState,
         readonly agentRuntime: AgentRuntimeType = "solidx",
         private persistSession = true,
+        sessionOwnerKey?: string,
     ) {
-        this.sessionKey = sessionKey(agentRuntime, agentUrl);
+        this.sessionKey = sessionKey(agentRuntime, agentUrl, sessionOwnerKey);
         const initialProvider = getStoredProvider();
         const initialModel = getStoredModel(initialProvider);
         const initialOptions: AgentSessionOptions = {
