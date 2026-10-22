@@ -36,7 +36,9 @@ const getUtcDynamicDateRange = (
         return [start.toISOString().slice(0, 10), end.toISOString().slice(0, 10)];
     }
 
-    return [start.toISOString(), end.toISOString()];
+    // Match the value format used by the normal datetime-local filter input.
+    // The backend still resolves and queries the full UTC range including milliseconds.
+    return [start.toISOString().slice(0, 16), end.toISOString().slice(0, 16)];
 };
 
 type SolidDynamicDateRangeInputsProps = {
@@ -53,7 +55,7 @@ export const SolidDynamicDateRangeInputs = ({
     return (
         <div className="solid-filter-var-input-between">
             <SolidInput
-                type="text"
+                type={fieldType === 'date' ? 'date' : 'datetime-local'}
                 value={start}
                 readOnly
                 aria-label="Filter start date"
@@ -61,7 +63,7 @@ export const SolidDynamicDateRangeInputs = ({
                 className="w-full solid-filter-compact-control"
             />
             <SolidInput
-                type="text"
+                type={fieldType === 'date' ? 'date' : 'datetime-local'}
                 value={end}
                 readOnly
                 aria-label="Filter end date"
