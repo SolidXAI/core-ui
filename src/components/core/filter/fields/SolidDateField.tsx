@@ -2,6 +2,7 @@
 import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
+import { isDynamicDateOperator, SolidDynamicDateRangeInputs } from '../SolidDynamicDateRangeInputs';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: "$eqi" },
@@ -45,16 +46,17 @@ const SolidDateField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
                 />
             </div>
             <div className='flex flex-col gap-2 w-full md:w-1/2 px-0 md:pl-0 md:pr-0 p-0'>
-                <SolidVarInputsFilterElement
-                    values={rule.value}
-                    onChange={(e: any) => {
-                        onChange(rule.id, 'value', e)
-                    }}
-                    numberOfInputs={numberOfInputs}
-                    inputType={InputTypes.Date}
-                    fieldMetadata={fieldMetadata}
-                >
-                </SolidVarInputsFilterElement>
+                {isDynamicDateOperator(rule.matchMode)
+                    ? <SolidDynamicDateRangeInputs matchMode={rule.matchMode} fieldType="date" />
+                    : <SolidVarInputsFilterElement
+                        values={rule.value}
+                        onChange={(e: any) => {
+                            onChange(rule.id, 'value', e)
+                        }}
+                        numberOfInputs={numberOfInputs}
+                        inputType={InputTypes.Date}
+                        fieldMetadata={fieldMetadata}
+                    />}
             </div>
         </div>
     );
