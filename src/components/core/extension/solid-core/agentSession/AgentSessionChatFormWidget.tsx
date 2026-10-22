@@ -1,5 +1,5 @@
 import React from "react";
-import { MessageSquareText } from "lucide-react";
+import { MessageSquareText, RefreshCw } from "lucide-react";
 import { solidGet } from "../../../../../http/solidHttp";
 import type { SolidFormWidgetProps } from "../../../../../types/solid-core";
 import { AgentThread } from "../../../solid-agent/thread/AgentThread";
@@ -35,9 +35,13 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
   const [loading, setLoading] = React.useState(false);
   const [loadingOlder, setLoadingOlder] = React.useState(false);
   const [error, setError] = React.useState(false);
+  const [refreshVersion, setRefreshVersion] = React.useState(0);
+  const previousSessionId = React.useRef(sessionId);
 
   React.useEffect(() => {
     let alive = true;
+    const sessionChanged = previousSessionId.current !== sessionId;
+    previousSessionId.current = sessionId;
     if (sessionId == null || sessionId === "") {
       setItems([]);
       setHasMore(false);
@@ -47,7 +51,7 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
 
     setLoading(true);
     setError(false);
-    setItems([]);
+    if (sessionChanged) setItems([]);
     void fetchSessionHistory(sessionId).then(async (history) => {
       const chatItems = await resolveAttachmentMedia(historyToItems(history.messages ?? []));
       if (!alive) return;
@@ -61,7 +65,7 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
     });
 
     return () => { alive = false; };
-  }, [sessionId]);
+  }, [sessionId, refreshVersion]);
 
   const loadOlder = React.useCallback(async () => {
     if (sessionId == null || !hasMore || loadingOlder) return;
@@ -82,27 +86,43 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
 
   return (
     <section className={styles.root} aria-label="Session chat interface">
+      <header className={styles.header}>
+        <span>Session conversation</span>
+        <button
+          type="button"
+          className={styles.refreshButton}
+          aria-label="Refresh session messages"
+          title="Refresh session messages"
+          disabled={sessionId == null || sessionId === "" || loading || loadingOlder}
+          onClick={() => setRefreshVersion((version) => version + 1)}
+        >
+          <RefreshCw size={15} className={loading ? styles.refreshing : undefined} />
+        </button>
+      </header>
       {sessionId == null || sessionId === "" ? (
         <div className={styles.state}>Save the session to view its conversation.</div>
-      ) : loading ? (
+      ) : loading && items.length === 0 ? (
         <div className={styles.state}>Loading session messages…</div>
-      ) : error ? (
+      ) : error && items.length === 0 ? (
         <div className={`${styles.state} ${styles.error}`}>Could not load messages for this session.</div>
       ) : items.length === 0 ? (
         <div className={styles.state}><MessageSquareText size={21} /><p>No messages found for this session.</p></div>
       ) : (
-        <div className={`${chatStyles.root} ${styles.messages}`}>
-          <AgentThread
-            items={items}
-            thinking={false}
-            working={false}
-            hasMore={hasMore}
-            loadingOlder={loadingOlder}
-            onLoadOlder={() => void loadOlder()}
-            onReply={noOp}
-            onPrompt={noOp}
-          />
-        </div>
+        <>
+          {error && <div className={`${styles.refreshError} ${styles.error}`}>Could not refresh messages.</div>}
+          <div className={`${chatStyles.root} ${styles.messages}`}>
+            <AgentThread
+              items={items}
+              thinking={false}
+              working={false}
+              hasMore={hasMore}
+              loadingOlder={loadingOlder}
+              onLoadOlder={() => void loadOlder()}
+              onReply={noOp}
+              onPrompt={noOp}
+            />
+          </div>
+        </>
       )}
     </section>
   );
