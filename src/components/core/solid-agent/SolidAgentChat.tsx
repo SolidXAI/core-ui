@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Clock, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -519,6 +519,7 @@ export function SolidAgentChat({
         setShowHistory(false);
         setShowProviderMenu(false);
         setMenuSessionId(null);
+        setHistoryPage(1);
         onInputsLocked?.(false);
         if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) {
             setCollectedInputs(null);
@@ -574,6 +575,7 @@ export function SolidAgentChat({
         setHistorySearchQuery("");
         setEditingSessionId(null);
         setMenuSessionId(null);
+        setHistoryPage(1);
     };
 
     const handleSaveRename = async (sessionId: string, newTitle: string) => {
@@ -588,6 +590,40 @@ export function SolidAgentChat({
         setEditingSessionId(null);
         await renameSession(agentUrl, sessionId, trimmed);
     };
+
+    const [historyPageSize, setHistoryPageSize] = useState(10);
+    const [historyPage, setHistoryPage] = useState(1);
+    const historyListRef = useRef<HTMLDivElement>(null);
+
+    // Dynamically calculate page size based on available container height so rows fill the window cleanly
+    useLayoutEffect(() => {
+        if (!showHistory) return;
+
+        const updateDynamicPageSize = () => {
+            const listEl = historyListRef.current;
+            if (!listEl) return;
+            const availableHeight = listEl.clientHeight;
+            if (availableHeight <= 0) return;
+
+            // Measure the first row's height if rendered, fallback to 38px (36px row + 2px gap)
+            const firstRow = listEl.querySelector(`.${styles.historyRow}`) as HTMLElement | null;
+            const rowHeight = firstRow && firstRow.offsetHeight > 20 ? firstRow.offsetHeight + 2 : 38;
+
+            const computed = Math.max(5, Math.floor(availableHeight / rowHeight));
+            setHistoryPageSize((prev) => (prev !== computed ? computed : prev));
+        };
+
+        updateDynamicPageSize();
+
+        const observer = new ResizeObserver(() => {
+            updateDynamicPageSize();
+        });
+        if (historyListRef.current) {
+            observer.observe(historyListRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [showHistory]);
 
     const filteredSessions = useMemo(() => {
         const rawQ = historySearchQuery.trim().toLowerCase();
@@ -609,6 +645,28 @@ export function SolidAgentChat({
             );
         });
     }, [sessions, historySearchQuery]);
+
+    // Reset pagination to page 1 whenever the search query changes to prevent search conflicts
+    useEffect(() => {
+        setHistoryPage(1);
+    }, [historySearchQuery]);
+
+    const totalHistoryPages = Math.max(1, Math.ceil(filteredSessions.length / historyPageSize));
+
+    useEffect(() => {
+        if (historyPage > totalHistoryPages) {
+            setHistoryPage(totalHistoryPages);
+        }
+    }, [historyPage, totalHistoryPages]);
+
+    useEffect(() => {
+        historyListRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    }, [historyPage]);
+
+    const paginatedSessions = useMemo(() => {
+        const start = (historyPage - 1) * historyPageSize;
+        return filteredSessions.slice(start, start + historyPageSize);
+    }, [filteredSessions, historyPage, historyPageSize]);
 
     const handleModelChange = (modelId: string) => {
         setSelectedModel(modelId);
@@ -1058,6 +1116,7 @@ export function SolidAgentChat({
                                     if (!v) {
                                         setHistorySearchQuery("");
                                         setEditingSessionId(null);
+                                        setHistoryPage(1);
                                     }
                                     setMenuSessionId(null);
                                     return !v;
@@ -1076,6 +1135,7 @@ export function SolidAgentChat({
                                 setHistorySearchQuery("");
                                 setEditingSessionId(null);
                                 setMenuSessionId(null);
+                                setHistoryPage(1);
                                 void signOutOfAgent(agentUrl);
                             }}
                         >
@@ -1171,143 +1231,180 @@ export function SolidAgentChat({
                         {sessions.length > 0 && filteredSessions.length === 0 && (
                             <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
                         )}
-                        {filteredSessions.map((session, index) => {
-                            const isCurrentSession = session.session_id === agent.historySessionId;
-                            const isMenuOpen = menuSessionId === session.session_id;
-                            const isNearBottom = index >= filteredSessions.length - 2 && filteredSessions.length > 3;
+                        <div className={styles.historyList} ref={historyListRef}>
+                            {paginatedSessions.map((session, index) => {
+                                const isCurrentSession = session.session_id === agent.historySessionId;
+                                const isMenuOpen = menuSessionId === session.session_id;
+                                const isNearBottom = index >= paginatedSessions.length - 2 && paginatedSessions.length > 3;
 
-                            return (
-                                <div
-                                    key={session.session_id}
-                                    className={`${styles.historyRow} ${isCurrentSession ? styles.historyRowActive : ""}`}
-                                >
-                                    {editingSessionId === session.session_id ? (
-                                        <form
-                                            className={styles.historyRenameForm}
-                                            onSubmit={(e) => {
-                                                e.preventDefault();
-                                                void handleSaveRename(session.session_id, editingTitle);
-                                            }}
-                                        >
-                                            <input
-                                                type="text"
-                                                className={styles.historyRenameInput}
-                                                value={editingTitle}
-                                                onChange={(e) => setEditingTitle(e.target.value)}
-                                                autoFocus
-                                                onFocus={(e) => e.target.select()}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === "Escape") {
-                                                        e.stopPropagation();
-                                                        setEditingSessionId(null);
-                                                    }
+                                return (
+                                    <div
+                                        key={session.session_id}
+                                        className={`${styles.historyRow} ${isCurrentSession ? styles.historyRowActive : ""}`}
+                                    >
+                                        {editingSessionId === session.session_id ? (
+                                            <form
+                                                className={styles.historyRenameForm}
+                                                onSubmit={(e) => {
+                                                    e.preventDefault();
+                                                    void handleSaveRename(session.session_id, editingTitle);
                                                 }}
-                                                aria-label="Rename conversation"
-                                            />
-                                            <button
-                                                type="submit"
-                                                className={styles.iconBtn}
-                                                aria-label="Save title"
-                                                title="Save"
                                             >
-                                                <Check size={14} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className={styles.iconBtn}
-                                                aria-label="Cancel rename"
-                                                title="Cancel"
-                                                onClick={() => setEditingSessionId(null)}
-                                            >
-                                                <X size={14} />
-                                            </button>
-                                        </form>
-                                    ) : (
-                                        <>
-                                            <button
-                                                type="button"
-                                                className={`${styles.historyItem} ${isCurrentSession ? styles.historyItemActive : ""}`}
-                                                onClick={() => void handleResumeSession(session)}
-                                                title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
-                                            >
-                                                <span className={styles.historyPreview}>
-                                                    {session.title || session.preview || "New conversation"}
-                                                </span>
-                                                {session.provider && (
-                                                    <span
-                                                        className={styles.historyProviderName}
-                                                        title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
-                                                    >
-                                                        {getProviderBadgeLabel(session.provider)}
-                                                    </span>
-                                                )}
-                                            </button>
-                                            <div
-                                                className={styles.historyMenuWrap}
-                                                ref={isMenuOpen ? historyMenuRef : undefined}
-                                            >
+                                                <input
+                                                    type="text"
+                                                    className={styles.historyRenameInput}
+                                                    value={editingTitle}
+                                                    onChange={(e) => setEditingTitle(e.target.value)}
+                                                    autoFocus
+                                                    onFocus={(e) => e.target.select()}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === "Escape") {
+                                                            e.stopPropagation();
+                                                            setEditingSessionId(null);
+                                                        }
+                                                    }}
+                                                    aria-label="Rename conversation"
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    className={styles.iconBtn}
+                                                    aria-label="Save title"
+                                                    title="Save"
+                                                >
+                                                    <Check size={14} />
+                                                </button>
                                                 <button
                                                     type="button"
-                                                    className={`${styles.historyMenuTrigger} ${isMenuOpen ? styles.historyMenuTriggerActive : ""}`}
-                                                    aria-label="Conversation options"
-                                                    title="Options"
-                                                    aria-expanded={isMenuOpen}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setMenuSessionId(isMenuOpen ? null : session.session_id);
-                                                    }}
+                                                    className={styles.iconBtn}
+                                                    aria-label="Cancel rename"
+                                                    title="Cancel"
+                                                    onClick={() => setEditingSessionId(null)}
                                                 >
-                                                    <MoreHorizontal size={14} />
+                                                    <X size={14} />
                                                 </button>
-                                                {isMenuOpen && (
-                                                    <div
-                                                        className={`${styles.historyMenuDropdown} ${isNearBottom ? styles.historyMenuDropdownUp : ""}`}
-                                                        role="menu"
+                                            </form>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    className={`${styles.historyItem} ${isCurrentSession ? styles.historyItemActive : ""}`}
+                                                    onClick={() => void handleResumeSession(session)}
+                                                    title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
+                                                >
+                                                    <span className={styles.historyPreview}>
+                                                        {session.title || session.preview || "New conversation"}
+                                                    </span>
+                                                    {session.provider && (
+                                                        <span
+                                                            className={styles.historyProviderName}
+                                                            title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
+                                                        >
+                                                            {getProviderBadgeLabel(session.provider)}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                                <div
+                                                    className={styles.historyMenuWrap}
+                                                    ref={isMenuOpen ? historyMenuRef : undefined}
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className={`${styles.historyMenuTrigger} ${isMenuOpen ? styles.historyMenuTriggerActive : ""}`}
+                                                        aria-label="Conversation options"
+                                                        title="Options"
+                                                        aria-expanded={isMenuOpen}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setMenuSessionId(isMenuOpen ? null : session.session_id);
+                                                        }}
                                                     >
-                                                        {session.created_at && (
-                                                            <div className={styles.historyMenuTime}>
-                                                                <Clock size={12} className={styles.historyMenuTimeIcon} />
-                                                                <span>{formatSessionTime(session.created_at)}</span>
-                                                            </div>
-                                                        )}
-                                                        <button
-                                                            type="button"
-                                                            className={styles.historyMenuItem}
-                                                            role="menuitem"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setMenuSessionId(null);
-                                                                setEditingSessionId(session.session_id);
-                                                                setEditingTitle(session.title || session.preview || "New conversation");
-                                                            }}
+                                                        <MoreHorizontal size={14} />
+                                                    </button>
+                                                    {isMenuOpen && (
+                                                        <div
+                                                            className={`${styles.historyMenuDropdown} ${isNearBottom ? styles.historyMenuDropdownUp : ""}`}
+                                                            role="menu"
                                                         >
-                                                            <Pencil size={13} />
-                                                            <span>Rename</span>
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className={`${styles.historyMenuItem} ${styles.historyMenuItemDanger}`}
-                                                            role="menuitem"
-                                                            onClick={async (e) => {
-                                                                e.stopPropagation();
-                                                                setMenuSessionId(null);
-                                                                if (!window.confirm("Delete this conversation?")) return;
-                                                                await deleteSession(agentUrl, session.session_id);
-                                                                setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
-                                                                if (session.session_id === agent.historySessionId) runtime?.newChat();
-                                                            }}
-                                                        >
-                                                            <Trash2 size={13} />
-                                                            <span>Delete</span>
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                                            {session.created_at && (
+                                                                <div className={styles.historyMenuTime}>
+                                                                    <Clock size={12} className={styles.historyMenuTimeIcon} />
+                                                                    <span>{formatSessionTime(session.created_at)}</span>
+                                                                </div>
+                                                            )}
+                                                            <button
+                                                                type="button"
+                                                                className={styles.historyMenuItem}
+                                                                role="menuitem"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setMenuSessionId(null);
+                                                                    setEditingSessionId(session.session_id);
+                                                                    setEditingTitle(session.title || session.preview || "New conversation");
+                                                                }}
+                                                            >
+                                                                <Pencil size={13} />
+                                                                <span>Rename</span>
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className={`${styles.historyMenuItem} ${styles.historyMenuItemDanger}`}
+                                                                role="menuitem"
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    setMenuSessionId(null);
+                                                                    if (!window.confirm("Delete this conversation?")) return;
+                                                                    await deleteSession(agentUrl, session.session_id);
+                                                                    setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
+                                                                    if (session.session_id === agent.historySessionId) runtime?.newChat();
+                                                                }}
+                                                            >
+                                                                <Trash2 size={13} />
+                                                                <span>Delete</span>
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {totalHistoryPages > 1 && (
+                            <div className={styles.historyPagination}>
+                                <button
+                                    type="button"
+                                    className={styles.historyPaginationBtn}
+                                    onClick={() => {
+                                        setMenuSessionId(null);
+                                        setHistoryPage((p) => Math.max(1, p - 1));
+                                    }}
+                                    disabled={historyPage <= 1}
+                                    title="Previous page"
+                                    aria-label="Previous page"
+                                >
+                                    <ChevronLeft size={13} />
+                                    <span>Prev</span>
+                                </button>
+                                <span className={styles.historyPaginationText}>
+                                    Page {historyPage} of {totalHistoryPages}
+                                </span>
+                                <button
+                                    type="button"
+                                    className={styles.historyPaginationBtn}
+                                    onClick={() => {
+                                        setMenuSessionId(null);
+                                        setHistoryPage((p) => Math.min(totalHistoryPages, p + 1));
+                                    }}
+                                    disabled={historyPage >= totalHistoryPages}
+                                    title="Next page"
+                                    aria-label="Next page"
+                                >
+                                    <span>Next</span>
+                                    <ChevronRight size={13} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <AgentThread

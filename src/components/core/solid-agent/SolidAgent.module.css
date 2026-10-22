@@ -588,7 +588,24 @@
 .bannerError { background: color-mix(in srgb, var(--agent-err) 10%, transparent); color: var(--agent-err); }
 
 /* ── History menu ────────────────────────────────────────────── */
-.historyPanel { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px 8px 60px 8px; }
+.historyPanel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 8px 8px 0 8px;
+}
+.historyList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 0 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 .historySearchBox {
   position: relative;
   display: flex;
@@ -826,7 +843,7 @@
   border-radius: 6px;
   border: 0;
   background: transparent;
-  color: var(--agent-fg);
+  color: var(--agent-muted);
   font-size: 12px;
   cursor: pointer;
   text-align: left;
@@ -842,6 +859,48 @@
 .historyMenuItemDanger:hover {
   background: color-mix(in srgb, #ef4444 12%, transparent);
   color: #ef4444;
+}
+
+.historyPagination {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 6px;
+  border-top: 1px solid var(--agent-border);
+  background: var(--agent-bg);
+  gap: 8px;
+}
+.historyPaginationBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--agent-border);
+  background: transparent;
+  color: var(--agent-muted);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  user-select: none;
+}
+.historyPaginationBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--agent-fg) 6%, transparent);
+  color: var(--agent-fg);
+  border-color: color-mix(in srgb, var(--agent-fg) 20%, transparent);
+}
+.historyPaginationBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.historyPaginationText {
+  font-size: 11.5px;
+  color: var(--agent-muted);
+  user-select: none;
+  font-weight: 500;
 }
 
 /* ── Thread ──────────────────────────────────────────────────── */
