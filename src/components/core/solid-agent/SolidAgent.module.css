@@ -913,6 +913,11 @@
   flex-direction: column;
   gap: 9px;
 }
+.userTurn {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
 .loadMore { align-self: center; }
 .notice { align-self: center; font-size: 12px; color: var(--agent-muted); }
 .spinner {
@@ -952,6 +957,9 @@
   background: var(--agent-page);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
   cursor: text;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
 }
 .composerBox:focus-within {
   border-color: var(--agent-primary);
@@ -1573,7 +1581,7 @@
   cursor: pointer;
 }
 .attachmentRemove:hover { background: var(--agent-tint); color: var(--agent-fg); }
-.attachmentErrors { font-size: 12px; color: var(--agent-err); display: flex; flex-direction: column; gap: 2px; }
+.attachmentErrors { font-size: 12px; color: var(--agent-err); display: flex; flex-direction: column; gap: 2px; width: 100%; max-width: 720px; margin: 0 auto; }
 .hint { flex: 1 1 auto; font-size: 11px; color: var(--agent-muted); }
 .sendBtn {
   width: 30px;
@@ -1628,6 +1636,9 @@
   padding: 6px;
   max-height: 220px;
   overflow-y: auto;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
 }
 .popoverItem {
   width: 100%;
@@ -1928,5 +1939,313 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+/* ── Full-Screen Modern Sidebar Layout ───────────────────────── */
+.fullScreenLayout {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.fullScreenSidebar {
+  width: 270px;
+  min-width: 270px;
+  max-width: 270px;
+  height: 100%;
+  background: color-mix(in srgb, var(--agent-bg) 95%, var(--agent-page, #000));
+  border-right: 1px solid var(--agent-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+  z-index: 10;
+  animation: sidebarSlideIn 0.18s ease;
+}
+
+@keyframes sidebarSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px 6px 12px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.sidebarSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--agent-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 8px 4px 8px;
+  user-select: none;
+}
+
+.sidebarNewChatBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--agent-border);
+  background: var(--agent-bg);
+  color: var(--agent-fg);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.sidebarNewChatBtn:hover {
+  background: var(--agent-tint);
+  border-color: color-mix(in srgb, var(--agent-primary) 30%, var(--agent-border));
+  color: var(--agent-fg);
+}
+
+.sidebarNewChatSplit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  background: var(--agent-bg);
+  border: 1px solid var(--agent-border);
+  border-radius: 8px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.sidebarNewChatSplit:hover {
+  border-color: color-mix(in srgb, var(--agent-primary) 30%, var(--agent-border));
+}
+
+.sidebarSplitActionBtn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--agent-fg);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  border-top-left-radius: 7px;
+  border-bottom-left-radius: 7px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.sidebarSplitActionBtn:hover {
+  background: var(--agent-tint);
+  color: var(--agent-primary);
+}
+
+.sidebarSplitTriggerBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid var(--agent-border);
+  background: transparent;
+  color: var(--agent-muted);
+  cursor: pointer;
+  border-top-right-radius: 7px;
+  border-bottom-right-radius: 7px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.sidebarSplitTriggerBtn:hover {
+  background: var(--agent-tint);
+  color: var(--agent-fg);
+}
+
+.sidebarSearchWrap {
+  padding: 6px 12px 8px 12px;
+  flex-shrink: 0;
+}
+
+.sidebarSearchWrap .historySearchBox {
+  margin: 0;
+}
+
+.sidebarSessions {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 8px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fullScreenSidebar .historyPagination {
+  padding: 8px 12px;
+  background: transparent;
+  border-top: 1px solid var(--agent-border);
+}
+
+.fullScreenMain {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  background: var(--agent-bg);
+}
+
+/* Center thread messages within a modern, comfortable reading column */
+.fullScreenMain .thread {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px 20px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.fullScreenMain .thread > * {
+  width: 100%;
+  max-width: 720px;
+  align-self: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  box-sizing: border-box;
+}
+
+.fullScreenMain .userTurn {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto !important;
+  align-self: center !important;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sidebarTriggerFloating {
+  position: absolute;
+  top: 13px;
+  left: 12px;
+  z-index: 20;
+  cursor: pointer;
+  background: var(--agent-page, #ffffff);
+  border: 1px solid var(--agent-border);
+  color: var(--agent-fg);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.sidebarTriggerFloating:hover {
+  background: var(--agent-tint, rgba(0, 0, 0, 0.05));
+  border-color: color-mix(in srgb, var(--agent-primary) 30%, var(--agent-border));
+  color: var(--agent-primary);
+}
+
+.sidebarTriggerFloating:active {
+  transform: scale(0.96);
+}
+
+/* Constrain empty state and suggestion cards symmetrically */
+.fullScreenMain .empty {
+  width: 100%;
+  max-width: 720px;
+  margin: auto auto;
+}
+
+.fullScreenMain .suggestions {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* Floating centered message box matching major AI providers (Codex/Claude/ChatGPT) */
+.fullScreenMain .composer {
+  width: 100%;
+  background: transparent;
+  border-top: 0;
+  padding: 0 20px 24px 20px;
+}
+
+.fullScreenMain .composerBox {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  border-radius: 16px;
+  border: 1px solid var(--agent-border);
+  background: var(--agent-page);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.fullScreenMain .composerBox:focus-within {
+  border-color: var(--agent-primary);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12), 0 0 0 3px var(--agent-tint);
+}
+
+.fullScreenMain .textarea {
+  padding: 12px 14px 6px;
+  font-size: 14px;
+}
+
+.fullScreenMain .composerRow {
+  padding: 4px 10px 10px 10px;
+}
+
+.fullScreenMain .composer .popover {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.fullScreenMain .composer .attachmentErrors {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .fullScreenMain .composer {
+    padding: 0 12px 14px 12px;
+  }
+  .fullScreenMain .composerBox {
+    border-radius: 12px;
+  }
+  .fullScreenMain .thread {
+    padding: 16px 12px 8px 12px;
+  }
 }
 

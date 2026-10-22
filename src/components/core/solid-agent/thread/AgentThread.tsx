@@ -224,7 +224,13 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
                 </button>
             )}
             {groups.map((group) => {
-                if (group.kind === "user") return renderItem(group.item);
+                if (group.kind === "user") {
+                    return (
+                        <div key={group.item.id} className={styles.userTurn}>
+                            {renderItem(group.item)}
+                        </div>
+                    );
+                }
 
                 const isCurrentTurn = working && group === groups[groups.length - 1];
                 const assistantCopyText = [...group.items].reverse()

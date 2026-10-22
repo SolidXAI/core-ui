@@ -181,7 +181,10 @@ export function SolidAgentChat({
     const signedInAs = agentAuth.auth?.user?.email ?? agentAuth.auth?.user?.username;
     const emptyStateSuggestions = suggestions ?? (agentRuntime === "agentHub" ? AGENT_HUB_DEFAULT_SUGGESTIONS : DEFAULT_SUGGESTIONS);
 
+    const windowMode = windowControls?.mode ?? agent.mode;
+    const isFullScreen = windowMode === "maximized";
     const [showHistory, setShowHistory] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
     const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
@@ -366,7 +369,10 @@ export function SolidAgentChat({
     const updateDropdownPosition = useCallback(() => {
         if (!providerMenuRef.current) return;
         const btnRect = providerMenuRef.current.getBoundingClientRect();
-        const container = headerRef.current || providerMenuRef.current.closest(`.${styles.header}`) || document.body;
+        const isInSidebar = isFullScreen && sidebarOpen;
+        const container = isInSidebar
+            ? (providerMenuRef.current.closest(`.${styles.fullScreenSidebar}`) || document.body)
+            : (headerRef.current || providerMenuRef.current.closest(`.${styles.header}`) || document.body);
         const containerRect = container.getBoundingClientRect();
 
         const menuWidth = 220;
@@ -399,7 +405,7 @@ export function SolidAgentChat({
             width: `${effectiveWidth}px`,
             maxWidth: `${effectiveWidth}px`,
         });
-    }, []);
+    }, [isFullScreen, sidebarOpen]);
 
     useLayoutEffect(() => {
         if (showProviderMenu) {
@@ -578,6 +584,14 @@ export function SolidAgentChat({
         setHistoryPage(1);
     };
 
+    const handleDeleteSession = async (sessionId: string) => {
+        setMenuSessionId(null);
+        if (!window.confirm("Delete this conversation?")) return;
+        await deleteSession(agentUrl, sessionId);
+        setSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
+        if (sessionId === agent.historySessionId) runtime?.newChat();
+    };
+
     const handleSaveRename = async (sessionId: string, newTitle: string) => {
         const trimmed = newTitle.trim();
         if (!trimmed) {
@@ -597,7 +611,8 @@ export function SolidAgentChat({
 
     // Dynamically calculate page size based on available container height so rows fill the window cleanly
     useLayoutEffect(() => {
-        if (!showHistory) return;
+        const isSidebarActive = isFullScreen && sidebarOpen;
+        if (!showHistory && !isSidebarActive) return;
 
         const updateDynamicPageSize = () => {
             const listEl = historyListRef.current;
@@ -605,11 +620,14 @@ export function SolidAgentChat({
             const availableHeight = listEl.clientHeight;
             if (availableHeight <= 0) return;
 
+            const sectionTitle = listEl.querySelector(`.${styles.sidebarSectionTitle}`) as HTMLElement | null;
+            const effectiveHeight = availableHeight - (sectionTitle?.offsetHeight ?? 0);
+
             // Measure the first row's height if rendered, fallback to 38px (36px row + 2px gap)
             const firstRow = listEl.querySelector(`.${styles.historyRow}`) as HTMLElement | null;
             const rowHeight = firstRow && firstRow.offsetHeight > 20 ? firstRow.offsetHeight + 2 : 38;
 
-            const computed = Math.max(5, Math.floor(availableHeight / rowHeight));
+            const computed = Math.max(5, Math.floor(effectiveHeight / rowHeight));
             setHistoryPageSize((prev) => (prev !== computed ? computed : prev));
         };
 
@@ -623,7 +641,7 @@ export function SolidAgentChat({
         }
 
         return () => observer.disconnect();
-    }, [showHistory]);
+    }, [showHistory, isFullScreen, sidebarOpen]);
 
     const filteredSessions = useMemo(() => {
         const rawQ = historySearchQuery.trim().toLowerCase();
@@ -779,8 +797,9 @@ export function SolidAgentChat({
         else setSeed({ text: prompt, key: nonce });
     }, [agent.prefill, handlesPrefill, dispatch, runtime, inputContext, messageInputs, beforeSend]);
 
+    const shouldLoadHistory = (showHistory || isFullScreen) && signedIn;
     useEffect(() => {
-        if (!showHistory || !signedIn) return;
+        if (!shouldLoadHistory) return;
         let alive = true;
         fetchSessionList(agentUrl).then((list) => {
             if (!alive) return;
@@ -794,7 +813,7 @@ export function SolidAgentChat({
         return () => {
             alive = false;
         };
-    }, [showHistory, agentUrl, signedIn]);
+    }, [shouldLoadHistory, agentUrl, signedIn]);
 
     useEffect(() => {
         return eventBus.on(SOLID_AGENT_EVENTS.sessionChanged, (payload) => {
@@ -819,7 +838,6 @@ export function SolidAgentChat({
     }, [agentUrl, selectedProvider, selectedModel]);
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
-    const windowMode = windowControls?.mode ?? agent.mode;
     const send = useCallback(async (text: string) => {
         if (!text.trim() || !runtime) return;
         onInputsLocked?.(true);
@@ -891,7 +909,6 @@ export function SolidAgentChat({
 
 
     const activeSessionId = agent.historySessionId || agent.sessionId;
-    const isFullScreen = windowMode === "maximized";
     const displaySessionId = activeSessionId
         ? (isFullScreen ? activeSessionId : (activeSessionId.length > 12 ? activeSessionId.slice(0, 8) : activeSessionId))
         : "";
@@ -1029,102 +1046,106 @@ export function SolidAgentChat({
                 </div>
                 {signedIn && (
                     <>
-                        {agentRuntime === "agentHub" || providers.length <= 1 ? (
-                            <button
-                                type="button"
-                                className={styles.iconBtn}
-                                title="New chat"
-                                aria-label="New chat"
-                                onClick={handleStartNewChat}
-                            >
-                                <Plus size={16} />
-                            </button>
-                        ) : (
-                            <div className={styles.newChatSplit} ref={providerMenuRef}>
+                        {(!isFullScreen || !sidebarOpen) && (
+                            agentRuntime === "agentHub" || providers.length <= 1 ? (
                                 <button
                                     type="button"
-                                    className={styles.splitActionBtn}
-                                    title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
+                                    className={styles.iconBtn}
+                                    title="New chat"
                                     aria-label="New chat"
                                     onClick={handleStartNewChat}
                                 >
-                                    <Plus size={15} />
+                                    <Plus size={16} />
                                 </button>
-                                <span className={styles.splitDivider} />
-                                <button
-                                    type="button"
-                                    className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
-                                    title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
-                                    aria-label="Select AI execution provider"
-                                    aria-expanded={showProviderMenu}
-                                    onClick={() => {
-                                        setShowProviderMenu((prev) => {
-                                            const next = !prev;
-                                            if (next) updateDropdownPosition();
-                                            return next;
-                                        });
-                                    }}
-                                >
-                                    {loadingProviders ? (
-                                        <Loader2 size={12} className={styles.spinIcon} />
-                                    ) : (
-                                        <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
-                                    )}
-                                </button>
-                                {showProviderMenu && (
-                                    <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
-                                        <div className={styles.providerDropdownHeader}>
-                                            <strong>Select AI Provider</strong>
-                                        </div>
+                            ) : (
+                                <div className={styles.newChatSplit} ref={providerMenuRef}>
+                                    <button
+                                        type="button"
+                                        className={styles.splitActionBtn}
+                                        title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
+                                        aria-label="New chat"
+                                        onClick={handleStartNewChat}
+                                    >
+                                        <Plus size={15} />
+                                    </button>
+                                    <span className={styles.splitDivider} />
+                                    <button
+                                        type="button"
+                                        className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
+                                        title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                        aria-label="Select AI execution provider"
+                                        aria-expanded={showProviderMenu}
+                                        onClick={() => {
+                                            setShowProviderMenu((prev) => {
+                                                const next = !prev;
+                                                if (next) updateDropdownPosition();
+                                                return next;
+                                            });
+                                        }}
+                                    >
                                         {loadingProviders ? (
-                                            <div className={styles.providerLoadingItem}>
-                                                <Loader2 size={13} className={styles.spinIcon} />
-                                                <span>Loading providers...</span>
-                                            </div>
+                                            <Loader2 size={12} className={styles.spinIcon} />
                                         ) : (
-                                            <div className={styles.providerList}>
-                                                {providers.map((p) => {
-                                                    const isSelected = p.id === selectedProvider;
-                                                    return (
-                                                        <button
-                                                            key={p.id}
-                                                            type="button"
-                                                            className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
-                                                            onClick={() => handleSelectProvider(p.id)}
-                                                        >
-                                                            <div className={styles.providerItemMeta}>
-                                                                <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
-                                                            </div>
-                                                            {isSelected && <Check size={14} className={styles.providerCheck} />}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
+                                            <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
                                         )}
-                                    </div>
-                                )}
-                            </div>
+                                    </button>
+                                    {showProviderMenu && (
+                                        <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
+                                            <div className={styles.providerDropdownHeader}>
+                                                <strong>Select AI Provider</strong>
+                                            </div>
+                                            {loadingProviders ? (
+                                                <div className={styles.providerLoadingItem}>
+                                                    <Loader2 size={13} className={styles.spinIcon} />
+                                                    <span>Loading providers...</span>
+                                                </div>
+                                            ) : (
+                                                <div className={styles.providerList}>
+                                                    {providers.map((p) => {
+                                                        const isSelected = p.id === selectedProvider;
+                                                        return (
+                                                            <button
+                                                                key={p.id}
+                                                                type="button"
+                                                                className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
+                                                                onClick={() => handleSelectProvider(p.id)}
+                                                            >
+                                                                <div className={styles.providerItemMeta}>
+                                                                    <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
+                                                                </div>
+                                                                {isSelected && <Check size={14} className={styles.providerCheck} />}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )
                         )}
-                        <button
-                            type="button"
-                            className={styles.iconBtn}
-                            title="History"
-                            aria-label="Chat history"
-                            aria-pressed={showHistory}
-                            onClick={() => {
-                                setShowHistory((v) => {
-                                    if (!v) {
-                                        setHistorySearchQuery("");
-                                        setEditingSessionId(null);
-                                        setHistoryPage(1);
-                                    }
-                                    setMenuSessionId(null);
-                                    return !v;
-                                });
-                            }}
-                        >
-                            <History size={16} />
-                        </button>
+                        {!isFullScreen && (
+                            <button
+                                type="button"
+                                className={styles.iconBtn}
+                                title="History"
+                                aria-label="Chat history"
+                                aria-pressed={showHistory}
+                                onClick={() => {
+                                    setShowHistory((v) => {
+                                        if (!v) {
+                                            setHistorySearchQuery("");
+                                            setEditingSessionId(null);
+                                            setHistoryPage(1);
+                                        }
+                                        setMenuSessionId(null);
+                                        return !v;
+                                    });
+                                }}
+                            >
+                                <History size={16} />
+                            </button>
+                        )}
                         {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}
@@ -1201,41 +1222,42 @@ export function SolidAgentChat({
                     </div>
                 )}
 
-                {showHistory ? (
-                    <div className={styles.historyPanel} aria-label="Past conversations">
-                        {sessions.length > 0 && (
-                            <div className={styles.historySearchBox}>
-                                <Search size={13} className={styles.historySearchIcon} />
-                                <input
-                                    type="text"
-                                    className={styles.historySearchInput}
-                                    placeholder="Search by title, message, or session ID…"
-                                    value={historySearchQuery}
-                                    onChange={(e) => setHistorySearchQuery(e.target.value)}
-                                    aria-label="Search past conversations"
-                                />
-                                {historySearchQuery && (
-                                    <button
-                                        type="button"
-                                        className={styles.historySearchClear}
-                                        onClick={() => setHistorySearchQuery("")}
-                                        title="Clear search"
-                                        aria-label="Clear search"
-                                    >
-                                        <X size={12} />
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                        {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
-                        {sessions.length > 0 && filteredSessions.length === 0 && (
-                            <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
-                        )}
-                        <div className={styles.historyList} ref={historyListRef}>
-                            {paginatedSessions.map((session, index) => {
+                {(() => {
+                    const renderSearchBox = () => (
+                        <div className={styles.historySearchBox}>
+                            <Search size={13} className={styles.historySearchIcon} />
+                            <input
+                                type="text"
+                                className={styles.historySearchInput}
+                                placeholder="Search by title, message, or session ID…"
+                                value={historySearchQuery}
+                                onChange={(e) => setHistorySearchQuery(e.target.value)}
+                                aria-label="Search past conversations"
+                            />
+                            {historySearchQuery && (
+                                <button
+                                    type="button"
+                                    className={styles.historySearchClear}
+                                    onClick={() => setHistorySearchQuery("")}
+                                    title="Clear search"
+                                    aria-label="Clear search"
+                                >
+                                    <X size={12} />
+                                </button>
+                            )}
+                        </div>
+                    );
+
+                    const renderSessionList = (items: AgentSessionSummary[] = filteredSessions) => (
+                        <>
+                            {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
+                            {sessions.length > 0 && items.length === 0 && (
+                                <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
+                            )}
+                            {items.map((session, index) => {
                                 const isCurrentSession = session.session_id === agent.historySessionId;
                                 const isMenuOpen = menuSessionId === session.session_id;
-                                const isNearBottom = index >= paginatedSessions.length - 2 && paginatedSessions.length > 3;
+                                const isNearBottom = index >= items.length - 2 && items.length > 3;
 
                                 return (
                                     <div
@@ -1351,11 +1373,7 @@ export function SolidAgentChat({
                                                                 role="menuitem"
                                                                 onClick={async (e) => {
                                                                     e.stopPropagation();
-                                                                    setMenuSessionId(null);
-                                                                    if (!window.confirm("Delete this conversation?")) return;
-                                                                    await deleteSession(agentUrl, session.session_id);
-                                                                    setSessions((prev) => prev.filter((s) => s.session_id !== session.session_id));
-                                                                    if (session.session_id === agent.historySessionId) runtime?.newChat();
+                                                                    await handleDeleteSession(session.session_id);
                                                                 }}
                                                             >
                                                                 <Trash2 size={13} />
@@ -1369,8 +1387,12 @@ export function SolidAgentChat({
                                     </div>
                                 );
                             })}
-                        </div>
-                        {totalHistoryPages > 1 && (
+                        </>
+                    );
+
+                    const renderPaginationControls = () => {
+                        if (totalHistoryPages <= 1) return null;
+                        return (
                             <div className={styles.historyPagination}>
                                 <button
                                     type="button"
@@ -1404,59 +1426,206 @@ export function SolidAgentChat({
                                     <ChevronRight size={13} />
                                 </button>
                             </div>
-                        )}
-                    </div>
-                ) : (
-                    <AgentThread
-                        items={agent.items}
-                        thinking={agent.working && agent.thinking}
-                        working={agent.working}
-                        hasMore={agent.hasMoreHistory}
-                        context={agent.context ?? undefined}
-                        emptyState={empty}
-                        onLoadOlder={() => void runtime?.loadOlder()}
-                        onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
-                        onPrompt={send}
-                    />
-                )}
+                        );
+                    };
 
-                <AgentComposer
-                    working={agent.working}
-                    disabled={!!agent.authError}
-                    commands={agent.commands}
-                    seed={seed?.text}
-                    seedKey={seed?.key}
-                    onSend={sendWithAttachments}
-                    onStop={() => runtime?.cancel()}
-                    canAttach={canAttach}
-                    modelIndicator={
-                        <AgentModelIndicator
-                            assignments={modelAssignments}
-                            activeProvider={selectedProvider}
-                            activeModel={selectedModel}
-                            providers={providers}
-                            models={models}
-                            onModelSelect={handleModelChange}
-                            disabled={agent.working}
-                            isThinking={isThinking}
-                            isFast={isFast}
-                            selectedReasoning={selectedReasoning}
-                            selectedSpeed={selectedSpeed}
-                            onThinkingToggle={handleThinkingToggle}
-                            onFastToggle={handleFastToggle}
-                            onReasoningSelect={handleReasoningChange}
-                            onSpeedSelect={handleSpeedChange}
+                    const threadComponent = (
+                        <AgentThread
+                            items={agent.items}
+                            thinking={agent.working && agent.thinking}
+                            working={agent.working}
+                            hasMore={agent.hasMoreHistory}
+                            context={agent.context ?? undefined}
+                            emptyState={empty}
+                            onLoadOlder={() => void runtime?.loadOlder()}
+                            onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
+                            onPrompt={send}
                         />
-                    }
-                    contextPill={
-                        <AgentContextPill
-                            usage={agent.usage}
-                            activeProvider={selectedProvider}
-                            modelName={selectedModel}
-                            disabled={agent.working}
+                    );
+
+                    const composerComponent = (
+                        <AgentComposer
+                            working={agent.working}
+                            disabled={!!agent.authError}
+                            commands={agent.commands}
+                            seed={seed?.text}
+                            seedKey={seed?.key}
+                            onSend={sendWithAttachments}
+                            onStop={() => runtime?.cancel()}
+                            canAttach={canAttach}
+                            modelIndicator={
+                                <AgentModelIndicator
+                                    assignments={modelAssignments}
+                                    activeProvider={selectedProvider}
+                                    activeModel={selectedModel}
+                                    providers={providers}
+                                    models={models}
+                                    onModelSelect={handleModelChange}
+                                    disabled={agent.working}
+                                    isThinking={isThinking}
+                                    isFast={isFast}
+                                    selectedReasoning={selectedReasoning}
+                                    selectedSpeed={selectedSpeed}
+                                    onThinkingToggle={handleThinkingToggle}
+                                    onFastToggle={handleFastToggle}
+                                    onReasoningSelect={handleReasoningChange}
+                                    onSpeedSelect={handleSpeedChange}
+                                />
+                            }
+                            contextPill={
+                                <AgentContextPill
+                                    usage={agent.usage}
+                                    activeProvider={selectedProvider}
+                                    modelName={selectedModel}
+                                    disabled={agent.working}
+                                />
+                            }
                         />
+                    );
+
+                    if (isFullScreen) {
+                        return (
+                            <div className={styles.fullScreenLayout}>
+                                {sidebarOpen && (
+                                    <aside className={styles.fullScreenSidebar} aria-label="Conversation sidebar">
+                                        <div className={styles.sidebarHeader}>
+                                            {agentRuntime === "agentHub" || providers.length <= 1 ? (
+                                                <button
+                                                    type="button"
+                                                    className={styles.sidebarNewChatBtn}
+                                                    title="New chat"
+                                                    aria-label="New chat"
+                                                    onClick={handleStartNewChat}
+                                                >
+                                                    <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                                        <Plus size={15} />
+                                                        <span>New chat</span>
+                                                    </span>
+                                                </button>
+                                            ) : (
+                                                <div className={styles.sidebarNewChatSplit} ref={providerMenuRef}>
+                                                    <button
+                                                        type="button"
+                                                        className={styles.sidebarSplitActionBtn}
+                                                        title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
+                                                        aria-label="New chat"
+                                                        onClick={handleStartNewChat}
+                                                    >
+                                                        <Plus size={15} />
+                                                        <span>New chat</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className={`${styles.sidebarSplitTriggerBtn} ${showProviderMenu ? styles.sidebarSplitTriggerActive : ""}`}
+                                                        title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                                        aria-label="Select AI execution provider"
+                                                        aria-expanded={showProviderMenu}
+                                                        onClick={() => {
+                                                            setShowProviderMenu((prev) => {
+                                                                const next = !prev;
+                                                                if (next) updateDropdownPosition();
+                                                                return next;
+                                                            });
+                                                        }}
+                                                    >
+                                                        {loadingProviders ? (
+                                                            <Loader2 size={12} className={styles.spinIcon} />
+                                                        ) : (
+                                                            <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
+                                                        )}
+                                                    </button>
+                                                    {showProviderMenu && (
+                                                        <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
+                                                            <div className={styles.providerDropdownHeader}>
+                                                                <strong>Select AI Provider</strong>
+                                                            </div>
+                                                            {loadingProviders ? (
+                                                                <div className={styles.providerLoadingItem}>
+                                                                    <Loader2 size={13} className={styles.spinIcon} />
+                                                                    <span>Loading providers...</span>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={styles.providerList}>
+                                                                    {providers.map((p) => {
+                                                                        const isSelected = p.id === selectedProvider;
+                                                                        return (
+                                                                            <button
+                                                                                key={p.id}
+                                                                                type="button"
+                                                                                className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
+                                                                                onClick={() => handleSelectProvider(p.id)}
+                                                                            >
+                                                                                <div className={styles.providerItemMeta}>
+                                                                                    <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
+                                                                                </div>
+                                                                                {isSelected && <Check size={14} className={styles.providerCheck} />}
+                                                                            </button>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {sessions.length > 0 && (
+                                            <div className={styles.sidebarSearchWrap}>
+                                                {renderSearchBox()}
+                                            </div>
+                                        )}
+                                        <div className={styles.sidebarSessions} ref={historyListRef}>
+                                            {sessions.length > 0 && <div className={styles.sidebarSectionTitle}>Recents</div>}
+                                            {renderSessionList(paginatedSessions)}
+                                        </div>
+                                        {renderPaginationControls()}
+                                    </aside>
+                                )}
+                                <div className={styles.fullScreenMain}>
+                                    <SolidTooltip delayDuration={150}>
+                                        <SolidTooltipTrigger asChild>
+                                            <button
+                                                type="button"
+                                                className={`solid-admin-sidebar-trigger ${styles.sidebarTriggerFloating}`}
+                                                onClick={() => setSidebarOpen((v) => !v)}
+                                                title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+                                                aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+                                            >
+                                                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                                    <rect x="1.5" y="2" width="13" height="12" rx="2" stroke="currentColor" />
+                                                    <path d="M5.5 2V14" stroke="currentColor" />
+                                                    <rect x="8" y="5.25" width="4.5" height="5.5" rx="0.9" stroke="currentColor" />
+                                                </svg>
+                                            </button>
+                                        </SolidTooltipTrigger>
+                                        <SolidTooltipContent side="right" align="center">
+                                            {sidebarOpen ? "Close sidebar" : "Open sidebar"}
+                                        </SolidTooltipContent>
+                                    </SolidTooltip>
+                                    {threadComponent}
+                                    {composerComponent}
+                                </div>
+                            </div>
+                        );
                     }
-                />
+
+                    return (
+                        <>
+                            {showHistory ? (
+                                <div className={styles.historyPanel} aria-label="Past conversations">
+                                    {sessions.length > 0 && renderSearchBox()}
+                                    <div className={styles.historyList} ref={historyListRef}>
+                                        {renderSessionList(paginatedSessions)}
+                                    </div>
+                                    {renderPaginationControls()}
+                                </div>
+                            ) : (
+                                threadComponent
+                            )}
+                            {composerComponent}
+                        </>
+                    );
+                })()}
                 </>
             )}
         </>
