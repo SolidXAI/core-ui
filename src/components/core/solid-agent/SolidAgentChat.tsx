@@ -65,6 +65,7 @@ type Props = {
     inputs?: Record<string, unknown>;
     requiredInputs?: AgentInputDefinition[];
     externalEmbed?: boolean;
+    sessionOwnerKey?: string;
     onInputsLocked?: (locked: boolean) => void;
     beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext | AgentInputContext | undefined>;
     /** Rendered inside a page (tab/form widget) instead of the floating window: no window controls. */
@@ -164,6 +165,7 @@ export function SolidAgentChat({
     inputs,
     requiredInputs = [],
     externalEmbed = false,
+    sessionOwnerKey,
     onInputsLocked,
     beforeSend,
     embedded = false,
@@ -172,7 +174,7 @@ export function SolidAgentChat({
     suggestions,
     windowControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -181,6 +183,7 @@ export function SolidAgentChat({
 
     const [showHistory, setShowHistory] = useState(false);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
+    const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
     const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
     const [editingTitle, setEditingTitle] = useState("");
@@ -487,13 +490,32 @@ export function SolidAgentChat({
         });
     };
 
-    const handleStartNewChat = () => {
-        runtime?.newChat(selectedProvider, selectedModel, {
-            thinking: isThinking,
-            reasoning: selectedReasoning,
-            fast: isFast,
-            speed: selectedSpeed,
-        });
+    const handleStartNewChat = async () => {
+        if (!runtime || startingNewChatRef.current) return;
+        startingNewChatRef.current = true;
+        try {
+            let latestSession: AgentSessionSummary | undefined;
+            if (agentRuntime === "agentHub") {
+                const latestSessions = await fetchSessionList(agentUrl);
+                if (latestSessions) {
+                    setSessions(latestSessions);
+                    latestSession = latestSessions[0];
+                }
+            }
+
+            if (latestSession?.has_user_message === false) {
+                runtime.resume(latestSession.session_id);
+            } else {
+                runtime.newChat(selectedProvider, selectedModel, {
+                    thinking: isThinking,
+                    reasoning: selectedReasoning,
+                    fast: isFast,
+                    speed: selectedSpeed,
+                });
+            }
+        } finally {
+            startingNewChatRef.current = false;
+        }
         setShowHistory(false);
         setShowProviderMenu(false);
         setMenuSessionId(null);

@@ -37,7 +37,7 @@ export function AgentContextPill({
 }: AgentContextPillProps) {
     const [open, setOpen] = useState(false);
     const [pinned, setPinned] = useState(false);
-    const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Clean up close timer on unmount
     useEffect(() => {

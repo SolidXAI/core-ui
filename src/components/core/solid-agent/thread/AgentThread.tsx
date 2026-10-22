@@ -218,8 +218,9 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
     return (
         <div ref={scrollRef} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
             {hasMore && (
-                <button type="button" className={`${styles.btn} ${styles.loadMore}`} onClick={onLoadOlder} disabled={loadingOlder}>
-                    {loadingOlder ? "Loading earlier messages…" : "Load earlier messages"}
+                <button type="button" className={`${styles.btn} ${styles.loadMore}`} onClick={onLoadOlder} disabled={loadingOlder}
+                    aria-label={loadingOlder ? "Loading earlier messages" : "Load earlier messages"} title={loadingOlder ? "Loading earlier messages" : undefined}>
+                    {loadingOlder ? <LoaderCircle size={14} className={styles.spinIcon} aria-hidden="true" /> : "Load earlier messages"}
                 </button>
             )}
             {groups.map((group) => {

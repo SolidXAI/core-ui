@@ -20,6 +20,7 @@ type SharedProps = {
     /** External bootstrap: the standalone route registers credentials for this private URL. */
     externalEmbed?: {
         agentUrl: string;
+        sessionOwnerKey?: string;
         onInputsLocked?: (locked: boolean) => void;
         beforeSend?: (request: BeforeUserMessageSendRequest, signal: AbortSignal) => Promise<EmbedMessageContext>;
     };
@@ -108,6 +109,7 @@ export function SolidAgentEmbedded(props: Props) {
             {/* key: switching type remounts the chat onto the other backend's conversation. */}
                 <SolidAgentChat key={agentUrl} agentUrl={agentUrl!!} agentRuntime={agentRuntime} title={title} agentVersion={props.agentVersion} inputContext={inputContext}
                 inputs={props.inputs} requiredInputs={props.requiredInputs} externalEmbed={!!props.externalEmbed} onInputsLocked={props.externalEmbed?.onInputsLocked}
+                sessionOwnerKey={props.externalEmbed?.sessionOwnerKey}
                 beforeSend={props.externalEmbed?.beforeSend}
                 embedded suggestions={suggestions} windowControls={windowControls} />
         </div>
