@@ -1,10 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { CheckCircle2, ChevronDown, LoaderCircle } from "lucide-react";
+import { ChevronRight, LoaderCircle } from "lucide-react";
 import styles from "../SolidAgent.module.css";
 import widgetStyles from "../widgets/solidChatWidgets.module.css";
-import { SolidXAIIcon } from "../SolidXAIIcon";
+
 import { AgentEventTypes, type AgentChatItem, type AgentContext } from "../types";
-import { toolCategory } from "../agentFormat";
 import { SolidAgentMessageCopyButton } from "../SolidAgentMarkdown";
 import { SolidAgentChatItem } from "./SolidAgentChatItem";
 import { parseWidgetContent } from "./inlineWidget";
@@ -34,9 +33,6 @@ const ASSISTANT_MESSAGE_TYPES = new Set<string>([
 ]);
 
 const isAssistantMessage = (item: AgentChatItem) => !item.widget && ASSISTANT_MESSAGE_TYPES.has(item.eventType);
-const isVisibleCurrentTool = (item: AgentChatItem) =>
-    item.eventType === AgentEventTypes.toolCalling
-    && toolCategory(item.eventData?.tool_name ?? "") !== "Context";
 
 const assistantCopyContent = (item: AgentChatItem): string | null => {
     if (item.widget === "markdown" || item.widget === "SolidMarkdownChatWidget") {
@@ -74,22 +70,39 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
     return groups;
 }
 
+function formatWorkedDuration(seconds: number): string {
+    const s = Math.max(1, seconds);
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
+}
+
 function AgentActivityDisclosure({
     turnKey,
     items,
-    detailItems,
     working,
-    showSummary,
     renderItem,
 }: {
     turnKey: string;
     items: AgentChatItem[];
-    detailItems: AgentChatItem[];
     working: boolean;
-    showSummary: boolean;
     renderItem: (item: AgentChatItem) => React.ReactNode;
 }) {
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(working);
+    const prevWorkingRef = useRef(working);
+    const userToggledRef = useRef(false);
+
+    useEffect(() => {
+        if (working && !prevWorkingRef.current) {
+            userToggledRef.current = false;
+            setExpanded(true);
+        } else if (!working && prevWorkingRef.current) {
+            setExpanded(false);
+        }
+        prevWorkingRef.current = working;
+    }, [working]);
+
     const [now, setNow] = useState(() => Date.now());
     const hasLiveTimer = useRef(working);
     const startTime = useRef(working ? Date.now() : (items[0]?.at || Date.now()));
@@ -106,46 +119,48 @@ function AgentActivityDisclosure({
 
     const toolCount = items.filter((item) => item.eventType === AgentEventTypes.toolCalling).length;
     const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
-    const recordedDuration = items.length > 1
-        ? Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000))
-        : 0;
-    const seconds = hasLiveTimer.current ? activeDuration : recordedDuration;
-    const durationLabel = `${seconds}s`;
+    
+    let recordedSeconds = 0;
+    if (items.length > 1) {
+        recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
+    }
+    const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);
+    const toolDurationSeconds = Math.round(sumToolMs / 1000);
+
+    const seconds = hasLiveTimer.current
+        ? activeDuration
+        : Math.max(recordedSeconds, toolDurationSeconds, 1);
+
+    const durationLabel = formatWorkedDuration(seconds);
+
     const summary = working
         ? `Working · ${toolCount ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ` : ""}${durationLabel}`
-        : toolCount
-          ? `${toolCount} tool${toolCount === 1 ? "" : "s"} called · took ${durationLabel}`
-          : `Activity · took ${durationLabel}`;
+        : `Worked for ${durationLabel}`;
+
     const panelId = `agent-activity-${turnKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 
+    if (items.length === 0 && !working) return null;
+
     return (
-        <section className={`${widgetStyles.ActivityGroup} ${showSummary ? "" : widgetStyles.ActivityTimerOnly}`} aria-label={showSummary ? "Agent activity" : undefined}>
-            {showSummary && (
-                <>
-                    {detailItems.length > 0 ? <button
-                        type="button"
-                        className={widgetStyles.ActivitySummary}
-                        aria-expanded={expanded}
-                        aria-controls={panelId}
-                        onClick={() => setExpanded((value) => !value)}
-                    >
-                        {working
-                            ? <LoaderCircle size={15} className={widgetStyles.ActivitySpinner} aria-hidden="true" />
-                            : <CheckCircle2 size={15} className={widgetStyles.ActivityComplete} aria-hidden="true" />}
-                        <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
-                        <ChevronDown size={15} className={`${widgetStyles.ActivityChevron} ${expanded ? widgetStyles.ActivityChevronOpen : ""}`} aria-hidden="true" />
-                    </button> : <div className={widgetStyles.ActivitySummary} role="status">
-                        {working
-                            ? <LoaderCircle size={15} className={widgetStyles.ActivitySpinner} aria-hidden="true" />
-                            : <CheckCircle2 size={15} className={widgetStyles.ActivityComplete} aria-hidden="true" />}
-                        <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
-                    </div>}
-                    {expanded && (
-                        <div id={panelId} className={widgetStyles.ActivityDetails}>
-                            {detailItems.map(renderItem)}
-                        </div>
-                    )}
-                </>
+        <section className={widgetStyles.ActivityGroup} aria-label="Agent activity">
+            <button
+                type="button"
+                className={widgetStyles.ActivitySummary}
+                aria-expanded={expanded}
+                aria-controls={panelId}
+                onClick={() => {
+                    userToggledRef.current = true;
+                    setExpanded((value) => !value);
+                }}
+            >
+                {working && <LoaderCircle size={13} className={widgetStyles.ActivitySpinner} aria-hidden="true" />}
+                <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
+                <ChevronRight size={13} className={`${widgetStyles.ActivityChevron} ${expanded ? widgetStyles.ActivityChevronOpen : ""}`} aria-hidden="true" />
+            </button>
+            {expanded && items.length > 0 && (
+                <div id={panelId} className={widgetStyles.ActivityDetails}>
+                    {items.map(renderItem)}
+                </div>
             )}
         </section>
     );
@@ -218,24 +233,16 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
                 let activityItems: AgentChatItem[] = [];
                 const flushActivity = (isLatest: boolean) => {
                     if (!activityItems.length) return;
-                    const currentActivity = isCurrentTurn && isLatest
-                        ? [...activityItems].reverse().find((item) => isVisibleCurrentTool(item) && item.live)
-                            ?? [...activityItems].reverse().find(isVisibleCurrentTool)
-                        : undefined;
-                    const detailItems = activityItems.filter((item) => item !== currentActivity);
                     const activityKey = `${group.key}-${activityItems[0].id}`;
                     turnContent.push(
                         <AgentActivityDisclosure
                             key={`activity-${activityKey}`}
                             turnKey={activityKey}
                             items={activityItems}
-                            detailItems={detailItems}
                             working={isCurrentTurn && isLatest}
-                            showSummary={detailItems.length > 0 || currentActivity !== undefined}
                             renderItem={renderItem}
                         />,
                     );
-                    if (currentActivity) turnContent.push(renderItem(currentActivity));
                     activityItems = [];
                 };
                 for (const item of group.items) {
@@ -253,9 +260,7 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
                             key={`activity-${group.key}`}
                             turnKey={group.key}
                             items={[]}
-                            detailItems={[]}
                             working
-                            showSummary
                             renderItem={renderItem}
                         />,
                     );
@@ -271,9 +276,6 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
 
                 return (
                     <div key={group.key} className={widgetStyles.AiTurnGroup}>
-                        <div className={`${widgetStyles.Avatar} ${widgetStyles.AvatarAi}`}>
-                            <SolidXAIIcon size={14} />
-                        </div>
                         <div className={widgetStyles.AiTurnContent}>{turnContent}</div>
                     </div>
                 );

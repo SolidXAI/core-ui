@@ -38,7 +38,7 @@ import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/setti
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
-import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { getRecordUserKeyQuery, normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
@@ -283,6 +283,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const buildEditNavigationQueryString = (rowData: any) => {
     const queryParams = new URLSearchParams(editActionQueryParams);
+    const recordUserKeyQuery = getRecordUserKeyQuery(rowData, solidListViewMetaData);
+    new URLSearchParams(recordUserKeyQuery).forEach((value, key) => queryParams.set(key, value));
     if (internationalisationEnabled) {
       const resolvedLocale = rowData?.localeName || getResolvedListLocale();
       if (resolvedLocale) {
@@ -329,8 +331,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
     useUpdateSolidEntityMutation,
-    useRecoverSolidEntityByIdQuery,
-    useLazyRecoverSolidEntityByIdQuery,
+    useRecoverSolidEntityByIdMutation,
     useRecoverSolidEntityMutation,
   } = entityApi;
 
@@ -526,13 +527,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [
     triggerRecoverSolidEntitiesById,
     {
-      data: recoverByIdData,
       isLoading: recoverByIdIsLoading,
-      error: recoverByIdError,
-      isError: recoverByIdIsError,
-      isSuccess: recoverByIdIsSuccess,
     },
-  ] = useLazyRecoverSolidEntityByIdQuery();
+  ] = useRecoverSolidEntityByIdMutation();
 
   const [
     triggerRecoverSolidEntities,
@@ -1097,8 +1094,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   // Recover functions
   const recoverById = async (id: any) => {
-    await triggerRecoverSolidEntitiesById(id).unwrap();
-    await setQueryString();
+    try {
+      const response: any = await triggerRecoverSolidEntitiesById(id).unwrap();
+      dispatch(showToast({ severity: "success", summary: "Success", detail: response?.data?.message || "Record recovered successfully.", life: 3000 }));
+      await setQueryString();
+    } catch (error: any) {
+      showError(error);
+    }
   };
 
   const recoverAll = async () => {
@@ -1107,7 +1109,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       recoverList.push(element.id);
     });
     try {
-      await triggerRecoverSolidEntities(recoverList).unwrap();
+      const response = await triggerRecoverSolidEntities(recoverList).unwrap();
+      dispatch(showToast({
+        severity: "success",
+        summary: "Success",
+        detail: response?.data?.message,
+        life: 3000,
+      }));
       setRecoverDialogVisible(false);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
@@ -1118,19 +1126,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   useEffect(() => {
-    if (recoverByIdIsSuccess && recoverByIdData) {
-      dispatch(showToast({ severity: "success", summary: "Success", detail: recoverByIdData.data.message, life: 3000 }));
-      return;
-    }
-    if (recoverByIdIsError && recoverByIdError) {
-      showError(recoverByIdError);
-      return;
-    }
-
     if (recoverIsError && recoverError) {
       showError(recoverError);
     }
-  }, [recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
+  }, [recoverIsError, recoverError]);
 
   const showError = async (error: any) => {
     const errorMessages = error?.data?.message;
