@@ -325,7 +325,7 @@ const normalizeWorkflowFieldValueForFormData = (value: any, fieldMetadata: any) 
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, embeded, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -338,6 +338,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         modelName: modelName,
         readOnly: readOnly,
         viewMode: viewMode,
+        embeded: embeded === true,
         onChange: onChange,
         onBlur: onBlur,
         setLightboxUrls: setLightboxUrls,
@@ -1763,6 +1764,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             modelName={params.modelName}
                             readOnly={readOnlyPermission || readOnlyArchivedVersion}
                             viewMode={viewMode}
+                            embeded={params.embeded === true}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
                             setLightboxUrls={setLightboxUrls}
