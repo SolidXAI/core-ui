@@ -618,21 +618,20 @@
   height: 32px;
   padding: 0 28px 0 30px;
   border-radius: 8px;
-  border: 1px solid var(--agent-border);
+  border: 0;
   background: var(--agent-tint);
   color: var(--agent-fg);
   font-family: inherit;
   font-size: 12px;
   outline: none;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  transition: background 0.15s, box-shadow 0.15s;
 }
 .historySearchInput::placeholder {
   color: var(--agent-muted);
 }
 .historySearchInput:focus {
   background: var(--agent-bg, #ffffff);
-  border-color: var(--agent-primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--agent-primary) 20%, transparent);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--agent-primary) 35%, transparent);
 }
 .historySearchIcon {
   position: absolute;
@@ -1955,8 +1954,8 @@
 
 .fullScreenSidebar {
   width: 270px;
-  min-width: 270px;
-  max-width: 270px;
+  min-width: 200px;
+  max-width: 500px;
   height: 100%;
   background: color-mix(in srgb, var(--agent-bg) 95%, var(--agent-page, #000));
   border-right: 1px solid var(--agent-border);
@@ -1966,6 +1965,36 @@
   overflow: hidden;
   z-index: 10;
   animation: sidebarSlideIn 0.18s ease;
+}
+
+.sidebarResizer {
+  position: relative;
+  width: 8px;
+  margin-left: -4px;
+  margin-right: -4px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 25;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+  background: transparent;
+}
+
+.sidebarResizer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+.sidebarResizer:hover::before,
+.sidebarResizerActive::before {
+  background: var(--agent-primary);
 }
 
 @keyframes sidebarSlideIn {
@@ -2006,18 +2035,17 @@
   height: 34px;
   padding: 0 10px;
   border-radius: 8px;
-  border: 1px solid var(--agent-border);
-  background: var(--agent-bg);
+  border: 0;
+  background: transparent;
   color: var(--agent-fg);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .sidebarNewChatBtn:hover {
   background: var(--agent-tint);
-  border-color: color-mix(in srgb, var(--agent-primary) 30%, var(--agent-border));
   color: var(--agent-fg);
 }
 
@@ -2028,14 +2056,14 @@
   flex: 1 1 auto;
   min-width: 0;
   height: 34px;
-  background: var(--agent-bg);
-  border: 1px solid var(--agent-border);
+  background: transparent;
+  border: 0;
   border-radius: 8px;
-  transition: border-color 0.15s, background 0.15s;
+  transition: background 0.15s;
 }
 
 .sidebarNewChatSplit:hover {
-  border-color: color-mix(in srgb, var(--agent-primary) 30%, var(--agent-border));
+  background: var(--agent-tint);
 }
 
 .sidebarSplitActionBtn {
@@ -2053,14 +2081,13 @@
   font-weight: 500;
   cursor: pointer;
   text-align: left;
-  border-top-left-radius: 7px;
-  border-bottom-left-radius: 7px;
+  border-radius: 6px;
   transition: color 0.15s, background 0.15s;
 }
 
 .sidebarSplitActionBtn:hover {
-  background: var(--agent-tint);
-  color: var(--agent-primary);
+  background: color-mix(in srgb, var(--agent-fg) 8%, transparent);
+  color: var(--agent-fg);
 }
 
 .sidebarSplitTriggerBtn {
@@ -2070,17 +2097,20 @@
   height: 100%;
   padding: 0 8px;
   border: 0;
-  border-left: 1px solid var(--agent-border);
   background: transparent;
   color: var(--agent-muted);
   cursor: pointer;
-  border-top-right-radius: 7px;
-  border-bottom-right-radius: 7px;
+  border-radius: 6px;
   transition: color 0.15s, background 0.15s;
 }
 
 .sidebarSplitTriggerBtn:hover {
-  background: var(--agent-tint);
+  background: color-mix(in srgb, var(--agent-fg) 8%, transparent);
+  color: var(--agent-fg);
+}
+
+.sidebarSplitTriggerActive {
+  background: color-mix(in srgb, var(--agent-fg) 8%, transparent);
   color: var(--agent-fg);
 }
 

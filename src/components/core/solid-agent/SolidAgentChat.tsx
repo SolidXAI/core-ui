@@ -95,6 +95,11 @@ const AGENT_HUB_DEFAULT_SUGGESTIONS = [
     "Summarize your capabilities",
 ];
 
+const SIDEBAR_WIDTH_STORAGE_KEY = "solid-agent.sidebar-width";
+const DEFAULT_SIDEBAR_WIDTH = 270;
+const MIN_SIDEBAR_WIDTH = 220;
+const MAX_SIDEBAR_WIDTH = 420;
+
 function formatDate(iso: string | null) {
     if (!iso) return "";
     const date = new Date(iso);
@@ -185,6 +190,24 @@ export function SolidAgentChat({
     const isFullScreen = windowMode === "maximized";
     const [showHistory, setShowHistory] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+        if (typeof window === "undefined") return DEFAULT_SIDEBAR_WIDTH;
+        try {
+            const stored = localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY);
+            if (stored) {
+                const num = parseInt(stored, 10);
+                if (!isNaN(num) && num >= MIN_SIDEBAR_WIDTH && num <= MAX_SIDEBAR_WIDTH) {
+                    return num;
+                }
+            }
+        } catch {}
+        return DEFAULT_SIDEBAR_WIDTH;
+    });
+    const [isDraggingSidebar, setIsDraggingSidebar] = useState(false);
+    const isResizingSidebarRef = useRef(false);
+    const sidebarWidthRef = useRef(sidebarWidth);
+    sidebarWidthRef.current = sidebarWidth;
+    const fullScreenLayoutRef = useRef<HTMLDivElement>(null);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
     const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
@@ -220,6 +243,7 @@ export function SolidAgentChat({
     const headerRef = useRef<HTMLDivElement>(null);
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
     const [menuSessionId, setMenuSessionId] = useState<string | null>(null);
+    const [menuPlacement, setMenuPlacement] = useState<"up" | "down">("down");
     const historyMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -405,7 +429,78 @@ export function SolidAgentChat({
             width: `${effectiveWidth}px`,
             maxWidth: `${effectiveWidth}px`,
         });
-    }, [isFullScreen, sidebarOpen]);
+    }, [isFullScreen, sidebarOpen, sidebarWidth]);
+
+    const handleSidebarResizeStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        isResizingSidebarRef.current = true;
+        setIsDraggingSidebar(true);
+
+        const layoutEl = fullScreenLayoutRef.current;
+        const layoutRect = layoutEl ? layoutEl.getBoundingClientRect() : { left: 0 };
+
+        const handlePointerMove = (moveEvent: PointerEvent) => {
+            if (!isResizingSidebarRef.current) return;
+            const rawWidth = Math.round(moveEvent.clientX - layoutRect.left);
+            const clampedWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, rawWidth));
+            sidebarWidthRef.current = clampedWidth;
+            setSidebarWidth(clampedWidth);
+        };
+
+        const handlePointerUp = () => {
+            if (!isResizingSidebarRef.current) return;
+            isResizingSidebarRef.current = false;
+            setIsDraggingSidebar(false);
+            document.removeEventListener("pointermove", handlePointerMove);
+            document.removeEventListener("pointerup", handlePointerUp);
+            document.removeEventListener("pointercancel", handlePointerUp);
+            document.body.style.removeProperty("cursor");
+            document.body.style.removeProperty("user-select");
+
+            try {
+                localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(sidebarWidthRef.current));
+            } catch {}
+        };
+
+        document.body.style.setProperty("cursor", "col-resize");
+        document.body.style.setProperty("user-select", "none");
+        document.addEventListener("pointermove", handlePointerMove);
+        document.addEventListener("pointerup", handlePointerUp);
+        document.addEventListener("pointercancel", handlePointerUp);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            document.body.style.removeProperty("cursor");
+            document.body.style.removeProperty("user-select");
+        };
+    }, []);
+
+    const handleSidebarResizeKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+        let delta = 0;
+        if (e.key === "ArrowLeft") delta = -10;
+        else if (e.key === "ArrowRight") delta = 10;
+        else if (e.key === "Home") {
+            e.preventDefault();
+            setSidebarWidth(MIN_SIDEBAR_WIDTH);
+            try { localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(MIN_SIDEBAR_WIDTH)); } catch {}
+            return;
+        } else if (e.key === "End") {
+            e.preventDefault();
+            setSidebarWidth(MAX_SIDEBAR_WIDTH);
+            try { localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(MAX_SIDEBAR_WIDTH)); } catch {}
+            return;
+        }
+        if (delta !== 0) {
+            e.preventDefault();
+            setSidebarWidth((prev) => {
+                const next = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, prev + delta));
+                try { localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(next)); } catch {}
+                return next;
+            });
+        }
+    }, []);
 
     useLayoutEffect(() => {
         if (showProviderMenu) {
@@ -614,11 +709,15 @@ export function SolidAgentChat({
         const isSidebarActive = isFullScreen && sidebarOpen;
         if (!showHistory && !isSidebarActive) return;
 
+        let rafId: number | null = null;
         const updateDynamicPageSize = () => {
             const listEl = historyListRef.current;
             if (!listEl) return;
             const availableHeight = listEl.clientHeight;
-            if (availableHeight <= 0) return;
+            if (availableHeight <= 0) {
+                rafId = requestAnimationFrame(updateDynamicPageSize);
+                return;
+            }
 
             const sectionTitle = listEl.querySelector(`.${styles.sidebarSectionTitle}`) as HTMLElement | null;
             const effectiveHeight = availableHeight - (sectionTitle?.offsetHeight ?? 0);
@@ -640,8 +739,11 @@ export function SolidAgentChat({
             observer.observe(historyListRef.current);
         }
 
-        return () => observer.disconnect();
-    }, [showHistory, isFullScreen, sidebarOpen]);
+        return () => {
+            if (rafId !== null) cancelAnimationFrame(rafId);
+            observer.disconnect();
+        };
+    }, [showHistory, isFullScreen, sidebarOpen, signedIn, sessions.length]);
 
     const filteredSessions = useMemo(() => {
         const rawQ = historySearchQuery.trim().toLowerCase();
@@ -1257,7 +1359,6 @@ export function SolidAgentChat({
                             {items.map((session, index) => {
                                 const isCurrentSession = session.session_id === agent.historySessionId;
                                 const isMenuOpen = menuSessionId === session.session_id;
-                                const isNearBottom = index >= items.length - 2 && items.length > 3;
 
                                 return (
                                     <div
@@ -1337,14 +1438,30 @@ export function SolidAgentChat({
                                                         aria-expanded={isMenuOpen}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            setMenuSessionId(isMenuOpen ? null : session.session_id);
+                                                            if (isMenuOpen) {
+                                                                setMenuSessionId(null);
+                                                            } else {
+                                                                const btn = e.currentTarget;
+                                                                const scrollContainer = btn.closest(`.${styles.historyList}`) || btn.closest(`.${styles.sidebarSessions}`);
+                                                                let openUp = false;
+                                                                if (scrollContainer) {
+                                                                    const btnRect = btn.getBoundingClientRect();
+                                                                    const containerRect = scrollContainer.getBoundingClientRect();
+                                                                    const spaceBelow = containerRect.bottom - btnRect.bottom;
+                                                                    openUp = spaceBelow < 115;
+                                                                } else {
+                                                                    openUp = index >= items.length - 3 && items.length > 3;
+                                                                }
+                                                                setMenuPlacement(openUp ? "up" : "down");
+                                                                setMenuSessionId(session.session_id);
+                                                            }
                                                         }}
                                                     >
                                                         <MoreHorizontal size={14} />
                                                     </button>
                                                     {isMenuOpen && (
                                                         <div
-                                                            className={`${styles.historyMenuDropdown} ${isNearBottom ? styles.historyMenuDropdownUp : ""}`}
+                                                            className={`${styles.historyMenuDropdown} ${menuPlacement === "up" ? styles.historyMenuDropdownUp : ""}`}
                                                             role="menu"
                                                         >
                                                             {session.created_at && (
@@ -1485,9 +1602,19 @@ export function SolidAgentChat({
 
                     if (isFullScreen) {
                         return (
-                            <div className={styles.fullScreenLayout}>
+                            <div className={styles.fullScreenLayout} ref={fullScreenLayoutRef}>
                                 {sidebarOpen && (
-                                    <aside className={styles.fullScreenSidebar} aria-label="Conversation sidebar">
+                                    <>
+                                        <aside
+                                            className={styles.fullScreenSidebar}
+                                            style={{
+                                                width: sidebarWidth,
+                                                minWidth: sidebarWidth,
+                                                maxWidth: sidebarWidth,
+                                                transition: isDraggingSidebar ? "none" : undefined,
+                                            }}
+                                            aria-label="Conversation sidebar"
+                                        >
                                         <div className={styles.sidebarHeader}>
                                             {agentRuntime === "agentHub" || providers.length <= 1 ? (
                                                 <button
@@ -1580,8 +1707,21 @@ export function SolidAgentChat({
                                         </div>
                                         {renderPaginationControls()}
                                     </aside>
-                                )}
-                                <div className={styles.fullScreenMain}>
+                                    <div
+                                        className={`${styles.sidebarResizer} ${isDraggingSidebar ? styles.sidebarResizerActive : ""}`}
+                                        role="separator"
+                                        aria-orientation="vertical"
+                                        aria-label="Resize sidebar"
+                                        aria-valuenow={sidebarWidth}
+                                        aria-valuemin={MIN_SIDEBAR_WIDTH}
+                                        aria-valuemax={MAX_SIDEBAR_WIDTH}
+                                        tabIndex={0}
+                                        onPointerDown={handleSidebarResizeStart}
+                                        onKeyDown={handleSidebarResizeKeyDown}
+                                    />
+                                </>
+                            )}
+                            <div className={styles.fullScreenMain}>
                                     <SolidTooltip delayDuration={150}>
                                         <SolidTooltipTrigger asChild>
                                             <button
