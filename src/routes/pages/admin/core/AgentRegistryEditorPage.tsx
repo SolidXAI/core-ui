@@ -673,7 +673,7 @@ export function AgentRegistryEditorPage() {
       setSecretEnvVarError("Use a valid environment variable name (letters, numbers, and underscores; it cannot start with a number).");
       return;
     }
-    if (["APP_ENCRYPTION_KEY", "DATABASE_URL", "AGENTHUB_MANAGER_INTERNAL_TOKEN", "AGENTHUB_BRIDGE_PROCESS_KEY"].includes(value)) {
+    if (["APP_ENCRYPTION_KEY", "DATABASE_URL", "AGENT_HUB_MANAGER_INTERNAL_TOKEN", "AGENT_HUB_BRIDGE_PROCESS_KEY"].includes(value)) {
       setSecretEnvVarError("This environment variable name is reserved by AgentHub.");
       return;
     }
