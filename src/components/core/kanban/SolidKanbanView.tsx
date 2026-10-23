@@ -253,7 +253,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     useDeleteMultipleSolidEntitiesMutation,
     useLazyGetSolidEntitiesQuery,
     useRecoverSolidEntityByIdMutation,
-    usePatchUpdateSolidEntityMutation
+    usePatchUpdateSolidEntityWithoutListInvalidationMutation
   } = entityApi;
 
   const menuItemId = searchParams.get("menuItemId");
@@ -426,7 +426,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     {
       isLoading: isPatchKanbanViewLoading,
     },
-  ] = usePatchUpdateSolidEntityMutation();
+  ] = usePatchUpdateSolidEntityWithoutListInvalidationMutation();
 
   const applyArchivedQueryState = (queryData: Record<string, any>) => {
     if (showArchived) {
@@ -961,12 +961,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     // Update the group data
     sourceGroup.groupData.records = sourceRecords;
     destinationGroup.groupData.records = destinationRecords;
-    sourceGroup.groupData.meta.totalRecords = Math.max(
-      0,
-      Number(sourceGroup.groupData.meta.totalRecords || 0) - 1
-    );
-    destinationGroup.groupData.meta.totalRecords =
-      Number(destinationGroup.groupData.meta.totalRecords || 0) + 1;
 
     // Update the kanbanViewData state
     const oldkanbanViewData = structuredClone(kanbanViewData);
@@ -988,6 +982,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
+        await loadKanbanBoard(filters);
         setSelectedRecords((previousRecords) => previousRecords.map((record) =>
           String(record?.id) === String(updatedItem?.id) ? updatedItem : record
         ));
