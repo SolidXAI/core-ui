@@ -3,10 +3,12 @@ import { camelCase } from "lodash";
 import { useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import type { SolidListViewHandle } from "../../../../components/core/list/SolidListView";
-import { registerListView, unregisterListView } from "../../../../components/core/list/listViewRegistry";
+import { getListView, registerListView, unregisterListView } from "../../../../components/core/list/listViewRegistry";
 import { usePathname } from "../../../../hooks/usePathname";
 import { useRouter } from "../../../../hooks/useRouter";
 import { resolveRetainedModelViewRoute, storeCurrentModelViewContext } from "../../../../helpers/modelViewPersistence";
+import { isMatchingAdminViewRefresh, ADMIN_VIEW_REFRESH_REQUESTED, type AdminViewRefreshRequest } from "../../../../helpers/adminViewRefresh";
+import { eventBus } from "../../../../helpers/eventBus";
 
 export function ListPage() {
   const params = useParams();
@@ -43,6 +45,13 @@ export function ListPage() {
 
     storeCurrentModelViewContext(currentUrl);
   }, [pathname, search]);
+
+  useEffect(() => eventBus.on<AdminViewRefreshRequest>(ADMIN_VIEW_REFRESH_REQUESTED, (request) => {
+    if (isMatchingAdminViewRefresh(request, { moduleName, modelName, viewName: "list" })) {
+      // The registered handle is the page's active list view; its refresh retains current filters.
+      getListView(listId)?.refresh();
+    }
+  }), [listId, moduleName, modelName]);
 
   return <SolidListView ref={setListRef} key={listId} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }

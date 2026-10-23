@@ -9,7 +9,7 @@ type Dispatch = (action: any) => any;
 export type AgentChatBinding = {
     agent: AgentState;
     dispatch: Dispatch;
-    /** Null only for an "agentHub" chat during its first render, before its connection opens. */
+    /** Null during the first render while the runtime is initialized after commit. */
     runtime: AgentRuntime | null;
 };
 
@@ -22,7 +22,7 @@ export type AgentChatBinding = {
  *   and its own runtime, opened on mount and closed on unmount. It never touches the
  *   launcher's conversation.
  */
-export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string, externalEmbed = false): AgentChatBinding {
+export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string, externalEmbed = false, sessionOwnerKey?: string): AgentChatBinding {
     const shared = agentRuntime === "solidx";
 
     const storeDispatch = useDispatch();
@@ -39,19 +39,24 @@ export function useAgentChat(agentRuntime: AgentRuntimeType, agentUrl: string, e
     }, []);
 
     const [localRuntime, setLocalRuntime] = useState<AgentRuntime | null>(null);
+    const [sharedRuntime, setSharedRuntime] = useState<AgentRuntime | null>(null);
     useEffect(() => {
-        if (shared) return;
-        const runtime = new AgentRuntime(agentUrl, localDispatch, () => localState.current, agentRuntime, !externalEmbed);
+        if (shared) {
+            const runtime = ensureAgentRuntime(agentUrl, storeDispatch, () => (store.getState() as any).solidAgent);
+            setSharedRuntime(runtime);
+            return;
+        }
+        const persistSession = !externalEmbed || !!sessionOwnerKey;
+        const runtime = new AgentRuntime(agentUrl, localDispatch, () => localState.current, agentRuntime, persistSession, sessionOwnerKey);
         setLocalRuntime(runtime);
         return () => {
             runtime.dispose();
             setLocalRuntime(null);
         };
-    }, [shared, agentUrl, agentRuntime, localDispatch, externalEmbed]);
+    }, [shared, agentUrl, agentRuntime, externalEmbed, sessionOwnerKey, localDispatch, store, storeDispatch]);
 
     if (shared) {
-        const runtime = ensureAgentRuntime(agentUrl, storeDispatch, () => (store.getState() as any).solidAgent);
-        return { agent: sharedState, dispatch: storeDispatch, runtime };
+        return { agent: sharedState, dispatch: storeDispatch, runtime: sharedRuntime?.agentUrl === agentUrl ? sharedRuntime : null };
     }
     return { agent: localState.current, dispatch: localDispatch, runtime: localRuntime };
 }

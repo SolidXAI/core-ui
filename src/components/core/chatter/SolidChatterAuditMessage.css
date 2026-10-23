@@ -1,0 +1,68 @@
+.solid-audit-change {
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.solid-audit-field-name {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.solid-audit-longtext-values {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.solid-audit-longtext-value {
+  max-width: 10rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.solid-audit-longtext-value.is-current {
+  color: var(--primary-color);
+}
+
+.solid-audit-diff-dialog.solid-radix-dialog-content {
+  display: flex;
+  width: 75vw;
+  max-width: 96vw;
+  max-height: 86dvh;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.solid-audit-diff-dialog__header {
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--surface-border, var(--border));
+}
+
+.solid-audit-diff-dialog__body {
+  min-height: 0;
+  overflow: auto;
+  padding: 0;
+}
+
+.solid-audit-diff-dialog__body table {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .solid-audit-diff-dialog.solid-radix-dialog-content {
+    width: 96vw;
+    max-width: 96vw;
+    max-height: 94dvh;
+  }
+}

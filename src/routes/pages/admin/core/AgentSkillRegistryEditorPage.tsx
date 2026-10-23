@@ -6,6 +6,7 @@ import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
+import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
 import {
   SolidButton,
   SolidCodeEditor,
@@ -32,6 +33,7 @@ type SkillRecord = {
   description?: string;
   body?: string;
   tags?: AgentHubTag[];
+  module?: AgentHubModule | null;
   agentSkills?: AgentReference[] | AgentReference | null;
 };
 
@@ -107,7 +109,7 @@ export function AgentSkillRegistryEditorPage() {
   const { data: response, isLoading, isFetching, refetch } = useGetSolidEntityByIdQuery(
     {
       id,
-      qs: "populate[0]=agentSkills&populate[1]=agentSkills.agentRegistry&populate[2]=tags",
+      qs: "populate[0]=agentSkills&populate[1]=agentSkills.agentRegistry&populate[2]=tags&populate[3]=module",
     },
     { skip: !id || id === "new" },
   );
@@ -122,22 +124,25 @@ export function AgentSkillRegistryEditorPage() {
   const [description, setDescription] = React.useState("");
   const [body, setBody] = React.useState("");
   const [tags, setTags] = React.useState<AgentHubTag[]>([]);
+  const [module, setModule] = React.useState<AgentHubModule | null>(null);
   const [creatingTag, setCreatingTag] = React.useState(false);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [auditRefreshVersion, setAuditRefreshVersion] = React.useState(0);
   const [confirmRefresh, setConfirmRefresh] = React.useState(false);
   const baseline = React.useRef("");
-  const currentForm = () => JSON.stringify({ name, type, iconName, description, body, tags });
+  const currentForm = () => JSON.stringify({ name, type, iconName, description, body, tags, moduleId: module?.id ?? null });
 
   React.useEffect(() => {
     const nextTags = agentHubTagsFrom(record?.tags);
+    const nextModule = agentHubModuleFrom(record?.module);
     setName(record?.name ?? "");
     setType(record?.type ?? "custom");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setBody(record?.body ?? "");
     setTags(nextTags);
-    baseline.current = JSON.stringify({ name: record?.name ?? "", type: record?.type ?? "custom", iconName: record?.iconName ?? "", description: record?.description ?? "", body: record?.body ?? "", tags: nextTags });
+    setModule(nextModule);
+    baseline.current = JSON.stringify({ name: record?.name ?? "", type: record?.type ?? "custom", iconName: record?.iconName ?? "", description: record?.description ?? "", body: record?.body ?? "", tags: nextTags, moduleId: nextModule?.id ?? null });
   }, [record]);
 
   const isReadOnly = record?.type === "solidx";
@@ -151,6 +156,7 @@ export function AgentSkillRegistryEditorPage() {
     if (!type.trim()) nextErrors.type = "Skill type is required.";
     if (!description.trim()) nextErrors.description = "Description is required.";
     if (!body.trim()) nextErrors.body = "Skill instructions are required.";
+    if (!module) nextErrors.module = "Module is required. Select a module before saving this skill.";
 
     setFieldErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -170,6 +176,7 @@ export function AgentSkillRegistryEditorPage() {
       description: description.trim(),
       body,
       ...agentHubTagsPayload(tags),
+      ...agentHubModulePayload(module),
     };
 
     try {
@@ -200,9 +207,10 @@ export function AgentSkillRegistryEditorPage() {
       const errorDetail = getSaveErrorMessage(error);
       const serverFieldErrors: Record<string, string> = {};
       if (/required|not be empty|cannot be empty|should not be empty/i.test(errorDetail)) {
-        for (const field of ["name", "type", "description", "body"]) {
+        for (const field of ["name", "type", "description", "body", "module"]) {
           if (!new RegExp(`\\b${field}\\b`, "i").test(errorDetail)) continue;
-          serverFieldErrors[field] = `${field === "body" ? "Skill instructions" : field[0].toUpperCase() + field.slice(1)} is required.`;
+          const label = field === "body" ? "Skill instructions" : field === "module" ? "Module" : field[0].toUpperCase() + field.slice(1);
+          serverFieldErrors[field] = `${label} is required.`;
         }
       }
       if (Object.keys(serverFieldErrors).length > 0) {
@@ -224,7 +232,7 @@ export function AgentSkillRegistryEditorPage() {
       label: "General Info",
       content: (
         <fieldset className="agent-skill-editor__general" disabled={isReadOnly}>
-          {isReadOnly && <p className="agent-skill-editor__readonly-note">SolidX skills are seeded by the AgentHub runtime and cannot be edited.</p>}
+          {isReadOnly && <p className="agent-skill-editor__readonly-note">SolidX skills cannot be edited.</p>}
           <div className="agent-skill-editor__fields">
             <label className="agent-skill-editor__field">
               <span>Name <b>*</b></span>
@@ -277,7 +285,8 @@ export function AgentSkillRegistryEditorPage() {
             </select>
             {fieldErrors.type && <small id="agent-skill-type-error" className="agent-skill-editor__field-error">{fieldErrors.type}</small>}
           </label>
-          <AgentHubTagsField value={tags} onChange={setTags} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
+          <AgentHubModuleField className="agent-skill-editor__field" value={module} onChange={(value) => { setModule(value); setFieldErrors((current) => ({ ...current, module: "" })); }} disabled={isReadOnly || isCreating || isSaving} clearable={false} required error={fieldErrors.module} />
+          <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={isReadOnly || isCreating || isSaving} onBusyChange={setCreatingTag} />
         </fieldset>
       ),
     },
@@ -298,6 +307,7 @@ export function AgentSkillRegistryEditorPage() {
                 setFieldErrors((current) => ({ ...current, body: "" }));
               }}
               language="markdown"
+              wordWrap="on"
               readOnly={isReadOnly}
               fontSize={11}
               height="max(32rem, calc(100dvh - 18rem))"

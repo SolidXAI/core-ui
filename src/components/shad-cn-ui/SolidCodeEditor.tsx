@@ -9,6 +9,7 @@ type SolidCodeEditorProps = {
   readOnly?: boolean;
   className?: string;
   language?: string;
+  wordWrap?: "off" | "on" | "wordWrapColumn" | "bounded";
   onMount?: (editor: any, monaco: any) => void;
 };
 
@@ -20,6 +21,7 @@ export function SolidCodeEditor({
   readOnly = false,
   className,
   language = "javascript",
+  wordWrap = "off",
   onMount,
 }: SolidCodeEditorProps) {
   const [editorTheme, setEditorTheme] = useState<"vs" | "vs-dark">("vs");
@@ -83,6 +85,7 @@ export function SolidCodeEditor({
           lineNumbers: "on",
           fontSize: typeof fontSize === "number" ? fontSize : parseInt(String(fontSize), 10) || 14,
           scrollBeyondLastLine: false,
+          wordWrap,
           overviewRulerBorder: false,
         }}
       />

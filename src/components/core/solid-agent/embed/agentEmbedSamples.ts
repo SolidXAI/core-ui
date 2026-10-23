@@ -8,8 +8,8 @@ export function embedSamples(agentId: number, fields: AgentInputDefinition[], sd
     const values = Object.fromEntries(fields.map((field) => [field.name, examples[field.dataType] ?? "Replace with your value"]));
     const valuesJson = js(values).replace(/\n/g, "\n    ");
     const backendUrl = hubBase.replace(/\/$/, "");
-    const environmentNote = `# AGENTHUB_BACKEND_URL=${backendUrl}`;
-    const environmentNoteSlash = `// AGENTHUB_BACKEND_URL=${backendUrl}`;
+    const environmentNote = `# AGENT_HUB_BACKEND_URL=${backendUrl}`;
+    const environmentNoteSlash = `// AGENT_HUB_BACKEND_URL=${backendUrl}`;
     const config = `agentId: ${agentId},\n    tokenEndpoint: "/api/agent-chat/token",\n    inputs: ${valuesJson}`;
     return {
         javascript: `<div id="agent-chat"></div>
@@ -26,12 +26,26 @@ export function embedSamples(agentId: number, fields: AgentInputDefinition[], sd
   // Update context before the first message or after starting a new chat:
   // await chat.setInputs({ ... });
 </script>`,
+        inline: `<div id="agent-chat" style="width:420px;height:600px"></div>
+<script src=${JSON.stringify(sdkUrl).replace(/</g, "&lt;")}></script>
+<script>
+  // Your app owns this container's size, position, and visibility.
+  // Keep the same instance mounted when navigating within your app.
+  const chat = SolidAgentEmbed.mount({
+    mode: "inline",
+    container: "#agent-chat",
+    ${config}
+  });
+  chat.open();
+  // chat.close() hides the iframe without ending the chat.
+  // chat.destroy() removes the iframe when the user signs out.
+</script>`,
         react: `"use client";
 import { useEffect, useRef } from "react";
 
 type AgentEmbed = { destroy: () => void };
 type AgentEmbedSdk = { mount: (options: {
-  container: HTMLElement; agentId: number; tokenEndpoint: string;
+  container: HTMLElement; mode?: "popup" | "inline"; agentId: number; tokenEndpoint: string;
   inputs: Record<string, unknown>; label?: string; title?: string;
   getTokenHeaders?: () => Record<string, string>;
 }) => AgentEmbed };
@@ -74,7 +88,7 @@ export function AgentChat() {
 }`,
         python: `# FastAPI. Install httpx; mount this router in your application.
 # Keep these server-only environment variables out of the browser bundle:
-# AGENTHUB_API_KEY, AGENTHUB_AGENT_ID, AGENTHUB_BACKEND_URL
+# AGENT_HUB_API_KEY, AGENT_HUB_AGENT_ID, AGENT_HUB_BACKEND_URL
 ${environmentNote}
 import os
 import httpx
@@ -82,7 +96,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 
 router = APIRouter()
-AGENTHUB_URL = (os.getenv("AGENTHUB_BACKEND_URL") or "").rstrip("/")
+AGENT_HUB_URL = (os.getenv("AGENT_HUB_BACKEND_URL") or "").rstrip("/")
 
 class TokenRequest(BaseModel):
     agentId: int
@@ -91,11 +105,11 @@ class TokenRequest(BaseModel):
 async def create_agent_token(body: TokenRequest, request: Request, response: Response):
     response.headers["Cache-Control"] = "no-store"
     try:
-        agent_id = int(os.environ.get("AGENTHUB_AGENT_ID", "0"))
+        agent_id = int(os.environ.get("AGENT_HUB_AGENT_ID", "0"))
     except ValueError:
         agent_id = 0
-    api_key = os.getenv("AGENTHUB_API_KEY")
-    if not api_key or not AGENTHUB_URL or agent_id <= 0:
+    api_key = os.getenv("AGENT_HUB_API_KEY")
+    if not api_key or not AGENT_HUB_URL or agent_id <= 0:
         raise HTTPException(status_code=503, detail="Chat is temporarily unavailable")
     if body.agentId != agent_id:
         raise HTTPException(status_code=400, detail="Agent is not configured for this application")
@@ -107,7 +121,7 @@ async def create_agent_token(body: TokenRequest, request: Request, response: Res
         payload["externalUserId"] = f"my-app:{external_id}"
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            upstream = await client.post(f"{AGENTHUB_URL}/api/agent/api-keys/embedded/me", json=payload)
+            upstream = await client.post(f"{AGENT_HUB_URL}/api/agent/api-keys/embedded/me", json=payload)
         if not upstream.is_success:
             raise HTTPException(status_code=502, detail="Chat is temporarily unavailable")
         return upstream.json()  # forward the token response; never cache or log it
@@ -121,7 +135,7 @@ import { ConfigService } from "@nestjs/config";
 import { Public } from "@solidxai/core";
 import { Request, Response } from "express";
 
-// Server environment: AGENTHUB_API_KEY=...; AGENTHUB_AGENT_ID=${agentId}
+// Server environment: AGENT_HUB_API_KEY=...; AGENT_HUB_AGENT_ID=${agentId}
 ${environmentNoteSlash}
 type EmbedRequest = Request & { user?: { id?: string | number; sub?: string | number } };
 @Controller("agent-chat")
@@ -132,9 +146,9 @@ export class AgentChatController {
   @Public() // allow anonymous use; remove/replace with your app policy for login-only chat
   async createToken(@Body() body: { agentId: number }, @Req() req: EmbedRequest, @Res() res: Response) {
     res.setHeader("Cache-Control", "no-store");
-    const agentId = Number(this.config.get("AGENTHUB_AGENT_ID")); // fixed; never trust browser selection
-    const apiKey = this.config.get<string>("AGENTHUB_API_KEY");
-    const baseUrl = this.config.get<string>("AGENTHUB_BACKEND_URL")?.replace(/\\/$/, "");
+    const agentId = Number(this.config.get("AGENT_HUB_AGENT_ID")); // fixed; never trust browser selection
+    const apiKey = this.config.get<string>("AGENT_HUB_API_KEY");
+    const baseUrl = this.config.get<string>("AGENT_HUB_BACKEND_URL")?.replace(/\\/$/, "");
     if (!apiKey || !baseUrl || !Number.isSafeInteger(agentId) || agentId <= 0)
       throw new HttpException("Chat is temporarily unavailable", HttpStatus.SERVICE_UNAVAILABLE);
     if (body.agentId !== agentId) throw new HttpException("Agent is not configured", HttpStatus.BAD_REQUEST);
@@ -157,16 +171,16 @@ export class AgentChatController {
 // authentication/authorization guard instead of @Public() when access is restricted.`,
         express: `// Express (Node.js 20+). Mount after any optional authentication middleware.
 // Protect this public endpoint with a distributed/IP-aware rate limiter in production.
-// Server environment: AGENTHUB_API_KEY=...; AGENTHUB_AGENT_ID=${agentId}
+// Server environment: AGENT_HUB_API_KEY=...; AGENT_HUB_AGENT_ID=${agentId}
 ${environmentNoteSlash}
 import express from "express";
 
 const router = express.Router();
 router.post("/api/agent-chat/token", async (req, res) => {
   res.set("Cache-Control", "no-store");
-  const agentId = Number(process.env.AGENTHUB_AGENT_ID); // fixed server-side allowlist
-  const apiKey = process.env.AGENTHUB_API_KEY;
-  const baseUrl = process.env.AGENTHUB_BACKEND_URL?.replace(/\\/$/, "");
+  const agentId = Number(process.env.AGENT_HUB_AGENT_ID); // fixed server-side allowlist
+  const apiKey = process.env.AGENT_HUB_API_KEY;
+  const baseUrl = process.env.AGENT_HUB_BACKEND_URL?.replace(/\\/$/, "");
   if (!apiKey || !baseUrl || !Number.isSafeInteger(agentId) || agentId <= 0)
     return res.status(503).json({ error: "Chat is temporarily unavailable" });
   if (Number(req.body?.agentId) !== agentId)
@@ -188,7 +202,7 @@ export default router;
 // Ensure express.json() is installed. Never accept API key/backend URL from req.body.`,
         java: `// Spring Boot 3 / Java 17+. Keep this route public for anonymous embeds,
 // or apply your application's authorization policy. Add a distributed rate limiter.
-// Server environment: AGENTHUB_API_KEY=...; AGENTHUB_AGENT_ID=${agentId}
+// Server environment: AGENT_HUB_API_KEY=...; AGENT_HUB_AGENT_ID=${agentId}
 ${environmentNoteSlash}
 @RestController
 public class AgentEmbedController {
@@ -196,9 +210,9 @@ public class AgentEmbedController {
       .connectTimeout(java.time.Duration.ofSeconds(5)).build();
   private final com.fasterxml.jackson.databind.ObjectMapper json = new com.fasterxml.jackson.databind.ObjectMapper();
 
-  @Value("\${AGENTHUB_API_KEY}") private String apiKey;
-  @Value("\${AGENTHUB_AGENT_ID}") private int agentId;
-  @Value("\${AGENTHUB_BACKEND_URL}") private String agentHubUrl;
+  @Value("\${AGENT_HUB_API_KEY}") private String apiKey;
+  @Value("\${AGENT_HUB_AGENT_ID}") private int agentId;
+  @Value("\${AGENT_HUB_BACKEND_URL}") private String agentHubUrl;
 
   @PostMapping("/api/agent-chat/token")
   public ResponseEntity<String> token(@RequestBody Map<String, Object> request,
@@ -231,7 +245,7 @@ public class AgentEmbedController {
 // org.springframework.http.*, java.util.Map. Do not log the key or token response.`,
         dotnet: `// ASP.NET Core Minimal API. Configure an IP/user rate-limit policy in production.
 // Authentication can be optional (anonymous demo) or required by your app's policy.
-// Server environment: AGENTHUB_API_KEY=...; AGENTHUB_AGENT_ID=${agentId}
+// Server environment: AGENT_HUB_API_KEY=...; AGENT_HUB_AGENT_ID=${agentId}
 ${environmentNoteSlash}
 using System.Security.Claims;
 using System.Collections.Generic;
@@ -240,10 +254,10 @@ using System.Net.Http.Json;
 builder.Services.AddHttpClient("AgentHub", client => client.Timeout = TimeSpan.FromSeconds(15));
 app.MapPost("/api/agent-chat/token", async (AgentTokenRequest body, HttpContext context, IHttpClientFactory clients, IConfiguration config) => {
     context.Response.Headers.CacheControl = "no-store";
-    if (!int.TryParse(config["AGENTHUB_AGENT_ID"], out var agentId) || agentId <= 0)
+    if (!int.TryParse(config["AGENT_HUB_AGENT_ID"], out var agentId) || agentId <= 0)
         return Results.StatusCode(503);
-    var apiKey = config["AGENTHUB_API_KEY"];
-    var baseUrl = config["AGENTHUB_BACKEND_URL"]?.TrimEnd('/');
+    var apiKey = config["AGENT_HUB_API_KEY"];
+    var baseUrl = config["AGENT_HUB_BACKEND_URL"]?.TrimEnd('/');
     if (string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(baseUrl))
         return Results.StatusCode(503);
     if (body.AgentId != agentId)

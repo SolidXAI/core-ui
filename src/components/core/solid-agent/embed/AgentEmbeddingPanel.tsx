@@ -10,7 +10,7 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
     const [backend, setBackend] = useState("express");
     const [copied, setCopied] = useState("");
     const [copyError, setCopyError] = useState("");
-    const sdkUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL").replace(/\/$/, "")}/api/agent-embed/sdk.js?v=2`;
+    const sdkUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL").replace(/\/$/, "")}/api/agent-embed/sdk.js?v=4`;
     const samples = embedSamples(agentId, fields, sdkUrl, hubUrl || "https://agenthub.example.com");
     async function copy(key: string, code: string) {
         try { await navigator.clipboard.writeText(code); setCopied(key); setCopyError(""); }
@@ -23,7 +23,7 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
     return <div className="agent-editor__stack">
         {!active && <p role="status" className="agent-editor__hint">Activate this agent before embedding it. Samples use the saved agent definition.</p>}
         <section className="agent-editor__section"><h2>1. Keep your API key on your server</h2>
-            <p>Configure <code>AGENTHUB_API_KEY</code>, <code>AGENTHUB_AGENT_ID</code>, and <code>AGENTHUB_BACKEND_URL</code> on the server that hosts your app API. Never expose the API key or AgentHub runtime URL in browser code. The browser receives only the short-lived embed response through the SDK handshake.</p>
+            <p>Configure <code>AGENT_HUB_API_KEY</code>, <code>AGENT_HUB_AGENT_ID</code>, and <code>AGENT_HUB_BACKEND_URL</code> on the server that hosts your app API. Never expose the API key or AgentHub runtime URL in browser code. The browser receives only the short-lived embed response through the SDK handshake.</p>
         </section>
         <section className="agent-editor__section"><h2>2. Create your token endpoint</h2>
             <p>Your app API accepts the SDK's token request, ignores any client-selected backend or API key, and uses the configured agent ID to call <code>/api/agent/api-keys/embedded/me</code> on AgentHub Runtime. Return the successful JSON response unchanged with <code>Cache-Control: no-store</code>; never cache or log credentials or tokens.</p>
@@ -38,13 +38,15 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
         </section>
         <section className="agent-editor__section"><h2>3. Embed the chat</h2>
             <p>Load the SDK from the public SDK URL shown below and mount it into a browser container. The SDK calls your app's <code>tokenEndpoint</code>, passes the response to the hosted chat in memory, and manages the iframe handshake and token renewal. No SolidX npm dependency is required.</p>
+            <p><code>mode: "popup"</code> is the default and provides a floating launcher. <code>mode: "inline"</code> fills your container; your app controls its size and layout. Keep the instance mounted across client-side navigation to preserve the live chat.</p>
             <p>Use a same-origin path such as <code>/api/agent-chat/token</code> when possible. If your app API has another origin, give <code>tokenEndpoint</code> its absolute URL and configure that API's CORS policy for the browser app origin.</p>
             <p>The SDK-serving SolidX API selects the hosted chat UI from its server-side <code>AGENT_EMBED_UI_URL</code> setting. The consuming app does not supply an <code>embedUrl</code> or choose the iframe host. Keep the SDK script URL and the configured hosted UI origin aligned to the same SolidX deployment.</p>
             <p>Pass the current page's required input values in <code>inputs</code> using the names and types in this agent's schema. These values provide task context; they are not authorization to access records. Enforce access to protected data in your own API/tools. For a logged-in app, use <code>getTokenHeaders</code> to send the app's normal bearer or CSRF header to your app API; do not send the AgentHub API key from the browser.</p>
             <SolidTabGroup tabs={[
                 { value: "javascript", label: "JavaScript", content: code(samples.javascript, "html") },
+                { value: "inline", label: "Inline", content: code(samples.inline, "html") },
                 { value: "react", label: "React", content: code(samples.react, "javascript") },
-            ]} value={tab} onValueChange={setTab} extra={copyButton(tab, tab === "javascript" ? samples.javascript : samples.react)} />
+            ]} value={tab} onValueChange={setTab} extra={copyButton(tab, samples[tab as "javascript" | "inline" | "react"])} />
         </section>
         <section className="agent-editor__section"><h2>Inputs</h2>
             {fields.length ? <table style={{ width: "100%", textAlign: "left" }}><thead><tr><th>Variable</th><th>Data type</th><th>Description</th><th>Default value</th><th>Optional</th></tr></thead>

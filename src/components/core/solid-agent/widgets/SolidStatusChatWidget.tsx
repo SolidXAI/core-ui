@@ -20,8 +20,9 @@ const TONE_ICON = { success: CheckCircle2, warning: AlertTriangle, error: Circle
  * The optional action posts `prompt` as a new user message.
  */
 export const SolidStatusChatWidget = ({ eventData, sendPrompt }: SolidChatWidgetProps) => {
-    const data = getChatWidgetData<StatusData>(eventData);
-    const tone: Tone = data.tone && data.tone in TONE_CLASS ? data.tone : "info";
+    const data = getChatWidgetData<StatusData & { status?: string; state?: string }>(eventData);
+    const rawTone = String(data.tone ?? data.status ?? data.state ?? "").toLowerCase() as Tone;
+    const tone: Tone = rawTone in TONE_CLASS ? rawTone : "info";
     const Icon = TONE_ICON[tone];
     return (
         <div className={`${styles.status} ${TONE_CLASS[tone]}`} role={tone === "error" ? "alert" : "status"}>
