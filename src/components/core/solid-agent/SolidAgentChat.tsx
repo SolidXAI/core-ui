@@ -1440,6 +1440,7 @@ export function SolidAgentChat({
                                                             e.stopPropagation();
                                                             if (isMenuOpen) {
                                                                 setMenuSessionId(null);
+                                                                e.currentTarget.blur();
                                                             } else {
                                                                 const btn = e.currentTarget;
                                                                 const scrollContainer = btn.closest(`.${styles.historyList}`) || btn.closest(`.${styles.sidebarSessions}`);

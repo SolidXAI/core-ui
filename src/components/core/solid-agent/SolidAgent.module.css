@@ -748,7 +748,7 @@
   transition: opacity 0.15s ease;
 }
 .historyRow:hover .historyProviderName,
-.historyRow:focus-within .historyProviderName,
+.historyRow:has(.historyMenuTrigger:focus-visible) .historyProviderName,
 .historyRowMenuOpen .historyProviderName {
   opacity: 0;
 }
@@ -768,7 +768,7 @@
   transition: opacity 0.15s ease;
 }
 .historyRow:hover .historyMenuWrap,
-.historyRow:focus-within .historyMenuWrap,
+.historyRow:has(.historyMenuTrigger:focus-visible) .historyMenuWrap,
 .historyRowMenuOpen .historyMenuWrap {
   opacity: 1;
   background: linear-gradient(
@@ -780,7 +780,7 @@
   border-radius: 0 8px 8px 0;
 }
 .historyRowActive:hover .historyMenuWrap,
-.historyRowActive:focus-within .historyMenuWrap,
+.historyRowActive:has(.historyMenuTrigger:focus-visible) .historyMenuWrap,
 .historyRowActive.historyRowMenuOpen .historyMenuWrap {
   background: linear-gradient(
     90deg,
@@ -804,7 +804,7 @@
   transition: background 0.15s, color 0.15s;
 }
 .historyRow:hover .historyMenuTrigger,
-.historyRow:focus-within .historyMenuTrigger,
+.historyRow:has(.historyMenuTrigger:focus-visible) .historyMenuTrigger,
 .historyRowMenuOpen .historyMenuTrigger,
 .historyMenuTriggerActive {
   pointer-events: auto;
