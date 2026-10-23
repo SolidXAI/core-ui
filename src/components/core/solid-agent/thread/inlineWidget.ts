@@ -41,8 +41,70 @@ function isPendingWidgetEnvelope(content: string): boolean {
     return afterKey === "" || afterKey.startsWith(":");
 }
 
-/** Returns the widget in a reply, or null when the reply is not that JSON (it then renders as text). */
-export function parseWidgetContent(content: unknown): InlineChatWidget | null {
+const EMBEDDED_ENVELOPE = '{"widgetName"';
+const FENCED_BLOCK = /^[ \t]*(`{3,}|~{3,})[^\n]*\n([\s\S]*?)(?:^[ \t]*\1[ \t]*$|(?![\s\S]))/gm;
+const INLINE_CODE = /(`+)(?!`)[^\n]*?[^`\n]\1(?!`)/g;
+
+/**
+ * Ranges of `text` where an envelope is example code, not a widget: inline code spans, and fenced
+ * blocks that hold more than a lone envelope. A fence holding only an envelope is still a widget.
+ */
+function exampleCodeRanges(text: string): Array<[number, number]> {
+    const fences: Array<[number, number]> = [];
+    const ranges: Array<[number, number]> = [];
+    let match: RegExpExecArray | null;
+    FENCED_BLOCK.lastIndex = 0;
+    while ((match = FENCED_BLOCK.exec(text))) {
+        const range: [number, number] = [match.index, match.index + match[0].length];
+        fences.push(range);
+        const body = match[2].trim();
+        if (!(body.indexOf(EMBEDDED_ENVELOPE) === 0 && body.charAt(body.length - 1) === "}")) ranges.push(range);
+    }
+    INLINE_CODE.lastIndex = 0;
+    while ((match = INLINE_CODE.exec(text))) {
+        const start = match.index;
+        if (!fences.some(([fs, fe]) => start >= fs && start < fe)) ranges.push([start, start + match[0].length]);
+    }
+    return ranges;
+}
+
+/** Parses the balanced JSON object starting at `start`, or null when it is not a widget envelope. */
+function parseEnvelopeAt(text: string, start: number): any {
+    let depth = 0;
+    let inString = false;
+    let escape = false;
+    for (let i = start; i < text.length; i++) {
+        const ch = text[i];
+        if (escape) {
+            escape = false;
+            continue;
+        }
+        if (ch === "\\" && inString) {
+            escape = true;
+            continue;
+        }
+        if (ch === '"') {
+            inString = !inString;
+            continue;
+        }
+        if (inString) continue;
+        if (ch === "{") depth++;
+        else if (ch === "}") {
+            depth--;
+            if (depth === 0) {
+                try {
+                    const parsed = JSON.parse(text.slice(start, i + 1));
+                    return parsed && typeof parsed === "object" && typeof parsed.widgetName === "string" ? parsed : null;
+                } catch {
+                    return null;
+                }
+            }
+        }
+    }
+    return null;
+}
+
+/** Returns the widget in a reply, or null when the reply is not that JSON (it then renders as text). */export function parseWidgetContent(content: unknown): InlineChatWidget | null {
     if (typeof content !== "string") return null;
     const trimmed = content.trim();
     if (!trimmed) return null;
@@ -67,43 +129,11 @@ export function parseWidgetContent(content: unknown): InlineChatWidget | null {
 
     // If candidate wasn't a standalone JSON object, look for embedded {"widgetName" envelope
     if (!parsed || typeof parsed !== "object" || typeof parsed.widgetName !== "string") {
-        const idx = candidate.indexOf('{"widgetName"');
-        if (idx !== -1) {
-            let depth = 0;
-            let inString = false;
-            let escape = false;
-            for (let i = idx; i < candidate.length; i++) {
-                const ch = candidate[i];
-                if (escape) {
-                    escape = false;
-                    continue;
-                }
-                if (ch === "\\" && inString) {
-                    escape = true;
-                    continue;
-                }
-                if (ch === '"') {
-                    inString = !inString;
-                    continue;
-                }
-                if (!inString) {
-                    if (ch === "{") depth++;
-                    else if (ch === "}") {
-                        depth--;
-                        if (depth === 0) {
-                            try {
-                                const candidateParsed = JSON.parse(candidate.slice(idx, i + 1));
-                                if (candidateParsed && typeof candidateParsed === "object" && typeof candidateParsed.widgetName === "string") {
-                                    parsed = candidateParsed;
-                                }
-                            } catch {
-                                // ignore
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
+        const codeRanges = exampleCodeRanges(candidate);
+        let idx = candidate.indexOf(EMBEDDED_ENVELOPE);
+        while (idx !== -1 && !parsed) {
+            if (!codeRanges.some(([start, end]) => idx >= start && idx < end)) parsed = parseEnvelopeAt(candidate, idx);
+            idx = candidate.indexOf(EMBEDDED_ENVELOPE, idx + 1);
         }
     }
 
