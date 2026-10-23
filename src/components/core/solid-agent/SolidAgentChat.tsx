@@ -1363,7 +1363,7 @@ export function SolidAgentChat({
                                 return (
                                     <div
                                         key={session.session_id}
-                                        className={`${styles.historyRow} ${isCurrentSession ? styles.historyRowActive : ""}`}
+                                        className={`${styles.historyRow} ${isCurrentSession ? styles.historyRowActive : ""} ${isMenuOpen ? styles.historyRowMenuOpen : ""}`}
                                     >
                                         {editingSessionId === session.session_id ? (
                                             <form

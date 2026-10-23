@@ -674,17 +674,11 @@
 .historyRowActive:hover {
   background: var(--agent-tint);
 }
-.historyActions {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding-right: 4px;
+.historyRowMenuOpen {
+  background: color-mix(in srgb, var(--agent-tint) 55%, transparent);
 }
-.historyActions .iconBtn {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
+.historyRowActive.historyRowMenuOpen {
+  background: var(--agent-tint);
 }
 .historyRenameForm {
   flex: 1 1 auto;
@@ -720,7 +714,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 4px 8px 10px;
+  padding: 8px 10px;
   border: 0;
   border-radius: 8px;
   background: transparent;
@@ -751,36 +745,69 @@
   white-space: nowrap;
   user-select: none;
   opacity: 0.85;
+  transition: opacity 0.15s ease;
+}
+.historyRow:hover .historyProviderName,
+.historyRow:focus-within .historyProviderName,
+.historyRowMenuOpen .historyProviderName {
+  opacity: 0;
 }
 .historyMenuWrap {
-  position: relative;
-  flex: 0 0 auto;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
-  padding-right: 4px;
+  justify-content: flex-end;
+  padding-right: 6px;
+  padding-left: 20px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.historyRow:hover .historyMenuWrap,
+.historyRow:focus-within .historyMenuWrap,
+.historyRowMenuOpen .historyMenuWrap {
+  opacity: 1;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--agent-tint) 55%, var(--surface-card, var(--agent-bg, #ffffff))) 30%,
+    color-mix(in srgb, var(--agent-tint) 55%, var(--surface-card, var(--agent-bg, #ffffff))) 100%
+  );
+  border-radius: 0 8px 8px 0;
+}
+.historyRowActive:hover .historyMenuWrap,
+.historyRowActive:focus-within .historyMenuWrap,
+.historyRowActive.historyRowMenuOpen .historyMenuWrap {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--agent-tint) 100%, var(--surface-card, var(--agent-bg, #ffffff))) 30%,
+    color-mix(in srgb, var(--agent-tint) 100%, var(--surface-card, var(--agent-bg, #ffffff))) 100%
+  );
 }
 .historyMenuTrigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   border: 0;
   background: transparent;
   color: var(--agent-muted);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s, background 0.15s, color 0.15s;
+  pointer-events: auto;
+  transition: background 0.15s, color 0.15s;
 }
 .historyRow:hover .historyMenuTrigger,
+.historyRow:focus-within .historyMenuTrigger,
+.historyRowMenuOpen .historyMenuTrigger,
 .historyMenuTriggerActive {
-  opacity: 1;
-}
-@media (hover: none) {
-  .historyMenuTrigger {
-    opacity: 0.7;
-  }
+  pointer-events: auto;
 }
 .historyMenuTrigger:hover,
 .historyMenuTriggerActive {
@@ -790,7 +817,7 @@
 .historyMenuDropdown {
   position: absolute;
   top: calc(100% + 4px);
-  right: 0;
+  right: 6px;
   z-index: 60;
   min-width: 140px;
   padding: 4px;
