@@ -1979,22 +1979,11 @@
   touch-action: none;
   flex-shrink: 0;
   background: transparent;
-}
-
-.sidebarResizer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 3px;
-  width: 2px;
-  background: transparent;
   transition: background 0.15s ease;
 }
 
-.sidebarResizer:hover::before,
-.sidebarResizerActive::before {
-  background: var(--agent-primary);
+.sidebarResizer:hover {
+  background: var(--agent-tint);
 }
 
 @keyframes sidebarSlideIn {
