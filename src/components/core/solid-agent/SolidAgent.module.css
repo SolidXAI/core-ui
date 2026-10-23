@@ -676,9 +676,11 @@
 }
 .historyRowMenuOpen {
   background: color-mix(in srgb, var(--agent-tint) 55%, transparent);
+  z-index: 50;
 }
 .historyRowActive.historyRowMenuOpen {
   background: var(--agent-tint);
+  z-index: 50;
 }
 .historyRenameForm {
   flex: 1 1 auto;
@@ -814,11 +816,16 @@
   background: color-mix(in srgb, var(--agent-fg) 8%, transparent);
   color: var(--agent-fg);
 }
+.historyRowMenuOpen .historyMenuWrap {
+  z-index: 60;
+  pointer-events: auto;
+}
 .historyMenuDropdown {
   position: absolute;
   top: calc(100% + 4px);
   right: 6px;
-  z-index: 60;
+  z-index: 100;
+  pointer-events: auto;
   min-width: 140px;
   padding: 4px;
   border-radius: 8px;
@@ -833,6 +840,20 @@
 .historyMenuDropdownUp {
   top: auto;
   bottom: calc(100% + 4px);
+}
+/* When any row has its menu open, suppress hover styles and 3-dots on all other rows */
+.sidebarSessions:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover,
+.historyList:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover,
+.sidebarSessionsMenuOpen .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover,
+.historyListMenuOpen .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover {
+  background: transparent;
+}
+.sidebarSessions:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen) .historyMenuWrap,
+.historyList:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen) .historyMenuWrap,
+.sidebarSessionsMenuOpen .historyRow:not(.historyRowMenuOpen) .historyMenuWrap,
+.historyListMenuOpen .historyRow:not(.historyRowMenuOpen) .historyMenuWrap {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 @keyframes historyMenuFadeIn {
   from {

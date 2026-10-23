@@ -1464,6 +1464,8 @@ export function SolidAgentChat({
                                                         <div
                                                             className={`${styles.historyMenuDropdown} ${menuPlacement === "up" ? styles.historyMenuDropdownUp : ""}`}
                                                             role="menu"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            onMouseDown={(e) => e.stopPropagation()}
                                                         >
                                                             {session.created_at && (
                                                                 <div className={styles.historyMenuTime}>
@@ -1702,7 +1704,7 @@ export function SolidAgentChat({
                                                 {renderSearchBox()}
                                             </div>
                                         )}
-                                        <div className={styles.sidebarSessions} ref={historyListRef}>
+                                        <div className={`${styles.sidebarSessions} ${menuSessionId ? styles.sidebarSessionsMenuOpen : ""}`} ref={historyListRef}>
                                             {sessions.length > 0 && <div className={styles.sidebarSectionTitle}>Recents</div>}
                                             {renderSessionList(paginatedSessions)}
                                         </div>
@@ -1755,7 +1757,7 @@ export function SolidAgentChat({
                             {showHistory ? (
                                 <div className={styles.historyPanel} aria-label="Past conversations">
                                     {sessions.length > 0 && renderSearchBox()}
-                                    <div className={styles.historyList} ref={historyListRef}>
+                                    <div className={`${styles.historyList} ${menuSessionId ? styles.historyListMenuOpen : ""}`} ref={historyListRef}>
                                         {renderSessionList(paginatedSessions)}
                                     </div>
                                     {renderPaginationControls()}
