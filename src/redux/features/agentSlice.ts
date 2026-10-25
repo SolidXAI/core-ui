@@ -9,6 +9,7 @@ import {
     type AgentContext,
     type AgentMessageContext,
     type AgentMode,
+    type AgentUsageStats,
     type SolidAgentOpenOptions,
 } from "../../components/core/solid-agent/types";
 
@@ -96,12 +97,18 @@ const agentSlice = createSlice({
         agentThreadReset(state) {
             Object.assign(state, createThreadState(), { commands: state.commands, hasMoreHistory: false, historyPage: 1 });
         },
-        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number }>) {
-            const { items, hasMore, page } = action.payload;
+        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null }>) {
+            const { items, hasMore, page, usage } = action.payload;
             // History is always older than anything already in the thread.
             state.items = [...items, ...state.items];
             state.hasMoreHistory = hasMore;
             state.historyPage = page;
+            if (usage && (!state.usage || state.usage.totalTokens === 0)) {
+                state.usage = {
+                    ...usage,
+                    contextLimit: state.usage?.contextLimit || usage.contextLimit || 0,
+                };
+            }
         },
         agentEventReceived(state, action: PayloadAction<AgentChatEvent>) {
             applyAgentEvent(state, action.payload);

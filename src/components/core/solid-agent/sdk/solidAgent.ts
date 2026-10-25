@@ -1,7 +1,7 @@
 import { eventBus } from "../../../../helpers/eventBus";
 import { getSolidStoreDispatch } from "../../../../redux/store/solidEntityApiPool";
 import { agentClosed, agentModeChanged, agentOpenRequested } from "../../../../redux/features/agentSlice";
-import type { AgentContext, SolidAgentOpenOptions } from "../types";
+import type { AgentContext, AgentRuntimeType, SolidAgentOpenOptions } from "../types";
 
 /**
  * Imperative API for the SolidX Agent chat, usable from any component, hook or extension
@@ -21,7 +21,7 @@ export type SolidAgentEventName = keyof typeof SOLID_AGENT_EVENTS;
 export type SolidAgentEventPayloads = {
     turnComplete: { sessionId: string | null; content?: string };
     widgetAction: { widgetId: string; widget: string; value: unknown };
-    sessionChanged: { sessionId: string | null };
+    sessionChanged: { sessionId: string | null; agentType?: AgentRuntimeType; provider?: string; model?: string | null };
 };
 
 function dispatch(action: any) {

@@ -252,8 +252,8 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   const {
     useDeleteMultipleSolidEntitiesMutation,
     useLazyGetSolidEntitiesQuery,
-    useLazyRecoverSolidEntityByIdQuery,
-    usePatchUpdateSolidEntityMutation
+    useRecoverSolidEntityByIdMutation,
+    usePatchUpdateSolidEntityWithoutListInvalidationMutation
   } = entityApi;
 
   const menuItemId = searchParams.get("menuItemId");
@@ -411,7 +411,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
-  const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useLazyRecoverSolidEntityByIdQuery();
+  const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useRecoverSolidEntityByIdMutation();
 
   // Delete mutation 
   const [
@@ -426,7 +426,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     {
       isLoading: isPatchKanbanViewLoading,
     },
-  ] = usePatchUpdateSolidEntityMutation();
+  ] = usePatchUpdateSolidEntityWithoutListInvalidationMutation();
 
   const applyArchivedQueryState = (queryData: Record<string, any>) => {
     if (showArchived) {
@@ -834,10 +834,14 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         populateMedia: toPopulateMedia,
         populateGroup: true,
         filters: {
-          [groupByFieldName]: {
-            $in: [groupByField],
-          },
-          ...filters
+          $and: [
+            {
+              [groupByFieldName]: {
+                $in: [groupByField],
+              },
+            },
+            ...(filters?.$and ?? [filters]),
+          ],
         },
         sort: DEFAULT_RECORD_SORT,
       });
@@ -978,6 +982,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
+        await loadKanbanBoard(filters);
         setSelectedRecords((previousRecords) => previousRecords.map((record) =>
           String(record?.id) === String(updatedItem?.id) ? updatedItem : record
         ));

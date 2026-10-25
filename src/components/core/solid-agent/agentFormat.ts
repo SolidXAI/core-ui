@@ -3,43 +3,120 @@
  * Ported from the agent-ui chat (SolidX Agent repo) so tool rows read the same.
  */
 
+const TOOL_PREFIXES = [
+    "mcp__solidx__",
+    "mcp_solidx_",
+    "solidx___",
+    "solidx__",
+    "solidx_",
+    "solidx-",
+    "solidx:",
+    "solidx/",
+    "solid_",
+];
+
+function cleanRawToolName(raw: string): string {
+    if (!raw || typeof raw !== "string") return "Tool";
+    let name = raw.trim();
+    const lower = name.toLowerCase();
+    for (const prefix of TOOL_PREFIXES) {
+        if (lower.startsWith(prefix)) {
+            name = name.slice(prefix.length);
+            break;
+        }
+    }
+    return name;
+}
+
+function humanizeIdentifier(id: string): string {
+    return id
+        .replace(/[._-]+/g, " ")
+        .replace(/\b\w/g, (ch) => ch.toUpperCase())
+        .trim();
+}
+
+const DATA_MODEL_ACTIONS: Record<string, string> = {
+    create_module: "Create Module",
+    create_model: "Create Model",
+    add_fields: "Add Fields",
+    update_fields: "Update Fields",
+    remove_fields: "Remove Fields",
+    remove_model: "Remove Model",
+    remove_module: "Remove Module",
+    update_model: "Update Model",
+};
+
 const TOOL_DISPLAY_NAMES: Record<string, string> = {
     manage_data_model: "Manage Data Model",
     discover_ui_selectors: "Discover UI Selectors",
     manage_metadata: "Manage Metadata",
     get_metadata: "Get Metadata",
+    get_skill_content: "Get Skill Content",
+    get_current_solidx_user: "Get Current User",
+    metadata_json_patch: "Patch Metadata",
     run_solidctl: "Run SolidCTL",
     introspect_database: "Introspect Database",
     run_read_only_sql: "Run Read-Only SQL",
     content_crud: "Content CRUD",
     filesystem_tool: "File System",
     bash: "Run Command",
+    view_file: "View File",
+    edit_file: "Edit File",
+    write_file: "Write File",
+    read_file: "Read File",
+    list_widgets: "List Widgets",
+    list_dir: "List Directory",
+    run_command: "Run Command",
 };
 
 const FILESYSTEM_ACTIONS: Record<string, string> = { read: "Read", write: "Write", edit: "Edit", search: "Search" };
 
 const TOOL_CATEGORIES: Record<string, string[]> = {
-    Context: ["introspect_database", "get_metadata", "run_read_only_sql"],
-    Build: ["manage_data_model", "manage_metadata", "content_crud"],
-    Files: ["filesystem_tool"],
+    Context: ["introspect_database", "get_metadata", "run_read_only_sql", "get_skill_content", "get_current_solidx_user"],
+    Build: ["manage_data_model", "manage_metadata", "content_crud", "metadata_json_patch"],
+    Files: ["filesystem_tool", "view_file", "edit_file", "write_file", "read_file", "list_dir"],
     Testing: ["discover_ui_selectors"],
     Deploy: ["run_solidctl"],
-    Terminal: ["bash"],
+    Terminal: ["bash", "run_command"],
 };
 
 /** Category shown as the tool card badge ("Context", "Build", ...). */
 export function toolCategory(name: string): string {
+    const clean = cleanRawToolName(name);
     for (const [category, tools] of Object.entries(TOOL_CATEGORIES)) {
-        if (tools.includes(name)) return category;
+        if (tools.includes(clean)) return category;
     }
     return "Tool";
 }
 
 export function toolDisplayName(name: string, args?: Record<string, unknown>): string {
-    if (name === "filesystem_tool" && typeof args?.action === "string") {
-        return FILESYSTEM_ACTIONS[args.action] ?? TOOL_DISPLAY_NAMES[name] ?? name;
+    if (!name) return "Tool";
+    const clean = cleanRawToolName(name);
+
+    if (clean === "filesystem_tool" && typeof args?.action === "string") {
+        return FILESYSTEM_ACTIONS[args.action] ?? "File System";
     }
-    return TOOL_DISPLAY_NAMES[name] ?? name;
+
+    if (clean === "manage_data_model" && typeof args?.action === "string") {
+        const actionStr = String(args.action).toLowerCase();
+        if (DATA_MODEL_ACTIONS[actionStr]) {
+            return DATA_MODEL_ACTIONS[actionStr];
+        }
+    }
+
+    if (clean === "get_skill_content") {
+        const concern = args?.concern || args?.skill_name || args?.skill;
+        if (typeof concern === "string" && concern.trim()) {
+            return `Skill: ${humanizeIdentifier(concern)}`;
+        }
+        return "Get Skill Content";
+    }
+
+    if (TOOL_DISPLAY_NAMES[clean]) {
+        return TOOL_DISPLAY_NAMES[clean];
+    }
+
+    return humanizeIdentifier(clean);
 }
 
 const truncate = (text: string, max = 80) => (text.length > max ? `${text.slice(0, max)}…` : text);

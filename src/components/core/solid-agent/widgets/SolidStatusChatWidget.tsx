@@ -30,8 +30,9 @@ const TONE_ICON = { success: CheckCircle2, warning: AlertTriangle, error: Circle
  */
 export const SolidStatusChatWidget = ({ eventData, sendPrompt }: SolidChatWidgetProps) => {
     const navigate = useNavigate();
-    const data = getChatWidgetData<StatusData>(eventData);
-    const tone: Tone = data.tone && data.tone in TONE_CLASS ? data.tone : "info";
+    const data = getChatWidgetData<StatusData & { status?: string; state?: string }>(eventData);
+    const rawTone = String(data.tone ?? data.status ?? data.state ?? "").toLowerCase() as Tone;
+    const tone: Tone = rawTone in TONE_CLASS ? rawTone : "info";
     const Icon = TONE_ICON[tone];
     const route = typeof data.route === "string" && data.route.startsWith("/") ? data.route : undefined;
     return (

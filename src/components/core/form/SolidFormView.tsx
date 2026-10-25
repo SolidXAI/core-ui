@@ -325,7 +325,7 @@ const normalizeWorkflowFieldValueForFormData = (value: any, fieldMetadata: any) 
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, embeded, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -338,6 +338,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         modelName: modelName,
         readOnly: readOnly,
         viewMode: viewMode,
+        embeded: embeded === true,
         onChange: onChange,
         onBlur: onBlur,
         setLightboxUrls: setLightboxUrls,
@@ -691,16 +692,22 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     const op = useRef(null);
     const MIN_CHATTER_WIDTH = 320;
+    const MIN_CHATTER_RATIO = 0.35;
     const MIN_FORM_SECTION_WIDTH = 420;
+
+    const getMinChatterWidth = () => {
+        const wrapperWidth = solidFormWrapperRef.current?.getBoundingClientRect().width ?? window.innerWidth;
+        return Math.max(MIN_CHATTER_WIDTH, wrapperWidth * MIN_CHATTER_RATIO);
+    };
 
     const getMaxChatterWidth = () => {
         const wrapperWidth = solidFormWrapperRef.current?.getBoundingClientRect().width ?? window.innerWidth;
-        return Math.max(MIN_CHATTER_WIDTH, wrapperWidth - MIN_FORM_SECTION_WIDTH);
+        return Math.max(getMinChatterWidth(), wrapperWidth - MIN_FORM_SECTION_WIDTH);
     };
 
     const clampChatterWidth = (width: number) => {
         const maxWidth = getMaxChatterWidth();
-        return Math.max(MIN_CHATTER_WIDTH, Math.min(width, maxWidth));
+        return Math.max(getMinChatterWidth(), Math.min(width, maxWidth));
     };
 
     useEffect(() => {
@@ -709,7 +716,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const parsed = parseInt(stored, 10);
             const clampedWidth = clampChatterWidth(parsed);
             setChatterLocaleWidth(clampedWidth);
-        }
+        } else setChatterLocaleWidth((current) => clampChatterWidth(current));
     }, []);
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
@@ -1008,6 +1015,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const solidWorkflowField = solidView?.layout?.attrs?.workflowField;
             const workflowFieldMetadata = solidFieldsMetadata?.[solidWorkflowField];
             if (params.id !== "new" && solidWorkflowField && workflowFieldMetadata && solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                const workflowFieldValue = solidWorkflowFieldValue !== "" && solidWorkflowFieldValue !== null && solidWorkflowFieldValue !== undefined
+                    ? solidWorkflowFieldValue
+                    : initialEntityData[solidWorkflowField];
                 const workflowFieldContext: SolidFieldProps = {
                     fieldMetadata: workflowFieldMetadata,
                     field: layoutFieldsObj[solidWorkflowField] ?? { attrs: { name: solidWorkflowField } },
@@ -1020,7 +1030,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData.delete(solidWorkflowField);
                     formData.delete(`${solidWorkflowField}Id`);
                     workflowSolidField.updateFormData(
-                        normalizeWorkflowFieldValueForFormData(solidWorkflowFieldValue, workflowFieldMetadata),
+                        normalizeWorkflowFieldValueForFormData(workflowFieldValue, workflowFieldMetadata),
                         formData
                     );
                 }
@@ -1160,7 +1170,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const formViewDataQs = qs.stringify({ populate: toPopulate, populateMedia: toPopulateMedia }, {
         encodeValuesOnly: true,
     });
-    const [initialEntityData, setInitialEntityData] = useState({});
+    const [initialEntityData, setInitialEntityData] = useState<Record<string, any>>({});
     const {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
@@ -1754,6 +1764,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             modelName={params.modelName}
                             readOnly={readOnlyPermission || readOnlyArchivedVersion}
                             viewMode={viewMode}
+                            embeded={params.embeded === true}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
                             setLightboxUrls={setLightboxUrls}
