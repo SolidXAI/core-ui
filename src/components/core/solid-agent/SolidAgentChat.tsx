@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, Clock, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -13,6 +13,7 @@ import {
     getCachedProviderModels,
     getStoredSessionTitles,
     renameSession,
+    type AgentSessionPage,
     type AgentSessionSummary,
 } from "./client/agentRest";
 import {
@@ -209,6 +210,18 @@ export function SolidAgentChat({
     sidebarWidthRef.current = sidebarWidth;
     const fullScreenLayoutRef = useRef<HTMLDivElement>(null);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
+    const [historyNextCursor, setHistoryNextCursor] = useState<string | null>(null);
+    const [historyHasMore, setHistoryHasMore] = useState(false);
+    const [historyInitialLoading, setHistoryInitialLoading] = useState(false);
+    const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
+    const [historyLoadError, setHistoryLoadError] = useState<string | null>(null);
+    const [debouncedHistorySearch, setDebouncedHistorySearch] = useState("");
+
+    const historyGenerationRef = useRef(0);
+    const historyAbortRef = useRef<AbortController | null>(null);
+    const historyInFlightRef = useRef(false);
+    const historySentinelRef = useRef<HTMLDivElement>(null);
+    const historyScrollRef = useRef<HTMLDivElement | null>(null);
     const [sessionToDelete, setSessionToDelete] = useState<AgentSessionSummary | null>(null);
     const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
@@ -598,10 +611,9 @@ export function SolidAgentChat({
         try {
             let latestSession: AgentSessionSummary | undefined;
             if (agentRuntime === "agentHub") {
-                const latestSessions = await fetchSessionList(agentUrl);
-                if (latestSessions) {
-                    setSessions(latestSessions);
-                    latestSession = latestSessions[0];
+                const latestPage = await fetchSessionList(agentUrl, { limit: 1 });
+                if (latestPage?.sessions?.length) {
+                    latestSession = latestPage.sessions[0];
                 }
             }
 
@@ -621,7 +633,6 @@ export function SolidAgentChat({
         setShowHistory(false);
         setShowProviderMenu(false);
         setMenuSessionId(null);
-        setHistoryPage(1);
         onInputsLocked?.(false);
         if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) {
             setCollectedInputs(null);
@@ -677,7 +688,6 @@ export function SolidAgentChat({
         setHistorySearchQuery("");
         setEditingSessionId(null);
         setMenuSessionId(null);
-        setHistoryPage(1);
     };
 
     const handleDeleteSession = async (sessionId: string) => {
@@ -701,51 +711,6 @@ export function SolidAgentChat({
         await renameSession(agentUrl, sessionId, trimmed);
     };
 
-    const [historyPageSize, setHistoryPageSize] = useState(10);
-    const [historyPage, setHistoryPage] = useState(1);
-    const historyListRef = useRef<HTMLDivElement>(null);
-
-    // Dynamically calculate page size based on available container height so rows fill the window cleanly
-    useLayoutEffect(() => {
-        const isSidebarActive = isFullScreen && sidebarOpen;
-        if (!showHistory && !isSidebarActive) return;
-
-        let rafId: number | null = null;
-        const updateDynamicPageSize = () => {
-            const listEl = historyListRef.current;
-            if (!listEl) return;
-            const availableHeight = listEl.clientHeight;
-            if (availableHeight <= 0) {
-                rafId = requestAnimationFrame(updateDynamicPageSize);
-                return;
-            }
-
-            const sectionTitle = listEl.querySelector(`.${styles.sidebarSectionTitle}`) as HTMLElement | null;
-            const effectiveHeight = availableHeight - (sectionTitle?.offsetHeight ?? 0);
-
-            // Measure the first row's height if rendered, fallback to 38px (36px row + 2px gap)
-            const firstRow = listEl.querySelector(`.${styles.historyRow}`) as HTMLElement | null;
-            const rowHeight = firstRow && firstRow.offsetHeight > 20 ? firstRow.offsetHeight + 2 : 38;
-
-            const computed = Math.max(5, Math.floor(effectiveHeight / rowHeight));
-            setHistoryPageSize((prev) => (prev !== computed ? computed : prev));
-        };
-
-        updateDynamicPageSize();
-
-        const observer = new ResizeObserver(() => {
-            updateDynamicPageSize();
-        });
-        if (historyListRef.current) {
-            observer.observe(historyListRef.current);
-        }
-
-        return () => {
-            if (rafId !== null) cancelAnimationFrame(rafId);
-            observer.disconnect();
-        };
-    }, [showHistory, isFullScreen, sidebarOpen, signedIn, sessions.length]);
-
     const filteredSessions = useMemo(() => {
         const rawQ = historySearchQuery.trim().toLowerCase();
         if (!rawQ) return sessions;
@@ -766,28 +731,6 @@ export function SolidAgentChat({
             );
         });
     }, [sessions, historySearchQuery]);
-
-    // Reset pagination to page 1 whenever the search query changes to prevent search conflicts
-    useEffect(() => {
-        setHistoryPage(1);
-    }, [historySearchQuery]);
-
-    const totalHistoryPages = Math.max(1, Math.ceil(filteredSessions.length / historyPageSize));
-
-    useEffect(() => {
-        if (historyPage > totalHistoryPages) {
-            setHistoryPage(totalHistoryPages);
-        }
-    }, [historyPage, totalHistoryPages]);
-
-    useEffect(() => {
-        historyListRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    }, [historyPage]);
-
-    const paginatedSessions = useMemo(() => {
-        const start = (historyPage - 1) * historyPageSize;
-        return filteredSessions.slice(start, start + historyPageSize);
-    }, [filteredSessions, historyPage, historyPageSize]);
 
     const handleModelChange = (modelId: string) => {
         setSelectedModel(modelId);
@@ -900,23 +843,150 @@ export function SolidAgentChat({
         else setSeed({ text: prompt, key: nonce });
     }, [agent.prefill, handlesPrefill, dispatch, runtime, inputContext, messageInputs, beforeSend]);
 
-    const shouldLoadHistory = (showHistory || isFullScreen) && signedIn;
     useEffect(() => {
-        if (!shouldLoadHistory) return;
-        let alive = true;
-        fetchSessionList(agentUrl).then((list) => {
-            if (!alive) return;
+        const timer = setTimeout(() => {
+            setDebouncedHistorySearch(historySearchQuery.trim());
+        }, 250);
+        return () => clearTimeout(timer);
+    }, [historySearchQuery]);
+
+    const loadSessionPage = useCallback(async (
+        cursor: string | null = null,
+        search: string = "",
+        replace: boolean = false,
+    ): Promise<AgentSessionPage | null> => {
+        if (!replace && historyInFlightRef.current) return null;
+        historyInFlightRef.current = true;
+
+        if (replace) {
+            historyAbortRef.current?.abort();
+            setSessions([]);
+            setHistoryNextCursor(null);
+            setHistoryHasMore(false);
+            setHistoryLoadError(null);
+            setHistoryInitialLoading(true);
+        } else {
+            setHistoryLoadingMore(true);
+        }
+
+        const generation = ++historyGenerationRef.current;
+        const controller = new AbortController();
+        historyAbortRef.current = controller;
+
+        try {
+            const page = await fetchSessionList(agentUrl, {
+                cursor,
+                search: search || undefined,
+                limit: 20,
+                signal: controller.signal,
+            });
+
+            if (generation !== historyGenerationRef.current || controller.signal.aborted) return null;
+            if (!page) {
+                setHistoryLoadError("Failed to load conversations.");
+                return null;
+            }
+
+            setHistoryLoadError(null);
             const storedTitles = getStoredSessionTitles(agentUrl);
-            const enriched = (list ?? []).map((s) => ({
+            const enriched = page.sessions.map((s) => ({
                 ...s,
                 title: storedTitles[s.session_id] || s.title || s.preview || "New conversation",
             }));
-            setSessions(enriched);
-        });
+
+            if (replace) {
+                setSessions(enriched);
+            } else {
+                setSessions((prev) => {
+                    const seen = new Set(prev.map((item) => item.session_id));
+                    return [...prev, ...enriched.filter((item) => !seen.has(item.session_id))];
+                });
+            }
+            setHistoryNextCursor(page.next_cursor);
+            setHistoryHasMore(page.has_more);
+            return page;
+        } catch (err: any) {
+            if (err?.name === "AbortError" || controller.signal.aborted) return null;
+            if (generation === historyGenerationRef.current) {
+                setHistoryLoadError("Failed to load conversations.");
+            }
+            return null;
+        } finally {
+            if (generation === historyGenerationRef.current) {
+                historyInFlightRef.current = false;
+                if (replace) setHistoryInitialLoading(false);
+                else setHistoryLoadingMore(false);
+            }
+        }
+    }, [agentUrl]);
+
+    const shouldLoadHistory = (showHistory || isFullScreen) && signedIn;
+    useEffect(() => {
+        if (!shouldLoadHistory) {
+            historyAbortRef.current?.abort();
+            historyGenerationRef.current += 1;
+            historyInFlightRef.current = false;
+            setHistoryInitialLoading(false);
+            setHistoryLoadingMore(false);
+            return;
+        }
+        void loadSessionPage(null, debouncedHistorySearch, true);
         return () => {
-            alive = false;
+            historyAbortRef.current?.abort();
+            historyGenerationRef.current += 1;
+            historyInFlightRef.current = false;
         };
-    }, [shouldLoadHistory, agentUrl, signedIn]);
+    }, [shouldLoadHistory, debouncedHistorySearch, loadSessionPage]);
+
+    useEffect(() => {
+        const root = historyScrollRef.current;
+        const sentinel = historySentinelRef.current;
+        if (!shouldLoadHistory || !root || !sentinel || !historyHasMore || !historyNextCursor
+            || historyInitialLoading || historyLoadingMore || historyLoadError) {
+            return;
+        }
+        const observer = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                void loadSessionPage(historyNextCursor, debouncedHistorySearch, false);
+            }
+        }, { root, rootMargin: "0px 0px 200px 0px" });
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [
+        shouldLoadHistory,
+        historyHasMore,
+        historyNextCursor,
+        historyInitialLoading,
+        historyLoadingMore,
+        historyLoadError,
+        debouncedHistorySearch,
+        loadSessionPage,
+    ]);
+
+    const handleRetryHistory = useCallback(() => {
+        setHistoryLoadError(null);
+        void loadSessionPage(historyNextCursor, debouncedHistorySearch, sessions.length === 0);
+    }, [historyNextCursor, debouncedHistorySearch, sessions.length, loadSessionPage]);
+
+    useEffect(() => {
+        if (!agent.historySessionId) return;
+        setSessions((prev) => {
+            const existing = prev.find((s) => s.session_id === agent.historySessionId);
+            if (existing) return prev;
+            const newSession: AgentSessionSummary = {
+                session_id: agent.historySessionId!,
+                status: "active",
+                totalSteps: 1,
+                created_at: new Date().toISOString(),
+                preview: "New conversation",
+                title: "New conversation",
+                provider: selectedProvider,
+                model: selectedModel,
+                runtime: agentRuntime,
+            };
+            return [newSession, ...prev];
+        });
+    }, [agent.historySessionId, selectedProvider, selectedModel, agentRuntime]);
 
     useEffect(() => {
         return eventBus.on(SOLID_AGENT_EVENTS.sessionChanged, (payload) => {
@@ -1266,7 +1336,6 @@ export function SolidAgentChat({
                                         if (!v) {
                                             setHistorySearchQuery("");
                                             setEditingSessionId(null);
-                                            setHistoryPage(1);
                                         }
                                         setMenuSessionId(null);
                                         return !v;
@@ -1286,7 +1355,6 @@ export function SolidAgentChat({
                                 setHistorySearchQuery("");
                                 setEditingSessionId(null);
                                 setMenuSessionId(null);
-                                setHistoryPage(1);
                                 void signOutOfAgent(agentUrl);
                             }}
                         >
@@ -1380,10 +1448,20 @@ export function SolidAgentChat({
 
                     const renderSessionList = (items: AgentSessionSummary[] = filteredSessions) => (
                         <>
-                            {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
-                            {sessions.length > 0 && items.length === 0 && (
-                                <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
-                            )}
+                            {historyInitialLoading ? (
+                                <>
+                                    <div className={styles.historySkeletonRow} />
+                                    <div className={styles.historySkeletonRow} />
+                                    <div className={styles.historySkeletonRow} />
+                                    <div className={styles.historySkeletonRow} />
+                                    <div className={styles.historySkeletonRow} />
+                                </>
+                            ) : (
+                                <>
+                                    {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
+                                    {sessions.length > 0 && items.length === 0 && (
+                                        <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
+                                    )}
                             {items.map((session, index) => {
                                 const isCurrentSession = session.session_id === agent.historySessionId;
                                 const isMenuOpen = menuSessionId === session.session_id;
@@ -1535,47 +1613,27 @@ export function SolidAgentChat({
                                     </div>
                                 );
                             })}
+                            {historyLoadingMore && (
+                                <>
+                                    <div className={styles.historySkeletonRow} />
+                                    <div className={styles.historySkeletonRow} />
+                                </>
+                            )}
+                            {historyLoadError && (
+                                <div className={styles.historyErrorRow}>
+                                    <span>{historyLoadError}</span>
+                                    <button type="button" className={styles.historyRetryBtn} onClick={handleRetryHistory}>
+                                        Retry
+                                    </button>
+                                </div>
+                            )}
+                            {historyHasMore && <div ref={historySentinelRef} className={styles.historySentinel} />}
                         </>
-                    );
+                    )}
+                </>
+            );
 
-                    const renderPaginationControls = () => {
-                        if (totalHistoryPages <= 1) return null;
-                        return (
-                            <div className={styles.historyPagination}>
-                                <button
-                                    type="button"
-                                    className={styles.historyPaginationBtn}
-                                    onClick={() => {
-                                        setMenuSessionId(null);
-                                        setHistoryPage((p) => Math.max(1, p - 1));
-                                    }}
-                                    disabled={historyPage <= 1}
-                                    title="Previous page"
-                                    aria-label="Previous page"
-                                >
-                                    <ChevronLeft size={13} />
-                                    <span>Prev</span>
-                                </button>
-                                <span className={styles.historyPaginationText}>
-                                    Page {historyPage} of {totalHistoryPages}
-                                </span>
-                                <button
-                                    type="button"
-                                    className={styles.historyPaginationBtn}
-                                    onClick={() => {
-                                        setMenuSessionId(null);
-                                        setHistoryPage((p) => Math.min(totalHistoryPages, p + 1));
-                                    }}
-                                    disabled={historyPage >= totalHistoryPages}
-                                    title="Next page"
-                                    aria-label="Next page"
-                                >
-                                    <span>Next</span>
-                                    <ChevronRight size={13} />
-                                </button>
-                            </div>
-                        );
-                    };
+
 
                     const threadComponent = (
                         <AgentThread
@@ -1727,16 +1785,18 @@ export function SolidAgentChat({
                                                 </div>
                                             )}
                                         </div>
-                                        {sessions.length > 0 && (
+                                        {(historyInitialLoading || sessions.length > 0 || historySearchQuery) && (
                                             <div className={styles.sidebarSearchWrap}>
                                                 {renderSearchBox()}
                                             </div>
                                         )}
-                                        <div className={`${styles.sidebarSessions} ${menuSessionId ? styles.sidebarSessionsMenuOpen : ""}`} ref={historyListRef}>
-                                            {sessions.length > 0 && <div className={styles.sidebarSectionTitle}>Recents</div>}
-                                            {renderSessionList(paginatedSessions)}
+                                        <div
+                                            className={`${styles.sidebarSessions} ${menuSessionId ? styles.sidebarSessionsMenuOpen : ""}`}
+                                            ref={(el) => { historyScrollRef.current = el; }}
+                                        >
+                                            {(historyInitialLoading || sessions.length > 0) && <div className={styles.sidebarSectionTitle}>Recents</div>}
+                                            {renderSessionList()}
                                         </div>
-                                        {renderPaginationControls()}
                                     </aside>
                                     <div
                                         className={`${styles.sidebarResizer} ${isDraggingSidebar ? styles.sidebarResizerActive : ""}`}
@@ -1784,11 +1844,13 @@ export function SolidAgentChat({
                         <>
                             {showHistory ? (
                                 <div className={styles.historyPanel} aria-label="Past conversations">
-                                    {sessions.length > 0 && renderSearchBox()}
-                                    <div className={`${styles.historyList} ${menuSessionId ? styles.historyListMenuOpen : ""}`} ref={historyListRef}>
-                                        {renderSessionList(paginatedSessions)}
+                                    {(historyInitialLoading || sessions.length > 0 || historySearchQuery) && renderSearchBox()}
+                                    <div
+                                        className={`${styles.historyList} ${menuSessionId ? styles.historyListMenuOpen : ""}`}
+                                        ref={(el) => { historyScrollRef.current = el; }}
+                                    >
+                                        {renderSessionList()}
                                     </div>
-                                    {renderPaginationControls()}
                                 </div>
                             ) : (
                                 threadComponent

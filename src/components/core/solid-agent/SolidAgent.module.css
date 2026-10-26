@@ -907,48 +907,58 @@
   background: color-mix(in srgb, #ef4444 12%, transparent);
   color: #ef4444;
 }
+.historySentinel {
+  height: 1px;
+  width: 100%;
+  opacity: 0;
+  pointer-events: none;
+}
 
-.historyPagination {
-  flex: 0 0 auto;
+.historySkeletonRow {
+  height: 36px;
+  border-radius: 8px;
+  margin: 2px 4px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--agent-fg) 4%, transparent) 0%,
+    color-mix(in srgb, var(--agent-fg) 8%, transparent) 50%,
+    color-mix(in srgb, var(--agent-fg) 4%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: historyShimmer 1.5s infinite ease-in-out;
+}
+
+@keyframes historyShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.historyErrorRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 6px;
-  border-top: 1px solid var(--agent-border);
-  background: var(--agent-bg);
-  gap: 8px;
-}
-.historyPaginationBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 26px;
-  padding: 0 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #ef4444;
+  background: color-mix(in srgb, #ef4444 8%, transparent);
   border-radius: 6px;
-  border: 1px solid var(--agent-border);
+  margin: 4px;
+}
+
+.historyRetryBtn {
   background: transparent;
-  color: var(--agent-muted);
-  font-size: 11.5px;
-  font-weight: 500;
+  border: 1px solid currentColor;
+  color: inherit;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
-  user-select: none;
-}
-.historyPaginationBtn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--agent-fg) 6%, transparent);
-  color: var(--agent-fg);
-  border-color: color-mix(in srgb, var(--agent-fg) 20%, transparent);
-}
-.historyPaginationBtn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-.historyPaginationText {
-  font-size: 11.5px;
-  color: var(--agent-muted);
-  user-select: none;
   font-weight: 500;
 }
+.historyRetryBtn:hover {
+  background: color-mix(in srgb, #ef4444 15%, transparent);
+}
+
 
 /* ── Thread ──────────────────────────────────────────────────── */
 .thread {
@@ -2171,11 +2181,6 @@
   gap: 2px;
 }
 
-.fullScreenSidebar .historyPagination {
-  padding: 8px 12px;
-  background: transparent;
-  border-top: 1px solid var(--agent-border);
-}
 
 .fullScreenMain {
   display: flex;

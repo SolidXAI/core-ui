@@ -17,6 +17,17 @@ export type AgentSessionSummary = {
 };
 
 export type AgentHistoryPage = { messages: any[]; has_more: boolean; session_usage?: Record<string, any> };
+export type AgentSessionPage = {
+    sessions: AgentSessionSummary[];
+    next_cursor: string | null;
+    has_more: boolean;
+};
+export type FetchSessionListOptions = {
+    cursor?: string | null;
+    search?: string;
+    limit?: number;
+    signal?: AbortSignal;
+};
 export type AgentConfigVersionStatus = {
     processConfigVersion: number;
     latestConfigVersion: number;
@@ -58,8 +69,30 @@ export function fetchSessionHistory(agentUrl: string, sessionId: string, page = 
 }
 
 /** The current user's past conversations (the agent derives the user from the token). */
-export function fetchSessionList(agentUrl: string) {
-    return agentFetch<AgentSessionSummary[]>(agentUrl, "/api/agent/sessions/history");
+export async function fetchSessionList(
+    agentUrl: string,
+    options?: FetchSessionListOptions,
+): Promise<AgentSessionPage | null> {
+    const params = new URLSearchParams();
+    params.set("paginated", "true");
+    if (options?.cursor) params.set("cursor", options.cursor);
+    if (options?.search) params.set("search", options.search);
+    if (options?.limit) params.set("limit", String(options.limit));
+
+    const res = await agentFetch<AgentSessionPage | AgentSessionSummary[]>(
+        agentUrl,
+        `/api/agent/sessions/history?${params.toString()}`,
+        { signal: options?.signal },
+    );
+    if (!res) return null;
+    if (Array.isArray(res)) {
+        return { sessions: res, next_cursor: null, has_more: false };
+    }
+    return {
+        sessions: Array.isArray(res.sessions) ? res.sessions : [],
+        next_cursor: res.next_cursor ?? null,
+        has_more: Boolean(res.has_more),
+    };
 }
 
 export function fetchAgentConfigVersionStatus(agentUrl: string) {
