@@ -73,8 +73,8 @@ export class AgentSocket {
         const runtime = this.runtime;
         void this.sendRaw(
             this.sessionId
-                ? { action: "resume_session", session_id: this.sessionId, provider, model, runtime, ...this.sessionOptions }
-                : { action: "start_session", provider, model, runtime, ...this.sessionOptions }
+                ? { action: "resume_session", session_id: this.sessionId, provider, model, runtime, widget_catalog: this.widgetCatalog, ...this.sessionOptions }
+                : { action: "start_session", provider, model, runtime, widget_catalog: this.widgetCatalog, ...this.sessionOptions }
         );
     }
 
@@ -202,6 +202,7 @@ export class AgentSocket {
                     provider,
                     model,
                     runtime: this.runtime,
+                    widget_catalog: this.widgetCatalog,
                     ...this.sessionOptions,
                 });
                 return;
@@ -273,6 +274,7 @@ export class AgentSocket {
             provider: this.provider ?? undefined,
             model: this.model ?? undefined,
             runtime: this.runtime,
+            widget_catalog: this.widgetCatalog,
             ...this.sessionOptions,
         };
         if (this.ws?.readyState === WebSocket.OPEN) void this.sendRaw(payload);
@@ -314,6 +316,7 @@ export class AgentSocket {
                 provider: this.provider ?? undefined,
                 model: this.model ?? undefined,
                 runtime: this.runtime,
+                widget_catalog: this.widgetCatalog,
                 ...this.sessionOptions,
             });
         } else {

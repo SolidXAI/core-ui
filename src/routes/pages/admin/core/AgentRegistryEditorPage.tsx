@@ -162,8 +162,8 @@ const agentRoleApi = createSolidEntityApi("agentRole");
 const agentSecretApi = createSolidEntityApi("agentSecret");
 const jobApi = createSolidEntityApi("agentJob");
 
-const skillFields = ["id", "name", "iconName", "description"];
-const toolFields = [...skillFields, "type", "status", "lastLoadError"];
+const skillFields = ["id", "name", "iconName", "description", "type"];
+const toolFields = [...skillFields, "status", "lastLoadError"];
 
 function fieldsQuery(fields: string[]): string {
   return fields.map((name) => `fields=${encodeURIComponent(name)}`).join("&");
@@ -332,7 +332,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
         <SolidDropdownMenuTrigger asChild><button type="button" className="agent-editor__resource-menu-trigger" aria-label={`Actions for ${item.name ?? item.displayName ?? item.key}`}><Ellipsis size={18} /></button></SolidDropdownMenuTrigger>
         <SolidDropdownMenuContent className="agent-editor__resource-menu">
           <SolidDropdownMenuItem onSelect={() => onView(item)}><Eye size={16} /> View</SolidDropdownMenuItem>
-          <SolidDropdownMenuItem asChild><a href={editUrlFor(item)} target="_blank" rel="noopener noreferrer"><Pencil size={16} /> Edit</a></SolidDropdownMenuItem>
+          {item.type !== "solidx" && <SolidDropdownMenuItem asChild><a href={editUrlFor(item)} target="_blank" rel="noopener noreferrer"><Pencil size={16} /> Edit</a></SolidDropdownMenuItem>}
           <SolidDropdownMenuItem className="agent-editor__resource-delete" onSelect={() => onRemove(item.id)}><Trash2 size={16} /> Delete</SolidDropdownMenuItem>
         </SolidDropdownMenuContent>
       </SolidDropdownMenu> : <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>}
