@@ -222,7 +222,11 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 style={{ minHeight: 180 }}
             />
             {isFormFieldValid(formik, fieldName) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldName]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldName]?.toString()}
+                />
             )}
         </div>
     );

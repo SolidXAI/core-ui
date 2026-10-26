@@ -1,5 +1,7 @@
 import { describeToolArgs, isLlmMetadata, parseToolResult } from "./agentFormat";
-import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentWireFrame } from "./types";
+import { parseWidgetContent, isSameAssistantContent } from "./thread/inlineWidget";
+export { isSameAssistantContent };
+import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentUsageStats, type AgentWireFrame } from "./types";
 
 /**
  * Turns agent events into thread items. Used by agentSlice for live socket frames and by the
@@ -22,6 +24,7 @@ export type AgentThreadState = {
     liveToolId: string | null;
     streamingId: string | null;
     turnStreamed: boolean;
+    usage: AgentUsageStats | null;
 };
 
 export function createThreadState(): AgentThreadState {
@@ -36,6 +39,7 @@ export function createThreadState(): AgentThreadState {
         liveToolId: null,
         streamingId: null,
         turnStreamed: false,
+        usage: null,
     };
 }
 
@@ -81,6 +85,7 @@ function lastAssistantText(state: AgentThreadState): string | undefined {
     }
     return undefined;
 }
+
 
 function pushAssistantText(state: AgentThreadState, content: string, at: number) {
     freezeLiveTool(state);
@@ -137,6 +142,41 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             state.historySessionId = frame.history_session_id ?? eventData.history_session_id ?? sessionId;
             const commands = frame.commands ?? eventData.commands;
             if (Array.isArray(commands)) state.commands = commands;
+            const limit = frame.context_limit ?? eventData.context_limit ?? 0;
+            if (limit > 0) {
+                const inTok = frame.total_input_tokens ?? eventData.total_input_tokens ?? 0;
+                const outTok = frame.total_output_tokens ?? eventData.total_output_tokens ?? 0;
+                state.usage = {
+                    totalCost: frame.total_cost ?? eventData.total_cost ?? 0,
+                    totalInputTokens: inTok,
+                    totalOutputTokens: outTok,
+                    totalTokens: frame.total_tokens ?? eventData.total_tokens ?? (inTok + outTok),
+                    contextTokens: frame.context_tokens ?? eventData.context_tokens ?? 0,
+                    contextLimit: limit,
+                };
+            }
+            state.authError = null;
+            break;
+        }
+
+        case AgentEventTypes.sessionUpdated: {
+            const sessionId = frame.session_id ?? eventData.session_id ?? null;
+            if (sessionId) state.sessionId = sessionId;
+            const limit = frame.context_limit ?? eventData.context_limit ?? 0;
+            if (limit > 0) {
+                if (state.usage) {
+                    state.usage.contextLimit = limit;
+                } else {
+                    state.usage = {
+                        totalCost: 0,
+                        totalInputTokens: 0,
+                        totalOutputTokens: 0,
+                        totalTokens: 0,
+                        contextTokens: 0,
+                        contextLimit: limit,
+                    };
+                }
+            }
             state.authError = null;
             break;
         }
@@ -151,20 +191,27 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 const attachments = Array.isArray(eventData.attachments) ? eventData.attachments : [];
                 if (content || attachments.length) {
                     // agentEventId lets the UI fetch the stored attachment files (agentEvent media) later.
-                    const replayEventData = attachments.length
-                        ? { content, attachments, agentEventId: eventData.agentEventId ?? frame.id }
-                        : { content };
+                    const replayEventData = {
+                        content,
+                        ...(attachments.length ? { attachments, agentEventId: eventData.agentEventId ?? frame.id } : {}),
+                        ...(eventData.message_context ? { message_context: eventData.message_context } : {}),
+                    };
                     state.items.push({ id: nextItemId("u"), at, eventType, eventData: replayEventData });
                 }
                 state.liveToolId = null;
+                state.turnStreamed = false;
             }
             break;
 
         case AgentEventTypes.agentStarted:
         case AgentEventTypes.stepStarted:
+        case AgentEventTypes.agentThinking:
             if (!replay) {
                 state.working = true;
                 if (!state.liveToolId) state.thinking = true;
+            }
+            if (eventType === AgentEventTypes.agentStarted) {
+                state.turnStreamed = false;
             }
             break;
 
@@ -179,11 +226,18 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             const toolName = eventData.tool_name ?? frame.tool_name ?? "tool";
             const args = eventData.arguments ?? {};
             const id = nextItemId("tool");
+            const stashedProgress = (state as any).pendingProgress ?? [];
+            (state as any).pendingProgress = [];
             state.items.push({
                 id,
                 at,
                 eventType,
-                eventData: { tool_name: toolName, arguments: args, summary: describeToolArgs(args, toolName) },
+                eventData: {
+                    tool_name: toolName,
+                    arguments: args,
+                    summary: describeToolArgs(args, toolName),
+                    ...(stashedProgress.length ? { progress: stashedProgress } : {}),
+                },
                 live: !replay,
             });
             state.liveToolId = id;
@@ -192,14 +246,27 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         }
 
         case AgentEventTypes.toolProgress: {
-            const tool = findItem(state, state.liveToolId);
-            if (!tool) break;
+            let tool = findItem(state, state.liveToolId);
+            if (!tool) {
+                tool = [...state.items].reverse().find((it) => it.eventType === AgentEventTypes.toolCalling && it.live) ?? null;
+            }
             const label = eventData.label ?? "";
             const status = eventData.status === "success" || eventData.status === "done" ? "done" : "running";
+            const step = { label, status, duration_ms: eventData.duration_ms };
+
+            if (!tool) {
+                if (!(state as any).pendingProgress) (state as any).pendingProgress = [];
+                const pending: any[] = (state as any).pendingProgress;
+                const idx = pending.findIndex((s: any) => s.label === label);
+                if (idx >= 0) pending[idx] = step;
+                else pending.push(step);
+                break;
+            }
+
             const progress: any[] = tool.eventData.progress ?? [];
-            const index = progress.findIndex((step) => step.label === label);
-            const step = { label, status, duration_ms: eventData.duration_ms ?? progress[index]?.duration_ms };
-            tool.eventData = { ...tool.eventData, progress: index >= 0 ? progress.map((entry, i) => (i === index ? step : entry)) : [...progress, step] };
+            const index = progress.findIndex((s) => s.label === label);
+            const mergedStep = { label, status, duration_ms: eventData.duration_ms ?? progress[index]?.duration_ms };
+            tool.eventData = { ...tool.eventData, progress: index >= 0 ? progress.map((entry, i) => (i === index ? mergedStep : entry)) : [...progress, mergedStep] };
             break;
         }
 
@@ -241,19 +308,43 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             const streamed = findItem(state, state.streamingId);
             stopStreaming(state);
             if (!content || isLlmMetadata(content)) break;
-            if (streamed) streamed.eventData = { ...streamed.eventData, content }; // authoritative final text
-            else if (lastAssistantText(state) !== content) pushAssistantText(state, content, at);
+            if (streamed) {
+                streamed.eventData = { ...streamed.eventData, content }; // authoritative final text
+            } else if (!isSameAssistantContent(lastAssistantText(state), content)) {
+                pushAssistantText(state, content, at);
+            }
             break;
         }
 
         case AgentEventTypes.turnComplete:
         case AgentEventTypes.turnCompleteLegacy: {
             const content: string = eventData.content ?? frame.content ?? "";
-            if (content && !state.turnStreamed && !isLlmMetadata(content) && lastAssistantText(state) !== content) {
+            const streamed = findItem(state, state.streamingId);
+            if (streamed && content && !isLlmMetadata(content)) {
+                streamed.eventData = { ...streamed.eventData, content };
+            } else if (content && !state.turnStreamed && !isLlmMetadata(content) && !isSameAssistantContent(lastAssistantText(state), content)) {
                 pushAssistantText(state, content, at);
             }
+            const limit = eventData.context_limit ?? frame.context_limit ?? state.usage?.contextLimit ?? 0;
+            if (limit > 0 || state.usage) {
+                const inTok = eventData.total_input_tokens ?? frame.total_input_tokens ?? state.usage?.totalInputTokens ?? 0;
+                const outTok = eventData.total_output_tokens ?? frame.total_output_tokens ?? state.usage?.totalOutputTokens ?? 0;
+                const prevCtx = state.usage?.contextTokens ?? 0;
+                const rawCtx = eventData.context_tokens ?? frame.context_tokens;
+                const ctxTok = (rawCtx !== undefined && rawCtx !== null && rawCtx > 0)
+                    ? rawCtx
+                    : (prevCtx > 0 ? prevCtx : inTok);
+                state.usage = {
+                    totalCost: eventData.total_cost ?? frame.total_cost ?? state.usage?.totalCost ?? 0,
+                    totalInputTokens: inTok,
+                    totalOutputTokens: outTok,
+                    totalTokens: eventData.total_tokens ?? frame.total_tokens ?? (inTok + outTok),
+                    contextTokens: ctxTok,
+                    contextLimit: limit,
+                };
+            }
             endTurn(state);
-            state.turnStreamed = false;
+            state.turnStreamed = true;
             break;
         }
 

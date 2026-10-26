@@ -58,6 +58,11 @@ const ADDABLE_TYPES = [...COMPATIBLE_TYPES, BEDROCK_TYPE];
 
 const BUILT_IN_TYPES = ["openai", "anthropic"];
 
+// Providers not in the models.dev catalog are keyed as `other(<name>)`; their model ID is always typed in.
+const OTHER_PROVIDER_VALUE = "__other_provider__";
+const toOtherProviderKey = (name: string) => `other(${name.trim()})`;
+export const isOtherProvider = (providerId?: string) => !!providerId && /^other\(.+\)$/.test(providerId);
+
 const DEFAULT_BUILT_IN_PROVIDERS: Record<string, ProviderEntry> = {
   openai: { type: "openai", apiKey: "" },
   anthropic: { type: "anthropic", apiKey: "" },
@@ -121,6 +126,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
   const [providerBaseUrl, setProviderBaseUrl] = useState(existingEntry?.baseUrl ?? "");
   const [providerApiKey, setProviderApiKey] = useState(existingEntry?.apiKey ?? "");
   const [providerRegion, setProviderRegion] = useState(existingEntry?.region ?? "");
+  const [otherProviderName, setOtherProviderName] = useState("");
   const { catalog, loading: catalogLoading, error: catalogError } = useModelsDevCatalog();
 
   const isCompatible = COMPATIBLE_TYPES.includes(providerType);
@@ -139,11 +145,20 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
       setProviderBaseUrl(entry?.baseUrl ?? "");
       setProviderApiKey(entry?.apiKey ?? "");
       setProviderRegion(entry?.region ?? "");
+      setOtherProviderName("");
     }
   }, [visible, editKey]);
 
   // In add mode, only show addable types (built-ins are always pre-added)
   // In edit mode, show all types but lock the value
+  const isOtherSelected = !isEdit && providerName === OTHER_PROVIDER_VALUE;
+  const providerNameOptions = [...catalogProviders, { label: "Other", value: OTHER_PROVIDER_VALUE }];
+  const hasValidCompatibleName = isEdit
+    ? !!providerName.trim()
+    : isOtherSelected
+      ? !!otherProviderName.trim() && !providers[toOtherProviderKey(otherProviderName)]
+      : catalogProviders.some((provider) => provider.value === providerName);
+
   const typeOptions = isEdit
     ? PROVIDER_TYPE_OPTIONS
     : PROVIDER_TYPE_OPTIONS.filter((opt) => ADDABLE_TYPES.includes(opt.value));
@@ -155,9 +170,8 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
     const entry: ProviderEntry = { type: providerType, apiKey: providerApiKey };
 
     if (isCompatible) {
-      if (!isEdit && !catalogProviders.some((provider) => provider.value === providerName)) return;
-      if (!providerName.trim() || !providerBaseUrl.trim()) return;
-      key = providerName.trim();
+      if (!hasValidCompatibleName || !providerBaseUrl.trim()) return;
+      key = isOtherSelected ? toOtherProviderKey(otherProviderName) : providerName.trim();
       entry.baseUrl = providerBaseUrl.trim();
     } else if (isBedrock) {
       if (!providerName.trim() || !providerRegion.trim()) return;
@@ -192,10 +206,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
 
   const canSave = !!providerType && (isBedrock
     ? !!providerName.trim() && !!providerRegion.trim()
-    : !isCompatible || (
-      (isEdit || catalogProviders.some((provider) => provider.value === providerName)) &&
-      !!providerName.trim() && !!providerBaseUrl.trim()
-    ));
+    : !isCompatible || (hasValidCompatibleName && !!providerBaseUrl.trim()));
 
   return (
     <SolidDialog open={visible} onOpenChange={(open) => !open && onHide()} style={{ width: "500px" }}>
@@ -220,6 +231,7 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
                     setProviderName(next === BEDROCK_TYPE && !providers[BEDROCK_DEFAULT_NAME] ? BEDROCK_DEFAULT_NAME : "");
                     setProviderBaseUrl("");
                     setProviderRegion("");
+                    setOtherProviderName("");
                   }
                 }}
                 placeholder="Select Provider Type"
@@ -233,24 +245,41 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
                 <div>
                   <label className="form-field-label">Provider Name</label>
                   <SearchableSettingsSelect
-                    options={catalogProviders}
+                    options={providerNameOptions}
                     placeholder={catalogLoading ? "Loading providers..." : "Select Provider"}
                     value={providerName}
                     onChange={(next) => {
                       setProviderName(next);
+                      if (next === OTHER_PROVIDER_VALUE) {
+                        setProviderBaseUrl("");
+                        return;
+                      }
+                      setOtherProviderName("");
                       const provider = catalog?.[next];
                       const matchingAdapter = providerType === "openai-compatible"
                         ? "@ai-sdk/openai-compatible" : "@ai-sdk/anthropic";
                       setProviderBaseUrl(provider?.npm === matchingAdapter ? provider.api ?? "" : "");
                     }}
-                    disabled={!providerType || catalogLoading || !!catalogError}
+                    disabled={!providerType || catalogLoading}
                   />
-                  {catalogError && <small className="text-color-secondary">Could not load providers from models.dev.</small>}
-                  {!catalogLoading && !catalogError && !!providerType && catalogProviders.length === 0 && (
-                    <small className="text-color-secondary">No additional catalog providers are available.</small>
+                  {isOtherSelected && (
+                    <div className="flex items-center gap-1 mt-2">
+                      <span className="text-color-secondary">other (</span>
+                      <SolidInput
+                        placeholder="e.g. Runpod"
+                        value={otherProviderName}
+                        // ":" separates provider and model in agent model keys, and ")" closes the name.
+                        onChange={(e) => setOtherProviderName(e.target.value.replace(/[:()]/g, ""))}
+                        className="w-full"
+                        aria-label="Other provider name"
+                      />
+                      <span className="text-color-secondary">)</span>
+                    </div>
                   )}
-                  <small className="text-color-secondary text-xs">Check that this provider supports the selected API format.</small>
-                </div>
+                  {isOtherSelected && !!otherProviderName.trim() && providers[toOtherProviderKey(otherProviderName)] && (
+                    <small className="text-color-secondary">{toOtherProviderKey(otherProviderName)} already exists.</small>
+                  )}
+                  {catalogError && <small className="text-color-secondary">Could not load providers from models.dev. Choose "Other" to name the provider.</small>}                </div>
               )}
               <div>
                 <label className="form-field-label">Base URL</label>
@@ -297,6 +326,22 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
               className="w-full"
             />
           </div>
+          {isEdit && (
+            <div
+              role="note"
+              style={{
+                padding: "0.625rem 0.75rem",
+                border: "1px solid var(--solid-info-border-color, rgba(147, 51, 234, 0.3))",
+                borderRadius: "0.5rem",
+                background: "var(--solid-info-bg, rgba(147, 51, 234, 0.1))",
+                color: "var(--solid-info-color, var(--solid-text-color, inherit))",
+                fontSize: "0.8125rem",
+                lineHeight: 1.4,
+              }}
+            >
+              Restart all agents using this provider for changes to take effect.
+            </div>
+          )}
         </div>
       </SolidDialogBody>
       <SolidDialogFooter>
@@ -430,6 +475,7 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
     providerType && BUILT_IN_TYPES.includes(providerType) ? providerType : undefined,
   ]);
   const [otherSelected, setOtherSelected] = useState(false);
+  const isOtherProviderSelected = isOtherProvider(modelEntry.providerId);
   const isKnownModel = models.some((m) => m.id === modelEntry.model);
   const showOther = otherSelected || (!loading && !!modelEntry.model && !isKnownModel);
   const modelOptions = [
@@ -462,6 +508,14 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
           </div>
           <div>
             <label className="form-field-label">Model</label>
+            {isOtherProviderSelected ? (
+              <SolidInput
+                className="w-full"
+                value={modelEntry.model || ""}
+                onChange={(e) => onModelEntryChange({ ...modelEntry, model: e.target.value })}
+                placeholder="Enter model ID, e.g. my-custom-model"
+              />
+            ) : <>
             <SearchableSettingsSelect
               value={selectedModelValue}
               options={modelOptions}
@@ -488,6 +542,7 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
                 placeholder="Enter model ID, e.g. my-custom-model"
               />
             )}
+            </>}
           </div>
         </div>
       </div>

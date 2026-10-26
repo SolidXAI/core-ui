@@ -11,6 +11,7 @@ import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 type AutoCompleteCompleteEvent = { query: string };
 
@@ -243,11 +244,13 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                 // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>
-                    {typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
                         ? (formik.errors[fieldLayoutInfo?.attrs?.name] as any)?.value?.toString()
                         : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()}
-                </p>
+                />
             )}
         </div>
     );
@@ -278,7 +281,11 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
 
     if (isMultiSelect) {
         return (
-            <p className={styles.fieldError}>This render mode is not supported for multi select.</p>
+            <SolidMessage
+                severity="error"
+                className={styles.fieldError}
+                text="This render mode is not supported for multi select."
+            />
         );
     }
 
@@ -306,7 +313,11 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
                 }}
             />
             {isFormFieldValid(formik, fieldName) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldName]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldName]?.toString()}
+                />
             )}
         </div>
     );
@@ -332,7 +343,11 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
 
     if (isMultiSelect) {
         return (
-            <p className={styles.fieldError}>This render mode is not supported for multi select.</p>
+            <SolidMessage
+                severity="error"
+                className={styles.fieldError}
+                text="This render mode is not supported for multi select."
+            />
         );
     }
 
@@ -367,7 +382,11 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
                 }}
             />
             {isFormFieldValid(formik, fieldName) && (
-                <p className={styles.fieldError}>{formik.errors[fieldName]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik.errors[fieldName]?.toString()}
+                />
             )}
         </div>
     );

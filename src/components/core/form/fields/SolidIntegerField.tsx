@@ -187,7 +187,11 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
                 autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );
@@ -217,7 +221,7 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                 </div>
             )}
-            <div className="relative h-12">
+            <div className="relative">
                 <Range
                     step={1}
                     min={min}
@@ -293,9 +297,11 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
                     })}
                 </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-2">
-                        <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
+                    <SolidMessage
+                        severity="error"
+                        className={styles.fieldError}
+                        text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                    />
                 )}
             </div>
         </div>

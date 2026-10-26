@@ -2,6 +2,7 @@ import React from "react";
 import { Plus, Search, X } from "lucide-react";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { SolidButton } from "../../../../components/shad-cn-ui/SolidButton";
+import type { AgentHubModule } from "./AgentHubModuleField";
 import "./AgentHubTagsField.css";
 
 export type AgentHubTag = { id: number; name: string };
@@ -23,9 +24,10 @@ export function agentHubTagsPayload(tags: AgentHubTag[]) {
 
 const tagApi = createSolidEntityApi("agentHubTag");
 
-export function AgentHubTagsField({ value, onChange, disabled = false, onBusyChange }: {
+export function AgentHubTagsField({ value, onChange, module, disabled = false, onBusyChange }: {
   value: AgentHubTag[];
   onChange: (tags: AgentHubTag[]) => void;
+  module: AgentHubModule | null;
   disabled?: boolean;
   onBusyChange?: (busy: boolean) => void;
 }) {
@@ -60,7 +62,7 @@ export function AgentHubTagsField({ value, onChange, disabled = false, onBusyCha
     setError("");
     onBusyChange?.(true);
     try {
-      let result = await createTag({ name }).unwrap();
+      let result = await createTag({ name, moduleId: module?.id }).unwrap();
       for (let depth = 0; depth < 3 && result && !result.id; depth += 1) result = result.data;
       const created = agentHubTagsFrom([result])[0];
       if (!created) throw new Error("The tag could not be loaded. Search for it again.");
@@ -105,7 +107,9 @@ export function AgentHubTagsField({ value, onChange, disabled = false, onBusyCha
             if (event.key === "Enter") { event.preventDefault(); if (open && options[activeIndex]) select(options[activeIndex]); else void add(); }
           }} />
         {name && <SolidButton variant="secondary" size="small" loading={isCreating}
-          disabled={!exact && !canCreate} onClick={() => void add()} leftIcon={<Plus size={14} />}>
+          disabled={!exact && !canCreate}
+          tooltip={isFetching ? "Wait for tag lookup to finish." : isError ? "Retry tag lookup before creating a tag." : undefined}
+          onClick={() => void add()} leftIcon={<Plus size={14} />}>
           {exact ? "Select" : "Create tag"}
         </SolidButton>}
       </div>

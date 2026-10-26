@@ -2170,6 +2170,7 @@ export function DatasourceIntrospectionPage() {
                       value={drawerDraft.userKeyField}
                       options={drawerUserKeyOptions}
                       placeholder="Select user key field"
+                      native={false}
                   onChange={(event) => changeUserKeyField(event.value)}
                 />
               </div>
@@ -2227,6 +2228,7 @@ export function DatasourceIntrospectionPage() {
                   id="sdix-legacy-type"
                   value={drawerDraft.legacyTableType}
                   options={mappingStrategyOptions}
+                  native={false}
                   onChange={(event) => updateLegacyTableType(event.value)}
                 />
                 <small className="sdix-inline-note">

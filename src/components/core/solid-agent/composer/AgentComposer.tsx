@@ -15,13 +15,27 @@ type Props = {
     onSend: (text: string, attachments: AgentAttachment[]) => void | Promise<void>;
     onStop: () => void;
     modelIndicator?: React.ReactNode;
+    contextPill?: React.ReactNode;
+    canAttach?: boolean;
 };
 
 /**
  * Message box: Enter sends, Shift+Enter adds a line, "/" at the start lists the agent's commands.
  * Files can be attached with the paperclip, dropped onto the box, or pasted.
  */
-export function AgentComposer({ working, disabled, placeholder, commands, seed, seedKey, onSend, onStop, modelIndicator }: Props) {
+export function AgentComposer({
+    working,
+    disabled,
+    placeholder,
+    commands,
+    seed,
+    seedKey,
+    onSend,
+    onStop,
+    modelIndicator,
+    contextPill,
+    canAttach = true,
+}: Props) {
     const [text, setText] = useState("");
     const [active, setActive] = useState(0);
     const [attachments, setAttachments] = useState<AgentAttachment[]>([]);
@@ -42,8 +56,8 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     }, [seedKey]);
 
     useEffect(() => {
-        if (!disabled) ref.current?.focus();
-    }, [disabled]);
+        if (!disabled && !sending) ref.current?.focus();
+    }, [disabled, sending]);
 
     const slashQuery = text.startsWith("/") && !text.includes(" ") ? text.slice(1).toLowerCase() : null;
     const matches = useMemo(
@@ -58,8 +72,15 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
         el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
     }
 
+    useEffect(() => {
+        if (!canAttach && attachments.length > 0) {
+            setAttachments([]);
+            setAttachErrors([]);
+        }
+    }, [canAttach]);
+
     const addFiles = async (files: File[]) => {
-        if (!files.length || disabled || sending) return;
+        if (!canAttach || !files.length || disabled || sending) return;
         const { added, errors } = await readAgentAttachments(files, attachments);
         if (added.length) setAttachments((prev) => [...prev, ...added]);
         setAttachErrors(errors);
@@ -94,6 +115,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     };
 
     const onKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.nativeEvent.isComposing) return;
         if (matches.length) {
             if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                 event.preventDefault();
@@ -113,6 +135,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
     };
 
     const onPaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+        if (!canAttach) return;
         const files = Array.from(event.clipboardData?.files ?? []);
         if (files.length) {
             event.preventDefault();
@@ -122,7 +145,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
 
     const dropHandlers = {
         onDragOver: (event: React.DragEvent) => {
-            if (disabled || sending || !event.dataTransfer?.types?.includes("Files")) return;
+            if (!canAttach || disabled || sending || !event.dataTransfer?.types?.includes("Files")) return;
             event.preventDefault();
             setDragging(true);
         },
@@ -130,7 +153,7 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
             if (!event.currentTarget.contains(event.relatedTarget as Node)) setDragging(false);
         },
         onDrop: (event: React.DragEvent) => {
-            if (disabled || sending) return;
+            if (!canAttach || disabled || sending) return;
             event.preventDefault();
             setDragging(false);
             void addFiles(Array.from(event.dataTransfer?.files ?? []));
@@ -160,81 +183,100 @@ export function AgentComposer({ working, disabled, placeholder, commands, seed, 
                 </div>
             )}
 
-            {attachments.length > 0 && (
-                <ul className={styles.attachmentTray} aria-label="Attached files">
-                    {attachments.map((item, index) => (
-                        <li key={`${item.meta.name}-${index}`} className={styles.attachmentChip}>
-                            {item.meta.previewUrl ? (
-                                <img className={styles.attachmentThumb} src={item.meta.previewUrl} alt="" />
-                            ) : (
-                                <span className={styles.attachmentIcon}><FileText size={14} /></span>
-                            )}
-                            <span className={styles.attachmentText}>
-                                <span className={styles.attachmentName} title={item.meta.name}>{item.meta.name}</span>
-                                <span className={styles.attachmentSize}>{formatFileSize(item.meta.size)}</span>
-                            </span>
-                            <button type="button" className={styles.attachmentRemove} aria-label={`Remove ${item.meta.name}`} onClick={() => removeAttachment(index)}>
-                                <X size={12} />
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
-
             {attachErrors.length > 0 && (
                 <div className={styles.attachmentErrors} role="alert">
                     {attachErrors.map((error) => <div key={error}>{error}</div>)}
                 </div>
             )}
 
-            <textarea
-                ref={ref}
-                className={styles.textarea}
-                rows={1}
-                value={text}
-                disabled={disabled || sending}
-                aria-label="Message the SolidX Agent"
-                placeholder={dragging ? "Drop files to attach" : placeholder ?? "Ask the agent…"}
-                onChange={(event) => {
-                    setText(event.target.value);
-                    setActive(0);
-                    autosize();
+            <div
+                className={styles.composerBox}
+                onClick={(e) => {
+                    const tag = (e.target as HTMLElement).tagName;
+                    if (tag !== "BUTTON" && tag !== "SUMMARY" && tag !== "INPUT" && tag !== "IMG") {
+                        ref.current?.focus();
+                    }
                 }}
-                onKeyDown={onKeyDown}
-                onPaste={onPaste}
-            />
-            <div className={styles.composerRow}>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept={AGENT_ATTACHMENT_ACCEPT}
-                    hidden
-                    onChange={(event) => {
-                        void addFiles(Array.from(event.target.files ?? []));
-                        event.target.value = "";
-                    }}
-                />
-                <button
-                    type="button"
-                    className={styles.iconBtn}
-                    aria-label="Attach files"
-                    title={`Attach files (up to ${MAX_AGENT_ATTACHMENTS}: images or text files)`}
-                    disabled={disabled || sending || attachments.length >= MAX_AGENT_ATTACHMENTS}
-                    onClick={() => fileInputRef.current?.click()}
-                >
-                    <Paperclip size={16} />
-                </button>
-                {modelIndicator}
-                {working ? (
-                    <button type="button" className={styles.stopBtn} onClick={onStop} aria-label="Stop the agent">
-                        <Square size={10} fill="currentColor" /> Stop
-                    </button>
-                ) : (
-                    <button type="button" className={styles.sendBtn} onClick={submit} disabled={!canSend} aria-label="Send">
-                        <ArrowUp size={16} />
-                    </button>
+            >
+                {attachments.length > 0 && (
+                    <ul className={styles.attachmentTray} aria-label="Attached files">
+                        {attachments.map((item, index) => (
+                            <li key={`${item.meta.name}-${index}`} className={styles.attachmentChip}>
+                                {item.meta.previewUrl ? (
+                                    <img className={styles.attachmentThumb} src={item.meta.previewUrl} alt="" />
+                                ) : (
+                                    <span className={styles.attachmentIcon}><FileText size={14} /></span>
+                                )}
+                                <span className={styles.attachmentText}>
+                                    <span className={styles.attachmentName} title={item.meta.name}>{item.meta.name}</span>
+                                    <span className={styles.attachmentSize}>{formatFileSize(item.meta.size)}</span>
+                                </span>
+                                <button type="button" className={styles.attachmentRemove} aria-label={`Remove ${item.meta.name}`} onClick={() => removeAttachment(index)}>
+                                    <X size={12} />
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
                 )}
+
+                <textarea
+                    ref={ref}
+                    className={styles.textarea}
+                    rows={1}
+                    value={text}
+                    disabled={disabled || sending}
+                    aria-label="Message the SolidX Agent"
+                    placeholder={dragging ? "Drop files to attach" : placeholder ?? "Ask the agent…"}
+                    onChange={(event) => {
+                        setText(event.target.value);
+                        setActive(0);
+                        autosize();
+                    }}
+                    onKeyDown={onKeyDown}
+                    onPaste={onPaste}
+                />
+                <div className={styles.composerRow}>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept={AGENT_ATTACHMENT_ACCEPT}
+                        hidden
+                        onChange={(event) => {
+                            void addFiles(Array.from(event.target.files ?? []));
+                            event.target.value = "";
+                        }}
+                    />
+                    {canAttach && (
+                        <button
+                            type="button"
+                            className={styles.iconBtn}
+                            aria-label="Attach files"
+                            title={`Attach files (up to ${MAX_AGENT_ATTACHMENTS}: images or text files)`}
+                            disabled={disabled || sending || attachments.length >= MAX_AGENT_ATTACHMENTS}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <Paperclip size={16} />
+                        </button>
+                    )}
+                    {modelIndicator}
+                    {contextPill}
+                    {working ? (
+                        <button
+                            type="button"
+                            className={styles.stopBtn}
+                            onClick={onStop}
+                            aria-label="Stop the agent"
+                            title="Stop the agent"
+                        >
+                            <Square size={12} fill="currentColor" />
+                        </button>
+                    ) : (
+                        <button type="button" className={styles.sendBtn} onClick={submit} disabled={!canSend} aria-label="Send">
+                            <ArrowUp size={16} />
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
