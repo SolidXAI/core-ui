@@ -209,6 +209,7 @@ export function SolidAgentChat({
     sidebarWidthRef.current = sidebarWidth;
     const fullScreenLayoutRef = useRef<HTMLDivElement>(null);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
+    const [sessionToDelete, setSessionToDelete] = useState<AgentSessionSummary | null>(null);
     const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
     const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
@@ -1101,6 +1102,33 @@ export function SolidAgentChat({
                     </form>
                 </SolidDialogBody>
             </SolidDialog>}
+            <SolidDialog
+                open={!!sessionToDelete}
+                onOpenChange={(open) => { if (!open) setSessionToDelete(null); }}
+                className={styles.inputDialog}
+                overlayClassName={styles.inputDialogOverlay}
+                header="Delete conversation?"
+                ariaLabel="Confirm conversation deletion"
+                style={{ width: "min(28rem, 94vw)" }}
+            >
+                <SolidDialogBody>
+                    <p>This conversation will be permanently deleted.</p>
+                    <div className={styles.inputActions}>
+                        <SolidButton variant="secondary" onClick={() => setSessionToDelete(null)}>Cancel</SolidButton>
+                        <SolidButton
+                            variant="destructive"
+                            onClick={async () => {
+                                const session = sessionToDelete;
+                                if (!session) return;
+                                await deleteSession(agentUrl, session.session_id);
+                                setSessions((prev) => prev.filter((item) => item.session_id !== session.session_id));
+                                if (session.session_id === agent.historySessionId) runtime?.newChat();
+                                setSessionToDelete(null);
+                            }}
+                        >Delete</SolidButton>
+                    </div>
+                </SolidDialogBody>
+            </SolidDialog>
             <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`} ref={headerRef}>
                 <div className={styles.headerMark}>
                     <Sparkles size={15} />

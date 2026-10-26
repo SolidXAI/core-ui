@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.21-beta.5] - 2026-10-22
+
+## [0.1.21-beta.4] - 2026-10-22
+
+## [0.1.21-beta.3] - 2026-10-22
+
+### Added
+
+- add confirmation dialog for deleting conversations in SolidAgentChat
+- add sessionOwnerKey support across components for user-specific session management
+
+### Fixed
+
+- refactor session rename handling to use button click and Enter key for submission
+- update type for closeTimerRef to use ReturnType for better type safety
+
 ## [0.1.21-beta.2] - 2026-10-22
 
 ### Added
