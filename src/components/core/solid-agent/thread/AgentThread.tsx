@@ -174,24 +174,30 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
     const prevHeight = useRef(0);
     const prevFirstId = useRef<string | undefined>(undefined);
     const isFetchingRef = useRef(false);
+    const safetyTimeoutRef = useRef<number | null>(null);
     const [internalLoading, setInternalLoading] = useState(false);
     const isLoadingOlder = loadingOlder || internalLoading;
 
     const onLoadOlderRef = useRef(onLoadOlder);
     onLoadOlderRef.current = onLoadOlder;
 
-    const triggerLoadOlder = React.useCallback(async () => {
+    const triggerLoadOlder = React.useCallback(() => {
         if (!hasMore || isFetchingRef.current || loadingOlder) return;
         isFetchingRef.current = true;
         setInternalLoading(true);
-        try {
-            await Promise.resolve(onLoadOlderRef.current());
-        } finally {
-            setTimeout(() => {
-                isFetchingRef.current = false;
-                setInternalLoading(false);
-            }, 400);
+
+        if (safetyTimeoutRef.current !== null) {
+            window.clearTimeout(safetyTimeoutRef.current);
         }
+
+        // Safety fallback timeout: only releases if network errors and items never update
+        safetyTimeoutRef.current = window.setTimeout(() => {
+            isFetchingRef.current = false;
+            setInternalLoading(false);
+            safetyTimeoutRef.current = null;
+        }, 8000);
+
+        onLoadOlderRef.current();
     }, [hasMore, loadingOlder]);
 
     useLayoutEffect(() => {
@@ -206,6 +212,12 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
         }
         prevFirstId.current = firstId;
         prevHeight.current = el.scrollHeight;
+
+        // When new items arrive, release the fetching lock and dismiss the loader steadily
+        if (safetyTimeoutRef.current !== null) {
+            window.clearTimeout(safetyTimeoutRef.current);
+            safetyTimeoutRef.current = null;
+        }
         isFetchingRef.current = false;
         setInternalLoading(false);
     }, [items]);
@@ -216,14 +228,10 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
         const onScroll = () => {
             pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
             prevHeight.current = el.scrollHeight;
-
-            if (hasMore && !isLoadingOlder && !isFetchingRef.current && el.scrollTop < 120) {
-                void triggerLoadOlder();
-            }
         };
         el.addEventListener("scroll", onScroll, { passive: true });
         return () => el.removeEventListener("scroll", onScroll);
-    }, [hasMore, isLoadingOlder, triggerLoadOlder]);
+    }, []);
 
     useEffect(() => {
         const rootEl = scrollRef.current;
@@ -233,20 +241,20 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
         const observer = new IntersectionObserver(
             (entries) => {
                 const [entry] = entries;
-                if (entry?.isIntersecting && !isLoadingOlder && !isFetchingRef.current) {
-                    void triggerLoadOlder();
+                if (entry?.isIntersecting && !isFetchingRef.current && !loadingOlder) {
+                    triggerLoadOlder();
                 }
             },
             {
                 root: rootEl,
-                rootMargin: "160px 0px 0px 0px",
+                rootMargin: "80px 0px 0px 0px",
                 threshold: 0,
             }
         );
 
         observer.observe(sentinelEl);
         return () => observer.disconnect();
-    }, [hasMore, isLoadingOlder, triggerLoadOlder]);
+    }, [hasMore, loadingOlder, triggerLoadOlder]);
 
     if (!items.length && !thinking && emptyState) {
         return <div className={styles.thread}>{emptyState}</div>;
@@ -267,15 +275,29 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
 
     return (
         <div ref={scrollRef} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
-            {hasMore && <div ref={topSentinelRef} style={{ height: 1, width: "100%", pointerEvents: "none" }} aria-hidden="true" />}
-            {isLoadingOlder && (
+            {hasMore && (
                 <div
-                    className={`${styles.notice} ${styles.loadMore}`}
-                    aria-live="polite"
-                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px 0" }}
+                    ref={topSentinelRef}
+                    style={{
+                        minHeight: isLoadingOlder ? 32 : 1,
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        pointerEvents: "none",
+                    }}
+                    aria-hidden={!isLoadingOlder}
                 >
-                    <LoaderCircle size={14} className={styles.spinIcon} aria-hidden="true" />
-                    <span>Loading earlier messages…</span>
+                    {isLoadingOlder && (
+                        <div
+                            className={`${styles.notice} ${styles.loadMore}`}
+                            aria-live="polite"
+                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                        >
+                            <LoaderCircle size={14} className={styles.spinIcon} aria-hidden="true" />
+                            <span>Loading earlier messages…</span>
+                        </div>
+                    )}
                 </div>
             )}
             {groups.map((group) => {
