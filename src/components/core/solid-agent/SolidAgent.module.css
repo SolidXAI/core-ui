@@ -1082,6 +1082,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 11.5px;
 }
 .modelInfoEffortText {
   color: var(--agent-muted);
@@ -1294,6 +1295,9 @@
   cursor: pointer;
   text-align: left;
   transition: background 0.12s;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
 }
 .modelSelectItem:hover {
   background: color-mix(in srgb, var(--agent-fg) 6%, transparent);
@@ -1314,6 +1318,9 @@
   align-items: center;
   gap: 6px;
   font-size: 11.5px;
+  font-weight: 500;
+}
+.modelSelectItemActive .modelSelectItemName {
   font-weight: 600;
 }
 .modelSelectItemDesc {

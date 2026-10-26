@@ -23,6 +23,7 @@ import {
     getStoredReasoning,
     getStoredSpeed,
     getStoredThinking,
+    setStoredProviderAndModel,
     setStoredSessionOptions,
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
@@ -580,8 +581,11 @@ export function SolidAgentChat({
         fetchProviderModels(agentUrl, providerId).then((res) => {
             const nextModels = res?.models || [];
             setModels(nextModels);
-            const targetModel = res?.default_model || nextModels[0]?.id || "";
+            const savedModel = getStoredModel(providerId);
+            const matchedModel = nextModels.find((m) => m.id === savedModel);
+            const targetModel = matchedModel ? matchedModel.id : (res?.default_model || nextModels[0]?.id || "");
             setSelectedModel(targetModel);
+            setStoredProviderAndModel(providerId, targetModel);
             const nextThinking = getStoredThinking(providerId);
             const nextReasoning = getStoredReasoning(providerId) ?? undefined;
             const nextFast = getStoredFast(providerId);
@@ -734,6 +738,7 @@ export function SolidAgentChat({
 
     const handleModelChange = (modelId: string) => {
         setSelectedModel(modelId);
+        setStoredProviderAndModel(selectedProvider, modelId);
         runtime?.updateModel(modelId, selectedProvider, {
             thinking: isThinking,
             reasoning: selectedReasoning,
@@ -969,24 +974,18 @@ export function SolidAgentChat({
     }, [historyNextCursor, debouncedHistorySearch, sessions.length, loadSessionPage]);
 
     useEffect(() => {
-        if (!agent.historySessionId) return;
-        setSessions((prev) => {
-            const existing = prev.find((s) => s.session_id === agent.historySessionId);
-            if (existing) return prev;
-            const newSession: AgentSessionSummary = {
-                session_id: agent.historySessionId!,
-                status: "active",
-                totalSteps: 1,
-                created_at: new Date().toISOString(),
-                preview: "New conversation",
-                title: "New conversation",
-                provider: selectedProvider,
-                model: selectedModel,
-                runtime: agentRuntime,
-            };
-            return [newSession, ...prev];
+        return eventBus.on(SOLID_AGENT_EVENTS.turnComplete, (payload) => {
+            if (payload?.agentType && payload.agentType !== agentRuntime) return;
+            if (!payload?.sessionId) return;
+            setSessions((prev) => {
+                const exists = prev.some((s) => s.session_id === payload.sessionId);
+                if (!exists) {
+                    void loadSessionPage(null, debouncedHistorySearch, true);
+                }
+                return prev;
+            });
         });
-    }, [agent.historySessionId, selectedProvider, selectedModel, agentRuntime]);
+    }, [agentRuntime, loadSessionPage, debouncedHistorySearch]);
 
     useEffect(() => {
         return eventBus.on(SOLID_AGENT_EVENTS.sessionChanged, (payload) => {
@@ -999,8 +998,11 @@ export function SolidAgentChat({
                     if (nextModels.length > 0) setModels(nextModels);
                     if (payload.model) {
                         setSelectedModel(payload.model);
+                        setStoredProviderAndModel(payload.provider, payload.model);
                     } else {
-                        const fallback = res?.default_model || nextModels[0]?.id || "";
+                        const saved = getStoredModel(payload.provider);
+                        const matched = nextModels.find((m) => m.id === saved);
+                        const fallback = matched ? matched.id : (res?.default_model || nextModels[0]?.id || "");
                         if (fallback) setSelectedModel(fallback);
                     }
                 });
