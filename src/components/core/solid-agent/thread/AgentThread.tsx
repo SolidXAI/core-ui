@@ -169,9 +169,30 @@ function AgentActivityDisclosure({
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
 export function AgentThread({ items, thinking, working = thinking, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const topSentinelRef = useRef<HTMLDivElement>(null);
     const pinned = useRef(true);
     const prevHeight = useRef(0);
     const prevFirstId = useRef<string | undefined>(undefined);
+    const isFetchingRef = useRef(false);
+    const [internalLoading, setInternalLoading] = useState(false);
+    const isLoadingOlder = loadingOlder || internalLoading;
+
+    const onLoadOlderRef = useRef(onLoadOlder);
+    onLoadOlderRef.current = onLoadOlder;
+
+    const triggerLoadOlder = React.useCallback(async () => {
+        if (!hasMore || isFetchingRef.current || loadingOlder) return;
+        isFetchingRef.current = true;
+        setInternalLoading(true);
+        try {
+            await Promise.resolve(onLoadOlderRef.current());
+        } finally {
+            setTimeout(() => {
+                isFetchingRef.current = false;
+                setInternalLoading(false);
+            }, 400);
+        }
+    }, [hasMore, loadingOlder]);
 
     useLayoutEffect(() => {
         const el = scrollRef.current;
@@ -185,6 +206,8 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
         }
         prevFirstId.current = firstId;
         prevHeight.current = el.scrollHeight;
+        isFetchingRef.current = false;
+        setInternalLoading(false);
     }, [items]);
 
     useEffect(() => {
@@ -193,10 +216,37 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
         const onScroll = () => {
             pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
             prevHeight.current = el.scrollHeight;
+
+            if (hasMore && !isLoadingOlder && !isFetchingRef.current && el.scrollTop < 120) {
+                void triggerLoadOlder();
+            }
         };
         el.addEventListener("scroll", onScroll, { passive: true });
         return () => el.removeEventListener("scroll", onScroll);
-    }, []);
+    }, [hasMore, isLoadingOlder, triggerLoadOlder]);
+
+    useEffect(() => {
+        const rootEl = scrollRef.current;
+        const sentinelEl = topSentinelRef.current;
+        if (!rootEl || !sentinelEl || !hasMore) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const [entry] = entries;
+                if (entry?.isIntersecting && !isLoadingOlder && !isFetchingRef.current) {
+                    void triggerLoadOlder();
+                }
+            },
+            {
+                root: rootEl,
+                rootMargin: "160px 0px 0px 0px",
+                threshold: 0,
+            }
+        );
+
+        observer.observe(sentinelEl);
+        return () => observer.disconnect();
+    }, [hasMore, isLoadingOlder, triggerLoadOlder]);
 
     if (!items.length && !thinking && emptyState) {
         return <div className={styles.thread}>{emptyState}</div>;
@@ -217,11 +267,16 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
 
     return (
         <div ref={scrollRef} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
-            {hasMore && (
-                <button type="button" className={`${styles.btn} ${styles.loadMore}`} onClick={onLoadOlder} disabled={loadingOlder}
-                    aria-label={loadingOlder ? "Loading earlier messages" : "Load earlier messages"} title={loadingOlder ? "Loading earlier messages" : undefined}>
-                    {loadingOlder ? <LoaderCircle size={14} className={styles.spinIcon} aria-hidden="true" /> : "Load earlier messages"}
-                </button>
+            {hasMore && <div ref={topSentinelRef} style={{ height: 1, width: "100%", pointerEvents: "none" }} aria-hidden="true" />}
+            {isLoadingOlder && (
+                <div
+                    className={`${styles.notice} ${styles.loadMore}`}
+                    aria-live="polite"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px 0" }}
+                >
+                    <LoaderCircle size={14} className={styles.spinIcon} aria-hidden="true" />
+                    <span>Loading earlier messages…</span>
+                </div>
             )}
             {groups.map((group) => {
                 if (group.kind === "user") {
