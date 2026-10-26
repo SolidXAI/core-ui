@@ -1932,6 +1932,15 @@ li.header-li-px {
   padding: 0 1px 3px;
 }
 
+.kanban-column:not(.kanban-column-folded) > .kaban-heading-area {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-height: 36px;
+  padding: 8px 6px;
+  background: var(--card);
+}
+
 .solid-kanban-lane-selection {
   display: flex;
   align-items: center;
@@ -5591,7 +5600,7 @@ flex-shrink: 0; */
 }
 
 .solid-kanban-board-scroll-context {
-  align-items: flex-start;
+  align-items: stretch;
   overflow: visible;
   flex: 0 0 auto;
   width: max-content;
