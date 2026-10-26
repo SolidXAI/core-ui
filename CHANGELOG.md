@@ -4,6 +4,98 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.21] - 2026-10-26
+
+### Added
+
+- add confirmation dialog for deleting conversations in SolidAgentChat
+- add sessionOwnerKey support across components for user-specific session management
+- enhance AgentSessionChatFormWidget with refresh functionality and improved styling
+- add AgentSessionChatFormWidget component for session chat interface
+- add SolidChatterAuditMessage component with diff viewing capabilities and styling
+- added context pill for codex
+- added context pill for pi
+- added context pill for native agent
+- enhance breadcrumb rendering with user key highlighting in AdminTopHeader
+- enhance routing queries with user key and action parameters in CardItem, KanbanCard, and SolidListView components
+- update agent session comparison UI with improved layout and tooltip support
+- enhance agent configuration comparison with no-change messages for prompts, skills, and model configuration
+- add agent configuration comparison page and versions panel
+- add notification for restarting processes after provider edits
+- add AgentContextPill component to display token usage and cost metrics in the composer
+- enhance agent availability handling and improve UI for unavailable agents
+- adjust tab layout properties for improved responsiveness
+- enhance AgentSession components with pagination and loading states
+- add AgentSessionComparisonHeaderAction component and integrate into registry
+- enhance provider handling with support for custom provider names
+- add vision model identification and UI tag for agent models
+- implement admin view refresh handling across various components
+- add navigation intent handling and routing support in SolidAgent components
+- implement beforeSend contributions and public event handling in SolidAgent components
+- add module validation and error handling in various editor pages; enhance styling for AgentHubModuleField
+- enhance message context handling and add beforeSend support in SolidAgent components
+- pass module prop to AgentHubTagsField in multiple editor pages
+- add AgentHubModuleField component and integrate module selection in agent, skill, and tool registry editor pages
+- enhance ArchivedChatterMessagesPage with advanced filtering and improved UI
+
+### Fixed
+
+- refactor session rename handling to use button click and Enter key for submission
+- update type for closeTimerRef to use ReturnType for better type safety
+- the cross-session leak and concurrency issue
+- pill visibility
+- remove duplicate delete button from tree view toolbar (#278)
+- update SolidDateTimeField to use ISO string for UTC date formatting (#275)
+- show success toast after bulk recovery of soft-deleted records (#277)
+- delete button css and prevent cross-session leak
+- fix Pi context window tracking with prompt caching and remove codex pill
+- simplify notification message for agent restart requirement
+- agenthub version display and make sure agenthub ui display remains conflict free from cli integration
+- the load history error in agent and infinite console issue
+- building was hidden for antigravity cli
+- agent auto collapsing while module creation
+- redesign stop button and remove tool duration metadata from widgets
+- cursor duplicate msgs and widget rendering
+- auto hide attachment icon and remove assistant logo from chat
+- clean tool call headers and balance activity vertical spacing
+- modern clean chatbox for agent ui
+- auto model does not support fast or thinking
+- Thinking and fast toggle dynamic fetches and cleaned the hardcoded code
+- update SDK version in AgentEmbeddingPanel to v4
+- argument order issue resolved
+- show thumbnails and typed file icons in uploaded (#255)
+- runtime related issues and added provider names for session resuming
+- removed tags from payload and resolved the conflict of agenthub
+
+### Changed
+
+- remove context pill and related telemetry
+- enhance agent context tracking with token limits, session totals, and updated UI pill display
+
+### Other
+
+- Embedded form  workflowfield (#284)
+- User profile role (#285)
+- Fix/validation error overlapping (#273)
+- success toast issue fix while recover duplicate record (#286)
+- Fix/automap mobile responsive (#279)
+- misaligned custom filter button fixed (#260)
+- Fix/kanban improvements (#269)
+- Revert "success toast issue fix while recover duplicate record"
+- success toast issue fix while recover duplicate record
+- merged branch dev with 'ft-cli-provider-changes' branch
+- added the search bar for session history and edit button to rename session
+- update alignment of session id in agent ui
+- version id and model name related issues fixed
+- normalize tool names in ui
+- removing extra circular buffering animation from manage data model
+- added vision support tags for models
+- removed unneeded descriptions and version from providers
+- changed duplicate microsoft icon (#250)
+- WIP fixed mobile responsive issues (#256)
+- Refactor code structure for improved readability and maintainability
+- added cli providers support and related changes
+
 ## [0.1.21-beta.5] - 2026-10-22
 
 ## [0.1.21-beta.4] - 2026-10-22
