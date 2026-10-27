@@ -920,6 +920,7 @@ export function SolidAgentChat({
 
         if (replace) {
             historyAbortRef.current?.abort();
+            setHistoryLoadingMore(false);
             setSessions([]);
             setHistoryNextCursor(null);
             setHistoryHasMore(false);
