@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Clock, Copy, History, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { AlertCircle, Check, ChevronDown, Clock, Copy, History, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -1372,13 +1372,28 @@ export function SolidAgentChat({
                                                             >
                                                                 <div className={styles.providerItemMeta}>
                                                                     <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
-                                                                    {isUnauthenticated && (
-                                                                        <span className={styles.providerBadgeUnauth} title="Not logged in / credentials required">
-                                                                            Unauthenticated
-                                                                        </span>
-                                                                    )}
                                                                 </div>
-                                                                {isSelected && <Check size={14} className={styles.providerCheck} />}
+                                                                {isUnauthenticated && (
+                                                                    <div className={styles.providerItemEnd}>
+                                                                        <SolidTooltip delayDuration={120}>
+                                                                            <SolidTooltipTrigger asChild>
+                                                                                <span
+                                                                                    className={styles.providerBadgeUnauth}
+                                                                                    role="img"
+                                                                                    aria-label="Unauthenticated"
+                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                >
+                                                                                    <AlertCircle size={15} strokeWidth={2} />
+                                                                                </span>
+                                                                            </SolidTooltipTrigger>
+                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
+                                                                                {p.id === "opencode"
+                                                                                    ? "Unauthenticated: Free models are available; credentials required for paid models."
+                                                                                    : "Unauthenticated: CLI credentials or login required."}
+                                                                            </SolidTooltipContent>
+                                                                        </SolidTooltip>
+                                                                    </div>
+                                                                )}
                                                             </button>
                                                         );
                                                     })}
@@ -1860,13 +1875,28 @@ export function SolidAgentChat({
                                                                             >
                                                                                 <div className={styles.providerItemMeta}>
                                                                                     <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
-                                                                                    {isUnauthenticated && (
-                                                                                        <span className={styles.providerBadgeUnauth} title="Not logged in / credentials required">
-                                                                                            Unauthenticated
-                                                                                        </span>
-                                                                                    )}
                                                                                 </div>
-                                                                                {isSelected && <Check size={14} className={styles.providerCheck} />}
+                                                                                {isUnauthenticated && (
+                                                                                    <div className={styles.providerItemEnd}>
+                                                                                        <SolidTooltip delayDuration={120}>
+                                                                                            <SolidTooltipTrigger asChild>
+                                                                                                <span
+                                                                                                    className={styles.providerBadgeUnauth}
+                                                                                                    role="img"
+                                                                                                    aria-label="Unauthenticated"
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                >
+                                                                                                    <AlertCircle size={15} strokeWidth={2} />
+                                                                                                </span>
+                                                                                            </SolidTooltipTrigger>
+                                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
+                                                                                                {p.id === "opencode"
+                                                                                                    ? "Unauthenticated: Free models are available; login required for paid models."
+                                                                                                    : "Unauthenticated: Login required."}
+                                                                                            </SolidTooltipContent>
+                                                                                        </SolidTooltip>
+                                                                                    </div>
+                                                                                )}
                                                                             </button>
                                                                         );
                                                                     })}
