@@ -584,10 +584,21 @@ export function SolidAgentChat({
     }, [menuSessionId]);
 
     useEffect(() => {
-        if (!agent.loadingHistory && resumingSessionId) {
+        if (!resumingSessionId) return;
+
+        // Clear resuming state once the target session has been loaded into Redux
+        if (agent.historySessionId === resumingSessionId && !agent.loadingHistory) {
             setResumingSessionId(null);
+            return;
         }
-    }, [agent.loadingHistory, resumingSessionId]);
+
+        // Safety timeout to prevent UI lock if network hangs or fails silently
+        const timer = setTimeout(() => {
+            setResumingSessionId((curr) => (curr === resumingSessionId ? null : curr));
+        }, 15000);
+
+        return () => clearTimeout(timer);
+    }, [agent.loadingHistory, agent.historySessionId, resumingSessionId]);
 
     const handleSelectProvider = async (providerId: string) => {
         if (providerId === selectedProvider && !isSwitchingProvider) {
@@ -637,7 +648,7 @@ export function SolidAgentChat({
     };
 
     const handleStartNewChat = async () => {
-        if (!runtime || startingNewChatRef.current || isStartingNewChat) return;
+        if (!runtime || startingNewChatRef.current || isStartingNewChat || !!resumingSessionId) return;
         setIsStartingNewChat(true);
         startingNewChatRef.current = true;
         try {
@@ -650,6 +661,7 @@ export function SolidAgentChat({
             }
 
             if (latestSession?.has_user_message === false) {
+                setResumingSessionId(latestSession.session_id);
                 runtime.resume(latestSession.session_id);
             } else {
                 runtime.newChat(selectedProvider, selectedModel, {
@@ -692,6 +704,10 @@ export function SolidAgentChat({
         }
 
         setResumingSessionId(session.session_id);
+        setShowHistory(false);
+        setHistorySearchQuery("");
+        setEditingSessionId(null);
+        setMenuSessionId(null);
         try {
             const targetProvider = session.provider || selectedProvider;
             const targetModel = session.model || selectedModel;
@@ -727,10 +743,6 @@ export function SolidAgentChat({
                 fast: nextFast,
                 speed: nextSpeed,
             });
-            setShowHistory(false);
-            setHistorySearchQuery("");
-            setEditingSessionId(null);
-            setMenuSessionId(null);
         } catch (err) {
             console.error("Failed to resume session:", err);
             setResumingSessionId(null);
@@ -1298,7 +1310,7 @@ export function SolidAgentChat({
                                     className={styles.iconBtn}
                                     title="New chat"
                                     aria-label="New chat"
-                                    disabled={isStartingNewChat}
+                                    disabled={isStartingNewChat || !!resumingSessionId}
                                     onClick={handleStartNewChat}
                                 >
                                     {isStartingNewChat ? <SolidSpinner size={15} className={styles.inlineSolidSpinner} /> : <Plus size={16} />}
@@ -1310,7 +1322,7 @@ export function SolidAgentChat({
                                         className={styles.splitActionBtn}
                                         title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
                                         aria-label="New chat"
-                                        disabled={isStartingNewChat}
+                                        disabled={isStartingNewChat || !!resumingSessionId}
                                         onClick={handleStartNewChat}
                                     >
                                         {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
@@ -1566,7 +1578,7 @@ export function SolidAgentChat({
                                                     type="button"
                                                     className={`${styles.historyItem} ${isCurrentSession ? styles.historyItemActive : ""}`}
                                                     onClick={() => void handleResumeSession(session)}
-                                                    disabled={isResumingThis}
+                                                    disabled={isResumingThis || !!resumingSessionId}
                                                     title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
                                                 >
                                                     {isResumingThis && <SolidSpinner size={13} className={styles.inlineSolidSpinner} aria-hidden="true" />}
@@ -1685,7 +1697,8 @@ export function SolidAgentChat({
 
 
 
-                    const isBusyTransitioning = isSwitchingProvider || agent.loadingHistory || !!resumingSessionId;
+                    const isViewingHistory = !isFullScreen && showHistory;
+                    const isBusyTransitioning = isSwitchingProvider || isStartingNewChat || agent.loadingHistory || !!resumingSessionId || isViewingHistory;
 
                     const threadComponent = (
                         <AgentThread
@@ -1708,8 +1721,12 @@ export function SolidAgentChat({
                             working={agent.working}
                             disabled={!!agent.authError || isBusyTransitioning}
                             placeholder={
-                                isSwitchingProvider
+                                isViewingHistory
+                                    ? "Select a conversation to continue…"
+                                    : isSwitchingProvider
                                     ? "Connecting..."
+                                    : isStartingNewChat
+                                    ? "Starting new chat..."
                                     : (agent.loadingHistory || !!resumingSessionId)
                                     ? "Loading conversation..."
                                     : undefined
@@ -1772,7 +1789,7 @@ export function SolidAgentChat({
                                                     className={styles.sidebarNewChatBtn}
                                                     title="New chat"
                                                     aria-label="New chat"
-                                                    disabled={isStartingNewChat}
+                                                    disabled={isStartingNewChat || !!resumingSessionId}
                                                     onClick={handleStartNewChat}
                                                 >
                                                     <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -1787,7 +1804,7 @@ export function SolidAgentChat({
                                                         className={styles.sidebarSplitActionBtn}
                                                         title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
                                                         aria-label="New chat"
-                                                        disabled={isStartingNewChat}
+                                                        disabled={isStartingNewChat || !!resumingSessionId}
                                                         onClick={handleStartNewChat}
                                                     >
                                                         {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
