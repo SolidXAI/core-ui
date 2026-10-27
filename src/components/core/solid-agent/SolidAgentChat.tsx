@@ -1362,6 +1362,7 @@ export function SolidAgentChat({
                                                 <div className={styles.providerList}>
                                                     {providers.map((p) => {
                                                         const isSelected = p.id === selectedProvider;
+                                                        const isUnauthenticated = p.authenticated === false;
                                                         return (
                                                             <button
                                                                 key={p.id}
@@ -1371,6 +1372,11 @@ export function SolidAgentChat({
                                                             >
                                                                 <div className={styles.providerItemMeta}>
                                                                     <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
+                                                                    {isUnauthenticated && (
+                                                                        <span className={styles.providerBadgeUnauth} title="Not logged in / credentials required">
+                                                                            Unauthenticated
+                                                                        </span>
+                                                                    )}
                                                                 </div>
                                                                 {isSelected && <Check size={14} className={styles.providerCheck} />}
                                                             </button>
@@ -1844,6 +1850,7 @@ export function SolidAgentChat({
                                                                 <div className={styles.providerList}>
                                                                     {providers.map((p) => {
                                                                         const isSelected = p.id === selectedProvider;
+                                                                        const isUnauthenticated = p.authenticated === false;
                                                                         return (
                                                                             <button
                                                                                 key={p.id}
@@ -1853,6 +1860,11 @@ export function SolidAgentChat({
                                                                             >
                                                                                 <div className={styles.providerItemMeta}>
                                                                                     <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
+                                                                                    {isUnauthenticated && (
+                                                                                        <span className={styles.providerBadgeUnauth} title="Not logged in / credentials required">
+                                                                                            Unauthenticated
+                                                                                        </span>
+                                                                                    )}
                                                                                 </div>
                                                                                 {isSelected && <Check size={14} className={styles.providerCheck} />}
                                                                             </button>
