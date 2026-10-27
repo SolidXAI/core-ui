@@ -6,7 +6,7 @@ import {
 import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
-import { toolDisplayName } from "../agentFormat";
+import { describeToolArgs, toolDisplayName } from "../agentFormat";
 
 type ToolStatus = "running" | "success" | "warning" | "error";
 type ToolProgressStep = { label: string; status: "running" | "done"; duration_ms?: number };
@@ -37,6 +37,9 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
     const hasArgs = !!args && Object.keys(args).length > 0;
     const expandable = (hasArgs || !!output) && status !== "running";
     const isRunning = live || status === "running";
+    const rawSummary: string = eventData.summary ?? "";
+    const isNoisySummary = rawSummary.startsWith("const ") || rawSummary.startsWith("let ") || rawSummary.includes("tools.solidx");
+    const summary = (!rawSummary || isNoisySummary) ? describeToolArgs(args, toolName) : rawSummary;
 
     return (
         <div className={`${styles.ToolCard} ${CARD_CLASS[status] ?? styles.ToolCardDone}`}>
@@ -49,7 +52,7 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
             >
                 <StatusIcon status={status} />
                 <span className={styles.ToolCardName}>{live ? `Invoking ${toolDisplayName(toolName, args)}…` : toolDisplayName(toolName, args)}</span>
-                {eventData.summary && <span className={styles.ToolCardDesc} title={eventData.summary}>{eventData.summary}</span>}
+                {summary && <span className={styles.ToolCardDesc} title={summary}>{summary}</span>}
                 {expandable && <ChevronRight size={11} className={`${styles.ToolCardChevron} ${expanded ? styles.ToolCardChevronOpen : ""}`} />}
             </button>
 
