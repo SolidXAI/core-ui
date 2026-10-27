@@ -1389,8 +1389,8 @@ export function SolidAgentChat({
                                                                             </SolidTooltipTrigger>
                                                                             <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
                                                                                 {p.id === "opencode"
-                                                                                    ? "Unauthenticated: Free models are available; credentials required for paid models."
-                                                                                    : "Unauthenticated: CLI credentials or login required."}
+                                                                                    ? "Unauthenticated: Free models are available; CLI login required for paid models."
+                                                                                    : "Unauthenticated: Login required."}
                                                                             </SolidTooltipContent>
                                                                         </SolidTooltip>
                                                                     </div>
