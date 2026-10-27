@@ -55,6 +55,7 @@ import {
   useRunDatasourceIntrospectionMigrationMutation,
 } from "../../../../redux/api/datasourceIntrospectionApi";
 import { modelsApi } from "../../../../redux/api/modelApi";
+import { solidMenusApi } from "../../../../redux/api/solidMenuApi";
 import "./DatasourceIntrospectionPage.css";
 
 type SessionSettings = {
@@ -2034,6 +2035,8 @@ export function DatasourceIntrospectionPage() {
       }).unwrap();
 
       setRunMigrationOutput(response.output || response.message || "");
+      // Seeding creates menu entries; refresh the mounted sidebar's cached menu.
+      dispatch(solidMenusApi.util.invalidateTags(["SolidMenu"]));
       setRunMigrationCompleted(true);
       dispatch(showToast({
         severity: "success",
