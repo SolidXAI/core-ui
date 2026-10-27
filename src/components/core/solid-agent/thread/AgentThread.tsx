@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ChevronRight, LoaderCircle } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "../SolidAgent.module.css";
 import widgetStyles from "../widgets/solidChatWidgets.module.css";
 
@@ -13,6 +14,7 @@ type Props = {
     items: AgentChatItem[];
     thinking: boolean;
     working?: boolean;
+    loadingHistory?: boolean;
     hasMore: boolean;
     loadingOlder?: boolean;
     context?: AgentContext;
@@ -153,7 +155,7 @@ function AgentActivityDisclosure({
                     setExpanded((value) => !value);
                 }}
             >
-                {working && <LoaderCircle size={13} className={widgetStyles.ActivitySpinner} aria-hidden="true" />}
+                {working && <SolidSpinner size={13} className={widgetStyles.ActivitySpinner} aria-hidden="true" />}
                 <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
                 <ChevronRight size={13} className={`${widgetStyles.ActivityChevron} ${expanded ? widgetStyles.ActivityChevronOpen : ""}`} aria-hidden="true" />
             </button>
@@ -167,7 +169,7 @@ function AgentActivityDisclosure({
 }
 
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
-export function AgentThread({ items, thinking, working = thinking, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
+export function AgentThread({ items, thinking, working = thinking, loadingHistory = false, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const topSentinelRef = useRef<HTMLDivElement>(null);
     const pinned = useRef(true);
@@ -254,7 +256,17 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
 
         observer.observe(sentinelEl);
         return () => observer.disconnect();
-    }, [hasMore, loadingOlder, triggerLoadOlder]);
+    }, [hasMore, isLoadingOlder, triggerLoadOlder]);
+
+    if (loadingHistory) {
+        return (
+            <div className={`${styles.thread} ${styles.threadCenterLoading}`} role="status" aria-live="polite" aria-label="Loading conversation">
+                <div className={styles.centerSpinnerWrapper}>
+                    <SolidSpinner size={28} />
+                </div>
+            </div>
+        );
+    }
 
     if (!items.length && !thinking && emptyState) {
         return <div className={styles.thread}>{emptyState}</div>;
@@ -275,29 +287,15 @@ export function AgentThread({ items, thinking, working = thinking, hasMore, load
 
     return (
         <div ref={scrollRef} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
-            {hasMore && (
+            {hasMore && <div ref={topSentinelRef} style={{ height: 1, width: "100%", pointerEvents: "none" }} aria-hidden="true" />}
+            {isLoadingOlder && (
                 <div
-                    ref={topSentinelRef}
-                    style={{
-                        minHeight: isLoadingOlder ? 32 : 1,
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        pointerEvents: "none",
-                    }}
-                    aria-hidden={!isLoadingOlder}
+                    className={`${styles.notice} ${styles.loadMore}`}
+                    aria-live="polite"
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px 0" }}
                 >
-                    {isLoadingOlder && (
-                        <div
-                            className={`${styles.notice} ${styles.loadMore}`}
-                            aria-live="polite"
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-                        >
-                            <LoaderCircle size={14} className={styles.spinIcon} aria-hidden="true" />
-                            <span>Loading earlier messages…</span>
-                        </div>
-                    )}
+                    <SolidSpinner size={14} className={styles.inlineSolidSpinner} aria-hidden="true" />
+                    <span>Loading earlier messages…</span>
                 </div>
             )}
             {groups.map((group) => {

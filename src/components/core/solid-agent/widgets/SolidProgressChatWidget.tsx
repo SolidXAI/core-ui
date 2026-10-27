@@ -1,4 +1,5 @@
-import { CheckCircle2, CircleX, Loader2 } from "lucide-react";
+import { CheckCircle2, CircleX } from "lucide-react";
+import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "../SolidAgent.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import { asArray, getChatWidgetData } from "./chatWidgetUtils";
@@ -9,7 +10,7 @@ type ProgressData = { title?: string; percent?: number; steps?: ProgressStep[] }
 export const SolidProgressStepIcon = ({ status }: { status?: ProgressStep["status"] }) => {
     if (status === "done") return <CheckCircle2 size={14} className={styles.okIcon} />;
     if (status === "error") return <CircleX size={14} className={styles.errIcon} />;
-    if (status === "running") return <Loader2 size={14} className={styles.spinIcon} />;
+    if (status === "running") return <SolidSpinner size={14} className={styles.inlineSolidSpinner} />;
     return <span style={{ width: 14, height: 14, borderRadius: 999, border: "2px dashed var(--agent-border)", display: "inline-block" }} />;
 };
 

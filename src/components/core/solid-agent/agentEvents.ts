@@ -20,6 +20,8 @@ export type AgentThreadState = {
     commands: AgentCommand[];
     working: boolean;
     thinking: boolean;
+    loadingHistory: boolean;
+    loadingOlder: boolean;
     authError: string | null;
     liveToolId: string | null;
     streamingId: string | null;
@@ -35,6 +37,8 @@ export function createThreadState(): AgentThreadState {
         commands: [],
         working: false,
         thinking: false,
+        loadingHistory: false,
+        loadingOlder: false,
         authError: null,
         liveToolId: null,
         streamingId: null,

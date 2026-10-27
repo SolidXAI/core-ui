@@ -4,6 +4,8 @@ import {
     agentConnectionChanged,
     agentEventReceived,
     agentHistoryLoaded,
+    agentHistoryLoadingFinished,
+    agentHistoryLoadingStarted,
     agentThreadReset,
     agentUserMessageAdded,
     type AgentState,
@@ -344,11 +346,13 @@ export class AgentRuntime {
         this.responseStarted = false;
         this.hadPriorSession = true;
         this.resetHistoryLoads();
+        this.historySessionId = sessionId;
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
-        this.dispatch(agentThreadReset());
+        this.dispatch(agentThreadReset({ loadingHistory: true, historySessionId: sessionId }));
         this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
+        void this.loadHistory(sessionId, 1);
     }
 
     async loadOlder() {
@@ -378,14 +382,21 @@ export class AgentRuntime {
         if (this.loadingHistoryPages.has(key) || this.loadedHistoryPages.has(key)) return;
         const generation = this.historyGeneration;
         this.loadingHistoryPages.set(key, generation);
+        this.dispatch(agentHistoryLoadingStarted({ isOlder: page > 1 }));
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
             this.loadedHistoryPages.add(key);
-            if (!result) return;
+            if (!result) {
+                this.dispatch(agentHistoryLoadingFinished());
+                return;
+            }
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
             const rawItems = historyToItems(result.messages ?? []);
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
-            if (generation !== this.historyGeneration || this.getState()?.historySessionId !== historySessionId) return;
+            if (generation !== this.historyGeneration || (this.historySessionId && this.historySessionId !== historySessionId)) {
+                this.dispatch(agentHistoryLoadingFinished());
+                return;
+            }
             const sessionUsage = result.session_usage;
             this.dispatch(agentHistoryLoaded({
                 items,
@@ -405,6 +416,7 @@ export class AgentRuntime {
         } catch {
             // History is a convenience; the live session still works without it.
             this.loadedHistoryPages.add(key);
+            this.dispatch(agentHistoryLoadingFinished());
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
         }
@@ -490,7 +502,7 @@ export class AgentRuntime {
                 this.resetHistoryLoads();
                 this.historySessionId = historyId;
             }
-            if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
+            if (event.eventType === AgentEventTypes.sessionStarted && (this.hadPriorSession || (state && state.items.length === 0)) && historyId) {
                 void this.loadHistory(historyId, 1);
             }
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {

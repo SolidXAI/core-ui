@@ -36,6 +36,7 @@ export class AgentSocket {
     private checkingProcessAvailability = false;
     private unacknowledgedMessage: AgentAction | null = null;
     private onSessionExpiredHook: (() => void) | null = null;
+    private pendingSessionUpdate = false;
 
     private offAuthChange: () => void;
     private readonly debugEmbed: boolean;
@@ -172,6 +173,17 @@ export class AgentSocket {
                 if (m) this.model = m;
                 if (eventType === "session_started") {
                     this.sessionReady = true;
+                    if (this.pendingSessionUpdate && this.sessionId) {
+                        this.pendingSessionUpdate = false;
+                        void this.sendRaw({
+                            action: "update_session",
+                            session_id: this.sessionId,
+                            provider: this.provider ?? undefined,
+                            model: this.model ?? undefined,
+                            runtime: this.runtime,
+                            ...this.sessionOptions,
+                        });
+                    }
                     this.flushQueue();
                 }
             } else if (eventType === "error" && /agent token/i.test(String(payload?.error ?? ""))) {
@@ -267,6 +279,7 @@ export class AgentSocket {
         this.unacknowledgedMessage = null;
         this.sessionId = null;
         this.sessionReady = false;
+        this.pendingSessionUpdate = false;
         this.queue = [];
         const payload: AgentAction = {
             action: "start_session",
@@ -294,6 +307,8 @@ export class AgentSocket {
                 runtime: this.runtime,
                 ...this.sessionOptions,
             });
+        } else if (!this.sessionId) {
+            this.pendingSessionUpdate = true;
         }
     }
 
@@ -307,6 +322,7 @@ export class AgentSocket {
         }
         this.sessionId = sessionId;
         this.sessionReady = false;
+        this.pendingSessionUpdate = false;
         if (this.ws?.readyState === WebSocket.OPEN) {
             void this.sendRaw({
                 action: "resume_session",

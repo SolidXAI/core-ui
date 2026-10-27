@@ -94,8 +94,26 @@ const agentSlice = createSlice({
             state.liveToolId = null;
             state.authError = null;
         },
-        agentThreadReset(state) {
-            Object.assign(state, createThreadState(), { commands: state.commands, hasMoreHistory: false, historyPage: 1 });
+        agentThreadReset(state, action: PayloadAction<{ loadingHistory?: boolean; historySessionId?: string | null } | undefined>) {
+            Object.assign(state, createThreadState(), {
+                commands: state.commands,
+                hasMoreHistory: false,
+                historyPage: 1,
+                historySessionId: action?.payload?.historySessionId ?? null,
+                loadingHistory: action?.payload?.loadingHistory ?? false,
+                loadingOlder: false,
+            });
+        },
+        agentHistoryLoadingStarted(state, action: PayloadAction<{ isOlder?: boolean } | undefined>) {
+            if (action?.payload?.isOlder) {
+                state.loadingOlder = true;
+            } else {
+                state.loadingHistory = true;
+            }
+        },
+        agentHistoryLoadingFinished(state) {
+            state.loadingHistory = false;
+            state.loadingOlder = false;
         },
         agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null }>) {
             const { items, hasMore, page, usage } = action.payload;
@@ -103,6 +121,8 @@ const agentSlice = createSlice({
             state.items = [...items, ...state.items];
             state.hasMoreHistory = hasMore;
             state.historyPage = page;
+            state.loadingHistory = false;
+            state.loadingOlder = false;
             if (usage && (!state.usage || state.usage.totalTokens === 0)) {
                 state.usage = {
                     ...usage,
@@ -124,6 +144,8 @@ export const {
     agentConnectionChanged,
     agentUserMessageAdded,
     agentThreadReset,
+    agentHistoryLoadingStarted,
+    agentHistoryLoadingFinished,
     agentHistoryLoaded,
     agentEventReceived,
 } = agentSlice.actions;

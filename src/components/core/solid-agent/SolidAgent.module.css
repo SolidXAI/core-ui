@@ -987,7 +987,62 @@
   flex: 0 0 auto;
 }
 @keyframes agentSpin { to { transform: rotate(360deg); } }
-.spinIcon { color: var(--agent-primary); animation: agentSpin 0.8s linear infinite; flex: 0 0 auto; }
+.threadCenterLoading {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 240px !important;
+}
+
+.centerSpinnerWrapper {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: auto !important;
+  padding: 24px !important;
+  align-self: center !important;
+  flex: 0 0 auto !important;
+}
+
+.centerSpinnerWrapper :global(.solid-spinner) {
+  color: var(--agent-fg, var(--foreground, #ffffff));
+}
+
+.centerSpinnerWrapper :global(.solid-spinner-icon) {
+  color: var(--agent-fg, var(--foreground, #ffffff));
+  stroke-width: 2.25px;
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  flex: 0 0 28px !important;
+}
+
+.inlineSolidSpinner {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  color: var(--agent-primary) !important;
+  vertical-align: middle !important;
+}
+
+.inlineSolidSpinner :global(.solid-spinner) {
+  color: inherit !important;
+  display: inline-flex !important;
+}
+
+.inlineSolidSpinner :global(.solid-spinner-icon) {
+  color: inherit !important;
+  flex: 0 0 auto !important;
+}
 
 .tableWrap { overflow-x: auto; }
 
@@ -2219,6 +2274,27 @@
   margin-left: auto !important;
   margin-right: auto !important;
   box-sizing: border-box;
+}
+
+.fullScreenMain .threadCenterLoading {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  margin: auto !important;
+  align-self: center !important;
+}
+
+.fullScreenMain .threadCenterLoading > *,
+.fullScreenMain .threadCenterLoading .centerSpinnerWrapper,
+.fullScreenMain .threadCenterLoading :global(.solid-spinner) {
+  width: auto !important;
+  max-width: none !important;
+  margin: auto !important;
+  align-self: center !important;
 }
 
 .fullScreenMain .userTurn {

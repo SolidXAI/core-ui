@@ -1,9 +1,9 @@
 import { useState } from "react";
 import {
     ChevronRight,
-    Loader2,
     XCircle,
 } from "lucide-react";
+import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import { toolDisplayName } from "../agentFormat";
@@ -58,7 +58,7 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
                 <div className={styles.ToolCardProgress}>
                     {progress.map((step, index) => (
                         <div key={index} className={`${styles.ToolProgressItem} ${step.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
-                            {step.status === "running" && <Loader2 size={10} className={styles.Spin} />}
+                            {step.status === "running" && <SolidSpinner size={10} className={styles.Spin} />}
                             <span className={styles.ToolProgressLabel}>{step.label}</span>
                         </div>
                     ))}
