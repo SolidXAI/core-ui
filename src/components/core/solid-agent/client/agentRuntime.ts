@@ -4,6 +4,7 @@ import {
     agentConnectionChanged,
     agentEventReceived,
     agentHistoryLoaded,
+    agentHistoryLoadingChanged,
     agentThreadReset,
     agentUserMessageAdded,
     type AgentState,
@@ -185,6 +186,8 @@ export class AgentRuntime {
             this.dispatch(agentThreadReset());
         });
         this.hadPriorSession = !!this.socket.currentSessionId;
+        if (this.hadPriorSession && this.getState()?.items.length === 0)
+            this.dispatch(agentHistoryLoadingChanged(true));
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => {
@@ -348,6 +351,7 @@ export class AgentRuntime {
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
         this.dispatch(agentThreadReset());
+        this.dispatch(agentHistoryLoadingChanged(true));
         this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
     }
 
@@ -378,6 +382,7 @@ export class AgentRuntime {
         if (this.loadingHistoryPages.has(key) || this.loadedHistoryPages.has(key)) return;
         const generation = this.historyGeneration;
         this.loadingHistoryPages.set(key, generation);
+        this.dispatch(agentHistoryLoadingChanged(true));
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
             this.loadedHistoryPages.add(key);
@@ -407,6 +412,8 @@ export class AgentRuntime {
             this.loadedHistoryPages.add(key);
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
+            if (generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId)
+                this.dispatch(agentHistoryLoadingChanged(false));
         }
     }
 
@@ -492,7 +499,7 @@ export class AgentRuntime {
             }
             if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
                 void this.loadHistory(historyId, 1);
-            }
+            } else if (event.eventType === AgentEventTypes.sessionStarted) this.dispatch(agentHistoryLoadingChanged(false));
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             const content = event.eventData.content ?? event.frame.content;
             const now = Date.now();

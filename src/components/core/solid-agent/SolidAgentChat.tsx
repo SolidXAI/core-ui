@@ -681,7 +681,11 @@ export function SolidAgentChat({
         async (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
             onInputsLocked?.(true);
-            try { return await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer"); }
+            try {
+                const result = await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer");
+                setShowHistory(false);
+                return result;
+            }
             catch (error) { onInputsLocked?.(false); throw error; }
         },
         [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
@@ -1196,12 +1200,18 @@ export function SolidAgentChat({
                             </div>
                         ))}
                     </div>
+                ) : agent.loadingHistory && agent.items.length === 0 ? (
+                    <div className={styles.historyLoading} role="status" aria-live="polite">
+                        <Loader2 size={18} className={styles.spinIcon} aria-hidden="true" />
+                        <span>Loading conversation…</span>
+                    </div>
                 ) : (
                     <AgentThread
                         items={agent.items}
                         thinking={agent.working && agent.thinking}
                         working={agent.working}
                         hasMore={agent.hasMoreHistory}
+                        loadingOlder={agent.loadingHistory}
                         context={agent.context ?? undefined}
                         emptyState={empty}
                         onLoadOlder={() => void runtime?.loadOlder()}
