@@ -1383,7 +1383,7 @@ export function SolidAgentChat({
                                                                                     aria-label="Unauthenticated"
                                                                                     onClick={(e) => e.stopPropagation()}
                                                                                 >
-                                                                                    <AlertCircle size={15} strokeWidth={2} />
+                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
                                                                                 </span>
                                                                             </SolidTooltipTrigger>
                                                                             <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
@@ -1886,7 +1886,7 @@ export function SolidAgentChat({
                                                                                                     aria-label="Unauthenticated"
                                                                                                     onClick={(e) => e.stopPropagation()}
                                                                                                 >
-                                                                                                    <AlertCircle size={15} strokeWidth={2} />
+                                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
                                                                                                 </span>
                                                                                             </SolidTooltipTrigger>
                                                                                             <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>

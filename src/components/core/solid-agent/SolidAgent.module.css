@@ -579,18 +579,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #f59e0b;
+  color: var(--agent-err, #dc2626);
   flex-shrink: 0;
   cursor: default;
   margin-left: auto;
   transition: transform 0.15s ease, opacity 0.15s ease, color 0.15s ease;
-  opacity: 0.88;
+  opacity: 0.85;
 }
 
 .providerBadgeUnauth:hover {
   opacity: 1;
-  color: #d97706;
-  transform: scale(1.1);
+  color: #b91c1c;
+  transform: scale(1.08);
 }
 
 .providerUnauthTooltip {
