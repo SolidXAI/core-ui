@@ -411,6 +411,10 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
+  const [
+    triggerLoadKanbanBoard,
+    { data: solidEntityKanbanViewData, isFetching: isKanbanFetching },
+  ] = useLazyGetSolidEntitiesQuery();
   const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useRecoverSolidEntityByIdMutation();
 
   // Delete mutation 
@@ -690,15 +694,11 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         },
       });
 
-      const response: any = await triggerGetSolidEntities(
+      await triggerLoadKanbanBoard(
         qs.stringify(queryData, {
           encodeValuesOnly: true
         })
       ).unwrap();
-
-      setServerSwimLaneCount(response?.meta?.totalRecords || 0);
-      setRawKanbanGroupRecords(response?.groupRecords || []);
-      setSelectedRecords([]);
     } catch (error: any) {
       dispatch(showToast({
         severity: "error",
@@ -712,6 +712,14 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!solidEntityKanbanViewData) return;
+
+    setServerSwimLaneCount(solidEntityKanbanViewData?.meta?.totalRecords || 0);
+    setRawKanbanGroupRecords(solidEntityKanbanViewData?.groupRecords || []);
+    setSelectedRecords([]);
+  }, [solidEntityKanbanViewData]);
 
   useEffect(() => {
     if (!queryDataLoaded || !solidKanbanViewMetaData || !groupByFieldName) return;
@@ -810,7 +818,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         detail: response?.data?.message || "Record recovered successfully.",
         life: 3000,
       }));
-      await loadKanbanBoard(filters);
     } catch (error: any) {
       dispatch(showToast({
         severity: "error",
@@ -1180,7 +1187,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
   const entityDisplayName = solidKanbanViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
-  const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : isRecoveringRecord ? "Recovering..." : loading || !queryDataLoaded ? "Loading..." : null;
+  const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : isRecoveringRecord ? "Recovering..." : loading || isKanbanFetching || !queryDataLoaded ? "Loading..." : null;
 
   const handleRefreshView = () => {
     if (hasAnyActiveFilters) {
