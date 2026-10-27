@@ -21,7 +21,7 @@ import { AggregationRule, GroupingRule } from "../common/GroupingComponent";
 import { SolidListViewColumn } from "../list/SolidListViewColumn";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from "../../../hooks/useSession";
-import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
+import { resolveFilterRuntimeValues, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { SolidListViewConfigure } from "../list/SolidListViewConfigure";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
@@ -1278,7 +1278,9 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const handleApplyCustomFilter = (nextFilterPredicates: any, persistFilter = false) => {
     const queryfilter = structuredClone(params.customFilter) || { $and: [] };
 
-    if (nextFilterPredicates?.custom_filter_predicate) queryfilter.$and.push(nextFilterPredicates.custom_filter_predicate);
+    if (nextFilterPredicates?.custom_filter_predicate) queryfilter.$and.push(
+      resolveFilterRuntimeValues(nextFilterPredicates.custom_filter_predicate, user?.id).value
+    );
     if (nextFilterPredicates?.search_predicate) queryfilter.$and.push(nextFilterPredicates.search_predicate);
     if (nextFilterPredicates?.saved_filter_predicate) queryfilter.$and.push(
       nextFilterPredicates.resolved_saved_filter_predicate ||

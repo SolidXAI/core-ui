@@ -2,8 +2,9 @@
 import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
+import { RelativeDateMatchMode } from '../../../../helpers/relativeDateFilters';
 
-export const dateFilterMatchModeOptions = [
+export const timeFilterMatchModeOptions = [
     { label: 'Equals', value: "$eqi" },
     { label: 'Not Equals', value: "$nei" },
     { label: 'Less Than', value: "$lt" },
@@ -14,6 +15,13 @@ export const dateFilterMatchModeOptions = [
     { label: 'Is null', value: "$null" },
     { label: 'Is Not null', value: "$notNull" }
 
+];
+
+export const dateFilterMatchModeOptions = [
+    ...timeFilterMatchModeOptions.slice(0, 7),
+    { label: 'This Week', value: RelativeDateMatchMode.THIS_WEEK },
+    { label: 'This Month', value: RelativeDateMatchMode.THIS_MONTH },
+    ...timeFilterMatchModeOptions.slice(7),
 ];
 
 const SolidDateField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {

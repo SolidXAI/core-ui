@@ -12,6 +12,10 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import { getUnboundSavedFilterVariableNames, parseSavedFilterQueryJson, resolveSavedFilterVariables } from '../../../helpers/resolveActiveUserId';
+import {
+    getRelativeDateBetweenTokens,
+    getRelativeDateMatchModeFromBetween,
+} from '../../../helpers/relativeDateFilters';
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
 import { Bookmark, Check, Filter, Pencil, Plus, Search, SearchX, Sparkles, Trash2, X } from "lucide-react";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
@@ -145,13 +149,18 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
         // CASE 2: normal field → loop stays
         for (const matchMode in condition) {
             const rawValue = condition[matchMode];
-            const mathcModeValue: any = matchMode
+            const relativeDateMatchMode = matchMode === '$between'
+                ? getRelativeDateMatchModeFromBetween(rawValue)
+                : null;
+            const mathcModeValue: any = relativeDateMatchMode || matchMode
             return {
                 id: currentId,
                 type: FilterRuleType.RULE,
                 fieldName,
                 matchMode: mathcModeValue,
-                value: Array.isArray(rawValue) ? rawValue : [rawValue],
+                value: relativeDateMatchMode
+                    ? null
+                    : Array.isArray(rawValue) ? rawValue : [rawValue],
                 parentRule,
                 children: []
             };
@@ -173,25 +182,37 @@ const transformRulesToFilters = (input: any, viewData: any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
-        if (rule.value !== undefined && rule.value !== null) {
+        const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
+        const resolvedFieldType = fieldMeta?.type === 'computed'
+            ? fieldMeta?.computedFieldValueType
+            : fieldMeta?.type;
+        const relativeDateBetweenTokens = ['date', 'datetime'].includes(resolvedFieldType)
+            ? getRelativeDateBetweenTokens(rule.matchMode, resolvedFieldType)
+            : null;
+
+        if (relativeDateBetweenTokens || (rule.value !== undefined && rule.value !== null)) {
 
             // Ensure rule.value is always an array of primitive values.
             // Mixed arrays like ["failed", { label: "pending", value: "pending" }]
             // must be normalized before query serialization.
-            const rawValues = Array.isArray(rule?.value) ? rule.value : [rule?.value];
-            let values = rawValues.map((item: any) => {
-                if (item && typeof item === "object") {
-                    if (Object.prototype.hasOwnProperty.call(item, "value")) return item.value;
-                    if (Object.prototype.hasOwnProperty.call(item, "label")) return item.label;
+            let matchMode = rule.matchMode;
+            let values: any = relativeDateBetweenTokens;
+            if (relativeDateBetweenTokens) {
+                matchMode = '$between';
+            } else {
+                const rawValues = Array.isArray(rule?.value) ? rule.value : [rule?.value];
+                values = rawValues.map((item: any) => {
+                    if (item && typeof item === "object") {
+                        if (Object.prototype.hasOwnProperty.call(item, "value")) return item.value;
+                        if (Object.prototype.hasOwnProperty.call(item, "label")) return item.label;
+                    }
+                    return item;
+                });
+                if (matchMode !== '$in' && matchMode !== '$notIn' && matchMode !== '$between' && matchMode !== '$null' && matchMode !== '$notNull') {
+                    values = values[0];
                 }
-                return item;
-            });
-            if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between' && rule.matchMode !== '$null' && rule.matchMode !== '$notNull') {
-                values = values[0];
             }
 
-
-            const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
             const isToManyRelation = fieldMeta?.type === 'relation'
                 && ['one-to-many', 'many-to-many'].includes(fieldMeta?.relationType);
 
@@ -202,7 +223,7 @@ const transformRulesToFilters = (input: any, viewData: any) => {
                 transformedRule = {
                     [rule.fieldName]: {
                         id: {
-                            [rule.matchMode]: values // Keep as array
+                            [matchMode]: values // Keep as array
                         }
                     }
                 };
@@ -210,7 +231,7 @@ const transformRulesToFilters = (input: any, viewData: any) => {
                 // Rule transformation
                 transformedRule = {
                     [rule.fieldName]: {
-                        [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
+                        [matchMode]: values    // Assuming `value` is always an array with `value` and `label`
                     }
                 };
             }

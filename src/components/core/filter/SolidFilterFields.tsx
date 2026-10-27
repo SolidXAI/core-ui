@@ -56,6 +56,8 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
             return 1;
         case '$null':
         case '$notNull':
+        case '$thisWeek':
+        case '$thisMonth':
             return 0;    
         default:
             return 1; // Default to single input if no specific match is found

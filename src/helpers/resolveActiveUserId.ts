@@ -1,3 +1,9 @@
+import {
+  isRelativeDateRuntimeToken,
+  isRelativeDateRuntimeVariableName,
+  resolveRelativeDateRuntimeToken,
+} from "./relativeDateFilters";
+
 const ACTIVE_USER_ID_TOKEN = "$activeUserId";
 const VARIABLE_EXPRESSION = /^\$([A-Za-z_][A-Za-z0-9_]*)$/;
 
@@ -27,12 +33,15 @@ export const getSavedFilterVariableNames = (value: any): string[] => {
 };
 
 export const getUnboundSavedFilterVariableNames = (value: any): string[] =>
-  getSavedFilterVariableNames(value).filter((name) => name !== "activeUserId");
+  getSavedFilterVariableNames(value).filter(
+    (name) => name !== "activeUserId" && !isRelativeDateRuntimeVariableName(name),
+  );
 
-export const resolveSavedFilterVariables = (
+export const resolveFilterRuntimeValues = (
   value: any,
   activeUserId: number | string | null | undefined,
-  variables: Record<string, any> = {}
+  variables: Record<string, any> = {},
+  now: Date = new Date(),
 ): { value: any; missingVariables: string[] } => {
   const missing = new Set<string>();
 
@@ -42,6 +51,10 @@ export const resolveSavedFilterVariables = (
       return Object.fromEntries(Object.entries(current).map(([key, nestedValue]) => [key, resolve(nestedValue)]));
     }
     if (typeof current !== "string") return current;
+
+    if (isRelativeDateRuntimeToken(current)) {
+      return resolveRelativeDateRuntimeToken(current, now);
+    }
 
     const exactMatch = current.match(VARIABLE_EXPRESSION);
     if (exactMatch) {
@@ -60,6 +73,8 @@ export const resolveSavedFilterVariables = (
   const resolved = resolve(value);
   return { value: resolved, missingVariables: Array.from(missing) };
 };
+
+export const resolveSavedFilterVariables = resolveFilterRuntimeValues;
 
 /**
  * Resolves the saved-filter runtime token without mutating the stored filter.

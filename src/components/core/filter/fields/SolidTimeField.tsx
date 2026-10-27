@@ -2,7 +2,7 @@
 import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
-import { dateFilterMatchModeOptions } from './SolidDateField';
+import { timeFilterMatchModeOptions } from './SolidDateField';
 
 const SolidTimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;
@@ -21,7 +21,7 @@ const SolidTimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
                     onChange={(e: any) => {
                         onChange(rule.id, 'matchMode', e.value)
                     }}
-                    options={dateFilterMatchModeOptions}
+                    options={timeFilterMatchModeOptions}
                     optionLabel='label'
                     optionValue='value'
                     placeholder="Select Operator"

@@ -32,7 +32,7 @@ import { isArchivedListRow } from "./columns/PublishStatusColumnDefaults";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
-import { resolveActiveUserId } from "../../../helpers/resolveActiveUserId";
+import { resolveFilterRuntimeValues } from "../../../helpers/resolveActiveUserId";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSettingsMap, resolveRecordClickAction } from "../../../helpers/settingsPayload";
 import { useGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
@@ -887,14 +887,21 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const queryfilter = structuredClone(params.customFilter) || { $and: [] }
 
     if (filterPredicates.custom_filter_predicate) {
-      queryfilter.$and.push(filterPredicates.custom_filter_predicate);
+      queryfilter.$and.push(resolveFilterRuntimeValues(
+        filterPredicates.custom_filter_predicate,
+        user?.id,
+      ).value);
     }
     if (filterPredicates.search_predicate) {
       queryfilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
       queryfilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
-        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
+        resolveFilterRuntimeValues(
+          filterPredicates.saved_filter_predicate,
+          user?.id,
+          filterPredicates.saved_filter_variables || {},
+        ).value);
     }
     if (filterPredicates.predefined_search_predicate) {
       queryfilter.$and.push(filterPredicates.predefined_search_predicate);

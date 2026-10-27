@@ -5,7 +5,7 @@ import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi"
 import qs from "qs";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useSession } from "../../../hooks/useSession";
-import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
+import { resolveFilterRuntimeValues, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
 import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
@@ -283,7 +283,10 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
     const restoredFilter = { $and: [] as any[] };
 
     if (persistedFilterObject?.custom_filter_predicate) {
-      restoredFilter.$and.push(persistedFilterObject.custom_filter_predicate);
+      restoredFilter.$and.push(resolveFilterRuntimeValues(
+        persistedFilterObject.custom_filter_predicate,
+        user?.id,
+      ).value);
     }
     if (persistedFilterObject?.search_predicate) {
       restoredFilter.$and.push(persistedFilterObject.search_predicate);
@@ -396,14 +399,21 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
     const updatedFilter = { $and: [] as any[] };
 
     if (filterPredicates.custom_filter_predicate) {
-      updatedFilter.$and.push(filterPredicates.custom_filter_predicate);
+      updatedFilter.$and.push(resolveFilterRuntimeValues(
+        filterPredicates.custom_filter_predicate,
+        user?.id,
+      ).value);
     }
     if (filterPredicates.search_predicate) {
       updatedFilter.$and.push(filterPredicates.search_predicate);
     }
     if (filterPredicates.saved_filter_predicate) {
       updatedFilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
-        resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
+        resolveFilterRuntimeValues(
+          filterPredicates.saved_filter_predicate,
+          user?.id,
+          filterPredicates.saved_filter_variables || {},
+        ).value);
     }
     if (filterPredicates.predefined_search_predicate) {
       updatedFilter.$and.push(filterPredicates.predefined_search_predicate);

@@ -6,7 +6,7 @@ import { DropResult } from "@hello-pangea/dnd";
 import qs from "qs";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useSession } from "../../../hooks/useSession";
-import { resolveActiveUserId, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
+import { resolveFilterRuntimeValues, resolveSavedFilterVariables } from "../../../helpers/resolveActiveUserId";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import KanbanBoard from "./KanbanBoard";
@@ -572,7 +572,10 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
           }
           if (queryObject.custom_filter_predicate) {
             // @ts-ignore
-            filters.$and.push(queryObject.custom_filter_predicate);
+            filters.$and.push(resolveFilterRuntimeValues(
+              queryObject.custom_filter_predicate,
+              user?.id,
+            ).value);
           }
           if (queryObject.search_predicate) {
             // @ts-ignore
@@ -1059,7 +1062,10 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
       if (filterPredicates.custom_filter_predicate) {
         // @ts-ignore
-        queryfilter.$and.push(filterPredicates.custom_filter_predicate);
+        queryfilter.$and.push(resolveFilterRuntimeValues(
+          filterPredicates.custom_filter_predicate,
+          user?.id,
+        ).value);
       }
       if (filterPredicates.search_predicate) {
         // @ts-ignore
@@ -1068,7 +1074,11 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       if (filterPredicates.saved_filter_predicate) {
         // @ts-ignore
         queryfilter.$and.push(filterPredicates.resolved_saved_filter_predicate ||
-          resolveActiveUserId(filterPredicates.saved_filter_predicate, user?.id));
+          resolveFilterRuntimeValues(
+            filterPredicates.saved_filter_predicate,
+            user?.id,
+            filterPredicates.saved_filter_variables || {},
+          ).value);
       }
       if (filterPredicates.predefined_search_predicate) {
         // @ts-ignore
