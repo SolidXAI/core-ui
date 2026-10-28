@@ -90,6 +90,7 @@ export function validateEmbedInputs(fields: AgentInputDefinition[], suppliedValu
     if (missing.length) throw new MissingAgentInputsError(missing);
     for (const field of fields) {
         const value = values[field.name];
+        if (field.optional && (value === undefined || value === null || (typeof value === "string" && !value.trim()))) continue;
         let valid = false;
         switch (field.dataType) {
             case "string": valid = typeof value === "string"; break;
