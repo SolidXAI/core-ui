@@ -7,6 +7,7 @@ import {
     fetchAgentConfigVersionStatus,
     fetchAgentModelAssignments,
     fetchAgentProviders,
+    fetchProviderAuth,
     fetchProviderModels,
     fetchSessionList,
     getCachedAgentProviders,
@@ -237,12 +238,22 @@ export function SolidAgentChat({
         if (agentRuntime === "agentHub") {
             return [{ id: "solidx", name: "Native", installed: true, version: "" }];
         }
-        return getCachedAgentProviders(agentUrl);
+        const cached = getCachedAgentProviders(agentUrl);
+        if (cached && cached.length > 0) return cached;
+        return [
+            { id: "solidx", name: "Native", installed: true, authenticated: true, version: "" },
+            { id: "copilot", name: "GitHub Copilot", installed: true, authenticated: null },
+            { id: "cursor", name: "Cursor", installed: true, authenticated: null },
+            { id: "claude", name: "Claude Code", installed: true, authenticated: null },
+            { id: "codex", name: "Codex", installed: true, authenticated: null },
+            { id: "opencode", name: "OpenCode", installed: true, authenticated: null },
+        ];
     });
     const [loadingProviders, setLoadingProviders] = useState<boolean>(() => {
         if (agentRuntime === "agentHub") return false;
         return getCachedAgentProviders(agentUrl).length === 0;
     });
+    const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(() => agentRuntime !== "agentHub");
     const [selectedProvider, setSelectedProvider] = useState<string>(() => (agentRuntime === "agentHub" ? "solidx" : getStoredProvider()));
     const [models, setModels] = useState<ProviderModelInfo[]>(() => {
         if (agentRuntime === "agentHub") return [];
@@ -366,13 +377,15 @@ export function SolidAgentChat({
             setProviders([{ id: "solidx", name: "Native", installed: true, version: "" }]);
             setSelectedProvider("solidx");
             setLoadingProviders(false);
+            setIsCheckingAuth(false);
             return;
         }
         let alive = true;
         if (providers.length === 0) {
             setLoadingProviders(true);
         }
-        fetchAgentProviders(agentUrl).then((list) => {
+        setIsCheckingAuth(true);
+        fetchAgentProviders(agentUrl, false).then((list) => {
             if (!alive) return;
             const installed = (list || []).filter((p) => p.installed);
             setProviders(installed);
@@ -383,10 +396,31 @@ export function SolidAgentChat({
                     setSelectedProvider(installed[0].id);
                 }
             }
+            // Check auth individually per CLI provider where status is not already resolved
+            installed.forEach((p) => {
+                if (p.id === "solidx") return;
+                if (p.authenticated !== null && p.authenticated !== undefined) return;
+                fetchProviderAuth(agentUrl, p.id)
+                    .then((auth) => {
+                        if (!alive) return;
+                        setProviders((prev) =>
+                            prev.map((item) => (item.id === p.id ? { ...item, authenticated: auth } : item))
+                        );
+                    })
+                    .catch(() => {
+                        if (!alive) return;
+                        setProviders((prev) =>
+                            prev.map((item) => (item.id === p.id ? { ...item, authenticated: false } : item))
+                        );
+                    });
+            });
         }).catch(() => {
             if (alive && providers.length === 0) setProviders([]);
         }).finally(() => {
-            if (alive) setLoadingProviders(false);
+            if (alive) {
+                setLoadingProviders(false);
+                setIsCheckingAuth(false);
+            }
         });
         return () => { alive = false; };
     }, [agentRuntime, agentUrl, signedIn]);
@@ -1068,15 +1102,22 @@ export function SolidAgentChat({
         });
     }, [agentUrl, selectedProvider, selectedModel]);
 
+    const activeProviderObj = providers.find((p) => p.id === selectedProvider);
+    const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
+    const isSelectedProviderCheckingAuth =
+        selectedProvider !== "solidx" &&
+        (activeProviderObj?.authenticated === null || activeProviderObj?.authenticated === undefined);
+
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const send = useCallback(async (text: string) => {
-        if (!text.trim() || !runtime) return;
+        if (isSelectedProviderCheckingAuth || !text.trim() || !runtime) return;
         onInputsLocked?.(true);
         try { return await runtime.sendMessage(text, inputContext, [], messageInputs, beforeSend, "widget"); }
         catch (error) { onInputsLocked?.(false); throw error; }
-    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked]);
+    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked, isSelectedProviderCheckingAuth]);
     const sendWithAttachments = useCallback(
         async (text: string, attachments: AgentAttachment[]) => {
+            if (isSelectedProviderCheckingAuth) return;
             if ((!text.trim() && !attachments.length) || !runtime) return;
             onInputsLocked?.(true);
             try {
@@ -1086,7 +1127,7 @@ export function SolidAgentChat({
             }
             catch (error) { onInputsLocked?.(false); throw error; }
         },
-        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
+        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked, isSelectedProviderCheckingAuth],
     );
     useEffect(() => {
         const onEmbedCommand = (event: Event) => {
@@ -1138,9 +1179,6 @@ export function SolidAgentChat({
         : agent.connection === "connecting" ? "Connecting…"
         : offline ? "Reconnecting…" : "";
 
-    const activeProviderObj = providers.find((p) => p.id === selectedProvider);
-    // const providerDisplayName = activeProviderObj?.name || (selectedProvider ? selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1) : "");
-    const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
 
 
     const activeSessionId = agent.historySessionId || agent.sessionId;
@@ -1358,7 +1396,7 @@ export function SolidAgentChat({
                                             <div className={styles.providerDropdownHeader}>
                                                 <strong>Select AI Provider</strong>
                                             </div>
-                                            {loadingProviders ? (
+                                            {loadingProviders && providers.length === 0 ? (
                                                 <div className={styles.providerLoadingItem}>
                                                     <SolidSpinner size={13} className={styles.inlineSolidSpinner} />
                                                     <span>Loading providers...</span>
@@ -1367,7 +1405,9 @@ export function SolidAgentChat({
                                                 <div className={styles.providerList}>
                                                     {providers.map((p) => {
                                                         const isSelected = p.id === selectedProvider;
-                                                        const isUnauthenticated = p.authenticated === false;
+                                                        const isCli = p.id !== "solidx";
+                                                        const isAuthChecking = isCli && (p.authenticated === null || p.authenticated === undefined);
+                                                        const isUnauthenticated = isCli && !isAuthChecking && p.authenticated === false;
                                                         return (
                                                             <button
                                                                 key={p.id}
@@ -1378,7 +1418,25 @@ export function SolidAgentChat({
                                                                 <div className={styles.providerItemMeta}>
                                                                     <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
                                                                 </div>
-                                                                {isUnauthenticated && (
+                                                                {isAuthChecking ? (
+                                                                    <div className={styles.providerItemEnd}>
+                                                                        <SolidTooltip delayDuration={120}>
+                                                                            <SolidTooltipTrigger asChild>
+                                                                                <span
+                                                                                    className={styles.providerBadgeChecking}
+                                                                                    role="status"
+                                                                                    aria-label="Checking authentication status"
+                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                >
+                                                                                    <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
+                                                                                </span>
+                                                                            </SolidTooltipTrigger>
+                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
+                                                                                Checking authentication status…
+                                                                            </SolidTooltipContent>
+                                                                        </SolidTooltip>
+                                                                    </div>
+                                                                ) : isUnauthenticated ? (
                                                                     <div className={styles.providerItemEnd}>
                                                                         <SolidTooltip delayDuration={120}>
                                                                             <SolidTooltipTrigger asChild>
@@ -1398,7 +1456,7 @@ export function SolidAgentChat({
                                                                             </SolidTooltipContent>
                                                                         </SolidTooltip>
                                                                     </div>
-                                                                )}
+                                                                ) : null}
                                                             </button>
                                                         );
                                                     })}
@@ -1746,10 +1804,12 @@ export function SolidAgentChat({
                     const composerComponent = (
                         <AgentComposer
                             working={agent.working}
-                            disabled={!!agent.authError || isBusyTransitioning}
+                            disabled={!!agent.authError || isBusyTransitioning || isSelectedProviderCheckingAuth}
                             placeholder={
                                 isViewingHistory
                                     ? "Select a conversation to continue…"
+                                    : isSelectedProviderCheckingAuth
+                                    ? `Checking ${providerDisplayName || "provider"} authentication…`
                                     : isSwitchingProvider
                                     ? "Connecting..."
                                     : isStartingNewChat
@@ -1862,7 +1922,7 @@ export function SolidAgentChat({
                                                             <div className={styles.providerDropdownHeader}>
                                                                 <strong>Select AI Provider</strong>
                                                             </div>
-                                                            {loadingProviders ? (
+                                                            {loadingProviders && providers.length === 0 ? (
                                                                 <div className={styles.providerLoadingItem}>
                                                                     <SolidSpinner size={13} className={styles.inlineSolidSpinner} />
                                                                     <span>Loading providers...</span>
@@ -1871,7 +1931,9 @@ export function SolidAgentChat({
                                                                 <div className={styles.providerList}>
                                                                     {providers.map((p) => {
                                                                         const isSelected = p.id === selectedProvider;
-                                                                        const isUnauthenticated = p.authenticated === false;
+                                                                        const isCli = p.id !== "solidx";
+                                                                        const isAuthChecking = isCli && (p.authenticated === null || p.authenticated === undefined);
+                                                                        const isUnauthenticated = isCli && !isAuthChecking && p.authenticated === false;
                                                                         return (
                                                                             <button
                                                                                 key={p.id}
@@ -1882,7 +1944,25 @@ export function SolidAgentChat({
                                                                                 <div className={styles.providerItemMeta}>
                                                                                     <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
                                                                                 </div>
-                                                                                {isUnauthenticated && (
+                                                                                {isAuthChecking ? (
+                                                                                    <div className={styles.providerItemEnd}>
+                                                                                        <SolidTooltip delayDuration={120}>
+                                                                                            <SolidTooltipTrigger asChild>
+                                                                                                <span
+                                                                                                    className={styles.providerBadgeChecking}
+                                                                                                    role="status"
+                                                                                                    aria-label="Checking authentication status"
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                >
+                                                                                                    <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
+                                                                                                </span>
+                                                                                            </SolidTooltipTrigger>
+                                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
+                                                                                                Checking authentication status…
+                                                                                            </SolidTooltipContent>
+                                                                                        </SolidTooltip>
+                                                                                    </div>
+                                                                                ) : isUnauthenticated ? (
                                                                                     <div className={styles.providerItemEnd}>
                                                                                         <SolidTooltip delayDuration={120}>
                                                                                             <SolidTooltipTrigger asChild>
@@ -1897,12 +1977,12 @@ export function SolidAgentChat({
                                                                                             </SolidTooltipTrigger>
                                                                                             <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
                                                                                                 {p.id === "opencode"
-                                                                                                    ? "Unauthenticated: Free models are available; login required for paid models."
+                                                                                                    ? "Unauthenticated: Free models are available; CLI login required for paid models."
                                                                                                     : "Unauthenticated: Login required."}
                                                                                             </SolidTooltipContent>
                                                                                         </SolidTooltip>
                                                                                     </div>
-                                                                                )}
+                                                                                ) : null}
                                                                             </button>
                                                                         );
                                                                     })}

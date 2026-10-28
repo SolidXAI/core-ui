@@ -157,13 +157,13 @@ export function getCachedProviderModels(agentUrl: string, providerId: string): P
 }
 
 /** List installed execution providers (both native SolidX and CLI agents). */
-export async function fetchAgentProviders(agentUrl: string): Promise<AgentProviderInfo[]> {
+export async function fetchAgentProviders(agentUrl: string, checkAuth: boolean = false): Promise<AgentProviderInfo[]> {
     try {
         const auth = await loadAgentAuth(agentUrl);
         const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
         const headers: Record<string, string> = {};
         if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
-        const res = await fetch(`${baseUrl}/api/agent/providers`, { headers });
+        const res = await fetch(`${baseUrl}/api/agent/providers?check_auth=${checkAuth}`, { headers });
         if (!res.ok) return getCachedAgentProviders(agentUrl);
         const data = await res.json();
         const list = Array.isArray(data?.providers) ? data.providers : [];
@@ -178,6 +178,28 @@ export async function fetchAgentProviders(agentUrl: string): Promise<AgentProvid
         return list;
     } catch {
         return getCachedAgentProviders(agentUrl);
+    }
+}
+
+/** Check authentication for a specific provider on-demand. */
+export async function fetchProviderAuth(agentUrl: string, providerId: string, forceRefresh: boolean = false): Promise<boolean> {
+    if (providerId.toLowerCase() === "solidx" || providerId.toLowerCase() === "default") {
+        return true;
+    }
+    try {
+        const auth = await loadAgentAuth(agentUrl);
+        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
+        const headers: Record<string, string> = {};
+        if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
+        const res = await fetch(
+            `${baseUrl}/api/agent/providers/${encodeURIComponent(providerId)}/auth?force_refresh=${forceRefresh}`,
+            { headers },
+        );
+        if (!res.ok) return false;
+        const data = await res.json();
+        return Boolean(data?.authenticated);
+    } catch {
+        return false;
     }
 }
 

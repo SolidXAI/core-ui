@@ -41,7 +41,7 @@ export interface AgentProviderInfo {
     id: string;
     name: string;
     installed: boolean;
-    authenticated?: boolean;
+    authenticated?: boolean | null;
     version?: string;
     default_model?: string;
 }

@@ -593,6 +593,17 @@
   transform: scale(1.08);
 }
 
+.providerBadgeChecking {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--agent-muted, #94a3b8);
+  flex-shrink: 0;
+  cursor: default;
+  margin-left: auto;
+  opacity: 0.9;
+}
+
 .providerUnauthTooltip {
   max-width: 250px;
   font-size: 11px;
