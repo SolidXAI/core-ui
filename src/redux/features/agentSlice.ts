@@ -103,19 +103,19 @@ const agentSlice = createSlice({
                 historyPage: 1,
                 historySessionId: action?.payload?.historySessionId ?? null,
                 loadingHistory: action?.payload?.loadingHistory ?? false,
-                loadingOlder: false,
             });
         },
         agentHistoryLoadingStarted(state, action: PayloadAction<{ isOlder?: boolean } | undefined>) {
             if (action?.payload?.isOlder) {
                 state.loadingOlder = true;
+                state.olderHistoryFailed = false;
             } else {
                 state.loadingHistory = true;
             }
         },
-        agentHistoryLoadingFinished(state) {
-            state.loadingHistory = false;
+        agentOlderHistoryFailed(state) {
             state.loadingOlder = false;
+            state.olderHistoryFailed = true;
         },
         agentHistoryLoadingChanged(state, action: PayloadAction<boolean>) {
             state.loadingHistory = action.payload;
@@ -129,6 +129,7 @@ const agentSlice = createSlice({
             state.historyPage = page;
             state.loadingHistory = false;
             state.loadingOlder = false;
+            state.olderHistoryFailed = false;
             if (usage && (!state.usage || state.usage.totalTokens === 0)) {
                 state.usage = {
                     ...usage,
@@ -151,7 +152,7 @@ export const {
     agentUserMessageAdded,
     agentThreadReset,
     agentHistoryLoadingStarted,
-    agentHistoryLoadingFinished,
+    agentOlderHistoryFailed,
     agentHistoryLoadingChanged,
     agentHistoryLoaded,
     agentEventReceived,

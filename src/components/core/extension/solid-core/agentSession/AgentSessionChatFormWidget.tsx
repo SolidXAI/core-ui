@@ -35,6 +35,7 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
   const [hasMore, setHasMore] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [loadingOlder, setLoadingOlder] = React.useState(false);
+  const [loadOlderFailed, setLoadOlderFailed] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [refreshVersion, setRefreshVersion] = React.useState(0);
   const previousSessionId = React.useRef(sessionId);
@@ -52,6 +53,7 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
 
     setLoading(true);
     setError(false);
+    setLoadOlderFailed(false);
     if (sessionChanged) setItems([]);
     void fetchSessionHistory(sessionId).then(async (history) => {
       const chatItems = await resolveAttachmentMedia(historyToItems(history.messages ?? []));
@@ -72,6 +74,7 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
     if (sessionId == null || !hasMore || loadingOlder) return;
     const nextPage = page + 1;
     setLoadingOlder(true);
+    setLoadOlderFailed(false);
     try {
       const history = await fetchSessionHistory(sessionId, nextPage);
       const olderItems = await resolveAttachmentMedia(historyToItems(history.messages ?? []));
@@ -79,7 +82,8 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
       setPage(Number(history.page) || nextPage);
       setHasMore(history.has_more === true);
     } catch {
-      // Keep the loaded messages visible; the user can retry with the control.
+      // Keep the loaded messages visible; the thread offers a retry.
+      setLoadOlderFailed(true);
     } finally {
       setLoadingOlder(false);
     }
@@ -121,6 +125,7 @@ export function AgentSessionChatFormWidget({ formData, formViewData }: SolidForm
               working={false}
               hasMore={hasMore}
               loadingOlder={loadingOlder}
+              loadOlderFailed={loadOlderFailed}
               onLoadOlder={() => void loadOlder()}
               onReply={noOp}
               onPrompt={noOp}

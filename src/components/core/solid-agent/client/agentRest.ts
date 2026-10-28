@@ -182,6 +182,8 @@ export async function fetchAgentProviders(agentUrl: string, checkAuth: boolean =
     return list;
 }
 
+const PROVIDER_AUTH_TIMEOUT_MS = 15_000;
+
 /** Check authentication for a specific provider on-demand. */
 export async function fetchProviderAuth(
     agentUrl: string,
@@ -191,11 +193,19 @@ export async function fetchProviderAuth(
     if (providerId.toLowerCase() === "solidx" || providerId.toLowerCase() === "default") {
         return { providerId: "solidx", authenticated: true, status: "authenticated" };
     }
-    const data = await agentFetch<{ id?: string; authenticated?: boolean | null; status?: string }>(
-        agentUrl,
-        `/api/agent/providers/${encodeURIComponent(providerId)}/auth?force_refresh=${forceRefresh}`,
-        { cache: "no-store" },
-    );
+    // CLI auth checks can hang; give up so the composer does not stay locked.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PROVIDER_AUTH_TIMEOUT_MS);
+    let data: { id?: string; authenticated?: boolean | null; status?: string } | null;
+    try {
+        data = await agentFetch(
+            agentUrl,
+            `/api/agent/providers/${encodeURIComponent(providerId)}/auth?force_refresh=${forceRefresh}`,
+            { cache: "no-store", signal: controller.signal },
+        );
+    } finally {
+        clearTimeout(timer);
+    }
     if (!data) throw new Error(`Unable to verify ${providerId} authentication`);
     const authenticated = data.authenticated === true ? true : data.authenticated === false ? false : null;
     const status = data.status === "authenticated" || data.status === "unauthenticated" || data.status === "unknown"

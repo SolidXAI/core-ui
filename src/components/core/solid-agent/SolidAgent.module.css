@@ -925,18 +925,12 @@
   bottom: calc(100% + 4px);
 }
 /* When any row has its menu open, suppress hover styles and 3-dots on all other rows */
-.sidebarSessions:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover,
-.historyList:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover,
-.sidebarSessionsMenuOpen .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover,
-.historyListMenuOpen .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover {
+.sessionsMenuOpen .historyRow:not(.historyRowMenuOpen):not(.historyRowActive):hover {
   background: transparent;
 }
-.sidebarSessions:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen) .historyMenuWrap,
-.historyList:has(.historyRowMenuOpen) .historyRow:not(.historyRowMenuOpen) .historyMenuWrap,
-.sidebarSessionsMenuOpen .historyRow:not(.historyRowMenuOpen) .historyMenuWrap,
-.historyListMenuOpen .historyRow:not(.historyRowMenuOpen) .historyMenuWrap {
-  opacity: 0 !important;
-  pointer-events: none !important;
+.sessionsMenuOpen .historyRow:not(.historyRowMenuOpen) .historyMenuWrap {
+  opacity: 0;
+  pointer-events: none;
 }
 @keyframes historyMenuFadeIn {
   from {
@@ -987,8 +981,8 @@
   color: var(--agent-muted);
 }
 .historyMenuItemDanger:hover {
-  background: color-mix(in srgb, #ef4444 12%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, var(--agent-err) 12%, transparent);
+  color: var(--agent-err);
 }
 .historySentinel {
   height: 1px;
@@ -1023,8 +1017,8 @@
   justify-content: space-between;
   padding: 8px 12px;
   font-size: 11px;
-  color: #ef4444;
-  background: color-mix(in srgb, #ef4444 8%, transparent);
+  color: var(--agent-err);
+  background: color-mix(in srgb, var(--agent-err) 8%, transparent);
   border-radius: 6px;
   margin: 4px;
 }
@@ -1040,7 +1034,7 @@
   font-weight: 500;
 }
 .historyRetryBtn:hover {
-  background: color-mix(in srgb, #ef4444 15%, transparent);
+  background: color-mix(in srgb, var(--agent-err) 15%, transparent);
 }
 
 
@@ -1060,6 +1054,9 @@
   justify-content: flex-end;
 }
 .loadMore { align-self: center; }
+.loadOlderSentinel { height: 1px; width: 100%; flex: 0 0 auto; pointer-events: none; }
+.loadOlderStatus { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 0; }
+.loadOlderError { align-self: stretch; gap: 8px; }
 .notice { align-self: center; font-size: 12px; color: var(--agent-muted); }
 .spinner {
   width: 14px;
@@ -1071,62 +1068,45 @@
   flex: 0 0 auto;
 }
 @keyframes agentSpin { to { transform: rotate(360deg); } }
-.threadCenterLoading {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 240px !important;
+.thread.threadCenterLoading {
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
 }
 
 .centerSpinnerWrapper {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: auto !important;
-  max-width: none !important;
-  height: auto !important;
-  margin: auto !important;
-  padding: 24px !important;
-  align-self: center !important;
-  flex: 0 0 auto !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin: auto;
+  padding: 24px;
 }
 
-.centerSpinnerWrapper :global(.solid-spinner) {
-  color: var(--agent-fg, var(--foreground, #ffffff));
+/* Scoped under .root so these outrank the global .solid-spinner rule whatever the stylesheet order. */
+.root .centerSpinnerWrapper :global(.solid-spinner) {
+  color: var(--agent-fg);
 }
 
 .centerSpinnerWrapper :global(.solid-spinner-icon) {
-  color: var(--agent-fg, var(--foreground, #ffffff));
   stroke-width: 2.25px;
-  width: 28px !important;
-  height: 28px !important;
-  max-width: 28px !important;
-  max-height: 28px !important;
-  flex: 0 0 28px !important;
+  flex: 0 0 28px;
 }
 
-.inlineSolidSpinner {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex: 0 0 auto !important;
-  color: var(--agent-primary) !important;
-  vertical-align: middle !important;
-}
-
-.inlineSolidSpinner :global(.solid-spinner) {
-  color: inherit !important;
-  display: inline-flex !important;
+.root .inlineSolidSpinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: var(--agent-primary);
+  vertical-align: middle;
 }
 
 .inlineSolidSpinner :global(.solid-spinner-icon) {
-  color: inherit !important;
-  flex: 0 0 auto !important;
+  flex: 0 0 auto;
 }
+
+.root .signInBtn .inlineSolidSpinner { color: #fff; }
 
 .tableWrap { overflow-x: auto; }
 
@@ -2242,6 +2222,12 @@
   color: var(--agent-fg);
 }
 
+.sidebarNewChatLabel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .sidebarNewChatSplit {
   position: relative;
   display: flex;
@@ -2354,39 +2340,24 @@
 .fullScreenMain .thread > * {
   width: 100%;
   max-width: 720px;
-  align-self: center !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
+  align-self: center;
+  margin-left: auto;
+  margin-right: auto;
   box-sizing: border-box;
 }
 
-.fullScreenMain .threadCenterLoading {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  height: 100% !important;
-  margin: auto !important;
-  align-self: center !important;
+.fullScreenMain .thread.threadCenterLoading {
+  justify-content: center;
 }
 
-.fullScreenMain .threadCenterLoading > *,
-.fullScreenMain .threadCenterLoading .centerSpinnerWrapper,
-.fullScreenMain .threadCenterLoading :global(.solid-spinner) {
-  width: auto !important;
-  max-width: none !important;
-  margin: auto !important;
-  align-self: center !important;
+.fullScreenMain .thread.threadCenterLoading > * {
+  width: auto;
+  max-width: none;
+  margin: auto;
 }
 
 .fullScreenMain .userTurn {
-  width: 100%;
-  max-width: 720px;
-  margin: 0 auto !important;
-  align-self: center !important;
-  display: flex;
+  margin: 0 auto;
   justify-content: flex-end;
 }
 
@@ -2416,6 +2387,11 @@
 
 .sidebarTriggerFloating:active {
   transform: scale(0.96);
+}
+
+.sidebarTriggerFloating:focus-visible {
+  outline: 2px solid var(--agent-primary);
+  outline-offset: 2px;
 }
 
 /* Constrain empty state and suggestion cards symmetrically */

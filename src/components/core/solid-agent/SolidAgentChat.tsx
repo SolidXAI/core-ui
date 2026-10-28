@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, Check, ChevronDown, Clock, Copy, History, LogOut, Maximize2, Minimize2, Minus, MoreHorizontal, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, Copy, History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -29,7 +29,7 @@ import {
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
-import type { AgentAttachment, AgentMode, AgentProviderAuthStatus, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
+import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
@@ -47,25 +47,10 @@ import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../sh
 import { SolidSpinner } from "../../shad-cn-ui/SolidSpinner";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
+import { AgentProviderDropdown, formatProviderName, getProviderAuthStatus } from "./AgentProviderDropdown";
+import { AgentSessionList, AgentSessionSearch } from "./AgentSessionList";
 
-export function formatProviderName(raw?: string): string {
-    if (!raw) return "";
-    const trimmed = raw.trim();
-    const lower = trimmed.toLowerCase();
-    if (lower.includes("copilot")) return "Copilot";
-    if (lower.includes("droid")) return "Droid";
-    if (lower.includes("claude")) return "Claude";
-    return trimmed;
-}
-
-function getProviderAuthStatus(provider?: AgentProviderInfo): AgentProviderAuthStatus {
-    if (!provider) return "error";
-    if (provider.id === "solidx") return "authenticated";
-    if (provider.authStatus) return provider.authStatus;
-    if (provider.authenticated === true) return "authenticated";
-    if (provider.authenticated === false) return "unauthenticated";
-    return "checking";
-}
+export { formatProviderName };
 
 type Props = {
     agentUrl: string;
@@ -112,25 +97,10 @@ const SIDEBAR_WIDTH_STORAGE_KEY = "solid-agent.sidebar-width";
 const DEFAULT_SIDEBAR_WIDTH = 270;
 const MIN_SIDEBAR_WIDTH = 220;
 const MAX_SIDEBAR_WIDTH = 420;
+const HISTORY_PAGE_LIMIT = 20;
 
-function formatDate(iso: string | null) {
-    if (!iso) return "";
-    const date = new Date(iso);
-    const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
-    if (days === 0) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    if (days === 1) return "Yesterday";
-    if (days < 7) return date.toLocaleDateString([], { weekday: "short" });
-    return date.toLocaleDateString([], { month: "short", day: "numeric" });
-}
-
-function formatSessionTime(iso: string | null): string {
-    if (!iso) return "";
-    const date = new Date(iso);
-    const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
-    if (days === 0) return `Today, ${timeStr}`;
-    if (days === 1) return `Yesterday, ${timeStr}`;
-    return `${date.toLocaleDateString([], { month: "short", day: "numeric" })}, ${timeStr}`;
+function withStoredTitle(session: AgentSessionSummary, storedTitles: Record<string, string>): AgentSessionSummary {
+    return { ...session, title: storedTitles[session.session_id] || session.title || session.preview || "New conversation" };
 }
 
 function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<string, string>): { values?: Record<string, unknown>; error?: string } {
@@ -232,13 +202,9 @@ export function SolidAgentChat({
     const historyGenerationRef = useRef(0);
     const historyAbortRef = useRef<AbortController | null>(null);
     const historyInFlightRef = useRef(false);
-    const historySentinelRef = useRef<HTMLDivElement>(null);
-    const historyScrollRef = useRef<HTMLDivElement | null>(null);
     const [sessionToDelete, setSessionToDelete] = useState<AgentSessionSummary | null>(null);
     const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
-    const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
-    const [editingTitle, setEditingTitle] = useState("");
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
     const [agentConfigVersion, setAgentConfigVersion] = useState<number | null>(() => agentVersion ?? null);
@@ -247,20 +213,9 @@ export function SolidAgentChat({
         if (agentRuntime === "agentHub") {
             return [{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }];
         }
-        const cached = getCachedAgentProviders(agentUrl);
-        if (cached && cached.length > 0) {
-            return cached.map((provider) => provider.id === "solidx"
-                ? { ...provider, authenticated: true, authStatus: "authenticated" }
-                : { ...provider, authenticated: null, authStatus: "checking" });
-        }
-        return [
-            { id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" },
-            { id: "copilot", name: "GitHub Copilot", installed: true, authenticated: null, authStatus: "checking" },
-            { id: "cursor", name: "Cursor", installed: true, authenticated: null, authStatus: "checking" },
-            { id: "claude", name: "Claude Code", installed: true, authenticated: null, authStatus: "checking" },
-            { id: "codex", name: "Codex", installed: true, authenticated: null, authStatus: "checking" },
-            { id: "opencode", name: "OpenCode", installed: true, authenticated: null, authStatus: "checking" },
-        ];
+        return getCachedAgentProviders(agentUrl).map((provider) => provider.id === "solidx"
+            ? { ...provider, authenticated: true, authStatus: "authenticated" }
+            : { ...provider, authenticated: null, authStatus: "checking" });
     });
     const [loadingProviders, setLoadingProviders] = useState<boolean>(() => {
         if (agentRuntime === "agentHub") return false;
@@ -287,9 +242,6 @@ export function SolidAgentChat({
     const providerMenuRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
-    const [menuSessionId, setMenuSessionId] = useState<string | null>(null);
-    const [menuPlacement, setMenuPlacement] = useState<"up" | "down">("down");
-    const historyMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (agentVersion != null) setAgentConfigVersion(agentVersion);
@@ -643,26 +595,6 @@ export function SolidAgentChat({
     }, [showProviderMenu]);
 
     useEffect(() => {
-        if (!menuSessionId) return;
-        const handleOutside = (e: MouseEvent) => {
-            if (historyMenuRef.current && !historyMenuRef.current.contains(e.target as Node)) {
-                setMenuSessionId(null);
-            }
-        };
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                setMenuSessionId(null);
-            }
-        };
-        document.addEventListener("mousedown", handleOutside);
-        document.addEventListener("keydown", handleKeyDown);
-        return () => {
-            document.removeEventListener("mousedown", handleOutside);
-            document.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [menuSessionId]);
-
-    useEffect(() => {
         if (!resumingSessionId) return;
 
         // Clear resuming state once the target session has been loaded into Redux
@@ -682,17 +614,15 @@ export function SolidAgentChat({
     const handleSelectProvider = async (providerId: string) => {
         if (providerId === selectedProvider && !isSwitchingProvider) {
             setShowProviderMenu(false);
-            setMenuSessionId(null);
             return;
         }
         setIsSwitchingProvider(true);
         setShowProviderMenu(false);
-        setMenuSessionId(null);
-        skipProviderEffectRef.current = providerId;
         try {
             const res = await fetchProviderModels(agentUrl, providerId);
             const nextModels = res?.models || [];
             setModels(nextModels);
+            skipProviderEffectRef.current = providerId;
             setSelectedProvider(providerId);
             const savedModel = getStoredModel(providerId);
             const matchedModel = nextModels.find((m) => m.id === savedModel);
@@ -756,7 +686,6 @@ export function SolidAgentChat({
         }
         setShowHistory(false);
         setShowProviderMenu(false);
-        setMenuSessionId(null);
         onInputsLocked?.(false);
         if (!externalEmbed && agentRuntime === "agentHub" && requiredInputs.length && inputs === undefined) {
             setCollectedInputs(null);
@@ -777,26 +706,22 @@ export function SolidAgentChat({
         if (session.session_id === currentActiveId) {
             setShowHistory(false);
             setHistorySearchQuery("");
-            setEditingSessionId(null);
-            setMenuSessionId(null);
             return;
         }
 
         setResumingSessionId(session.session_id);
         setShowHistory(false);
         setHistorySearchQuery("");
-        setEditingSessionId(null);
-        setMenuSessionId(null);
         try {
             const targetProvider = session.provider || selectedProvider;
             const targetModel = session.model || selectedModel;
 
             let targetModels = models;
             if (targetProvider && targetProvider !== selectedProvider) {
-                skipProviderEffectRef.current = targetProvider;
-                setSelectedProvider(targetProvider);
                 const res = await fetchProviderModels(agentUrl, targetProvider);
                 targetModels = res?.models || [];
+                skipProviderEffectRef.current = targetProvider;
+                setSelectedProvider(targetProvider);
                 if (targetModels.length > 0) {
                     setModels(targetModels);
                 }
@@ -828,47 +753,14 @@ export function SolidAgentChat({
         }
     };
 
-    const handleDeleteSession = async (sessionId: string) => {
-        setMenuSessionId(null);
-        if (!window.confirm("Delete this conversation?")) return;
-        await deleteSession(agentUrl, sessionId);
-        setSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
-        if (sessionId === agent.historySessionId) runtime?.newChat();
-    };
-
     const handleSaveRename = async (sessionId: string, newTitle: string) => {
         const trimmed = newTitle.trim();
-        if (!trimmed) {
-            setEditingSessionId(null);
-            return;
-        }
+        if (!trimmed) return;
         setSessions((prev) =>
             prev.map((s) => (s.session_id === sessionId ? { ...s, title: trimmed } : s))
         );
-        setEditingSessionId(null);
         await renameSession(agentUrl, sessionId, trimmed);
     };
-
-    const filteredSessions = useMemo(() => {
-        const rawQ = historySearchQuery.trim().toLowerCase();
-        if (!rawQ) return sessions;
-        const cleanQ = rawQ.replace(/^(session[-_:]?|id[:=]?|#)/i, "").trim() || rawQ;
-        return sessions.filter((s) => {
-            const title = (s.title || s.preview || "").toLowerCase();
-            const sessionId = (s.session_id || "").toLowerCase();
-            const provider = (s.provider || "").toLowerCase();
-            const model = (s.model || "").toLowerCase();
-            const dateStr = s.created_at ? formatDate(s.created_at).toLowerCase() : "";
-            return (
-                title.includes(rawQ) ||
-                sessionId.includes(rawQ) ||
-                sessionId.includes(cleanQ) ||
-                provider.includes(rawQ) ||
-                model.includes(rawQ) ||
-                dateStr.includes(rawQ)
-            );
-        });
-    }, [sessions, historySearchQuery]);
 
     const handleModelChange = (modelId: string) => {
         setSelectedModel(modelId);
@@ -1017,7 +909,7 @@ export function SolidAgentChat({
             const page = await fetchSessionList(agentUrl, {
                 cursor,
                 search: search || undefined,
-                limit: 20,
+                limit: HISTORY_PAGE_LIMIT,
                 signal: controller.signal,
             });
 
@@ -1029,10 +921,7 @@ export function SolidAgentChat({
 
             setHistoryLoadError(null);
             const storedTitles = getStoredSessionTitles(agentUrl);
-            const enriched = page.sessions.map((s) => ({
-                ...s,
-                title: storedTitles[s.session_id] || s.title || s.preview || "New conversation",
-            }));
+            const enriched = page.sessions.map((s) => withStoredTitle(s, storedTitles));
 
             if (replace) {
                 setSessions(enriched);
@@ -1078,49 +967,40 @@ export function SolidAgentChat({
         };
     }, [shouldLoadHistory, debouncedHistorySearch, loadSessionPage]);
 
-    useEffect(() => {
-        const root = historyScrollRef.current;
-        const sentinel = historySentinelRef.current;
-        if (!shouldLoadHistory || !root || !sentinel || !historyHasMore || !historyNextCursor
-            || historyInitialLoading || historyLoadingMore || historyLoadError) {
-            return;
-        }
-        const observer = new IntersectionObserver((entries) => {
-            if (entries.some((entry) => entry.isIntersecting)) {
-                void loadSessionPage(historyNextCursor, debouncedHistorySearch, false);
-            }
-        }, { root, rootMargin: "0px 0px 200px 0px" });
-        observer.observe(sentinel);
-        return () => observer.disconnect();
-    }, [
-        shouldLoadHistory,
-        historyHasMore,
-        historyNextCursor,
-        historyInitialLoading,
-        historyLoadingMore,
-        historyLoadError,
-        debouncedHistorySearch,
-        loadSessionPage,
-    ]);
+    const loadMoreSessions = useCallback(() => {
+        if (historyNextCursor) void loadSessionPage(historyNextCursor, debouncedHistorySearch, false);
+    }, [historyNextCursor, debouncedHistorySearch, loadSessionPage]);
 
     const handleRetryHistory = useCallback(() => {
         setHistoryLoadError(null);
         void loadSessionPage(historyNextCursor, debouncedHistorySearch, sessions.length === 0);
     }, [historyNextCursor, debouncedHistorySearch, sessions.length, loadSessionPage]);
 
+    const sessionsRef = useRef(sessions);
+    sessionsRef.current = sessions;
+    // Only a visible, unfiltered list needs live updates; opening the list or clearing the search reloads it.
+    const historyListLiveRef = useRef(false);
+    historyListLiveRef.current = shouldLoadHistory && !debouncedHistorySearch;
+
     useEffect(() => {
         return eventBus.on(SOLID_AGENT_EVENTS.turnComplete, (payload) => {
             if (payload?.agentType && payload.agentType !== agentRuntime) return;
-            if (!payload?.sessionId) return;
-            setSessions((prev) => {
-                const exists = prev.some((s) => s.session_id === payload.sessionId);
-                if (!exists) {
-                    void loadSessionPage(null, debouncedHistorySearch, true);
-                }
-                return prev;
-            });
+            const sessionId = payload?.sessionId;
+            if (!sessionId || !historyListLiveRef.current) return;
+            if (sessionsRef.current.some((s) => s.session_id === sessionId)) return;
+            fetchSessionList(agentUrl, { limit: HISTORY_PAGE_LIMIT }).then((page) => {
+                if (!page?.sessions.length) return;
+                const storedTitles = getStoredSessionTitles(agentUrl);
+                setSessions((prev) => {
+                    const seen = new Set(prev.map((s) => s.session_id));
+                    const fresh = page.sessions
+                        .filter((s) => !seen.has(s.session_id))
+                        .map((s) => withStoredTitle(s, storedTitles));
+                    return fresh.length ? [...fresh, ...prev] : prev;
+                });
+            }).catch(() => undefined);
         });
-    }, [agentRuntime, loadSessionPage, debouncedHistorySearch]);
+    }, [agentRuntime, agentUrl]);
 
     useEffect(() => {
         return eventBus.on(SOLID_AGENT_EVENTS.sessionChanged, (payload) => {
@@ -1156,14 +1036,13 @@ export function SolidAgentChat({
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const send = useCallback(async (text: string) => {
-        if (isSelectedProviderCheckingAuth || !text.trim() || !runtime) return;
+        if (!text.trim() || !runtime) return;
         onInputsLocked?.(true);
         try { return await runtime.sendMessage(text, inputContext, [], messageInputs, beforeSend, "widget"); }
         catch (error) { onInputsLocked?.(false); throw error; }
-    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked, isSelectedProviderCheckingAuth]);
+    }, [runtime, inputContext, messageInputs, beforeSend, onInputsLocked]);
     const sendWithAttachments = useCallback(
         async (text: string, attachments: AgentAttachment[]) => {
-            if (isSelectedProviderCheckingAuth) return;
             if ((!text.trim() && !attachments.length) || !runtime) return;
             onInputsLocked?.(true);
             try {
@@ -1173,7 +1052,7 @@ export function SolidAgentChat({
             }
             catch (error) { onInputsLocked?.(false); throw error; }
         },
-        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked, isSelectedProviderCheckingAuth],
+        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
     );
     useEffect(() => {
         const onEmbedCommand = (event: Event) => {
@@ -1242,9 +1121,6 @@ export function SolidAgentChat({
         });
     }, [activeSessionId]);
 
-
-    // const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
-
     const empty = (
         <div className={styles.empty}>
             <div className={styles.emptyMark}><Sparkles size={24} /></div>
@@ -1268,6 +1144,112 @@ export function SolidAgentChat({
             </div>
         </div>
     );
+
+    const isViewingHistory = !isFullScreen && showHistory;
+    const isBusyTransitioning = isSwitchingProvider || isStartingNewChat || agent.loadingHistory || !!resumingSessionId || isViewingHistory;
+
+    const threadComponent = (
+        <AgentThread
+            items={agent.items}
+            thinking={agent.working && agent.thinking}
+            working={agent.working}
+            loadingHistory={agent.loadingHistory || !!resumingSessionId}
+            hasMore={agent.hasMoreHistory}
+            loadingOlder={agent.loadingOlder}
+            loadOlderFailed={agent.olderHistoryFailed}
+            context={agent.context ?? undefined}
+            emptyState={empty}
+            onLoadOlder={() => void runtime?.loadOlder()}
+            onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
+            onPrompt={send}
+        />
+    );
+
+    const composerComponent = (
+        <AgentComposer
+            working={agent.working}
+            disabled={!!agent.authError || isBusyTransitioning || isSelectedProviderCheckingAuth}
+            placeholder={
+                isViewingHistory
+                    ? "Select a conversation to continue…"
+                    : isSelectedProviderCheckingAuth
+                    ? `Checking ${providerDisplayName || "provider"} authentication…`
+                    : isSwitchingProvider
+                    ? "Connecting..."
+                    : isStartingNewChat
+                    ? "Starting new chat..."
+                    : (agent.loadingHistory || !!resumingSessionId)
+                    ? "Loading conversation..."
+                    : undefined
+            }
+            commands={agent.commands}
+            seed={seed?.text}
+            seedKey={seed?.key}
+            onSend={sendWithAttachments}
+            onStop={() => runtime?.cancel()}
+            canAttach={canAttach}
+            modelIndicator={
+                <AgentModelIndicator
+                    assignments={modelAssignments}
+                    activeProvider={selectedProvider}
+                    activeModel={selectedModel}
+                    providers={providers}
+                    models={models}
+                    onModelSelect={handleModelChange}
+                    disabled={agent.working || isBusyTransitioning}
+                    isThinking={isThinking}
+                    isFast={isFast}
+                    selectedReasoning={selectedReasoning}
+                    selectedSpeed={selectedSpeed}
+                    onThinkingToggle={handleThinkingToggle}
+                    onFastToggle={handleFastToggle}
+                    onReasoningSelect={handleReasoningChange}
+                    onSpeedSelect={handleSpeedChange}
+                />
+            }
+            contextPill={
+                <AgentContextPill
+                    usage={agent.usage}
+                    activeProvider={selectedProvider}
+                    modelName={selectedModel}
+                    disabled={agent.working || isBusyTransitioning}
+                />
+            }
+        />
+    );
+
+    const toggleProviderMenu = () => setShowProviderMenu((open) => !open);
+    const providerDropdown = showProviderMenu && (
+        <AgentProviderDropdown
+            providers={providers}
+            selectedProvider={selectedProvider}
+            loading={loadingProviders}
+            loadError={providersLoadError}
+            style={dropdownStyle}
+            onSelect={(providerId) => void handleSelectProvider(providerId)}
+            onRetryProviders={retryProviders}
+            onRetryAuth={retryProviderAuth}
+        />
+    );
+
+    const showSessionSearch = historyInitialLoading || sessions.length > 0 || !!historySearchQuery;
+    const sessionSearch = <AgentSessionSearch value={historySearchQuery} onChange={setHistorySearchQuery} />;
+    const sessionListProps = {
+        sessions,
+        loading: historyInitialLoading,
+        loadingMore: historyLoadingMore,
+        error: historyLoadError,
+        hasMore: historyHasMore,
+        searchQuery: debouncedHistorySearch,
+        activeSessionId: resumingSessionId || activeSessionId,
+        resumingSessionId,
+        providerLabel: getProviderBadgeLabel,
+        onResume: (session: AgentSessionSummary) => void handleResumeSession(session),
+        onRename: (sessionId: string, title: string) => void handleSaveRename(sessionId, title),
+        onDelete: setSessionToDelete,
+        onRetry: handleRetryHistory,
+        onLoadMore: loadMoreSessions,
+    };
 
     return (
         <>
@@ -1423,13 +1405,7 @@ export function SolidAgentChat({
                                         title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
                                         aria-label="Select AI execution provider"
                                         aria-expanded={showProviderMenu}
-                                        onClick={() => {
-                                            setShowProviderMenu((prev) => {
-                                                const next = !prev;
-                                                if (next) updateDropdownPosition();
-                                                return next;
-                                            });
-                                        }}
+                                        onClick={toggleProviderMenu}
                                     >
                                         {loadingProviders ? (
                                             <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
@@ -1437,115 +1413,7 @@ export function SolidAgentChat({
                                             <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
                                         )}
                                     </button>
-                                    {showProviderMenu && (
-                                        <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
-                                            <div className={styles.providerDropdownHeader}>
-                                                <strong>Select AI Provider</strong>
-                                                {providersLoadError && (
-                                                    <button type="button" className={styles.providerRetryButton} onClick={retryProviders}>
-                                                        Provider list unavailable — retry
-                                                    </button>
-                                                )}
-                                            </div>
-                                            {loadingProviders && providers.length === 0 ? (
-                                                <div className={styles.providerLoadingItem}>
-                                                    <SolidSpinner size={13} className={styles.inlineSolidSpinner} />
-                                                    <span>Loading providers...</span>
-                                                </div>
-                                            ) : (
-                                                <div className={styles.providerList}>
-                                                    {providers.map((p) => {
-                                                        const isSelected = p.id === selectedProvider;
-                                                        const isCli = p.id !== "solidx";
-                                                        const authStatus = getProviderAuthStatus(p);
-                                                        const isAuthChecking = isCli && authStatus === "checking";
-                                                        const isAuthError = isCli && authStatus === "error";
-                                                        const isUnauthenticated = isCli && authStatus === "unauthenticated";
-                                                        return (
-                                                            <button
-                                                                key={p.id}
-                                                                type="button"
-                                                                className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
-                                                                onClick={() => handleSelectProvider(p.id)}
-                                                            >
-                                                                <div className={styles.providerItemMeta}>
-                                                                    <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
-                                                                </div>
-                                                                {isAuthChecking ? (
-                                                                    <div className={styles.providerItemEnd}>
-                                                                        <SolidTooltip delayDuration={120}>
-                                                                            <SolidTooltipTrigger asChild>
-                                                                                <span
-                                                                                    className={styles.providerBadgeChecking}
-                                                                                    role="status"
-                                                                                    aria-label="Checking authentication status"
-                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                >
-                                                                                    <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
-                                                                                </span>
-                                                                            </SolidTooltipTrigger>
-                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
-                                                                                Checking authentication status…
-                                                                            </SolidTooltipContent>
-                                                                        </SolidTooltip>
-                                                                    </div>
-                                                                ) : isAuthError ? (
-                                                                    <div className={styles.providerItemEnd}>
-                                                                        <SolidTooltip delayDuration={120}>
-                                                                            <SolidTooltipTrigger asChild>
-                                                                                <span
-                                                                                    className={styles.providerBadgeAuthError}
-                                                                                    role="button"
-                                                                                    tabIndex={0}
-                                                                                    aria-label={`Retry ${formatProviderName(p.name)} authentication check`}
-                                                                                    onClick={(e) => {
-                                                                                        e.stopPropagation();
-                                                                                        retryProviderAuth(p.id);
-                                                                                    }}
-                                                                                    onKeyDown={(e) => {
-                                                                                        if (e.key === "Enter" || e.key === " ") {
-                                                                                            e.preventDefault();
-                                                                                            e.stopPropagation();
-                                                                                            retryProviderAuth(p.id);
-                                                                                        }
-                                                                                    }}
-                                                                                >
-                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
-                                                                                </span>
-                                                                            </SolidTooltipTrigger>
-                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
-                                                                                Could not verify authentication. Click to retry.
-                                                                            </SolidTooltipContent>
-                                                                        </SolidTooltip>
-                                                                    </div>
-                                                                ) : isUnauthenticated ? (
-                                                                    <div className={styles.providerItemEnd}>
-                                                                        <SolidTooltip delayDuration={120}>
-                                                                            <SolidTooltipTrigger asChild>
-                                                                                <span
-                                                                                    className={styles.providerBadgeUnauth}
-                                                                                    role="img"
-                                                                                    aria-label="Unauthenticated"
-                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                >
-                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
-                                                                                </span>
-                                                                            </SolidTooltipTrigger>
-                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
-                                                                                {p.id === "opencode"
-                                                                                    ? "Unauthenticated: Free models are available; CLI login required for paid models."
-                                                                                    : "Unauthenticated: Login required."}
-                                                                            </SolidTooltipContent>
-                                                                        </SolidTooltip>
-                                                                    </div>
-                                                                ) : null}
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                    {providerDropdown}
                                 </div>
                             )
                         )}
@@ -1557,14 +1425,8 @@ export function SolidAgentChat({
                                 aria-label="Chat history"
                                 aria-pressed={showHistory}
                                 onClick={() => {
-                                    setShowHistory((v) => {
-                                        if (!v) {
-                                            setHistorySearchQuery("");
-                                            setEditingSessionId(null);
-                                        }
-                                        setMenuSessionId(null);
-                                        return !v;
-                                    });
+                                    if (!showHistory) setHistorySearchQuery("");
+                                    setShowHistory(!showHistory);
                                 }}
                             >
                                 <History size={16} />
@@ -1578,8 +1440,6 @@ export function SolidAgentChat({
                             onClick={() => {
                                 setShowHistory(false);
                                 setHistorySearchQuery("");
-                                setEditingSessionId(null);
-                                setMenuSessionId(null);
                                 void signOutOfAgent(agentUrl);
                             }}
                         >
@@ -1645,299 +1505,7 @@ export function SolidAgentChat({
                     </div>
                 )}
 
-                {(() => {
-                    const renderSearchBox = () => (
-                        <div className={styles.historySearchBox}>
-                            <Search size={13} className={styles.historySearchIcon} />
-                            <input
-                                type="text"
-                                className={styles.historySearchInput}
-                                placeholder="Search by title, message, or session ID…"
-                                value={historySearchQuery}
-                                onChange={(e) => setHistorySearchQuery(e.target.value)}
-                                aria-label="Search past conversations"
-                            />
-                            {historySearchQuery && (
-                                <button
-                                    type="button"
-                                    className={styles.historySearchClear}
-                                    onClick={() => setHistorySearchQuery("")}
-                                    title="Clear search"
-                                    aria-label="Clear search"
-                                >
-                                    <X size={12} />
-                                </button>
-                            )}
-                        </div>
-                    );
-
-                    const renderSessionList = (items: AgentSessionSummary[] = filteredSessions) => (
-                        <>
-                            {historyInitialLoading ? (
-                                <>
-                                    <div className={styles.historySkeletonRow} />
-                                    <div className={styles.historySkeletonRow} />
-                                    <div className={styles.historySkeletonRow} />
-                                    <div className={styles.historySkeletonRow} />
-                                    <div className={styles.historySkeletonRow} />
-                                </>
-                            ) : (
-                                <>
-                                    {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
-                                    {sessions.length > 0 && items.length === 0 && (
-                                        <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
-                                    )}
-                            {items.map((session, index) => {
-                                const isResumingThis = resumingSessionId === session.session_id;
-                                const isCurrentSession = session.session_id === (resumingSessionId || agent.historySessionId || agent.sessionId);
-                                const isMenuOpen = menuSessionId === session.session_id;
-
-                                return (
-                                    <div
-                                        key={session.session_id}
-                                        className={`${styles.historyRow} ${isCurrentSession ? styles.historyRowActive : ""} ${isMenuOpen ? styles.historyRowMenuOpen : ""}`}
-                                    >
-                                        {editingSessionId === session.session_id ? (
-                                            <form
-                                                className={styles.historyRenameForm}
-                                                onSubmit={(e) => {
-                                                    e.preventDefault();
-                                                    void handleSaveRename(session.session_id, editingTitle);
-                                                }}
-                                            >
-                                                <input
-                                                    type="text"
-                                                    className={styles.historyRenameInput}
-                                                    value={editingTitle}
-                                                    onChange={(e) => setEditingTitle(e.target.value)}
-                                                    autoFocus
-                                                    onFocus={(e) => e.target.select()}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === "Escape") {
-                                                            e.stopPropagation();
-                                                            setEditingSessionId(null);
-                                                        }
-                                                    }}
-                                                    aria-label="Rename conversation"
-                                                />
-                                                <button
-                                                    type="submit"
-                                                    className={styles.iconBtn}
-                                                    aria-label="Save title"
-                                                    title="Save"
-                                                >
-                                                    <Check size={14} />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className={styles.iconBtn}
-                                                    aria-label="Cancel rename"
-                                                    title="Cancel"
-                                                    onClick={() => setEditingSessionId(null)}
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </form>
-                                        ) : (
-                                            <>
-                                                <button
-                                                    type="button"
-                                                    className={`${styles.historyItem} ${isCurrentSession ? styles.historyItemActive : ""}`}
-                                                    onClick={() => void handleResumeSession(session)}
-                                                    disabled={isResumingThis || !!resumingSessionId}
-                                                    title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
-                                                >
-                                                    {isResumingThis && <SolidSpinner size={13} className={styles.inlineSolidSpinner} aria-hidden="true" />}
-                                                    <span className={styles.historyPreview}>
-                                                        {session.title || session.preview || "New conversation"}
-                                                    </span>
-                                                    {session.provider && (
-                                                        <span
-                                                            className={styles.historyProviderName}
-                                                            title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
-                                                        >
-                                                            {getProviderBadgeLabel(session.provider)}
-                                                        </span>
-                                                    )}
-                                                </button>
-                                                <div
-                                                    className={styles.historyMenuWrap}
-                                                    ref={isMenuOpen ? historyMenuRef : undefined}
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        className={`${styles.historyMenuTrigger} ${isMenuOpen ? styles.historyMenuTriggerActive : ""}`}
-                                                        aria-label="Conversation options"
-                                                        title="Options"
-                                                        aria-expanded={isMenuOpen}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (isMenuOpen) {
-                                                                setMenuSessionId(null);
-                                                                e.currentTarget.blur();
-                                                            } else {
-                                                                const btn = e.currentTarget;
-                                                                const scrollContainer = btn.closest(`.${styles.historyList}`) || btn.closest(`.${styles.sidebarSessions}`);
-                                                                let openUp = false;
-                                                                if (scrollContainer) {
-                                                                    const btnRect = btn.getBoundingClientRect();
-                                                                    const containerRect = scrollContainer.getBoundingClientRect();
-                                                                    const spaceBelow = containerRect.bottom - btnRect.bottom;
-                                                                    openUp = spaceBelow < 115;
-                                                                } else {
-                                                                    openUp = index >= items.length - 3 && items.length > 3;
-                                                                }
-                                                                setMenuPlacement(openUp ? "up" : "down");
-                                                                setMenuSessionId(session.session_id);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <MoreHorizontal size={14} />
-                                                    </button>
-                                                    {isMenuOpen && (
-                                                        <div
-                                                            className={`${styles.historyMenuDropdown} ${menuPlacement === "up" ? styles.historyMenuDropdownUp : ""}`}
-                                                            role="menu"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            onMouseDown={(e) => e.stopPropagation()}
-                                                        >
-                                                            {session.created_at && (
-                                                                <div className={styles.historyMenuTime}>
-                                                                    <Clock size={12} className={styles.historyMenuTimeIcon} />
-                                                                    <span>{formatSessionTime(session.created_at)}</span>
-                                                                </div>
-                                                            )}
-                                                            <button
-                                                                type="button"
-                                                                className={styles.historyMenuItem}
-                                                                role="menuitem"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setMenuSessionId(null);
-                                                                    setEditingSessionId(session.session_id);
-                                                                    setEditingTitle(session.title || session.preview || "New conversation");
-                                                                }}
-                                                            >
-                                                                <Pencil size={13} />
-                                                                <span>Rename</span>
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                className={`${styles.historyMenuItem} ${styles.historyMenuItemDanger}`}
-                                                                role="menuitem"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    setMenuSessionId(null);
-                                                                    setSessionToDelete(session);
-                                                                }}
-                                                            >
-                                                                <Trash2 size={13} />
-                                                                <span>Delete</span>
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                            {historyLoadingMore && (
-                                <>
-                                    <div className={styles.historySkeletonRow} />
-                                    <div className={styles.historySkeletonRow} />
-                                </>
-                            )}
-                            {historyLoadError && (
-                                <div className={styles.historyErrorRow}>
-                                    <span>{historyLoadError}</span>
-                                    <button type="button" className={styles.historyRetryBtn} onClick={handleRetryHistory}>
-                                        Retry
-                                    </button>
-                                </div>
-                            )}
-                            {historyHasMore && <div ref={historySentinelRef} className={styles.historySentinel} />}
-                        </>
-                    )}
-                </>
-            );
-
-
-
-                    const isViewingHistory = !isFullScreen && showHistory;
-                    const isBusyTransitioning = isSwitchingProvider || isStartingNewChat || agent.loadingHistory || !!resumingSessionId || isViewingHistory;
-
-                    const threadComponent = (
-                        <AgentThread
-                            items={agent.items}
-                            thinking={agent.working && agent.thinking}
-                            working={agent.working}
-                            loadingHistory={agent.loadingHistory || !!resumingSessionId}
-                            hasMore={agent.hasMoreHistory}
-                            loadingOlder={agent.loadingOlder}
-                            context={agent.context ?? undefined}
-                            emptyState={empty}
-                            onLoadOlder={() => void runtime?.loadOlder()}
-                            onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
-                            onPrompt={send}
-                        />
-                    );
-
-                    const composerComponent = (
-                        <AgentComposer
-                            working={agent.working}
-                            disabled={!!agent.authError || isBusyTransitioning || isSelectedProviderCheckingAuth}
-                            placeholder={
-                                isViewingHistory
-                                    ? "Select a conversation to continue…"
-                                    : isSelectedProviderCheckingAuth
-                                    ? `Checking ${providerDisplayName || "provider"} authentication…`
-                                    : isSwitchingProvider
-                                    ? "Connecting..."
-                                    : isStartingNewChat
-                                    ? "Starting new chat..."
-                                    : (agent.loadingHistory || !!resumingSessionId)
-                                    ? "Loading conversation..."
-                                    : undefined
-                            }
-                            commands={agent.commands}
-                            seed={seed?.text}
-                            seedKey={seed?.key}
-                            onSend={sendWithAttachments}
-                            onStop={() => runtime?.cancel()}
-                            canAttach={canAttach}
-                            modelIndicator={
-                                <AgentModelIndicator
-                                    assignments={modelAssignments}
-                                    activeProvider={selectedProvider}
-                                    activeModel={selectedModel}
-                                    providers={providers}
-                                    models={models}
-                                    onModelSelect={handleModelChange}
-                                    disabled={agent.working || isBusyTransitioning}
-                                    isThinking={isThinking}
-                                    isFast={isFast}
-                                    selectedReasoning={selectedReasoning}
-                                    selectedSpeed={selectedSpeed}
-                                    onThinkingToggle={handleThinkingToggle}
-                                    onFastToggle={handleFastToggle}
-                                    onReasoningSelect={handleReasoningChange}
-                                    onSpeedSelect={handleSpeedChange}
-                                />
-                            }
-                            contextPill={
-                                <AgentContextPill
-                                    usage={agent.usage}
-                                    activeProvider={selectedProvider}
-                                    modelName={selectedModel}
-                                    disabled={agent.working || isBusyTransitioning}
-                                />
-                            }
-                        />
-                    );
-
-                    if (isFullScreen) {
-                        return (
+                {isFullScreen ? (
                             <div className={styles.fullScreenLayout} ref={fullScreenLayoutRef}>
                                 {sidebarOpen && (
                                     <>
@@ -1961,7 +1529,7 @@ export function SolidAgentChat({
                                                     disabled={isStartingNewChat || !!resumingSessionId}
                                                     onClick={handleStartNewChat}
                                                 >
-                                                    <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                                                    <span className={styles.sidebarNewChatLabel}>
                                                         {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
                                                         <span>New chat</span>
                                                     </span>
@@ -1985,13 +1553,7 @@ export function SolidAgentChat({
                                                         title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
                                                         aria-label="Select AI execution provider"
                                                         aria-expanded={showProviderMenu}
-                                                        onClick={() => {
-                                                            setShowProviderMenu((prev) => {
-                                                                const next = !prev;
-                                                                if (next) updateDropdownPosition();
-                                                                return next;
-                                                            });
-                                                        }}
+                                                        onClick={toggleProviderMenu}
                                                     >
                                                         {loadingProviders ? (
                                                             <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
@@ -1999,130 +1561,16 @@ export function SolidAgentChat({
                                                             <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
                                                         )}
                                                     </button>
-                                                    {showProviderMenu && (
-                                                        <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
-                                                            <div className={styles.providerDropdownHeader}>
-                                                                <strong>Select AI Provider</strong>
-                                                                {providersLoadError && (
-                                                                    <button type="button" className={styles.providerRetryButton} onClick={retryProviders}>
-                                                                        Provider list unavailable — retry
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                            {loadingProviders && providers.length === 0 ? (
-                                                                <div className={styles.providerLoadingItem}>
-                                                                    <SolidSpinner size={13} className={styles.inlineSolidSpinner} />
-                                                                    <span>Loading providers...</span>
-                                                                </div>
-                                                            ) : (
-                                                                <div className={styles.providerList}>
-                                                                    {providers.map((p) => {
-                                                                        const isSelected = p.id === selectedProvider;
-                                                                        const isCli = p.id !== "solidx";
-                                                                        const authStatus = getProviderAuthStatus(p);
-                                                                        const isAuthChecking = isCli && authStatus === "checking";
-                                                                        const isAuthError = isCli && authStatus === "error";
-                                                                        const isUnauthenticated = isCli && authStatus === "unauthenticated";
-                                                                        return (
-                                                                            <button
-                                                                                key={p.id}
-                                                                                type="button"
-                                                                                className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
-                                                                                onClick={() => handleSelectProvider(p.id)}
-                                                                            >
-                                                                                <div className={styles.providerItemMeta}>
-                                                                                    <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
-                                                                                </div>
-                                                                                {isAuthChecking ? (
-                                                                                    <div className={styles.providerItemEnd}>
-                                                                                        <SolidTooltip delayDuration={120}>
-                                                                                            <SolidTooltipTrigger asChild>
-                                                                                                <span
-                                                                                                    className={styles.providerBadgeChecking}
-                                                                                                    role="status"
-                                                                                                    aria-label="Checking authentication status"
-                                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                                >
-                                                                                                    <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
-                                                                                                </span>
-                                                                                            </SolidTooltipTrigger>
-                                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
-                                                                                                Checking authentication status…
-                                                                                            </SolidTooltipContent>
-                                                                                        </SolidTooltip>
-                                                                                    </div>
-                                                                                ) : isAuthError ? (
-                                                                                    <div className={styles.providerItemEnd}>
-                                                                                        <SolidTooltip delayDuration={120}>
-                                                                                            <SolidTooltipTrigger asChild>
-                                                                                                <span
-                                                                                                    className={styles.providerBadgeAuthError}
-                                                                                                    role="button"
-                                                                                                    tabIndex={0}
-                                                                                                    aria-label={`Retry ${formatProviderName(p.name)} authentication check`}
-                                                                                                    onClick={(e) => {
-                                                                                                        e.stopPropagation();
-                                                                                                        retryProviderAuth(p.id);
-                                                                                                    }}
-                                                                                                    onKeyDown={(e) => {
-                                                                                                        if (e.key === "Enter" || e.key === " ") {
-                                                                                                            e.preventDefault();
-                                                                                                            e.stopPropagation();
-                                                                                                            retryProviderAuth(p.id);
-                                                                                                        }
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
-                                                                                                </span>
-                                                                                            </SolidTooltipTrigger>
-                                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
-                                                                                                Could not verify authentication. Click to retry.
-                                                                                            </SolidTooltipContent>
-                                                                                        </SolidTooltip>
-                                                                                    </div>
-                                                                                ) : isUnauthenticated ? (
-                                                                                    <div className={styles.providerItemEnd}>
-                                                                                        <SolidTooltip delayDuration={120}>
-                                                                                            <SolidTooltipTrigger asChild>
-                                                                                                <span
-                                                                                                    className={styles.providerBadgeUnauth}
-                                                                                                    role="img"
-                                                                                                    aria-label="Unauthenticated"
-                                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                                >
-                                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
-                                                                                                </span>
-                                                                                            </SolidTooltipTrigger>
-                                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
-                                                                                                {p.id === "opencode"
-                                                                                                    ? "Unauthenticated: Free models are available; CLI login required for paid models."
-                                                                                                    : "Unauthenticated: Login required."}
-                                                                                            </SolidTooltipContent>
-                                                                                        </SolidTooltip>
-                                                                                    </div>
-                                                                                ) : null}
-                                                                            </button>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
+                                                    {providerDropdown}
                                                 </div>
                                             )}
                                         </div>
-                                        {(historyInitialLoading || sessions.length > 0 || historySearchQuery) && (
+                                        {showSessionSearch && (
                                             <div className={styles.sidebarSearchWrap}>
-                                                {renderSearchBox()}
+                                                {sessionSearch}
                                             </div>
                                         )}
-                                        <div
-                                            className={`${styles.sidebarSessions} ${menuSessionId ? styles.sidebarSessionsMenuOpen : ""}`}
-                                            ref={(el) => { historyScrollRef.current = el; }}
-                                        >
-                                            {(historyInitialLoading || sessions.length > 0) && <div className={styles.sidebarSectionTitle}>Recents</div>}
-                                            {renderSessionList()}
-                                        </div>
+                                        <AgentSessionList className={styles.sidebarSessions} sectionTitle="Recents" {...sessionListProps} />
                                     </aside>
                                     <div
                                         className={`${styles.sidebarResizer} ${isDraggingSidebar ? styles.sidebarResizerActive : ""}`}
@@ -2143,7 +1591,7 @@ export function SolidAgentChat({
                                         <SolidTooltipTrigger asChild>
                                             <button
                                                 type="button"
-                                                className={`solid-admin-sidebar-trigger ${styles.sidebarTriggerFloating}`}
+                                                className={styles.sidebarTriggerFloating}
                                                 onClick={() => setSidebarOpen((v) => !v)}
                                                 title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
                                                 aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
@@ -2163,28 +1611,19 @@ export function SolidAgentChat({
                                     {composerComponent}
                                 </div>
                             </div>
-                        );
-                    }
-
-                    return (
-                        <>
-                            {showHistory ? (
-                                <div className={styles.historyPanel} aria-label="Past conversations">
-                                    {(historyInitialLoading || sessions.length > 0 || historySearchQuery) && renderSearchBox()}
-                                    <div
-                                        className={`${styles.historyList} ${menuSessionId ? styles.historyListMenuOpen : ""}`}
-                                        ref={(el) => { historyScrollRef.current = el; }}
-                                    >
-                                        {renderSessionList()}
-                                    </div>
-                                </div>
-                            ) : (
-                                threadComponent
-                            )}
-                            {composerComponent}
-                        </>
-                    );
-                })()}
+                ) : (
+                    <>
+                        {showHistory ? (
+                            <div className={styles.historyPanel} aria-label="Past conversations">
+                                {showSessionSearch && sessionSearch}
+                                <AgentSessionList className={styles.historyList} {...sessionListProps} />
+                            </div>
+                        ) : (
+                            threadComponent
+                        )}
+                        {composerComponent}
+                    </>
+                )}
                 </>
             )}
         </>

@@ -19,6 +19,27 @@ const TOOL_PREFIXES = [
     "solid_",
 ];
 
+/**
+ * Returns the source between the parenthesis at `openIndex` and its matching close,
+ * skipping parentheses inside string literals. Unbalanced input yields the remainder.
+ */
+function readCallArgs(code: string, openIndex: number): string {
+    let depth = 0;
+    let quote: string | null = null;
+    for (let i = openIndex; i < code.length; i++) {
+        const ch = code[i];
+        if (quote) {
+            if (ch === "\\") i++;
+            else if (ch === quote) quote = null;
+            continue;
+        }
+        if (ch === '"' || ch === "'" || ch === "`") quote = ch;
+        else if (ch === "(") depth++;
+        else if (ch === ")" && --depth === 0) return code.slice(openIndex + 1, i);
+    }
+    return code.slice(openIndex + 1);
+}
+
 export function parseExecuteCode(rawCode: unknown): {
     innerTool?: string;
     innerArgs?: Record<string, unknown>;
@@ -28,10 +49,10 @@ export function parseExecuteCode(rawCode: unknown): {
     const code = rawCode.trim();
 
     // 1. Detect tool invocation: tools.solidx.<tool>(<args>), tools["solidx"].<tool>(<args>), tools.<server>.<tool>(<args>), or solidx.<tool>(<args>)
-    const toolCallMatch = code.match(/(?:await\s+)?(?:tools\.(?:solidx|[\w-]+)\.|tools\[["'](?:solidx|[\w-]+)["']\]\.|solidx\.)([a-zA-Z0-9_]+)\s*\(([\s\S]*?)\)/);
+    const toolCallMatch = /(?:tools\.(?:solidx|[\w-]+)\.|tools\[["'](?:solidx|[\w-]+)["']\]\.|\bsolidx\.)([a-zA-Z0-9_]+)\s*\(/.exec(code);
     if (toolCallMatch) {
         const innerTool = toolCallMatch[1];
-        const rawArgStr = toolCallMatch[2].trim();
+        const rawArgStr = readCallArgs(code, toolCallMatch.index + toolCallMatch[0].length - 1).trim();
         let innerArgs: Record<string, unknown> = {};
         if (rawArgStr.startsWith("{") && rawArgStr.endsWith("}")) {
             try {
@@ -51,9 +72,9 @@ export function parseExecuteCode(rawCode: unknown): {
     }
 
     // 2. Detect tool search: search({ query: "..." }) or search("...")
-    const searchMatch = code.match(/(?:await\s+)?search\s*\(([\s\S]*?)\)/);
+    const searchMatch = /\bsearch\s*\(/.exec(code);
     if (searchMatch) {
-        const rawArg = searchMatch[1].trim();
+        const rawArg = readCallArgs(code, searchMatch.index + searchMatch[0].length - 1).trim();
         let query = "";
         const qm = rawArg.match(/query\s*:\s*["']([^"']+)["']/) || rawArg.match(/^["']([^"']+)["']/);
         if (qm) query = qm[1];

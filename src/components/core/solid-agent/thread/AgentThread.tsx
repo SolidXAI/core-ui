@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "../SolidAgent.module.css";
@@ -17,6 +17,8 @@ type Props = {
     loadingHistory?: boolean;
     hasMore: boolean;
     loadingOlder?: boolean;
+    /** The last older-page load failed; auto-loading pauses until the user retries. */
+    loadOlderFailed?: boolean;
     context?: AgentContext;
     emptyState?: React.ReactNode;
     onLoadOlder: () => void;
@@ -169,41 +171,23 @@ function AgentActivityDisclosure({
 }
 
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
-export function AgentThread({ items, thinking, working = thinking, loadingHistory = false, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
-    const scrollRef = useRef<HTMLDivElement>(null);
+export function AgentThread({ items, thinking, working = thinking, loadingHistory = false, hasMore, loadingOlder = false, loadOlderFailed = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
+    // The scroll container unmounts while history loads or the empty state shows, so it is tracked as state.
+    const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
     const topSentinelRef = useRef<HTMLDivElement>(null);
     const pinned = useRef(true);
     const prevHeight = useRef(0);
     const prevFirstId = useRef<string | undefined>(undefined);
-    const isFetchingRef = useRef(false);
-    const safetyTimeoutRef = useRef<number | null>(null);
-    const [internalLoading, setInternalLoading] = useState(false);
-    const isLoadingOlder = loadingOlder || internalLoading;
+    const attachScrollEl = useCallback((el: HTMLDivElement | null) => {
+        if (el) pinned.current = true;
+        setScrollEl(el);
+    }, []);
 
     const onLoadOlderRef = useRef(onLoadOlder);
     onLoadOlderRef.current = onLoadOlder;
 
-    const triggerLoadOlder = React.useCallback(() => {
-        if (!hasMore || isFetchingRef.current || loadingOlder) return;
-        isFetchingRef.current = true;
-        setInternalLoading(true);
-
-        if (safetyTimeoutRef.current !== null) {
-            window.clearTimeout(safetyTimeoutRef.current);
-        }
-
-        // Safety fallback timeout: only releases if network errors and items never update
-        safetyTimeoutRef.current = window.setTimeout(() => {
-            isFetchingRef.current = false;
-            setInternalLoading(false);
-            safetyTimeoutRef.current = null;
-        }, 8000);
-
-        onLoadOlderRef.current();
-    }, [hasMore, loadingOlder]);
-
     useLayoutEffect(() => {
-        const el = scrollRef.current;
+        const el = scrollEl;
         if (!el) return;
         const firstId = items[0]?.id;
         if (prevFirstId.current && firstId !== prevFirstId.current && prevHeight.current) {
@@ -214,18 +198,10 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
         }
         prevFirstId.current = firstId;
         prevHeight.current = el.scrollHeight;
-
-        // When new items arrive, release the fetching lock and dismiss the loader steadily
-        if (safetyTimeoutRef.current !== null) {
-            window.clearTimeout(safetyTimeoutRef.current);
-            safetyTimeoutRef.current = null;
-        }
-        isFetchingRef.current = false;
-        setInternalLoading(false);
-    }, [items]);
+    }, [items, scrollEl]);
 
     useEffect(() => {
-        const el = scrollRef.current;
+        const el = scrollEl;
         if (!el) return;
         const onScroll = () => {
             pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
@@ -233,30 +209,21 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
         };
         el.addEventListener("scroll", onScroll, { passive: true });
         return () => el.removeEventListener("scroll", onScroll);
-    }, []);
+    }, [scrollEl]);
 
     useEffect(() => {
-        const rootEl = scrollRef.current;
         const sentinelEl = topSentinelRef.current;
-        if (!rootEl || !sentinelEl || !hasMore) return;
+        if (!scrollEl || !sentinelEl || !hasMore || loadingOlder || loadOlderFailed) return;
 
         const observer = new IntersectionObserver(
             (entries) => {
-                const [entry] = entries;
-                if (entry?.isIntersecting && !isFetchingRef.current && !loadingOlder) {
-                    triggerLoadOlder();
-                }
+                if (entries.some((entry) => entry.isIntersecting)) onLoadOlderRef.current();
             },
-            {
-                root: rootEl,
-                rootMargin: "80px 0px 0px 0px",
-                threshold: 0,
-            }
+            { root: scrollEl, rootMargin: "80px 0px 0px 0px", threshold: 0 },
         );
-
         observer.observe(sentinelEl);
         return () => observer.disconnect();
-    }, [hasMore, isLoadingOlder, triggerLoadOlder]);
+    }, [scrollEl, hasMore, loadingOlder, loadOlderFailed]);
 
     if (loadingHistory) {
         return (
@@ -286,18 +253,21 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
     );
 
     return (
-        <div ref={scrollRef} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
-            {hasMore && <div ref={topSentinelRef} style={{ height: 1, width: "100%", pointerEvents: "none" }} aria-hidden="true" />}
-            {isLoadingOlder && (
-                <div
-                    className={`${styles.notice} ${styles.loadMore}`}
-                    aria-live="polite"
-                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "8px 0" }}
-                >
+        <div ref={attachScrollEl} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
+            {hasMore && <div ref={topSentinelRef} className={styles.loadOlderSentinel} aria-hidden="true" />}
+            {loadingOlder ? (
+                <div className={`${styles.notice} ${styles.loadOlderStatus}`} role="status">
                     <SolidSpinner size={14} className={styles.inlineSolidSpinner} aria-hidden="true" />
                     <span>Loading earlier messages…</span>
                 </div>
-            )}
+            ) : hasMore && loadOlderFailed ? (
+                <div className={`${styles.historyErrorRow} ${styles.loadOlderError}`} role="alert">
+                    <span>Couldn&rsquo;t load earlier messages.</span>
+                    <button type="button" className={styles.historyRetryBtn} onClick={() => onLoadOlderRef.current()}>
+                        Retry
+                    </button>
+                </div>
+            ) : null}
             {groups.map((group) => {
                 if (group.kind === "user") {
                     return (

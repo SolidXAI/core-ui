@@ -22,6 +22,7 @@ export type AgentThreadState = {
     thinking: boolean;
     loadingHistory: boolean;
     loadingOlder: boolean;
+    olderHistoryFailed: boolean;
     authError: string | null;
     liveToolId: string | null;
     streamingId: string | null;
@@ -39,6 +40,7 @@ export function createThreadState(): AgentThreadState {
         thinking: false,
         loadingHistory: false,
         loadingOlder: false,
+        olderHistoryFailed: false,
         authError: null,
         liveToolId: null,
         streamingId: null,

@@ -5,8 +5,8 @@ import {
     agentEventReceived,
     agentHistoryLoaded,
     agentHistoryLoadingChanged,
-    agentHistoryLoadingFinished,
     agentHistoryLoadingStarted,
+    agentOlderHistoryFailed,
     agentThreadReset,
     agentUserMessageAdded,
     type AgentState,
@@ -380,26 +380,25 @@ export class AgentRuntime {
         this.socket.close();
     }
 
+    private isCurrentHistoryLoad(generation: number, historySessionId: string) {
+        return generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId;
+    }
+
     private async loadHistory(historySessionId: string, page: number) {
         const key = `${historySessionId}:${page}`;
         if (this.loadingHistoryPages.has(key) || this.loadedHistoryPages.has(key)) return;
         const generation = this.historyGeneration;
+        const isOlder = page > 1;
         this.loadingHistoryPages.set(key, generation);
-        this.dispatch(agentHistoryLoadingStarted({ isOlder: page > 1 }));
+        this.dispatch(agentHistoryLoadingStarted({ isOlder }));
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
-            this.loadedHistoryPages.add(key);
-            if (!result) {
-                this.dispatch(agentHistoryLoadingFinished());
-                return;
-            }
+            if (!result) throw new Error("History page unavailable");
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
             const rawItems = historyToItems(result.messages ?? []);
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
-            if (generation !== this.historyGeneration || (this.historySessionId && this.historySessionId !== historySessionId)) {
-                this.dispatch(agentHistoryLoadingFinished());
-                return;
-            }
+            if (!this.isCurrentHistoryLoad(generation, historySessionId)) return;
+            this.loadedHistoryPages.add(key);
             const sessionUsage = result.session_usage;
             this.dispatch(agentHistoryLoaded({
                 items,
@@ -418,12 +417,12 @@ export class AgentRuntime {
             }));
         } catch {
             // History is a convenience; the live session still works without it.
-            this.loadedHistoryPages.add(key);
-            this.dispatch(agentHistoryLoadingFinished());
+            // A failed older page stays retryable from the thread.
+            if (!isOlder) this.loadedHistoryPages.add(key);
+            else if (this.isCurrentHistoryLoad(generation, historySessionId)) this.dispatch(agentOlderHistoryFailed());
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
-            if (generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId)
-                this.dispatch(agentHistoryLoadingChanged(false));
+            if (this.isCurrentHistoryLoad(generation, historySessionId)) this.dispatch(agentHistoryLoadingChanged(false));
         }
     }
 
@@ -507,7 +506,7 @@ export class AgentRuntime {
                 this.resetHistoryLoads();
                 this.historySessionId = historyId;
             }
-            if (event.eventType === AgentEventTypes.sessionStarted && (this.hadPriorSession || (state && state.items.length === 0)) && historyId) {
+            if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
                 void this.loadHistory(historyId, 1);
             } else if (event.eventType === AgentEventTypes.sessionStarted) this.dispatch(agentHistoryLoadingChanged(false));
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
