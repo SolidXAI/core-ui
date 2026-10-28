@@ -498,6 +498,18 @@
   font-size: 10.5px;
   color: var(--agent-muted);
 }
+.providerRetryButton {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--agent-err, #dc2626);
+  font-size: 10.5px;
+  cursor: pointer;
+}
+.providerRetryButton:hover {
+  text-decoration: underline;
+}
 .providerList {
   display: flex;
   flex-direction: column;
@@ -602,6 +614,24 @@
   cursor: default;
   margin-left: auto;
   opacity: 0.9;
+}
+
+.providerBadgeAuthError {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--agent-warn, #d97706);
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-left: auto;
+  opacity: 0.9;
+}
+
+.providerBadgeAuthError:hover,
+.providerBadgeAuthError:focus-visible {
+  opacity: 1;
+  transform: scale(1.08);
+  outline: none;
 }
 
 .providerUnauthTooltip {

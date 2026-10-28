@@ -37,11 +37,14 @@ export type AgentModelAssignments = { reasoning: AgentModelAssignment; fast: Age
 /** @deprecated Use AgentRuntimeType. */
 export type AgentType = AgentRuntimeType;
 
+export type AgentProviderAuthStatus = "checking" | "authenticated" | "unauthenticated" | "error";
+
 export interface AgentProviderInfo {
     id: string;
     name: string;
     installed: boolean;
     authenticated?: boolean | null;
+    authStatus?: AgentProviderAuthStatus;
     version?: string;
     default_model?: string;
 }

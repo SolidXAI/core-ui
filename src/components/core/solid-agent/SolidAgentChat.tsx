@@ -29,7 +29,7 @@ import {
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
-import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
+import type { AgentAttachment, AgentMode, AgentProviderAuthStatus, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
 import { useAgentAuth } from "./useAgentAuth";
@@ -56,6 +56,15 @@ export function formatProviderName(raw?: string): string {
     if (lower.includes("droid")) return "Droid";
     if (lower.includes("claude")) return "Claude";
     return trimmed;
+}
+
+function getProviderAuthStatus(provider?: AgentProviderInfo): AgentProviderAuthStatus {
+    if (!provider) return "error";
+    if (provider.id === "solidx") return "authenticated";
+    if (provider.authStatus) return provider.authStatus;
+    if (provider.authenticated === true) return "authenticated";
+    if (provider.authenticated === false) return "unauthenticated";
+    return "checking";
 }
 
 type Props = {
@@ -236,24 +245,29 @@ export function SolidAgentChat({
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
     const [providers, setProviders] = useState<AgentProviderInfo[]>(() => {
         if (agentRuntime === "agentHub") {
-            return [{ id: "solidx", name: "Native", installed: true, version: "" }];
+            return [{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }];
         }
         const cached = getCachedAgentProviders(agentUrl);
-        if (cached && cached.length > 0) return cached;
+        if (cached && cached.length > 0) {
+            return cached.map((provider) => provider.id === "solidx"
+                ? { ...provider, authenticated: true, authStatus: "authenticated" }
+                : { ...provider, authenticated: null, authStatus: "checking" });
+        }
         return [
-            { id: "solidx", name: "Native", installed: true, authenticated: true, version: "" },
-            { id: "copilot", name: "GitHub Copilot", installed: true, authenticated: null },
-            { id: "cursor", name: "Cursor", installed: true, authenticated: null },
-            { id: "claude", name: "Claude Code", installed: true, authenticated: null },
-            { id: "codex", name: "Codex", installed: true, authenticated: null },
-            { id: "opencode", name: "OpenCode", installed: true, authenticated: null },
+            { id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" },
+            { id: "copilot", name: "GitHub Copilot", installed: true, authenticated: null, authStatus: "checking" },
+            { id: "cursor", name: "Cursor", installed: true, authenticated: null, authStatus: "checking" },
+            { id: "claude", name: "Claude Code", installed: true, authenticated: null, authStatus: "checking" },
+            { id: "codex", name: "Codex", installed: true, authenticated: null, authStatus: "checking" },
+            { id: "opencode", name: "OpenCode", installed: true, authenticated: null, authStatus: "checking" },
         ];
     });
     const [loadingProviders, setLoadingProviders] = useState<boolean>(() => {
         if (agentRuntime === "agentHub") return false;
         return getCachedAgentProviders(agentUrl).length === 0;
     });
-    const [isCheckingAuth, setIsCheckingAuth] = useState<boolean>(() => agentRuntime !== "agentHub");
+    const [providersLoadError, setProvidersLoadError] = useState(false);
+    const [providersReloadKey, setProvidersReloadKey] = useState(0);
     const [selectedProvider, setSelectedProvider] = useState<string>(() => (agentRuntime === "agentHub" ? "solidx" : getStoredProvider()));
     const [models, setModels] = useState<ProviderModelInfo[]>(() => {
         if (agentRuntime === "agentHub") return [];
@@ -374,20 +388,24 @@ export function SolidAgentChat({
 
     useEffect(() => {
         if (agentRuntime === "agentHub") {
-            setProviders([{ id: "solidx", name: "Native", installed: true, version: "" }]);
+            setProviders([{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }]);
             setSelectedProvider("solidx");
             setLoadingProviders(false);
-            setIsCheckingAuth(false);
+            setProvidersLoadError(false);
+            return;
+        }
+        if (!signedIn) {
+            setLoadingProviders(false);
             return;
         }
         let alive = true;
-        if (providers.length === 0) {
-            setLoadingProviders(true);
-        }
-        setIsCheckingAuth(true);
+        setLoadingProviders(true);
+        setProvidersLoadError(false);
         fetchAgentProviders(agentUrl, false).then((list) => {
             if (!alive) return;
-            const installed = (list || []).filter((p) => p.installed);
+            const installed = (list || []).filter((p) => p.installed).map((provider) => provider.id === "solidx"
+                ? { ...provider, authenticated: true, authStatus: "authenticated" as const }
+                : { ...provider, authenticated: null, authStatus: "checking" as const });
             setProviders(installed);
             if (installed.length > 0) {
                 const current = getStoredProvider();
@@ -396,34 +414,61 @@ export function SolidAgentChat({
                     setSelectedProvider(installed[0].id);
                 }
             }
-            // Check auth individually per CLI provider where status is not already resolved
+            // Authentication is intentionally loaded separately from fast provider discovery.
             installed.forEach((p) => {
                 if (p.id === "solidx") return;
-                if (p.authenticated !== null && p.authenticated !== undefined) return;
                 fetchProviderAuth(agentUrl, p.id)
-                    .then((auth) => {
+                    .then((result) => {
                         if (!alive) return;
                         setProviders((prev) =>
-                            prev.map((item) => (item.id === p.id ? { ...item, authenticated: auth } : item))
+                            prev.map((item) => (item.id === p.id ? {
+                                ...item,
+                                authenticated: result.authenticated,
+                                authStatus: result.status === "unknown" ? "error" : result.status,
+                            } : item))
                         );
                     })
                     .catch(() => {
                         if (!alive) return;
                         setProviders((prev) =>
-                            prev.map((item) => (item.id === p.id ? { ...item, authenticated: false } : item))
+                            prev.map((item) => (item.id === p.id ? { ...item, authenticated: null, authStatus: "error" } : item))
                         );
                     });
             });
         }).catch(() => {
-            if (alive && providers.length === 0) setProviders([]);
+            if (!alive) return;
+            setProvidersLoadError(true);
+            setProviders((prev) => prev.map((provider) => provider.id === "solidx"
+                ? { ...provider, authenticated: true, authStatus: "authenticated" }
+                : { ...provider, authenticated: null, authStatus: "error" }));
         }).finally(() => {
             if (alive) {
                 setLoadingProviders(false);
-                setIsCheckingAuth(false);
             }
         });
         return () => { alive = false; };
-    }, [agentRuntime, agentUrl, signedIn]);
+    }, [agentRuntime, agentUrl, signedIn, providersReloadKey]);
+
+    const retryProviders = useCallback(() => {
+        setProvidersReloadKey((value) => value + 1);
+    }, []);
+
+    const retryProviderAuth = useCallback((providerId: string) => {
+        setProviders((prev) => prev.map((provider) => provider.id === providerId
+            ? { ...provider, authenticated: null, authStatus: "checking" }
+            : provider));
+        void fetchProviderAuth(agentUrl, providerId, true).then((result) => {
+            setProviders((prev) => prev.map((provider) => provider.id === providerId ? {
+                ...provider,
+                authenticated: result.authenticated,
+                authStatus: result.status === "unknown" ? "error" : result.status,
+            } : provider));
+        }).catch(() => {
+            setProviders((prev) => prev.map((provider) => provider.id === providerId
+                ? { ...provider, authenticated: null, authStatus: "error" }
+                : provider));
+        });
+    }, [agentUrl]);
 
     useEffect(() => {
         if (!selectedProvider || agentRuntime === "agentHub") return;
@@ -1106,7 +1151,8 @@ export function SolidAgentChat({
     const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
     const isSelectedProviderCheckingAuth =
         selectedProvider !== "solidx" &&
-        (activeProviderObj?.authenticated === null || activeProviderObj?.authenticated === undefined);
+        !!activeProviderObj &&
+        getProviderAuthStatus(activeProviderObj) === "checking";
 
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
     const send = useCallback(async (text: string) => {
@@ -1395,6 +1441,11 @@ export function SolidAgentChat({
                                         <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
                                             <div className={styles.providerDropdownHeader}>
                                                 <strong>Select AI Provider</strong>
+                                                {providersLoadError && (
+                                                    <button type="button" className={styles.providerRetryButton} onClick={retryProviders}>
+                                                        Provider list unavailable — retry
+                                                    </button>
+                                                )}
                                             </div>
                                             {loadingProviders && providers.length === 0 ? (
                                                 <div className={styles.providerLoadingItem}>
@@ -1406,8 +1457,10 @@ export function SolidAgentChat({
                                                     {providers.map((p) => {
                                                         const isSelected = p.id === selectedProvider;
                                                         const isCli = p.id !== "solidx";
-                                                        const isAuthChecking = isCli && (p.authenticated === null || p.authenticated === undefined);
-                                                        const isUnauthenticated = isCli && !isAuthChecking && p.authenticated === false;
+                                                        const authStatus = getProviderAuthStatus(p);
+                                                        const isAuthChecking = isCli && authStatus === "checking";
+                                                        const isAuthError = isCli && authStatus === "error";
+                                                        const isUnauthenticated = isCli && authStatus === "unauthenticated";
                                                         return (
                                                             <button
                                                                 key={p.id}
@@ -1433,6 +1486,35 @@ export function SolidAgentChat({
                                                                             </SolidTooltipTrigger>
                                                                             <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
                                                                                 Checking authentication status…
+                                                                            </SolidTooltipContent>
+                                                                        </SolidTooltip>
+                                                                    </div>
+                                                                ) : isAuthError ? (
+                                                                    <div className={styles.providerItemEnd}>
+                                                                        <SolidTooltip delayDuration={120}>
+                                                                            <SolidTooltipTrigger asChild>
+                                                                                <span
+                                                                                    className={styles.providerBadgeAuthError}
+                                                                                    role="button"
+                                                                                    tabIndex={0}
+                                                                                    aria-label={`Retry ${formatProviderName(p.name)} authentication check`}
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        retryProviderAuth(p.id);
+                                                                                    }}
+                                                                                    onKeyDown={(e) => {
+                                                                                        if (e.key === "Enter" || e.key === " ") {
+                                                                                            e.preventDefault();
+                                                                                            e.stopPropagation();
+                                                                                            retryProviderAuth(p.id);
+                                                                                        }
+                                                                                    }}
+                                                                                >
+                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
+                                                                                </span>
+                                                                            </SolidTooltipTrigger>
+                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
+                                                                                Could not verify authentication. Click to retry.
                                                                             </SolidTooltipContent>
                                                                         </SolidTooltip>
                                                                     </div>
@@ -1921,6 +2003,11 @@ export function SolidAgentChat({
                                                         <div className={styles.providerDropdown} style={dropdownStyle} role="menu">
                                                             <div className={styles.providerDropdownHeader}>
                                                                 <strong>Select AI Provider</strong>
+                                                                {providersLoadError && (
+                                                                    <button type="button" className={styles.providerRetryButton} onClick={retryProviders}>
+                                                                        Provider list unavailable — retry
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                             {loadingProviders && providers.length === 0 ? (
                                                                 <div className={styles.providerLoadingItem}>
@@ -1932,8 +2019,10 @@ export function SolidAgentChat({
                                                                     {providers.map((p) => {
                                                                         const isSelected = p.id === selectedProvider;
                                                                         const isCli = p.id !== "solidx";
-                                                                        const isAuthChecking = isCli && (p.authenticated === null || p.authenticated === undefined);
-                                                                        const isUnauthenticated = isCli && !isAuthChecking && p.authenticated === false;
+                                                                        const authStatus = getProviderAuthStatus(p);
+                                                                        const isAuthChecking = isCli && authStatus === "checking";
+                                                                        const isAuthError = isCli && authStatus === "error";
+                                                                        const isUnauthenticated = isCli && authStatus === "unauthenticated";
                                                                         return (
                                                                             <button
                                                                                 key={p.id}
@@ -1959,6 +2048,35 @@ export function SolidAgentChat({
                                                                                             </SolidTooltipTrigger>
                                                                                             <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
                                                                                                 Checking authentication status…
+                                                                                            </SolidTooltipContent>
+                                                                                        </SolidTooltip>
+                                                                                    </div>
+                                                                                ) : isAuthError ? (
+                                                                                    <div className={styles.providerItemEnd}>
+                                                                                        <SolidTooltip delayDuration={120}>
+                                                                                            <SolidTooltipTrigger asChild>
+                                                                                                <span
+                                                                                                    className={styles.providerBadgeAuthError}
+                                                                                                    role="button"
+                                                                                                    tabIndex={0}
+                                                                                                    aria-label={`Retry ${formatProviderName(p.name)} authentication check`}
+                                                                                                    onClick={(e) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        retryProviderAuth(p.id);
+                                                                                                    }}
+                                                                                                    onKeyDown={(e) => {
+                                                                                                        if (e.key === "Enter" || e.key === " ") {
+                                                                                                            e.preventDefault();
+                                                                                                            e.stopPropagation();
+                                                                                                            retryProviderAuth(p.id);
+                                                                                                        }
+                                                                                                    }}
+                                                                                                >
+                                                                                                    <AlertCircle size={12} strokeWidth={1.8} />
+                                                                                                </span>
+                                                                                            </SolidTooltipTrigger>
+                                                                                            <SolidTooltipContent side="top" align="center" className={styles.providerUnauthTooltip}>
+                                                                                                Could not verify authentication. Click to retry.
                                                                                             </SolidTooltipContent>
                                                                                         </SolidTooltip>
                                                                                     </div>

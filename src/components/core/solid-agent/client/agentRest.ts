@@ -40,6 +40,12 @@ export type ProviderModelsResponse = {
     models: ProviderModelInfo[];
 };
 
+export type ProviderAuthResponse = {
+    providerId: string;
+    authenticated: boolean | null;
+    status: "authenticated" | "unauthenticated" | "unknown";
+};
+
 /** Calls the agent at the `httpUrl` named at sign-in, with `Authorization: Bearer <agentToken>`; null when signed out or on error. */
 async function agentFetch<T>(agentUrl: string, path: string, init: RequestInit = {}, retried = false): Promise<T | null> {
     const auth = await loadAgentAuth(agentUrl);
@@ -158,49 +164,48 @@ export function getCachedProviderModels(agentUrl: string, providerId: string): P
 
 /** List installed execution providers (both native SolidX and CLI agents). */
 export async function fetchAgentProviders(agentUrl: string, checkAuth: boolean = false): Promise<AgentProviderInfo[]> {
-    try {
-        const auth = await loadAgentAuth(agentUrl);
-        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
-        const headers: Record<string, string> = {};
-        if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
-        const res = await fetch(`${baseUrl}/api/agent/providers?check_auth=${checkAuth}`, { headers });
-        if (!res.ok) return getCachedAgentProviders(agentUrl);
-        const data = await res.json();
-        const list = Array.isArray(data?.providers) ? data.providers : [];
-        if (list.length > 0) {
-            providersMemoryCache.set(agentUrl, list);
-            try {
-                sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
-            } catch {
-                // ignore
-            }
+    const data = await agentFetch<{ providers?: AgentProviderInfo[] }>(
+        agentUrl,
+        `/api/agent/providers?check_auth=${checkAuth}`,
+        { cache: "no-store" },
+    );
+    if (!data) throw new Error("Unable to load providers");
+    const list = Array.isArray(data.providers) ? data.providers : [];
+    if (list.length > 0) {
+        providersMemoryCache.set(agentUrl, list);
+        try {
+            sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
+        } catch {
+            // ignore
         }
-        return list;
-    } catch {
-        return getCachedAgentProviders(agentUrl);
     }
+    return list;
 }
 
 /** Check authentication for a specific provider on-demand. */
-export async function fetchProviderAuth(agentUrl: string, providerId: string, forceRefresh: boolean = false): Promise<boolean> {
+export async function fetchProviderAuth(
+    agentUrl: string,
+    providerId: string,
+    forceRefresh: boolean = false,
+): Promise<ProviderAuthResponse> {
     if (providerId.toLowerCase() === "solidx" || providerId.toLowerCase() === "default") {
-        return true;
+        return { providerId: "solidx", authenticated: true, status: "authenticated" };
     }
-    try {
-        const auth = await loadAgentAuth(agentUrl);
-        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
-        const headers: Record<string, string> = {};
-        if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
-        const res = await fetch(
-            `${baseUrl}/api/agent/providers/${encodeURIComponent(providerId)}/auth?force_refresh=${forceRefresh}`,
-            { headers },
-        );
-        if (!res.ok) return false;
-        const data = await res.json();
-        return Boolean(data?.authenticated);
-    } catch {
-        return false;
-    }
+    const data = await agentFetch<{ id?: string; authenticated?: boolean | null; status?: string }>(
+        agentUrl,
+        `/api/agent/providers/${encodeURIComponent(providerId)}/auth?force_refresh=${forceRefresh}`,
+        { cache: "no-store" },
+    );
+    if (!data) throw new Error(`Unable to verify ${providerId} authentication`);
+    const authenticated = data.authenticated === true ? true : data.authenticated === false ? false : null;
+    const status = data.status === "authenticated" || data.status === "unauthenticated" || data.status === "unknown"
+        ? data.status
+        : authenticated === true
+        ? "authenticated"
+        : authenticated === false
+        ? "unauthenticated"
+        : "unknown";
+    return { providerId: data.id || providerId, authenticated, status };
 }
 
 /** Return model catalog for a specific provider. */
