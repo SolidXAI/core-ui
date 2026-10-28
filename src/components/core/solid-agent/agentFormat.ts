@@ -27,8 +27,8 @@ export function parseExecuteCode(rawCode: unknown): {
     if (!rawCode || typeof rawCode !== "string") return {};
     const code = rawCode.trim();
 
-    // 1. Detect tool invocation: tools.solidx.<tool>(<args>), tools.<server>.<tool>(<args>), or solidx.<tool>(<args>)
-    const toolCallMatch = code.match(/(?:await\s+)?(?:tools\.(?:solidx|[\w-]+)\.|solidx\.)([a-zA-Z0-9_]+)\s*\(([\s\S]*?)\)/);
+    // 1. Detect tool invocation: tools.solidx.<tool>(<args>), tools["solidx"].<tool>(<args>), tools.<server>.<tool>(<args>), or solidx.<tool>(<args>)
+    const toolCallMatch = code.match(/(?:await\s+)?(?:tools\.(?:solidx|[\w-]+)\.|tools\[["'](?:solidx|[\w-]+)["']\]\.|solidx\.)([a-zA-Z0-9_]+)\s*\(([\s\S]*?)\)/);
     if (toolCallMatch) {
         const innerTool = toolCallMatch[1];
         const rawArgStr = toolCallMatch[2].trim();
@@ -62,7 +62,8 @@ export function parseExecuteCode(rawCode: unknown): {
 
     // 3. Clean assignment / boilerplate noise for generic code: "const r = await ...", "return r;", trailing semicolons
     const cleaned = code
-        .replace(/^(?:const|let|var)\s+\w+\s*=\s*(?:await\s+)?/m, "")
+        .replace(/^\/\/[^\n]*\n?/gm, "")
+        .replace(/^(?:const|let|var)\s+(?:\[[^\]]+\]|\{[^\}]+\}|\w+)\s*=\s*(?:await\s+)?/m, "")
         .replace(/;\s*return\s+\w+;?$/m, "")
         .replace(/;\s*$/, "")
         .trim();
