@@ -4,6 +4,7 @@ import {
     agentConnectionChanged,
     agentEventReceived,
     agentHistoryLoaded,
+    agentHistoryLoadingChanged,
     agentHistoryLoadingFinished,
     agentHistoryLoadingStarted,
     agentThreadReset,
@@ -187,6 +188,8 @@ export class AgentRuntime {
             this.dispatch(agentThreadReset());
         });
         this.hadPriorSession = !!this.socket.currentSessionId;
+        if (this.hadPriorSession && this.getState()?.items.length === 0)
+            this.dispatch(agentHistoryLoadingChanged(true));
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => {
@@ -419,6 +422,8 @@ export class AgentRuntime {
             this.dispatch(agentHistoryLoadingFinished());
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
+            if (generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId)
+                this.dispatch(agentHistoryLoadingChanged(false));
         }
     }
 
@@ -504,7 +509,7 @@ export class AgentRuntime {
             }
             if (event.eventType === AgentEventTypes.sessionStarted && (this.hadPriorSession || (state && state.items.length === 0)) && historyId) {
                 void this.loadHistory(historyId, 1);
-            }
+            } else if (event.eventType === AgentEventTypes.sessionStarted) this.dispatch(agentHistoryLoadingChanged(false));
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             const content = event.eventData.content ?? event.frame.content;
             const now = Date.now();

@@ -28,6 +28,7 @@ export type AgentState = AgentThreadState & {
     prefill: AgentPrefill | null;
     hasMoreHistory: boolean;
     historyPage: number;
+    loadingHistory: boolean;
     /** Context of the last prompt sent from outside the chat (e.g. a Test Hub button). */
     context: AgentContext | null;
 };
@@ -40,6 +41,7 @@ const initialState: AgentState = {
     prefill: null,
     hasMoreHistory: false,
     historyPage: 1,
+    loadingHistory: false,
     context: null,
 };
 
@@ -115,6 +117,10 @@ const agentSlice = createSlice({
             state.loadingHistory = false;
             state.loadingOlder = false;
         },
+        agentHistoryLoadingChanged(state, action: PayloadAction<boolean>) {
+            state.loadingHistory = action.payload;
+            if (!action.payload) state.loadingOlder = false;
+        },
         agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null }>) {
             const { items, hasMore, page, usage } = action.payload;
             // History is always older than anything already in the thread.
@@ -146,6 +152,7 @@ export const {
     agentThreadReset,
     agentHistoryLoadingStarted,
     agentHistoryLoadingFinished,
+    agentHistoryLoadingChanged,
     agentHistoryLoaded,
     agentEventReceived,
 } = agentSlice.actions;

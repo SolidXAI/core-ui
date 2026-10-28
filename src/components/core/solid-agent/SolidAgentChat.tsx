@@ -1079,7 +1079,11 @@ export function SolidAgentChat({
         async (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
             onInputsLocked?.(true);
-            try { return await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer"); }
+            try {
+                const result = await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer");
+                setShowHistory(false);
+                return result;
+            }
             catch (error) { onInputsLocked?.(false); throw error; }
         },
         [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
@@ -1681,9 +1685,10 @@ export function SolidAgentChat({
                                                                 type="button"
                                                                 className={`${styles.historyMenuItem} ${styles.historyMenuItemDanger}`}
                                                                 role="menuitem"
-                                                                onClick={async (e) => {
+                                                                onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    await handleDeleteSession(session.session_id);
+                                                                    setMenuSessionId(null);
+                                                                    setSessionToDelete(session);
                                                                 }}
                                                             >
                                                                 <Trash2 size={13} />
