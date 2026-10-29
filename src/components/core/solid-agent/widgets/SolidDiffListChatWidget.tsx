@@ -8,6 +8,15 @@ import { asArray, getChatWidgetData } from "./chatWidgetUtils";
 type DiffFile = { path: string; diff?: string; additions?: number; deletions?: number };
 type DiffListData = { title?: string; files?: DiffFile[] };
 
+/**
+ * Diff lines without truly empty ones. A unified diff never has an empty line — a blank context line
+ * is " " — so "" only appears when the sender double-spaced the text, which rendered as a blank row
+ * between every line.
+ */
+function diffLines(diff = "") {
+    return diff.split("\n").filter((line) => line !== "");
+}
+
 function countChanges(diff = "") {
     let additions = 0;
     let deletions = 0;
@@ -33,7 +42,7 @@ export const SolidDiffListChatWidget = ({ eventData }: SolidChatWidgetProps) => 
     const data = getChatWidgetData<DiffListData>(eventData);
     const files = asArray<DiffFile>(data.files);
     const [open, setOpen] = useState<Set<number>>(new Set());
-    const allDiffs = files.map((file) => `--- ${file.path}\n${file.diff ?? ""}`).join("\n\n");
+    const allDiffs = files.map((file) => `--- ${file.path}\n${diffLines(file.diff).join("\n")}`).join("\n\n");
 
     const toggle = (index: number) =>
         setOpen((prev) => {
@@ -64,11 +73,11 @@ export const SolidDiffListChatWidget = ({ eventData }: SolidChatWidgetProps) => 
                         {expanded && (
                             <div style={{ position: "relative" }}>
                                 <div style={{ position: "absolute", right: 6, top: 4 }}>
-                                    <SolidAgentCopyButton text={file.diff ?? ""} label={`Copy ${file.path}`} />
+                                    <SolidAgentCopyButton text={diffLines(file.diff).join("\n")} label={`Copy ${file.path}`} />
                                 </div>
                                 <pre className={styles.diff}>
-                                    {(file.diff ?? "").split("\n").map((line, i) => (
-                                        <span key={i} className={`${styles.diffLine} ${diffLineClass(line)}`}>{line || " "}</span>
+                                    {diffLines(file.diff).map((line, i) => (
+                                        <span key={i} className={`${styles.diffLine} ${diffLineClass(line)}`}>{line}</span>
                                     ))}
                                 </pre>
                             </div>

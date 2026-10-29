@@ -68,6 +68,22 @@ export function AppEventListener() {
   const pathname = usePathname();
   const dispatch = useDispatch();
 
+  // Reveal scrollbars only while scrolling (see auto-hiding scrollbars in _main.scss).
+  // `scroll` doesn't bubble, so one capturing listener covers every scrollable element.
+  useEffect(() => {
+    const timers = new WeakMap<Element, number>();
+    const onScroll = (event: Event) => {
+      const target = event.target;
+      const element = target instanceof Element ? target : target === document ? document.documentElement : null;
+      if (!element) return;
+      element.setAttribute("data-scrolling", "");
+      window.clearTimeout(timers.get(element));
+      timers.set(element, window.setTimeout(() => element.removeAttribute("data-scrolling"), 900));
+    };
+    document.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => document.removeEventListener("scroll", onScroll, { capture: true });
+  }, []);
+
   useEffect(() => {
     const off = eventBus.on<GlobalErrorPayload>(AppEvents.GlobalError, (payload) => {
       if (!pathname.startsWith("/admin") && !pathname.startsWith("/auth")) {

@@ -19,7 +19,7 @@ import {
  * `agentEventReceived` and applied by the shared reducer in solid-agent/agentEvents.ts.
  */
 
-export type AgentPrefill = { prompt: string; context?: AgentContext; autoSend?: boolean; nonce: number };
+export type AgentPrefill = { prompt: string; context?: AgentContext; autoSend?: boolean; newSession?: boolean; nonce: number };
 
 export type AgentState = AgentThreadState & {
     open: boolean;
@@ -54,7 +54,7 @@ const agentSlice = createSlice({
             state.open = true;
             state.mode = options.mode ?? (state.mode === "bubble" ? "compact" : state.mode);
             if (options.prompt) {
-                state.prefill = { prompt: options.prompt, context: options.context, autoSend: options.autoSend, nonce: Date.now() };
+                state.prefill = { prompt: options.prompt, context: options.context, autoSend: options.autoSend, newSession: options.newSession, nonce: Date.now() };
             }
             if (options.context) state.context = options.context;
         },
