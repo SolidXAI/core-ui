@@ -333,14 +333,14 @@
     line-height: inherit;
 }
 
-.solidMessageWrapper > div:has(> div > svg) {
+.auditChanges {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     min-width: 0;
 }
 
-.solidMessageWrapper > div > div:has(> svg) {
+.auditChange {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: start;
@@ -348,22 +348,24 @@
     min-width: 0;
 }
 
-.solidMessageWrapper > div > div:has(> svg) > span:first-child {
+.auditField {
     grid-column: 1 / -1;
 }
 
-.solidMessageWrapper > div > div:has(> svg) > span {
+.auditField,
+.auditPreviousValue,
+.auditCurrentValue {
     min-width: 0;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
 }
 
-.solidMessageWrapper > div > div:has(> svg) > svg {
+.auditChange > svg {
     margin-top: 0.1rem;
     color: var(--muted-foreground);
 }
 
-.solidMessageWrapper > div > div:has(> svg) > svg path {
+.auditChange > svg path {
     fill: currentColor;
     fill-opacity: 1;
 }

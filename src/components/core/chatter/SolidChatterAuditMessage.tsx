@@ -2,6 +2,7 @@
 import React from 'react'
 import dayjs from 'dayjs'
 import { RightArrowSvg } from '../../../components/Svg/RightArrowSvg'
+import styles from './chatter.module.css'
 
 const DATE_FIELD_TYPES = ['date', 'datetime', 'time']
 
@@ -60,17 +61,17 @@ export const SolidChatterAuditMessage: React.FC<SolidChatterAuditMessageProps> =
     }
 
     return (
-        <div className='flex flex-col gap-2'>
+        <div className={`${styles.auditChanges} flex flex-col gap-2`}>
             {visibleAuditRecord.map((item: AuditRecord, index: number) => (
-                <div key={index} className='flex gap-2'>
-                    <span className='m-0 '>
+                <div key={index} className={`${styles.auditChange} flex gap-2`}>
+                    <span className={`${styles.auditField} m-0`}>
                         {"(" + (item.fieldDisplayName || item.field) + ")"}
                     </span>
-                    <span className='m-0  font-bold'>
+                    <span className={`${styles.auditPreviousValue} m-0 font-bold`}>
                         {formatAuditValue(item.previous, item.previousDisplay, item.fieldType)}
                     </span>
                     <RightArrowSvg />
-                    <span className='m-0 font-bold text-[var(--primary-color)]'>
+                    <span className={`${styles.auditCurrentValue} m-0 font-bold text-[var(--primary-color)]`}>
                         {formatAuditValue(item.current, item.currentDisplay, item.fieldType)}
                     </span>
                 </div>
