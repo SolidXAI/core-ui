@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.22-beta.2] - 2026-10-30
+
+### Other
+
+- added Html format for import data from odoo chatter (#297)
+
 ## [0.1.22-beta.1] - 2026-10-30
 
 ### Fixed
