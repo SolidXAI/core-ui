@@ -220,7 +220,11 @@ export type AgentChatItem = {
 /** Options for `solidAgent.open`. */
 export type SolidAgentOpenOptions = {
     prompt?: string;
+    /** Send the prompt without the user pressing Enter. Held until the user is signed in to the agent. */
     autoSend?: boolean;
+    /** Start a fresh chat session before placing the prompt (like the header's "New chat"). A reply
+     *  still streaming in the old session keeps running there and stays in its history. */
+    newSession?: boolean;
     context?: AgentContext;
     mode?: Exclude<AgentMode, "bubble">;
 };

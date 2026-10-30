@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.22-beta.0] - 2026-10-29
+
+### Added
+
+- add loading state for history in agent chat and update styles
+
+### Fixed
+
+- allow optional fields to be skipped in validateEmbedInputs function
+- include widget_catalog in session payloads and update skillFields
+- render agent markdown tables and code blocks reliably
+- update environment variable names to use AGENT_HUB prefix for consistency
+
+### Other
+
+- 7 oct testhub feedback (#289)
+- Merge pull request #288 from SolidXAI/fix/refresh-workspace-menu-after-migration
+- Kanban dragdrop count (#283)
+- M2 m dropdown (#282)
+- Recover duplicate toast (#287)
+
 ## [0.1.21] - 2026-10-26
 
 ### Added

@@ -867,12 +867,18 @@ export function SolidAgentChat({
     // SDK requests: solidAgent.open({ prompt, autoSend, context }).
     useEffect(() => {
         if (!handlesPrefill || !agent.prefill || !runtime) return;
-        const { prompt, autoSend, context, nonce } = agent.prefill;
+        const { prompt, autoSend, newSession, context, nonce } = agent.prefill;
+        // An auto-sent prompt waits for the agent sign-in instead of going out unauthenticated.
+        if (autoSend && !signedIn) return;
         dispatch(agentPrefillConsumed());
         setShowHistory(false);
-        if (autoSend) runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) }, [], messageInputs, beforeSend, "prefill");
+        if (newSession) {
+            runtime.newChat();
+            onInputsLocked?.(false);
+        }
+        if (autoSend) void runtime.sendMessage(prompt, { ...inputContext, ...(context ?? {}) }, [], messageInputs, beforeSend, "prefill");
         else setSeed({ text: prompt, key: nonce });
-    }, [agent.prefill, handlesPrefill, dispatch, runtime, inputContext, messageInputs, beforeSend]);
+    }, [agent.prefill, signedIn, handlesPrefill, dispatch, runtime, inputContext, onInputsLocked, messageInputs, beforeSend]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
