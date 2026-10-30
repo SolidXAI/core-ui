@@ -285,7 +285,7 @@
 }
 
 /* Keep activity inside the available panel, including mobile overlays. */
-.solid-locale-tab-content > .h-full {
+.solid-chatter-panel {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -295,13 +295,13 @@
   overflow: hidden;
 }
 
-.solid-locale-tab-content > .h-full > :first-child {
+.solid-chatter-header {
   flex-shrink: 0;
   max-height: 70%;
   overflow-y: auto;
 }
 
-.solid-locale-tab-content .solid-chatter-body {
+.solid-chatter-activity {
   flex: 1;
   min-height: 0;
   min-width: 0;

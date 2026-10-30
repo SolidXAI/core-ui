@@ -129,7 +129,7 @@ export const SolidChatterHeader = (props: Props) => {
     };
 
     return (
-        <div className={`${styles.chatterTitle} ${title ? styles.chatterTitleWithLabel : ''} solid-list-toolbar`}>
+        <div className={`${styles.chatterTitle} ${title ? styles.chatterTitleWithLabel : ''} solid-chatter-header solid-list-toolbar`}>
             <div className='flex justify-between items-center solid-list-toolbar-row'>
                 {title && 
                     (<p className="m-0 view-title solid-text-wrapper form-wrapper-title">
