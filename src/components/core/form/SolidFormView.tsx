@@ -888,6 +888,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
         solidFormViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
     const [refreshChatterMessage, setRefreshChatterMessage] = useState<boolean>(true);
     useEffect(() => {
+        if (isEntityDeleteSuceess) {
+            dispatch(showToast({
+                severity: "success",
+                summary: ERROR_MESSAGES.DELETED,
+                detail: ERROR_MESSAGES.ENTITY_DELETE,
+                life: 3000,
+            }));
+        }
+    }, [dispatch, isEntityDeleteSuceess]);
+
+    useEffect(() => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
