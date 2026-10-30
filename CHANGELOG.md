@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.22-beta.1] - 2026-10-30
+
+### Fixed
+
+- enable hover effect for disabled step buttons (#296)
+
 ## [0.1.22-beta.0] - 2026-10-29
 
 ### Added
