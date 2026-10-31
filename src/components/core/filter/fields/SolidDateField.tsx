@@ -1,7 +1,7 @@
 
 import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
-import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
+import { getUtcDynamicDateRange, InputTypes, isDynamicDateOperator, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: "$eqi" },
@@ -11,6 +11,8 @@ export const dateFilterMatchModeOptions = [
     { label: 'Greater Than', value: "$gt" },
     { label: 'Greater Than Or Equal', value: "$gte" },
     { label: 'Between', value: "$between" },
+    { label: 'This Week', value: "$thisWeek" },
+    { label: 'This Month', value: "$thisMonth" },
     { label: 'Is null', value: "$null" },
     { label: 'Is Not null', value: "$notNull" }
 
@@ -20,6 +22,7 @@ const SolidDateField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
     // const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const columnDataType = 'date';
+    const isDynamicDate = isDynamicDateOperator(rule.matchMode);
 
 
     // TODO: the body template to be controlled based on the format that one is expecting the date to be displayed in.
@@ -44,15 +47,15 @@ const SolidDateField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
             </div>
             <div className='flex flex-col gap-2 w-full md:w-1/2 px-0 md:pl-0 md:pr-0 p-0'>
                 <SolidVarInputsFilterElement
-                    values={rule.value}
+                    values={isDynamicDate ? getUtcDynamicDateRange(rule.matchMode, 'date') : rule.value}
                     onChange={(e: any) => {
-                        onChange(rule.id, 'value', e)
+                        if (!isDynamicDate) onChange(rule.id, 'value', e)
                     }}
                     numberOfInputs={numberOfInputs}
                     inputType={InputTypes.Date}
                     fieldMetadata={fieldMetadata}
-                >
-                </SolidVarInputsFilterElement>
+                    readOnly={isDynamicDate}
+                />
             </div>
         </div>
     );

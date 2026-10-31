@@ -3,12 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { dateFilterMatchModeOptions } from './SolidDateField';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
-import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
+import { getUtcDynamicDateRange, InputTypes, isDynamicDateOperator, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
 const SolidDatetimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const columnDataType = 'date';
+    const isDynamicDate = isDynamicDateOperator(rule.matchMode);
 
     const [numberOfInputs, setNumberOfInputs] = useState<any>(null);
     // TODO: the body template to be controlled based on the format that one is expecting the date to be displayed in.
@@ -37,15 +38,15 @@ const SolidDatetimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilte
 
             <div className='flex flex-col gap-2 w-full md:w-1/2 px-0 md:pl-0 md:pr-0 p-0'>
                 <SolidVarInputsFilterElement
-                    values={rule.value}
+                    values={isDynamicDate ? getUtcDynamicDateRange(rule.matchMode, 'datetime') : rule.value}
                     onChange={(e: any) => {
-                        onChange(rule.id, 'value', e)
+                        if (!isDynamicDate) onChange(rule.id, 'value', e)
                     }}
                     numberOfInputs={numberOfInputs}
                     inputType={InputTypes.DateTime}
                     fieldMetadata={fieldMetadata}
-                >
-                </SolidVarInputsFilterElement>
+                    readOnly={isDynamicDate}
+                />
             </div>
         </div>
     );
