@@ -27,16 +27,21 @@ export const useSolidAutocompleteField = ({
     const [filteredItems, setFilteredItems] = useState<any[]>([]);
 
     useEffect(() => {
-      setSelectedItem((previousData: any) => {
-        if (previousData === existingData) return previousData;
-        if (previousData === null || existingData === null) return existingData;
+        setSelectedItem((previousItem: any) => {
+            if (Object.is(previousItem, existingData)) {
+                return previousItem;
+            }
 
-        const unchanged =
-          previousData?.[valueKey] === existingData?.[valueKey] &&
-          previousData?.[labelKey] === existingData?.[labelKey];
+            if (previousItem == null || existingData == null) {
+                return existingData;
+            }
 
-        return unchanged ? previousData : existingData;
-      });
+            const unchanged =
+                previousItem[valueKey] === existingData[valueKey] &&
+                previousItem[labelKey] === existingData[labelKey];
+
+            return unchanged ? previousItem : existingData;
+        });
     }, [existingData, labelKey, valueKey]);
 
     const searchItems = useCallback(async (event: { query: string }) => {

@@ -290,20 +290,10 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
   isFormFieldValid,
   searchModuleName,
   searchModelName,
-  modelMetaData,
   errors,
   touched,
 }: any) => {
   const [filteredOperations, setFilteredOperations] = useState<{ label: string; value: string }[]>([]);
-
-  useEffect(() => {
-    if (!row.moduleName && modelMetaData?.module?.name) {
-      formik.setFieldValue(`computedFieldTriggerConfig[${index}].moduleName`, modelMetaData?.module?.name);
-    }
-    if (!row.modelName && modelMetaData?.singularName) {
-      formik.setFieldValue(`computedFieldTriggerConfig[${index}].modelName`, modelMetaData?.singularName);
-    }
-  }, [modelMetaData?.module?.name, modelMetaData?.singularName]);
 
   const searchOperations = (event: any) => {
     const query = event.query.toLowerCase();
@@ -314,6 +304,24 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
     );
   };
 
+  const moduleExistingData = useMemo(() => {
+    if (!row.moduleName) return null;
+
+    return {
+      name: row.moduleName,
+      displayName: row.displayName || formatDisplayName(row.moduleName),
+    };
+  }, [row.moduleName, row.displayName]);
+
+  const modelExistingData = useMemo(() => {
+    if (!row.modelName) return null;
+
+    return {
+      singularName: row.modelName,
+      displayName: row.displayName || formatDisplayName(row.modelName),
+    };
+  }, [row.modelName, row.displayName]);
+
   const triggerModuleField = useSolidAutocompleteField({
     formik,
     fieldName: `computedFieldTriggerConfig[${index}].moduleName`,
@@ -321,17 +329,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
     labelKey: "displayName",
     valueKey: "name",
     searchData: searchModuleName,
-    existingData: row.moduleName
-      ? {
-        name: row.moduleName,
-        displayName: row.displayName || formatDisplayName(row.moduleName),
-      }
-      : modelMetaData?.module?.name
-        ? {
-          name: modelMetaData.module.name,
-          displayName: modelMetaData.module.displayName || formatDisplayName(modelMetaData.module.name),
-        }
-        : null,
+    existingData: moduleExistingData,
     relationField: true,
   });
 
@@ -342,17 +340,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
     labelKey: "displayName",
     valueKey: "singularName",
     searchData: searchModelName,
-    existingData: row.modelName
-      ? {
-        singularName: row.modelName,
-        displayName: row.displayName || formatDisplayName(row.modelName),
-      }
-      : modelMetaData?.singularName
-        ? {
-          singularName: modelMetaData?.singularName,
-          displayName: modelMetaData?.displayName || formatDisplayName(modelMetaData.singularName),
-        }
-        : null,
+    existingData: modelExistingData,
     relationField: true,
   });
 
@@ -1392,21 +1380,35 @@ const FieldMetaDataForm = ({
 
 
 
+  const createDefaultComputedFieldTriggerConfig = () => ({
+    moduleName: modelMetaData?.module?.name ?? "",
+    modelName: modelMetaData?.singularName ?? "",
+    operations: [],
+  });
+
   const parseComputedFieldTriggerConfig = (input: any) => {
+    const defaultConfig = createDefaultComputedFieldTriggerConfig();
+    let parsedConfigs: any[] | null = null;
+
     try {
       if (typeof input === "string") {
         const parsed = JSON.parse(input);
-        return Array.isArray(parsed) ? parsed : [parsed];
+        parsedConfigs = Array.isArray(parsed) ? parsed : [parsed];
       } else if (Array.isArray(input)) {
-        return input;
+        parsedConfigs = input;
       } else if (typeof input === "object" && input !== null) {
-        return [input];
+        parsedConfigs = [input];
       }
     } catch {
-      return [{ moduleName: "", modelName: "", operations: [] }];
+      parsedConfigs = null;
     }
 
-    return [{ moduleName: "", modelName: "", operations: [] }];
+    return (parsedConfigs && parsedConfigs.length > 0 ? parsedConfigs : [defaultConfig]).map((config: any) => ({
+      ...config,
+      moduleName: config?.moduleName || defaultConfig.moduleName,
+      modelName: config?.modelName || defaultConfig.modelName,
+      operations: Array.isArray(config?.operations) ? config.operations : [],
+    }));
   };
 
 
@@ -1747,14 +1749,17 @@ const FieldMetaDataForm = ({
   const handleAdd = () => {
     const updatedRows = [
       ...formik.values.computedFieldTriggerConfig,
-      { moduleName: '', modelName: '', operations: [] }
+      createDefaultComputedFieldTriggerConfig(),
     ];
     formik.setFieldValue("computedFieldTriggerConfig", updatedRows);
   };
 
   const handleDelete = (index: number) => {
     const updatedRows = formik.values.computedFieldTriggerConfig.filter((_: any, i: number) => i !== index);
-    formik.setFieldValue("computedFieldTriggerConfig", updatedRows.length > 0 ? updatedRows : [{ moduleName: '', modelName: '', operations: [] }]);
+    formik.setFieldValue(
+      "computedFieldTriggerConfig",
+      updatedRows.length > 0 ? updatedRows : [createDefaultComputedFieldTriggerConfig()]
+    );
   };
 
   const computedFieldSearchHandlers = useMemo(() => {
