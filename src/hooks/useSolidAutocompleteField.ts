@@ -36,6 +36,16 @@ export const useSolidAutocompleteField = ({
                 return existingData;
             }
 
+            // handles primitive values
+            if (
+              typeof previousItem !== "object" ||
+              typeof existingData !== "object"
+            ) {
+              return previousItem === existingData
+                ? previousItem
+                : existingData;
+            }
+
             const unchanged =
                 previousItem[valueKey] === existingData[valueKey] &&
                 previousItem[labelKey] === existingData[labelKey];
