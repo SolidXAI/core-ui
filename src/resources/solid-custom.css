@@ -903,6 +903,11 @@ textarea {
   left: 0;
   width: max-content;
   max-width: 140px;
+  max-height: 120px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
@@ -924,6 +929,7 @@ textarea {
 .solid-user-menu-roles:focus .solid-user-menu-roles-list {
   visibility: visible;
   opacity: 1;
+  pointer-events: auto;
 }
 
 .solid-user-menu-sep {
