@@ -7547,7 +7547,12 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   position: static;
   width: 100%;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
+}
+
+.solid-auth-theme-wrapper.left .solid-auth-form-pane-content .auth-container,
+.solid-auth-theme-wrapper.right .solid-auth-form-pane-content .auth-container {
+  margin-inline: auto;
 }
 
 .solid-auth-theme-wrapper.left .solid-auth-form-pane-content,
