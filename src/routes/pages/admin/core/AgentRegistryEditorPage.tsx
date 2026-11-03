@@ -758,8 +758,8 @@ export function AgentRegistryEditorPage() {
       </section>
     </div> },
     { value: "persona", label: "System Prompt", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div>
-      <div className="agent-editor__persona-actions"><button type="button" className="agent-editor__persona-preview-toggle" aria-pressed={previewSystemPrompt} aria-label={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} onClick={() => setPreviewSystemPrompt((current) => !current)}>
-        {previewSystemPrompt ? <Pencil size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}{previewSystemPrompt ? "Edit" : "Preview"}
+      <div className="agent-editor__persona-actions"><button type="button" className="agent-editor__persona-preview-toggle" aria-pressed={previewSystemPrompt} aria-label={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} title={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} onClick={() => setPreviewSystemPrompt((current) => !current)}>
+        {previewSystemPrompt ? <Pencil size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
       </button>{record?.id && <AgentPersonaHistory agentId={record.id} savedPrompt={record.systemPrompt ?? ""} refreshVersion={auditVersion} />}</div></div>
       {previewSystemPrompt ? <div className="agent-editor__persona-preview" role="region" aria-label="System prompt preview">{systemPrompt.trim() ? <SolidAgentMarkdown text={systemPrompt} /> : <p className="agent-editor__hint">Nothing to preview yet.</p>}</div>
         : <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />}
