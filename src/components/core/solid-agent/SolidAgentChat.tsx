@@ -210,26 +210,21 @@ export function SolidAgentChat({
     const [agentConfigVersion, setAgentConfigVersion] = useState<number | null>(() => agentVersion ?? null);
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
     const [providers, setProviders] = useState<AgentProviderInfo[]>(() => {
-        if (agentRuntime === "agentHub") {
-            return [{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }];
-        }
         return getCachedAgentProviders(agentUrl).map((provider) => provider.id === "solidx"
             ? { ...provider, authenticated: true, authStatus: "authenticated" }
             : { ...provider, authenticated: null, authStatus: "checking" });
     });
     const [loadingProviders, setLoadingProviders] = useState<boolean>(() => {
-        if (agentRuntime === "agentHub") return false;
         return getCachedAgentProviders(agentUrl).length === 0;
     });
     const [providersLoadError, setProvidersLoadError] = useState(false);
     const [providersReloadKey, setProvidersReloadKey] = useState(0);
-    const [selectedProvider, setSelectedProvider] = useState<string>(() => (agentRuntime === "agentHub" ? "solidx" : getStoredProvider()));
+    const [selectedProvider, setSelectedProvider] = useState<string>(() => getStoredProvider());
     const [models, setModels] = useState<ProviderModelInfo[]>(() => {
-        if (agentRuntime === "agentHub") return [];
         const cached = getCachedProviderModels(agentUrl, getStoredProvider());
         return cached?.models || [];
     });
-    const [selectedModel, setSelectedModel] = useState<string>(() => (agentRuntime === "agentHub" ? "" : getStoredModel(getStoredProvider()) || ""));
+    const [selectedModel, setSelectedModel] = useState<string>(() => getStoredModel(getStoredProvider()) || "");
     const [isThinking, setIsThinking] = useState<boolean>(() => getStoredThinking(getStoredProvider()));
     const [selectedReasoning, setSelectedReasoning] = useState<string>(() => getStoredReasoning(getStoredProvider()) || "");
     const [isFast, setIsFast] = useState<boolean>(() => getStoredFast(getStoredProvider()));
@@ -339,13 +334,6 @@ export function SolidAgentChat({
     }, [agentUrl, signedIn]);
 
     useEffect(() => {
-        if (agentRuntime === "agentHub") {
-            setProviders([{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }]);
-            setSelectedProvider("solidx");
-            setLoadingProviders(false);
-            setProvidersLoadError(false);
-            return;
-        }
         if (!signedIn) {
             setLoadingProviders(false);
             return;
@@ -423,7 +411,7 @@ export function SolidAgentChat({
     }, [agentUrl]);
 
     useEffect(() => {
-        if (!selectedProvider || agentRuntime === "agentHub") return;
+        if (!selectedProvider) return;
         if (skipProviderEffectRef.current === selectedProvider) {
             skipProviderEffectRef.current = null;
             return;
@@ -1135,7 +1123,7 @@ export function SolidAgentChat({
                 <p className={styles.emptyText}>{agentRuntime === "agentHub"
                     ? "Ask this agent for help with its configured capabilities. It can use the tools and knowledge available to it."
                     : "Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you."}</p>
-                {agentRuntime !== "agentHub" && providerDisplayName && (
+                {providerDisplayName && (
                     <div className={styles.emptyProviderBadge}>
                         Using <strong>{providerDisplayName}</strong>
                     </div>
@@ -1348,7 +1336,7 @@ export function SolidAgentChat({
                         )}
                     </div>
                     <span className={styles.headerSub}>
-                        {agentRuntime !== "agentHub" && signedIn && providerDisplayName && (
+                        {signedIn && providerDisplayName && (
                             <span className={styles.headerProviderTag} title={`Active Provider: ${providerDisplayName}`}>
                                 {providerDisplayName}
                             </span>
@@ -1381,7 +1369,7 @@ export function SolidAgentChat({
                 {signedIn && (
                     <>
                         {(!isFullScreen || !sidebarOpen) && (
-                            agentRuntime === "agentHub" || providers.length <= 1 ? (
+                            providers.length <= 1 ? (
                                 <button
                                     type="button"
                                     className={styles.iconBtn}
@@ -1526,7 +1514,7 @@ export function SolidAgentChat({
                                             aria-label="Conversation sidebar"
                                         >
                                         <div className={styles.sidebarHeader}>
-                                            {agentRuntime === "agentHub" || providers.length <= 1 ? (
+                                            {providers.length <= 1 ? (
                                                 <button
                                                     type="button"
                                                     className={styles.sidebarNewChatBtn}

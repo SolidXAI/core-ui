@@ -1,4 +1,5 @@
 import { clearAgentAuth, loadAgentAuth, isExternalAgentAuth, renewExternalAgentAuth } from "./agentAuth";
+import { toHttpBase, agentIdOf } from "./agentUrls";
 import type { AgentUploadedAttachment, AgentModelAssignments, AgentProviderInfo, ProviderModelInfo, AgentRuntimeType } from "../types";
 
 export const HISTORY_PAGE_SIZE = 50;
@@ -109,12 +110,28 @@ export function fetchAgentConfigVersionStatus(agentUrl: string) {
 export async function fetchAgentModelAssignments(agentUrl: string): Promise<AgentModelAssignments | null> {
     try {
         const auth = await loadAgentAuth(agentUrl);
-        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
+        const aid = agentIdOf(agentUrl);
         const headers: Record<string, string> = {};
         if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
-        const res = await fetch(`${baseUrl}/api/agent/models`, { headers, cache: "no-store" });
-        if (!res.ok) return null;
-        return ((await res.json()) as AgentModelAssignments) ?? null;
+
+        if (auth?.httpUrl) {
+            const workerUrl = `${auth.httpUrl.replace(/\/$/, "")}/api/agent/models`;
+            try {
+                const res = await fetch(workerUrl, { headers, cache: "no-store" });
+                if (res.ok) {
+                    const data = ((await res.json()) as AgentModelAssignments) ?? null;
+                    if (data && (data.reasoning || data.fast)) return data;
+                }
+            } catch {
+                // fallback to manager url
+            }
+        }
+
+        const managerBase = toHttpBase(agentUrl).replace(/\/$/, "");
+        const managerUrl = aid !== undefined ? `${managerBase}/api/agent/models?agentId=${aid}` : `${managerBase}/api/agent/models`;
+        const mRes = await fetch(managerUrl, { headers, cache: "no-store" });
+        if (!mRes.ok) return null;
+        return ((await mRes.json()) as AgentModelAssignments) ?? null;
     } catch {
         return null;
     }

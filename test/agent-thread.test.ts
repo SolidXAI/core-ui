@@ -111,6 +111,16 @@ describe("Agent Thread Helper Tests", () => {
                 data: { tone: "error" },
             });
         });
+
+        it("merges multiple markdown widget envelopes into a single combined message", () => {
+            const raw =
+                JSON.stringify({ widgetName: "markdown", data: "I will inspect the image." }) +
+                JSON.stringify({ widgetName: "markdown", data: "It shows a futuristic portfolio." });
+            const result = parseWidgetContent(raw);
+            assert.notEqual(result, null);
+            assert.equal(result?.widget, "markdown");
+            assert.equal(result?.data?.text, "I will inspect the image.\n\nIt shows a futuristic portfolio.");
+        });
     });
 
     describe("classifyWidgetContent", () => {

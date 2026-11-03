@@ -69,7 +69,7 @@ function exampleCodeRanges(text: string): Array<[number, number]> {
 }
 
 /** Parses the balanced JSON object starting at `start`, or null when it is not a widget envelope. */
-function parseEnvelopeAt(text: string, start: number): any {
+function parseEnvelopeAt(text: string, start: number): { parsed: any; end: number } | null {
     let depth = 0;
     let inString = false;
     let escape = false;
@@ -94,7 +94,9 @@ function parseEnvelopeAt(text: string, start: number): any {
             if (depth === 0) {
                 try {
                     const parsed = JSON.parse(text.slice(start, i + 1));
-                    return parsed && typeof parsed === "object" && typeof parsed.widgetName === "string" ? parsed : null;
+                    return parsed && typeof parsed === "object" && typeof parsed.widgetName === "string"
+                        ? { parsed, end: i + 1 }
+                        : null;
                 } catch {
                     return null;
                 }
@@ -131,9 +133,48 @@ function parseEnvelopeAt(text: string, start: number): any {
     if (!parsed || typeof parsed !== "object" || typeof parsed.widgetName !== "string") {
         const codeRanges = exampleCodeRanges(candidate);
         let idx = candidate.indexOf(EMBEDDED_ENVELOPE);
-        while (idx !== -1 && !parsed) {
-            if (!codeRanges.some(([start, end]) => idx >= start && idx < end)) parsed = parseEnvelopeAt(candidate, idx);
+        const envelopes: any[] = [];
+        while (idx !== -1) {
+            if (!codeRanges.some(([start, end]) => idx >= start && idx < end)) {
+                const res = parseEnvelopeAt(candidate, idx);
+                if (res) {
+                    envelopes.push(res.parsed);
+                    idx = candidate.indexOf(EMBEDDED_ENVELOPE, res.end);
+                    continue;
+                }
+            }
             idx = candidate.indexOf(EMBEDDED_ENVELOPE, idx + 1);
+        }
+        if (envelopes.length === 1) {
+            parsed = envelopes[0];
+        } else if (envelopes.length > 1) {
+            const markdownTexts: string[] = [];
+            for (const env of envelopes) {
+                const w = (env.widgetName || "").trim().toLowerCase();
+                if (w === "" || w === "markdown") {
+                    let text = env.data;
+                    if (typeof text === "string") {
+                        try {
+                            const inner = JSON.parse(text);
+                            if (typeof inner === "object" && inner && typeof inner.text === "string") {
+                                text = inner.text;
+                            }
+                        } catch {
+                            // ignore
+                        }
+                    } else if (typeof text === "object" && text && typeof text.text === "string") {
+                        text = text.text;
+                    }
+                    if (typeof text === "string" && text.trim()) {
+                        markdownTexts.push(text.trim());
+                    }
+                }
+            }
+            if (markdownTexts.length > 0) {
+                parsed = { widgetName: "markdown", data: markdownTexts.join("\n\n") };
+            } else {
+                parsed = envelopes[envelopes.length - 1];
+            }
         }
     }
 

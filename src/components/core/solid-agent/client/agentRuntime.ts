@@ -302,7 +302,7 @@ export class AgentRuntime {
             this.frame = null;
         }
         this.pendingDelta = "";
-        const sessionId = this.socket.currentSessionId;
+        const sessionId = this.socket.currentSessionId || readSessionId(this.sessionKey);
         if (sessionId) {
             this.publish("onCancelRequested", { sessionId });
             this.socket.send({ action: "cancel", session_id: sessionId });

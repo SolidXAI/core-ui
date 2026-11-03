@@ -9,9 +9,15 @@ export function formatProviderName(raw?: string): string {
     if (!raw) return "";
     const trimmed = raw.trim();
     const lower = trimmed.toLowerCase();
+    if (lower.includes("solidx") || lower.includes("native")) return "Native";
     if (lower.includes("copilot")) return "Copilot";
     if (lower.includes("droid")) return "Droid";
     if (lower.includes("claude")) return "Claude";
+    if (lower.includes("opencode")) return "OpenCode";
+    if (lower.includes("antigravity")) return "Antigravity";
+    if (lower.includes("codex")) return "Codex";
+    if (lower.includes("cursor")) return "Cursor";
+    if (lower.includes("pi")) return "Pi";
     return trimmed;
 }
 
