@@ -76,6 +76,11 @@
 .agent-editor__test-chat { width:100%; height:100%!important; border:0!important; border-radius:0!important; }
 .agent-editor__persona { padding:0; overflow:hidden; }
 .agent-editor__persona .agent-editor__section-head { padding:1rem; }
+.agent-editor__persona-actions { display:flex; align-items:center; gap:.4rem; flex:0 0 auto; }
+.agent-editor__persona-preview-toggle { display:inline-flex; align-items:center; justify-content:center; gap:.4rem; height:2.15rem; padding:0 .7rem; border:1px solid var(--surface-border,var(--border)); border-radius:.6rem; background:var(--surface-card,var(--card)); color:var(--text-color-secondary,var(--muted-foreground)); font:inherit; font-size:.8rem; font-weight:600; cursor:pointer; }
+.agent-editor__persona-preview-toggle:hover,.agent-editor__persona-preview-toggle[aria-pressed="true"] { border-color:color-mix(in srgb,var(--primary-color,var(--primary)) 42%,var(--surface-border,var(--border))); background:color-mix(in srgb,var(--primary-color,var(--primary)) 7%,var(--surface-card,var(--card))); color:var(--primary-color,var(--primary)); }
+.agent-editor__persona-preview-toggle:focus-visible { outline:2px solid var(--primary-color,var(--primary)); outline-offset:2px; }
+.agent-editor__persona-preview { box-sizing:border-box; min-height:max(34rem,calc(100dvh - 18rem)); padding:1.25rem; border-top:1px solid var(--surface-border,var(--border)); background:var(--surface-ground,var(--background)); }
 .agent-editor__persona .agent-editor__error { padding:0 1rem; }
 .agent-editor__picker { position:relative; max-width:32rem; }
 .agent-editor__picker-results { position:absolute; z-index:20; top:100%; left:0; right:0; max-height:18rem; overflow:auto; margin-top:.2rem; padding:.3rem; border:1px solid var(--surface-border,var(--border)); border-radius:.55rem; background:var(--surface-card,var(--card)); box-shadow:0 8px 24px #0002; }

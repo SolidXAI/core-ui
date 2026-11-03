@@ -3,6 +3,8 @@ import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
+import { hasAnyRole } from "../../../../helpers/rolesHelper";
+import { useSession } from "../../../../hooks/useSession";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { solidPatch } from "../../../../http/solidHttp";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
@@ -76,6 +78,8 @@ function getSaveErrorMessage(error: unknown): string {
 
 export function AgentToolRegistryEditorPage() {
   const { id = "" } = useParams<{ id: string }>();
+  const { data: session } = useSession();
+  const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const entityApi = React.useMemo(() => createSolidEntityApi("agentToolRegistry"), []);
@@ -261,8 +265,9 @@ export function AgentToolRegistryEditorPage() {
     { value: "agents", label: "Agents", content: <section className="agent-tool-editor__agents"><div><h2>Associated agents</h2><p>Agents linked to this tool. Associations are read-only here.</p></div>
       {isLoading ? <p>Loading associated agents…</p> : agents.length ? <div className="agent-tool-editor__agent-grid">{agents.map((agent, index) => <div className="agent-tool-editor__agent-card" key={String(agent.id ?? agent.name ?? index)}><SharedAgentRegistryCard rowData={agent} /></div>)}</div> : <div className="agent-tool-editor__empty">No agents are currently associated with this tool.</div>}
     </section> },
-    { value: "sessions", label: "Sessions", content: <AgentToolSessionsPanel agents={sessionAgents} /> },
+    ...(isAdmin ? [{ value: "sessions", label: "Sessions", content: <AgentToolSessionsPanel agents={sessionAgents} /> }] : []),
   ];
+  const visibleActiveTab = !isAdmin && activeTab === "sessions" ? "general" : activeTab;
 
   return <main className="agent-tool-editor">
     <header className="agent-tool-editor__header"><div><div className="agent-tool-editor__heading-with-refresh"><h1>{record ? "Edit Tool" : "Create Tool"}</h1>{record?.id && <button type="button" className={`agent-tool-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh tool" title="Refresh tool" disabled={isFetching || isSaving} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div></div><div className="agent-tool-editor__actions">
@@ -283,8 +288,8 @@ export function AgentToolRegistryEditorPage() {
       }} />}
     {isLoading ? <div className="agent-tool-editor__loading">Loading tool…</div> : record?.id ? (
       <AgentRegistryAuditPanel modelSingularName="agentToolRegistry" recordId={record.id} refreshVersion={auditRefreshVersion} modelUserKey={record.name}>
-        <SolidTabGroup tabs={tabs} value={activeTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />
+        <SolidTabGroup tabs={tabs} value={visibleActiveTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />
       </AgentRegistryAuditPanel>
-    ) : <SolidTabGroup tabs={tabs} value={activeTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />}
+    ) : <SolidTabGroup tabs={tabs} value={visibleActiveTab} onValueChange={setActiveTab} className="agent-tool-editor__tabs" listClassName="agent-tool-editor__tab-list" panelClassName="agent-tool-editor__tab-panel" />}
   </main>;
 }
