@@ -375,7 +375,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     valueKey: "value",
     searchData: serachDataSource,
     existingData: formik.values.dataSource,
-    additionalAction: (e: any) => formik.setFieldValue("dataSourceType", e.target.value.type),
+    additionalAction: (e: any) => formik.setFieldValue("dataSourceType", e.value.type),
   });
 
   const parentModelField = useSolidAutocompleteField({
