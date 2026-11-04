@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.22-beta.3] - 2026-11-04
+
+### Added
+
+- add preview toggle for skill body with Markdown support in AgentSkillRegistryEditorPage
+- enhance AgentRegistryEditor and AgentToolRegistryEditor with admin role checks and UI improvements
+
+### Fixed
+
+- update persona preview toggle button to include title attribute for better accessibility
+
+### Other
+
+- after record recover refresh issue fixes (#292)
+- make kanban header sticky (#293)
+- after record recover refresh issue fixes (#292)
+- make kanban header sticky (#293)
+- Reapply "module-package dialog: list locally modified files and require acknowledging them before an update"
+- Revert "module-package dialog: list locally modified files and require acknowledging them before an update"
+- module-package dialog: list locally modified files and require acknowledging them before an update
+
 ## [0.1.22-beta.2] - 2026-10-30
 
 ### Other
