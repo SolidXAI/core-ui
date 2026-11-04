@@ -283,6 +283,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                     .find((content) => content !== null && content.length > 0);
                 const turnContent: React.ReactNode[] = [];
                 let activityItems: AgentChatItem[] = [];
+                let hasTrailingActivity = false;
                 const flushActivity = (isLatest: boolean) => {
                     if (!activityItems.length) return;
                     const activityKey = `${group.key}-${activityItems[0].id}`;
@@ -296,21 +297,25 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                         />,
                     );
                     activityItems = [];
+                    if (isLatest) {
+                        hasTrailingActivity = true;
+                    }
                 };
                 for (const item of group.items) {
                     if (isAssistantMessage(item)) {
                         flushActivity(false);
                         turnContent.push(renderItem(item, false));
+                        hasTrailingActivity = false;
                     } else {
                         activityItems.push(item);
                     }
                 }
                 flushActivity(true);
-                if (isCurrentTurn && thinking && group.items.length === 0) {
+                if (isCurrentTurn && (working || thinking) && !hasTrailingActivity) {
                     turnContent.push(
                         <AgentActivityDisclosure
-                            key={`activity-${group.key}`}
-                            turnKey={group.key}
+                            key={`activity-working-${group.key}`}
+                            turnKey={`${group.key}-working`}
                             items={[]}
                             working
                             renderItem={renderItem}
