@@ -26,7 +26,7 @@ type Props = {
     onPrompt: (text: string) => void;
 };
 
-type ItemGroup = { kind: "user"; item: AgentChatItem } | { kind: "agent"; key: string; items: AgentChatItem[] };
+type ItemGroup = { kind: "user"; item: AgentChatItem } | { kind: "agent"; key: string; items: AgentChatItem[]; startedAt?: number };
 
 const isUserItem = (item: AgentChatItem) => item.eventType === AgentEventTypes.userMessage && !item.widget;
 const ASSISTANT_MESSAGE_TYPES = new Set<string>([
@@ -57,8 +57,9 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
     const groups: ItemGroup[] = [];
     let turn: AgentChatItem[] = [];
     let turnKey = "initial-agent-turn";
+    let startedAt: number | undefined = undefined;
     const flush = () => {
-        if (turn.length) groups.push({ kind: "agent", key: turnKey, items: turn });
+        if (turn.length) groups.push({ kind: "agent", key: turnKey, items: turn, startedAt });
         turn = [];
     };
     for (const item of items) {
@@ -66,6 +67,7 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
             flush();
             groups.push({ kind: "user", item });
             turnKey = `after-${item.id}`;
+            startedAt = item.at;
         } else {
             turn.push(item);
         }
@@ -86,11 +88,13 @@ function AgentActivityDisclosure({
     turnKey,
     items,
     working,
+    startedAt,
     renderItem,
 }: {
     turnKey: string;
     items: AgentChatItem[];
     working: boolean;
+    startedAt?: number;
     renderItem: (item: AgentChatItem) => React.ReactNode;
 }) {
     const [expanded, setExpanded] = useState(working);
@@ -109,7 +113,7 @@ function AgentActivityDisclosure({
 
     const [now, setNow] = useState(() => Date.now());
     const hasLiveTimer = useRef(working);
-    const startTime = useRef(working ? Date.now() : (items[0]?.at || Date.now()));
+    const startTime = useRef(startedAt || items[0]?.at || Date.now());
 
     useEffect(() => {
         if (!working) {
@@ -246,6 +250,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
             kind: "agent",
             key: lastGroup?.kind === "user" ? `after-${lastGroup.item.id}` : "working-turn",
             items: [],
+            startedAt: lastGroup?.kind === "user" ? lastGroup.item.at : undefined,
         });
     }
     const renderItem = (item: AgentChatItem, showMessageMeta?: boolean) => (
@@ -293,6 +298,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                             turnKey={activityKey}
                             items={activityItems}
                             working={isCurrentTurn && isLatest}
+                            startedAt={group.startedAt}
                             renderItem={renderItem}
                         />,
                     );
@@ -318,6 +324,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                             turnKey={`${group.key}-working`}
                             items={[]}
                             working
+                            startedAt={group.startedAt}
                             renderItem={renderItem}
                         />,
                     );

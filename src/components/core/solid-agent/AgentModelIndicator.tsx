@@ -231,13 +231,18 @@ export function AgentModelIndicator({
         !selectedReasoning ||
         isOffEffort({ id: selectedReasoning, name: selectedReasoning });
 
+    const isAntigravity = activeProvider === "antigravity";
+    const isGemini = (activeModel || activeModelInfo?.id || "").toLowerCase().includes("gemini");
+
     const hasReasoningSupport =
         !isNativeProvider &&
         !isAutoModel &&
-        (reasoningEfforts.length > 0 ||
-            Boolean(activeModelInfo?.supports_thinking) ||
-            REASONING_PROVIDERS.has(activeProvider) ||
-            (activeModel?.includes("thinking") ?? false));
+        (isAntigravity
+            ? isGemini && reasoningEfforts.length > 0
+            : (reasoningEfforts.length > 0 ||
+                Boolean(activeModelInfo?.supports_thinking) ||
+                REASONING_PROVIDERS.has(activeProvider) ||
+                (activeModel?.includes("thinking") ?? false)));
 
     const visionModels = useMemo(() => {
         return models.filter((m) => isVisionModel(m));
