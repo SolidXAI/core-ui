@@ -5,6 +5,8 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { solidPost } from "../../../../http/solidHttp";
 import { useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
+import { hasAnyRole } from "../../../../helpers/rolesHelper";
+import { useSession } from "../../../../hooks/useSession";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
@@ -342,6 +344,8 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
 
 export function AgentRegistryEditorPage() {
   const { id = "new" } = useParams<{ id: string }>();
+  const { data: session } = useSession();
+  const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -381,6 +385,7 @@ export function AgentRegistryEditorPage() {
   const [updateSecretLink] = agentSecretApi.useUpdateSolidEntityMutation();
   const record = recordFrom(response) as Agent | undefined;
   const [tab, setTab] = React.useState(searchParams.get("tab") === "config-versions" ? "config-versions" : "basics");
+  const [previewSystemPrompt, setPreviewSystemPrompt] = React.useState(false);
   const jobs = jobApi.useGetSolidEntitiesQuery(
     `offset=0&limit=1000&filters[agent][id][$eq]=${encodeURIComponent(id)}&${fieldsQuery(["id", "status"])}`,
     { skip: id === "new" || tab !== "jobs" });
@@ -585,7 +590,7 @@ export function AgentRegistryEditorPage() {
     if (stepLimit < 1 || turnStepLimit < 1 || costLimit < 0) next.limits = "Step limits must be positive and cost limit cannot be negative.";
     setErrors(next);
     if (Object.keys(next).length) {
-      setTab(next.systemPrompt ? "persona" : next.limits ? "policies" : "basics");
+      setTab(next.systemPrompt ? "persona" : next.limits && isAdmin ? "policies" : "basics");
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(next).join(" ") }));
       return false;
     }
@@ -753,8 +758,11 @@ export function AgentRegistryEditorPage() {
       </section>
     </div> },
     { value: "persona", label: "System Prompt", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div>
-      {record?.id && <AgentPersonaHistory agentId={record.id} savedPrompt={record.systemPrompt ?? ""} refreshVersion={auditVersion} />}</div>
-      <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />
+      <div className="agent-editor__persona-actions"><button type="button" className="agent-editor__persona-preview-toggle" aria-pressed={previewSystemPrompt} aria-label={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} title={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} onClick={() => setPreviewSystemPrompt((current) => !current)}>
+        {previewSystemPrompt ? <Pencil size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
+      </button>{record?.id && <AgentPersonaHistory agentId={record.id} savedPrompt={record.systemPrompt ?? ""} refreshVersion={auditVersion} />}</div></div>
+      {previewSystemPrompt ? <div className="agent-editor__persona-preview" role="region" aria-label="System prompt preview">{systemPrompt.trim() ? <SolidAgentMarkdown text={systemPrompt} /> : <p className="agent-editor__hint">Nothing to preview yet.</p>}</div>
+        : <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />}
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
@@ -793,12 +801,13 @@ export function AgentRegistryEditorPage() {
         : items(related).length ? <div className="agent-editor__related">{items(related).map((item) => <article key={item.id}><strong>{item.name ?? item.title ?? `#${item.id}`}</strong><span>{item.status ?? ""}</span></article>)}</div>
         : <div className="agent-editor__empty">No {label.toLowerCase()} for this agent yet.</div>}</section> })),
     ...(record?.id ? [{ value: "sessions", label: "Sessions", content: <AgentSessionsPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
-    ...(record?.id ? [{ value: "config-versions", label: "Config versions", content: <AgentConfigVersionsPanel agentId={record.id} active={tab === "config-versions"} /> }] : []),
+    ...(record?.id ? [{ value: "config-versions", label: "Version History", content: <AgentConfigVersionsPanel agentId={record.id} active={tab === "config-versions"} /> }] : []),
     ...(record?.id ? [{ value: "embedding", label: "Embedding", content: <AgentEmbeddingPanel agentId={record.id}
       fields={parseInputs(record.requiredInputs)} active={record.status === "active"}
       hubUrl={String(getSettingsMap(settings).solidxAgentHubBackendUrl ?? "")} /> }] : []),
   ];
-  const content = <SolidTabGroup tabs={tabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
+  const visibleTabs = isAdmin ? tabs : tabs.filter(({ value }) => !["policies", "processes", "jobs", "sessions", "embedding"].includes(value));
+  const content = <SolidTabGroup tabs={visibleTabs} value={tab} onValueChange={setTab} className="agent-editor__tabs" listClassName="agent-editor__tab-list" panelClassName="agent-editor__tab-panel" />;
   return <main className="agent-editor"><header className="agent-editor__header"><div className="agent-editor__heading-with-refresh"><h1>{record?.id ? "Edit Agent" : "Create Agent"}</h1>{record?.id && <button type="button" className={`agent-editor__refresh${isFetching ? " is-loading" : ""}`} aria-label="Refresh agent" title="Refresh agent" disabled={isFetching || updating} onClick={requestRefresh}><RefreshCw size={14} /></button>}</div><div className="agent-editor__actions">
     <SolidButton variant="secondary" leftIcon={<ArrowLeft size={16} />} onClick={() => navigate(-1)}>Back</SolidButton>
     {record?.id && <SolidButton variant="secondary" leftIcon={<FlaskConical size={16} />} onClick={openAgentTest}>Test Agent</SolidButton>}
