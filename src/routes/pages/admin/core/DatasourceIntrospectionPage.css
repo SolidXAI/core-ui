@@ -500,7 +500,7 @@
 .sdix-table-primary-cell span,
 .sdix-muted-cell {
   color: #6b7388;
-  font-size: 0.76rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.1;
 }
 

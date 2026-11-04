@@ -8,8 +8,8 @@
 }
 
 .fieldLabel {
-    font-size: 11px;
-    color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
+    font-size: var(--solid-font-size-ui-control);
+    color: var(--foreground);
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -27,7 +27,7 @@
     background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
     padding: 0 11px !important;
-    font-size: 13px !important;
+    font-size: var(--solid-font-size-ui-control) !important;
     box-shadow: none !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
@@ -51,7 +51,7 @@
     background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
     padding: 8px 11px !important;
-    font-size: 13px !important;
+    font-size: var(--solid-font-size-ui-control) !important;
     resize: vertical !important;
     box-shadow: none !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
@@ -91,7 +91,7 @@
     background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
     padding: 0 11px !important;
-    font-size: 13px !important;
+    font-size: var(--solid-font-size-ui-control) !important;
     box-shadow: none !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
@@ -198,7 +198,7 @@
 
 .fieldViewLabel {
     margin: 0;
-    font-size: 11px;
+    font-size: var(--solid-font-size-ui-control);
     color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
     font-weight: 500;
     line-height: 1.35;
@@ -207,7 +207,7 @@
 
 .fieldViewValue {
     margin: 0;
-    font-size: 13px;
+    font-size: var(--solid-font-size-body-small);
     color: var(--foreground);
     min-height: 18px;
     line-height: 1.4;
@@ -221,6 +221,14 @@
     background: color-mix(in srgb, var(--card) 97%, var(--background) 3%);
     padding: 12px 14px;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 767px) {
+    .fieldInput,
+    .fieldTextarea,
+    .fieldNumberWrapper :global(.solid-input) {
+        font-size: var(--solid-font-size-ui-control) !important;
+    }
 }
 
 .mediaAttachmentCardView {
@@ -246,7 +254,7 @@
     margin: 0;
     text-align: left;
     color: var(--foreground);
-    font-size: 13px;
+    font-size: var(--solid-font-size-body-small);
     font-weight: 600;
     line-height: 1.35;
     letter-spacing: -0.01em;

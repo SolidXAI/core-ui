@@ -33,7 +33,7 @@
   background: transparent;
   border: none;
   padding: 0.65rem 0;
-  font-size: 0.78rem;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   color: var(--muted-foreground);
   cursor: pointer;

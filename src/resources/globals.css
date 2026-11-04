@@ -172,7 +172,7 @@ a {
 }
 
 .wrapper form a {
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   color: grey;
 }
 
@@ -267,7 +267,7 @@ a {
   height: 30px;
   border-radius: 6px;
   padding: 0 22px 0 6px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 500;
   border-color: color-mix(in srgb, var(--border) 88%, transparent);
 }
@@ -279,7 +279,7 @@ a {
 }
 
 .solid-react-datepicker-select-shell .solid-select-trigger-label {
-  font-size: 11px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 500;
 }
 
@@ -760,7 +760,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 .navBarTwo .menuHead a {
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 16px;
   color: #4b4d52;
   padding: 0.75rem 0.75rem 0.75rem 0rem;
@@ -786,7 +786,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 .navBarTwo .subMenuHead a {
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 16px;
   color: #4b4d52;
   padding: 0.75rem;
@@ -914,8 +914,8 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 }
 
 .form-field-label {
-  font-size: 12px;
-  color: var(--muted-foreground);
+  font-size: var(--solid-font-size-ui-control);
+  color: var(--foreground);
   font-weight: 500;
   display: flex;
   align-items: center;
@@ -931,7 +931,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 }
 
 .solid-settings-subheading {
-  font-size: 0.95rem;
+  font-size: var(--solid-font-size-body);
   font-weight: 600;
   color: var(--solid-form-title, #0f172a);
   margin: 0 0 0.35rem;
@@ -956,7 +956,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
   background: #111827;
   color: #fff;
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.3;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   max-width: 280px;
@@ -970,7 +970,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
   background: #111827;
   color: #fff;
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.3;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   max-width: 280px;
@@ -978,7 +978,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 }
 
 .form-wrapper-subtitle {
-  font-size: 0.75rem !important;
+  font-size: var(--solid-font-size-body-small) !important;
   font-weight: 700;
   margin-bottom: 8px;
   color: #000 !important;
@@ -992,12 +992,12 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 }
 
 .form-subheading {
-  font-size: 0.8em;
+  font-size: var(--solid-font-size-body-small);
   font-weight: 700;
 }
 
 .form-wrapper-heading {
-  font-size: 0.95rem !important;
+  font-size: var(--solid-font-size-body) !important;
   font-weight: 700;
   color: var(--solid-form-title, #0f172a) !important;
   letter-spacing: 0.05em;
@@ -1100,7 +1100,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 }
 
 .no-of-reviews {
-  font-size: 0.85rem;
+  font-size: var(--solid-font-size-body-small);
   color: grey;
   margin-left: 0.5rem;
   padding-top: 0.3rem;
@@ -1135,7 +1135,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
 
 /* Reviews */
 .review_user {
-  font-size: 0.8rem;
+  font-size: var(--solid-font-size-body-small);
   color: grey;
 }
 
@@ -1298,7 +1298,7 @@ footer {
 
 .listHead {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 16px;
   color: #4b4d52;
 }
@@ -1347,7 +1347,7 @@ footer {
 
 .form-demo .form-label {
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
 }
 
 /* Form */
@@ -1400,7 +1400,7 @@ select:focus-visible {
 }
 
 input::placeholder {
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   /* Change this value to your desired font size */
   color: var(--input-placeholder);
 }
@@ -1718,7 +1718,7 @@ li.header-li-px {
 
 .small-button {
   max-height: 2rem !important;
-  font-size: 0.75rem !important;
+  font-size: var(--solid-font-size-ui-control) !important;
   border-radius: 4px !important;
 }
 
@@ -1749,7 +1749,7 @@ li.header-li-px {
 .type-field-card .type-heading {
   font-weight: 600;
   color: rgb(50, 50, 77);
-  font-size: 0.875rem;
+  font-size: var(--solid-font-size-ui-control);
   line-height: 1.43;
   padding: 0;
   margin: 0;
@@ -1757,7 +1757,7 @@ li.header-li-px {
 
 .type-field-card .type-description {
   color: rgb(102, 102, 135);
-  font-size: 0.75rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.33;
   padding: 0;
   margin: 0;
@@ -1898,14 +1898,14 @@ li.header-li-px {
 }
 
 .kanban-card-heading {
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 16px;
   color: #4b4d52;
   font-weight: 600;
 }
 
 .kanban-card-content {
-  font-size: 0.7rem;
+  font-size: var(--solid-font-size-caption);
   line-height: 16px;
   color: #4b4d52;
 }
@@ -1962,7 +1962,7 @@ li.header-li-px {
   border-top: 1px solid var(--border);
   background: var(--card);
   color: var(--muted-foreground);
-  font-size: 0.78rem;
+  font-size: var(--solid-font-size-body-small);
   position: sticky;
   bottom: 0;
   z-index: 5;
@@ -1997,7 +1997,7 @@ li.header-li-px {
   min-height: 28px;
   padding-top: 2px;
   padding-bottom: 2px;
-  font-size: 0.78rem;
+  font-size: var(--solid-font-size-ui-control);
 }
 
 @media (max-width: 640px) {
@@ -2017,7 +2017,7 @@ li.header-li-px {
   margin-left: 10px;
   border-radius: 20px;
   padding: 5px 10px 5px 10px;
-  font-size: 0.8rem
+  font-size: var(--solid-font-size-caption)
 }
 
 .kanban-column-folded .kaban-heading-area:hover {
@@ -2068,7 +2068,7 @@ li.header-li-px {
 
 .load-more-button {
   color: #000;
-  font-size: 0.8rem;
+  font-size: var(--solid-font-size-body-small);
   cursor: pointer;
 }
 
@@ -2189,7 +2189,7 @@ li.header-li-px {
 }
 
 .chatter-collapsed-content {
-  font-size: 0.72rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   letter-spacing: 0.02em;
   background: color-mix(in srgb, var(--muted) 20%, var(--card) 80%);
@@ -2328,7 +2328,7 @@ li.header-li-px {
   /* margin: 0 0 0.2rem; */
   text-align: center;
   color: var(--muted-foreground, var(--text-color-secondary)) !important;
-  font-size: 11px !important;
+  font-size: var(--solid-font-size-caption) !important;
   line-height: 1;
   letter-spacing: 0.01em;
 }
@@ -2398,7 +2398,7 @@ li.header-li-px {
   transition: all 0.3s ease;
   min-width: 96px;
   white-space: nowrap;
-  font-size: 0.75rem;
+  font-size: var(--solid-font-size-ui-control);
   line-height: 1.2;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
   margin-right: -10px;
@@ -2535,7 +2535,7 @@ li.header-li-px {
   transition: all 0.2s ease;
   color: var(--foreground);
   border-radius: 8px;
-  font-size: 0.76rem;
+  font-size: var(--solid-font-size-body-small);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -2558,7 +2558,7 @@ li.header-li-px {
   .arrow-step-button {
     padding: 0.3rem 0.9rem;
     min-width: 85px;
-    font-size: 0.75rem;
+    font-size: var(--solid-font-size-ui-control);
   }
 }
 
@@ -2566,7 +2566,7 @@ li.header-li-px {
   .arrow-step-button {
     padding: 0.25rem 0.6rem !important;
     min-width: 80px;
-    font-size: 0.7rem;
+    font-size: var(--solid-font-size-ui-control);
   }
 }
 
@@ -2686,7 +2686,7 @@ li.header-li-px {
   bottom: 10px;
   right: 10px;
   color: #8D9199;
-  font-size: 0.75rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 400;
   line-height: 1rem;
 }
@@ -2699,17 +2699,17 @@ li.header-li-px {
 
 .solid-paginator span {
   margin-left: auto;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
 }
 
 .solid-paginator-label,
 .solid-paginator-report {
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1;
 }
 
 .solid-form-footer-pagination-meta {
-  font-size: 0.75rem;
+  font-size: var(--solid-font-size-caption);
 }
 
 .layout-config-button {
@@ -2779,7 +2779,7 @@ li.header-li-px {
 .solid-panel-menu .subMenuHead a {
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 16px;
   color: var(--text-color);
   padding: 0.75rem;
@@ -2955,7 +2955,7 @@ li.header-li-px {
   gap: 6px;
   padding: 0.2rem 0.45rem !important;
   color: color-mix(in srgb, var(--primary) 90%, var(--foreground) 10%) !important;
-  font-size: 0.75rem !important;
+  font-size: var(--solid-font-size-caption) !important;
   border-radius: 999px !important;
   background: color-mix(in srgb, var(--primary) 10%, transparent) !important;
   border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
@@ -2965,7 +2965,7 @@ li.header-li-px {
 .search-filter-chip-type {
   display: flex;
   align-items: center;
-  font-size: 0.74rem !important;
+  font-size: var(--solid-font-size-caption) !important;
   background: color-mix(in srgb, var(--primary) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
   border-radius: 999px;
@@ -3064,7 +3064,7 @@ li.header-li-px {
   min-height: 24px;
   line-height: 1;
   padding: 0 8px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -3097,7 +3097,7 @@ li.header-li-px {
 }
 
 .solid-chip-manager-title {
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
 }
@@ -3106,7 +3106,7 @@ li.header-li-px {
   border: 0;
   background: transparent;
   color: color-mix(in srgb, var(--primary) 85%, var(--foreground) 15%);
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   cursor: pointer;
   padding: 0;
@@ -3142,7 +3142,7 @@ li.header-li-px {
 }
 
 .solid-chip-manager-item-label {
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   color: color-mix(in srgb, var(--foreground) 90%, transparent);
   max-width: 260px;
   white-space: nowrap;
@@ -3189,7 +3189,7 @@ li.header-li-px {
   max-width: 260px !important;
   min-width: 120px;
   height: 30px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-ui-control);
   line-height: 1.2;
 }
 
@@ -3216,7 +3216,7 @@ li.header-li-px {
 
 .solid-filter-dialog-subtitle {
   margin-top: 4px !important;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.3;
   color: color-mix(in srgb, var(--foreground) 64%, transparent);
 }
@@ -3250,7 +3250,7 @@ li.header-li-px {
 
 .solid-delete-model-popup__intro {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 78%, transparent);
 }
@@ -3273,13 +3273,13 @@ li.header-li-px {
   text-align: left;
   vertical-align: top;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
-  font-size: 12px;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.45;
 }
 
 .solid-delete-model-popup__table th {
   background: color-mix(in srgb, var(--accent) 34%, transparent);
-  font-size: 11px;
+  font-size: var(--solid-font-size-body-small);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: color-mix(in srgb, var(--foreground) 78%, transparent);
@@ -3320,7 +3320,7 @@ li.header-li-px {
 }
 
 .solid-delete-model-popup__confirm .solid-checkbox-label {
-  font-size: 11.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 80%, transparent);
 }
@@ -3341,7 +3341,7 @@ li.header-li-px {
   border: 1px solid color-mix(in srgb, #f59e0b 30%, var(--border));
   background: color-mix(in srgb, #f59e0b 10%, transparent);
   color: color-mix(in srgb, #92400e 92%, var(--foreground));
-  font-size: 11.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
 }
 
@@ -3356,7 +3356,7 @@ li.header-li-px {
   border: 1px solid color-mix(in srgb, #ef4444 32%, var(--border));
   background: color-mix(in srgb, #ef4444 8%, transparent);
   color: color-mix(in srgb, #b91c1c 92%, var(--foreground));
-  font-size: 11.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
 }
 
@@ -3371,7 +3371,7 @@ li.header-li-px {
 
 .solid-user-form-subtitle {
   margin-top: 3px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.4;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
@@ -3395,7 +3395,7 @@ li.header-li-px {
 
 .solid-generate-code-popup__intro {
   margin: 0;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 78%, transparent);
 }
@@ -3411,7 +3411,7 @@ li.header-li-px {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
@@ -3425,7 +3425,7 @@ li.header-li-px {
 }
 
 .solid-generate-code-popup__list li {
-  font-size: 11.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 80%, transparent);
 }
@@ -3439,14 +3439,14 @@ li.header-li-px {
 .solid-export-module-version__label,
 .solid-export-module-version__copy {
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 80%, transparent);
 }
 
 .solid-export-module-version__copy code {
   font-family: var(--font-mono, "SFMono-Regular", Consolas, monospace);
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   word-break: break-all;
 }
 
@@ -3456,7 +3456,7 @@ li.header-li-px {
 
 .solid-export-module-version__error {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   color: color-mix(in srgb, #dc2626 80%, var(--foreground));
 }
 
@@ -3466,7 +3466,7 @@ li.header-li-px {
   gap: 8px;
   padding: 10px 12px;
   border-radius: 10px;
-  font-size: 11.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
 }
 
@@ -3490,7 +3490,7 @@ li.header-li-px {
 
 .solid-generate-code-popup__loading-title {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
   font-weight: 700;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
@@ -3499,7 +3499,7 @@ li.header-li-px {
 .solid-generate-code-popup__loading-copy {
   max-width: 320px;
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 72%, transparent);
 }
@@ -3529,7 +3529,7 @@ li.header-li-px {
 }
 
 .solid-generate-code-popup__command-label {
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -3542,7 +3542,7 @@ li.header-li-px {
   border-radius: 12px;
   background: #101828;
   color: #f8fafc;
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.6;
   font-family: "SFMono-Regular", SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
   overflow-x: auto;
@@ -3551,7 +3551,7 @@ li.header-li-px {
 }
 
 .solid-generate-code-popup__command-help {
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.6;
   color: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
@@ -3588,7 +3588,7 @@ li.header-li-px {
 }
 
 .solid-filter-section-title {
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
@@ -3596,7 +3596,7 @@ li.header-li-px {
 
 .solid-grouping-section-copy {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 64%, transparent);
 }
@@ -3637,7 +3637,7 @@ li.header-li-px {
   justify-content: center;
   background: color-mix(in srgb, var(--primary) 16%, white 84%);
   color: var(--primary);
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   line-height: 1;
   margin-top: 2px;
@@ -3663,7 +3663,7 @@ li.header-li-px {
 
 .solid-grouping-rule-title,
 .solid-aggregation-row-title {
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   line-height: 1.3;
   color: color-mix(in srgb, var(--foreground) 94%, transparent);
@@ -3672,7 +3672,7 @@ li.header-li-px {
 .solid-grouping-rule-caption,
 .solid-grouping-rule-summary,
 .solid-aggregation-row-caption {
-  font-size: 10.5px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.35;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
@@ -3706,7 +3706,7 @@ li.header-li-px {
 }
 
 .solid-grouping-inline-label {
-  font-size: 10.5px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 68%, transparent);
 }
@@ -3721,7 +3721,7 @@ li.header-li-px {
 
 .solid-grouping-row-select .solid-select {
   min-height: 30px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-ui-control);
   padding: 0 28px 0 10px;
   border-radius: 10px;
   background: color-mix(in srgb, var(--card) 94%, var(--background) 6%);
@@ -3767,7 +3767,7 @@ li.header-li-px {
   justify-content: center;
   gap: 8px;
   padding: 10px 12px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   color: color-mix(in srgb, var(--foreground) 58%, transparent);
   background: color-mix(in srgb, var(--accent) 46%, transparent);
 }
@@ -3820,7 +3820,7 @@ li.header-li-px {
 .solid-filter-control-wrap .solid-autocomplete-chip-control {
   min-height: 30px;
   height: 30px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-ui-control);
 }
 
 .solid-filter-compact-control.solid-input,
@@ -3831,7 +3831,7 @@ li.header-li-px {
 .solid-filter-compact-control .solid-select-trigger {
   min-height: 30px;
   height: 30px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-ui-control);
 }
 
 .solid-filter-compact-control.solid-select-wrap .solid-select,
@@ -3874,7 +3874,7 @@ li.header-li-px {
 .solid-filter-action-btn i.pi {
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 78%, transparent);
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
 }
 
 .solid-filter-action-btn.solid-filter-action-icon-btn.is-danger i.pi {
@@ -3886,7 +3886,7 @@ li.header-li-px {
   border-radius: 8px;
   min-height: 22px;
   padding: 0 6px;
-  font-size: 11px !important;
+  font-size: var(--solid-font-size-caption) !important;
   letter-spacing: 0.02em;
   background: color-mix(in srgb, var(--accent) 62%, transparent);
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
@@ -3900,13 +3900,13 @@ li.header-li-px {
 
 .solid-filter-operator-option {
   justify-content: flex-start;
-  font-size: 11px !important;
+  font-size: var(--solid-font-size-caption) !important;
   border-radius: 6px;
   padding: 4px 8px !important;
 }
 
 .solid-filter-add-condition-btn {
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   color: color-mix(in srgb, var(--foreground) 84%, transparent);
   margin-top: 2px !important;
   padding: 0 4px !important;
@@ -3994,7 +3994,7 @@ li.header-li-px {
   border-radius: 8px;
   background: color-mix(in srgb, var(--card) 98%, transparent);
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
-  font-size: 12px;
+  font-size: var(--solid-font-size-ui-control);
   padding: 0 28px 0 10px;
   appearance: none;
 }
@@ -4010,7 +4010,7 @@ li.header-li-px {
   right: 8px;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 10px;
+  font-size: var(--solid-font-size-caption);
   color: color-mix(in srgb, var(--foreground) 65%, transparent);
   pointer-events: none;
 }
@@ -4036,7 +4036,7 @@ li.header-li-px {
   min-width: 76px;
   min-height: 28px;
   border-radius: 7px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -4047,7 +4047,7 @@ li.header-li-px {
 .solid-filter-rule-field .solid-input::placeholder,
 .solid-filter-rule-value .solid-input::placeholder,
 .solid-filter-rule-value .solid-select::placeholder {
-  font-size: 11px;
+  font-size: var(--solid-font-size-body-small);
   color: color-mix(in srgb, var(--foreground) 58%, transparent);
 }
 
@@ -4162,7 +4162,7 @@ li.header-li-px {
 
 .solid-search-overlay-heading {
   margin: 0 !important;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0;
@@ -4184,7 +4184,7 @@ li.header-li-px {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
@@ -4200,7 +4200,7 @@ li.header-li-px {
   border-radius: 999px;
   background: color-mix(in srgb, var(--muted) 78%, transparent);
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
-  font-size: 10px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   line-height: 1;
 }
@@ -4212,7 +4212,7 @@ li.header-li-px {
   border-radius: 8px;
   min-height: 40px;
   padding: 6px 8px !important;
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.3;
   color: color-mix(in srgb, var(--foreground) 90%, transparent);
   background: transparent !important;
@@ -4287,7 +4287,7 @@ li.header-li-px {
 .solid-search-overlay-option-title {
   overflow: hidden;
   color: color-mix(in srgb, var(--foreground) 94%, transparent);
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 500;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -4302,7 +4302,7 @@ li.header-li-px {
   display: -webkit-box;
   overflow: hidden;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 400;
   line-height: 1.3;
   text-overflow: ellipsis;
@@ -4359,14 +4359,14 @@ li.header-li-px {
 }
 
 .solid-search-overlay-empty-title {
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
 }
 
 .solid-search-overlay-empty-subtitle {
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 400;
   line-height: 1.35;
   color: color-mix(in srgb, var(--foreground) 66%, transparent);
@@ -4400,7 +4400,7 @@ li.header-li-px {
   border-radius: 8px;
   min-height: 40px;
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.2;
 }
 
@@ -4516,14 +4516,14 @@ li.header-li-px {
 }
 
 .solid-search-overlay-footer-title {
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
 }
 
 .solid-search-overlay-footer-subtitle {
-  font-size: 10px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 400;
   line-height: 1.3;
   color: color-mix(in srgb, var(--foreground) 60%, transparent);
@@ -4533,7 +4533,7 @@ li.header-li-px {
 .solid-search-overlay-footer-btn {
   min-height: 22px;
   border-radius: 8px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   justify-content: flex-start;
   padding: 0 8px !important;
 }
@@ -4568,7 +4568,7 @@ li.header-li-px {
 }
 
 .solid-search-overlay-no-fields-text {
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.25;
   font-weight: 500;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
@@ -4729,70 +4729,6 @@ li.header-li-px {
 }
 
 
-@media (min-width: 1600px) and (max-width: 1699px) {
-  html {
-    font-size: 100% !important;
-  }
-
-  /* .chatter-section {
-    width: 360px;
-  } */
-}
-
-/* 1500px - 1599px */
-@media (min-width: 1500px) and (max-width: 1599px) {
-  html {
-    font-size: 97.5% !important;
-  }
-
-  /* 
-  .chatter-section {
-    width: 345px;
-  } */
-}
-
-/* 1400px - 1499px */
-@media (min-width: 1401px) and (max-width: 1499px) {
-  html {
-    font-size: 95% !important;
-  }
-
-  /* .chatter-section {
-    width: 330px;
-  } */
-}
-
-/* 1300px - 1399px */
-@media (min-width: 1300px) and (max-width: 1400px) {
-  html {
-    font-size: 92.5% !important;
-  }
-
-  /* .chatter-section {
-    width: 310px;
-  } */
-}
-
-/* 1200px - 1299px */
-@media (min-width: 1200px) and (max-width: 1299px) {
-  html {
-    font-size: 90% !important;
-  }
-
-  /* 
-  .chatter-section {
-    width: 300px;
-  } */
-}
-
-/* 1024px - 1199px */
-@media (min-width: 991px) and (max-width: 1199px) {
-  html {
-    font-size: 87.5% !important;
-  }
-
-}
-
 .kanban-ungrouped-column {
   max-width: 100%;
 }
@@ -4914,7 +4850,7 @@ html.dark .solid-kanban-card-selection,
   background: color-mix(in srgb, var(--primary) 12%, transparent);
   color: color-mix(in srgb, var(--primary) 78%, var(--foreground) 22%);
   padding: 3px 8px;
-  font-size: 0.64rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   letter-spacing: 0.06em;
 }
@@ -4928,7 +4864,7 @@ html.dark .solid-kanban-card-selection,
 
 .solid-kanban-config-placeholder-description {
   max-width: 38ch;
-  font-size: 0.82rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.55;
   color: color-mix(in srgb, var(--foreground) 68%, transparent);
 }
@@ -4937,7 +4873,7 @@ html.dark .solid-kanban-card-selection,
   border-radius: 6px;
   background: color-mix(in srgb, var(--muted) 72%, transparent);
   padding: 1px 5px;
-  font-size: 0.78rem;
+  font-size: var(--solid-font-size-body-small);
   color: color-mix(in srgb, var(--foreground) 88%, transparent);
 }
 
@@ -4947,7 +4883,7 @@ html.dark .solid-kanban-card-selection,
   border-radius: 12px;
   background: color-mix(in srgb, var(--background) 72%, var(--muted) 28%);
   padding: 12px 14px;
-  font-size: 0.79rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.5;
   color: color-mix(in srgb, var(--foreground) 76%, transparent);
 }
@@ -5001,7 +4937,7 @@ html.dark .solid-kanban-card-selection,
   background: color-mix(in srgb, var(--mq-card-chip-bg, color-mix(in srgb, var(--primary) 8%, transparent)) 78%, var(--background) 22%);
   color: var(--mq-card-chip-text, var(--primary));
   padding: 2px 7px;
-  font-size: 0.62rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 650;
   letter-spacing: 0.01em;
   white-space: nowrap;
@@ -5015,13 +4951,13 @@ html.dark .solid-kanban-card-selection,
   background: color-mix(in srgb, var(--muted) 24%, var(--card) 76%);
   color: color-mix(in srgb, var(--foreground) 48%, transparent);
   padding: 2px 6px;
-  font-size: 0.62rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 650;
   white-space: nowrap;
 }
 
 .mq-message-kanban-card__title {
-  font-size: 0.98rem;
+  font-size: var(--solid-font-size-body);
   font-weight: 700;
   line-height: 1.35;
   padding-right: 72px;
@@ -5035,7 +4971,7 @@ html.dark .solid-kanban-card-selection,
 
 .mq-message-kanban-card__subtitle {
   margin-top: 5px;
-  font-size: 0.71rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 500;
   line-height: 1.4;
   color: color-mix(in srgb, var(--foreground) 54%, transparent);
@@ -5060,7 +4996,7 @@ html.dark .solid-kanban-card-selection,
 }
 
 .mq-message-kanban-card__metric-label {
-  font-size: 0.62rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -5069,7 +5005,7 @@ html.dark .solid-kanban-card-selection,
 
 .mq-message-kanban-card__metric-value {
   margin-top: 3px;
-  font-size: 0.74rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 680;
   line-height: 1.35;
   color: color-mix(in srgb, var(--foreground) 84%, transparent);
@@ -5102,7 +5038,7 @@ html.dark .solid-kanban-card-selection,
 
 .mq-message-kanban-card__timeline-label {
   display: block;
-  font-size: 0.62rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -5112,7 +5048,7 @@ html.dark .solid-kanban-card-selection,
 .mq-message-kanban-card__timeline-value {
   display: block;
   margin-top: 3px;
-  font-size: 0.74rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   line-height: 1.35;
   color: color-mix(in srgb, var(--foreground) 88%, transparent);
@@ -5131,7 +5067,7 @@ html.dark .solid-kanban-card-selection,
   flex-shrink: 0;
   background: color-mix(in srgb, var(--mq-card-avatar-bg, color-mix(in srgb, var(--primary) 10%, transparent)) 52%, var(--background) 48%);
   color: color-mix(in srgb, var(--mq-card-accent, var(--primary)) 78%, var(--foreground) 22%);
-  font-size: 0.64rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 800;
 }
 
@@ -5147,7 +5083,7 @@ html.dark .solid-kanban-card-selection,
 }
 
 .mq-message-kanban-card__error-label {
-  font-size: 0.62rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -5155,7 +5091,7 @@ html.dark .solid-kanban-card-selection,
 }
 
 .mq-message-kanban-card__error-value {
-  font-size: 0.73rem;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 72%, transparent);
   display: -webkit-box;
@@ -5210,7 +5146,7 @@ html.dark .solid-kanban-card-selection,
 }
 
 .solid-media-card-widget__file-type {
-  font-size: 0.75rem;
+  font-size: var(--solid-font-size-caption);
   letter-spacing: 0.14em;
   opacity: 0.78;
 }
@@ -5234,7 +5170,7 @@ html.dark .solid-kanban-card-selection,
   backdrop-filter: blur(8px);
   background: rgba(15, 23, 42, 0.66);
   color: white;
-  font-size: 0.72rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   letter-spacing: 0.04em;
 }
@@ -5264,7 +5200,7 @@ html.dark .solid-kanban-card-selection,
 }
 
 .solid-media-card-widget__title {
-  font-size: 0.98rem;
+  font-size: var(--solid-font-size-body);
   font-weight: 700;
   line-height: 1.3;
   color: var(--foreground);
@@ -5274,7 +5210,7 @@ html.dark .solid-kanban-card-selection,
 }
 
 .solid-media-card-widget__subtitle {
-  font-size: 0.78rem;
+  font-size: var(--solid-font-size-body-small);
   color: color-mix(in srgb, var(--foreground) 64%, transparent);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5298,7 +5234,7 @@ html.dark .solid-kanban-card-selection,
 .solid-media-card-widget__meta-label {
   display: block;
   margin-bottom: 4px;
-  font-size: 0.68rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -5307,7 +5243,7 @@ html.dark .solid-kanban-card-selection,
 
 .solid-media-card-widget__meta-value {
   display: block;
-  font-size: 0.8rem;
+  font-size: var(--solid-font-size-body-small);
   font-weight: 600;
   color: var(--foreground);
   overflow: hidden;
@@ -5325,7 +5261,7 @@ html.dark .solid-kanban-card-selection,
 
 .solid-media-card-widget__record-id,
 .solid-media-card-widget__kind {
-  font-size: 0.74rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
@@ -5414,7 +5350,7 @@ html.dark .solid-kanban-card-selection,
 
 .solid-media-upload-help {
   color: color-mix(in srgb, var(--foreground) 54%, transparent);
-  font-size: 0.75rem;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.35;
   margin-top: -0.125rem;
 }
@@ -5521,7 +5457,7 @@ html.dark .solid-kanban-card-selection,
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
   color: var(--secondary-dark-color);
-  font-size: 12px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 500;
   line-height: 16px;
 }
@@ -5545,7 +5481,7 @@ html.dark .solid-kanban-card-selection,
   align-items: center;
   flex-shrink: 0;
   border-radius: 6.25rem;
-  font-size: 0.68rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
 }
 
@@ -5967,7 +5903,7 @@ html.dark .solid-media-card-widget__kind,
 
 .kanban-fold-action-button {
   min-height: 25px;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   font-weight: 500;
 }
 
@@ -5975,7 +5911,7 @@ html.dark .solid-media-card-widget__kind,
   margin-top: 8px;
   width: 100%;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   color: color-mix(in srgb, var(--primary) 88%, var(--foreground) 12%);
 }
 
@@ -6067,7 +6003,7 @@ html.dark .solid-media-card-widget__kind,
 
 .solid-empty-listview-header-subtitle {
   margin-top: 3px;
-  font-size: 0.82rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.35;
   color: color-mix(in srgb, var(--foreground) 66%, transparent);
 }
@@ -6099,7 +6035,7 @@ html.dark .solid-media-card-widget__kind,
 }
 
 .solid-empty-listview-title {
-  font-size: 0.92rem;
+  font-size: var(--solid-font-size-body);
   font-weight: 700;
   line-height: 1.3;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
@@ -6107,7 +6043,7 @@ html.dark .solid-media-card-widget__kind,
 
 .solid-empty-listview-description {
   max-width: 36ch;
-  font-size: 0.76rem;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 65%, transparent);
 }
@@ -6125,7 +6061,7 @@ html.dark .solid-media-card-widget__kind,
   height: 30px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: var(--solid-font-size-body-small);
   padding: 0 11px;
 }
 
@@ -6162,7 +6098,7 @@ html.dark .solid-media-card-widget__kind,
 .solid-empty-listview-secondary-action.solid-btn {
   border-radius: 8px;
   min-height: 26px;
-  font-size: 0.76rem;
+  font-size: var(--solid-font-size-body-small);
 }
 
 html.dark .solid-empty-listview-placeholder-container,
@@ -6260,11 +6196,11 @@ html.dark html.dark .solid-empty-listview-secondary-action.solid-btn,
   }
 
   .solid-empty-listview-header-title {
-    font-size: 0.98rem;
+    font-size: var(--solid-font-size-body);
   }
 
   .solid-empty-listview-header-subtitle {
-    font-size: 0.78rem;
+    font-size: var(--solid-font-size-body-small);
   }
 
   .solid-empty-listview-body {
@@ -6277,7 +6213,7 @@ html.dark html.dark .solid-empty-listview-secondary-action.solid-btn,
   }
 
   .solid-empty-listview-description {
-    font-size: 0.74rem;
+    font-size: var(--solid-font-size-caption);
   }
 
   .solid-empty-listview-actions {
@@ -6373,7 +6309,7 @@ html.dark html.dark .solid-empty-listview-secondary-action.solid-btn,
   border-radius: 999px;
   background: color-mix(in srgb, var(--primary) 14%, transparent);
   color: var(--primary);
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6399,7 +6335,7 @@ html.dark html.dark .solid-empty-listview-secondary-action.solid-btn,
 
 .register-success-text {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.5;
   color: var(--muted-foreground);
 }

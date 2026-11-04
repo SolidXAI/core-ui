@@ -82,7 +82,7 @@
   border: 0;
   background: transparent;
   color: var(--muted-foreground);
-  font-size: 13px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 500;
   padding: 12px 0 10px;
   border-bottom: 2px solid transparent;
@@ -121,13 +121,13 @@
 }
 
 .toastTitle {
-  font-size: 12px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   line-height: 1.25;
 }
 
 .toastBody {
-  font-size: 12px;
+  font-size: var(--solid-font-size-body-small);
   color: var(--muted-foreground);
   line-height: 1.25;
 }
@@ -191,7 +191,7 @@
 
 .confirmBody {
   padding: 14px;
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
   color: var(--muted-foreground);
 }
 
@@ -311,7 +311,7 @@
 }
 
 .field label {
-  font-size: 12px;
+  font-size: var(--solid-font-size-ui-control);
   color: var(--muted-foreground);
   font-weight: 500;
 }
@@ -324,7 +324,7 @@
   background: var(--background);
   color: var(--foreground);
   padding: 0 11px;
-  font-size: 13px;
+  font-size: var(--solid-font-size-ui-control);
 }
 
 .input:disabled {
@@ -401,7 +401,7 @@
   border-radius: 6px;
   background: transparent;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   height: 24px;
   padding: 0 8px;
@@ -457,7 +457,7 @@
 }
 
 .versionName {
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
   font-weight: 600;
 }
 
@@ -583,7 +583,7 @@
   background: transparent;
   color: var(--muted-foreground);
   padding: 5px 12px;
-  font-size: 12px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   cursor: pointer;
 }
@@ -600,7 +600,7 @@
 .diagnosticsTable {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--solid-font-size-body-small);
 }
 
 .diagnosticsTable thead tr {
@@ -753,7 +753,7 @@
 
   .tabTrigger {
     flex: 0 0 auto;
-    font-size: 12px;
+    font-size: var(--solid-font-size-ui-control);
     padding: 11px 0 9px;
   }
 
@@ -793,5 +793,9 @@
 
   .versionActions {
     width: 100%;
+  }
+
+  .input {
+    font-size: var(--solid-font-size-ui-control);
   }
 }

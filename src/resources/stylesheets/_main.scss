@@ -4,6 +4,7 @@
 
 html {
     height: 100%;
+    /* Keep the root at the browser default so rem units respect user settings. */
     font-size: 100%;
 }
 
@@ -17,6 +18,58 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
+    font-size: var(--solid-font-size-body);
+    line-height: var(--solid-line-height-body);
+}
+
+:root {
+    /*
+     * Enterprise UI typography tokens.
+     * Values stay in rem so browser and accessibility font scaling continue to work.
+     * Pixel values in comments assume the browser default root size of 16px.
+     */
+
+    /* Marketing, dashboard, or empty-state hero headings. 40px equivalent. */
+    --solid-font-size-display: 2.5rem;
+
+    /* Main page titles, such as an individual screen title. 32px equivalent. */
+    --solid-font-size-page-title: 2rem;
+
+    /* Major section headings within a page. 28px equivalent. */
+    --solid-font-size-section-title: 1.75rem;
+
+    /* Subsection headings and prominent card headings. 24px equivalent. */
+    --solid-font-size-subsection-title: 1.5rem;
+
+    /* Smaller component headings and dialog section headings. 20px equivalent. */
+    --solid-font-size-component-title: 1.25rem;
+
+    /* Introductory or emphasized body text. 18px equivalent. */
+    --solid-font-size-body-large: 1.125rem;
+
+    /* Default application text and long-form content. 16px equivalent. */
+    --solid-font-size-body: 1rem;
+
+    /* Dense UI text, table cells, helper text, and secondary content. 14px equivalent. */
+    --solid-font-size-body-small: 0.875rem;
+
+    /* Compact metadata, timestamps, badges, and supporting text. 12px equivalent. */
+    --solid-font-size-caption: 0.75rem;
+
+    /* Text inside buttons, inputs, selects, tabs, and other interactive controls. 14px equivalent. */
+    --solid-font-size-ui-control: 0.875rem;
+
+    /* Display and hero heading line height. */
+    --solid-line-height-display: 1.2;
+
+    /* Heading line height for page, section, subsection, and component titles. */
+    --solid-line-height-heading: 1.25;
+
+    /* Default readable line height for body and long-form text. */
+    --solid-line-height-body: 1.5;
+
+    /* Compact line height for controls and dense UI text. */
+    --solid-line-height-ui-control: 1.4286;
 }
 
 /*
