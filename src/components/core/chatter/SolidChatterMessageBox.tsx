@@ -4,6 +4,7 @@ import Image from "../../common/Image"
 import { useEffect, useMemo, useRef, useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidChatterCustomMessage } from './SolidChatterCustomMessage'
+import { isChatterMessageWidget, SolidChatterMessageWidget } from './SolidChatterMessageWidget'
 import { SolidChatterAuditMessage } from './SolidChatterAuditMessage'
 import { Check, GitBranch, MessageSquare, Paperclip, Pencil, Trash2, X } from 'lucide-react'
 import { SolidButton, SolidLightbox, SolidTag, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger, SolidIcon, SolidTextarea, type SolidIconName } from '../../shad-cn-ui'
@@ -13,6 +14,7 @@ import { useSession } from '../../../hooks/useSession'
 import { buildMessageBodyWithMentionTokens, parseMessageBodyMentions } from './chatterMentions'
 import { useChatterMentions } from './useChatterMentions'
 import { SolidChatterMentionMenu } from './SolidChatterMentionMenu'
+import type { SolidChatterMessageWidgetProps } from '../../../types/solid-core'
 
 interface Props {
     messageId?: number | string,
@@ -24,6 +26,7 @@ interface Props {
     time?: string,
     auditRecord?: any,
     messageSubType?: string,
+    chatterMessage?: SolidChatterMessageWidgetProps['chatterMessage'],
     status?: string,
     modelDisplayName?: string,
     modelUserKey?: string,
@@ -60,7 +63,7 @@ const getFileIcon = (mimeType: string): SolidIconName => {
 };
 
 export const SolidChatterMessageBox = (props: Props) => {
-    const { messageId, user, userId, messageType, message, messageBodyMentions, time, auditRecord, media, messageSubType, status, modelDisplayName, modelUserKey, onRefresh } = props;
+    const { messageId, user, userId, messageType, message, messageBodyMentions, time, auditRecord, media, messageSubType, chatterMessage, status, modelDisplayName, modelUserKey, onRefresh } = props;
     const [lightboxSlides, setLightboxSlides] = useState<SolidLightboxSlide[]>([]);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [taskStatus, setTaskStatus] = useState<string | undefined>(status);
@@ -145,7 +148,7 @@ export const SolidChatterMessageBox = (props: Props) => {
             : messageSubType === "audit_insert"
                 ? "Inserted"
                 : "Audit record")
-        : "Internal note";
+        : isChatterMessageWidget(messageType, messageSubType) ? "Custom message" : "Internal note";
 
     const TypeIcon = messageType === 'audit' ? GitBranch : MessageSquare;
 
@@ -342,10 +345,12 @@ export const SolidChatterMessageBox = (props: Props) => {
                                 {modelUserKey && <> · <span className='font-medium'>{modelUserKey}</span></>}
                             </p>
                         )}
-                        {localMessage && !isEditing && (
+                        {(localMessage || (chatterMessage && isChatterMessageWidget(messageType, messageSubType))) && !isEditing && (
                             <div className={styles.solidMessageWrapper}>
                                 {messageType === 'audit'
                                     ? <SolidChatterAuditMessage auditRecord={auditRecord} />
+                                    : chatterMessage && isChatterMessageWidget(messageType, messageSubType)
+                                        ? <SolidChatterMessageWidget chatterMessage={chatterMessage} />
                                     : <SolidChatterCustomMessage message={localMessage} />}
                             </div>
                         )}

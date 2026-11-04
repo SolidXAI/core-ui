@@ -6,6 +6,7 @@ const resourceName = 'menu-item-metadata';
 export const solidMenusApi = createApi({
     reducerPath: 'solidMenuApi',
     baseQuery: baseQueryWithAuth,
+    tagTypes: ['SolidMenu'],
     endpoints: (builder) => ({
         getSolidMenus: builder.query({
             query: (qs) => {
@@ -26,6 +27,7 @@ export const solidMenusApi = createApi({
         }),
         getSolidMenuBasedOnRole: builder.query({
             query: () => `/${resourceName}/me`,
+            providesTags: ['SolidMenu'],
         }),
         createSolidMenu: builder.mutation({
             query: (solidMenu) => ({

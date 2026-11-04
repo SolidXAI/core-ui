@@ -16,3 +16,6 @@ export type SolidListRowActionEvent = {
 export type SolidListRowActionProps = SolidListRowActionEvent & {
   closePopup?: () => void;
 };
+
+/** Kanban card actions receive the same record context as List row actions. */
+export type SolidKanbanCardActionProps = SolidListRowActionProps;

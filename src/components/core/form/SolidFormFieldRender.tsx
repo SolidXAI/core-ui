@@ -3,6 +3,7 @@
 import { SolidMessage } from "../../shad-cn-ui";
 import { FormikObject, SolidFieldProps } from "./fields/ISolidField";
 import { SolidFormFieldRenderExtension } from "./SolidFormFieldRenderExtension";
+import styles from "./fields/solidFields.module.css";
 
 export type SolidFormFieldRenderProps = {
     formik: FormikObject;
@@ -41,9 +42,11 @@ export const SolidFormFieldRender = ({ formik, fieldContext }: any) => {
                             <SolidFormFieldRenderExtension widget={editWidget} formik={formik}  fieldContext={fieldContext}/>
                         }
                         {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                            <div className="absolute mt-1">
-                                <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                            </div>
+                            <SolidMessage
+                                severity="error"
+                                className={styles.fieldError}
+                                text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                            />
                         )}
                     </>
                 }

@@ -1,0 +1,86 @@
+.root {
+  display: flex;
+  min-height: 28rem;
+  height: min(68vh, 54rem);
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.15rem 0.5rem;
+  color: var(--text-color-secondary, var(--muted-foreground));
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.refreshButton {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--surface-border, var(--border));
+  border-radius: 0.5rem;
+  background: var(--surface-card, var(--card));
+  color: var(--text-color-secondary, var(--muted-foreground));
+  cursor: pointer;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 8%, var(--surface-card, var(--card)));
+  color: var(--primary-color, var(--primary));
+}
+
+.refreshButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.refreshing {
+  animation: session-chat-refresh 0.8s linear infinite;
+}
+
+.refreshError {
+  flex: 0 0 auto;
+  padding: 0 0 0.4rem;
+  font-size: 0.75rem;
+}
+
+.messages {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--surface-border, var(--border));
+  border-radius: 0.75rem;
+  background: var(--surface-card, var(--card));
+}
+
+.state {
+  display: flex;
+  min-height: 12rem;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--text-color-secondary, var(--muted-foreground));
+  text-align: center;
+}
+
+.state p {
+  margin: 0;
+}
+
+.error {
+  color: var(--destructive, #b91c1c);
+}
+
+@keyframes session-chat-refresh {
+  to { transform: rotate(360deg); }
+}

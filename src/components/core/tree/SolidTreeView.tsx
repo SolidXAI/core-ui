@@ -245,8 +245,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
     useUpdateSolidEntityMutation,
-    useRecoverSolidEntityByIdQuery,
-    useLazyRecoverSolidEntityByIdQuery,
+    useRecoverSolidEntityByIdMutation,
     useRecoverSolidEntityMutation,
   } = entityApi;
 
@@ -255,13 +254,9 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [
     triggerRecoverSolidEntitiesById,
     {
-      data: recoverByIdData,
       isLoading: recoverByIdIsLoading,
-      error: recoverByIdError,
-      isError: recoverByIdIsError,
-      isSuccess: recoverByIdIsSuccess,
     },
-  ] = useLazyRecoverSolidEntityByIdQuery();
+  ] = useRecoverSolidEntityByIdMutation();
 
   const [
     triggerRecoverSolidEntities,
@@ -1976,19 +1971,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                       createButtonUrl={createButtonUrl}
                       createActionQueryParams={createActionQueryParams}
                       responsiveIconOnly={true}
-                    />
-                  )}
-
-                {actionsAllowed.includes(`${permissionExpression(params.modelName, "delete")}`) &&
-                  solidTreeViewMetaData?.data?.solidView?.layout?.attrs.delete !== false &&
-                  selectedRecords.length > 0 && (
-                    <SolidButton
-                      type="button"
-                      label="Delete"
-                      size="sm"
-                      onClick={() => setDeleteRecordsDialogVisible(true)}
-                      className="small-button"
-                      severity="danger"
                     />
                   )}
 

@@ -1,5 +1,4 @@
-import { useLazyGetfieldsQuery } from "../../../redux/api/fieldApi";
-import { useDeleteMultipleModelsMutation } from "../../../redux/api/modelApi";
+import { useDeletefieldMutation, useLazyGetfieldsQuery } from "../../../redux/api/fieldApi";
 import Link from "../../common/Link";
 import qs from "qs";
 import { useEffect, useState } from "react";
@@ -34,7 +33,7 @@ export const FieldListViewData = () => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [triggerGetModels, { data: field, isLoading }] = useLazyGetfieldsQuery();
 
-  const [deleteManyModel] = useDeleteMultipleModelsMutation();
+  const [deleteField] = useDeletefieldMutation();
 
   useEffect(() => {
     if (field) {
@@ -159,11 +158,13 @@ export const FieldListViewData = () => {
     setQueryString(0, rows, sortField, sortOrder, defaults);
   };
 
-  const deleteBulk = () => {
-    const deleteList = selectedMenus.map((element) => element.id);
-    deleteManyModel(deleteList);
+  const deleteBulk = async () => {
+    for (const field of selectedMenus) {
+      await deleteField(field.id).unwrap();
+    }
     setDialogVisible(false);
     setSelectedMenus([]);
+    await setQueryString(first, rows, sortField, sortOrder, filters);
   };
 
   const onDeleteClose = () => {

@@ -11,7 +11,7 @@ import { usePathname } from "../../hooks/usePathname";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { env } from "../../adapters/env";
 import { normalizeAssetUrl } from "../../helpers/assetUrl";
-import { resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
+import { getMenuContextForActiveRoute, resolveRetainedModelViewRoute } from "../../helpers/modelViewPersistence";
 import type { MenuItemIconSource } from "../../helpers/menuItemIcons";
 import { SolidMenuItemIcon } from "./SolidMenuItemIcon";
 
@@ -67,13 +67,31 @@ function doesSearchParamsMatchSubset(requiredParams: URLSearchParams, currentPar
 }
 
 function isMenuPathActive(itemPath: string | undefined, currentPathname: string, currentSearchParams: URLSearchParams): boolean {
-  if (!itemPath) return false;
+    if (!itemPath) return false;
 
-  const resolvedItemPath = resolveRetainedModelViewRoute(itemPath);
-  const { pathname: itemPathname, searchParams: itemSearchParams } = getPathAndParams(resolvedItemPath);
-  if (itemPathname !== normalizePath(currentPathname)) return false;
+    const { pathname: itemPathname, searchParams: itemSearchParams } = getPathAndParams(itemPath);
+    const currentPath = normalizePath(currentPathname);
+    const modelMenuMatch = itemPathname.match(/^(\/admin\/core\/[^/]+\/[^/]+)\/(?:list|tree|kanban|card)$/);
 
-    return doesSearchParamsMatchSubset(itemSearchParams, currentSearchParams);
+    if (!modelMenuMatch) {
+        return itemPathname === currentPath && doesSearchParamsMatchSubset(itemSearchParams, currentSearchParams);
+    }
+
+    const modelPath = modelMenuMatch[1];
+    if (currentPath !== modelPath && !currentPath.startsWith(modelPath + "/")) return false;
+
+    // New routes keep identity in the URL. Older form routes use the saved view as a fallback.
+    const activeContext = getMenuContextForActiveRoute(currentPath, currentSearchParams);
+    const itemMenuId = itemSearchParams.get("menuItemId");
+    const activeMenuId = activeContext.get("menuItemId");
+    if (itemMenuId && activeMenuId) return itemMenuId === activeMenuId;
+
+    const itemActionId = itemSearchParams.get("actionId");
+    const activeActionId = activeContext.get("actionId");
+    if (itemActionId && activeActionId) return itemActionId === activeActionId;
+
+    // A model link without menu identity is matched by its model path alone.
+    return !itemMenuId && !itemActionId;
 }
 
 function cloneMenuItems(items: SolidMenuItem[] = []): SolidMenuItem[] {

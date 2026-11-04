@@ -277,7 +277,7 @@ export const SolidKanbanViewConfigure = ({
                         }}
                     >
                         <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
-                        <span className="solid-header-action-button-label">Clear cache</span>
+                        <span className="solid-header-action-button-label">Reset View</span>
                     </SolidDropdownMenuItem>
                 </SolidDropdownMenuContent>
             </SolidDropdownMenu>

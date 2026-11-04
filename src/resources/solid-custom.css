@@ -334,7 +334,9 @@ textarea {
   inset: 0 auto 0 0;
   top: 0;
   height: 100vh;
+  height: 100dvh;
   width: var(--sidebar-width);
+  box-sizing: border-box;
   background: var(--sidebar-background);
   color: var(--sidebar-foreground);
   border-right: 1px solid var(--sidebar-border);
@@ -531,6 +533,7 @@ textarea {
   left: 0;
   width: 14px;
   height: 100vh;
+  height: 100dvh;
   border: 0;
   background: transparent;
   z-index: 61;
@@ -775,7 +778,7 @@ textarea {
 
 .solid-user-menu-trigger-name {
   font-size: 12.5px;
-  line-height: 1.1;
+  line-height: 1.2;
   font-weight: 650;
   white-space: nowrap;
   overflow: hidden;
@@ -784,8 +787,11 @@ textarea {
 
 .solid-user-menu-trigger-role {
   font-size: 10.5px;
-  line-height: 1.1;
+  line-height: 1.2;
   color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .solid-user-avatar {
@@ -863,6 +869,61 @@ textarea {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.solid-user-menu-role-row {
+  overflow: visible;
+  display: flex;
+  align-items: center;
+}
+
+.solid-user-menu-roles {
+  position: relative;
+  display: inline-flex;
+  margin-left: 4px;
+  overflow: visible;
+  outline: none;
+}
+
+.solid-user-menu-role-count {
+  color: var(--primary);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.solid-user-menu-roles:hover .solid-user-menu-role-count,
+.solid-user-menu-roles:focus .solid-user-menu-role-count {
+  text-decoration: underline;
+}
+
+.solid-user-menu-roles-list {
+  position: absolute;
+  z-index: 71;
+  top: 100%;
+  left: 0;
+  width: max-content;
+  max-width: 140px;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--popover, var(--card));
+  color: var(--popover-foreground, var(--card-foreground));
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.2);
+  white-space: normal;
+  line-height: 1.35;
+  transition: opacity 120ms ease;
+}
+
+.solid-user-menu-roles:hover .solid-user-menu-roles-list,
+.solid-user-menu-roles:focus .solid-user-menu-roles-list {
+  visibility: visible;
+  opacity: 1;
 }
 
 .solid-user-menu-sep {
@@ -1398,6 +1459,281 @@ textarea {
   box-shadow: 0 18px 48px rgba(2, 6, 23, 0.35);
 }
 
+.solid-popup-dialog.solid-common-dialog.solid-agent-session-compare-popup {
+  width: 95vw !important;
+  max-width: 95vw !important;
+  height: 95vh !important;
+  max-height: 95vh !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.solid-popup-dialog.solid-delete-model-dialog.solid-radix-dialog-content {
+  display: flex;
+  flex-direction: column;
+  width: min(960px, calc(100vw - 32px));
+  height: min(760px, calc(100vh - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+  padding: 0;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__head,
+.solid-delete-model-dialog .solid-delete-model-popup__footer {
+  flex: 0 0 auto;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__head {
+  padding: 20px 24px 16px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 16px 24px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__summary {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 12px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__summary > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 9px 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 22%, var(--card));
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__summary strong {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__summary span {
+  color: var(--muted-foreground);
+  font-size: 11px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__inventory {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 10px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__change + .solid-delete-model-popup__change {
+  border-top: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__change summary {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.75fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__change summary::-webkit-details-marker {
+  display: none;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__change summary::before {
+  content: "+";
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  color: var(--muted-foreground);
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__change[open] summary::before {
+  content: "−";
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__change-name {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__change-description {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__count {
+  grid-column: 3;
+  grid-row: 1;
+  z-index: 1;
+  justify-self: start;
+  margin-right: 20px;
+  min-width: 23px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 48%, var(--card));
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__items {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0 42px 12px;
+  list-style: disc;
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__empty {
+  margin: 0;
+  padding: 16px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__manual {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, #f59e0b 34%, var(--border));
+  border-radius: 10px;
+  background: color-mix(in srgb, #f59e0b 9%, var(--card));
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__manual > strong {
+  color: color-mix(in srgb, #92400e 92%, var(--foreground));
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__manual code {
+  overflow-wrap: anywhere;
+  color: var(--muted-foreground);
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__ddl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 5px 4px 8px;
+  border: 1px solid color-mix(in srgb, #b45309 20%, var(--border));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--card) 82%, #f59e0b 5%);
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__ddl code {
+  overflow-wrap: anywhere;
+  color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__copy-ddl {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border) 92%, transparent);
+  border-radius: 5px;
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__copy-ddl:hover {
+  background: color-mix(in srgb, var(--accent) 45%, var(--card));
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__copy-ddl:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px 18px;
+  background: var(--card);
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__confirm {
+  flex: 1;
+  padding: 0;
+  background: transparent;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__confirm .solid-checkbox-label {
+  font-size: 11px;
+}
+
+.solid-delete-model-dialog .solid-delete-model-popup__actions {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+@media (max-width: 700px) {
+  .solid-popup-dialog.solid-delete-model-dialog.solid-radix-dialog-content {
+    width: calc(100vw - 20px);
+    height: calc(100vh - 20px);
+    max-height: calc(100vh - 20px);
+  }
+
+  .solid-delete-model-dialog .solid-delete-model-popup__head,
+  .solid-delete-model-dialog .solid-delete-model-popup__body,
+  .solid-delete-model-dialog .solid-delete-model-popup__footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .solid-delete-model-dialog .solid-delete-model-popup__change summary {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 10px;
+  }
+
+  .solid-delete-model-dialog .solid-delete-model-popup__change-description {
+    grid-column: 1 / -1;
+  }
+
+  .solid-delete-model-dialog .solid-delete-model-popup__change summary::before,
+  .solid-delete-model-dialog .solid-delete-model-popup__count {
+    grid-column: 2;
+  }
+
+  .solid-delete-model-dialog .solid-delete-model-popup__footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
 @media (max-width: 1199px) {
   .solid-main {
     margin-left: 0;
@@ -1414,6 +1750,11 @@ textarea {
 
   .solid-sidebar {
     width: min(88vw, 320px);
+    width: min(88svw, 320px);
+    width: min(88dvw, 320px);
+    max-width: calc(100vw - 48px);
+    max-width: calc(100svw - 48px);
+    max-width: calc(100dvw - 48px);
     transform: translateX(-104%);
   }
 
@@ -1423,6 +1764,11 @@ textarea {
 
   .solid-sidebar.is-collapsed {
     width: min(88vw, 320px);
+    width: min(88svw, 320px);
+    width: min(88dvw, 320px);
+    max-width: calc(100vw - 48px);
+    max-width: calc(100svw - 48px);
+    max-width: calc(100dvw - 48px);
   }
 
   .solid-sidebar-hotspot {
@@ -2570,7 +2916,7 @@ textarea {
 .solid-auth-center-stack {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--solid-auth-brand-form-gap);
 }
 
 .solid-auth-center-details {
@@ -2971,7 +3317,7 @@ textarea {
 .solid-auth-theme-wrapper.left .solid-auth-form-pane .solid-auth-brand,
 .solid-auth-theme-wrapper.right .solid-auth-form-pane .solid-auth-brand {
   align-self: flex-start;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
 }
 
 .solid-auth-theme-wrapper .solid-auth-image-pane {
@@ -3010,6 +3356,7 @@ textarea {
 /* Auth theme contract (driven by the global app theme mode) */
 .solid-auth-theme-wrapper {
   --solid-surface-base: #020204;
+  --solid-auth-brand-form-gap: 24px;
   --solid-surface-pane: #020204;
   --solid-surface-image: #27272a;
   --solid-surface-card: #111113;
@@ -3543,6 +3890,21 @@ textarea {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
+@media (min-width: 768px) and (max-width: 991px) {
+  .solid-list-toolbar .solid-custom-filter-wrapper,
+  .solid-list-toolbar .solid-global-search-element,
+  .solid-list-toolbar .solid-global-search-element-wrapper,
+  .solid-list-toolbar .solid-search-overlay-panel {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .solid-list-toolbar .solid-global-search-input-item {
+    flex: 1 0 100%;
+    min-width: 0;
+  }
+}
+
 .solid-tree-toolbar .solid-global-search-element {
   height: 36px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
@@ -3583,6 +3945,20 @@ textarea {
 
 .solid-tree-toolbar .custom-filter-button:hover {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+.solid-list-toolbar .custom-filter-button {
+  right: 4px;
+  padding: 0;
+}
+
+.solid-list-toolbar .solid-global-search-element input {
+  padding-right: 42px;
+}
+
+.solid-list-toolbar .solid-global-search-chip-list:has(> li:not(.solid-global-search-input-item)) {
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .solid-tree-toolbar .solid-btn.solid-icon-button {
@@ -4096,6 +4472,36 @@ html.dark .solid-header-cog-trigger:hover,
 
 .solid-paginator-meta {
   align-items: center;
+}
+
+.solid-paginator-left {
+  display: inline-flex;
+  align-items: center;
+  margin-right: auto;
+}
+
+.solid-list-selection-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.solid-list-selection-clear {
+  border: 0;
+  padding: 2px 5px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font: inherit;
+  cursor: pointer;
+}
+
+.solid-list-selection-clear:hover {
+  color: var(--foreground);
+  text-decoration: underline;
 }
 
 .solid-paginator-label,
@@ -7132,7 +7538,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 24px;
+  gap: var(--solid-auth-brand-form-gap);
   padding: clamp(28px, 4vh, 40px) 0;
 }
 
@@ -7287,7 +7693,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 20px;
+    gap: var(--solid-auth-brand-form-gap);
     padding: 0;
   }
 
@@ -7301,5 +7707,47 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   .solid-auth-theme-wrapper.left .solid-auth-form-pane-content,
   .solid-auth-theme-wrapper.right .solid-auth-form-pane-content {
     display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  .solid-auth-theme-wrapper.center {
+    box-sizing: border-box;
+    justify-items: center;
+    overflow-x: hidden;
+    padding: 14px !important;
+    width: 100%;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-center-layout {
+    width: 100% !important;
+    max-width: 388px !important;
+    min-height: auto;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-center-stack,
+  .solid-auth-theme-wrapper.center .auth-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    box-sizing: border-box;
+  }
+
+  .solid-auth-theme-wrapper.center .auth-container {
+    padding: 22px !important;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-brand {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .solid-auth-theme-wrapper.center .solid-auth-brand-logo img {
+    max-width: min(180px, 68vw);
   }
 }

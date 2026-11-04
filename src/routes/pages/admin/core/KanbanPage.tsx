@@ -1,12 +1,14 @@
 import { SolidKanbanView } from "../../../../components/core/kanban/SolidKanbanView";
 import type { SolidKanbanViewHandle } from "../../../../components/core/kanban/SolidKanbanView";
-import { registerKanbanView, unregisterKanbanView } from "../../../../components/core/kanban/kanbanViewRegistry";
+import { getKanbanView, registerKanbanView, unregisterKanbanView } from "../../../../components/core/kanban/kanbanViewRegistry";
 import { camelCase } from "lodash";
 import { useCallback, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { storeCurrentModelViewContext } from "../../../../helpers/modelViewPersistence";
 import { usePathname } from "../../../../hooks/usePathname";
 import { useSearchParams } from "../../../../hooks/useSearchParams";
+import { isMatchingAdminViewRefresh, ADMIN_VIEW_REFRESH_REQUESTED, type AdminViewRefreshRequest } from "../../../../helpers/adminViewRefresh";
+import { eventBus } from "../../../../helpers/eventBus";
 
 export function KanbanPage() {
   const params = useParams();
@@ -33,6 +35,12 @@ export function KanbanPage() {
     const currentUrl = search ? `${pathname}?${search}` : pathname;
     storeCurrentModelViewContext(currentUrl);
   }, [pathname, search]);
+
+  useEffect(() => eventBus.on<AdminViewRefreshRequest>(ADMIN_VIEW_REFRESH_REQUESTED, (request) => {
+    if (isMatchingAdminViewRefresh(request, { moduleName, modelName, viewName: "kanban" })) {
+      getKanbanView(kanbanId)?.refresh();
+    }
+  }), [kanbanId, moduleName, modelName]);
 
   return <SolidKanbanView ref={setKanbanRef} key={kanbanId} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }

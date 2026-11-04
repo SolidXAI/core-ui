@@ -8,6 +8,7 @@ import { Layout } from "./Layout";
 import SolidChangeForcePassword from "../auth/SolidChangeForcePassword";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { SolidDialog, SolidDialogBody, SolidDialogSeparator } from "../shad-cn-ui";
+import { SolidAgentMount } from "../core/solid-agent/SolidAgentMount";
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     // const theme = useSelector((state: any) => state.theme.mode);
@@ -31,6 +32,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <>
             <Layout>{children}</Layout>
+            <SolidAgentMount />
             {isForcePasswordChange && (
                 <SolidDialog
                     header="Change Default Password"

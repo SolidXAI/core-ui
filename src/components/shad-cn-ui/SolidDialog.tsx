@@ -7,6 +7,7 @@ type SolidDialogProps = {
   onOpenChange?: (open: boolean) => void;
   children?: React.ReactNode;
   className?: string;
+  ariaLabel?: string;
   contentClassName?: string;
   overlayClassName?: string;
   style?: React.CSSProperties;
@@ -33,7 +34,7 @@ function cx(...parts: Array<string | false | undefined>) {
 }
 
 const DATEPICKER_OUTSIDE_SAFE_SELECTOR =
-  "#solid-datepicker-portal, .react-datepicker, .react-datepicker-popper, .react-datepicker__portal, [class*='react-datepicker'], [data-solid-dialog-outside-safe='true']";
+  "#solid-datepicker-portal, .react-datepicker, .react-datepicker-popper, .react-datepicker__portal, [class*='react-datepicker'], .solid-autocomplete-panel, [data-solid-dialog-outside-safe='true']";
 
 function isDatePickerInteractionTarget(target: EventTarget | null): boolean {
   if (!target) return false;
@@ -70,6 +71,7 @@ export function SolidDialog({
   onOpenChange,
   children,
   className,
+  ariaLabel,
   contentClassName,
   overlayClassName,
   style,
@@ -94,6 +96,7 @@ export function SolidDialog({
         <Dialog.Overlay className={cx("solid-radix-dialog-overlay", overlayClassName)} />
         <Dialog.Content
           className={cx("solid-radix-dialog-content", className, contentClassName)}
+          aria-label={ariaLabel}
           style={style ?? contentStyle}
           onEscapeKeyDown={(event: any) => {
             if (!dismissible) event.preventDefault();

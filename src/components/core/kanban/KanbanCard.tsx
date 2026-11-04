@@ -5,6 +5,7 @@ import { DraggableProvided } from "@hello-pangea/dnd";
 import { RotateCcw } from "lucide-react";
 import { CompatibleDraggable } from "../common/dndCompat";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
+import { getRecordActionQuery, getRecordUserKeyQuery } from "../../../helpers/routePaths";
 import {
   SolidDropdownMenu,
   SolidDropdownMenuContent,
@@ -13,6 +14,7 @@ import {
   SolidIcon,
 } from "../../shad-cn-ui";
 import { SolidCollectionRowActionMenuItems } from "../common/SolidCollectionRowActionMenuItems";
+import { SolidCheckbox } from "../../shad-cn-ui/SolidCheckbox";
 
 // Define the types for the data and props
 interface Data {
@@ -39,9 +41,12 @@ interface KanbanCardProps {
   showArchived?: boolean;
   params?: any;
   handleCustomButtonClick?: (buttonAttrs: any, event: any) => void;
+  selectionEnabled?: boolean;
+  selected?: boolean;
+  onSelectionChange?: (record: Data, selected: boolean) => void;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived, params, handleCustomButtonClick }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, recordClickAction = "edit", groupByFieldName, group, cardNode, DynamicCardWidget, onDelete, onRecover, showArchived, params, handleCustomButtonClick, selectionEnabled = false, selected = false, onSelectionChange }) => {
   const router = useRouter()
   const isArchivedRecord = data?.deletedAt !== null && data?.deletedAt !== undefined;
 
@@ -52,13 +57,23 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   const openRecord = () => {
     if (isArchivedRecord) return;
     persistReturnView();
-    router.push(`${editButtonUrl}/${data?.id}?viewMode=${recordClickAction}`);
+    const query = new URLSearchParams({ viewMode: recordClickAction });
+    const actionQuery = new URLSearchParams(getRecordActionQuery(solidKanbanViewMetaData));
+    actionQuery.forEach((value, key) => query.set(key, value));
+    const userKeyQuery = getRecordUserKeyQuery(data, solidKanbanViewMetaData);
+    new URLSearchParams(userKeyQuery).forEach((value, key) => query.set(key, value));
+    router.push(`${editButtonUrl}/${data?.id}?${query.toString()}`);
   };
 
   const openEdit = () => {
     if (isArchivedRecord) return;
     persistReturnView();
-    router.push(`${editButtonUrl}/${data?.id}?viewMode=edit`);
+    const query = new URLSearchParams({ viewMode: "edit" });
+    const actionQuery = new URLSearchParams(getRecordActionQuery(solidKanbanViewMetaData));
+    actionQuery.forEach((value, key) => query.set(key, value));
+    const userKeyQuery = getRecordUserKeyQuery(data, solidKanbanViewMetaData);
+    new URLSearchParams(userKeyQuery).forEach((value, key) => query.set(key, value));
+    router.push(`${editButtonUrl}/${data?.id}?${query.toString()}`);
   };
 
   const renderRecoverAction = (data) => {
@@ -131,10 +146,8 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
     <CompatibleDraggable draggableId={String(data.id)} index={index} isDragDisabled={isDragDisabled}>
       {(provided: DraggableProvided, snapshot) => (
         <div
-          className=""
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...(!isDragDisabled ? provided.dragHandleProps : {})}
           style={{ marginTop: "1rem", ...provided.draggableProps.style }}
           className="kanban-card-container"
         >
@@ -144,18 +157,36 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             style={{
               opacity: snapshot.isDragging ? 0.9 : 1,
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
-              cursor: isArchivedRecord ? "default" : (isDragDisabled ? "pointer" : "grab")
+              cursor: "default",
             }}
             elevation={snapshot.isDragging ? 3 : 1}
-            className={`solid-kanban-card${isArchivedRecord ? " greyed-out-row" : ""}`}
+            className={`solid-kanban-card${isArchivedRecord ? " greyed-out-row" : ""}${selected ? " solid-kanban-card-selected" : ""}`}
             onClick={openRecord}
           >
-            {renderKanbanAction(data)}
-            {DynamicCardWidget ? (
+            {selectionEnabled && !isArchivedRecord && (
               <div
-                className={isArchivedRecord ? "solid-archived-card-content" : undefined}
-                style={isArchivedRecord ? { pointerEvents: "none" } : undefined}
+                className="solid-kanban-card-selection"
+                onClick={(event) => event.stopPropagation()}
+                onMouseDown={(event) => event.stopPropagation()}
+                onTouchStart={(event) => event.stopPropagation()}
               >
+                <SolidCheckbox
+                  checked={selected}
+                  aria-label={`Select ${data?.messageId || data?.id || "Kanban card"}`}
+                  onChange={(event) => onSelectionChange?.(data, event.currentTarget.checked)}
+                />
+              </div>
+            )}
+            {renderKanbanAction(data)}
+            <div
+              {...(!isDragDisabled ? provided.dragHandleProps : {})}
+              className={`solid-kanban-card-content${isArchivedRecord ? " solid-archived-card-content" : ""}`}
+              style={{
+                ...(isArchivedRecord ? { pointerEvents: "none" } : {}),
+                cursor: isArchivedRecord ? "default" : (isDragDisabled ? "pointer" : "grab"),
+              }}
+            >
+              {DynamicCardWidget ? (
                 <DynamicCardWidget
                   rowData={data}
                   solidKanbanViewMetaData={solidKanbanViewMetaData}
@@ -172,8 +203,8 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
                   openRecord={openRecord}
                   openEdit={openEdit}
                 />
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
         </div>
       )}

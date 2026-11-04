@@ -1,0 +1,68 @@
+.valueWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.5rem;
+}
+
+.value {
+  color: var(--foreground, var(--text-color, #25233a));
+  font-variant-numeric: tabular-nums;
+}
+
+.infoButton {
+  display: inline-grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #111827;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.infoButton:hover,
+.infoButton:focus-visible {
+  background: #fff;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.popover {
+  width: min(19rem, calc(100vw - 1rem));
+  padding: 0.85rem 0.95rem !important;
+  border: 1px solid color-mix(in srgb, var(--primary-color, var(--primary, #7434d5)) 20%, var(--surface-border, var(--border, #e3e1ea))) !important;
+  border-radius: 0.75rem !important;
+  background: var(--surface-card, var(--card, #fff)) !important;
+  color: var(--text-color, var(--foreground, #25233a)) !important;
+  box-shadow: 0 12px 30px color-mix(in srgb, #21143b 16%, transparent) !important;
+  white-space: normal;
+}
+
+.popoverEyebrow {
+  margin-bottom: 0.35rem;
+  color: var(--primary-color, var(--primary, #7434d5));
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+}
+
+.popoverTitle {
+  color: var(--text-color, var(--foreground, #25233a));
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.popoverDescription {
+  margin: 0.35rem 0 0;
+  color: var(--text-color-secondary, var(--muted-foreground, #6b6878));
+  font-size: 0.78rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}

@@ -40,7 +40,11 @@ export const AdminTopHeader = () => {
     // This avoids stale list breadcrumbs bleeding into form routes that do not
     // carry actionId in their query string.
     if (hasMatchingActionData && (moduleFromApi || modelFromApi || actionFromApi)) {
-      return [moduleFromApi, modelFromApi, actionFromApi].filter(Boolean);
+      const recordUserKey = searchParams.get("recordUserKey");
+      const actionLabel = actionFromApi
+        ? recordUserKey ? `${recordUserKey} (${actionFromApi})` : actionFromApi
+        : recordUserKey;
+      return [moduleFromApi, modelFromApi, actionLabel].filter(Boolean);
     }
 
     const segments = pathname.split("/").filter(Boolean);
@@ -51,11 +55,17 @@ export const AdminTopHeader = () => {
       const moduleName = segments[2];
       const modelName = segments[3];
       const viewName = segments[4];
+      const actionName = searchParams.get("actionName");
+      const recordUserKey = searchParams.get("recordUserKey");
+      const currentLabel = actionName || (viewName ? toLabel(viewName) : null);
+      const currentViewLabel = recordUserKey
+        ? `${recordUserKey}${currentLabel ? ` (${currentLabel})` : ""}`
+        : currentLabel;
       const next = [
         moduleName ? toLabel(moduleName) : null,
         // After browser Back, the previous action response may still be cached; use it only when it belongs to this URL.
         hasMatchingActionData && modelFromApi ? decodeURIComponent(modelFromApi) : modelName ? toLabel(modelName) : null,
-        viewName ? toLabel(viewName) : null,
+        currentViewLabel,
       ].filter(Boolean) as string[];
       return next.length ? next : ["Admin"];
     }
@@ -71,14 +81,19 @@ export const AdminTopHeader = () => {
     return ["Admin"];
   }, [actionId, actionResponse, pathname, searchParams]);
 
-  const showBack = /\/admin\/core\/[^/]+\/[^/]+\/form\/[^/]+/.test(pathname);
+  const showBack = /\/admin\/core\/[^/]+\/[^/]+\/(?:form|editor)\/[^/]+/.test(pathname);
+  const recordUserKey = searchParams.get("recordUserKey");
+  const renderCrumbLabel = (crumb: string, index: number) => {
+    if (index !== 2 || !recordUserKey || !crumb.startsWith(recordUserKey)) return crumb;
+    return <><strong>{recordUserKey}</strong>{crumb.slice(recordUserKey.length)}</>;
+  };
 
   const triggerSidebar = () => {
     window.dispatchEvent(new CustomEvent(SIDEBAR_TOGGLE_EVENT));
   };
 
   const handleBreadcrumbClick = (crumbIndex: number) => {
-    // When on a form view, clicking the model name (second crumb) should navigate back to list
+    // When on a form or custom editor view, clicking the model name (second crumb) should navigate back to list
     // Index 1 is the model name in a breadcrumb like: Module > Model > Action
     if (crumbIndex === 1 && showBack) {
       const segments = pathname.split("/").filter(Boolean);
@@ -137,10 +152,10 @@ export const AdminTopHeader = () => {
                   onClick={() => handleBreadcrumbClick(index)}
                   style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", textDecoration: "underline", fontFamily: 'inherit' }}
                 >
-                  {crumb}
+                  {renderCrumbLabel(crumb, index)}
                 </button>
               ) : (
-                <span className="solid-bread-crum-text-wrapper">{crumb}</span>
+                <span className="solid-bread-crum-text-wrapper">{renderCrumbLabel(crumb, index)}</span>
               )}
             </span>
           ))}

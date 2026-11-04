@@ -1,7 +1,10 @@
 
 import React from 'react'
 import dayjs from 'dayjs'
+import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer-continued'
 import { RightArrowSvg } from '../../../components/Svg/RightArrowSvg'
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from '../../../components/shad-cn-ui'
+import './SolidChatterAuditMessage.css'
 
 const DATE_FIELD_TYPES = ['date', 'datetime', 'time']
 
@@ -62,19 +65,53 @@ export const SolidChatterAuditMessage: React.FC<SolidChatterAuditMessageProps> =
     return (
         <div className='flex flex-col gap-2'>
             {visibleAuditRecord.map((item: AuditRecord, index: number) => (
-                <div key={index} className='flex gap-2'>
-                    <span className='m-0 '>
-                        {"(" + (item.fieldDisplayName || item.field) + ")"}
-                    </span>
-                    <span className='m-0  font-bold'>
-                        {formatAuditValue(item.previous, item.previousDisplay, item.fieldType)}
-                    </span>
-                    <RightArrowSvg />
-                    <span className='m-0 font-bold text-[var(--primary-color)]'>
-                        {formatAuditValue(item.current, item.currentDisplay, item.fieldType)}
-                    </span>
-                </div>
+                <AuditFieldChange key={index} item={item} />
             ))}
         </div>
     );
 };
+
+function AuditFieldChange({ item }: { item: AuditRecord }) {
+    const [isDiffOpen, setIsDiffOpen] = React.useState(false)
+    const previousValue = formatAuditValue(item.previous, item.previousDisplay, item.fieldType)
+    const currentValue = formatAuditValue(item.current, item.currentDisplay, item.fieldType)
+    const isLongText = item.fieldType?.toLowerCase() === 'longtext'
+
+    return <div className='solid-audit-change flex gap-2'>
+                    <span className='solid-audit-field-name m-0'>
+                        {"(" + (item.fieldDisplayName || item.field) + ")"}
+                    </span>
+                    {isLongText ? <>
+                        <div className='solid-audit-longtext-values'>
+                            <LongTextValue value={previousValue} onClick={() => setIsDiffOpen(true)} />
+                            <RightArrowSvg />
+                            <LongTextValue value={currentValue} current onClick={() => setIsDiffOpen(true)} />
+                        </div>
+                        <SolidDialog open={isDiffOpen} onOpenChange={setIsDiffOpen} ariaLabel={`${item.fieldDisplayName || item.field} differences`} className='solid-audit-diff-dialog' showHeader={false}>
+                            <SolidDialogHeader className='solid-audit-diff-dialog__header'>
+                                <SolidDialogTitle>{item.fieldDisplayName || item.field}</SolidDialogTitle>
+                                <SolidDialogClose aria-label='Close' />
+                            </SolidDialogHeader>
+                            <SolidDialogBody className='solid-audit-diff-dialog__body'>
+                                <ReactDiffViewer oldValue={previousValue} newValue={currentValue} splitView compareMethod={DiffMethod.WORDS} showDiffOnly={false} />
+                            </SolidDialogBody>
+                        </SolidDialog>
+                    </> : <>
+                        <span className='m-0 font-bold'>{previousValue}</span>
+                        <RightArrowSvg />
+                        <span className='m-0 font-bold text-[var(--primary-color)]'>{currentValue}</span>
+                    </>}
+                </div>
+}
+
+function LongTextValue({ value, current = false, onClick }: { value: string; current?: boolean; onClick: () => void }) {
+    const preview = value.length > 20 ? `${value.slice(0, 20)}...` : value
+    return <SolidTooltip>
+        <SolidTooltipTrigger asChild>
+            <button type='button' className={`solid-audit-longtext-value font-bold${current ? ' is-current' : ''}`} onClick={onClick} aria-haspopup='dialog'>
+                {preview}
+            </button>
+        </SolidTooltipTrigger>
+        <SolidTooltipContent>View full text diff</SolidTooltipContent>
+    </SolidTooltip>
+}

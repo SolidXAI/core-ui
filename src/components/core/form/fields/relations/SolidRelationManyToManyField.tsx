@@ -227,6 +227,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         onSelect={(e: { value: RelationItem }) => linkItem(e.value)}
                         onUnselect={(e: { value: RelationItem }) => unlinkItem(e.value)}
                         className="solid-standard-autocomplete w-full"
+                        portal={fieldContext.embeded === true}
                     />
                     {fieldContext.field.attrs.inlineCreate && (
                         <>

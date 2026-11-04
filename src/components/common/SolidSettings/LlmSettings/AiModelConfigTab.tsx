@@ -6,11 +6,12 @@ import {
   SolidDialogFooter,
   SolidDialogHeader,
   SolidDialogTitle,
+  SolidAutocomplete,
   SolidInput,
-  SolidSelect,
   SolidSwitch,
   SolidTextarea,
 } from "../../../shad-cn-ui";
+import { useModelsDevCatalog, useModelsDevModels } from "../../../../hooks/useModelsDevModels";
 
 
 export interface ModelBehavior {
@@ -22,6 +23,7 @@ export interface ProviderEntry {
   type: string;
   apiKey: string;
   baseUrl?: string;
+  region?: string;
 }
 
 export interface ModelEntry {
@@ -44,11 +46,22 @@ const PROVIDER_TYPE_OPTIONS = [
   { label: "Anthropic", value: "anthropic" },
   { label: "OpenAI Compatible", value: "openai-compatible" },
   { label: "Anthropic Compatible", value: "anthropic-compatible" },
+  { label: "Amazon Bedrock", value: "bedrock" },
 ];
 
 const COMPATIBLE_TYPES = ["openai-compatible", "anthropic-compatible"];
 
+// Native Bedrock (Converse API): authenticated with a Bedrock API key and a region, no base URL.
+const BEDROCK_TYPE = "bedrock";
+const BEDROCK_DEFAULT_NAME = "amazon-bedrock";
+const ADDABLE_TYPES = [...COMPATIBLE_TYPES, BEDROCK_TYPE];
+
 const BUILT_IN_TYPES = ["openai", "anthropic"];
+
+// Providers not in the models.dev catalog are keyed as `other(<name>)`; their model ID is always typed in.
+const OTHER_PROVIDER_VALUE = "__other_provider__";
+const toOtherProviderKey = (name: string) => `other(${name.trim()})`;
+export const isOtherProvider = (providerId?: string) => !!providerId && /^other\(.+\)$/.test(providerId);
 
 const DEFAULT_BUILT_IN_PROVIDERS: Record<string, ProviderEntry> = {
   openai: { type: "openai", apiKey: "" },
@@ -67,6 +80,34 @@ const cardStyle: React.CSSProperties = {
   background: "var(--solid-card-bg, var(--solid-surface-bg, transparent))",
 };
 
+function SearchableSettingsSelect({ value, options, placeholder, disabled, onChange }: {
+  value: string;
+  options: { label: string; value: string }[];
+  placeholder: string;
+  disabled?: boolean;
+  onChange: (value: string) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const selectedLabel = options.find((option) => option.value === value)?.label;
+  const selected = React.useMemo(() => selectedLabel ? { label: selectedLabel, value } : null, [selectedLabel, value]);
+  const suggestions = options.filter((option) =>
+    `${option.label} ${option.value}`.toLowerCase().includes(query.trim().toLowerCase()));
+
+  return <SolidAutocomplete
+    className="solid-standard-autocomplete w-full"
+    value={selected}
+    suggestions={suggestions}
+    completeMethod={({ query: next }) => setQuery(next)}
+    onChange={(event) => onChange(event.value?.value ?? "")}
+    field="label"
+    placeholder={placeholder}
+    disabled={disabled}
+    dropdown
+    forceSelection
+    portal
+  />;
+}
+
 
 interface ProviderModalProps {
   visible: boolean;
@@ -84,8 +125,16 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
   const [providerName, setProviderName] = useState(editKey && !BUILT_IN_TYPES.includes(editKey) ? editKey : "");
   const [providerBaseUrl, setProviderBaseUrl] = useState(existingEntry?.baseUrl ?? "");
   const [providerApiKey, setProviderApiKey] = useState(existingEntry?.apiKey ?? "");
+  const [providerRegion, setProviderRegion] = useState(existingEntry?.region ?? "");
+  const [otherProviderName, setOtherProviderName] = useState("");
+  const { catalog, loading: catalogLoading, error: catalogError } = useModelsDevCatalog();
 
   const isCompatible = COMPATIBLE_TYPES.includes(providerType);
+  const isBedrock = providerType === BEDROCK_TYPE;
+  const catalogProviders = Object.entries(catalog ?? {})
+    .filter(([id]) => !providers[id])
+    .map(([id, provider]) => ({ label: provider.name ? `${provider.name} (${id})` : id, value: id }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   // Reset state when modal opens with new data
   React.useEffect(() => {
@@ -95,14 +144,24 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
       setProviderName(editKey && !BUILT_IN_TYPES.includes(editKey) ? editKey : "");
       setProviderBaseUrl(entry?.baseUrl ?? "");
       setProviderApiKey(entry?.apiKey ?? "");
+      setProviderRegion(entry?.region ?? "");
+      setOtherProviderName("");
     }
   }, [visible, editKey]);
 
-  // In add mode, only show compatible types (built-ins are always pre-added)
+  // In add mode, only show addable types (built-ins are always pre-added)
   // In edit mode, show all types but lock the value
+  const isOtherSelected = !isEdit && providerName === OTHER_PROVIDER_VALUE;
+  const providerNameOptions = [...catalogProviders, { label: "Other", value: OTHER_PROVIDER_VALUE }];
+  const hasValidCompatibleName = isEdit
+    ? !!providerName.trim()
+    : isOtherSelected
+      ? !!otherProviderName.trim() && !providers[toOtherProviderKey(otherProviderName)]
+      : catalogProviders.some((provider) => provider.value === providerName);
+
   const typeOptions = isEdit
     ? PROVIDER_TYPE_OPTIONS
-    : PROVIDER_TYPE_OPTIONS.filter((opt) => COMPATIBLE_TYPES.includes(opt.value));
+    : PROVIDER_TYPE_OPTIONS.filter((opt) => ADDABLE_TYPES.includes(opt.value));
 
   const handleSave = () => {
     if (!providerType) return;
@@ -111,9 +170,13 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
     const entry: ProviderEntry = { type: providerType, apiKey: providerApiKey };
 
     if (isCompatible) {
-      if (!providerName.trim()) return;
+      if (!hasValidCompatibleName || !providerBaseUrl.trim()) return;
+      key = isOtherSelected ? toOtherProviderKey(otherProviderName) : providerName.trim();
+      entry.baseUrl = providerBaseUrl.trim();
+    } else if (isBedrock) {
+      if (!providerName.trim() || !providerRegion.trim()) return;
       key = providerName.trim();
-      entry.baseUrl = providerBaseUrl;
+      entry.region = providerRegion.trim();
     } else {
       key = providerType;
     }
@@ -141,7 +204,9 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
     onHide();
   };
 
-  const canSave = providerType && (isCompatible ? providerName.trim() : true);
+  const canSave = !!providerType && (isBedrock
+    ? !!providerName.trim() && !!providerRegion.trim()
+    : !isCompatible || (hasValidCompatibleName && !!providerBaseUrl.trim()));
 
   return (
     <SolidDialog open={visible} onOpenChange={(open) => !open && onHide()} style={{ width: "500px" }}>
@@ -157,16 +222,16 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
           {!(isEdit && BUILT_IN_TYPES.includes(editKey!)) && (
             <div>
               <label className="form-field-label">Provider Type</label>
-              <SolidSelect
-                className="w-full"
+              <SearchableSettingsSelect
                 value={providerType}
                 options={typeOptions}
-                native={false}
-                onChange={(e) => {
-                  setProviderType(e.value);
+                onChange={(next) => {
+                  setProviderType(next);
                   if (!isEdit) {
-                    setProviderName("");
+                    setProviderName(next === BEDROCK_TYPE && !providers[BEDROCK_DEFAULT_NAME] ? BEDROCK_DEFAULT_NAME : "");
                     setProviderBaseUrl("");
+                    setProviderRegion("");
+                    setOtherProviderName("");
                   }
                 }}
                 placeholder="Select Provider Type"
@@ -178,9 +243,62 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
             <>
               {!isEdit && (
                 <div>
-                  <label className="form-field-label">Name (unique identifier)</label>
+                  <label className="form-field-label">Provider Name</label>
+                  <SearchableSettingsSelect
+                    options={providerNameOptions}
+                    placeholder={catalogLoading ? "Loading providers..." : "Select Provider"}
+                    value={providerName}
+                    onChange={(next) => {
+                      setProviderName(next);
+                      if (next === OTHER_PROVIDER_VALUE) {
+                        setProviderBaseUrl("");
+                        return;
+                      }
+                      setOtherProviderName("");
+                      const provider = catalog?.[next];
+                      const matchingAdapter = providerType === "openai-compatible"
+                        ? "@ai-sdk/openai-compatible" : "@ai-sdk/anthropic";
+                      setProviderBaseUrl(provider?.npm === matchingAdapter ? provider.api ?? "" : "");
+                    }}
+                    disabled={!providerType || catalogLoading}
+                  />
+                  {isOtherSelected && (
+                    <div className="flex items-center gap-1 mt-2">
+                      <span className="text-color-secondary">other (</span>
+                      <SolidInput
+                        placeholder="e.g. Runpod"
+                        value={otherProviderName}
+                        // ":" separates provider and model in agent model keys, and ")" closes the name.
+                        onChange={(e) => setOtherProviderName(e.target.value.replace(/[:()]/g, ""))}
+                        className="w-full"
+                        aria-label="Other provider name"
+                      />
+                      <span className="text-color-secondary">)</span>
+                    </div>
+                  )}
+                  {isOtherSelected && !!otherProviderName.trim() && providers[toOtherProviderKey(otherProviderName)] && (
+                    <small className="text-color-secondary">{toOtherProviderKey(otherProviderName)} already exists.</small>
+                  )}
+                  {catalogError && <small className="text-color-secondary">Could not load providers from models.dev. Choose "Other" to name the provider.</small>}                </div>
+              )}
+              <div>
+                <label className="form-field-label">Base URL</label>
+                <SolidInput
+                  placeholder="https://api.example.com/v1"
+                  value={providerBaseUrl}
+                  onChange={(e) => setProviderBaseUrl(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+            </>
+          )}
+          {isBedrock && (
+            <>
+              {!isEdit && (
+                <div>
+                  <label className="form-field-label">Provider Name</label>
                   <SolidInput
-                    placeholder="e.g. openrouter, together-ai"
+                    placeholder={BEDROCK_DEFAULT_NAME}
                     value={providerName}
                     onChange={(e) => setProviderName(e.target.value)}
                     className="w-full"
@@ -188,13 +306,14 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
                 </div>
               )}
               <div>
-                <label className="form-field-label">Base URL</label>
+                <label className="form-field-label">Region</label>
                 <SolidInput
-                  placeholder="https://openrouter.ai/api/v1"
-                  value={providerBaseUrl}
-                  onChange={(e) => setProviderBaseUrl(e.target.value)}
+                  placeholder="us-west-2"
+                  value={providerRegion}
+                  onChange={(e) => setProviderRegion(e.target.value)}
                   className="w-full"
                 />
+                <small className="text-color-secondary text-xs">Use a Bedrock API key below. Models are called through the Bedrock Converse API.</small>
               </div>
             </>
           )}
@@ -207,6 +326,22 @@ const ProviderModal = ({ visible, onHide, providers, onProvidersChange, editKey 
               className="w-full"
             />
           </div>
+          {isEdit && (
+            <div
+              role="note"
+              style={{
+                padding: "0.625rem 0.75rem",
+                border: "1px solid var(--solid-info-border-color, rgba(147, 51, 234, 0.3))",
+                borderRadius: "0.5rem",
+                background: "var(--solid-info-bg, rgba(147, 51, 234, 0.1))",
+                color: "var(--solid-info-color, var(--solid-text-color, inherit))",
+                fontSize: "0.8125rem",
+                lineHeight: 1.4,
+              }}
+            >
+              Restart all agents using this provider for changes to take effect.
+            </div>
+          )}
         </div>
       </SolidDialogBody>
       <SolidDialogFooter>
@@ -272,7 +407,7 @@ export const ProvidersTab = ({ providers, onProvidersChange, showAddModal, onAdd
               <th style={{ textAlign: "left", padding: "0.75rem 1rem" }}>Name</th>
               <th style={{ textAlign: "left", padding: "0.75rem 1rem" }}>Type</th>
               <th style={{ textAlign: "left", padding: "0.75rem 1rem" }}>API Key</th>
-              <th style={{ textAlign: "left", padding: "0.75rem 1rem" }}>Base URL</th>
+              <th style={{ textAlign: "left", padding: "0.75rem 1rem" }}>Base URL / Region</th>
             </tr>
           </thead>
           <tbody>
@@ -299,7 +434,7 @@ export const ProvidersTab = ({ providers, onProvidersChange, showAddModal, onAdd
                   <td style={{ padding: "0.75rem 1rem", fontWeight: 500 }}>{displayName}</td>
                   <td style={{ padding: "0.75rem 1rem" }}>{typeLabel}</td>
                   <td style={{ padding: "0.75rem 1rem" }}>{maskedKey}</td>
-                  <td style={{ padding: "0.75rem 1rem" }}>{entry.baseUrl || "-"}</td>
+                  <td style={{ padding: "0.75rem 1rem" }}>{entry.baseUrl || entry.region || "-"}</td>
                 </tr>
               );
             })}
@@ -330,7 +465,24 @@ interface ModelConfigTabProps {
   onModelEntryChange: (entry: ModelEntry) => void;
 }
 
+const OTHER_MODEL_VALUE = "__other__";
+
 export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: ModelConfigTabProps) => {
+  const providerType = providers[modelEntry.providerId]?.type;
+  // Look up models.dev by provider key first (e.g. "groq", "openrouter"), then by built-in type.
+  const { models, loading, error } = useModelsDevModels([
+    modelEntry.providerId,
+    providerType && BUILT_IN_TYPES.includes(providerType) ? providerType : undefined,
+  ]);
+  const [otherSelected, setOtherSelected] = useState(false);
+  const isOtherProviderSelected = isOtherProvider(modelEntry.providerId);
+  const isKnownModel = models.some((m) => m.id === modelEntry.model);
+  const showOther = otherSelected || (!loading && !!modelEntry.model && !isKnownModel);
+  const modelOptions = [
+    ...models.map((m) => ({ label: m.name === m.id ? m.id : `${m.name} (${m.id})`, value: m.id })),
+    { label: "Other", value: OTHER_MODEL_VALUE },
+  ];
+  const selectedModelValue = showOther ? OTHER_MODEL_VALUE : modelEntry.model || "";
   const providerOptions = Object.entries(providers).map(([key, entry]) => {
     const typeLabel = PROVIDER_TYPE_OPTIONS.find((o) => o.value === entry.type)?.label ?? entry.type;
     const label = BUILT_IN_TYPES.includes(key) ? typeLabel : `${key} (${typeLabel})`;
@@ -344,23 +496,53 @@ export const ModelConfigTab = ({ modelEntry, providers, onModelEntryChange }: Mo
         <div className="flex flex-col gap-4 mt-4">
           <div>
             <label className="form-field-label">Provider</label>
-            <SolidSelect
-              className="w-full"
+            <SearchableSettingsSelect
               value={modelEntry.providerId}
               options={providerOptions}
-              native={false}
-              onChange={(e) => onModelEntryChange({ ...modelEntry, providerId: e.value })}
+              onChange={(next) => {
+                setOtherSelected(false);
+                onModelEntryChange({ ...modelEntry, providerId: next, model: "" });
+              }}
               placeholder="Select Provider"
             />
           </div>
           <div>
             <label className="form-field-label">Model</label>
-            <SolidInput
-              placeholder="e.g. gpt-4o-mini"
-              value={modelEntry.model || ""}
-              onChange={(e) => onModelEntryChange({ ...modelEntry, model: e.target.value })}
-              className="w-full"
+            {isOtherProviderSelected ? (
+              <SolidInput
+                className="w-full"
+                value={modelEntry.model || ""}
+                onChange={(e) => onModelEntryChange({ ...modelEntry, model: e.target.value })}
+                placeholder="Enter model ID, e.g. my-custom-model"
+              />
+            ) : <>
+            <SearchableSettingsSelect
+              value={selectedModelValue}
+              options={modelOptions}
+              onChange={(next) => {
+                if (next === OTHER_MODEL_VALUE) {
+                  setOtherSelected(true);
+                  if (isKnownModel) onModelEntryChange({ ...modelEntry, model: "" });
+                  return;
+                }
+                setOtherSelected(false);
+                onModelEntryChange({ ...modelEntry, model: next });
+              }}
+              placeholder={loading ? "Loading models..." : "Select Model"}
+              disabled={!modelEntry.providerId || loading}
             />
+            {error && (
+              <small className="text-color-secondary">Could not load models from models.dev. Choose "Other" to enter a model ID.</small>
+            )}
+            {showOther && (
+              <SolidInput
+                className="w-full mt-2"
+                value={modelEntry.model || ""}
+                onChange={(e) => onModelEntryChange({ ...modelEntry, model: e.target.value })}
+                placeholder="Enter model ID, e.g. my-custom-model"
+              />
+            )}
+            </>}
           </div>
         </div>
       </div>

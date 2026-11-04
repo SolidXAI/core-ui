@@ -7,6 +7,7 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { SolidNumberInput } from "../../../shad-cn-ui";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 export class SolidDecimalField implements ISolidField {
 
@@ -18,8 +19,11 @@ export class SolidDecimalField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
-            formData.append(fieldLayoutInfo.attrs.name, value);
+
+        if (value === undefined || value === null || value === "") {
+            formData.append(fieldLayoutInfo.attrs.name,"");
+        } else {
+            formData.append(fieldLayoutInfo.attrs.name,String(value));
         }
     }
 
@@ -29,7 +33,7 @@ export class SolidDecimalField implements ISolidField {
 
         const existingValue = this.fieldContext.data[fieldName];
 
-        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue ?? '';
     }
 
     validationSchema(): Yup.Schema {
@@ -46,11 +50,11 @@ export class SolidDecimalField implements ISolidField {
             schema = schema.nullable(); // Allow null when not required
         }
         // 2. length (min/max)
-        if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+        if (fieldMetadata.min != null) {
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_INTEGER(fieldLabel,fieldMetadata.min));
         }
-        if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.max));
+        if (fieldMetadata.max != null) {
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_INTEGER(fieldLabel,fieldMetadata.max));
         }
         return schema;
     }
@@ -166,11 +170,15 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
                             "onFieldChange"
                         );
                     }}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    value={formik.values[fieldLayoutInfo.attrs.name] ?? ''}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );

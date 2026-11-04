@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { FileArchive, FolderTree, RefreshCw, Sparkles, UploadCloud, X } from "lucide-react";
+import { ArrowRight, FileArchive, FolderTree, RefreshCw, RotateCcw, Sparkles, UploadCloud, X } from "lucide-react";
 import {
   useConfirmModulePackageImportMutation,
   useDismissModulePackageImportMutation,
   useLazyGetModulePackageImportStatusQuery,
+  useRestoreModulePackageImportMutation,
   useRunModulePackageBuildMutation,
   useRunModulePackageSeedMutation,
   useValidateModulePackageImportMutation,
@@ -36,7 +37,11 @@ type ModulePackageImportContentProps = {
   onImported?: () => void;
   initialTransactionKey?: string | null;
   autoResume?: boolean;
+  // Update this installed module: the uploaded package must be for it.
+  targetModuleName?: string | null;
 };
+
+type PackageMode = "install" | "update";
 
 type StepStatus = "pending" | "running" | "success" | "warning" | "error";
 type StepKey = "preview" | "import" | "build" | "seed";
@@ -52,16 +57,45 @@ type StepMap = Record<StepKey, StepState>;
 
 const STEP_ORDER: StepKey[] = ["preview", "import", "build", "seed"];
 
-function createInitialSteps(): StepMap {
+const VERSION_COMPARISONS: Record<string, { label: string; tone: "neutral" | "warning" | "danger" }> = {
+  new: { label: "New install", tone: "neutral" },
+  upgrade: { label: "Upgrade", tone: "neutral" },
+  first_version: { label: "First versioned release", tone: "neutral" },
+  same: { label: "Reinstall", tone: "warning" },
+  downgrade: { label: "Downgrade", tone: "danger" },
+  legacy_package: { label: "Unversioned package", tone: "danger" },
+};
+
+function formatVersionLabel(version?: string | null) {
+  return version ? `v${version}` : "unversioned";
+}
+
+function getPackageMode(transaction: any, fallbackMode: PackageMode = "install"): PackageMode {
+  return transaction?.mode ?? transaction?.preview?.mode ?? fallbackMode;
+}
+
+function getWorkflowLabels(transaction: any, fallbackMode: PackageMode = "install") {
+  if (transaction?.restoredFromBackup) return { noun: "restore", past: "restored" };
+  return getPackageMode(transaction, fallbackMode) === "update"
+    ? { noun: "update", past: "updated" }
+    : { noun: "import", past: "imported" };
+}
+
+function createInitialSteps(mode: PackageMode = "install"): StepMap {
+  const isUpdate = mode === "update";
   return {
     preview: {
       title: "Preview",
-      description: "Upload a `.sldx` archive to validate it and preview its contents automatically.",
+      description: isUpdate
+        ? "Upload a `.sldx` archive of the new version to compare it with the installed module."
+        : "Upload a `.sldx` archive to validate it and preview its contents automatically.",
       status: "pending",
     },
     import: {
-      title: "Import",
-      description: "Import the files locally. This may restart the UI and API, dismiss the popup, and require a page refresh before you continue.",
+      title: isUpdate ? "Update" : "Import",
+      description: isUpdate
+        ? "Replace the module folders with the new version. The current folders are backed up first. This may restart the UI and API, dismiss the popup, and require a page refresh before you continue."
+        : "Import the files locally. This may restart the UI and API, dismiss the popup, and require a page refresh before you continue.",
       status: "pending",
     },
     build: {
@@ -71,7 +105,9 @@ function createInitialSteps(): StepMap {
     },
     seed: {
       title: "Seed",
-      description: "Seed the imported module after the build step completes.",
+      description: isUpdate
+        ? "Seed the updated module after the build step completes."
+        : "Seed the imported module after the build step completes.",
       status: "pending",
     },
   };
@@ -104,6 +140,7 @@ function isResumableModulePackageStatus(status?: string | null) {
     "build_succeeded",
     "seed_running",
     "seed_failed",
+    "restore_running",
   ].includes(String(status ?? ""));
 }
 
@@ -115,9 +152,11 @@ function getBuildStepStatusFromTransaction(transaction: any): StepStatus {
   return "pending";
 }
 
-function hydrateStepsFromTransaction(transaction: any): StepMap {
-  const nextSteps = createInitialSteps();
+function hydrateStepsFromTransaction(transaction: any, fallbackMode: PackageMode = "install"): StepMap {
+  const mode = getPackageMode(transaction, fallbackMode);
+  const nextSteps = createInitialSteps(mode);
   const status = String(transaction?.status ?? "");
+  const { noun } = getWorkflowLabels(transaction, fallbackMode);
 
   if (transaction?.preview || transaction?.validation) {
     nextSteps.preview = {
@@ -130,13 +169,23 @@ function hydrateStepsFromTransaction(transaction: any): StepMap {
   }
 
   if (
-    transaction?.outputs?.import ||
-    ["awaiting_restart", "build_running", "build_failed", "build_succeeded", "seed_running", "seed_failed", "completed"].includes(status)
+    status !== "restore_running" &&
+    (transaction?.outputs?.import ||
+      ["awaiting_restart", "build_running", "build_failed", "build_succeeded", "seed_running", "seed_failed", "completed"].includes(status))
   ) {
     nextSteps.import = {
       ...nextSteps.import,
       status: "success",
-      description: "Archive extracted. Wait for the UI and API to finish restarting, then refresh this page to continue.",
+      description: transaction?.restoredFromBackup
+        ? "Previous version restored. Wait for the UI and API to finish restarting, then refresh this page to continue."
+        : "Archive extracted. Wait for the UI and API to finish restarting, then refresh this page to continue.",
+      output: [transaction?.outputs?.import, transaction?.outputs?.restore].filter(Boolean).join("\n\n") || undefined,
+    };
+  } else if (status === "restore_running") {
+    nextSteps.import = {
+      ...nextSteps.import,
+      status: "warning",
+      description: "Restoring the previous version did not finish. Use Restore again to complete it.",
       output: transaction?.outputs?.import ?? undefined,
     };
   }
@@ -158,7 +207,7 @@ function hydrateStepsFromTransaction(transaction: any): StepMap {
     nextSteps.build = {
       ...nextSteps.build,
       status: "pending",
-      description: "Import completed. Once the UI and API are back, refresh this module list page and continue with Build Now.",
+      description: `${noun.charAt(0).toUpperCase()}${noun.slice(1)} completed. Once the UI and API are back, refresh this module list page and continue with Build Now.`,
     };
   }
 
@@ -230,13 +279,24 @@ export function ModulePackageDialog({ open, onOpenChange, onImported }: ModulePa
   );
 }
 
-export function ModulePackageImportContent({ onClose, onImported, initialTransactionKey = null, autoResume = false }: ModulePackageImportContentProps) {
+export function ModulePackageImportContent({
+  onClose,
+  onImported,
+  initialTransactionKey = null,
+  autoResume = false,
+  targetModuleName = null,
+}: ModulePackageImportContentProps) {
   const dispatch = useDispatch();
+  const fallbackMode: PackageMode = targetModuleName ? "update" : "install";
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewResponse, setPreviewResponse] = useState<any | null>(null);
   const [transactionKey, setTransactionKey] = useState<string | null>(null);
   const [overwriteExisting, setOverwriteExisting] = useState(false);
-  const [steps, setSteps] = useState<StepMap>(() => createInitialSteps());
+  const [acknowledgeVersionChange, setAcknowledgeVersionChange] = useState(false);
+  const [pruneOnSeed, setPruneOnSeed] = useState(false);
+  const [showAllFiles, setShowAllFiles] = useState(false);
+  const [isRestoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
+  const [steps, setSteps] = useState<StepMap>(() => createInitialSteps(fallbackMode));
   const [selectedStep, setSelectedStep] = useState<StepKey>("preview");
   const [finalSummary, setFinalSummary] = useState<string | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -248,6 +308,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
   const [fetchModulePackageImportStatus] = useLazyGetModulePackageImportStatusQuery();
   const [runModulePackageBuild] = useRunModulePackageBuildMutation();
   const [runModulePackageSeed] = useRunModulePackageSeedMutation();
+  const [restoreModulePackageImport] = useRestoreModulePackageImportMutation();
 
   const hasResumedTransactionRef = useRef(false);
   const lastAutoPreviewFileRef = useRef<string | null>(null);
@@ -282,7 +343,21 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
   const hasConflicts = (previewResponse?.conflicts?.length ?? 0) > 0;
   const suggestedStep = getSuggestedStepFromSteps(steps, Boolean(previewResponse), isArchiveValid);
 
-  const canImport = steps.preview.status !== "pending" && isArchiveValid && steps.import.status !== "success" && !isProcessing && !isPreviewing;
+  const packageMode = getPackageMode(previewResponse, fallbackMode);
+  const isUpdate = packageMode === "update";
+  const workflowLabels = getWorkflowLabels(previewResponse, fallbackMode);
+  const packageModuleName = previewResponse?.preview?.module?.name || previewResponse?.moduleName || targetModuleName || "this module";
+  const installedVersion = previewResponse?.installedVersion ?? previewResponse?.preview?.installedVersion ?? null;
+  const incomingVersion = previewResponse?.incomingVersion ?? previewResponse?.preview?.incomingVersion ?? null;
+  const versionComparison = previewResponse?.versionComparison ?? previewResponse?.preview?.versionComparison ?? null;
+  const requiresVersionAcknowledgement = Boolean(previewResponse?.preview?.requiresVersionAcknowledgement);
+  // Clicking the Update button approves the shown version; risky updates also need an explicit acknowledgement.
+  const isUpdateApproved = !isUpdate || !requiresVersionAcknowledgement || acknowledgeVersionChange;
+  const backup = previewResponse?.backup ?? null;
+
+  const canImport = steps.preview.status !== "pending" && isArchiveValid && isUpdateApproved && steps.import.status !== "success" && !isProcessing && !isPreviewing;
+  const canRestore = Boolean(backup && transactionKey) && steps.import.status !== "pending" && !isProcessing;
+  const isRestoreInterrupted = previewResponse?.status === "restore_running";
   const canRunBuild = steps.import.status === "success" && !isProcessing;
   const canRunSeed = (steps.build.status === "success" || steps.build.status === "warning") && !isProcessing;
   const canContinueFromPreview = Boolean(previewResponse) && isArchiveValid && !isPreviewing;
@@ -325,6 +400,9 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
 
     const formData = new FormData();
     formData.append("modulePackage", selectedFile);
+    if (targetModuleName) {
+      formData.append("expectedModuleName", targetModuleName);
+    }
 
     try {
       setIsPreviewing(true);
@@ -332,16 +410,18 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       setPreviewResponse(response);
       setTransactionKey(response?.transactionKey ?? null);
       setOverwriteExisting(false);
+      setAcknowledgeVersionChange(false);
+      setShowAllFiles(false);
       setFinalSummary(null);
-      setSteps(hydrateStepsFromTransaction(response));
+      setSteps(hydrateStepsFromTransaction(response, fallbackMode));
       setSelectedStep("preview");
       dispatch(
         showToast({
           severity: response?.validation?.valid ? "success" : "warn",
           summary: response?.validation?.valid ? "Archive validated" : "Archive needs attention",
           detail: response?.validation?.valid
-            ? "Review the preview and continue with the import when you are ready."
-            : "The uploaded archive is missing one or more required SolidX validation markers.",
+            ? `Review the preview and continue with the ${getWorkflowLabels(response, fallbackMode).noun} when you are ready.`
+            : "The uploaded archive has validation issues. Review them below.",
         }),
       );
     } catch (error: any) {
@@ -349,7 +429,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
     } finally {
       setIsPreviewing(false);
     }
-  }, [dispatch, selectedFile, validateModulePackageImport]);
+  }, [dispatch, fallbackMode, selectedFile, targetModuleName, validateModulePackageImport]);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -393,12 +473,13 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
   const executeSeedStep = useCallback(async (activeTransactionKey: string) => {
     updateStep("seed", {
       status: "running",
-      description: "Running `solidctl seed --modules-to-seed` for the imported module.",
+      description: `Running \`solidctl seed --modules-to-seed${pruneOnSeed ? " --prune" : ""}\` for the ${workflowLabels.past} module.`,
     });
 
     const seedResponse = await runModulePackageSeed({
       transactionKey: activeTransactionKey,
       seedGlobalMetadata: false,
+      prune: pruneOnSeed,
     }).unwrap();
 
     const seedFailed = seedResponse?.status === "seed_failed";
@@ -411,7 +492,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
     });
 
     return seedResponse;
-  }, [runModulePackageSeed, updateStep]);
+  }, [pruneOnSeed, runModulePackageSeed, updateStep, workflowLabels.past]);
 
   const handleRunBuild = useCallback(async () => {
     if (!transactionKey) {
@@ -458,16 +539,16 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       }
 
       if (buildFailed && !seedFailed) {
-        setFinalSummary("Module imported and seeded successfully, but the build step reported errors.");
+        setFinalSummary(`Module ${workflowLabels.past} and seeded successfully, but the build step reported errors.`);
         return;
       }
 
       if (seedFailed) {
-        setFinalSummary("Module imported, but the seed step needs attention.");
+        setFinalSummary(`Module ${workflowLabels.past}, but the seed step needs attention.`);
         return;
       }
 
-      setFinalSummary("Module import completed successfully.");
+      setFinalSummary(`Module ${workflowLabels.noun} completed successfully.`);
     } catch (error: any) {
       updateStep("seed", {
         status: "error",
@@ -476,7 +557,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       setFinalSummary("The seed step needs attention before the workflow can be closed.");
       setIsProcessing(false);
     }
-  }, [dispatch, executeSeedStep, onImported, previewResponse?.outputs?.build, steps.build.status, transactionKey, updateStep]);
+  }, [dispatch, executeSeedStep, onImported, previewResponse?.outputs?.build, steps.build.status, transactionKey, updateStep, workflowLabels.noun, workflowLabels.past]);
 
   useEffect(() => {
     if (!initialTransactionKey || hasResumedTransactionRef.current) {
@@ -488,19 +569,21 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
     const loadTransaction = async () => {
       try {
         const transaction = await fetchModulePackageImportStatus({ transactionKey: initialTransactionKey }).unwrap();
-        const hydratedSteps = hydrateStepsFromTransaction(transaction);
+        const hydratedSteps = hydrateStepsFromTransaction(transaction, fallbackMode);
+        const labels = getWorkflowLabels(transaction, fallbackMode);
         setPreviewResponse(transaction);
         setTransactionKey(transaction?.transactionKey ?? null);
         setSteps(hydratedSteps);
+        setPruneOnSeed(Boolean(transaction?.restoredFromBackup));
         setSelectedStep(getSuggestedStepFromSteps(hydratedSteps, Boolean(transaction?.preview || transaction?.validation), Boolean(transaction?.validation?.valid)));
 
         if (transaction?.status === "completed") {
-          setFinalSummary("Module import completed successfully.");
+          setFinalSummary(`Module ${labels.noun} completed successfully.`);
           return;
         }
 
         if (transaction?.status === "seed_failed") {
-          setFinalSummary("Module imported, but the seed step needs attention.");
+          setFinalSummary(`Module ${labels.past}, but the seed step needs attention.`);
           return;
         }
 
@@ -513,7 +596,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
     };
 
     void loadTransaction();
-  }, [autoResume, dispatch, fetchModulePackageImportStatus, initialTransactionKey]);
+  }, [autoResume, dispatch, fallbackMode, fetchModulePackageImportStatus, initialTransactionKey]);
 
   const handleStartImport = async () => {
     if (!transactionKey) {
@@ -526,13 +609,16 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       setFinalSummary(null);
       updateStep("import", {
         status: "running",
-        description: "Extracting the archive and placing files into `solid-api` and `solid-ui`.",
+        description: isUpdate
+          ? "Backing up the current module folders and placing the new version into `solid-api` and `solid-ui`."
+          : "Extracting the archive and placing files into `solid-api` and `solid-ui`.",
       });
 
-      const response = await confirmModulePackageImport({
-        transactionKey,
-        overwriteExisting,
-      }).unwrap();
+      const response = await confirmModulePackageImport(
+        isUpdate
+          ? { transactionKey, confirmedVersion: incomingVersion, acknowledgeVersionChange }
+          : { transactionKey, overwriteExisting },
+      ).unwrap();
 
       updateStep("import", {
         status: "success",
@@ -544,8 +630,10 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       dispatch(
         showToast({
           severity: "success",
-          summary: "Module imported",
-          detail: "The module files were placed locally. Wait for the UI and API to restart, then refresh this module list page to continue with build and seed.",
+          summary: isUpdate ? "Module updated" : "Module imported",
+          detail: isUpdate
+            ? `${packageModuleName} was updated to ${formatVersionLabel(incomingVersion)}. Wait for the UI and API to restart, then refresh this module list page to continue with build and seed.`
+            : "The module files were placed locally. Wait for the UI and API to restart, then refresh this module list page to continue with build and seed.",
         }),
       );
       onClose();
@@ -554,8 +642,36 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
         status: "error",
         description: getErrorMessage(error),
       });
-      setFinalSummary("The module import could not be completed.");
+      setFinalSummary(`The module ${workflowLabels.noun} could not be completed.`);
       setIsProcessing(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!transactionKey || !backup) {
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      setFinalSummary(null);
+      const response = await restoreModulePackageImport({ transactionKey }).unwrap();
+      setPreviewResponse(response);
+      setSteps(hydrateStepsFromTransaction(response, fallbackMode));
+      setPruneOnSeed(true);
+      setRestoreConfirmOpen(false);
+      setIsProcessing(false);
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: "Previous version restored",
+          detail: `${packageModuleName} ${formatVersionLabel(backup.version)} was put back. Wait for the UI and API to restart, then refresh this module list page to continue with build and seed.`,
+        }),
+      );
+      onClose();
+    } catch (error: any) {
+      setIsProcessing(false);
+      dispatch(showToast({ severity: "error", summary: "Restore failed", detail: getErrorMessage(error) }));
     }
   };
 
@@ -565,6 +681,75 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       void dismissModulePackageImport({ transactionKey });
     }
     onClose();
+  };
+
+  const renderVersionApproval = () => {
+    const comparison = VERSION_COMPARISONS[versionComparison ?? ""] ?? { label: "Update", tone: "neutral" };
+    const identicalContent = Boolean(previewResponse?.preview?.identicalContent);
+    const acknowledgementLabel = identicalContent
+      ? "Reinstall anyway, even though the content is identical"
+      : versionComparison === "same"
+        ? `I understand this reinstalls ${formatVersionLabel(installedVersion)}`
+        : versionComparison === "downgrade"
+          ? `I understand this downgrades ${packageModuleName} to ${formatVersionLabel(incomingVersion)}`
+          : "I understand this package has no version";
+
+    return (
+      <div className={`solid-module-package-notice${comparison.tone === "danger" ? " is-danger" : comparison.tone === "warning" ? " is-warning" : ""}`}>
+        <div className="solid-module-package-notice__title">Version change</div>
+        <div className="solid-module-package-version">
+          <span className="solid-module-package-version__value">{formatVersionLabel(installedVersion)}</span>
+          <ArrowRight size={14} aria-label="to" />
+          <span className="solid-module-package-version__value">{formatVersionLabel(incomingVersion)}</span>
+          <span className={`solid-module-package-version__badge is-${comparison.tone}`}>{comparison.label}</span>
+        </div>
+        {isArchiveValid && requiresVersionAcknowledgement ? (
+          <SolidCheckbox
+            checked={acknowledgeVersionChange}
+            onChange={(event) => setAcknowledgeVersionChange(event.currentTarget.checked)}
+            label={acknowledgementLabel}
+          />
+        ) : null}
+      </div>
+    );
+  };
+
+  const renderChangeSummary = () => {
+    const changeSet = previewResponse?.preview?.changeSet;
+    if (!changeSet) return null;
+
+    const sides: Array<[string, any]> = [["solid-api", changeSet.solidApi], ["solid-ui", changeSet.solidUi]];
+    return (
+      <div className="solid-module-package-checklist__section">
+        <div className="solid-module-package-checklist__title">Files that will change</div>
+        {previewResponse?.preview?.identicalContent ? (
+          <p className="solid-module-package-diff__empty">No file changes. The package content matches the installed module.</p>
+        ) : null}
+        {sides.map(([label, diff]) => {
+          const added: string[] = diff?.added ?? [];
+          const modified: string[] = diff?.modified ?? [];
+          const removed: string[] = diff?.removed ?? [];
+          const hasChanges = added.length + modified.length + removed.length > 0;
+          return (
+            <details key={label} className="solid-module-package-diff">
+              <summary>
+                <span className="solid-module-package-diff__side">{label}</span>
+                <span className="is-added">+{added.length}</span>
+                <span className="is-modified">~{modified.length}</span>
+                <span className="is-removed">−{removed.length}</span>
+                <span className="solid-module-package-diff__unchanged">{diff?.unchangedCount ?? 0} unchanged</span>
+              </summary>
+              <ul className="solid-module-package-diff__list">
+                {added.map((file) => <li key={`a:${file}`} className="is-added">+ {file}</li>)}
+                {modified.map((file) => <li key={`m:${file}`} className="is-modified">~ {file}</li>)}
+                {removed.map((file) => <li key={`r:${file}`} className="is-removed">− {file}</li>)}
+                {!hasChanges ? <li>No changes</li> : null}
+              </ul>
+            </details>
+          );
+        })}
+      </div>
+    );
   };
 
   const renderPreviewContent = () => {
@@ -621,9 +806,10 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
                 setPreviewResponse(null);
                 setTransactionKey(null);
                 setOverwriteExisting(false);
+                setAcknowledgeVersionChange(false);
                 setFinalSummary(null);
                 setSelectedStep("preview");
-                setSteps(createInitialSteps());
+                setSteps(createInitialSteps(fallbackMode));
               }}
               disabled={isProcessing}
             >
@@ -659,6 +845,9 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
             </div>
 
             <div className="solid-module-package-checklist">
+              {isUpdate ? renderVersionApproval() : null}
+              {isUpdate ? renderChangeSummary() : null}
+
               <div className="solid-module-package-checklist__section">
                 <div className="solid-module-package-checklist__title">Required markers</div>
                 <ul className="solid-module-package-inline-list">
@@ -690,7 +879,7 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
                 </div>
               ) : null}
 
-              {hasConflicts ? (
+              {hasConflicts && !isUpdate ? (
                 <div className="solid-module-package-notice is-warning">
                   <div className="solid-module-package-notice__title">Existing files detected</div>
                   <ul className="solid-module-package-inline-list">
@@ -707,13 +896,23 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
               ) : null}
             </div>
 
-            <div className="solid-module-package-tree">
-              {(previewResponse?.preview?.fileTree ?? []).map((entry: string) => (
-                <div key={entry} className="solid-module-package-tree__row">
-                  {entry}
-                </div>
-              ))}
-            </div>
+            {isUpdate ? (
+              <div>
+                <SolidButton type="button" size="small" variant="ghost" onClick={() => setShowAllFiles((current) => !current)}>
+                  {showAllFiles ? "Hide package files" : `Show all package files (${previewResponse?.preview?.fileTree?.length ?? 0})`}
+                </SolidButton>
+              </div>
+            ) : null}
+
+            {!isUpdate || showAllFiles ? (
+              <div className="solid-module-package-tree">
+                {(previewResponse?.preview?.fileTree ?? []).map((entry: string) => (
+                  <div key={entry} className="solid-module-package-tree__row">
+                    {entry}
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </>
         )}
       </div>
@@ -727,12 +926,29 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
           type="button"
           size="small"
           onClick={() => setSelectedStep("import")}
-          disabled={!canContinueFromPreview}
+          disabled={!canContinueFromPreview || !isUpdateApproved}
           rightIcon={<Sparkles size={14} />}
         >
-          Continue to import
+          {isUpdate ? "Continue to update" : "Continue to import"}
         </SolidButton>
       );
+    }
+
+    const restoreButton = backup && !isRestoreConfirmOpen ? (
+      <SolidButton
+        type="button"
+        size="small"
+        variant="ghost"
+        onClick={() => setRestoreConfirmOpen(true)}
+        disabled={!canRestore}
+        leftIcon={<RotateCcw size={14} />}
+      >
+        Restore {formatVersionLabel(backup.version)}
+      </SolidButton>
+    ) : null;
+
+    if (activeStep === "import" && isRestoreInterrupted) {
+      return restoreButton;
     }
 
     if (activeStep === "import") {
@@ -745,38 +961,44 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
           loading={isProcessing && steps.import.status === "running"}
           leftIcon={<Sparkles size={14} />}
         >
-          Import Module
+          {isUpdate ? `Update to ${formatVersionLabel(incomingVersion)}` : "Import Module"}
         </SolidButton>
       );
     }
 
     if (activeStep === "build") {
       return (
-        <SolidButton
-          type="button"
-          size="small"
-          variant="outline"
-          onClick={handleRunBuild}
-          disabled={!canRunBuild}
-          loading={isProcessing && steps.build.status === "running"}
-        >
-          {steps.build.status === "success" || steps.build.status === "warning" ? "Build Again" : "Build Now"}
-        </SolidButton>
+        <>
+          {restoreButton}
+          <SolidButton
+            type="button"
+            size="small"
+            variant="outline"
+            onClick={handleRunBuild}
+            disabled={!canRunBuild}
+            loading={isProcessing && steps.build.status === "running"}
+          >
+            {steps.build.status === "success" || steps.build.status === "warning" ? "Build Again" : "Build Now"}
+          </SolidButton>
+        </>
       );
     }
 
     if (activeStep === "seed") {
       return (
-        <SolidButton
-          type="button"
-          size="small"
-          variant="outline"
-          onClick={handleRunSeed}
-          disabled={!canRunSeed}
-          loading={isProcessing && steps.seed.status === "running"}
-        >
-          {steps.seed.status === "success" || steps.seed.status === "warning" ? "Seed Again" : "Seed"}
-        </SolidButton>
+        <>
+          {restoreButton}
+          <SolidButton
+            type="button"
+            size="small"
+            variant="outline"
+            onClick={handleRunSeed}
+            disabled={!canRunSeed}
+            loading={isProcessing && steps.seed.status === "running"}
+          >
+            {steps.seed.status === "success" || steps.seed.status === "warning" ? "Seed Again" : "Seed"}
+          </SolidButton>
+        </>
       );
     }
 
@@ -788,28 +1010,82 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
       return renderPreviewContent();
     }
 
+    const restoreConfirm = isRestoreConfirmOpen && backup ? (
+      <div className="solid-module-package-notice is-danger">
+        <div className="solid-module-package-notice__title">Restore {formatVersionLabel(backup.version)}?</div>
+        <ul className="solid-module-package-inline-list">
+          <li>This puts back the {packageModuleName} folders from before this update ({formatVersionLabel(backup.version)}).</li>
+          <li>When the API restarts, the database schema is synced to that code: columns added by the newer version are dropped along with their data, and tables it added are left in place.</li>
+          <li>Back up the database first if this module has data you care about.</li>
+          <li>After the restart, refresh this page and run build and seed again. Prune is turned on for that seed.</li>
+        </ul>
+        <div className="solid-module-package-notice__actions">
+          <SolidButton type="button" size="small" variant="ghost" onClick={() => setRestoreConfirmOpen(false)} disabled={isProcessing}>
+            Cancel
+          </SolidButton>
+          <SolidButton
+            type="button"
+            size="small"
+            variant="destructive"
+            onClick={handleRestore}
+            disabled={!canRestore}
+            loading={isProcessing}
+            leftIcon={<RotateCcw size={14} />}
+          >
+            Restore {formatVersionLabel(backup.version)}
+          </SolidButton>
+        </div>
+      </div>
+    ) : null;
+
     if (activeStep === "import") {
       return (
         <div className="solid-module-package-step-stack">
           <div className="solid-module-package-notice is-warning">
-            <div className="solid-module-package-notice__title">What happens after import</div>
+            <div className="solid-module-package-notice__title">{isUpdate ? "What happens during the update" : "What happens after import"}</div>
             <ul className="solid-module-package-inline-list">
+              {isUpdate ? (
+                <>
+                  <li>The current {packageModuleName} folders in solid-api and solid-ui are backed up, then replaced with {formatVersionLabel(incomingVersion)}. Files the new version no longer has are removed.</li>
+                  <li>Local changes made inside these folders are kept only in the backup.</li>
+                </>
+              ) : null}
               <li>Depending on the files in this archive, both the UI and API services may restart immediately.</li>
               <li>This popup may get dismissed as part of that restart.</li>
               <li>Wait for both services to come back, then refresh this module list page to continue with build and seed.</li>
             </ul>
           </div>
+          {restoreConfirm}
           {steps.import.output ? <pre className="solid-module-package-step__output">{steps.import.output}</pre> : null}
         </div>
       );
     }
 
-    if (activeStep === "build" && steps.build.output) {
-      return <pre className="solid-module-package-step__output">{steps.build.output}</pre>;
+    if (activeStep === "build") {
+      if (!restoreConfirm && !steps.build.output) return null;
+      return (
+        <div className="solid-module-package-step-stack">
+          {restoreConfirm}
+          {steps.build.output ? <pre className="solid-module-package-step__output">{steps.build.output}</pre> : null}
+        </div>
+      );
     }
 
-    if (activeStep === "seed" && steps.seed.output) {
-      return <pre className="solid-module-package-step__output">{steps.seed.output}</pre>;
+    if (activeStep === "seed") {
+      return (
+        <div className="solid-module-package-step-stack">
+          {restoreConfirm}
+          {isUpdate ? (
+            <SolidCheckbox
+              checked={pruneOnSeed}
+              onChange={(event) => setPruneOnSeed(event.currentTarget.checked)}
+              disabled={isProcessing}
+              label="Remove metadata this module no longer defines (prune). This also removes permissions for endpoints that no longer exist."
+            />
+          ) : null}
+          {steps.seed.output ? <pre className="solid-module-package-step__output">{steps.seed.output}</pre> : null}
+        </div>
+      );
     }
 
     return null;
@@ -819,9 +1095,13 @@ export function ModulePackageImportContent({ onClose, onImported, initialTransac
     <>
       <SolidDialogHeader className="solid-filter-dialog-head solid-module-package-dialog__header">
         <div>
-          <SolidDialogTitle className="solid-filter-dialog-title m-0">Import Module Package</SolidDialogTitle>
+          <SolidDialogTitle className="solid-filter-dialog-title m-0">
+            {isUpdate ? `Update ${targetModuleName || packageModuleName}` : "Import Module Package"}
+          </SolidDialogTitle>
           <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
-            Upload a `.sldx` archive, let SolidX preview it automatically, then move through import, build, and seed.
+            {isUpdate
+              ? "Upload a `.sldx` archive of the new version, review the version change and the files that will change, then move through update, build, and seed."
+              : "Upload a `.sldx` archive, let SolidX preview it automatically, then move through import, build, and seed."}
           </SolidDialogDescription>
         </div>
         {!isProcessing ? (

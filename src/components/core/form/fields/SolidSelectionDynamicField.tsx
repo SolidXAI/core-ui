@@ -12,6 +12,7 @@ import { SolidFieldTooltip } from "../../../../components/common/SolidFieldToolt
 import { formikValuestoQueryString } from "../../../../helpers/helpers";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 type AutoCompleteCompleteEvent = { query: string };
 
@@ -290,11 +291,13 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 // }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>
-                    {typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
                         ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
                         : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()}
-                </p>
+                />
             )}
         </div>
     );

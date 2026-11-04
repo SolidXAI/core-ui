@@ -218,6 +218,10 @@ export const ERROR_MESSAGES = {
   FIELD_MAXIMUM_CHARACTER: (field: string, characters: Number) =>
     `${field} should not be more than ${characters} characters long.`,
 
+  // -------------------- INTEGER VALIDATION --------------------
+  FIELD_MINIMUM_INTEGER: (field: string, characters: Number) => `${field} must be at least ${characters}.`,
+  FIELD_MAXIMUM_INTEGER: (field: string, characters: Number) => `${field} must be at most ${characters}.`,
+
   // -------------------- OTP --------------------
   OTP_CHARACTER: (count: Number) =>
     `OTP must be a ${count}-digit number`,

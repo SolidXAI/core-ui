@@ -218,3 +218,45 @@
 [data-theme="dark"] .solid-module-automap-list {
   color: color-mix(in srgb, var(--foreground) 80%, var(--muted-foreground));
 }
+
+@media (max-width: 767px) {
+  .solid-module-menu-icon-upload {
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .solid-module-menu-icon-row {
+    min-width: 0;
+  }
+
+  .solid-module-menu-icon-row > :first-child {
+    flex: 0 0 auto;
+  }
+
+  .solid-module-menu-icon-meta,
+  .solid-module-menu-icon-header {
+    min-width: 0;
+  }
+
+  .solid-module-menu-icon-header {
+    gap: 0.5rem;
+  }
+
+  .solid-module-menu-icon-actions {
+    flex: 0 0 auto;
+    gap: 0.35rem;
+  }
+
+  .solid-module-menu-icon-header .solid-module-mobile-text-wrapper {
+    flex: 1 1 auto;
+    max-width: none;
+    min-width: 0;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+  }
+}

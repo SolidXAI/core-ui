@@ -37,4 +37,5 @@ export const AppEvents = {
   SessionUpdated: "session:updated",
   SessionCleared: "session:cleared",
   GlobalError: "error:global",
+  AdminViewRefreshRequested: "solidx.admin:view-refresh-requested",
 } as const;

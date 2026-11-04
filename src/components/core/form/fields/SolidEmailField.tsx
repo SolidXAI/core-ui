@@ -7,6 +7,7 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { SolidInput } from "../../../shad-cn-ui";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 export class SolidEmailField implements ISolidField {
 
@@ -165,7 +166,11 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
                 autoComplete={autoComplete}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );

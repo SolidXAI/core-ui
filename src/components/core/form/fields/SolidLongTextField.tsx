@@ -152,7 +152,11 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                 className={styles.fieldTextarea}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );
@@ -514,9 +518,11 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
             </div>
 
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="mt-1">
-                    <SolidMessage text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );

@@ -5,6 +5,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { SolidButton } from "../../../shad-cn-ui/SolidButton";
 import { SolidIcon } from "../../../shad-cn-ui";
 import { SolidPasswordInput } from "../../../shad-cn-ui/SolidPasswordInput";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import {
     SolidDialog,
     SolidDialogBody,
@@ -22,6 +23,8 @@ import { usePathname } from "../../../../hooks/usePathname";
 import { useSearchParams } from "../../../../hooks/useSearchParams";
 import { updatePasswordField } from "../../../../helpers/updatePasswordField";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../../redux/features/toastSlice";
 
 export class SolidPasswordField implements ISolidField {
 
@@ -233,7 +236,11 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     className="w-full"
                 />
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                    <SolidMessage
+                        severity="error"
+                        className={styles.fieldError}
+                        text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                    />
                 )}
             </div>
 
@@ -271,7 +278,11 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     className="w-full"
                 />
                 {((formik.touched[`${fieldLayoutInfo.attrs.name}Confirm`] || formik.submitCount > 0) && formik.errors[`${fieldLayoutInfo.attrs.name}Confirm`]) && (
-                    <p className={styles.fieldError}>{formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()}</p>
+                    <SolidMessage
+                        severity="error"
+                        className={styles.fieldError}
+                        text={formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()}
+                    />
                 )}
             </div>
         </div>
@@ -303,6 +314,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
         formik.touched[fieldName] && formik.errors[fieldName];
 
     const [visible, setVisible] = useState(false);
+    const dispatch = useDispatch();
 
     const fieldName = fieldLayoutInfo.attrs.name;
     const confirmFieldName = `${fieldName}Confirm`;
@@ -329,12 +341,20 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     confirmFieldValue: values[confirmFieldName],
                 });
 
+                dispatch(showToast({
+                    severity: "success",
+                    summary: "Success",
+                    detail: "Password updated successfully",
+                }));
                 // formik.setFieldValue(fieldName, values[fieldName]);
                 resetForm();
                 setVisible(false);
-            } catch (err) {
-                console.error(err);
-                // TODO: show user-friendly error
+            } catch (err: unknown) {
+                dispatch(showToast({
+                    severity: "error",
+                    summary: "Error",
+                    detail: err instanceof Error ? err.message : ERROR_MESSAGES.FAILED_TO_UPDATE_PASSWORD,
+                }));
             }
         },
     });
@@ -383,7 +403,11 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                                 className="w-full"
                             />
                             {isFormFieldValid(modalFormik, fieldName) && (
-                                <p className={styles.fieldError}>{modalFormik.errors[fieldName]?.toString()}</p>
+                                <SolidMessage
+                                    severity="error"
+                                    className={styles.fieldError}
+                                    text={modalFormik.errors[fieldName]?.toString()}
+                                />
                             )}
                         </div>
 
@@ -400,7 +424,11 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                                 className="w-full"
                             />
                             {isFormFieldValid(modalFormik, confirmFieldName) && (
-                                <p className={styles.fieldError}>{modalFormik.errors[confirmFieldName]?.toString()}</p>
+                                <SolidMessage
+                                    severity="error"
+                                    className={styles.fieldError}
+                                    text={modalFormik.errors[confirmFieldName]?.toString()}
+                                />
                             )}
                         </div>
 

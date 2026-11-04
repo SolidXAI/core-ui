@@ -119,9 +119,12 @@ const createSolidEntityApiInternal = (entityName: string) => {
                     { type: entityName, id: 'LIST' },
                 ],
             }),
-            recoverSolidEntityById: builder.query({
+            recoverSolidEntityById: builder.mutation({
                 query: (id) => `/${kebabEntityName}/recover/${id}`,
-                providesTags: (_result, _error, id) => [{ type: entityName, id }],
+                invalidatesTags: (_result, _error, id) => [
+                    { type: entityName, id },
+                    { type: entityName, id: 'LIST' },
+                ],
             }),
             recoverSolidEntity: builder.mutation({
                 query: (data) => ({
@@ -141,6 +144,14 @@ const createSolidEntityApiInternal = (entityName: string) => {
                     { type: entityName, id },
                     { type: entityName, id: 'LIST' },
                 ],
+            }),
+            patchUpdateSolidEntityWithoutListInvalidation: builder.mutation({
+                query: ({ id, data }) => ({
+                    url: `/${kebabEntityName}/${id}`,
+                    method: 'PATCH',
+                    body: data,
+                }),
+                invalidatesTags: (_result, _error, { id }) => [{ type: entityName, id }],
             }),
             publishSolidEntity: builder.mutation({
                 query: (id) => ({

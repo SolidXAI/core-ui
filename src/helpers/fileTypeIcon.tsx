@@ -13,6 +13,7 @@ const DEFAULT_FILE_ICON: FileTypeIconTone = {
 const FILE_TYPE_ICON_MAP: Record<string, FileTypeIconTone> = {
     pdf: { bg: "#DC2626", corner: "#FCA5A5" },
     txt: { bg: "#475569", corner: "#CBD5E1" },
+    md: { bg: "#475569", corner: "#CBD5E1" },
     doc: { bg: "#2563EB", corner: "#93C5FD" },
     docx: { bg: "#2563EB", corner: "#93C5FD" },
     xls: { bg: "#16A34A", corner: "#86EFAC" },
@@ -44,6 +45,8 @@ export const getFileTypeIconTone = (fileUrl: string, fileName?: string) => {
 
 export const SolidFileTypeIcon = ({ fileUrl, fileName, size = 24, className }: { fileUrl: string; fileName?: string; size?: number; className?: string }) => {
     const icon = getFileTypeIconTone(fileUrl, fileName);
+    const extension = getFileExtension(fileName, fileUrl);
+    const extensionLabel = (extension || "file").slice(0,4).toUpperCase();
 
     return (
         <svg
@@ -65,6 +68,18 @@ export const SolidFileTypeIcon = ({ fileUrl, fileName, size = 24, className }: {
             />
             <path d="M9.5 12.25h9.5M9.5 15.25h12" stroke="rgba(255,255,255,0.42)" strokeWidth="1.4" strokeLinecap="round" />
             <rect x="7.5" y="18" width="17" height="7.5" rx="1.5" fill="rgba(255,255,255,0.2)" />
+            <text
+                x="16"
+                y="23.35"
+                textAnchor="middle"
+                fill="rgba(255,255,255,0.92)"
+                fontFamily="Arial, sans-serif"
+                fontSize="5.2"
+                fontWeight="700"
+                letterSpacing="0.15"
+            >
+                {extensionLabel}
+            </text>
         </svg>
     );
 };

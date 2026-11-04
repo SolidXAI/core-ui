@@ -1,0 +1,15 @@
+.agent-hub-module-field > span b {
+  color: #dc2626;
+}
+
+.agent-hub-module-field__select--invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #fecaca inset;
+}
+
+.agent-hub-module-field__error {
+  color: #dc2626 !important;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.35;
+}

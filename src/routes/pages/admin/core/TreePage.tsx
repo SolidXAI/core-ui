@@ -2,10 +2,12 @@ import { camelCase } from "lodash";
 import { useCallback, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import type { SolidTreeViewHandle } from "../../../../components/core/tree/SolidTreeView";
-import { registerTree, unregisterTree } from "../../../../components/core/tree/treeViewRegistry";
+import { getTree, registerTree, unregisterTree } from "../../../../components/core/tree/treeViewRegistry";
 import { SolidTreeView } from "../../../../components/core/tree/SolidTreeView";
 import { storeCurrentModelViewContext } from "../../../../helpers/modelViewPersistence";
 import { usePathname } from "../../../../hooks/usePathname";
+import { isMatchingAdminViewRefresh, ADMIN_VIEW_REFRESH_REQUESTED, type AdminViewRefreshRequest } from "../../../../helpers/adminViewRefresh";
+import { eventBus } from "../../../../helpers/eventBus";
 
 export function TreePage() {
   const params = useParams();
@@ -34,6 +36,12 @@ export function TreePage() {
     const currentUrl = search ? `${pathname}?${search}` : pathname;
     storeCurrentModelViewContext(currentUrl);
   }, [pathname, search]);
+
+  useEffect(() => eventBus.on<AdminViewRefreshRequest>(ADMIN_VIEW_REFRESH_REQUESTED, (request) => {
+    if (isMatchingAdminViewRefresh(request, { moduleName, modelName, viewName: "tree" })) {
+      getTree(treeId)?.refresh();
+    }
+  }), [treeId, moduleName, modelName]);
 
   return <SolidTreeView ref={setTreeRef} key={moduleName + modelName + menuItemId + menuItemName + actionId + actionName} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }
