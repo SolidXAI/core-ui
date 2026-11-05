@@ -12,6 +12,8 @@ export const FilterMatchMode = {
   IN: "in",
   NOT_IN: "notIn",
   BETWEEN: "between",
+  THIS_WEEK: "thisWeek",
+  THIS_MONTH: "thisMonth"
 } as const;
 
 export type FilterMatchModeValue =

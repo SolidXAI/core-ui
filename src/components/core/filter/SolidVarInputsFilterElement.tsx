@@ -38,8 +38,48 @@ const areInputsEqual = (left: any[] = [], right: any[] = []) => {
 };
 
 
+const DYNAMIC_DATE_OPERATORS = ['$thisWeek', '$thisMonth'];
+
+export const isDynamicDateOperator = (matchMode: string): boolean =>
+    DYNAMIC_DATE_OPERATORS.includes(matchMode);
+
+export const getUtcDynamicDateRange = (
+    matchMode: string,
+    fieldType: 'date' | 'datetime',
+): [string, string] => {
+    const now = new Date();
+    let start: Date;
+    let end: Date;
+
+    if (matchMode === '$thisWeek') {
+        start = new Date(Date.UTC(
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate(),
+        ));
+
+        const daysSinceMonday = (start.getUTCDay() + 6) % 7;
+        start.setUTCDate(start.getUTCDate() - daysSinceMonday);
+
+        end = new Date(start);
+        end.setUTCDate(end.getUTCDate() + 7);
+        end.setUTCMilliseconds(-1);
+    } else {
+        start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+        end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+        end.setUTCMilliseconds(-1);
+    }
+
+    if (fieldType === 'date') {
+        return [start.toISOString().slice(0, 10), end.toISOString().slice(0, 10)];
+    }
+
+    return [start.toISOString().slice(0, 16), end.toISOString().slice(0, 16)];
+};
+
+
 // Based on numberOfInputs map the input filed and hide add and delete 
-export const SolidVarInputsFilterElement = ({ values, onChange, inputType = InputTypes.Text, numberOfInputs = null, fieldMetadata }: any) => {
+export const SolidVarInputsFilterElement = ({ values, onChange, inputType = InputTypes.Text, numberOfInputs = null, fieldMetadata, readOnly = false }: any) => {
     const normalizedValues = useMemo(() => {
         const emptyShape = numberOfInputs && numberOfInputs > 0 ? Array(numberOfInputs).fill('') : [''];
         if (!values || !Array.isArray(values)) {
@@ -132,7 +172,8 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                 <SolidInput
                     type="date"
                     value={value || ""}
-                    onChange={(e) => updateInputs(index, e.target.value)}
+                    onChange={readOnly ? undefined : (e) => updateInputs(index, e.target.value)}
+                    readOnly={readOnly}
                     className="w-full solid-filter-compact-control"
                 />
             );
@@ -143,7 +184,8 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                 <SolidInput
                     type="datetime-local"
                     value={value || ""}
-                    onChange={(e) => updateInputs(index, e.target.value)}
+                    onChange={readOnly ? undefined : (e) => updateInputs(index, e.target.value)}
+                    readOnly={readOnly}
                     className="w-full solid-filter-compact-control"
                 />
             );
@@ -262,7 +304,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
             {inputs && inputs.map((value: any, index: number) => (
                 <div className="solid-filter-var-input-row" key={`solid-filter-value-${index}`}>
                     {renderInputByType(value, index, false)}
-                    {numberOfInputs === null &&
+                    {numberOfInputs === null && !readOnly &&
                         <>
                             <SolidButton variant="ghost" size="sm" onClick={() => addInput()} className='solid-filter-action-btn solid-filter-action-icon-btn'>
                                 <SolidIcon name="si-plus" aria-hidden />
