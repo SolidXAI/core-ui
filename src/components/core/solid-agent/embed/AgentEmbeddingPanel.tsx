@@ -17,7 +17,7 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
         catch { setCopyError("Clipboard access is unavailable. Select and copy the code below."); }
     }
     const code = (value: string, language: string) => <SolidCodeEditor readOnly value={value} language={language} fontSize={11} height="420px" />;
-    const copyButton = (key: string, value: string) => <SolidButton variant="secondary" size="small" onClick={() => void copy(key, value)}>
+    const copyButton = (key: string, value: string) => <SolidButton variant="secondary" onClick={() => void copy(key, value)}>
         {copied === key ? <Check size={14} /> : <Copy size={14} />} {copied === key ? "Copied" : "Copy code"}
     </SolidButton>;
     return <div className="agent-editor__stack">

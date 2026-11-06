@@ -572,7 +572,7 @@ export function SettingsComponent() {
               </SolidTooltipContent>
             </SolidTooltip>
           </div>
-          <SolidButton size="sm" type="button" loading={false} onClick={handleSave} disabled={!hasChanges}>
+          <SolidButton type="button" loading={false} onClick={handleSave} disabled={!hasChanges}>
             Save
           </SolidButton>
         </div>

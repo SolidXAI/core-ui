@@ -221,10 +221,10 @@ const UserProfileMenu = () => {
             <p className="solid-shadcn-dialog-text">Are you sure you want to log out?</p>
           </div>
           <div className="solid-shadcn-dialog-actions">
-            <SolidButton size="sm" variant="destructive" onClick={onLogout}>
+            <SolidButton variant="destructive" onClick={onLogout}>
               Logout
             </SolidButton>
-            <SolidButton size="sm" variant="outline" onClick={() => setConfirmLogout(false)}>
+            <SolidButton variant="outline" onClick={() => setConfirmLogout(false)}>
               Cancel
             </SolidButton>
           </div>

@@ -707,7 +707,7 @@ export function AgentRegistryEditorPage() {
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
-        {inputs.length > 0 && <SolidButton type="button" variant="secondary" size="small" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add input</SolidButton>}
+        {inputs.length > 0 && <SolidButton type="button" variant="secondary" onClick={() => setInputs((current) => [...current, { name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add input</SolidButton>}
       </div>
       {!inputs.length ? <div className="agent-editor__empty">This agent has no inputs. <button type="button" onClick={() => setInputs([{ name: "", description: "", dataType: "string", defaultValue: null, optional: false }])}><Plus size={15} /> Add an input variable</button></div>
         : <div className="agent-editor__inputs">{inputs.map((input, index) => <div className="agent-editor__input-row" key={index}>

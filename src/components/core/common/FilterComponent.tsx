@@ -142,13 +142,13 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
         </div>
       </div>
       <div className='solid-filter-rule-actions'>
-        <SolidButton variant="ghost" size='sm' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
+        <SolidButton variant="ghost" onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
           <Plus size={14} />
         </SolidButton>
-        <SolidButton variant="ghost" size='sm' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
+        <SolidButton variant="ghost" onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
           <FolderPlus size={14} />
         </SolidButton>
-        <SolidButton variant="ghost" size='sm' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn is-danger'>
+        <SolidButton variant="ghost" onClick={() => onDelete(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn is-danger'>
           <Trash2 size={14} />
         </SolidButton>
       </div>
@@ -189,7 +189,7 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
       ))}
       {/* Add Condition Button to add parent rule */}
       {level === 0 &&
-        <SolidButton variant="ghost" size='sm' onClick={() => onAddRule(group.id)} className='px-0 mt-2 solid-filter-add-condition-btn'>
+        <SolidButton variant="ghost" onClick={() => onAddRule(group.id)} className='px-0 mt-2 solid-filter-add-condition-btn'>
           <Plus size={14} />
           Add Condition
         </SolidButton>
@@ -390,8 +390,8 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
         />
       ))}
       <div className='solid-filter-builder-actions'>
-        <SolidButton variant="primary" size="sm" onClick={() => transformFilterRules(filterRules)} type="submit" className="solid-filter-submit-btn">Apply</SolidButton>
-        <SolidButton type='button' variant="outline" size='sm' onClick={closeDialog} className="solid-filter-cancel-btn">Cancel</SolidButton>
+        <SolidButton variant="primary" onClick={() => transformFilterRules(filterRules)} type="submit" className="solid-filter-submit-btn">Apply</SolidButton>
+        <SolidButton type='button' variant="outline" onClick={closeDialog} className="solid-filter-cancel-btn">Cancel</SolidButton>
         {/* 
         <br></br>
         <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} /> */}

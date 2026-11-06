@@ -2063,7 +2063,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         {isShowChatter === true &&
                             <SolidButton
                                 icon="si si-angle-double-right"
-                                size="sm"
                                 text
                                 className="chatter-collapse-btn"
                                 style={{ width: 26, height: 26, aspectRatio: '1/1' }}
@@ -2082,7 +2081,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 </div>
                                 <SolidButton
                                     icon="si si-chevron-left"
-                                    size="sm"
                                     className="px-0"
                                     style={{ width: 30 }}
                                     onClick={() => handleChatterExpandClick('chatter')}

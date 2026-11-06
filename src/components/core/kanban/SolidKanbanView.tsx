@@ -1266,7 +1266,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                   <SolidButton
                     type="button"
                     variant="outline"
-                    size="sm"
                     className="solid-icon-button"
                     onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
                     aria-label="Toggle search"
@@ -1297,7 +1296,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                 {enableCardSelection && actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <SolidButton
                   type="button"
                   variant="destructive"
-                  size="sm"
                   onClick={openBulkDeleteDialog}
                 >
                   Delete
@@ -1305,7 +1303,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                 <SolidButton
                   type="button"
                   variant="outline"
-                  size="sm"
                   className="solid-icon-button"
                   onClick={handleRefreshView}
                   aria-label="Refresh board"
@@ -1343,7 +1340,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                     <SolidButton
                       type="button"
                       variant="ghost"
-                      size="sm"
                       onClick={() => setSelectedRecords([])}
                       aria-label="Clear selected cards"
                     >

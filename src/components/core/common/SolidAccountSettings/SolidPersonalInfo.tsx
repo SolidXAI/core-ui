@@ -66,10 +66,10 @@ const ConfirmDialog = ({
         <div className={styles.confirmHeader}>{title}</div>
         <div className={styles.confirmBody}>{text}</div>
         <div className={styles.confirmActions}>
-          <SolidButton size="sm" variant="destructive" onClick={onConfirm}>
+          <SolidButton variant="destructive" onClick={onConfirm}>
             Confirm
           </SolidButton>
-          <SolidButton size="sm" variant="outline" onClick={onCancel}>
+          <SolidButton variant="outline" onClick={onCancel}>
             Cancel
           </SolidButton>
         </div>
@@ -262,7 +262,6 @@ export const SolidPersonalInfo = () => {
 
             <SolidButton
               type="button"
-              size="sm"
               variant="outline"
               className={styles.accountSecondaryBtn}
               onClick={() => fileInputRef.current?.click()}
@@ -322,7 +321,7 @@ export const SolidPersonalInfo = () => {
         </div>
 
         <div className={styles.footerActions}>
-          <SolidButton type="submit" size="sm" loading={formik.isSubmitting} disabled={isSaveDisabled}>
+          <SolidButton type="submit" loading={formik.isSubmitting} disabled={isSaveDisabled}>
             Save
           </SolidButton>
         </div>

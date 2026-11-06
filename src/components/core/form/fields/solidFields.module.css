@@ -3,8 +3,8 @@
 .fieldWrapper {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-top: 10px;
+    gap: var(--solid-space-1);
+    margin-top: var(--solid-field-gap);
 }
 
 .fieldLabel {
@@ -13,7 +13,7 @@
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--solid-space-1);
     margin: 0;
     line-height: 1.35;
     letter-spacing: 0.01em;
@@ -21,12 +21,12 @@
 
 .fieldInput {
     width: 100% !important;
-    height: 34px !important;
-    border-radius: 8px !important;
+    height: var(--solid-input-height) !important;
+    border-radius: var(--solid-control-radius) !important;
     border: 1px solid var(--border) !important;
     background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
-    padding: 0 11px !important;
+    padding: 0 var(--solid-control-padding-inline) !important;
     font-size: var(--solid-font-size-ui-control) !important;
     box-shadow: none !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
@@ -46,11 +46,11 @@
 
 .fieldTextarea {
     width: 100% !important;
-    border-radius: 8px !important;
+    border-radius: var(--solid-control-radius) !important;
     border: 1px solid var(--border) !important;
     background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
-    padding: 8px 11px !important;
+    padding: var(--solid-space-2) var(--solid-control-padding-inline) !important;
     font-size: var(--solid-font-size-ui-control) !important;
     resize: vertical !important;
     box-shadow: none !important;
@@ -85,12 +85,12 @@
 
 .fieldNumberWrapper :global(.solid-input) {
     width: 100% !important;
-    height: 34px !important;
-    border-radius: 8px !important;
+    height: var(--solid-input-height) !important;
+    border-radius: var(--solid-control-radius) !important;
     border: 1px solid var(--border) !important;
     background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
-    padding: 0 11px !important;
+    padding: 0 var(--solid-control-padding-inline) !important;
     font-size: var(--solid-font-size-ui-control) !important;
     box-shadow: none !important;
     transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
@@ -114,14 +114,14 @@
 }
 
 .fieldError {
-    margin: 2px 0 0;
+    margin: var(--solid-space-1) 0 0;
     color: #ef4444;
     font-size: 11.5px;
     line-height: 1.3;
 }
 
 .fieldHelper {
-    margin: 2px 0 0;
+    margin: var(--solid-space-1) 0 0;
     color: var(--muted-foreground);
     font-size: 11.5px;
     line-height: 1.35;
@@ -139,7 +139,7 @@
 :global(.solid-segmented.is-invalid) {
     border-color: #ef4444 !important;
     box-shadow: 0 0 0 1px #fecaca inset !important;
-    border-radius: 8px;
+    border-radius: var(--solid-control-radius);
 }
 
 .fieldErrorBadge {
@@ -157,9 +157,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 32px;
-    width: 32px;
-    border-radius: 8px;
+    height: var(--solid-control-height);
+    width: var(--solid-control-height);
+    border-radius: var(--solid-control-radius);
     border: 1px solid #d6dae5;
     background: #ffffff;
     color: #1f2937;
@@ -192,14 +192,14 @@
 .fieldViewWrapper {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    margin-top: 10px;
+    gap: var(--solid-space-1);
+    margin-top: var(--solid-field-gap);
 }
 
 .fieldViewLabel {
     margin: 0;
     font-size: var(--solid-font-size-ui-control);
-    color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
+    color: var(--foreground);
     font-weight: 500;
     line-height: 1.35;
     letter-spacing: 0.01em;
@@ -219,7 +219,7 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     background: color-mix(in srgb, var(--card) 97%, var(--background) 3%);
-    padding: 12px 14px;
+    padding: var(--solid-space-3) var(--solid-space-4);
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 

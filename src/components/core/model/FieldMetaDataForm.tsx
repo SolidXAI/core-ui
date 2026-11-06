@@ -222,7 +222,6 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
       {/* Plus Button to add a new row */}
       <SolidButton
         icon="si si-plus"
-        size="small"
         onClick={onAdd}
         type="button"
       />
@@ -230,7 +229,6 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
       {/* Trash Button to delete the row */}
       <SolidButton
         icon="si si-trash"
-        size="small"
         onClick={onDelete}
         outlined
         severity="danger"
@@ -444,7 +442,6 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
       {/* Trash Button to delete the row */}
       <SolidButton
         icon="si si-trash"
-        size="small"
         onClick={() => onDelete(index)}
         disabled={disableDelete}
         outlined
@@ -3018,7 +3015,6 @@ const FieldMetaDataForm = ({
                                   <div>
                                     <SolidButton
                                       icon="si si-plus"
-                                      size="small"
                                       onClick={handleAdd}
                                       type="button"
                                       className="ml-2"
@@ -3616,8 +3612,8 @@ const FieldMetaDataForm = ({
                     </TabView>
                   </div>
                   <div className="solid-field-form-actions">
-                    <SolidButton label={submitLabel} size="small" onClick={() => showError()} type="submit" />
-                    <SolidButton label="Cancel" size="small" severity="secondary" type="reset" onClick={closeForm} outlined />
+                    <SolidButton label={submitLabel} onClick={() => showError()} type="submit" />
+                    <SolidButton label="Cancel" severity="secondary" type="reset" onClick={closeForm} outlined />
                   </div>
                 </div>
                 {/* <div className="ml-4">
@@ -3650,7 +3646,6 @@ const FieldMetaDataForm = ({
             <SolidButton
               label="Yes"
               icon="si si-check"
-              size="small"
               type="reset"
               severity="danger"
               autoFocus
@@ -3660,7 +3655,7 @@ const FieldMetaDataForm = ({
                 setShowTypeFilter(true);
               }}
             />
-            <SolidButton label="No" icon="si si-times" size="small" onClick={() => setIsBackPopupVisible(false)} />
+            <SolidButton label="No" icon="si si-times" onClick={() => setIsBackPopupVisible(false)} />
           </div>
         }
       >

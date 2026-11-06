@@ -147,7 +147,6 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
                 <SolidButton
                   type="button"
                   variant="ghost"
-                  size="sm"
                   className="kaban-load-more"
                   onClick={() => handleLoadMore(groupByField)}
                 >

@@ -23,7 +23,6 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
                 presentation.isIconOnly ? "solid-icon-button" : "",
                 presentation.buttonClassName ?? ""
             ].filter(Boolean).join(" ")}
-            size="small"
             icon={presentation.icon}
             iconPos={presentation.iconPos}
             label={presentation.label}

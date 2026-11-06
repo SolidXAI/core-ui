@@ -772,7 +772,6 @@ export function ModulePackageImportContent({
             <div className="solid-module-package-dropzone__actions">
               <SolidButton
                 type="button"
-                size="small"
                 variant="outline"
                 onClick={(event) => {
                   event.stopPropagation();
@@ -799,7 +798,6 @@ export function ModulePackageImportContent({
             </div>
             <SolidButton
               type="button"
-              size="small"
               variant="ghost"
               onClick={() => {
                 setSelectedFile(null);
@@ -898,7 +896,7 @@ export function ModulePackageImportContent({
 
             {isUpdate ? (
               <div>
-                <SolidButton type="button" size="small" variant="ghost" onClick={() => setShowAllFiles((current) => !current)}>
+                <SolidButton type="button" variant="ghost" onClick={() => setShowAllFiles((current) => !current)}>
                   {showAllFiles ? "Hide package files" : `Show all package files (${previewResponse?.preview?.fileTree?.length ?? 0})`}
                 </SolidButton>
               </div>
@@ -924,7 +922,6 @@ export function ModulePackageImportContent({
       return (
         <SolidButton
           type="button"
-          size="small"
           onClick={() => setSelectedStep("import")}
           disabled={!canContinueFromPreview || !isUpdateApproved}
           rightIcon={<Sparkles size={14} />}
@@ -937,7 +934,6 @@ export function ModulePackageImportContent({
     const restoreButton = backup && !isRestoreConfirmOpen ? (
       <SolidButton
         type="button"
-        size="small"
         variant="ghost"
         onClick={() => setRestoreConfirmOpen(true)}
         disabled={!canRestore}
@@ -955,7 +951,6 @@ export function ModulePackageImportContent({
       return (
         <SolidButton
           type="button"
-          size="small"
           onClick={handleStartImport}
           disabled={!canImport}
           loading={isProcessing && steps.import.status === "running"}
@@ -972,7 +967,6 @@ export function ModulePackageImportContent({
           {restoreButton}
           <SolidButton
             type="button"
-            size="small"
             variant="outline"
             onClick={handleRunBuild}
             disabled={!canRunBuild}
@@ -990,7 +984,6 @@ export function ModulePackageImportContent({
           {restoreButton}
           <SolidButton
             type="button"
-            size="small"
             variant="outline"
             onClick={handleRunSeed}
             disabled={!canRunSeed}
@@ -1020,12 +1013,11 @@ export function ModulePackageImportContent({
           <li>After the restart, refresh this page and run build and seed again. Prune is turned on for that seed.</li>
         </ul>
         <div className="solid-module-package-notice__actions">
-          <SolidButton type="button" size="small" variant="ghost" onClick={() => setRestoreConfirmOpen(false)} disabled={isProcessing}>
+          <SolidButton type="button" variant="ghost" onClick={() => setRestoreConfirmOpen(false)} disabled={isProcessing}>
             Cancel
           </SolidButton>
           <SolidButton
             type="button"
-            size="small"
             variant="destructive"
             onClick={handleRestore}
             disabled={!canRestore}
@@ -1169,7 +1161,6 @@ export function ModulePackageImportContent({
                 <span className="solid-module-package-summary__copy">{finalSummary}</span>
                 <SolidButton
                   type="button"
-                  size="small"
                   variant="outline"
                   leftIcon={<RefreshCw size={14} />}
                   onClick={() => window.location.reload()}

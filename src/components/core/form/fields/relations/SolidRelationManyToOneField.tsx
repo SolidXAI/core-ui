@@ -537,7 +537,6 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                     variant="outline"
                     aria-label="Filter"
                     type="button"
-                    size="sm"
                     onClick={() => setvisibleCreateRelationEntity(true)}
                     className="custom-add-button"
                 />

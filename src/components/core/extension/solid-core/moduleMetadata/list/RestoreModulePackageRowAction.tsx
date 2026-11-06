@@ -135,11 +135,11 @@ const RestoreModulePackageRowAction = (event: SolidListRowdataDynamicFunctionPro
 
         <div className="solid-generate-code-popup__actions">
           {backup ? (
-            <SolidButton size="small" variant="destructive" leftIcon={<History size={14} />} onClick={handleRestore}>
+            <SolidButton variant="destructive" leftIcon={<History size={14} />} onClick={handleRestore}>
               Restore {formatVersion(backup.backup?.version)}
             </SolidButton>
           ) : null}
-          <SolidButton size="small" variant="outline" onClick={() => dispatch(closePopup())}>
+          <SolidButton variant="outline" onClick={() => dispatch(closePopup())}>
             {backup ? "Cancel" : "Close"}
           </SolidButton>
         </div>

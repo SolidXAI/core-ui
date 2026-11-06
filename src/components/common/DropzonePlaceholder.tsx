@@ -29,7 +29,7 @@ export const DropzonePlaceholder = ({ mediaTypes, mediaAllowedExtensions, mediaM
                 <p className="solid-dropzone-meta m-0">Allowed extensions: {allowedExtensionsLabel}</p>
             )}
             <div>
-                <SolidButton variant="outline" size='sm' type="button">
+                <SolidButton variant="outline" type="button">
                     Click to Browse
                 </SolidButton>
             </div>

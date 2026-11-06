@@ -264,10 +264,10 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                     {renderInputByType(value, index, false)}
                     {numberOfInputs === null &&
                         <>
-                            <SolidButton variant="ghost" size="sm" onClick={() => addInput()} className='solid-filter-action-btn solid-filter-action-icon-btn'>
+                            <SolidButton variant="ghost" onClick={() => addInput()} className='solid-filter-action-btn solid-filter-action-icon-btn'>
                                 <SolidIcon name="si-plus" aria-hidden />
                             </SolidButton>
-                            <SolidButton variant="ghost" size="sm" onClick={() => deleteInput(index)} className='solid-filter-action-btn solid-filter-action-icon-btn is-danger'>
+                            <SolidButton variant="ghost" onClick={() => deleteInput(index)} className='solid-filter-action-btn solid-filter-action-icon-btn is-danger'>
                                 <SolidIcon name="si-trash" aria-hidden />
                             </SolidButton>
                         </>

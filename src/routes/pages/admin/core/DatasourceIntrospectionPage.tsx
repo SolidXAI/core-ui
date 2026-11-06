@@ -2342,7 +2342,6 @@ export function DatasourceIntrospectionPage() {
                   <span className="sdix-column-type-cell">
                     {!column.handledBySuperclass && (column.include || column.matched) ? (
                       <SolidButton
-                        size="small"
                         variant="outline"
                         className="sdix-column-action-icon"
                         onClick={() => openFieldConfigEditor(column.columnName)}
@@ -2361,15 +2360,15 @@ export function DatasourceIntrospectionPage() {
                   <span className="sdix-column-action">
                     <div className="sdix-column-action-stack">
                       {column.handledBySuperclass ? (
-                        <SolidButton size="small" variant="outline" disabled className="sdix-column-action-chip sdix-column-action-chip--managed">
+                        <SolidButton variant="outline" disabled className="sdix-column-action-chip sdix-column-action-chip--managed">
                           Managed
                         </SolidButton>
                       ) : column.isPrimaryKey ? (
-                        <SolidButton size="small" variant="outline" disabled className="sdix-column-action-chip sdix-column-action-chip--required">
+                        <SolidButton variant="outline" disabled className="sdix-column-action-chip sdix-column-action-chip--required">
                           Required
                         </SolidButton>
                       ) : column.matched ? (
-                        <SolidButton size="small" variant="outline" onClick={() => setColumnIncluded(column.columnName, false)}>
+                        <SolidButton variant="outline" onClick={() => setColumnIncluded(column.columnName, false)}>
                           Remove mapping
                         </SolidButton>
                       ) : (
@@ -2487,7 +2486,6 @@ export function DatasourceIntrospectionPage() {
             </div>
             {mappingPreview.migration.content ? (
               <SolidButton
-                size="small"
                 variant="outline"
                 className="sdix-review-copy-button"
                 leftIcon={migrationPreviewCopied ? <Check size={14} /> : <Copy size={14} />}
@@ -2786,7 +2784,7 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
       ) : bootstrapError ? (
         <div className="sdix-error">
           <span>{readQueryError(bootstrapError)}</span>
-          <SolidButton size="small" variant="outline" onClick={() => void refetchBootstrap()}>
+          <SolidButton variant="outline" onClick={() => void refetchBootstrap()}>
             Retry
           </SolidButton>
         </div>
@@ -2814,7 +2812,6 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                   </div>
                 ) : null}
                 <SolidButton
-                  size="small"
                   leftIcon={<Sparkles size={14} />}
                   onClick={() => startMappingForRows(selectedRows)}
                   disabled={!selectedRowCount}
@@ -2830,7 +2827,6 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                   native={false}
                 />
                 <SolidButton
-                  size="small"
                   className="sdix-icon-button"
                   leftIcon={<RefreshCw size={16} />}
                   onClick={() => void handleRefresh()}
@@ -2838,7 +2834,6 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                   aria-label="Refresh"
                 />
                 <SolidButton
-                  size="small"
                   className="sdix-icon-button"
                   leftIcon={<Cog size={16} />}
                   onClick={() => {
@@ -2885,7 +2880,7 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                 ) : tablesError ? (
                   <div className="sdix-error is-inline">
                     <span>{readQueryError(tablesError)}</span>
-                    <SolidButton size="small" variant="outline" onClick={() => void refetchTables()}>
+                    <SolidButton variant="outline" onClick={() => void refetchTables()}>
                       Retry
                     </SolidButton>
                   </div>
@@ -2900,7 +2895,7 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                       value={filteredRecords}
                       dataKey="tableName"
                       viewportHeight="calc(100vh - 162px)"
-                      size="small"
+                      size="normal"
                       onRowClick={({ data }) => toggleSelectedRow(data)}
                       rowClassName={(rowData) => selectedListRowKeySet.has(makeTableKey(rowData.schema, rowData.tableName)) ? "sdix-table-row-selected" : ""}
                       emptyMessage="No datasource tables found"
@@ -3009,7 +3004,7 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
           ) : (
             <div className="sdix-workspace-screen">
               <div className="sdix-workspace-header">
-                <SolidButton size="small" variant="outline" leftIcon={<ArrowLeft size={14} />} onClick={leaveWorkspace}>
+                <SolidButton variant="outline" leftIcon={<ArrowLeft size={14} />} onClick={leaveWorkspace}>
                   Back
                 </SolidButton>
                 <div className="sdix-workspace-header__identity sdix-workspace-header__identity--right">
@@ -3025,14 +3020,14 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
               {!selectedTable && !isTablesLoading ? (
                 <div className="sdix-error">
                   <span>The selected table is no longer available for this datasource.</span>
-                  <SolidButton size="small" variant="outline" onClick={leaveWorkspace}>
+                  <SolidButton variant="outline" onClick={leaveWorkspace}>
                     Back to table list
                   </SolidButton>
                 </div>
               ) : drawerLoadingError ? (
                 <div className="sdix-error">
                   <span>{readQueryError(drawerLoadingError)}</span>
-                  <SolidButton size="small" variant="outline" onClick={() => selectedTable && void loadWorkspaceItem(selectedTable)}>
+                  <SolidButton variant="outline" onClick={() => selectedTable && void loadWorkspaceItem(selectedTable)}>
                     Retry
                   </SolidButton>
                 </div>
@@ -3131,13 +3126,12 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                       <div className="sdix-wizard-footer__meta">{workspaceMeta}</div>
                       <div className="sdix-wizard-footer__actions">
                         {drawerDraft.mapped && drawerDraft.modelId ? (
-                          <SolidButton size="small" variant="outline" leftIcon={<ExternalLink size={14} />} onClick={openMappedModelForm}>
+                          <SolidButton variant="outline" leftIcon={<ExternalLink size={14} />} onClick={openMappedModelForm}>
                             Open model form
                           </SolidButton>
                         ) : null}
                         {workspaceStep === "configure" ? (
                           <SolidButton
-                            size="small"
                             leftIcon={<Save size={14} />}
                             loading={isPreviewMappingLoading}
                             onClick={() => void reviewMappingJson()}
@@ -3147,21 +3141,20 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                         ) : null}
                         {workspaceStep === "review-json" ? (
                           <>
-                            <SolidButton size="small" variant="outline" onClick={() => setWorkspaceStep("configure")}>
+                            <SolidButton variant="outline" onClick={() => setWorkspaceStep("configure")}>
                               Back
                             </SolidButton>
-                            <SolidButton size="small" leftIcon={<Save size={14} />} loading={isSavingMapping} onClick={() => void persistMappingArtifacts()}>
+                            <SolidButton leftIcon={<Save size={14} />} loading={isSavingMapping} onClick={() => void persistMappingArtifacts()}>
                               Continue
                             </SolidButton>
                           </>
                         ) : null}
                         {workspaceStep === "generate-code" ? (
                           <>
-                            <SolidButton size="small" variant="outline" onClick={() => setWorkspaceStep("review-json")}>
+                            <SolidButton variant="outline" onClick={() => setWorkspaceStep("review-json")}>
                               Back
                             </SolidButton>
                             <SolidButton
-                              size="small"
                               disabled={!hasAttemptedGenerateCode || isGenerateCodeLoading || isGeneratingCodeWorkflow}
                               onClick={() => setWorkspaceStep("create-migrations")}
                             >
@@ -3171,10 +3164,10 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                         ) : null}
                         {workspaceStep === "create-migrations" ? (
                           <>
-                            <SolidButton size="small" variant="outline" onClick={() => setWorkspaceStep("generate-code")}>
+                            <SolidButton variant="outline" onClick={() => setWorkspaceStep("generate-code")}>
                               Back
                             </SolidButton>
-                            <SolidButton size="small" leftIcon={<Save size={14} />} loading={isCreatingMigrationArtifacts} onClick={() => void handleCreateMigrationArtifacts()}>
+                            <SolidButton leftIcon={<Save size={14} />} loading={isCreatingMigrationArtifacts} onClick={() => void handleCreateMigrationArtifacts()}>
                               Continue
                             </SolidButton>
                           </>
@@ -3182,7 +3175,6 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                         {workspaceStep === "run-migration" ? (
                           runMigrationCompleted ? (
                             <SolidButton
-                              size="small"
                               leftIcon={<Check size={14} />}
                               onClick={() => navigate("/admin/core/solid-core/model-metadata/list")}
                             >
@@ -3190,10 +3182,10 @@ npx @solidxai/solidctl@latest seed --modules-to-seed ${bootstrap?.module?.name |
                             </SolidButton>
                           ) : (
                             <>
-                              <SolidButton size="small" variant="outline" onClick={() => setWorkspaceStep("create-migrations")}>
+                              <SolidButton variant="outline" onClick={() => setWorkspaceStep("create-migrations")}>
                                 Back
                               </SolidButton>
-                              <SolidButton size="small" leftIcon={<Database size={14} />} loading={isRunMigrationLoading} onClick={() => void handleRunMigration()}>
+                              <SolidButton leftIcon={<Database size={14} />} loading={isRunMigrationLoading} onClick={() => void handleRunMigration()}>
                                 Continue
                               </SolidButton>
                             </>

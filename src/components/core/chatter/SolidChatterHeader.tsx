@@ -139,7 +139,7 @@ export const SolidChatterHeader = (props: Props) => {
                 <div className='flex items-center ml-auto solid-header-buttons-wrapper'>
                     {/* <Button
                         label="Send Message"
-                        size="small"
+                        size="default"
                         type="button"
                         onClick={() => handleTabClick('email-message')}
                         {...(activeTab !== 'email-message' && {
@@ -149,14 +149,12 @@ export const SolidChatterHeader = (props: Props) => {
                     /> */}
                     {/* <SolidButton
                         label="Log Note"
-                        size="sm"
                         type="button"
                         variant="primary"
                         className="solid-purple-button"
                         onClick={() => handleTabClick('log')}
                     /> */}
                     <SolidButton
-                        size="sm"
                         type="button"
                         aria-label="Log Note"
                         variant="outline"
@@ -166,7 +164,6 @@ export const SolidChatterHeader = (props: Props) => {
                         onClick={() => handleTabClick('log')}
                     />
                     <SolidButton
-                        size="sm"
                         type="button"
                         aria-label="Filter"
                         variant="outline"
@@ -176,7 +173,6 @@ export const SolidChatterHeader = (props: Props) => {
                         onClick={handleFilterClick}
                     />
                     <SolidButton
-                        size="sm"
                         type="button"
                         aria-label="Refresh"
                         variant="outline"
@@ -261,14 +257,12 @@ export const SolidChatterHeader = (props: Props) => {
                 </SolidDialogBody>
                 <SolidDialogFooter>
                         <SolidButton 
-                            label="Clear" 
-                            size="sm"
+                            label="Clear"
                             variant="outline"
                             onClick={handleClearFilters}
                         />
                         <SolidButton 
-                            label="Apply" 
-                            size="sm"
+                            label="Apply"
                             className="solid-purple-button"
                             onClick={handleApplyFilters}
                         />

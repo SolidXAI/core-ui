@@ -164,7 +164,6 @@ export const SolidMqMessagesSummarizeListHeaderAction = ({
                         Click <strong>Continue</strong> to load the summary.
                     </p>
                     <SolidButton
-                        size="small"
                         loading={loading}
                         onClick={handleContinue}
                     >

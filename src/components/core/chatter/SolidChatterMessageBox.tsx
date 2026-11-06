@@ -324,7 +324,6 @@ export const SolidChatterMessageBox = (props: Props) => {
                                 {canEditNote && !isEditing && (
                                     <SolidButton
                                         type="button"
-                                        size="sm"
                                         variant="ghost"
                                         className="solid-icon-button"
                                         leftIcon={<Pencil size={12} />}
@@ -393,7 +392,6 @@ export const SolidChatterMessageBox = (props: Props) => {
                                                     <span>{file.name} ({formatFileSize(file.size)})</span>
                                                     <SolidButton
                                                         type="button"
-                                                        size="sm"
                                                         variant="ghost"
                                                         className='solid-icon-button'
                                                         leftIcon={<X size={12} />}
@@ -409,7 +407,6 @@ export const SolidChatterMessageBox = (props: Props) => {
                                     <div className='flex items-center gap-2'>
                                         <SolidButton
                                             type="button"
-                                            size="sm"
                                             variant="ghost"
                                             className="solid-icon-button"
                                             leftIcon={<Paperclip size={14} />}
@@ -422,7 +419,6 @@ export const SolidChatterMessageBox = (props: Props) => {
                                     <div className='flex items-center justify-end gap-2'>
                                     <SolidButton
                                         type="button"
-                                        size="sm"
                                         variant="outline"
                                         leftIcon={<X size={12} />}
                                         onClick={handleCancelEdit}
@@ -431,7 +427,6 @@ export const SolidChatterMessageBox = (props: Props) => {
                                     </SolidButton>
                                     <SolidButton
                                         type="button"
-                                        size="sm"
                                         variant="primary"
                                         loading={isUpdatingNote}
                                         leftIcon={<Check size={12} />}
@@ -453,7 +448,6 @@ export const SolidChatterMessageBox = (props: Props) => {
                                             {isEditing && canEditNote && (
                                                 <SolidButton
                                                     type="button"
-                                                    size="sm"
                                                     variant="ghost"
                                                     className="solid-icon-button"
                                                     leftIcon={<Trash2 size={12} color="#dc2626" />}
@@ -510,7 +504,6 @@ export const SolidChatterMessageBox = (props: Props) => {
                                 ) : (
                                     <SolidButton
                                         type="button"
-                                        size="sm"
                                         variant="outline"
                                         className="text-xs px-2 py-1"
                                         leftIcon={<Check size={12} />}

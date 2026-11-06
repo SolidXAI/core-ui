@@ -37,7 +37,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                     icon={icon}
                     leftIcon={!icon ? defaultIcon : undefined}
                     className={`${className} max-[576px]:hidden sm:hidden lg:flex`}
-                    size='sm'
                 >
                     {label}
                 </SolidButton>
@@ -48,7 +47,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                     icon={icon}
                     leftIcon={!icon ? defaultIcon : undefined}
                     className={`${className} lg:hidden solid-icon-button `}
-                    size='sm'
                 />
 
                 {/* {responsiveIconOnly ? (
@@ -58,7 +56,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                             icon={icon}
                             leftIcon={!icon ? defaultIcon : undefined}
                             className={`${className} lg:hidden solid-icon-button `}
-                            size='sm'
                         />
 
                         <SolidButton
@@ -66,7 +63,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                             icon={icon}
                             leftIcon={!icon ? defaultIcon : undefined}
                             className={`${className} hidden lg:inline-flex`}
-                            size='sm'
                         >
                             {label}
                         </SolidButton>
@@ -77,7 +73,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                         icon={icon}
                         leftIcon={!icon ? defaultIcon : undefined}
                         className={`${className}`}
-                        size='sm'
                     >
                         {label}
                     </SolidButton>

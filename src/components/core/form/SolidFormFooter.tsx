@@ -206,7 +206,6 @@ export const SolidFormFooter = ({ params, internationalisationEnabled = false }:
                         <SolidButton
                             icon="si si-angle-left"
                             variant="ghost"
-                            size="sm"
                             onClick={() => handlePrev()}
                             disabled={isLoading}
                         />
@@ -221,7 +220,6 @@ export const SolidFormFooter = ({ params, internationalisationEnabled = false }:
                         <SolidButton
                             icon="si si-angle-right"
                             variant="ghost"
-                            size="sm"
                             onClick={() => handleNext()}
                             disabled={isLoading}
                         />
