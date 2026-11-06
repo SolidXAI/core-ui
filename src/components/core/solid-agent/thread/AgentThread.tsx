@@ -89,12 +89,20 @@ function AgentActivityDisclosure({
     items,
     working,
     startedAt,
+    endedAt,
+    totalStartedAt,
+    isLastActivity,
+    hasMultipleActivities,
     renderItem,
 }: {
     turnKey: string;
     items: AgentChatItem[];
     working: boolean;
     startedAt?: number;
+    endedAt?: number;
+    totalStartedAt?: number;
+    isLastActivity?: boolean;
+    hasMultipleActivities?: boolean;
     renderItem: (item: AgentChatItem) => React.ReactNode;
 }) {
     const [expanded, setExpanded] = useState(working);
@@ -112,38 +120,55 @@ function AgentActivityDisclosure({
     }, [working]);
 
     const [now, setNow] = useState(() => Date.now());
-    const hasLiveTimer = useRef(working);
-    const startTime = useRef(startedAt || items[0]?.at || Date.now());
+    const startTimeRef = useRef(startedAt || items[0]?.at || Date.now());
+    const endTimeRef = useRef<number | undefined>(endedAt);
+
+    useEffect(() => {
+        if (startedAt) startTimeRef.current = startedAt;
+        if (endedAt) endTimeRef.current = endedAt;
+    }, [startedAt, endedAt]);
 
     useEffect(() => {
         if (!working) {
-            if (hasLiveTimer.current) setNow(Date.now());
+            if (!endTimeRef.current) endTimeRef.current = Date.now();
             return;
         }
-        hasLiveTimer.current = true;
+        endTimeRef.current = undefined;
         const timer = window.setInterval(() => setNow(Date.now()), 1000);
         return () => window.clearInterval(timer);
     }, [working]);
 
     const toolCount = items.filter((item) => item.eventType === AgentEventTypes.toolCalling).length;
-    const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
-    
-    let recordedSeconds = 0;
-    if (items.length > 1) {
-        recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
-    }
-    const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);
-    const toolDurationSeconds = Math.round(sumToolMs / 1000);
 
-    const seconds = hasLiveTimer.current
-        ? activeDuration
-        : Math.max(recordedSeconds, toolDurationSeconds, 1);
+    let seconds = 0;
+    if (working) {
+        seconds = Math.max(1, Math.floor((now - startTimeRef.current) / 1000));
+    } else {
+        const stepMs = (endTimeRef.current && startTimeRef.current) ? (endTimeRef.current - startTimeRef.current) : 0;
+        let recordedSeconds = Math.max(0, Math.floor(stepMs / 1000));
+        if (recordedSeconds === 0 && items.length > 1) {
+            recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
+        }
+        const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);
+        const toolDurationSeconds = Math.round(sumToolMs / 1000);
+        seconds = Math.max(recordedSeconds, toolDurationSeconds, 1);
+    }
+
+    let totalSeconds = 0;
+    if (totalStartedAt) {
+        const effectiveEnd = working ? now : (endTimeRef.current || items[items.length - 1]?.at || now);
+        totalSeconds = Math.max(0, Math.floor((effectiveEnd - totalStartedAt) / 1000));
+    }
 
     const durationLabel = formatWorkedDuration(seconds);
+    const showTotal = Boolean(hasMultipleActivities && totalSeconds > seconds);
+    const totalDurationLabel = showTotal ? formatWorkedDuration(totalSeconds) : "";
 
     const summary = working
-        ? `Working · ${toolCount ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ` : ""}${durationLabel}`
-        : `Worked for ${durationLabel}`;
+        ? `Working · ${toolCount ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ` : ""}${durationLabel}${showTotal ? ` (Total ${totalDurationLabel})` : ""}`
+        : isLastActivity && showTotal
+            ? `Worked for ${durationLabel} · Total ${totalDurationLabel}`
+            : `Worked for ${durationLabel}`;
 
     const panelId = `agent-activity-${turnKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 
@@ -289,50 +314,100 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                 const turnContent: React.ReactNode[] = [];
                 let activityItems: AgentChatItem[] = [];
                 let hasTrailingActivity = false;
-                const flushActivity = (isLatest: boolean) => {
+
+                // Determine planned activity block count to know if this turn has multiple steps
+                let plannedActivityCount = 0;
+                let pendingActivityCount = 0;
+                for (const item of group.items) {
+                    if (isAssistantMessage(item)) {
+                        if (pendingActivityCount > 0) {
+                            plannedActivityCount++;
+                            pendingActivityCount = 0;
+                        }
+                    } else {
+                        pendingActivityCount++;
+                    }
+                }
+                if (pendingActivityCount > 0) plannedActivityCount++;
+                if (isCurrentTurn && (working || thinking) && pendingActivityCount === 0) {
+                    plannedActivityCount++;
+                }
+                const hasMultipleActivities = plannedActivityCount > 1;
+
+                let activityIndex = 0;
+                let currentStepStartTime = group.startedAt || group.items[0]?.at || Date.now();
+
+                const flushActivity = (isLatest: boolean, nextMessageAt?: number) => {
                     if (!activityItems.length) return;
                     const activityKey = `${group.key}-${activityItems[0].id}`;
+                    const isLast = activityIndex === plannedActivityCount - 1;
+                    const stepEnd = isLatest && isCurrentTurn ? undefined : (nextMessageAt || activityItems[activityItems.length - 1]?.at);
+
                     turnContent.push(
                         <AgentActivityDisclosure
                             key={`activity-${activityKey}`}
                             turnKey={activityKey}
                             items={activityItems}
                             working={isCurrentTurn && isLatest}
-                            startedAt={group.startedAt}
+                            startedAt={currentStepStartTime}
+                            endedAt={stepEnd}
+                            totalStartedAt={group.startedAt}
+                            isLastActivity={isLast}
+                            hasMultipleActivities={hasMultipleActivities}
                             renderItem={renderItem}
                         />,
                     );
+                    activityIndex++;
                     activityItems = [];
                     if (isLatest) {
                         hasTrailingActivity = true;
                     }
                 };
+
                 for (const item of group.items) {
                     if (isAssistantMessage(item)) {
-                        flushActivity(false);
+                        flushActivity(false, item.at);
                         turnContent.push(renderItem(item, false));
+                        currentStepStartTime = item.at;
                         hasTrailingActivity = false;
                     } else {
                         activityItems.push(item);
                     }
                 }
                 flushActivity(true);
+
                 if (isCurrentTurn && (working || thinking) && !hasTrailingActivity) {
+                    const isLast = activityIndex === plannedActivityCount - 1;
                     turnContent.push(
                         <AgentActivityDisclosure
                             key={`activity-working-${group.key}`}
                             turnKey={`${group.key}-working`}
                             items={[]}
                             working
-                            startedAt={group.startedAt}
+                            startedAt={currentStepStartTime}
+                            totalStartedAt={group.startedAt}
+                            isLastActivity={isLast}
+                            hasMultipleActivities={hasMultipleActivities}
                             renderItem={renderItem}
                         />,
                     );
+                    activityIndex++;
                 }
+
                 if (!isCurrentTurn && assistantCopyText) {
+                    const lastItemAt = group.items[group.items.length - 1]?.at;
+                    const totalTurnSeconds = (group.startedAt && lastItemAt)
+                        ? Math.max(0, Math.floor((lastItemAt - group.startedAt) / 1000))
+                        : 0;
+                    const totalTurnText = (hasMultipleActivities && totalTurnSeconds > 0)
+                        ? `Total ${formatWorkedDuration(totalTurnSeconds)} · `
+                        : "";
+
                     turnContent.push(
                         <div key={`meta-${group.key}`} className={`${widgetStyles.BubbleMeta} ${widgetStyles.BubbleMetaAssistant} ${widgetStyles.TurnMeta}`}>
-                            <span className={widgetStyles.Timestamp}>{formatChatTime(group.items[group.items.length - 1].at)}</span>
+                            <span className={widgetStyles.Timestamp}>
+                                {totalTurnText}{formatChatTime(lastItemAt)}
+                            </span>
                             <SolidAgentMessageCopyButton text={assistantCopyText} />
                         </div>,
                     );
