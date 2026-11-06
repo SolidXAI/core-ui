@@ -68,7 +68,6 @@ export const SolidEmptyListViewPlaceholder = ({
                             type="button"
                             className={`solid-empty-listview-secondary-action ${button?.attrs?.className ?? ''}`}
                             variant={button?.attrs?.showText === false ? "primary" : "ghost"}
-                            size="small"
                             icon={button?.attrs?.icon}
                             leftIcon={!button?.attrs?.icon ? <SquarePen size={14} /> : undefined}
                             onClick={() => {

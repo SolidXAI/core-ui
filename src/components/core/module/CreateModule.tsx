@@ -313,7 +313,6 @@ const CreateModule = ({ params, data }: any) => {
       {!isCreateMode && shouldShowGeneralSave && formik.dirty && (
         <div className="solid-module-general-info-actions">
           <SolidButton
-            size="sm"
             type="submit"
             form="module-general-info-form"
             onClick={() => showError()}
@@ -538,7 +537,6 @@ const CreateModule = ({ params, data }: any) => {
                     <div className="solid-module-automap-actions">
                       <SolidButton
                         type="button"
-                        size="sm"
                         onClick={() => router.push(`/admin/core/solid-core/modules/${data?.id}/datasource-introspection`)}
                       >
                         Auto Map Tables
@@ -571,7 +569,6 @@ const CreateModule = ({ params, data }: any) => {
             <div className="flex items-center gap-2">
               <SolidButton
                 variant="outline"
-                size="sm"
                 type="button"
                 onClick={handleCancel}
                 className="bg-[var(--primary-color-text)]"
@@ -580,7 +577,6 @@ const CreateModule = ({ params, data }: any) => {
               </SolidButton>
               {shouldShowGeneralSave && formik.dirty && (
                 <SolidButton
-                  size="sm"
                   type="submit"
                   form="module-general-info-form"
                   onClick={() => showError()}

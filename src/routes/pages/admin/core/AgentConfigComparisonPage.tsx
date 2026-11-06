@@ -151,7 +151,7 @@ export function AgentConfigComparisonPage() {
   const modelChanges = modelConfiguration.groups.reduce((total, group) => total + group.fields.filter((field) => field.status !== "matched").length, 0);
   const subtitle = comparison.agent.title && comparison.agent.title !== comparison.agent.name ? comparison.agent.title : null;
   return <main className="config-compare">
-    <header className="config-compare__page-header"><div><div className="config-compare__eyebrow"><GitCompareArrows size={13} /> Config comparison</div><h1>{comparison.agent.name}</h1>{subtitle && <p>{subtitle}</p>}</div><SolidButton variant="secondary" size="sm" onClick={back}><ArrowLeft size={14} /> Back to agent</SolidButton></header>
+    <header className="config-compare__page-header"><div><div className="config-compare__eyebrow"><GitCompareArrows size={13} /> Config comparison</div><h1>{comparison.agent.name}</h1>{subtitle && <p>{subtitle}</p>}</div><SolidButton variant="secondary" onClick={back}><ArrowLeft size={14} /> Back to agent</SolidButton></header>
     <div className="config-compare__sheet">
       <div className="config-compare__version-headers"><VersionHeader version={comparison.versions.left} side="Older" /><span className="config-compare__center"><span className="config-compare__arrow"><ArrowRight size={14} /></span></span><VersionHeader version={comparison.versions.right} side="Newer" /></div>
       <section className="config-compare__section"><SectionHeader icon={<FileText size={15} />} title={systemPrompt.title} changes={systemPrompt.status === "matched" ? 0 : 1} />{systemPrompt.status === "matched" ? <p className="config-compare__empty">No changes to persona</p> : <ComparisonRowView comparison={comparison} row={systemPrompt} kind="prompt" />}</section>

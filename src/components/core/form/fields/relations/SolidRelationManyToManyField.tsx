@@ -238,7 +238,6 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                                     variant="outline"
                                     aria-label="Filter"
                                     type="button"
-                                    size="sm"
                                     onClick={() => setVisibleCreateDialog(true)}
                                     className="custom-add-button"
                                     disabled={isUnsaved}
@@ -374,7 +373,6 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                             variant="outline"
                             aria-label="Filter"
                             type="button"
-                            size="sm"
                             onClick={() => setVisibleCreateDialog(true)}
                             className="custom-add-button"
                             disabled={isUnsaved}
@@ -673,14 +671,12 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                 <div className="solid-radix-dialog-footer flex gap-2 justify-end">
                     <SolidButton
                         label="Link"
-                        size="sm"
                         disabled={!selectedLinkItem || isLinking}
                         loading={isLinking}
                         onClick={handleLinkConfirm}
                     />
                     <SolidButton
                         label="Cancel"
-                        size="sm"
                         variant="outline"
                         className="bg-[var(--primary-color-text)]"
                         onClick={() => setVisibleLinkDialog(false)}
@@ -714,10 +710,9 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     </p>
                 </SolidDialogBody>
                 <div className="solid-radix-dialog-footer solid-field-confirm-actions">
-                    <SolidButton label="Save" size="sm" onClick={saveParentEntity} autoFocus />
+                    <SolidButton label="Save" onClick={saveParentEntity} autoFocus />
                     <SolidButton
                         label="Cancel"
-                        size="sm"
                         onClick={() => setShowSaveParentEntityConfirmationPopup(false)}
                         variant="outline"
                     />

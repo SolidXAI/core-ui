@@ -437,7 +437,6 @@ export const GeneralSettings = () => {
               <div className="flex gap-4">
                 {formik.dirty && (
                   <SolidButton
-                    size="sm"
                     type="submit"
                     loading={formik.isSubmitting}
                     onClick={() => showError()}
@@ -1394,7 +1393,7 @@ const AiSettingsSection = ({ aiConfig, onAiConfigChange }: AiSettingsSectionProp
                 tabPosition="left"
                 extra={
                     activeTab === "providers" ? (
-                        <SolidButton size="sm" onClick={() => setShowAddProvider(true)}>
+                        <SolidButton onClick={() => setShowAddProvider(true)}>
                             Add
                         </SolidButton>
                     ) : undefined

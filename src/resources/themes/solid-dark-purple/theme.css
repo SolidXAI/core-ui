@@ -102,7 +102,7 @@
 
   .form-field-label {
     font-size: 12px;
-    color: var(--muted-foreground);
+    color: var(--foreground);
     font-weight: 500;
     display: flex;
     align-items: center;

@@ -132,7 +132,6 @@ export const SolidVersionHistory = ({ params, currentRecord }: SolidVersionHisto
                                 <td className="p-2 text-right">
                                     <SolidButton
                                         type="button"
-                                        size="sm"
                                         variant="outline"
                                         icon="si si-eye"
                                         className="solid-icon-button"

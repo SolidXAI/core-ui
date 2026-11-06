@@ -80,7 +80,6 @@ export function SolidFormViewNormalHeaderButton({
                 ].filter(Boolean).join(" ")}
                 {...button.attrs}
                 label={presentation.label}
-                size="sm"
                 iconPos={presentation.iconPos}
                 icon={presentation.icon}
                 tooltip={presentation.tooltip}

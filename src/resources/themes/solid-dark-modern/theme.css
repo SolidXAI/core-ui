@@ -215,7 +215,7 @@
   .solid-kanban-toolbar .solid-global-search-element input,
   .solid-tree-toolbar .solid-global-search-element input {
     height: 40px;
-    font-size: 13px;
+  font-size: var(--solid-font-size-ui-control);
     color: #eef2f8;
   }
 
@@ -281,7 +281,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #b5bdd1;
+    color: var(--foreground);
     margin-bottom: 0.5rem;
   }
 
@@ -354,7 +354,7 @@
   .solid-data-table-th {
     border-bottom: 0;
     color: #c8a989;
-    font-size: 10.5px;
+  font-size: var(--solid-font-size-body-small);
     font-weight: 800;
     letter-spacing: 0.1em;
     text-transform: uppercase;

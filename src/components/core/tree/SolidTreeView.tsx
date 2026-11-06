@@ -1780,7 +1780,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                     ? button.attrs.label
                     : ""
                 }
-                size="sm"
                 iconPos="left"
                 onClick={() => {
                   const event: SolidListRowActionEvent = {
@@ -1801,7 +1800,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           solidTreeViewLayout?.attrs?.showRowEditInContextMenu === false && (
             <SolidButton
               variant="ghost"
-              size="sm"
               leftIcon={<Pencil size={14} />}
               className="solid-tree-row-action-icon"
               onClick={() => openRowForEdit(rowData, "edit")}
@@ -1820,7 +1818,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               true)) && (
             <SolidButton
               variant="ghost"
-              size="sm"
               leftIcon={<Trash2 size={14} />}
               className="solid-tree-row-action-icon is-danger"
               onClick={() => {
@@ -1940,7 +1937,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   <div className="solid-list-search-toggle">
                     <SolidButton
                       type="button"
-                      size="sm"
                       variant="outline"
                       leftIcon={<Search size={14} />}
                       className="solid-icon-button"
@@ -1976,7 +1972,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
                 <SolidButton
                   type="button"
-                  size="sm"
                   variant="outline"
                   leftIcon={<RefreshCw size={14} />}
                   className="solid-icon-button"
@@ -1985,7 +1980,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 {showArchived && selectedRecoverRecords.length > 0 && (
                   <SolidButton
                     type="button"
-                    size="sm"
                     variant="secondary"
                     className="hidden lg:flex"
                     onClick={() => setRecoverDialogVisible(true)}
@@ -2042,7 +2036,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                       <SolidButton
                         type="button"
                         variant="primary"
-                        size="small"
                         leftIcon={<Plus size={14} />}
                         onClick={openGroupingBuilder}
                       >
@@ -2172,7 +2165,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                         <SolidButton
                           type="button"
                           variant="outline"
-                          size="sm"
                           leftIcon={<ChevronLeft size={14} />}
                           disabled={!canPrev || treeLoading}
                           className="solid-tree-paginator-btn"
@@ -2181,7 +2173,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                         <SolidButton
                           type="button"
                           variant="outline"
-                          size="sm"
                           leftIcon={<ChevronRight size={14} />}
                           disabled={!canNext || treeLoading}
                           className="solid-tree-paginator-btn"
@@ -2250,8 +2241,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           </SolidDialogDescription>
         </SolidDialogBody>
         <SolidDialogFooter>
-          <SolidButton label="No" size="sm" variant="outline" onClick={() => setRecoverDialogVisible(false)} />
-          <SolidButton label="Yes" size="sm" severity="danger" onClick={recoverAll} />
+          <SolidButton label="No" variant="outline" onClick={() => setRecoverDialogVisible(false)} />
+          <SolidButton label="Yes" severity="danger" onClick={recoverAll} />
         </SolidDialogFooter>
       </SolidDialog>
       {openLightbox && (

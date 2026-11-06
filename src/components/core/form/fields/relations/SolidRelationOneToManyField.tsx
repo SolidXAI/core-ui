@@ -360,10 +360,9 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                     </p>
                 </SolidDialogBody>
                 <div className="solid-radix-dialog-footer solid-field-confirm-actions">
-                    <SolidButton label="Save" size="sm" onClick={saveParentEntity} autoFocus />
+                    <SolidButton label="Save" onClick={saveParentEntity} autoFocus />
                     <SolidButton
                         label="Cancel"
-                        size="sm"
                         onClick={() => setShowSaveParentEntityConfirmationPopup(false)}
                         variant="outline"
                     />

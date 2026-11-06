@@ -361,11 +361,11 @@ const GroupingComponent = ({
 
       {/* FOOTER */}
       <div className="solid-grouping-footer">
-        <SolidButton size="sm" variant="outline" onClick={closeDialog}>
+        <SolidButton variant="outline" onClick={closeDialog}>
           <SolidIcon name="si-times" />
           Cancel
         </SolidButton>
-        <SolidButton size="sm" variant="primary" onClick={() => applyGrouping(groupingRules, aggregationRules)}>
+        <SolidButton variant="primary" onClick={() => applyGrouping(groupingRules, aggregationRules)}>
           <SolidIcon name="si-check" />
           Apply
         </SolidButton>

@@ -115,7 +115,6 @@ export const SolidVersionInfo = () => {
         <div className={styles.versionActions}>
           <SolidButton
             type="button"
-            size="sm"
             variant="outline"
             onClick={() => setShowDiagnostics(true)}
           >
@@ -142,7 +141,6 @@ export const SolidVersionInfo = () => {
                 <span className={styles.diagnosticsRefreshStatus} aria-live="polite">{lastDiagnosticsRefreshLabel}</span>
                 <SolidButton
                   type="button"
-                  size="sm"
                   variant="outline"
                   loading={isRefreshingDiagnostics}
                   onClick={() => void refreshDiagnosticsSnapshot()}

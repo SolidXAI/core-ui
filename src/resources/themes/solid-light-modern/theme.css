@@ -266,7 +266,7 @@
   .solid-kanban-toolbar .solid-global-search-element input,
   .solid-tree-toolbar .solid-global-search-element input {
     height: 36px;
-    font-size: 12.5px;
+  font-size: var(--solid-font-size-ui-control);
     color: #2e251f;
     background: transparent !important;
   }
@@ -403,7 +403,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #8d7c6e;
+    color: var(--foreground);
     margin-bottom: 0.5rem;
   }
 
@@ -456,7 +456,7 @@
     margin-bottom: 0 !important;
     color: #5f5549;
     background: transparent;
-    font-size: 13px;
+  font-size: var(--solid-font-size-ui-control);
     font-weight: 500;
     line-height: 1;
     white-space: nowrap;
@@ -521,7 +521,7 @@
     border-radius: 8px;
     background: transparent !important;
     color: #5f5549 !important;
-    font-size: 13px;
+  font-size: var(--solid-font-size-ui-control);
     font-weight: 500;
     line-height: 1;
     box-shadow: none !important;
@@ -654,7 +654,7 @@
   .solid-data-table-th {
     border-bottom: 0;
     color: #50443a;
-    font-size: 11px;
+  font-size: var(--solid-font-size-body-small);
     font-weight: 600;
     letter-spacing: 0.01em;
     text-transform: none;

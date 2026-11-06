@@ -260,7 +260,7 @@
     gap: 0.35rem;
     margin-bottom: 0.45rem;
     padding: 0.15rem 0;
-    color: #91a8c4;
+    color: var(--foreground);
     font-size: 0.79rem;
     font-weight: 700;
     letter-spacing: 0.03em;
@@ -307,7 +307,7 @@
     color: #e3ecf7;
     font-weight: 700;
     letter-spacing: 0.04em;
-    font-size: 0.78rem;
+  font-size: var(--solid-font-size-body-small);
   }
 
   .solid-custom-overlay,
