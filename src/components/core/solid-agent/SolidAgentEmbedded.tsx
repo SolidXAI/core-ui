@@ -11,6 +11,8 @@ import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/
 
 type SharedProps = {
     title?: string;
+    /** Exact agent name used to scope registered chat widgets. */
+    agentName?: string;
     /** Additional key/value context sent with each message to the agent. */
     inputContext?: AgentInputContext;
     /** Values for the AgentHub agent's declared requiredInputs. */
@@ -107,7 +109,7 @@ export function SolidAgentEmbedded(props: Props) {
             style={{ height, display: "flex", flexDirection: "column", border: "1px solid var(--solid-agent-border)", borderRadius: 12, overflow: "hidden", background: "var(--solid-agent-bg)" }}
         >
             {/* key: switching type remounts the chat onto the other backend's conversation. */}
-                <SolidAgentChat key={agentUrl} agentUrl={agentUrl!!} agentRuntime={agentRuntime} title={title} agentVersion={props.agentVersion} inputContext={inputContext}
+                <SolidAgentChat key={agentUrl} agentUrl={agentUrl!!} agentRuntime={agentRuntime} title={title} agentName={props.agentName} agentVersion={props.agentVersion} inputContext={inputContext}
                 inputs={props.inputs} requiredInputs={props.requiredInputs} externalEmbed={!!props.externalEmbed} onInputsLocked={props.externalEmbed?.onInputsLocked}
                 sessionOwnerKey={props.externalEmbed?.sessionOwnerKey}
                 beforeSend={props.externalEmbed?.beforeSend}

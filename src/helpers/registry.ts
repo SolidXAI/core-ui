@@ -99,9 +99,11 @@ import {
 
 import { scheduleFrequencyOnFieldChangeHandler } from "../components/core/extension/solid-core/scheduled-job/scheduleFrequencyOnFieldChangeHandler";
 import { MetadataExplorerFormWidget } from "../components/core/extension/solid-core/metadata/MetadataExplorerFormWidget";
-import { DefaultUserMessageChatWidget } from "../components/core/solid-agent/widgets/DefaultUserMessageChatWidget";
-import { DefaultAssistantMessageChatWidget } from "../components/core/solid-agent/widgets/DefaultAssistantMessageChatWidget";
-import { DefaultToolCallChatWidget } from "../components/core/solid-agent/widgets/DefaultToolCallChatWidget";
+import { DefaultAgentUserTurnCompletionWidget } from "../components/core/solid-agent/widgets/DefaultAgentUserTurnCompletionWidget";
+import { DefaultAgentTurnCompletionWidget } from "../components/core/solid-agent/widgets/DefaultAgentTurnCompletionWidget";
+import { DefaultAgentToolCallWidget } from "../components/core/solid-agent/widgets/DefaultAgentToolCallWidget";
+import { DefaultAgentToolGroupWidget } from "../components/core/solid-agent/widgets/DefaultAgentToolGroupWidget";
+import { DefaultAgentTurnCompletionWrapperWidget } from "../components/core/solid-agent/widgets/DefaultAgentTurnCompletionWrapperWidget";
 import { DefaultErrorChatWidget } from "../components/core/solid-agent/widgets/DefaultErrorChatWidget";
 import { DefaultNoticeChatWidget } from "../components/core/solid-agent/widgets/DefaultNoticeChatWidget";
 import { DefaultUnknownChatWidget } from "../components/core/solid-agent/widgets/DefaultUnknownChatWidget";
@@ -199,13 +201,53 @@ export const getExtensionComponents = (type: ExtensionComponentType, fieldType: 
         .map(([name]) => name);
 };
 
+/** Resolve a ToolCalling renderer by the exact tool name declared in its registration metadata. */
+export const getToolCallChatWidgetName = (toolName: string): string | null => {
+    if (!toolName) return null;
+    return getExtensionComponents(ExtensionComponentTypes.agentToolCallWidget).find((name) => {
+        const metadata = getExtensionComponentMetadata(name);
+        return metadata?.toolName === toolName;
+    }) ?? null;
+};
+
+/** An omitted or empty agents list makes a widget available to every agent. */
+export const isAgentWidgetAvailable = (name: string, agentName?: string): boolean => {
+    const agents = getExtensionComponentMetadata(name)?.agents;
+    if (agents === undefined) return true;
+    if (!Array.isArray(agents)) return false;
+    return agents.length === 0 || (typeof agentName === "string" && agents.includes(agentName));
+};
+
+const findAgentWidget = (type: ExtensionComponentType, marker: string, agentName?: string): string | null => {
+    const names = getExtensionComponents(type).filter((name) =>
+        getExtensionComponentMetadata(name)?.[marker] === true && isAgentWidgetAvailable(name, agentName),
+    );
+    return names.find((name) => {
+        const agents = getExtensionComponentMetadata(name)?.agents;
+        return Array.isArray(agents) && agents.length > 0;
+    }) ?? names[0] ?? null;
+};
+
+/** Resolve a UI module's user-message renderer; the built-in widget remains the fallback. */
+export const getUserMessageChatWidgetName = (agentName?: string): string | null =>
+    findAgentWidget(ExtensionComponentTypes.agentUserTurnCompletionWidget, "userMessage", agentName);
+
+/** Resolve the registered activity-group renderer, if one has opted in. */
+export const getToolGroupChatWidgetName = (agentName?: string): string | null =>
+    findAgentWidget(ExtensionComponentTypes.agentToolGroupWidget, "toolGroup", agentName);
+
+/** Resolve a UI module's assistant-turn wrapper; otherwise use the built-in layout. */
+export const getAgentTurnChatWidgetName = (agentName?: string): string | null =>
+    findAgentWidget(ExtensionComponentTypes.agentTurnCompletionWrapperWidget, "agentTurn", agentName);
+
 /** Discover agent-facing metadata from chat widgets that opt in through their metadata hook. */
-export const getAgentChatWidgetCatalog = (): AgentChatWidgetMetadata[] => {
+export const getAgentChatWidgetCatalog = (agentName?: string): AgentChatWidgetMetadata[] => {
     const seenComponents = new Set<ExtensionComponentMetadata>();
     const widgets: AgentChatWidgetMetadata[] = [];
 
     Object.entries(extensionRegistry.components).forEach(([name, registered]) => {
-        if (registered.type !== ExtensionComponentTypes.chatInteractionWidget || seenComponents.has(registered)) return;
+        if (registered.type !== ExtensionComponentTypes.agentTurnCompletionWidget || seenComponents.has(registered)
+            || !isAgentWidgetAvailable(name, agentName)) return;
         seenComponents.add(registered);
 
         const metadata = getExtensionComponentMetadata(name);
@@ -529,24 +571,26 @@ registerExtensionFunction("restartAgentHubProcessRowAction", restartAgentHubProc
 
 // SolidX Agent chat widgets.
 // Defaults render an event by its event_type when event_data.widget is absent (see SolidAgentChatItem).
-registerExtensionComponent("DefaultUserMessageChatWidget", DefaultUserMessageChatWidget, ExtensionComponentTypes.chatInteractionWidget);
-registerExtensionComponent("DefaultAssistantMessageChatWidget", DefaultAssistantMessageChatWidget, ExtensionComponentTypes.chatInteractionWidget);
-registerExtensionComponent("DefaultToolCallChatWidget", DefaultToolCallChatWidget, ExtensionComponentTypes.chatInteractionWidget);
-registerExtensionComponent("DefaultErrorChatWidget", DefaultErrorChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["error"]);
-registerExtensionComponent("DefaultNoticeChatWidget", DefaultNoticeChatWidget, ExtensionComponentTypes.chatInteractionWidget);
-registerExtensionComponent("DefaultThinkingChatWidget", DefaultThinkingChatWidget, ExtensionComponentTypes.chatInteractionWidget);
-registerExtensionComponent("DefaultUnknownChatWidget", DefaultUnknownChatWidget, ExtensionComponentTypes.chatInteractionWidget);
+registerExtensionComponent("DefaultAgentUserTurnCompletionWidget", DefaultAgentUserTurnCompletionWidget, ExtensionComponentTypes.agentUserTurnCompletionWidget);
+registerExtensionComponent("DefaultAgentTurnCompletionWidget", DefaultAgentTurnCompletionWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
+registerExtensionComponent("DefaultAgentToolCallWidget", DefaultAgentToolCallWidget, ExtensionComponentTypes.agentToolCallWidget);
+registerExtensionComponent("DefaultAgentToolGroupWidget", DefaultAgentToolGroupWidget, ExtensionComponentTypes.agentToolGroupWidget);
+registerExtensionComponent("DefaultAgentTurnCompletionWrapperWidget", DefaultAgentTurnCompletionWrapperWidget, ExtensionComponentTypes.agentTurnCompletionWrapperWidget);
+registerExtensionComponent("DefaultErrorChatWidget", DefaultErrorChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["error"]);
+registerExtensionComponent("DefaultNoticeChatWidget", DefaultNoticeChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
+registerExtensionComponent("DefaultThinkingChatWidget", DefaultThinkingChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
+registerExtensionComponent("DefaultUnknownChatWidget", DefaultUnknownChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
 // Named widgets, chosen by event_data.widget (full name or the short alias).
-registerExtensionComponent("SolidMarkdownChatWidget", SolidMarkdownChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["markdown"]);
-registerExtensionComponent("SolidQuestionChatWidget", SolidQuestionChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["question"]);
-registerExtensionComponent("SolidChecklistChatWidget", SolidChecklistChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["checklist"]);
-registerExtensionComponent("SolidDiffListChatWidget", SolidDiffListChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["diff-list"]);
-registerExtensionComponent("SolidCodeChatWidget", SolidCodeChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["code"]);
-registerExtensionComponent("SolidJsonChatWidget", SolidJsonChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["json"]);
-registerExtensionComponent("SolidTableChatWidget", SolidTableChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["table"]);
-registerExtensionComponent("SolidGalleryChatWidget", SolidGalleryChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["gallery"]);
-registerExtensionComponent("SolidProgressChatWidget", SolidProgressChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["progress"]);
-registerExtensionComponent("SolidStatusChatWidget", SolidStatusChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["status"]);
-registerExtensionComponent("SolidLinkCardChatWidget", SolidLinkCardChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["link-card"]);
-registerExtensionComponent("SolidNavigationIntentChatWidget", SolidNavigationIntentChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["navigation-intent"]);
-registerExtensionComponent("SolidToolActivityChatWidget", SolidToolActivityChatWidget, ExtensionComponentTypes.chatInteractionWidget, ["tool-activity"]);
+registerExtensionComponent("SolidMarkdownChatWidget", SolidMarkdownChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["markdown"]);
+registerExtensionComponent("SolidQuestionChatWidget", SolidQuestionChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["question"]);
+registerExtensionComponent("SolidChecklistChatWidget", SolidChecklistChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["checklist"]);
+registerExtensionComponent("SolidDiffListChatWidget", SolidDiffListChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["diff-list"]);
+registerExtensionComponent("SolidCodeChatWidget", SolidCodeChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["code"]);
+registerExtensionComponent("SolidJsonChatWidget", SolidJsonChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["json"]);
+registerExtensionComponent("SolidTableChatWidget", SolidTableChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["table"]);
+registerExtensionComponent("SolidGalleryChatWidget", SolidGalleryChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["gallery"]);
+registerExtensionComponent("SolidProgressChatWidget", SolidProgressChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["progress"]);
+registerExtensionComponent("SolidStatusChatWidget", SolidStatusChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["status"]);
+registerExtensionComponent("SolidLinkCardChatWidget", SolidLinkCardChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["link-card"]);
+registerExtensionComponent("SolidNavigationIntentChatWidget", SolidNavigationIntentChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["navigation-intent"]);
+registerExtensionComponent("SolidToolActivityChatWidget", SolidToolActivityChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["tool-activity"]);
