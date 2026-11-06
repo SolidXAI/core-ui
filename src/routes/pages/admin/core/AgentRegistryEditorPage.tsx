@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, GitBranch, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, GitBranch, LayoutGrid, List, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -14,7 +14,7 @@ import { AgentPersonaHistory } from "./AgentPersonaHistory";
 import { AgentConfigVersionsPanel } from "./AgentConfigVersionsPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
 import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
-import { AgentResourceCardWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
+import { AgentResourceCardWidget, AgentResourceRowWidget } from "../../../../components/core/extension/solid-core/agentRegistry/card/AgentResourceCardWidget";
 import { AgentSessionsPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentToolSessionsPanel";
 import { AgentProcessesPanel } from "../../../../components/core/extension/solid-core/agentToolRegistry/AgentProcessesPanel";
 import type { SolidKanbanCardWidgetProps } from "../../../../types/solid-core";
@@ -297,7 +297,9 @@ function ResourcePreviewDialog({ item, kind, onClose }: { item: Item; kind: "ski
   </SolidDialog>;
 }
 
-function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor }: {
+type ResourceView = "card" | "list";
+
+function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor, compact, view, onViewChange, renderRow }: {
   label: string; description: string; options: Item[]; selected: Item[];
   onAdd: (id: number) => void; onRemove: (id: number) => void; createUrl?: string;
   render: (item: Item, link?: Link) => React.ReactNode;
@@ -305,30 +307,66 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
   linkFor?: (id: number) => Link | undefined;
   onView?: (item: Item) => void;
   editUrlFor?: (item: Item) => string;
+  compact?: boolean;
+  view?: ResourceView;
+  onViewChange?: (view: ResourceView) => void;
+  renderRow?: (item: Item) => React.ReactNode;
 }) {
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const pickerRef = React.useRef<HTMLDivElement>(null);
   const showAssociatedCount = label === "Skills" || label === "Tools";
-  const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id)
-    && `${item.name ?? item.displayName ?? item.key ?? ""} ${item.description ?? ""}`.toLowerCase().includes(search.toLowerCase())).slice(0, 20);
+  const typedName = search.trim();
+  const query = typedName.toLowerCase();
+  const matchesSearch = (item: Item) => `${item.name ?? item.displayName ?? item.key ?? ""} ${item.description ?? ""}`.toLowerCase().includes(query);
+  const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id) && matchesSearch(item)).slice(0, 20);
+  const visibleSelected = selected.filter(matchesSearch);
+  const canCreate = Boolean(createUrl && query)
+    && ![...options, ...selected].some((item) => String(item.name ?? item.displayName ?? item.key ?? "").toLowerCase() === query);
+  const isList = view === "list" && Boolean(renderRow);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const dismiss = (event: Event) => {
+      if (!pickerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("focusin", dismiss);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("focusin", dismiss);
+    };
+  }, [open]);
+
   return <section className="agent-editor__section">
-    <div className="agent-editor__section-head"><div><h2>{label}</h2><p>{description}</p></div>
-      {createUrl && <a href={createUrl} target="_blank" rel="noopener noreferrer" className="agent-editor__new-link">Create {label === "Skills" ? "skill" : "tool"} <ExternalLink size={14} /></a>}
+    <div className="agent-editor__picker-bar">
+    <div className="agent-editor__picker-heading"><div className="agent-editor__picker-title"><h2>{label}</h2>
+        {showAssociatedCount && <div className="agent-editor__linked-count" role="status">
+          ({query ? `${visibleSelected.length} of ${selected.length}` : selected.length})
+        </div>}
+      </div>
+      <p title={description}>{description}</p>
     </div>
-    {showAssociatedCount && <div className="agent-editor__linked-count" role="status">
-      {selected.length} {label.toLowerCase()} associated
-    </div>}
-    <div className="agent-editor__picker">
+    <div className="agent-editor__picker" ref={pickerRef}>
       <SolidInput value={search} placeholder={`Search and add ${label.toLowerCase()}…`} aria-label={`Search ${label.toLowerCase()}`}
-        onFocus={() => setOpen(true)} onChange={(event) => { setSearch(event.target.value); setOpen(true); }} />
+        onFocus={() => setOpen(true)} onClick={() => setOpen(true)} onChange={(event) => { setSearch(event.target.value); setOpen(true); }} />
       {open && <div className="agent-editor__picker-results">
-        {available.length ? available.map((item) => <button type="button" key={item.id} onClick={() => { onAdd(item.id); setSearch(""); setOpen(false); }}>
+        {available.map((item) => <button type="button" key={item.id} onClick={() => { onAdd(item.id); setSearch(""); setOpen(false); }}>
           <strong>{item.name ?? item.displayName ?? item.key}</strong><span>{item.description}</span>
-        </button>) : <p>No available {label.toLowerCase()} found.</p>}
+        </button>)}
+        {canCreate && <a className="agent-editor__picker-add" href={`${createUrl}?name=${encodeURIComponent(typedName)}`} target="_blank" rel="noopener noreferrer" onClick={() => { setSearch(""); setOpen(false); }}>
+          <Plus size={16} aria-hidden="true" /><strong>Add "{typedName}"</strong><ExternalLink size={14} aria-hidden="true" />
+        </a>}
+        {!available.length && !canCreate && <p>No available {label.toLowerCase()} found.</p>}
       </div>}
     </div>
-    {selected.length ? <div className="agent-editor__cards">{selected.map((item) => <div className="agent-editor__linked-card" key={item.id}>
-      <div className="agent-editor__card-content">{render(item, linkFor?.(item.id))}</div>
+    {view && onViewChange && renderRow && <div className="agent-editor__view-toggle" role="group" aria-label={`${label} view`}>
+      <button type="button" aria-label="List view" title="List view" aria-pressed={view === "list"} onClick={() => onViewChange("list")}><List size={16} /></button>
+      <button type="button" aria-label="Card view" title="Card view" aria-pressed={view === "card"} onClick={() => onViewChange("card")}><LayoutGrid size={16} /></button>
+    </div>}
+    </div>
+    {visibleSelected.length ? <div className={isList ? "agent-editor__list" : "agent-editor__cards"}>{visibleSelected.map((item) => <div className={`agent-editor__linked-card${compact || isList ? " agent-editor__linked-card--compact" : ""}`} key={item.id}>
+      <div className="agent-editor__card-content">{isList ? renderRow?.(item) : render(item, linkFor?.(item.id))}</div>
       {renderSettings?.(item, linkFor?.(item.id))}
       {onView && editUrlFor ? <SolidDropdownMenu>
         <SolidDropdownMenuTrigger asChild><button type="button" className="agent-editor__resource-menu-trigger" aria-label={`Actions for ${item.name ?? item.displayName ?? item.key}`}><Ellipsis size={18} /></button></SolidDropdownMenuTrigger>
@@ -338,7 +376,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
           <SolidDropdownMenuItem className="agent-editor__resource-delete" onSelect={() => onRemove(item.id)}><Trash2 size={16} /> Delete</SolidDropdownMenuItem>
         </SolidDropdownMenuContent>
       </SolidDropdownMenu> : <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>}
-    </div>)}</div> : <div className="agent-editor__empty">No {label.toLowerCase()} linked yet.</div>}
+    </div>)}</div> : <div className="agent-editor__empty">{selected.length ? `No linked ${label.toLowerCase()} match "${typedName}".` : `No ${label.toLowerCase()} linked yet.`}</div>}
   </section>;
 }
 
@@ -445,6 +483,7 @@ export function AgentRegistryEditorPage() {
   const [alwaysIncludeValues, setAlwaysIncludeValues] = React.useState<Record<number, boolean>>({});
   const [requiresApprovalValues, setRequiresApprovalValues] = React.useState<Record<number, boolean>>({});
   const [secretEnvVarNames, setSecretEnvVarNames] = React.useState<Record<number, string>>({});
+  const [resourceView, setResourceView] = React.useState<ResourceView>("list");
   const [pendingSecret, setPendingSecret] = React.useState<Item | null>(null);
   const [secretEnvVarDraft, setSecretEnvVarDraft] = React.useState("");
   const [secretEnvVarError, setSecretEnvVarError] = React.useState("");
@@ -694,7 +733,7 @@ export function AgentRegistryEditorPage() {
     setSecretEnvVarError("");
   };
   const linkSetting = (label: string, checked: boolean, onChange: (checked: boolean) => void, hint: string) =>
-    <label className="agent-editor__link-setting"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span><strong>{label}</strong><small>{hint}</small></span></label>;
+    <label className="agent-editor__link-setting" title={hint}><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span><strong>{label}</strong><small>{hint}</small></span></label>;
   const agentStatus = record?.status ?? "draft";
   const activationRemainingMs = Math.max(0, (activationReadyAt ?? 0) - countdownNow);
   const activationRemainingSeconds = Math.ceil(activationRemainingMs / 1000);
@@ -768,6 +807,7 @@ export function AgentRegistryEditorPage() {
       onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "skill" })} editUrlFor={(item) => `/admin/core/solid-core/agent-skill-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentSkills, "agentSkillRegistry", id)}
+      view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}
       render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Always include", alwaysIncludeValues[item.id] ?? true,
           (checked) => setAlwaysIncludeValues((current) => ({ ...current, [item.id]: checked })), "Add the full skill to the agent prompt. Turn off to load it on demand.")}</div>} /> },
@@ -775,6 +815,7 @@ export function AgentRegistryEditorPage() {
       onAdd={(id) => toggle(setToolIds, id)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "tool" })} editUrlFor={(item) => `/admin/core/solid-core/agent-tool-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentTools, "agentToolRegistry", id)}
+      view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}
       render={(item) => <AgentResourceCardWidget {...({ rowData: item } as SolidKanbanCardWidgetProps)} />}
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Require approval", requiresApprovalValues[item.id] ?? false,
           (checked) => setRequiresApprovalValues((current) => ({ ...current, [item.id]: checked })), "Pause before running this tool until a user approves it.")}</div>} /> },
@@ -784,14 +825,13 @@ export function AgentRegistryEditorPage() {
       </fieldset>)}{!roles.records.length && <div className="agent-editor__empty">No roles available.</div>}</section>
       <section className="agent-editor__section"><h2>Execution limits</h2><div className="agent-editor__grid">
         {[["Step limit", stepLimit, setStepLimit], ["Turn step limit", turnStepLimit, setTurnStepLimit], ["Cost limit", costLimit, setCostLimit]].map(([label, value, setter]) =>
-          <label className="agent-editor__field" key={label as string}><span>{label as string}</span><input type="number" min={label === "Cost limit" ? 0 : 1} step={label === "Cost limit" ? 0.01 : 1} value={value as number} onChange={(event) => (setter as (value: number) => void)(Number(event.target.value))} /></label>)}
+          <label className="agent-editor__field" key={label as string}><span>{label as string}</span><input type="number" min={label === "Cost limit" ? 0 : 1} step={label === "Cost limit" ? 0.01 : 1} value={value as number} onChange={(event) => (setter as (value: number) => void)(Number(event.target.value))} />{label === "Cost limit" && <small className="agent-editor__hint">Cost is an estimate and is not guaranteed to be correct.</small>}</label>)}
       </div>{errors.limits && <small className="agent-editor__error">{errors.limits}</small>}</section></div> },
     { value: "secrets", label: "Secrets", content: <LinkPicker label="Secrets" description="Grant access to existing secrets. Secret values are never shown here." options={secrets.records} selected={linked(secretIds, secrets.records, items(record?.agentSecrets).map((link) => link.secret).filter(Boolean))}
       onAdd={(id) => { const secret = secrets.records.find((item) => item.id === id); if (secret) beginSecretEnvVarEdit(secret); }} onRemove={(id) => toggle(setSecretIds, id)}
-      linkFor={(id) => linkForTarget(record?.agentSecrets, "secret", id)}
-      render={(item, link) => <div className="agent-editor__secret"><strong>{item.displayName ?? item.name ?? item.key}</strong><span>{item.key}</span><p>{item.description}</p>
-        <div className="agent-editor__secret-env"><span>Process environment</span><code>{secretEnvVarNames[item.id] ?? link?.envVarName ?? item.key ?? item.name}</code>
-          <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={14} /></button></div></div>} /> },
+      compact
+      render={(item) => <div className="agent-editor__secret"><strong title={item.displayName ?? item.name ?? item.key}>{item.displayName ?? item.name ?? item.key}</strong>
+        <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={16} /></button></div>} /> },
     ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...((record?.id ? [
       ["jobs", "Jobs", jobs.currentData?.records],
@@ -835,7 +875,7 @@ export function AgentRegistryEditorPage() {
           <span className="agent-editor__version-details-copy"><strong>Add a name and description</strong><small>Optional details help identify this version later.</small></span>
         </label>
         {includeVersionDetails && <div className="agent-editor__version-details-fields">
-          <label className="agent-editor__field"><span>Version name <small>Optional</small></span><SolidInput autoFocus placeholder="e.g. Updated support workflow" value={versionName} onChange={(event) => setVersionName(event.target.value)} /></label>
+          <label className="agent-editor__field"><span>Version name <small>Optional</small></span><SolidInput autoFocus placeholder="e.g. Updated support workflow" value={versionName} onChange={(event) => setVersionName(event.target.value)} /><small className="agent-editor__hint">A _yyyymmdd_hhmm date and time suffix is always added to the name.</small></label>
           <label className="agent-editor__field"><span>Description <small>Optional</small></span><textarea placeholder="What changed in this version?" value={versionDescription} rows={3} onChange={(event) => setVersionDescription(event.target.value)} /></label>
         </div>}
       </div></SolidDialogBody>

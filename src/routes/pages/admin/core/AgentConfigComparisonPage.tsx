@@ -30,7 +30,7 @@ const StatusMark = React.forwardRef<HTMLButtonElement, StatusMarkProps>(({ match
 });
 StatusMark.displayName = "StatusMark";
 
-function SectionHeader({ icon, title, count, changes }: { icon: React.ReactNode; title: string; count?: number; changes: number }) {
+function SectionHeader({ icon, title, count, changes }: { icon: React.ReactNode; title: string; count?: string; changes: number }) {
   return <header className="config-compare__section-head">
     <span className="config-compare__section-icon">{icon}</span>
     <h2>{title}</h2>
@@ -147,7 +147,7 @@ export function AgentConfigComparisonPage() {
       {error && <button type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button>}</div></main>;
   }
   const { systemPrompt, skills, modelConfiguration } = comparison.sections;
-  const skillChanges = skills?.rows.filter((row) => row.status !== "matched").length ?? 0;
+  const changedSkills = skills?.rows.filter((row) => row.status !== "matched") ?? [];
   const modelChanges = modelConfiguration.groups.reduce((total, group) => total + group.fields.filter((field) => field.status !== "matched").length, 0);
   const subtitle = comparison.agent.title && comparison.agent.title !== comparison.agent.name ? comparison.agent.title : null;
   return <main className="config-compare">
@@ -155,7 +155,7 @@ export function AgentConfigComparisonPage() {
     <div className="config-compare__sheet">
       <div className="config-compare__version-headers"><VersionHeader version={comparison.versions.left} side="Older" /><span className="config-compare__center"><span className="config-compare__arrow"><ArrowRight size={14} /></span></span><VersionHeader version={comparison.versions.right} side="Newer" /></div>
       <section className="config-compare__section"><SectionHeader icon={<FileText size={15} />} title={systemPrompt.title} changes={systemPrompt.status === "matched" ? 0 : 1} />{systemPrompt.status === "matched" ? <p className="config-compare__empty">No changes to persona</p> : <ComparisonRowView comparison={comparison} row={systemPrompt} kind="prompt" />}</section>
-      <section className="config-compare__section"><SectionHeader icon={<Puzzle size={15} />} title={skills?.title ?? "Skills"} count={skills?.rows.length} changes={skillChanges} />{!skills ? <p className="config-compare__empty">Skill comparison is not available yet.</p> : skills.rows.length ? <div className="config-compare__rows">{skills.rows.map((row) => <ComparisonRowView key={row.id} comparison={comparison} row={row} kind="skill" />)}</div> : <p className="config-compare__empty">No changes to skills</p>}</section>
+      <section className="config-compare__section"><SectionHeader icon={<Puzzle size={15} />} title={skills?.title ?? "Skills"} count={skills?.rows.length ? `${changedSkills.length} of ${skills.rows.length}` : undefined} changes={changedSkills.length} />{!skills ? <p className="config-compare__empty">Skill comparison is not available yet.</p> : changedSkills.length ? <div className="config-compare__rows">{changedSkills.map((row) => <ComparisonRowView key={row.id} comparison={comparison} row={row} kind="skill" />)}</div> : <p className="config-compare__empty">No changes to skills</p>}</section>
       <section className="config-compare__section"><SectionHeader icon={<Cpu size={15} />} title={modelConfiguration.title} changes={modelChanges} />{modelChanges === 0 ? <p className="config-compare__empty">No changes to model configuration</p> : modelConfiguration.groups.map((group) => <div className="config-compare__model-group" key={group.id}><h3>{group.title}</h3><div className="config-compare__rows">{group.fields.map((field) => <div className={`config-compare__row config-compare__model-row is-${field.status}`} key={field.key}>
         <div className="config-compare__cell"><small>{field.label}</small><strong>{field.left ?? "—"}</strong></div><div className="config-compare__center"><StatusMark matched={field.status === "matched"} label={field.label} interactive={false} /></div><div className="config-compare__cell"><small>{field.label}</small><strong>{field.right ?? "—"}</strong></div>
       </div>)}</div></div>)}</section>
