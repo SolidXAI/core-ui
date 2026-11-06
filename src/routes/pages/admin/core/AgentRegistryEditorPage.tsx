@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, GitBranch, LayoutGrid, List, Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Ellipsis, ExternalLink, Eye, FlaskConical, GitBranch, LayoutGrid, List, Pencil, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
@@ -299,9 +299,56 @@ function ResourcePreviewDialog({ item, kind, onClose }: { item: Item; kind: "ski
 
 type ResourceView = "card" | "list";
 
-function LinkPicker({ label, description, options, selected, onAdd, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor, compact, view, onViewChange, renderRow }: {
+const itemLabel = (item: Item) => String(item.name ?? item.displayName ?? item.key ?? "");
+const itemMatches = (item: Item, query: string) => `${itemLabel(item)} ${item.description ?? ""}`.toLowerCase().includes(query);
+
+function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfirm }: {
+  label: string; options: Item[]; selected: Item[]; createUrl?: string;
+  onClose: () => void; onConfirm: (ids: number[]) => void;
+}) {
+  const [search, setSearch] = React.useState("");
+  const [picked, setPicked] = React.useState<number[]>([]);
+  const plural = label.toLowerCase();
+  const singular = plural.slice(0, -1);
+  const typedName = search.trim();
+  const query = typedName.toLowerCase();
+  const linkedIds = new Set(selected.map((item) => item.id));
+  const pickedIds = new Set(picked);
+  const visible = options.filter((item) => !linkedIds.has(item.id) && itemMatches(item, query));
+  const visiblePicked = visible.filter((item) => pickedIds.has(item.id)).length;
+  const allPicked = visible.length > 0 && visiblePicked === visible.length;
+  const canCreate = Boolean(createUrl && query) && ![...options, ...selected].some((item) => itemLabel(item).toLowerCase() === query);
+  const togglePicked = (id: number) => setPicked((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
+  const toggleAll = () => {
+    const ids = visible.map((item) => item.id);
+    setPicked((current) => allPicked ? current.filter((id) => !ids.includes(id)) : Array.from(new Set([...current, ...ids])));
+  };
+  return <SolidDialog open onOpenChange={(next) => { if (!next) onClose(); }} header={`Add ${plural}`} style={{ width: "min(34rem, 94vw)" }}
+    footer={<><SolidButton type="button" variant="secondary" onClick={onClose}>Cancel</SolidButton>
+      <SolidButton type="button" disabled={!picked.length} onClick={() => { onConfirm(picked); onClose(); }}>{picked.length ? `Add ${picked.length} ${picked.length === 1 ? singular : plural}` : `Add ${plural}`}</SolidButton></>}>
+    <SolidDialogBody><div className="agent-editor__add-dialog">
+      <SolidInput autoFocus value={search} placeholder={`Search ${plural}…`} aria-label={`Search ${plural}`} onChange={(event) => setSearch(event.target.value)} />
+      <div className="agent-editor__add-options" role="group" aria-label={`Available ${plural}`}>
+        {visible.length > 0 && <label className="agent-editor__add-option agent-editor__add-option--all">
+          <input type="checkbox" checked={allPicked} ref={(element) => { if (element) element.indeterminate = visiblePicked > 0 && !allPicked; }} onChange={toggleAll} />
+          <span><strong>Select all ({visible.length})</strong></span>
+        </label>}
+        {visible.map((item) => <label className="agent-editor__add-option" key={item.id}>
+          <input type="checkbox" checked={pickedIds.has(item.id)} onChange={() => togglePicked(item.id)} />
+          <span><strong title={itemLabel(item)}>{itemLabel(item)}</strong>{item.description && <small title={item.description}>{item.description}</small>}</span>
+        </label>)}
+        {!visible.length && !canCreate && <p className="agent-editor__add-empty">No available {plural} found.</p>}
+        {canCreate && <a className="agent-editor__add-create" href={`${createUrl}?name=${encodeURIComponent(typedName)}`} target="_blank" rel="noopener noreferrer">
+          <Plus size={16} aria-hidden="true" /><strong>Create a new {singular} "{typedName}"</strong><ExternalLink size={14} aria-hidden="true" />
+        </a>}
+      </div>
+    </div></SolidDialogBody>
+  </SolidDialog>;
+}
+
+function LinkPicker({ label, description, options, selected, onAdd, onAddMany, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor, compact, view, onViewChange, renderRow }: {
   label: string; description: string; options: Item[]; selected: Item[];
-  onAdd: (id: number) => void; onRemove: (id: number) => void; createUrl?: string;
+  onAdd?: (id: number) => void; onAddMany?: (ids: number[]) => void; onRemove: (id: number) => void; createUrl?: string;
   render: (item: Item, link?: Link) => React.ReactNode;
   renderSettings?: (item: Item, link?: Link) => React.ReactNode;
   linkFor?: (id: number) => Link | undefined;
@@ -314,16 +361,16 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
 }) {
   const [search, setSearch] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [addOpen, setAddOpen] = React.useState(false);
   const pickerRef = React.useRef<HTMLDivElement>(null);
   const showAssociatedCount = label === "Skills" || label === "Tools";
   const typedName = search.trim();
   const query = typedName.toLowerCase();
-  const matchesSearch = (item: Item) => `${item.name ?? item.displayName ?? item.key ?? ""} ${item.description ?? ""}`.toLowerCase().includes(query);
-  const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id) && matchesSearch(item)).slice(0, 20);
-  const visibleSelected = selected.filter(matchesSearch);
-  const canCreate = Boolean(createUrl && query)
-    && ![...options, ...selected].some((item) => String(item.name ?? item.displayName ?? item.key ?? "").toLowerCase() === query);
+  const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id) && itemMatches(item, query)).slice(0, 20);
+  const visibleSelected = selected.filter((item) => itemMatches(item, query));
   const isList = view === "list" && Boolean(renderRow);
+  const closeSearch = () => { setSearchOpen(false); setSearch(""); };
 
   React.useEffect(() => {
     if (!open) return;
@@ -347,19 +394,21 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
       </div>
       <p title={description}>{description}</p>
     </div>
-    <div className="agent-editor__picker" ref={pickerRef}>
+    {onAddMany ? <div className="agent-editor__picker-actions">
+      {searchOpen && <SolidInput className="agent-editor__list-search" autoFocus value={search} placeholder={`Search linked ${label.toLowerCase()}…`} aria-label={`Search linked ${label.toLowerCase()}`}
+        onChange={(event) => setSearch(event.target.value)} onBlur={() => { if (!search.trim()) closeSearch(); }} onKeyDown={(event) => { if (event.key === "Escape") closeSearch(); }} />}
+      <button type="button" className="agent-editor__icon-button" aria-label={searchOpen ? "Close search" : `Search linked ${label.toLowerCase()}`} title={searchOpen ? "Close search" : `Search linked ${label.toLowerCase()}`} aria-expanded={searchOpen}
+        onMouseDown={(event) => event.preventDefault()} onClick={() => { if (searchOpen) closeSearch(); else setSearchOpen(true); }}><Search size={16} /></button>
+      <button type="button" className="agent-editor__icon-button" aria-label={`Add ${label.toLowerCase()}`} title={`Add ${label.toLowerCase()}`} aria-haspopup="dialog" onClick={() => setAddOpen(true)}><Plus size={16} /></button>
+    </div> : <div className="agent-editor__picker" ref={pickerRef}>
       <SolidInput value={search} placeholder={`Search and add ${label.toLowerCase()}…`} aria-label={`Search ${label.toLowerCase()}`}
         onFocus={() => setOpen(true)} onClick={() => setOpen(true)} onChange={(event) => { setSearch(event.target.value); setOpen(true); }} />
       {open && <div className="agent-editor__picker-results">
-        {available.map((item) => <button type="button" key={item.id} onClick={() => { onAdd(item.id); setSearch(""); setOpen(false); }}>
+        {available.length ? available.map((item) => <button type="button" key={item.id} onClick={() => { onAdd?.(item.id); setSearch(""); setOpen(false); }}>
           <strong>{item.name ?? item.displayName ?? item.key}</strong><span>{item.description}</span>
-        </button>)}
-        {canCreate && <a className="agent-editor__picker-add" href={`${createUrl}?name=${encodeURIComponent(typedName)}`} target="_blank" rel="noopener noreferrer" onClick={() => { setSearch(""); setOpen(false); }}>
-          <Plus size={16} aria-hidden="true" /><strong>Add "{typedName}"</strong><ExternalLink size={14} aria-hidden="true" />
-        </a>}
-        {!available.length && !canCreate && <p>No available {label.toLowerCase()} found.</p>}
+        </button>) : <p>No available {label.toLowerCase()} found.</p>}
       </div>}
-    </div>
+    </div>}
     {view && onViewChange && renderRow && <div className="agent-editor__view-toggle" role="group" aria-label={`${label} view`}>
       <button type="button" aria-label="List view" title="List view" aria-pressed={view === "list"} onClick={() => onViewChange("list")}><List size={16} /></button>
       <button type="button" aria-label="Card view" title="Card view" aria-pressed={view === "card"} onClick={() => onViewChange("card")}><LayoutGrid size={16} /></button>
@@ -377,6 +426,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onRemove, cr
         </SolidDropdownMenuContent>
       </SolidDropdownMenu> : <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>}
     </div>)}</div> : <div className="agent-editor__empty">{selected.length ? `No linked ${label.toLowerCase()} match "${typedName}".` : `No ${label.toLowerCase()} linked yet.`}</div>}
+    {addOpen && onAddMany && <AddLinksDialog label={label} options={options} selected={selected} createUrl={createUrl} onClose={() => setAddOpen(false)} onConfirm={onAddMany} />}
   </section>;
 }
 
@@ -593,6 +643,8 @@ export function AgentRegistryEditorPage() {
   };
   const toggle = (setter: React.Dispatch<React.SetStateAction<number[]>>, value: number) =>
     setter((current) => current.includes(value) ? current.filter((id) => id !== value) : [...current, value]);
+  const addAll = (setter: React.Dispatch<React.SetStateAction<number[]>>, values: number[]) =>
+    setter((current) => Array.from(new Set([...current, ...values])));
 
   const syncLinks = async (agentId: number, previous: Link[] | undefined, selected: number[], field: string,
     create: any, remove: any, update: any, extra: Record<string, unknown> | ((targetId: number) => Record<string, unknown>) = {}) => {
@@ -804,7 +856,7 @@ export function AgentRegistryEditorPage() {
         : <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />}
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
-      onAdd={(id) => toggle(setSkillIds, id)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
+      onAddMany={(ids) => addAll(setSkillIds, ids)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "skill" })} editUrlFor={(item) => `/admin/core/solid-core/agent-skill-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentSkills, "agentSkillRegistry", id)}
       view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}
@@ -812,7 +864,7 @@ export function AgentRegistryEditorPage() {
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Always include", alwaysIncludeValues[item.id] ?? true,
           (checked) => setAlwaysIncludeValues((current) => ({ ...current, [item.id]: checked })), "Add the full skill to the agent prompt. Turn off to load it on demand.")}</div>} /> },
     { value: "tools", label: "Tools", content: <LinkPicker label="Tools" description="Tools available to this agent." options={tools.records} selected={linked(toolIds, tools.records, items(record?.agentTools).map((link) => link.agentToolRegistry).filter(Boolean))}
-      onAdd={(id) => toggle(setToolIds, id)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
+      onAddMany={(ids) => addAll(setToolIds, ids)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "tool" })} editUrlFor={(item) => `/admin/core/solid-core/agent-tool-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentTools, "agentToolRegistry", id)}
       view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}

@@ -93,10 +93,28 @@
 .agent-editor__picker-results button:hover { background:var(--surface-hover,#f2f3f4); }
 .agent-editor__picker-results span { overflow:hidden; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.8rem; text-overflow:ellipsis; white-space:nowrap; }
 .agent-editor__picker-results p { padding:.5rem; }
-.agent-editor__picker-add { display:flex; align-items:center; gap:.45rem; padding:.55rem .7rem; border-radius:.35rem; color:var(--primary-color,var(--primary)); text-decoration:none; }
-.agent-editor__picker-add:hover { background:var(--surface-hover,#f2f3f4); }
-.agent-editor__picker-add svg { flex:0 0 auto; }
-.agent-editor__picker-add strong { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.agent-editor__picker-actions { display:flex; flex:0 1 auto; align-items:center; gap:.35rem; min-width:0; }
+.agent-editor__picker-actions .agent-editor__list-search { width:16rem; min-width:0; animation:agent-editor-search-expand .15s ease-out; }
+@keyframes agent-editor-search-expand { from { width:0; opacity:0; } }
+@media(prefers-reduced-motion:reduce) { .agent-editor__picker-actions .agent-editor__list-search { animation:none; } }
+.agent-editor__icon-button { display:grid; width:2.2rem; height:2.2rem; flex:0 0 auto; place-items:center; border:1px solid var(--surface-border,var(--border)); border-radius:.5rem; background:transparent; color:var(--text-color-secondary,var(--muted-foreground)); cursor:pointer; }
+.agent-editor__icon-button:hover { background:var(--surface-hover,#f2f3f4); color:var(--text-color,var(--foreground)); }
+.agent-editor__icon-button[aria-expanded=true] { color:var(--primary-color,var(--primary)); }
+.agent-editor__icon-button:focus-visible { outline:2px solid var(--primary-color,var(--primary)); outline-offset:1px; }
+.agent-editor__add-dialog { display:flex; flex-direction:column; gap:.6rem; }
+.agent-editor__add-options { display:flex; flex-direction:column; height:20rem; max-height:50vh; overflow:auto; padding:0 .25rem .25rem; border:1px solid var(--surface-border,var(--border)); border-radius:.55rem; }
+.agent-editor__add-option { display:flex; flex:0 0 auto; align-items:flex-start; gap:.6rem; padding:.5rem .6rem; border-radius:.35rem; cursor:pointer; }
+.agent-editor__add-option:hover { background:var(--surface-hover,#f2f3f4); }
+.agent-editor__add-option input { width:1rem; height:1rem; flex:0 0 auto; margin:.15rem 0 0; accent-color:var(--primary-color,var(--primary)); }
+.agent-editor__add-option>span { display:flex; flex-direction:column; gap:.1rem; min-width:0; }
+.agent-editor__add-option strong { overflow:hidden; font-size:.875rem; text-overflow:ellipsis; white-space:nowrap; }
+.agent-editor__add-option small { overflow:hidden; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.78rem; text-overflow:ellipsis; white-space:nowrap; }
+.agent-editor__add-option--all { position:sticky; top:0; z-index:1; border-bottom:1px solid var(--surface-border,var(--border)); border-radius:0; background:var(--surface-card,var(--card)); }
+.agent-editor__add-empty { margin:0; padding:.75rem; color:var(--text-color-secondary,var(--muted-foreground)); font-size:.85rem; text-align:center; }
+.agent-editor__add-create { display:flex; flex:0 0 auto; align-items:center; gap:.45rem; padding:.55rem .6rem; border-radius:.35rem; color:var(--primary-color,var(--primary)); text-decoration:none; }
+.agent-editor__add-create:hover { background:var(--surface-hover,#f2f3f4); }
+.agent-editor__add-create svg { flex:0 0 auto; }
+.agent-editor__add-create strong { flex:1 1 auto; min-width:0; overflow:hidden; font-size:.875rem; text-overflow:ellipsis; white-space:nowrap; }
 .agent-editor__view-toggle { display:inline-flex; flex:0 0 auto; gap:.1rem; padding:.15rem; border:1px solid var(--surface-border,var(--border)); border-radius:.5rem; }
 .agent-editor__view-toggle button { display:grid; width:1.9rem; height:1.9rem; place-items:center; border:0; border-radius:.35rem; background:transparent; color:var(--text-color-secondary,var(--muted-foreground)); cursor:pointer; }
 .agent-editor__view-toggle button:hover { color:var(--text-color,var(--foreground)); }
