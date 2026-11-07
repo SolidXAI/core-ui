@@ -15,6 +15,7 @@ type AgentRegistryAuditPanelProps = {
 };
 
 const MIN_CHATTER_WIDTH = 320;
+const MIN_CHATTER_RATIO = 0.35;
 const MIN_EDITOR_WIDTH = 420;
 const WIDTH_STORAGE_KEY = "chatter_locale_width";
 
@@ -30,8 +31,9 @@ export function AgentRegistryAuditPanel({ children, modelSingularName, recordId,
 
   const clampWidth = React.useCallback((nextWidth: number) => {
     const availableWidth = wrapperRef.current?.getBoundingClientRect().width ?? window.innerWidth;
-    const maxWidth = Math.max(MIN_CHATTER_WIDTH, availableWidth - MIN_EDITOR_WIDTH);
-    return Math.max(MIN_CHATTER_WIDTH, Math.min(nextWidth, maxWidth));
+    const minWidth = Math.max(MIN_CHATTER_WIDTH, availableWidth * MIN_CHATTER_RATIO);
+    const maxWidth = Math.max(minWidth, availableWidth - MIN_EDITOR_WIDTH);
+    return Math.max(minWidth, Math.min(nextWidth, maxWidth));
   }, []);
 
   React.useEffect(() => {
@@ -39,7 +41,7 @@ export function AgentRegistryAuditPanel({ children, modelSingularName, recordId,
     if (stored) {
       const parsed = Number.parseInt(stored, 10);
       if (Number.isFinite(parsed)) setWidth(clampWidth(parsed));
-    }
+    } else setWidth((current) => clampWidth(current));
     const onResize = () => setWidth((current) => clampWidth(current));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);

@@ -18,8 +18,8 @@ export const SolidProgressStepIcon = ({ status }: { status?: ProgressStep["statu
  * Send later events with the same widgetId to update it in place.
  */
 export const SolidProgressChatWidget = ({ eventData }: SolidChatWidgetProps) => {
-    const data = getChatWidgetData<ProgressData>(eventData);
-    const steps = asArray<ProgressStep>(data.steps);
+    const data = getChatWidgetData<ProgressData & { items?: ProgressStep[] }>(eventData);
+    const steps = asArray<ProgressStep>(data.steps ?? data.items);
     const percent = typeof data.percent === "number" ? Math.max(0, Math.min(100, data.percent)) : null;
     return (
         <div className={styles.card}>

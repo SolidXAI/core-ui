@@ -1,6 +1,5 @@
 import styles from "../SolidAgent.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
-import { formatDuration } from "../agentFormat";
 import { asArray, getChatWidgetData } from "./chatWidgetUtils";
 import { SolidProgressStepIcon } from "./SolidProgressChatWidget";
 
@@ -20,9 +19,8 @@ export const SolidToolActivityChatWidget = ({ eventData }: SolidChatWidgetProps)
                 {tools.map((tool, index) => (
                     <div key={index} className={styles.stepRow}>
                         <SolidProgressStepIcon status={tool.status === "running" ? "running" : tool.status === "error" ? "error" : "done"} />
-                        <span style={{ fontWeight: 600 }}>{tool.name}</span>
+                        <span style={{ fontWeight: 400, color: "var(--solid-agent-muted-fg)" }}>{tool.name}</span>
                         <span className={styles.toolSummary}>{tool.summary}</span>
-                        <span className={styles.toolMeta}>{formatDuration(tool.duration_ms)}</span>
                     </div>
                 ))}
             </div>

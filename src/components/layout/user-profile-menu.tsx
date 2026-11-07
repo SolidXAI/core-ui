@@ -71,14 +71,14 @@ const UserProfileMenu = () => {
   const value = userData?.data?.email;
   const initials = getInitials(value);
   const bgColor = getColorFromInitials(initials);
-  const roleLabel = userData?.data?.roles
-    ?.filter((role: any) => role.name !== "Internal User")
-    .map((role: any) => role.name)
-    .join(" | ");
+  const displayRoles = (userData?.data?.roles || []).filter(
+    (role: any) => role?.name && role.name !== "Internal User"
+  );
+  const mainRole = displayRoles[0]?.name || "User";
+  const additionalRoles = displayRoles.slice(1);
   const displayName = userData?.data?.fullName || (settingsMap?.enableUsername
     ? userData?.data?.username
     : userData?.data?.email);
-  const primaryRole = roleLabel?.split("|")?.[0]?.trim() || "User";
 
   const UserProfileAvatar = ({ compact = false }: { compact?: boolean }) => {
     const imageUrl = userData?.data?._media?.profilePicture?.[0]?._full_url;
@@ -113,7 +113,10 @@ const UserProfileMenu = () => {
             <UserProfileAvatar compact />
             <span className="solid-user-menu-trigger-meta">
               <span className="solid-user-menu-trigger-name">{displayName || "User"}</span>
-              <span className="solid-user-menu-trigger-role">{roleLabel}</span>
+              <span className="solid-user-menu-trigger-role">
+                {mainRole}
+                {additionalRoles.length > 0 ? ` +${additionalRoles.length}` : ""}
+              </span>
             </span>
           </span>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -127,7 +130,23 @@ const UserProfileMenu = () => {
               <UserProfileAvatar />
               <div className="solid-user-menu-meta">
                 <span className="solid-user-menu-title">{displayName || "User"}</span>
-                <span className="solid-user-menu-subtitle">{roleLabel || "User"}</span>
+                <div className="solid-user-menu-subtitle solid-user-menu-role-row">
+                  {mainRole}
+                  {additionalRoles.length > 0 ? (
+                    <span
+                      className="solid-user-menu-roles"
+                      tabIndex={0}
+                      aria-label={`${additionalRoles.length} additional ${additionalRoles.length === 1 ? "role" : "roles"}`}
+                    >
+                      <span className="solid-user-menu-role-count">+{additionalRoles.length}</span>
+                      <span className="solid-user-menu-roles-list">
+                        {additionalRoles.map((role: any, index: number) => (
+                          <span key={role.id ?? `${role.name}-${index}`}>{role.name}</span>
+                        ))}
+                      </span>
+                    </span>
+                  ) : null}
+                </div>
               </div>
             </div>
 

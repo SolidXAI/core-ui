@@ -56,7 +56,8 @@ export function createSolidStore(options: CreateSolidStoreOptions = {}) {
     middlewareManager: entityApiMiddlewareManager,
   });
 
-  return store;
+  const storeWithManager = Object.assign(store, { reducerManager });
+  return storeWithManager;
 }
 
 export type SolidStore = ReturnType<typeof createSolidStore>;

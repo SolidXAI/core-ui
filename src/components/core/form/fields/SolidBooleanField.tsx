@@ -230,7 +230,11 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
                 }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );
@@ -305,7 +309,11 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                 }
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );
@@ -396,7 +404,11 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
                 <span className="ml-2">{fieldLabel || "Yes"}</span>
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <p className={styles.fieldError}>{formik.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+                <SolidMessage
+                    severity="error"
+                    className={styles.fieldError}
+                    text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                />
             )}
         </div>
     );

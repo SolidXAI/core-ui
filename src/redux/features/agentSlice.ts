@@ -9,6 +9,7 @@ import {
     type AgentContext,
     type AgentMessageContext,
     type AgentMode,
+    type AgentUsageStats,
     type SolidAgentOpenOptions,
 } from "../../components/core/solid-agent/types";
 
@@ -18,7 +19,7 @@ import {
  * `agentEventReceived` and applied by the shared reducer in solid-agent/agentEvents.ts.
  */
 
-export type AgentPrefill = { prompt: string; context?: AgentContext; autoSend?: boolean; nonce: number };
+export type AgentPrefill = { prompt: string; context?: AgentContext; autoSend?: boolean; newSession?: boolean; nonce: number };
 
 export type AgentState = AgentThreadState & {
     open: boolean;
@@ -27,6 +28,7 @@ export type AgentState = AgentThreadState & {
     prefill: AgentPrefill | null;
     hasMoreHistory: boolean;
     historyPage: number;
+    loadingHistory: boolean;
     /** Context of the last prompt sent from outside the chat (e.g. a Test Hub button). */
     context: AgentContext | null;
 };
@@ -39,6 +41,7 @@ const initialState: AgentState = {
     prefill: null,
     hasMoreHistory: false,
     historyPage: 1,
+    loadingHistory: false,
     context: null,
 };
 
@@ -51,7 +54,7 @@ const agentSlice = createSlice({
             state.open = true;
             state.mode = options.mode ?? (state.mode === "bubble" ? "compact" : state.mode);
             if (options.prompt) {
-                state.prefill = { prompt: options.prompt, context: options.context, autoSend: options.autoSend, nonce: Date.now() };
+                state.prefill = { prompt: options.prompt, context: options.context, autoSend: options.autoSend, newSession: options.newSession, nonce: Date.now() };
             }
             if (options.context) state.context = options.context;
         },
@@ -94,14 +97,23 @@ const agentSlice = createSlice({
             state.authError = null;
         },
         agentThreadReset(state) {
-            Object.assign(state, createThreadState(), { commands: state.commands, hasMoreHistory: false, historyPage: 1 });
+            Object.assign(state, createThreadState(), { commands: state.commands, hasMoreHistory: false, historyPage: 1, loadingHistory: false });
         },
-        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number }>) {
-            const { items, hasMore, page } = action.payload;
+        agentHistoryLoadingChanged(state, action: PayloadAction<boolean>) {
+            state.loadingHistory = action.payload;
+        },
+        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null }>) {
+            const { items, hasMore, page, usage } = action.payload;
             // History is always older than anything already in the thread.
             state.items = [...items, ...state.items];
             state.hasMoreHistory = hasMore;
             state.historyPage = page;
+            if (usage && (!state.usage || state.usage.totalTokens === 0)) {
+                state.usage = {
+                    ...usage,
+                    contextLimit: state.usage?.contextLimit || usage.contextLimit || 0,
+                };
+            }
         },
         agentEventReceived(state, action: PayloadAction<AgentChatEvent>) {
             applyAgentEvent(state, action.payload);
@@ -117,6 +129,7 @@ export const {
     agentConnectionChanged,
     agentUserMessageAdded,
     agentThreadReset,
+    agentHistoryLoadingChanged,
     agentHistoryLoaded,
     agentEventReceived,
 } = agentSlice.actions;

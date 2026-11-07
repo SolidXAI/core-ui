@@ -63,6 +63,7 @@ import MqMessageDetailsKanbanCardAction from "../components/core/extension/solid
 import MqMessageKanbanQuickFilterHeaderAction from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanQuickFilterHeaderAction";
 import MqMessageSelectedRecordsSummaryHeaderAction from "../components/core/extension/solid-core/mqMessage/MqMessageSelectedRecordsSummaryHeaderAction";
 import AgentSessionComparisonHeaderAction from "../components/core/extension/solid-core/agentSession/AgentSessionComparisonHeaderAction";
+import { AgentSessionChatFormWidget } from "../components/core/extension/solid-core/agentSession/AgentSessionChatFormWidget";
 import { AgentSessionConfigVersionListWidget } from "../components/core/extension/solid-core/agentSession/AgentSessionConfigVersionListWidget";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
 import { AgentRegistryCardWidget } from "../components/core/extension/solid-core/agentRegistry/card/AgentRegistryCardWidget";
@@ -281,6 +282,7 @@ registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMe
 registerExtensionComponent("ModuleImportListHeaderAction", ModuleImportListHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("ClearModulePackageRuntimeHeaderAction", ClearModulePackageRuntimeHeaderAction, ExtensionComponentTypes.listHeaderAction);
 registerExtensionComponent("AgentSessionComparisonHeaderAction", AgentSessionComparisonHeaderAction, ExtensionComponentTypes.listHeaderAction);
+registerExtensionComponent("AgentSessionChatFormWidget", AgentSessionChatFormWidget, ExtensionComponentTypes.formFieldViewWidget);
 registerExtensionComponent("AgentSessionConfigVersionListWidget", AgentSessionConfigVersionListWidget, ExtensionComponentTypes.listFieldWidget);
 
 // ...

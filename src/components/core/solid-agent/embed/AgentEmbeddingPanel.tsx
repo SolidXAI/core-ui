@@ -23,7 +23,7 @@ export function AgentEmbeddingPanel({ agentId, fields, hubUrl, active }: { agent
     return <div className="agent-editor__stack">
         {!active && <p role="status" className="agent-editor__hint">Activate this agent before embedding it. Samples use the saved agent definition.</p>}
         <section className="agent-editor__section"><h2>1. Keep your API key on your server</h2>
-            <p>Configure <code>AGENTHUB_API_KEY</code>, <code>AGENTHUB_AGENT_ID</code>, and <code>AGENTHUB_BACKEND_URL</code> on the server that hosts your app API. Never expose the API key or AgentHub runtime URL in browser code. The browser receives only the short-lived embed response through the SDK handshake.</p>
+            <p>Configure <code>AGENT_HUB_API_KEY</code>, <code>AGENT_HUB_AGENT_ID</code>, and <code>AGENT_HUB_BACKEND_URL</code> on the server that hosts your app API. Never expose the API key or AgentHub runtime URL in browser code. The browser receives only the short-lived embed response through the SDK handshake.</p>
         </section>
         <section className="agent-editor__section"><h2>2. Create your token endpoint</h2>
             <p>Your app API accepts the SDK's token request, ignores any client-selected backend or API key, and uses the configured agent ID to call <code>/api/agent/api-keys/embedded/me</code> on AgentHub Runtime. Return the successful JSON response unchanged with <code>Cache-Control: no-store</code>; never cache or log credentials or tokens.</p>

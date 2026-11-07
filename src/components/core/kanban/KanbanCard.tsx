@@ -5,6 +5,7 @@ import { DraggableProvided } from "@hello-pangea/dnd";
 import { RotateCcw } from "lucide-react";
 import { CompatibleDraggable } from "../common/dndCompat";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
+import { getRecordActionQuery, getRecordUserKeyQuery } from "../../../helpers/routePaths";
 import {
   SolidDropdownMenu,
   SolidDropdownMenuContent,
@@ -56,13 +57,23 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   const openRecord = () => {
     if (isArchivedRecord) return;
     persistReturnView();
-    router.push(`${editButtonUrl}/${data?.id}?viewMode=${recordClickAction}`);
+    const query = new URLSearchParams({ viewMode: recordClickAction });
+    const actionQuery = new URLSearchParams(getRecordActionQuery(solidKanbanViewMetaData));
+    actionQuery.forEach((value, key) => query.set(key, value));
+    const userKeyQuery = getRecordUserKeyQuery(data, solidKanbanViewMetaData);
+    new URLSearchParams(userKeyQuery).forEach((value, key) => query.set(key, value));
+    router.push(`${editButtonUrl}/${data?.id}?${query.toString()}`);
   };
 
   const openEdit = () => {
     if (isArchivedRecord) return;
     persistReturnView();
-    router.push(`${editButtonUrl}/${data?.id}?viewMode=edit`);
+    const query = new URLSearchParams({ viewMode: "edit" });
+    const actionQuery = new URLSearchParams(getRecordActionQuery(solidKanbanViewMetaData));
+    actionQuery.forEach((value, key) => query.set(key, value));
+    const userKeyQuery = getRecordUserKeyQuery(data, solidKanbanViewMetaData);
+    new URLSearchParams(userKeyQuery).forEach((value, key) => query.set(key, value));
+    router.push(`${editButtonUrl}/${data?.id}?${query.toString()}`);
   };
 
   const renderRecoverAction = (data) => {
