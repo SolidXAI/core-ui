@@ -63,7 +63,7 @@ export const SolidChatterAuditMessage: React.FC<SolidChatterAuditMessageProps> =
     }
 
     return (
-        <div className='flex flex-col gap-2'>
+        <div className='solid-audit-changes flex flex-col gap-2'>
             {visibleAuditRecord.map((item: AuditRecord, index: number) => (
                 <AuditFieldChange key={index} item={item} />
             ))}
@@ -97,9 +97,9 @@ function AuditFieldChange({ item }: { item: AuditRecord }) {
                             </SolidDialogBody>
                         </SolidDialog>
                     </> : <>
-                        <span className='m-0 font-bold'>{previousValue}</span>
+                        <span className='solid-audit-previous-value m-0 font-bold'>{previousValue}</span>
                         <RightArrowSvg />
-                        <span className='m-0 font-bold text-[var(--primary-color)]'>{currentValue}</span>
+                        <span className='solid-audit-current-value m-0 font-bold text-[var(--primary-color)]'>{currentValue}</span>
                     </>}
                 </div>
 }

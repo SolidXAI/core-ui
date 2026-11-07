@@ -332,3 +332,40 @@
     color: inherit;
     line-height: inherit;
 }
+
+.auditChanges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.auditChange {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.25rem 0.5rem;
+    min-width: 0;
+}
+
+.auditField {
+    grid-column: 1 / -1;
+}
+
+.auditField,
+.auditPreviousValue,
+.auditCurrentValue {
+    min-width: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.auditChange > svg {
+    margin-top: 0.1rem;
+    color: var(--muted-foreground);
+}
+
+.auditChange > svg path {
+    fill: currentColor;
+    fill-opacity: 1;
+}

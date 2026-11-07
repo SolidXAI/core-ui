@@ -1,16 +1,47 @@
-.solid-audit-change {
-  align-items: flex-start;
+.solid-audit-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
   min-width: 0;
 }
 
+.solid-audit-change {
+  align-items: flex-start;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.25rem 0.5rem;
+}
+
 .solid-audit-field-name {
-  flex: 0 0 auto;
-  white-space: nowrap;
+  grid-column: 1 / -1;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.solid-audit-previous-value,
+.solid-audit-current-value {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.solid-audit-change > svg {
+  margin-top: 0.1rem;
+  color: var(--muted-foreground);
+}
+
+.solid-audit-change > svg path {
+  fill: currentColor;
+  fill-opacity: 1;
 }
 
 .solid-audit-longtext-values {
-  display: inline-flex;
-  align-items: flex-start;
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
   gap: 0.5rem;
   min-width: 0;
 }
