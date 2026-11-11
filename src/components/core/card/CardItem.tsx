@@ -114,7 +114,7 @@ const CardItem: React.FC<CardItemProps> = ({
                   <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
                   <span className="solid-header-action-button-label">Edit</span>
                 </SolidDropdownMenuItem>
-                {onDelete ? (
+                {onDelete && data?.isBuiltin !== true && data?.is_builtin !== true ? (
                   <SolidDropdownMenuItem
                     className="solid-header-dropdown-item solid-header-dropdown-item-danger"
                     onSelect={() => onDelete(data)}
