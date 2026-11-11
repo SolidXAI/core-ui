@@ -20,6 +20,7 @@ export function AgentEmbedPage() {
     const agentId = Number(useParams().agentId);
     const [store] = useState(() => configureStore({ reducer: { solidAgent: agentReducer } }));
     const [bootstrap, setBootstrap] = useState<AgentEmbedBootstrap | null>(null);
+    const [agentName, setAgentName] = useState<string | undefined>();
     const [inputs, setInputs] = useState<Record<string, unknown>>({});
     const [error, setError] = useState("");
     const [missingInputs, setMissingInputs] = useState<string[]>([]);
@@ -117,6 +118,7 @@ export function AgentEmbedPage() {
                     // A renewal may return a changed schema. Existing sessions keep their original inputs.
                     if (!locked.current) { validateEmbedInputs(next.requiredInputs, data.inputs); setInputs(data.inputs); }
                     schema.current = next;
+                    setAgentName(typeof data.agentName === "string" && data.agentName.trim() ? data.agentName.trim() : undefined);
                     setBootstrap(next);
                     setError("");
                     setMissingInputs([]);
@@ -213,7 +215,7 @@ export function AgentEmbedPage() {
                 </div>
             </section>
         ) : null}
-        {bootstrap ? <SolidAgentEmbedded agentRuntime="agentHub" agentId={agentId} title={bootstrap.title} inputs={inputs} height="100%"
+        {bootstrap ? <SolidAgentEmbedded agentRuntime="agentHub" agentId={agentId} agentName={agentName} title={bootstrap.title} inputs={inputs} height="100%"
             externalEmbed={{ agentUrl,
                 sessionOwnerKey: String(bootstrap.user.id),
                 beforeSend, onInputsLocked: (value) => { locked.current = value; send("inputs_locked", { locked: value }); } }} />

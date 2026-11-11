@@ -55,6 +55,7 @@ export { formatProviderName };
 type Props = {
     agentUrl: string;
     title?: string;
+    agentName?: string;
     /** AgentHub configuration version to display in the header. */
     agentVersion?: number;
     /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
@@ -147,6 +148,7 @@ function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<stri
 export function SolidAgentChat({
     agentUrl,
     title = "SolidX Agent",
+    agentName,
     agentVersion,
     agentRuntime = "solidx",
     inputContext = {},
@@ -162,7 +164,7 @@ export function SolidAgentChat({
     suggestions,
     windowControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -1145,6 +1147,7 @@ export function SolidAgentChat({
     const threadComponent = (
         <AgentThread
             items={agent.items}
+            agentName={agentName}
             thinking={agent.working && agent.thinking}
             working={agent.working}
             loadingHistory={agent.loadingHistory || !!resumingSessionId}

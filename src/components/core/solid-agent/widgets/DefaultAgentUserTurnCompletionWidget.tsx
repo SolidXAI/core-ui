@@ -12,7 +12,7 @@ import { asArray, formatChatTime } from "./chatWidgetUtils";
  * Attachments show above the bubble: image thumbnails (click to enlarge) or file chips.
  * History only carries attachment metadata, so reloaded images show as chips.
  */
-export const DefaultUserMessageChatWidget = ({ eventData, timestamp }: SolidChatWidgetProps) => {
+export const DefaultAgentUserTurnCompletionWidget = ({ eventData, timestamp }: SolidChatWidgetProps) => {
     const content = String(eventData.content ?? "");
     const attachments = asArray<AgentAttachmentMeta>(eventData.attachments);
     const namespaces = eventData.message_context?.namespaces && typeof eventData.message_context.namespaces === "object"
@@ -94,6 +94,6 @@ export const DefaultUserMessageChatWidget = ({ eventData, timestamp }: SolidChat
     );
 };
 
-Object.assign(DefaultUserMessageChatWidget, { getExtensionMetadata: () => ({
+Object.assign(DefaultAgentUserTurnCompletionWidget, { getExtensionMetadata: () => ({
     chatInteraction: { role: "event-renderer", agentSelectable: false },
 }) });

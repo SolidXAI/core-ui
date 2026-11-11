@@ -158,6 +158,7 @@ export class AgentRuntime {
         readonly agentRuntime: AgentRuntimeType = "solidx",
         private persistSession = true,
         sessionOwnerKey?: string,
+        agentName?: string,
     ) {
         this.sessionKey = sessionKey(agentRuntime, agentUrl, sessionOwnerKey);
         const initialProvider = getStoredProvider();
@@ -175,7 +176,7 @@ export class AgentRuntime {
             initialProvider,
             initialModel,
             initialOptions,
-            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog() : [],
+            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog(agentName) : [],
         );
         this.socket.setOnSessionExpired(() => {
             if (this.persistSession) writeSessionId(this.sessionKey, null);

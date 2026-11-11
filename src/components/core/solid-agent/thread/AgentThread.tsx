@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ChevronRight } from "lucide-react";
 import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
+import { getAgentTurnChatWidgetName, getExtensionComponent, getToolGroupChatWidgetName } from "../../../../helpers/registry";
+import { ExtensionComponentTypes } from "../../../../types/extension-registry";
 import styles from "../SolidAgent.module.css";
 import widgetStyles from "../widgets/solidChatWidgets.module.css";
 
@@ -9,9 +10,12 @@ import { SolidAgentMessageCopyButton } from "../SolidAgentMarkdown";
 import { SolidAgentChatItem } from "./SolidAgentChatItem";
 import { parseWidgetContent } from "./inlineWidget";
 import { formatChatTime } from "../widgets/chatWidgetUtils";
+import { DefaultAgentToolGroupWidget } from "../widgets/DefaultAgentToolGroupWidget";
+import { DefaultAgentTurnCompletionWrapperWidget } from "../widgets/DefaultAgentTurnCompletionWrapperWidget";
 
 type Props = {
     items: AgentChatItem[];
+    agentName?: string;
     thinking: boolean;
     working?: boolean;
     loadingHistory?: boolean;
@@ -76,106 +80,8 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
     return groups;
 }
 
-function formatWorkedDuration(seconds: number): string {
-    const s = Math.max(1, seconds);
-    if (s < 60) return `${s}s`;
-    const m = Math.floor(s / 60);
-    const rem = s % 60;
-    return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
-}
-
-function AgentActivityDisclosure({
-    turnKey,
-    items,
-    working,
-    startedAt,
-    renderItem,
-}: {
-    turnKey: string;
-    items: AgentChatItem[];
-    working: boolean;
-    startedAt?: number;
-    renderItem: (item: AgentChatItem) => React.ReactNode;
-}) {
-    const [expanded, setExpanded] = useState(working);
-    const prevWorkingRef = useRef(working);
-    const userToggledRef = useRef(false);
-
-    useEffect(() => {
-        if (working && !prevWorkingRef.current) {
-            userToggledRef.current = false;
-            setExpanded(true);
-        } else if (!working && prevWorkingRef.current) {
-            setExpanded(false);
-        }
-        prevWorkingRef.current = working;
-    }, [working]);
-
-    const [now, setNow] = useState(() => Date.now());
-    const hasLiveTimer = useRef(working);
-    const startTime = useRef(startedAt || items[0]?.at || Date.now());
-
-    useEffect(() => {
-        if (!working) {
-            if (hasLiveTimer.current) setNow(Date.now());
-            return;
-        }
-        hasLiveTimer.current = true;
-        const timer = window.setInterval(() => setNow(Date.now()), 1000);
-        return () => window.clearInterval(timer);
-    }, [working]);
-
-    const toolCount = items.filter((item) => item.eventType === AgentEventTypes.toolCalling).length;
-    const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
-    
-    let recordedSeconds = 0;
-    if (items.length > 1) {
-        recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
-    }
-    const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);
-    const toolDurationSeconds = Math.round(sumToolMs / 1000);
-
-    const seconds = hasLiveTimer.current
-        ? activeDuration
-        : Math.max(recordedSeconds, toolDurationSeconds, 1);
-
-    const durationLabel = formatWorkedDuration(seconds);
-
-    const summary = working
-        ? `Working · ${toolCount ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ` : ""}${durationLabel}`
-        : `Worked for ${durationLabel}`;
-
-    const panelId = `agent-activity-${turnKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
-
-    if (items.length === 0 && !working) return null;
-
-    return (
-        <section className={widgetStyles.ActivityGroup} aria-label="Agent activity">
-            <button
-                type="button"
-                className={widgetStyles.ActivitySummary}
-                aria-expanded={expanded}
-                aria-controls={panelId}
-                onClick={() => {
-                    userToggledRef.current = true;
-                    setExpanded((value) => !value);
-                }}
-            >
-                {working && <SolidSpinner size={13} className={widgetStyles.ActivitySpinner} aria-hidden="true" />}
-                <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
-                <ChevronRight size={13} className={`${widgetStyles.ActivityChevron} ${expanded ? widgetStyles.ActivityChevronOpen : ""}`} aria-hidden="true" />
-            </button>
-            {expanded && items.length > 0 && (
-                <div id={panelId} className={widgetStyles.ActivityDetails}>
-                    {items.map(renderItem)}
-                </div>
-            )}
-        </section>
-    );
-}
-
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
-export function AgentThread({ items, thinking, working = thinking, loadingHistory = false, hasMore, loadingOlder = false, loadOlderFailed = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
+export function AgentThread({ items, agentName, thinking, working = thinking, loadingHistory = false, hasMore, loadingOlder = false, loadOlderFailed = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
     // The scroll container unmounts while history loads or the empty state shows, so it is tracked as state.
     const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
     const topSentinelRef = useRef<HTMLDivElement>(null);
@@ -254,8 +160,14 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
         });
     }
     const renderItem = (item: AgentChatItem, showMessageMeta?: boolean) => (
-        <SolidAgentChatItem key={item.id} item={item} agentContext={context} showMessageMeta={showMessageMeta} onReply={onReply} onPrompt={onPrompt} />
+        <SolidAgentChatItem key={item.id} item={item} agentName={agentName} agentContext={context} showMessageMeta={showMessageMeta} onReply={onReply} onPrompt={onPrompt} />
     );
+    const toolGroupWidgetName = getToolGroupChatWidgetName(agentName) ?? "DefaultAgentToolGroupWidget";
+    const ToolGroupWidget = getExtensionComponent(toolGroupWidgetName, ExtensionComponentTypes.agentToolGroupWidget)
+        ?? DefaultAgentToolGroupWidget;
+    const agentTurnWidgetName = getAgentTurnChatWidgetName(agentName) ?? "DefaultAgentTurnCompletionWrapperWidget";
+    const AgentTurnWidget = getExtensionComponent(agentTurnWidgetName, ExtensionComponentTypes.agentTurnCompletionWrapperWidget)
+        ?? DefaultAgentTurnCompletionWrapperWidget;
 
     return (
         <div ref={attachScrollEl} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
@@ -293,7 +205,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                     if (!activityItems.length) return;
                     const activityKey = `${group.key}-${activityItems[0].id}`;
                     turnContent.push(
-                        <AgentActivityDisclosure
+                        <ToolGroupWidget
                             key={`activity-${activityKey}`}
                             turnKey={activityKey}
                             items={activityItems}
@@ -319,7 +231,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                 flushActivity(true);
                 if (isCurrentTurn && (working || thinking) && !hasTrailingActivity) {
                     turnContent.push(
-                        <AgentActivityDisclosure
+                        <ToolGroupWidget
                             key={`activity-working-${group.key}`}
                             turnKey={`${group.key}-working`}
                             items={[]}
@@ -339,9 +251,9 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                 }
 
                 return (
-                    <div key={group.key} className={widgetStyles.AiTurnGroup}>
-                        <div className={widgetStyles.AiTurnContent}>{turnContent}</div>
-                    </div>
+                    <AgentTurnWidget key={group.key}>
+                        {turnContent}
+                    </AgentTurnWidget>
                 );
             })}
         </div>
