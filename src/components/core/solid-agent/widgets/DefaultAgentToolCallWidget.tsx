@@ -59,12 +59,15 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
             {/* Progress sub-steps: visible while running or when expanded */}
             {(isRunning || expanded) && progress.length > 0 && (
                 <div className={styles.ToolCardProgress}>
-                    {progress.map((step, index) => (
-                        <div key={index} className={`${styles.ToolProgressItem} ${step.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
-                            {step.status === "running" && <SolidSpinner size={10} className={styles.Spin} />}
-                            <span className={styles.ToolProgressLabel}>{step.label}</span>
-                        </div>
-                    ))}
+                    {progress.map((step, index) => {
+                        const isStepRunning = isRunning && step.status === "running";
+                        return (
+                            <div key={index} className={`${styles.ToolProgressItem} ${isStepRunning ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
+                                {isStepRunning && <SolidSpinner size={10} className={styles.Spin} />}
+                                <span className={styles.ToolProgressLabel}>{step.label}</span>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 

@@ -13,7 +13,17 @@ function formatWorkedDuration(seconds: number): string {
 }
 
 /** Default disclosure for consecutive agent activity items within one turn. */
-export function DefaultAgentToolGroupWidget({ turnKey, items, working, startedAt, renderItem }: SolidToolGroupWidgetProps) {
+export function DefaultAgentToolGroupWidget({
+    turnKey,
+    items,
+    working,
+    startedAt,
+    endedAt,
+    totalStartedAt,
+    isLastActivity,
+    hasMultipleActivities,
+    renderItem,
+}: SolidToolGroupWidgetProps) {
     const [expanded, setExpanded] = useState(working);
     const prevWorkingRef = useRef(working);
 
@@ -24,34 +34,56 @@ export function DefaultAgentToolGroupWidget({ turnKey, items, working, startedAt
     }, [working]);
 
     const [now, setNow] = useState(() => Date.now());
-    const hasLiveTimer = useRef(working);
-    const startTime = useRef(startedAt || (working ? Date.now() : (items[0]?.at || Date.now())));
+    const startTimeRef = useRef(startedAt || items[0]?.at || Date.now());
+    const endTimeRef = useRef<number | undefined>(endedAt);
+
+    useEffect(() => {
+        if (startedAt) startTimeRef.current = startedAt;
+        if (endedAt) endTimeRef.current = endedAt;
+    }, [startedAt, endedAt]);
 
     useEffect(() => {
         if (!working) {
-            if (hasLiveTimer.current) setNow(Date.now());
+            if (!endTimeRef.current) endTimeRef.current = Date.now();
             return;
         }
-        hasLiveTimer.current = true;
+        endTimeRef.current = undefined;
         const timer = window.setInterval(() => setNow(Date.now()), 1000);
         return () => window.clearInterval(timer);
     }, [working]);
 
     const toolCount = items.filter((item) => item.eventType === AgentEventTypes.toolCalling).length;
-    const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
-    let recordedSeconds = 0;
-    if (items.length > 1) {
-        recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
+
+    let seconds = 0;
+    if (working) {
+        seconds = Math.max(1, Math.floor((now - startTimeRef.current) / 1000));
+    } else {
+        const stepMs = (endTimeRef.current && startTimeRef.current) ? (endTimeRef.current - startTimeRef.current) : 0;
+        let recordedSeconds = Math.max(0, Math.floor(stepMs / 1000));
+        if (recordedSeconds === 0 && items.length > 1) {
+            recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
+        }
+        const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);
+        const toolDurationSeconds = Math.round(sumToolMs / 1000);
+        seconds = Math.max(recordedSeconds, toolDurationSeconds, 1);
     }
-    const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);
-    const toolDurationSeconds = Math.round(sumToolMs / 1000);
-    const seconds = hasLiveTimer.current
-        ? activeDuration
-        : Math.max(recordedSeconds, toolDurationSeconds, 1);
+
+    let totalSeconds = 0;
+    if (totalStartedAt) {
+        const effectiveEnd = working ? now : (endTimeRef.current || items[items.length - 1]?.at || now);
+        totalSeconds = Math.max(0, Math.floor((effectiveEnd - totalStartedAt) / 1000));
+    }
+
     const durationLabel = formatWorkedDuration(seconds);
+    const showTotal = Boolean(hasMultipleActivities && totalSeconds > seconds);
+    const totalDurationLabel = showTotal ? formatWorkedDuration(totalSeconds) : "";
+
     const summary = working
-        ? `Working · ${toolCount ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ` : ""}${durationLabel}`
-        : `Worked for ${durationLabel}`;
+        ? `Working · ${toolCount ? `${toolCount} tool${toolCount === 1 ? "" : "s"} · ` : ""}${durationLabel}${showTotal ? ` (Total ${totalDurationLabel})` : ""}`
+        : isLastActivity && showTotal
+            ? `Worked for ${durationLabel} · Total ${totalDurationLabel}`
+            : `Worked for ${durationLabel}`;
+
     const panelId = `agent-activity-${turnKey.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 
     if (items.length === 0 && !working) return null;

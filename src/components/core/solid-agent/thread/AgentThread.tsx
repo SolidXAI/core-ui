@@ -80,6 +80,13 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
     return groups;
 }
 
+function formatWorkedDuration(seconds: number): string {
+    const s = Math.max(1, seconds);
+    if (s < 60) return `${s}s`;
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
+}
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
 export function AgentThread({ items, agentName, thinking, working = thinking, loadingHistory = false, hasMore, loadingOlder = false, loadOlderFailed = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
     // The scroll container unmounts while history loads or the empty state shows, so it is tracked as state.
@@ -201,50 +208,100 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
                 const turnContent: React.ReactNode[] = [];
                 let activityItems: AgentChatItem[] = [];
                 let hasTrailingActivity = false;
-                const flushActivity = (isLatest: boolean) => {
+
+                // Determine planned activity block count to know if this turn has multiple steps
+                let plannedActivityCount = 0;
+                let pendingActivityCount = 0;
+                for (const item of group.items) {
+                    if (isAssistantMessage(item)) {
+                        if (pendingActivityCount > 0) {
+                            plannedActivityCount++;
+                            pendingActivityCount = 0;
+                        }
+                    } else {
+                        pendingActivityCount++;
+                    }
+                }
+                if (pendingActivityCount > 0) plannedActivityCount++;
+                if (isCurrentTurn && (working || thinking) && pendingActivityCount === 0) {
+                    plannedActivityCount++;
+                }
+                const hasMultipleActivities = plannedActivityCount > 1;
+
+                let activityIndex = 0;
+                let currentStepStartTime = group.startedAt || group.items[0]?.at || Date.now();
+
+                const flushActivity = (isLatest: boolean, nextMessageAt?: number) => {
                     if (!activityItems.length) return;
                     const activityKey = `${group.key}-${activityItems[0].id}`;
+                    const isLast = activityIndex === plannedActivityCount - 1;
+                    const stepEnd = isLatest && isCurrentTurn ? undefined : (nextMessageAt || activityItems[activityItems.length - 1]?.at);
+
                     turnContent.push(
                         <ToolGroupWidget
                             key={`activity-${activityKey}`}
                             turnKey={activityKey}
                             items={activityItems}
                             working={isCurrentTurn && isLatest}
-                            startedAt={group.startedAt}
+                            startedAt={currentStepStartTime}
+                            endedAt={stepEnd}
+                            totalStartedAt={group.startedAt}
+                            isLastActivity={isLast}
+                            hasMultipleActivities={hasMultipleActivities}
                             renderItem={renderItem}
                         />,
                     );
+                    activityIndex++;
                     activityItems = [];
                     if (isLatest) {
                         hasTrailingActivity = true;
                     }
                 };
+
                 for (const item of group.items) {
                     if (isAssistantMessage(item)) {
-                        flushActivity(false);
+                        flushActivity(false, item.at);
                         turnContent.push(renderItem(item, false));
+                        currentStepStartTime = item.at;
                         hasTrailingActivity = false;
                     } else {
                         activityItems.push(item);
                     }
                 }
                 flushActivity(true);
+
                 if (isCurrentTurn && (working || thinking) && !hasTrailingActivity) {
+                    const isLast = activityIndex === plannedActivityCount - 1;
                     turnContent.push(
                         <ToolGroupWidget
                             key={`activity-working-${group.key}`}
                             turnKey={`${group.key}-working`}
                             items={[]}
                             working
-                            startedAt={group.startedAt}
+                            startedAt={currentStepStartTime}
+                            totalStartedAt={group.startedAt}
+                            isLastActivity={isLast}
+                            hasMultipleActivities={hasMultipleActivities}
                             renderItem={renderItem}
                         />,
                     );
+                    activityIndex++;
                 }
+
                 if (!isCurrentTurn && assistantCopyText) {
+                    const lastItemAt = group.items[group.items.length - 1]?.at;
+                    const totalTurnSeconds = (group.startedAt && lastItemAt)
+                        ? Math.max(0, Math.floor((lastItemAt - group.startedAt) / 1000))
+                        : 0;
+                    const totalTurnText = (hasMultipleActivities && totalTurnSeconds > 0)
+                        ? `Total ${formatWorkedDuration(totalTurnSeconds)} · `
+                        : "";
+
                     turnContent.push(
                         <div key={`meta-${group.key}`} className={`${widgetStyles.BubbleMeta} ${widgetStyles.BubbleMetaAssistant} ${widgetStyles.TurnMeta}`}>
-                            <span className={widgetStyles.Timestamp}>{formatChatTime(group.items[group.items.length - 1].at)}</span>
+                            <span className={widgetStyles.Timestamp}>
+                                {totalTurnText}{formatChatTime(lastItemAt)}
+                            </span>
                             <SolidAgentMessageCopyButton text={assistantCopyText} />
                         </div>,
                     );

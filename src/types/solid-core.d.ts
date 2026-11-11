@@ -377,6 +377,10 @@ export type SolidToolGroupWidgetProps = {
     items: import("../components/core/solid-agent/types").AgentChatItem[];
     working: boolean;
     startedAt?: number;
+    endedAt?: number;
+    totalStartedAt?: number;
+    isLastActivity?: boolean;
+    hasMultipleActivities?: boolean;
     renderItem: (item: import("../components/core/solid-agent/types").AgentChatItem) => import("react").ReactNode;
 }
 
