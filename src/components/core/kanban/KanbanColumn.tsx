@@ -68,66 +68,66 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
   return (
     <div className={group.folded ? "kanban-column kanban-column-folded" : "kanban-column"}>
       <div className="kaban-heading-area">
-        {selectionEnabled && (
-          <div
-            className="solid-kanban-lane-selection"
-            onClick={(event) => event.stopPropagation()}
-            onMouseDown={(event) => event.stopPropagation()}
-            onTouchStart={(event) => event.stopPropagation()}
-          >
-            <label className="solid-checkbox solid-kanban-lane-checkbox">
-              <input
-                ref={laneCheckboxRef}
-                type="checkbox"
-                className="solid-checkbox-input"
-                checked={allSelected}
-                disabled={selectableRecords.length === 0}
-                aria-label={`Select loaded cards in ${group.label}`}
-                title={`Select loaded cards in ${group.label}`}
-                onChange={() => onToggleLaneSelection?.(selectableRecords, !allSelected)}
-              />
-              <span className="solid-checkbox-box" />
-            </label>
-          </div>
-        )}
-        {group.folded &&
+          {selectionEnabled && (
+            <div
+              className="solid-kanban-lane-selection"
+              onClick={(event) => event.stopPropagation()}
+              onMouseDown={(event) => event.stopPropagation()}
+              onTouchStart={(event) => event.stopPropagation()}
+            >
+              <label className="solid-checkbox solid-kanban-lane-checkbox">
+                <input
+                  ref={laneCheckboxRef}
+                  type="checkbox"
+                  className="solid-checkbox-input"
+                  checked={allSelected}
+                  disabled={selectableRecords.length === 0}
+                  aria-label={`Select loaded cards in ${group.label}`}
+                  title={`Select loaded cards in ${group.label}`}
+                  onChange={() => onToggleLaneSelection?.(selectableRecords, !allSelected)}
+                />
+                <span className="solid-checkbox-box" />
+              </label>
+            </div>
+          )}
+          {group.folded &&
           <a onClick={e => toggleFold(groupByField)}>
-            <div className="flex items-center">
-              <div className="kanban-arrow-icon-container">
-                <SolidIcon name="si-sort-up-fill" aria-hidden />
-                <SolidIcon name="si-sort-down-fill" aria-hidden />
+              <div className="flex items-center">
+                <div className="kanban-arrow-icon-container">
+                  <SolidIcon name="si-sort-up-fill" aria-hidden />
+                  <SolidIcon name="si-sort-down-fill" aria-hidden />
+                </div>
+                <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
               </div>
+            </a>
+          }
+
+          {!group.folded &&
+          <div className="flex items-center">
               <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
             </div>
-          </a>
-        }
-
+          }
         {!group.folded &&
-          <div className="flex items-center">
-            <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
-          </div>
-        }
-        {!group.folded &&
-          <SolidDropdownMenu>
-            <SolidDropdownMenuTrigger asChild>
-              <SolidButton
-                size="xs"
-                variant="ghost"
-                className="kanban-column-cogwheel solid-icon-button"
-                icon="si-cog"
-                aria-label={`Open ${group.label} lane options`}
-              />
-            </SolidDropdownMenuTrigger>
-            <SolidDropdownMenuContent className="solid-custom-overlay kanban-options-panel" align="start">
-              <SolidDropdownMenuItem
-                className="solid-header-dropdown-item kanban-fold-action-button"
-                onSelect={() => toggleFold(groupByField)}
-              >
-                <SolidIcon name="si-angle-double-left" className="solid-header-action-button-icon" aria-hidden />
-                <span className="solid-header-action-button-label">Fold</span>
-              </SolidDropdownMenuItem>
-            </SolidDropdownMenuContent>
-          </SolidDropdownMenu>
+            <SolidDropdownMenu>
+              <SolidDropdownMenuTrigger asChild>
+                <SolidButton
+                  size="xs"
+                  variant="ghost"
+                  className="kanban-column-cogwheel solid-icon-button"
+                  icon="si-cog"
+                  aria-label={`Open ${group.label} lane options`}
+                />
+              </SolidDropdownMenuTrigger>
+              <SolidDropdownMenuContent className="solid-custom-overlay kanban-options-panel" align="start">
+                <SolidDropdownMenuItem
+                  className="solid-header-dropdown-item kanban-fold-action-button"
+                  onSelect={() => toggleFold(groupByField)}
+                >
+                  <SolidIcon name="si-angle-double-left" className="solid-header-action-button-icon" aria-hidden />
+                  <span className="solid-header-action-button-label">Fold</span>
+                </SolidDropdownMenuItem>
+              </SolidDropdownMenuContent>
+            </SolidDropdownMenu>
         }
       </div>
       {!group.folded && (

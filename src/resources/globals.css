@@ -4760,8 +4760,8 @@ li.header-li-px {
 
 .solid-kanban-action {
   position: absolute;
-  top: var(--solid-space-2);
-  right: var(--solid-space-2);
+  top: 11px;
+  right: var(--solid-space-2-5);
   z-index: 2;
 }
 
@@ -4922,6 +4922,11 @@ html.dark .solid-kanban-card-selection,
   padding-right: 72px;
 }
 
+/* Card selection is an overlay; reserve its left-side hit area in the card header. */
+.solid-kanban-card:has(> .solid-kanban-card-selection) .mq-message-kanban-card__eyebrow {
+  padding-left: var(--solid-control-height-sm);
+}
+
 .mq-message-kanban-card__chip {
   display: inline-flex;
   align-items: center;
@@ -4929,9 +4934,10 @@ html.dark .solid-kanban-card-selection,
   background: color-mix(in srgb, var(--mq-card-chip-bg, color-mix(in srgb, var(--primary) 8%, transparent)) 78%, var(--background) 22%);
   color: var(--mq-card-chip-text, var(--primary));
   padding: 2px 7px;
-  font-size: var(--solid-font-size-caption);
-  font-weight: 500;
+  font-size: var(--solid-font-size-micro);
+  font-weight: 650;
   letter-spacing: 0.01em;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -4943,14 +4949,14 @@ html.dark .solid-kanban-card-selection,
   background: color-mix(in srgb, var(--muted) 24%, var(--card) 76%);
   color: color-mix(in srgb, var(--foreground) 48%, transparent);
   padding: 2px 6px;
-  font-size: var(--solid-font-size-caption);
-  font-weight: 500;
+  font-size: var(--solid-font-size-micro);
+  font-weight: 650;
   white-space: nowrap;
 }
 
 .mq-message-kanban-card__title {
-  font-size: var(--solid-font-size-body);
-  font-weight: 600;
+  font-size: var(--solid-font-size-body-small);
+  font-weight: 700;
   line-height: 1.35;
   padding-right: 72px;
   color: color-mix(in srgb, var(--foreground) 95%, transparent);
@@ -4963,8 +4969,8 @@ html.dark .solid-kanban-card-selection,
 
 .mq-message-kanban-card__subtitle {
   margin-top: var(--solid-space-1);
-  font-size: var(--solid-font-size-body-small);
-  font-weight: 500;
+  font-size: var(--solid-font-size-caption);
+  font-weight: 600;
   line-height: 1.4;
   color: color-mix(in srgb, var(--foreground) 54%, transparent);
   white-space: nowrap;
@@ -4988,8 +4994,8 @@ html.dark .solid-kanban-card-selection,
 }
 
 .mq-message-kanban-card__metric-label {
-  font-size: var(--solid-font-size-caption);
-  font-weight: 500;
+  font-size: var(--solid-font-size-micro);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: color-mix(in srgb, var(--foreground) 42%, transparent);
@@ -4997,8 +5003,8 @@ html.dark .solid-kanban-card-selection,
 
 .mq-message-kanban-card__metric-value {
   margin-top: var(--solid-space-1);
-  font-size: var(--solid-font-size-body-small);
-  font-weight: 500;
+  font-size: var(--solid-font-size-caption);
+  font-weight: 700;
   line-height: 1.35;
   color: color-mix(in srgb, var(--foreground) 84%, transparent);
   white-space: nowrap;
@@ -5030,8 +5036,8 @@ html.dark .solid-kanban-card-selection,
 
 .mq-message-kanban-card__timeline-label {
   display: block;
-  font-size: var(--solid-font-size-caption);
-  font-weight: 500;
+  font-size: var(--solid-font-size-micro);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: color-mix(in srgb, var(--foreground) 40%, transparent);
@@ -5041,7 +5047,7 @@ html.dark .solid-kanban-card-selection,
   display: block;
   margin-top: var(--solid-space-1);
   font-size: var(--solid-font-size-caption);
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.35;
   color: color-mix(in srgb, var(--foreground) 88%, transparent);
   white-space: nowrap;
