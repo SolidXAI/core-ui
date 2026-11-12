@@ -786,6 +786,7 @@ textarea {
 }
 
 .solid-user-menu-trigger-role {
+  display: inline-flex;
   font-size: 10.5px;
   line-height: 1.2;
   color: var(--muted);
