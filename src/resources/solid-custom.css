@@ -337,8 +337,8 @@ html.dark .solid-backend-indicator[data-status="offline"] {
   /* Compatibility alias for the default control height */
   --solid-input-height: 2.125rem;
   /* 34px; SolidX text and select fields */
-  --solid-control-padding-inline-sm: var(--solid-space-2);
-  /* 8px; compact control padding */
+  --solid-control-padding-inline-sm: var(--solid-space-2-5);
+  /* 10px; compact control padding */
   --solid-control-padding-inline-xs: var(--solid-space-2);
   /* 8px; extra-small control padding */
   --solid-control-padding-inline-md: var(--solid-space-2-5);
