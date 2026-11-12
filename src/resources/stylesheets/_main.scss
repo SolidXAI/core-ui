@@ -59,6 +59,9 @@ body {
     /* Compact metadata, timestamps, badges, and supporting text. 12px equivalent. */
     --solid-font-size-caption: 0.75rem;
 
+    /* Micro labels and highly compact supporting text. 10px equivalent. */
+    --solid-font-size-micro: 0.625rem;
+
     /* Text inside buttons, inputs, selects, tabs, and other interactive controls. 14px equivalent. */
     --solid-font-size-ui-control: 0.875rem;
 

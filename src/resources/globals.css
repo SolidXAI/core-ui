@@ -2153,18 +2153,6 @@ li.header-li-px {
   margin-top: auto;
 }
 
-.chatter-collapse-btn {
-  position: absolute;
-  top: 10px;
-  transform: none;
-  left: 10px;
-  z-index: 10;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 8%, transparent);
-  background: color-mix(in srgb, var(--card) 95%, var(--background) 5%);
-  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
-  border-radius: 999px;
-}
-
 .chatter-section {
   position: relative;
   flex-shrink: 0;
@@ -2198,7 +2186,10 @@ li.header-li-px {
   padding: 0.6rem 0.38rem;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   width: 28px;

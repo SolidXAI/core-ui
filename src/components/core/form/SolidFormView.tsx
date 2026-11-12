@@ -2063,14 +2063,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         {isShowChatter === true &&
                             <SolidButton
                                 icon="si si-angle-double-right"
-                                text
-                                className="chatter-collapse-btn"
-                                style={{ width: 26, height: 26, aspectRatio: '1/1' }}
+                                variant="surface"
+                                size="sm"
+                                className="chatter-collapse-btn solid-icon-button"
                                 onClick={() => setShowChatter(false)}
                             />
                         }
                         {isShowChatter === false ?
-                            <div className="flex flex-col gap-2 justify-center p-1">
+                            <div className="flex w-full flex-col items-center justify-center gap-2 p-0">
                                 {/*Show the info tab when workflow info or internationalisation is enabled. */}
                                 {showChatterInfo &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
@@ -2081,8 +2081,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 </div>
                                 <SolidButton
                                     icon="si si-chevron-left"
-                                    className="px-0"
-                                    style={{ width: 30 }}
+                                    size="sm"
+                                    className="solid-icon-button px-0"
                                     onClick={() => handleChatterExpandClick('chatter')}
                                 />
                             </div>

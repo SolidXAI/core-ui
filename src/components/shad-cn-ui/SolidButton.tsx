@@ -2,7 +2,7 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import { SolidIcon, parseSolidIconMeta } from "./SolidIcon";
 
-type SolidButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "destructive";
+type SolidButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "surface" | "destructive";
 type SolidButtonSize = "default" | "sm" | "md" | "lg" | "small" | "medium" | "large";
 
 type SolidButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {

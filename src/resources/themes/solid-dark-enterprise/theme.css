@@ -231,8 +231,8 @@
 
   .solid-list-toolbar .solid-global-search-element,
   .solid-list-toolbar .custom-filter-button,
-  .solid-list-toolbar .solid-icon-button,
-  .solid-form-toolbar-actions .solid-icon-button {
+  .solid-list-toolbar .solid-icon-button:not(.solid-btn),
+  .solid-form-toolbar-actions .solid-icon-button:not(.solid-btn) {
     background: rgba(18, 27, 41, 0.9);
     border: 1px solid rgba(86, 117, 158, 0.2);
     border-radius: 10px;

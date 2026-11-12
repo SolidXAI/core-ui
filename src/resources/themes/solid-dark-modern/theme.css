@@ -226,9 +226,9 @@
   }
 
   .solid-list-toolbar .custom-filter-button,
-  .solid-list-toolbar .solid-icon-button,
-  .solid-header-cog-trigger,
-  .solid-form-toolbar-actions .solid-icon-button {
+  .solid-list-toolbar .solid-icon-button:not(.solid-btn),
+  .solid-header-cog-trigger:not(.solid-btn),
+  .solid-form-toolbar-actions .solid-icon-button:not(.solid-btn) {
     border: 1px solid rgba(65, 76, 104, 0.72) !important;
     background: #1f2738 !important;
     color: #eef2f8 !important;

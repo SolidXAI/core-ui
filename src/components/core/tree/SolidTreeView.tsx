@@ -1937,7 +1937,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   <div className="solid-list-search-toggle">
                     <SolidButton
                       type="button"
-                      variant="outline"
+                      variant="surface"
                       leftIcon={<Search size={14} />}
                       className="solid-icon-button"
                       onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
@@ -1972,7 +1972,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
                 <SolidButton
                   type="button"
-                  variant="outline"
+                  variant="surface"
                   leftIcon={<RefreshCw size={14} />}
                   className="solid-icon-button"
                   onClick={() => { void loadRootGroups(getPagination("root").offset); }}

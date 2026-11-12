@@ -93,8 +93,9 @@ export function AgentRegistryAuditPanel({ children, modelSingularName, recordId,
             <div className="agent-registry-audit-panel__resize" onMouseDown={() => setIsResizing(true)} />
             <SolidButton
               icon="si si-angle-double-right"
-              text
-              className="chatter-collapse-btn"
+              variant="surface"
+              size="sm"
+              className="chatter-collapse-btn solid-icon-button"
               onClick={() => setIsOpen(false)}
               aria-label="Collapse audit trail"
             />
@@ -115,7 +116,14 @@ export function AgentRegistryAuditPanel({ children, modelSingularName, recordId,
             <button type="button" className="chatter-collapsed-content" onClick={() => { setIsOpen(true); setRefreshChatterMessage(true); }}>
               Audit Trail
             </button>
-            <SolidButton icon="si si-chevron-left" className="px-0" onClick={() => { setIsOpen(true); setRefreshChatterMessage(true); }} aria-label="Expand audit trail" />
+            <SolidButton
+              icon="si si-chevron-left"
+              size="sm"
+              variant="primary"
+              className="solid-icon-button"
+              onClick={() => { setIsOpen(true); setRefreshChatterMessage(true); }}
+              aria-label="Expand audit trail"
+            />
           </div>
         )}
       </aside>

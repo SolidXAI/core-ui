@@ -1496,7 +1496,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     <div className="solid-list-search-toggle">
                       <SolidButton
                         type="button"
-                        variant="outline"
+                        variant="surface"
                         className="solid-icon-button"
                         onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
                         leftIcon={<Search size={14} />}
@@ -1552,7 +1552,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   {params.embeded !== true && (
                     <SolidButton
                       type="button"
-                      variant="outline"
+                      variant="surface"
                       className="solid-icon-button "
                       onClick={() => {
                         setQueryString();

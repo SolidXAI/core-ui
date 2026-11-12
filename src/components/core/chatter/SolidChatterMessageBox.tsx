@@ -296,7 +296,7 @@ export const SolidChatterMessageBox = (props: Props) => {
     };
 
     return (
-        <div className={styles.solidChatterMessageBox}>
+        <div className="solid-chatter-message-box">
             <div className={styles.solidChatterMessageCard}>
                 <div className={styles.solidChatterMessageLayout}>
                     <div className={styles.solidChatterAvatar} style={avatarStyle}>

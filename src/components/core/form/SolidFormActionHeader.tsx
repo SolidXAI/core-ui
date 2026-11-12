@@ -125,18 +125,18 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                 <div className="flex gap-2">
                     <SolidPopoverTrigger asChild>
                         <SolidButton
-                            variant="outline"
+                            variant="surface"
                             type="button"
                             icon={'si si-cog'}
-                            className="solid-icon-button bg-[var(--surface-card)] max-[576px]:hidden sm:hidden lg:flex"
+                            className="solid-icon-button max-[576px]:hidden sm:hidden lg:flex"
                         />
                     </SolidPopoverTrigger>
                     <SolidPopoverTrigger asChild>
                         <SolidButton
-                            variant="outline"
+                            variant="surface"
                             type="button"
                             icon={'si si-cog'}
-                            className="solid-icon-button bg-[var(--surface-card)] lg:hidden"
+                            className="solid-icon-button lg:hidden"
                         />
                     </SolidPopoverTrigger>
                 </div>

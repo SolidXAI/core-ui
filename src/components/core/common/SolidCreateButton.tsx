@@ -44,6 +44,7 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                 {/* Mobile Version */}
                 <SolidButton
                     type="button"
+                    variant="surface"
                     icon={icon}
                     leftIcon={!icon ? defaultIcon : undefined}
                     className={`${className} lg:hidden solid-icon-button `}

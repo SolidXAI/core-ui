@@ -1265,7 +1265,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                  <div className="solid-list-search-toggle">
                   <SolidButton
                     type="button"
-                    variant="outline"
+                    variant="surface"
                     className="solid-icon-button"
                     onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
                     aria-label="Toggle search"
@@ -1302,7 +1302,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
                 </SolidButton>}
                 <SolidButton
                   type="button"
-                  variant="outline"
+                  variant="surface"
                   className="solid-icon-button"
                   onClick={handleRefreshView}
                   aria-label="Refresh board"

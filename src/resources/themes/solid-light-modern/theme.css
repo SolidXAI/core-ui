@@ -330,9 +330,9 @@
   }
 
   .solid-list-toolbar .custom-filter-button,
-  .solid-list-toolbar .solid-icon-button,
-  .solid-header-cog-trigger,
-  .solid-form-toolbar-actions .solid-icon-button {
+  .solid-list-toolbar .solid-icon-button:not(.solid-btn),
+  .solid-header-cog-trigger:not(.solid-btn),
+  .solid-form-toolbar-actions .solid-icon-button:not(.solid-btn) {
     border: 1px solid var(--solid-border-default) !important;
     background: #f7f0e3 !important;
     color: #5c4b3e !important;
@@ -559,7 +559,7 @@
     border-color: var(--solid-border-default) !important;
   }
 
-  .chatter-section .chatterTitle {
+  .chatter-section .solid-chatter-header {
     border-bottom: 1px solid var(--solid-border-default) !important;
   }
 
@@ -575,14 +575,6 @@
   .chatter-section .chatterDividerContent {
     background: #efe5d6 !important;
     border-color: var(--solid-border-default) !important;
-  }
-
-  .chatter-section .chatter-collapse-btn {
-    left: 10px !important;
-    top: 10px !important;
-    background: #f6efe2 !important;
-    border-color: var(--solid-border-default) !important;
-    color: #4b4036 !important;
   }
 
   .solid-list-table-area {

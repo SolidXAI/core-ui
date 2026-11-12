@@ -1,0 +1,33 @@
+.chatter-collapse-btn {
+  position: absolute;
+  top: var(--solid-space-2);
+  transform: none;
+  left: var(--solid-space-3);
+  z-index: 10;
+}
+
+.solid-chatter-header {
+  padding: var(--solid-space-2) var(--solid-space-3);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.solid-chatter-subheader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--solid-control-height);
+}
+
+.solid-chatter-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--solid-control-gap);
+  margin-left: auto;
+}
+
+.solid-chatter-body{
+  padding: var(--solid-space-3);
+}
+
+.solid-chatter-message-box {
+}
