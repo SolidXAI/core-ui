@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import { SolidIcon, parseSolidIconMeta } from "./SolidIcon";
 
 type SolidButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "surface" | "destructive";
-type SolidButtonSize = "default" | "sm" | "md" | "lg" | "small" | "medium" | "large";
+type SolidButtonSize = "default" | "xs" | "extra-small" | "sm" | "md" | "lg" | "small" | "medium" | "large";
 
 type SolidButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: SolidButtonVariant;
@@ -61,11 +61,13 @@ export const SolidButton = React.forwardRef<HTMLButtonElement, SolidButtonProps>
               ? "ghost"
               : "primary");
   // Omitted size uses the base .solid-btn default (32px). Canonical explicit
-  // sizes are sm, md, and lg; long-form values remain compatibility aliases.
-  const resolvedSize: "sm" | "md" | "lg" | undefined =
+  // sizes are xs, sm, md, and lg; long-form values remain compatibility aliases.
+  const resolvedSize: "xs" | "sm" | "md" | "lg" | undefined =
     size === undefined
       ? undefined
-      : size === "sm" || size === "small"
+      : size === "xs" || size === "extra-small"
+        ? "xs"
+        : size === "sm" || size === "small"
         ? "sm"
         : size === "lg" || size === "large"
           ? "lg"

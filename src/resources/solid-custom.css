@@ -325,6 +325,8 @@ html.dark .solid-backend-indicator[data-status="offline"] {
   /* 48px */
 
   /* Shared component dimensions. */
+  --solid-control-height-xs: 1.5rem;
+  /* 24px; extra-small control tier */
   --solid-control-height-sm: 1.75rem;
   /* 28px; compact control tier */
   --solid-control-height-md: 2rem;
@@ -337,6 +339,8 @@ html.dark .solid-backend-indicator[data-status="offline"] {
   /* 34px; SolidX text and select fields */
   --solid-control-padding-inline-sm: var(--solid-space-2);
   /* 8px; compact control padding */
+  --solid-control-padding-inline-xs: var(--solid-space-2);
+  /* 8px; extra-small control padding */
   --solid-control-padding-inline-md: var(--solid-space-2-5);
   /* 10px; default control padding */
   --solid-control-padding-inline-lg: var(--solid-space-4);
@@ -347,6 +351,8 @@ html.dark .solid-backend-indicator[data-status="offline"] {
   /* 8px; shared input and button radius */
   --solid-control-icon-size: 1rem;
   /* 16px; shared button and action icon size */
+  --solid-control-icon-size-xs: 0.75rem;
+  /* 12px; extra-small button and action icon size */
   --solid-control-gap-sm: var(--solid-space-1);
   /* 4px; compact control spacing */
   --solid-control-gap: var(--solid-space-2);
@@ -1872,6 +1878,13 @@ textarea {
   cursor: not-allowed;
 }
 
+.solid-btn--xs {
+  height: var(--solid-control-height-xs);
+  padding: 0 var(--solid-control-padding-inline-xs);
+  border-radius: var(--solid-control-radius);
+  font-size: var(--solid-font-size-control-xs);
+}
+
 .solid-btn--sm {
   height: var(--solid-control-height-sm);
   padding: 0 var(--solid-control-padding-inline-sm);
@@ -1898,6 +1911,11 @@ textarea {
   width: var(--solid-control-height);
   min-width: var(--solid-control-height);
   padding: 0;
+}
+
+.solid-btn.solid-btn--xs.solid-icon-button {
+  width: var(--solid-control-height-xs);
+  min-width: var(--solid-control-height-xs);
 }
 
 .solid-btn.solid-btn--sm.solid-icon-button {
@@ -1985,6 +2003,18 @@ textarea {
   font-size: var(--solid-control-icon-size);
   line-height: 1;
   text-align: center;
+}
+
+.solid-btn.solid-btn--xs .solid-btn-icon > svg {
+  width: var(--solid-control-icon-size-xs);
+  height: var(--solid-control-icon-size-xs);
+  flex: 0 0 var(--solid-control-icon-size-xs);
+}
+
+.solid-btn.solid-btn--xs .solid-btn-icon > i {
+  width: var(--solid-control-icon-size-xs);
+  min-width: var(--solid-control-icon-size-xs);
+  font-size: var(--solid-control-icon-size-xs);
 }
 
 .solid-btn-label {
