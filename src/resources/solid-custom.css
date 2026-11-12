@@ -5585,6 +5585,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   background: transparent;
   color: var(--foreground);
   font-size: var(--solid-font-size-control-sm);
+  font-weight: 500;
   line-height: 1.2;
   cursor: pointer;
   user-select: none;
