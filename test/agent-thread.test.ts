@@ -1,6 +1,11 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { classifyWidgetContent, isSameAssistantContent, parseWidgetContent } from "../src/components/core/solid-agent/thread/inlineWidget.ts";
+import {
+    classifyWidgetContent,
+    isSameAssistantContent,
+    parseWidgetContent,
+    resolveChatWidgetFallback,
+} from "../src/components/core/solid-agent/thread/inlineWidget.ts";
 
 // node --experimental-strip-types --test test/agent-thread.test.ts
 
@@ -186,6 +191,36 @@ describe("Agent Thread Helper Tests", () => {
             assert.equal(checkIsSessionExpired({ error: "Rate limit exceeded" }, null), false);
             assert.equal(checkIsSessionExpired({ error: "Invalid API key" }, null), false);
             assert.equal(checkIsSessionExpired({ error: "Tool execution failed" }, null), false);
+        });
+    });
+
+    describe("resolveChatWidgetFallback", () => {
+        it("preserves widget name for unregistered inline widgets so DefaultUnknownChatWidget labels it cleanly", () => {
+            const inline = { widget: "scenario-candidates", data: { summary: "Ready", candidates: [] } };
+            const resolved = resolveChatWidgetFallback({
+                requestedWidget: inline.widget,
+                defaultWidgetName: "DefaultAgentTurnCompletionWidget",
+                inline,
+                rawEventData: { content: "{}" },
+            });
+            assert.equal(resolved.widgetName, "DefaultUnknownChatWidget");
+            assert.deepEqual(resolved.eventData, {
+                summary: "Ready",
+                candidates: [],
+                widget: "scenario-candidates",
+            });
+        });
+
+        it("falls back to the event type default when no custom widget was requested", () => {
+            const rawEventData = { content: "Hello" };
+            const resolved = resolveChatWidgetFallback({
+                requestedWidget: null,
+                defaultWidgetName: "DefaultAgentTurnCompletionWidget",
+                inline: null,
+                rawEventData,
+            });
+            assert.equal(resolved.widgetName, "DefaultAgentTurnCompletionWidget");
+            assert.equal(resolved.eventData, rawEventData);
         });
     });
 });

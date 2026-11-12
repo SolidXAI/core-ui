@@ -4,7 +4,7 @@ import { ExtensionComponentTypes } from "../../../../types/extension-registry";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import styles from "../SolidAgent.module.css";
 import { AgentEventTypes, type AgentChatItem, type AgentContext } from "../types";
-import { classifyWidgetContent } from "./inlineWidget";
+import { classifyWidgetContent, resolveChatWidgetFallback } from "./inlineWidget";
 
 export { classifyWidgetContent, parseWidgetContent, type InlineChatWidget, type InlineChatWidgetState } from "./inlineWidget";
 
@@ -110,24 +110,30 @@ export const SolidAgentChatItem = ({ item, agentName, agentContext, showMessageM
     const userWidgetName = item.eventType === AgentEventTypes.userMessage
         ? getUserMessageChatWidgetName(agentName)
         : null;
-    const widgetName = item.widget ?? inline?.widget ?? toolWidgetName ?? userWidgetName ?? getDefaultChatWidgetName(item.eventType);
+    const defaultWidgetName = getDefaultChatWidgetName(item.eventType);
+    const widgetName = item.widget ?? inline?.widget ?? toolWidgetName ?? userWidgetName ?? defaultWidgetName;
     const widgetType = item.eventType === AgentEventTypes.toolCalling
         ? ExtensionComponentTypes.agentToolCallWidget
         : item.eventType === AgentEventTypes.userMessage
             ? ExtensionComponentTypes.agentUserTurnCompletionWidget
             : ExtensionComponentTypes.agentTurnCompletionWidget;
-    const fallbackWidgetName = item.eventType === AgentEventTypes.toolCalling
-        ? "DefaultAgentToolCallWidget"
-        : item.eventType === AgentEventTypes.userMessage
-            ? "DefaultAgentUserTurnCompletionWidget"
-            : "DefaultUnknownChatWidget";
     const selectedWidget = (widgetType === ExtensionComponentTypes.agentToolCallWidget || isAgentWidgetAvailable(widgetName, agentName))
         ? getExtensionComponent(widgetName, widgetType)
         : null;
-    const resolvedWidgetName = selectedWidget ? widgetName : fallbackWidgetName;
-    const DynamicWidget = selectedWidget ?? getExtensionComponent(fallbackWidgetName, widgetType);
+    const fallback = selectedWidget
+        ? null
+        : resolveChatWidgetFallback({
+            requestedWidget: widgetType === ExtensionComponentTypes.agentTurnCompletionWidget
+                ? (item.widget ?? inline?.widget)
+                : null,
+            defaultWidgetName,
+            inline,
+            rawEventData: item.eventData,
+        });
+    const resolvedWidgetName = selectedWidget ? widgetName : fallback!.widgetName;
+    const DynamicWidget = selectedWidget ?? getExtensionComponent(resolvedWidgetName, widgetType);
     const widgetId = item.widgetId ?? item.id;
-    const eventData = inline ? inline.data : item.eventData;
+    const eventData = fallback ? fallback.eventData : (inline ? inline.data : item.eventData);
 
     const widgetProps: SolidChatWidgetProps = {
         eventType: item.eventType,

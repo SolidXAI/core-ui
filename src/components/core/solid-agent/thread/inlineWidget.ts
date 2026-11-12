@@ -245,3 +245,25 @@ export function isSameAssistantContent(a: string | undefined, b: string | undefi
     }
     return false;
 }
+
+/**
+ * Resolves fallback widget name and payload when the primary widget is unregistered or unavailable.
+ * Preserves the requested widget name so DefaultUnknownChatWidget reports `Unknown widget: <name>`
+ * instead of mislabeling an inline widget reply as `Unhandled event: LlmComplete`.
+ */
+export function resolveChatWidgetFallback(params: {
+    requestedWidget?: string | null;
+    defaultWidgetName: string;
+    inline: InlineChatWidget | null;
+    rawEventData: Record<string, any>;
+}): { widgetName: string; eventData: Record<string, any> } {
+    const { requestedWidget, defaultWidgetName, inline, rawEventData } = params;
+    const baseData = inline ? inline.data : rawEventData;
+    if (requestedWidget) {
+        const eventData = baseData?.widget === requestedWidget
+            ? baseData
+            : { ...baseData, widget: requestedWidget };
+        return { widgetName: "DefaultUnknownChatWidget", eventData };
+    }
+    return { widgetName: defaultWidgetName, eventData: baseData };
+}
