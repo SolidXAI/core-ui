@@ -110,13 +110,13 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
         {!group.folded &&
           <SolidDropdownMenu>
             <SolidDropdownMenuTrigger asChild>
-              <button
-                type="button"
-                className="solid-header-cog-trigger kanban-column-cogwheel"
+              <SolidButton
+                size="xs"
+                variant="ghost"
+                className="kanban-column-cogwheel solid-icon-button"
+                icon="si-cog"
                 aria-label={`Open ${group.label} lane options`}
-              >
-                <SolidIcon name="si-cog" aria-hidden />
-              </button>
+              />
             </SolidDropdownMenuTrigger>
             <SolidDropdownMenuContent className="solid-custom-overlay kanban-options-panel" align="start">
               <SolidDropdownMenuItem

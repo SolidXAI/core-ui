@@ -5,6 +5,7 @@ import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersiste
 import { getRecordActionQuery, getRecordUserKeyQuery } from "../../../helpers/routePaths";
 import { RotateCcw } from "lucide-react";
 import {
+  SolidButton,
   SolidDropdownMenu,
   SolidDropdownMenuContent,
   SolidDropdownMenuItem,
@@ -98,13 +99,13 @@ const CardItem: React.FC<CardItemProps> = ({
           <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
             <SolidDropdownMenu>
               <SolidDropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="solid-header-cog-trigger solid-kanban-action-trigger"
+                <SolidButton
+                  size="xs"
+                  variant="surface"
+                  className="solid-kanban-action-trigger solid-icon-button"
+                  icon="si-ellipsis-v"
                   aria-label="Open card actions"
-                >
-                  <SolidIcon name="si-ellipsis-v" aria-hidden />
-                </button>
+                />
               </SolidDropdownMenuTrigger>
               <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
                 <SolidDropdownMenuItem
