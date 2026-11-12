@@ -7,6 +7,7 @@ import { CompatibleDraggable } from "../common/dndCompat";
 import { storeCurrentModelViewContext } from "../../../helpers/modelViewPersistence";
 import { getRecordActionQuery, getRecordUserKeyQuery } from "../../../helpers/routePaths";
 import {
+  SolidButton,
   SolidDropdownMenu,
   SolidDropdownMenuContent,
   SolidDropdownMenuItem,
@@ -101,13 +102,13 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
       <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
         <SolidDropdownMenu>
           <SolidDropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="solid-header-cog-trigger solid-kanban-action-trigger"
+            <SolidButton
+              size="xs"
+              variant="surface"
+              className="solid-kanban-action-trigger solid-icon-button"
+              icon="si-ellipsis-v"
               aria-label="Open card actions"
-            >
-              <SolidIcon name="si-ellipsis-v" aria-hidden />
-            </button>
+            />
           </SolidDropdownMenuTrigger>
           <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
             <SolidDropdownMenuItem

@@ -63,7 +63,6 @@ export const BackButton = () => {
         <SolidButton
             variant="ghost"
             leftIcon={<ArrowLeft size={14} />}
-            size="small"
             type="button"
             aria-label="Back"
             onClick={handleGoBack}

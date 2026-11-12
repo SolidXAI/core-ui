@@ -162,7 +162,6 @@ const ClearModulePackageRuntimeHeaderAction = () => {
                     <div className="solid-generate-code-popup__command-help">{command.help}</div>
                   </div>
                   <SolidButton
-                    size="small"
                     variant="outline"
                     className="solid-generate-code-popup__command-copy"
                     leftIcon={copied ? <Check size={14} /> : <Copy size={14} />}
@@ -185,7 +184,6 @@ const ClearModulePackageRuntimeHeaderAction = () => {
 
         <div className="solid-generate-code-popup__actions">
           <SolidButton
-            size="small"
             autoFocus
             severity="danger"
             leftIcon={<Trash2 size={14} />}
@@ -193,7 +191,7 @@ const ClearModulePackageRuntimeHeaderAction = () => {
           >
             Clear Package Runtime
           </SolidButton>
-          <SolidButton size="small" variant="outline" onClick={() => dispatch(closePopup())}>
+          <SolidButton variant="outline" onClick={() => dispatch(closePopup())}>
             Cancel
           </SolidButton>
         </div>

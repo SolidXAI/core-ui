@@ -13,7 +13,7 @@ export const SettingDropzoneActivePlaceholder = ({note}:any) => {
             <p className='text-center'>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
             <small className='mb-2 text-center'>Note: {note ? note : "200px image width is ideal"}</small>
             <div>
-                <SolidButton variant="outline" size="sm" severity="secondary" label='Click to Browse' type="button" />
+                <SolidButton variant="outline" severity="secondary" label='Click to Browse' type="button" />
             </div>
         </div>
     )

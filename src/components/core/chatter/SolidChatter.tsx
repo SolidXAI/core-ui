@@ -221,7 +221,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 </div>
                 <p className='m-0 text-base font-medium text-color'>No activity yet</p>
                 <p className='m-0 text-sm'>Log your first internal note or send a message to get things started.</p>
-                <SolidButton size='sm' variant='outline' onClick={() => handleTabClick('log')}>
+                <SolidButton variant='outline' onClick={() => handleTabClick('log')}>
                     {isLogComposerOpen ? 'Cancel' : 'Log a note'}
                 </SolidButton>
             </div>
@@ -266,7 +266,6 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 <div className='flex justify-center'>
                     <SolidButton
                         type='button'
-                        size='sm'
                         variant='outline'
                         onClick={handleLoadMore}
                     >

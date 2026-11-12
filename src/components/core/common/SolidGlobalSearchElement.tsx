@@ -434,7 +434,6 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, activeSavedF
             <div className="solid-saved-filter-main-wrap">
                 <SolidButton
                     variant="ghost"
-                    size="sm"
                     className={`solid-saved-filter-main w-full ${isActive ? "is-active" : ""} ${isFocused ? "solid-search-overlay-option-active" : ""}`}
                     id={optionId}
                     role="option"
@@ -473,7 +472,6 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, activeSavedF
                     <>
                         <SolidButton
                             variant="outline"
-                            size="sm"
                             className="solid-saved-filter-icon-btn"
                             onMouseDown={(e) => {
                                 e.preventDefault();
@@ -485,7 +483,6 @@ const SavedFilterList = ({ savedfilter, activeSavedFilterReference, activeSavedF
                         </SolidButton>
                         <SolidButton
                             variant="outline"
-                            size="sm"
                             className="solid-saved-filter-icon-btn is-danger"
                             onMouseDown={(e) => {
                                 e.preventDefault();
@@ -2342,7 +2339,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 />
                                 <SolidButton
                                     variant="outline"
-                                    size="sm"
                                     onMouseDown={(e) => {
                                         // Preserve input focus so overlay keyboard navigation continues to work.
                                         e.preventDefault();
@@ -2425,7 +2421,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                             role="option"
                                                             aria-selected={focusedIndex === optionIndex}
                                                             variant="ghost"
-                                                            size="sm"
                                                             className={`text-color solid-search-overlay-option ${focusedIndex === optionIndex ? "solid-search-overlay-option-active" : ""}`}
                                                             onMouseDown={(e) => {
                                                                 e.preventDefault();
@@ -2471,7 +2466,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         role="option"
                                                         aria-selected={focusedIndex === optionIndex}
                                                         variant="ghost"
-                                                        size="sm"
                                                         className={`text-color solid-search-overlay-option ${focusedIndex === optionIndex ? "solid-search-overlay-option-active" : ""}`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
@@ -2734,13 +2728,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </SolidDialogHeader>
                     <SolidDialogSeparator />
                     <SolidDialogFooter className="justify-center">
-                        <SolidButton variant="destructive" size="sm" onClick={deleteSavedFilter}>
+                        <SolidButton variant="destructive" onClick={deleteSavedFilter}>
                             <Check size={14} />
                             Yes
                         </SolidButton>
                         <SolidButton
                             variant="outline"
-                            size="sm"
                             onClick={() => {
                                 setIsDeleteSQDialogVisible(false);
                                 setSavedFilterTobeDeleted(null);

@@ -106,7 +106,7 @@ export function AgentHubTagsField({ value, onChange, module, disabled = false, o
             if (event.key === "ArrowUp") { event.preventDefault(); setActiveIndex((index) => Math.max(index - 1, 0)); }
             if (event.key === "Enter") { event.preventDefault(); if (open && options[activeIndex]) select(options[activeIndex]); else void add(); }
           }} />
-        {name && <SolidButton variant="secondary" size="small" loading={isCreating}
+        {name && <SolidButton variant="secondary" loading={isCreating}
           disabled={!exact && !canCreate}
           tooltip={isFetching ? "Wait for tag lookup to finish." : isError ? "Retry tag lookup before creating a tag." : undefined}
           onClick={() => void add()} leftIcon={<Plus size={14} />}>

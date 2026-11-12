@@ -32,8 +32,8 @@ export function AgentConfigVersionsPanel({ agentId, active }: { agentId: number;
   return <section className="config-versions">
     <div className="config-versions__toolbar"><div><h2>Config versions</h2><p>Select two versions to compare. Latest versions appear first.</p></div>
       <div className="config-versions__actions">
-        {selected.length === 2 && <SolidButton size="small" onClick={compare}><ArrowLeftRight size={15} /> Compare</SolidButton>}
-        <SolidButton variant="secondary" size="small" aria-label="Refresh config versions" disabled={result.isFetching} onClick={() => void result.refetch()}><RefreshCw size={15} /></SolidButton>
+        {selected.length === 2 && <SolidButton onClick={compare}><ArrowLeftRight size={15} /> Compare</SolidButton>}
+        <SolidButton variant="secondary" aria-label="Refresh config versions" disabled={result.isFetching} onClick={() => void result.refetch()}><RefreshCw size={15} /></SolidButton>
       </div>
     </div>
     {result.isFetching ? <div className="config-compare__empty" role="status">Loading config versions…</div>
@@ -46,8 +46,8 @@ export function AgentConfigVersionsPanel({ agentId, active }: { agentId: number;
             <td><span className="config-versions__number">v{version.versionNumber}</span></td><td><strong>{version.name || `Version ${version.versionNumber}`}</strong></td><td>{version.description || "—"}</td><td><time dateTime={version.createdAt}>{formatConfigDate(version.createdAt)}</time></td></tr>;
         })}</tbody></table></div>}
     {total > PAGE_SIZE && <div className="config-versions__pagination"><span>{offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}</span><div className="config-versions__actions">
-      <SolidButton variant="secondary" size="small" disabled={!offset || result.isFetching} onClick={() => setOffset((value) => Math.max(0, value - PAGE_SIZE))}>Previous</SolidButton>
-      <SolidButton variant="secondary" size="small" disabled={offset + PAGE_SIZE >= total || result.isFetching} onClick={() => setOffset((value) => value + PAGE_SIZE)}>Next</SolidButton>
+      <SolidButton variant="secondary" disabled={!offset || result.isFetching} onClick={() => setOffset((value) => Math.max(0, value - PAGE_SIZE))}>Previous</SolidButton>
+      <SolidButton variant="secondary" disabled={offset + PAGE_SIZE >= total || result.isFetching} onClick={() => setOffset((value) => value + PAGE_SIZE)}>Next</SolidButton>
     </div></div>}
   </section>;
 }

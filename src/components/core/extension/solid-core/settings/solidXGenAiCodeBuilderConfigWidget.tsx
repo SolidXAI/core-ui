@@ -103,7 +103,7 @@ export default function solidXGenAiCodeBuilderConfigWidget({ setting, value, upd
         tabPosition="left"
         extra={
           activeTab === "providers" ? (
-            <SolidButton size="sm" onClick={() => setShowAddProvider(true)}>
+            <SolidButton onClick={() => setShowAddProvider(true)}>
               Add
             </SolidButton>
           ) : undefined

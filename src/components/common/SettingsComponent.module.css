@@ -133,7 +133,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
   background: color-mix(in srgb, var(--surface-card, var(--card)) 92%, var(--card) 8%);
   color: var(--muted-foreground);
-  font-size: 0.72rem;
+  font-size: var(--solid-font-size-ui-control);
   cursor: help;
 }
 

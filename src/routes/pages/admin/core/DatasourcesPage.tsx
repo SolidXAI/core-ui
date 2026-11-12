@@ -79,7 +79,7 @@ export function DatasourcesPage() {
       ) : error ? (
         <div className="sdm-error">
           <span>Unable to load datasource configuration.</span>
-          <SolidButton size="small" variant="outline" onClick={() => void refetch()}>
+          <SolidButton variant="outline" onClick={() => void refetch()}>
             Retry
           </SolidButton>
         </div>

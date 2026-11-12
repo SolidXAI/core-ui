@@ -18,28 +18,22 @@
 }
 
 .solid-locale-tabs-list {
-  display: flex;
-  align-items: center;
-  gap: 0rem;
-  min-height: 44px;
-  padding: 0 0.9rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
-  background: color-mix(in srgb, var(--card) 97%, var(--background) 3%);
-  justify-content: flex-start;
+  padding: 0 var(--solid-space-3) 0 3.25rem;
+  gap: var(--solid-space-3) !important;
 }
 
 .solid-locale-tabs .solid-tabs-trigger {
   position: relative;
   background: transparent;
   border: none;
-  padding: 0.65rem 0;
-  font-size: 0.78rem;
+  padding: var(--solid-space-3) 0;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   color: var(--muted-foreground);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 150ms ease, border-color 150ms ease;
-  margin-left: 12px;
+  margin: 0 !important;
 }
 
 .solid-locale-tabs .solid-tabs-trigger:hover {
@@ -54,7 +48,7 @@
 .solid-locale-tabs-panel {
   flex: 1;
   min-height: 0;
-  padding: 0;
+  padding: 0 !important;
   display: flex;
   flex-direction: column;
 }

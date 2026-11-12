@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import styles from './chatter.module.css'
+import './solid-chatter.css'
 import { SolidMessageComposer } from './SolidMessageComposer'
 import { useLazyGetusersQuery } from '../../../redux/api/userApi'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
@@ -129,17 +129,17 @@ export const SolidChatterHeader = (props: Props) => {
     };
 
     return (
-        <div className={`${styles.chatterTitle} ${title ? styles.chatterTitleWithLabel : ''} solid-list-toolbar`}>
-            <div className='flex justify-between items-center solid-list-toolbar-row'>
+        <div className={`solid-chatter-header${title ? ' solid-chatter-header--with-title' : ''}`}>
+            <div className="solid-chatter-subheader">
                 {title && 
                     (<p className="m-0 view-title solid-text-wrapper form-wrapper-title">
                         {title}
                     </p>
                 )}
-                <div className='flex items-center ml-auto solid-header-buttons-wrapper'>
+                <div className="solid-chatter-actions">
                     {/* <Button
                         label="Send Message"
-                        size="small"
+                        size="default"
                         type="button"
                         onClick={() => handleTabClick('email-message')}
                         {...(activeTab !== 'email-message' && {
@@ -149,37 +149,33 @@ export const SolidChatterHeader = (props: Props) => {
                     /> */}
                     {/* <SolidButton
                         label="Log Note"
-                        size="sm"
                         type="button"
                         variant="primary"
                         className="solid-purple-button"
                         onClick={() => handleTabClick('log')}
                     /> */}
                     <SolidButton
-                        size="sm"
                         type="button"
                         aria-label="Log Note"
-                        variant="outline"
+                        variant="surface"
                         className="solid-icon-button"
                         style={{ gap: 0 }}
                         leftIcon={<Edit size={14} />}
                         onClick={() => handleTabClick('log')}
                     />
                     <SolidButton
-                        size="sm"
                         type="button"
                         aria-label="Filter"
-                        variant="outline"
-                        className={`solid-icon-button ${hasActiveFilters ? 'is-filter-active' : ''}`}
+                        variant={hasActiveFilters ? "primary" : "surface"}
+                        className="solid-icon-button"
                         style={{ gap: 0 }}
                         leftIcon={<Filter size={14} />}
                         onClick={handleFilterClick}
                     />
                     <SolidButton
-                        size="sm"
                         type="button"
                         aria-label="Refresh"
-                        variant="outline"
+                        variant="surface"
                         className="solid-icon-button"
                         style={{ gap: 0 }}
                         leftIcon={<RefreshCw size={14} />}
@@ -261,14 +257,12 @@ export const SolidChatterHeader = (props: Props) => {
                 </SolidDialogBody>
                 <SolidDialogFooter>
                         <SolidButton 
-                            label="Clear" 
-                            size="sm"
+                            label="Clear"
                             variant="outline"
                             onClick={handleClearFilters}
                         />
                         <SolidButton 
-                            label="Apply" 
-                            size="sm"
+                            label="Apply"
                             className="solid-purple-button"
                             onClick={handleApplyFilters}
                         />

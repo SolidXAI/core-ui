@@ -2,8 +2,8 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import { SolidIcon, parseSolidIconMeta } from "./SolidIcon";
 
-type SolidButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "destructive";
-type SolidButtonSize = "sm" | "md" | "lg" | "small" | "medium" | "large";
+type SolidButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "surface" | "destructive";
+type SolidButtonSize = "default" | "xs" | "extra-small" | "sm" | "md" | "lg" | "small" | "medium" | "large";
 
 type SolidButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: SolidButtonVariant;
@@ -29,7 +29,7 @@ function cx(...parts: Array<string | false | undefined>) {
 
 export const SolidButton = React.forwardRef<HTMLButtonElement, SolidButtonProps>(function SolidButton({
   variant,
-  size = "md",
+  size,
   fullWidth,
   loading,
   leftIcon,
@@ -60,8 +60,18 @@ export const SolidButton = React.forwardRef<HTMLButtonElement, SolidButtonProps>
             : text
               ? "ghost"
               : "primary");
-  const resolvedSize: "sm" | "md" | "lg" =
-    size === "small" ? "sm" : size === "large" ? "lg" : size === "medium" ? "md" : size === "lg" ? "lg" : size === "sm" ? "sm" : "md";
+  // Omitted size uses the base .solid-btn default (32px). Canonical explicit
+  // sizes are xs, sm, md, and lg; long-form values remain compatibility aliases.
+  const resolvedSize: "xs" | "sm" | "md" | "lg" | undefined =
+    size === undefined
+      ? undefined
+      : size === "xs" || size === "extra-small"
+        ? "xs"
+        : size === "sm" || size === "small"
+        ? "sm"
+        : size === "lg" || size === "large"
+          ? "lg"
+          : "md";
   const normalizedIcon = typeof icon === "string" ? icon.trim() : "";
   const iconMeta = normalizedIcon ? parseSolidIconMeta(normalizedIcon) : undefined;
   const looksLikeCssIconClass = /\b[a-z0-9_-]+-[a-z0-9_-]+\b/i.test(normalizedIcon);
@@ -101,7 +111,7 @@ export const SolidButton = React.forwardRef<HTMLButtonElement, SolidButtonProps>
       className={cx(
         "solid-btn",
         `solid-btn--${resolvedVariant}`,
-        `solid-btn--${resolvedSize}`,
+        resolvedSize ? `solid-btn--${resolvedSize}` : false,
         fullWidth && "solid-btn--full",
         loading && "is-loading",
         rounded && "solid-btn-rounded",

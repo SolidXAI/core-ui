@@ -8,7 +8,6 @@ export const SettingsImageRemoveButton = ({ onClick }: any) => {
             label="Remove"
             severity="danger"
             leftIcon={<X size={14} aria-hidden />}
-            size="small"
             className="mt-2"
             onClick={onClick}
         />

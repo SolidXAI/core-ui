@@ -97,7 +97,7 @@ export function DiagnosticsPage() {
             </div>
           </div>
           <div className="solid-studio-home-toolbar-right">
-            <SolidButton size="sm" variant="outline" onClick={() => setRefreshTick((v) => v + 1)}>
+            <SolidButton variant="outline" onClick={() => setRefreshTick((v) => v + 1)}>
               Refresh
             </SolidButton>
           </div>

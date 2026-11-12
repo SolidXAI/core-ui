@@ -212,7 +212,7 @@
 }
 
 .UserText {
-    font-size: 13px;
+    font-size: var(--solid-font-size-body-small);
     margin: 0;
     white-space: pre-wrap;
 }
@@ -775,7 +775,7 @@
     gap: 7px;
     width: 100%;
     padding: 2px 6px;
-    font-size: 12px;
+    font-size: var(--solid-font-size-ui-control);
     flex-wrap: nowrap;
     min-width: 0;
     background: transparent;

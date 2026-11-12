@@ -169,7 +169,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         <div className="solid-generate-code-popup__actions">
           {!isSolidCoreModel ? (
             <SolidButton
-              size="small"
               autoFocus
               leftIcon={<Sparkles size={14} />}
               loading={isGenerateCodeUpdating}
@@ -178,7 +177,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
               Generate
             </SolidButton>
           ) : null}
-          <SolidButton size="small" variant="outline" onClick={() => dispatch(closePopup())}>
+          <SolidButton variant="outline" onClick={() => dispatch(closePopup())}>
             {isSolidCoreModel ? "Close" : "Cancel"}
           </SolidButton>
         </div>

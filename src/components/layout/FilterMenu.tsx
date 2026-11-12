@@ -61,7 +61,6 @@ const FilterMenu = () => {
                         leftIcon={<Cog size={16} aria-hidden />}
                         className="transparent-background"
                         variant="ghost"
-                        size="sm"
                         aria-haspopup
                         aria-controls="popup_menu"
                     />

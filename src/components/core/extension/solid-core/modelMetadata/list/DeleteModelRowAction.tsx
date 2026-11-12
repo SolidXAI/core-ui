@@ -138,8 +138,8 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                     <SolidCheckbox id="delete-model-confirmation" name="confirm" checked={isConfirmed} onChange={() => setIsConfirmed(!isConfirmed)} label="I reviewed the automatic changes above and understand the database table drop is a separate manual step." />
                 </div>}
                 <div className="solid-delete-model-popup__actions">
-                    <SolidButton size="small" variant="destructive" disabled={!preview || !isConfirmed || isApplying || isLoadingPreview} loading={isApplying} autoFocus onClick={deleteModelHandler}>Delete model</SolidButton>
-                    <SolidButton size="small" variant="outline" disabled={isApplying} onClick={() => dispatch(closePopup())}>Cancel</SolidButton>
+                    <SolidButton variant="destructive" disabled={!preview || !isConfirmed || isApplying || isLoadingPreview} loading={isApplying} autoFocus onClick={deleteModelHandler}>Delete model</SolidButton>
+                    <SolidButton variant="outline" disabled={isApplying} onClick={() => dispatch(closePopup())}>Cancel</SolidButton>
                 </div>
             </div>
         </div>
