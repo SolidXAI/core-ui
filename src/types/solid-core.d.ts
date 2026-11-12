@@ -344,8 +344,9 @@ export type SolidChatterMessageWidgetProps = {
 };
 
 /**
- * Props of a SolidX Agent chat widget (ExtensionComponentTypes.chatInteractionWidget).
- * Resolved from `event_data.widget`, or from the default widget for `eventType`.
+ * Props of a SolidX Agent chat widget (agentTurnCompletionWidget, agentToolCallWidget, or agentUserTurnCompletionWidget).
+ * Resolved from `event_data.widget`, tool-name metadata for ToolCalling events,
+ * or the default widget for `eventType`.
  */
 export type SolidChatWidgetProps = {
     /** Agent event type, e.g. "ToolCalling", "LlmComplete", "UserMessage". */
@@ -368,6 +369,19 @@ export type SolidChatWidgetProps = {
     sendPrompt: (text: string) => void;
     /** Page context the conversation was started with (module, model, record). */
     agentContext?: import("../components/core/solid-agent/types").AgentContext;
+}
+
+/** Props of an activity-group widget (ExtensionComponentTypes.agentToolGroupWidget). */
+export type SolidToolGroupWidgetProps = {
+    turnKey: string;
+    items: import("../components/core/solid-agent/types").AgentChatItem[];
+    working: boolean;
+    renderItem: (item: import("../components/core/solid-agent/types").AgentChatItem) => import("react").ReactNode;
+}
+
+/** Props of an assistant-turn wrapper (ExtensionComponentTypes.agentTurnCompletionWrapperWidget). */
+export type SolidAgentTurnWidgetProps = {
+    children: import("react").ReactNode;
 }
 
 export type SolidSettingsWidgetProps = {

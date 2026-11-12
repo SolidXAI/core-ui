@@ -1,12 +1,13 @@
 import React from "react";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, Eye, Pencil, RefreshCw } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
 import { AgentHubModuleField, agentHubModuleFrom, agentHubModulePayload, type AgentHubModule } from "./AgentHubModuleField";
+import { SolidAgentMarkdown } from "../../../../components/core/solid-agent/SolidAgentMarkdown";
 import {
   SolidButton,
   SolidCodeEditor,
@@ -97,6 +98,8 @@ function skillAgents(record?: SkillRecord): AgentReference[] {
 
 export function AgentSkillRegistryEditorPage() {
   const { id = "" } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const initialName = id === "new" ? searchParams.get("name") ?? "" : "";
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const entityApi = React.useMemo(() => createSolidEntityApi("agentSkillRegistry"), []);
@@ -123,6 +126,7 @@ export function AgentSkillRegistryEditorPage() {
   const [iconName, setIconName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [body, setBody] = React.useState("");
+  const [previewBody, setPreviewBody] = React.useState(false);
   const [tags, setTags] = React.useState<AgentHubTag[]>([]);
   const [module, setModule] = React.useState<AgentHubModule | null>(null);
   const [creatingTag, setCreatingTag] = React.useState(false);
@@ -135,7 +139,7 @@ export function AgentSkillRegistryEditorPage() {
   React.useEffect(() => {
     const nextTags = agentHubTagsFrom(record?.tags);
     const nextModule = agentHubModuleFrom(record?.module);
-    setName(record?.name ?? "");
+    setName(record?.name ?? initialName);
     setType(record?.type ?? "custom");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
@@ -297,10 +301,13 @@ export function AgentSkillRegistryEditorPage() {
         <div className="agent-skill-editor__skill">
           <section className="agent-skill-editor__panel">
             <header>
-              <h2>Skill instructions <b>*</b></h2>
-              <p>Write the skill's Markdown body here.</p>
+              <div><h2>Skill instructions <b>*</b></h2>
+                <p>Write the skill's Markdown body here.</p></div>
+              <button type="button" className="agent-skill-editor__preview-toggle" aria-pressed={previewBody} aria-label={previewBody ? "Edit skill body" : "Preview skill body"} title={previewBody ? "Edit skill body" : "Preview skill body"} onClick={() => setPreviewBody((current) => !current)}>
+                {previewBody ? <Pencil size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
+              </button>
             </header>
-            <SolidCodeEditor
+            {previewBody ? <div className="agent-skill-editor__preview" role="region" aria-label="Skill body preview">{body.trim() ? <SolidAgentMarkdown text={body} /> : <p className="agent-skill-editor__preview-empty">Nothing to preview yet.</p>}</div> : <SolidCodeEditor
               value={body}
               onChange={(value) => {
                 setBody(value ?? "");
@@ -312,7 +319,7 @@ export function AgentSkillRegistryEditorPage() {
               fontSize={11}
               height="max(32rem, calc(100dvh - 18rem))"
               className={`agent-skill-editor__code${fieldErrors.body ? " agent-skill-editor__code--invalid" : ""}`}
-            />
+            />}
             {fieldErrors.body && <small className="agent-skill-editor__field-error agent-skill-editor__body-error">{fieldErrors.body}</small>}
           </section>
         </div>

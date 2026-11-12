@@ -264,6 +264,57 @@
   white-space: nowrap;
 }
 
+.row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.row .iconBadge {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.55rem;
+}
+
+.row .status {
+  flex: 0 0 auto;
+}
+
+.rowText {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.15rem 1rem;
+}
+
+@media (max-width: 600px) {
+  .rowText {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.rowText .title {
+  font-size: 0.9rem;
+}
+
+.rowDetail {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-color-secondary, #64748b);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowDetailError {
+  color: #b91c1c;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card { transition: none; }
   .card:hover { transform: none; }

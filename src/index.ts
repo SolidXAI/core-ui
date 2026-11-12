@@ -592,6 +592,7 @@ export { SolidAgentMount } from './components/core/solid-agent/SolidAgentMount';
 export { SolidAgentMarkdown, SolidAgentCopyButton } from './components/core/solid-agent/SolidAgentMarkdown';
 export { SolidAgentChatItem, getDefaultChatWidgetName } from './components/core/solid-agent/thread/SolidAgentChatItem';
 export { getChatWidgetData } from './components/core/solid-agent/widgets/chatWidgetUtils';
+export { DefaultAgentUserTurnCompletionWidget } from './components/core/solid-agent/widgets/DefaultAgentUserTurnCompletionWidget';
 export { disposeAgentRuntime } from './components/core/solid-agent/client/agentRuntime';
 export { signInWithApiKey, clearAgentAuth, clearAllAgentAuth } from './components/core/solid-agent/client/agentAuth';
 export { default as agentReducer } from './redux/features/agentSlice';
@@ -634,6 +635,8 @@ export type {
     SolidFormFieldWidgetProps,
     SolidChatterMessageWidgetProps,
     SolidChatWidgetProps,
+    SolidToolGroupWidgetProps,
+    SolidAgentTurnWidgetProps,
     SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidBeforeListDataLoad,

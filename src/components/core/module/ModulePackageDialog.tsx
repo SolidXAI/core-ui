@@ -293,6 +293,7 @@ export function ModulePackageImportContent({
   const [transactionKey, setTransactionKey] = useState<string | null>(null);
   const [overwriteExisting, setOverwriteExisting] = useState(false);
   const [acknowledgeVersionChange, setAcknowledgeVersionChange] = useState(false);
+  const [acknowledgeLocalChanges, setAcknowledgeLocalChanges] = useState(false);
   const [pruneOnSeed, setPruneOnSeed] = useState(false);
   const [showAllFiles, setShowAllFiles] = useState(false);
   const [isRestoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
@@ -352,7 +353,10 @@ export function ModulePackageImportContent({
   const versionComparison = previewResponse?.versionComparison ?? previewResponse?.preview?.versionComparison ?? null;
   const requiresVersionAcknowledgement = Boolean(previewResponse?.preview?.requiresVersionAcknowledgement);
   // Clicking the Update button approves the shown version; risky updates also need an explicit acknowledgement.
-  const isUpdateApproved = !isUpdate || !requiresVersionAcknowledgement || acknowledgeVersionChange;
+  // Package files edited since the last install are replaced by the update; the user has to confirm that too.
+  const locallyModifiedReplaced: string[] = previewResponse?.preview?.fileSync?.locallyModifiedReplaced ?? [];
+  const isUpdateApproved = !isUpdate
+    || ((!requiresVersionAcknowledgement || acknowledgeVersionChange) && (locallyModifiedReplaced.length === 0 || acknowledgeLocalChanges));
   const backup = previewResponse?.backup ?? null;
 
   const canImport = steps.preview.status !== "pending" && isArchiveValid && isUpdateApproved && steps.import.status !== "success" && !isProcessing && !isPreviewing;
@@ -411,6 +415,7 @@ export function ModulePackageImportContent({
       setTransactionKey(response?.transactionKey ?? null);
       setOverwriteExisting(false);
       setAcknowledgeVersionChange(false);
+      setAcknowledgeLocalChanges(false);
       setShowAllFiles(false);
       setFinalSummary(null);
       setSteps(hydrateStepsFromTransaction(response, fallbackMode));
@@ -616,7 +621,7 @@ export function ModulePackageImportContent({
 
       const response = await confirmModulePackageImport(
         isUpdate
-          ? { transactionKey, confirmedVersion: incomingVersion, acknowledgeVersionChange }
+          ? { transactionKey, confirmedVersion: incomingVersion, acknowledgeVersionChange, acknowledgeLocalChanges }
           : { transactionKey, overwriteExisting },
       ).unwrap();
 
@@ -805,6 +810,7 @@ export function ModulePackageImportContent({
                 setTransactionKey(null);
                 setOverwriteExisting(false);
                 setAcknowledgeVersionChange(false);
+                setAcknowledgeLocalChanges(false);
                 setFinalSummary(null);
                 setSelectedStep("preview");
                 setSteps(createInitialSteps(fallbackMode));
@@ -844,6 +850,22 @@ export function ModulePackageImportContent({
 
             <div className="solid-module-package-checklist">
               {isUpdate ? renderVersionApproval() : null}
+
+              {isUpdate && isArchiveValid && locallyModifiedReplaced.length > 0 ? (
+                <div className="solid-module-package-notice is-warning">
+                  <div className="solid-module-package-notice__title">Files changed locally will be replaced</div>
+                  <ul className="solid-module-package-inline-list">
+                    {locallyModifiedReplaced.map((file) => (
+                      <li key={file}>{file}</li>
+                    ))}
+                  </ul>
+                  <SolidCheckbox
+                    checked={acknowledgeLocalChanges}
+                    onChange={(event) => setAcknowledgeLocalChanges(event.currentTarget.checked)}
+                    label="I understand these files will be replaced. The backup keeps my versions."
+                  />
+                </div>
+              ) : null}
               {isUpdate ? renderChangeSummary() : null}
 
               <div className="solid-module-package-checklist__section">

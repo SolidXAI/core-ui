@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { hasAnyRole } from "../../../../helpers/rolesHelper";
 import { useSession } from "../../../../hooks/useSession";
@@ -78,6 +78,8 @@ function getSaveErrorMessage(error: unknown): string {
 
 export function AgentToolRegistryEditorPage() {
   const { id = "" } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const initialName = id === "new" ? searchParams.get("name") ?? "" : "";
   const { data: session } = useSession();
   const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
   const navigate = useNavigate();
@@ -113,7 +115,7 @@ export function AgentToolRegistryEditorPage() {
   React.useEffect(() => {
     const nextTags = agentHubTagsFrom(record?.tags);
     const nextModule = agentHubModuleFrom(record?.module);
-    setName(record?.name ?? "");
+    setName(record?.name ?? initialName);
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");
     setType(record?.type ?? "custom");
