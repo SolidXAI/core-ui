@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Check, Copy, Sparkles } from "lucide-react";
-import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui/SolidTooltip";
+import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../../shad-cn-ui/SolidTooltip";
 import type { SolidAgentChatHeaderWidgetProps } from "../../../../types/solid-core";
 import styles from "../SolidAgent.module.css";
 
