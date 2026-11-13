@@ -11,6 +11,21 @@ import { SolidButton } from "../shad-cn-ui/SolidButton";
 import { SolidDialog } from "../shad-cn-ui/SolidDialog";
 import { SolidIcon, parseSolidIconMeta } from "../shad-cn-ui/SolidIcon";
 import { getSettingsMap } from "../../helpers/settingsPayload";
+import { getCurrentSolidEnvironmentLabel } from "../../helpers/buttonEnvironment";
+
+const SolidEnvironmentBadge = () => {
+  if (getCurrentSolidEnvironmentLabel() !== "dev") return null;
+
+  return (
+    <span
+      className="solid-user-menu-environment-badge"
+      title="Development environment"
+      aria-label="Development environment"
+    >
+      DEV
+    </span>
+  );
+};
 
 const UserProfileMenu = () => {
   const dispatch = useDispatch();
@@ -119,9 +134,12 @@ const UserProfileMenu = () => {
               </span>
             </span>
           </span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M7 5.83301L3.5 9.33301H10.5L7 5.83301Z" fill="currentColor" />
-          </svg>
+          <span className="solid-user-menu-trigger-actions">
+            <SolidEnvironmentBadge />
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M7 5.83301L3.5 9.33301H10.5L7 5.83301Z" fill="currentColor" />
+            </svg>
+          </span>
         </button>
 
         {menuOpen && (
