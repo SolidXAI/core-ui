@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Copy, History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -49,6 +49,10 @@ import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
 import { AgentProviderDropdown, formatProviderName, getProviderAuthStatus } from "./AgentProviderDropdown";
 import { AgentSessionList, AgentSessionSearch } from "./AgentSessionList";
+import { AgentWorkspaceHeaderActions } from "./AgentWorkspaceHeaderActions";
+import type { AgentWorkspaceControls } from "./embed/agentWorkspace";
+import { getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
+import { ExtensionComponentTypes } from "../../../types/extension-registry";
 
 export { formatProviderName };
 
@@ -80,6 +84,7 @@ type Props = {
         onRestore: () => void;
         onClose: () => void;
     };
+    workspaceControls?: AgentWorkspaceControls;
 };
 
 const DEFAULT_SUGGESTIONS = [
@@ -163,6 +168,7 @@ export function SolidAgentChat({
     handlesPrefill = !embedded && agentRuntime === "solidx",
     suggestions,
     windowControls,
+    workspaceControls,
 }: Props) {
     const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
@@ -1106,16 +1112,9 @@ export function SolidAgentChat({
     const displaySessionId = activeSessionId
         ? (isFullScreen ? activeSessionId : (activeSessionId.length > 12 ? activeSessionId.slice(0, 8) : activeSessionId))
         : "";
-    const [copiedSession, setCopiedSession] = useState(false);
-    const handleCopySessionId = useCallback(() => {
-        if (!activeSessionId) return;
-        navigator.clipboard?.writeText(activeSessionId).then(() => {
-            setCopiedSession(true);
-            setTimeout(() => setCopiedSession(false), 2000);
-        }).catch(() => {
-            // ignore clipboard failure
-        });
-    }, [activeSessionId]);
+    const headerWidgetName = getAgentChatHeaderWidgetName(agentName) ?? "DefaultAgentChatHeaderWidget";
+    const AgentChatHeaderWidget = getExtensionComponent(headerWidgetName, ExtensionComponentTypes.agentChatHeaderWidget)
+        ?? getExtensionComponent("DefaultAgentChatHeaderWidget", ExtensionComponentTypes.agentChatHeaderWidget);
 
     const empty = (
         <div className={styles.empty}>
@@ -1325,50 +1324,18 @@ export function SolidAgentChat({
                 </SolidDialogBody>
             </SolidDialog>
             <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`} ref={headerRef}>
-                <div className={styles.headerMark}>
-                    <Sparkles size={15} />
-                    <span className={styles.statusDot} style={{ background: statusColor }} />
-                </div>
-                <div className={styles.headerTitle}>
-                    <div className={styles.headerTitleRow}>
-                        <strong>{title}</strong>
-                        {agentRuntime === "agentHub" && agentConfigVersion != null && (
-                            <span className={styles.headerVersionTag} title={`Agent Version: v${agentConfigVersion}`}>
-                                v{agentConfigVersion}
-                            </span>
-                        )}
-                    </div>
-                    <span className={styles.headerSub}>
-                        {signedIn && providerDisplayName && (
-                            <span className={styles.headerProviderTag} title={`Active Provider: ${providerDisplayName}`}>
-                                {providerDisplayName}
-                            </span>
-                        )}
-                        {signedIn && activeSessionId && (
-                            <SolidTooltip delayDuration={150}>
-                                <SolidTooltipTrigger asChild>
-                                    <button
-                                        type="button"
-                                        className={styles.headerSessionTag}
-                                        onClick={handleCopySessionId}
-                                        aria-label={`Session ID: ${activeSessionId}. Click to copy`}
-                                    >
-                                        <span className={styles.headerSessionCode}>{displaySessionId}</span>
-                                        {copiedSession ? (
-                                            <Check size={11} className={`${styles.headerSessionIcon} ${styles.headerSessionIconCopied}`} />
-                                        ) : (
-                                            <Copy size={11} className={styles.headerSessionIcon} />
-                                        )}
-                                    </button>
-                                </SolidTooltipTrigger>
-                                <SolidTooltipContent side="bottom" align="start">
-                                    {copiedSession ? "Copied Session ID!" : `Session: ${activeSessionId} (Click to copy)`}
-                                </SolidTooltipContent>
-                            </SolidTooltip>
-                        )}
-                        {statusText && <span className={styles.headerStatusText}>{statusText}</span>}
-                    </span>
-                </div>
+                {AgentChatHeaderWidget && <AgentChatHeaderWidget
+                    title={title}
+                    agentName={agentName}
+                    agentRuntime={agentRuntime}
+                    agentConfigVersion={agentConfigVersion}
+                    statusColor={statusColor}
+                    statusText={statusText}
+                    providerDisplayName={providerDisplayName}
+                    signedIn={signedIn}
+                    activeSessionId={activeSessionId}
+                    displaySessionId={displaySessionId}
+                />}
                 {signedIn && (
                     <>
                         {(!isFullScreen || !sidebarOpen) && (
@@ -1444,7 +1411,8 @@ export function SolidAgentChat({
                         </button>}
                     </>
                 )}
-                {(!embedded || windowControls) && (
+                {workspaceControls && <AgentWorkspaceHeaderActions {...workspaceControls} />}
+                {!workspaceControls && (!embedded || windowControls) && (
                     <>
                         {windowMode !== "docked" && (
                             <button type="button" className={styles.iconBtn} title="Dock to the side" aria-label="Dock to the side" onClick={() => windowControls ? windowControls.onDock() : setMode("docked")}>

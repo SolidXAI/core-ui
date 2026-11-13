@@ -265,8 +265,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 52px;
-  padding: 0 8px 0 14px;
+  min-height: 52px;
+  height: auto;
+  padding: 8px 8px 8px 14px;
   border-bottom: 1px solid var(--agent-border);
 }
 .headerMark {

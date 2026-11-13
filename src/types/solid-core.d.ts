@@ -389,6 +389,20 @@ export type SolidAgentTurnWidgetProps = {
     children: import("react").ReactNode;
 }
 
+/** Props for the left identity section of the agent chat header. */
+export type SolidAgentChatHeaderWidgetProps = {
+    title: string;
+    agentName?: string;
+    agentRuntime: "solidx" | "agentHub";
+    agentConfigVersion?: number | null;
+    statusColor: string;
+    statusText: string;
+    providerDisplayName: string;
+    signedIn: boolean;
+    activeSessionId: string;
+    displaySessionId: string;
+}
+
 export type SolidSettingsWidgetProps = {
     setting: any;
     value: any;

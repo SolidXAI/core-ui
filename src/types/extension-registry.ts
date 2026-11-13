@@ -23,6 +23,8 @@ export const ExtensionComponentTypes = {
     agentToolGroupWidget: "agentToolGroupWidget",
     agentToolCallWidget: "agentToolCallWidget",
     agentUserTurnCompletionWidget: "agentUserTurnCompletionWidget",
+    /** Renders the agent identity area on the left side of the chat header. */
+    agentChatHeaderWidget: "agentChatHeaderWidget",
     // Renders the wrapper around one assistant turn, including activity and responses.
     agentTurnCompletionWrapperWidget: "agentTurnCompletionWrapperWidget",
 

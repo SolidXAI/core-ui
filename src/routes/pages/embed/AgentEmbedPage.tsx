@@ -7,6 +7,7 @@ import { SolidAgentEmbedded } from "../../../components/core/solid-agent/SolidAg
 import { onAgentPublicEvent, type AgentPublicEvent } from "../../../components/core/solid-agent/client/agentPublicEvents";
 import { registerExternalAgentAuth, renewExternalAgentAuth, type AgentAuth } from "../../../components/core/solid-agent/client/agentAuth";
 import { EMBED_CHANNEL, EMBED_PUBLIC_PROTOCOL_VERSION, MissingAgentInputsError, validateBootstrap, validateEmbedInputs, validateMessageContext, type AgentEmbedBootstrap, type BeforeUserMessageSendRequest, type EmbedMessageContext } from "../../../components/core/solid-agent/embed/agentEmbedProtocol";
+import { parseAgentWorkspaceState, type AgentWorkspaceState } from "../../../components/core/solid-agent/embed/agentWorkspace";
 import styles from "./AgentEmbedPage.module.css";
 
 /** Request IDs correlate iframe messages; they are not credentials and need not be cryptographic. */
@@ -21,6 +22,7 @@ export function AgentEmbedPage() {
     const [store] = useState(() => configureStore({ reducer: { solidAgent: agentReducer } }));
     const [bootstrap, setBootstrap] = useState<AgentEmbedBootstrap | null>(null);
     const [agentName, setAgentName] = useState<string | undefined>();
+    const [workspace, setWorkspace] = useState<AgentWorkspaceState | null>(null);
     const [inputs, setInputs] = useState<Record<string, unknown>>({});
     const [error, setError] = useState("");
     const [missingInputs, setMissingInputs] = useState<string[]>([]);
@@ -119,6 +121,7 @@ export function AgentEmbedPage() {
                     if (!locked.current) { validateEmbedInputs(next.requiredInputs, data.inputs); setInputs(data.inputs); }
                     schema.current = next;
                     setAgentName(typeof data.agentName === "string" && data.agentName.trim() ? data.agentName.trim() : undefined);
+                    setWorkspace(parseAgentWorkspaceState(data.workspace));
                     setBootstrap(next);
                     setError("");
                     setMissingInputs([]);
@@ -131,6 +134,8 @@ export function AgentEmbedPage() {
                     else setError(message);
                     request.reject(new Error(message)); send("error", { error: message });
                 }
+            } else if (data.type === "workspace_state") {
+                setWorkspace(parseAgentWorkspaceState(data.workspace));
             } else if (data.type === "set_inputs") {
                 try {
                     if (locked.current) throw new Error("Start a new chat before changing inputs.");
@@ -170,7 +175,7 @@ export function AgentEmbedPage() {
         const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") send("close"); };
         window.addEventListener("keydown", onKey);
         send("ready", { protocolVersion: EMBED_PUBLIC_PROTOCOL_VERSION,
-            capabilities: ["inlinePanel", "asyncBeforeSend", "messageContextV1", "publicCommands"] });
+            capabilities: ["inlinePanel", "asyncBeforeSend", "messageContextV1", "publicCommands", "workspaceControlsV1"] });
         void renewExternalAgentAuth(agentUrl).then(() => {
             console.info("[agent-embed][iframe] initial auth renewal completed");
         }).catch((failure) => {
@@ -216,6 +221,7 @@ export function AgentEmbedPage() {
             </section>
         ) : null}
         {bootstrap ? <SolidAgentEmbedded agentRuntime="agentHub" agentId={agentId} agentName={agentName} title={bootstrap.title} inputs={inputs} height="100%"
+            workspaceControls={workspace ? { ...workspace, onAction: (action, nextAgentName) => send("workspace_request", { action, agentName: nextAgentName }) } : undefined}
             externalEmbed={{ agentUrl,
                 sessionOwnerKey: String(bootstrap.user.id),
                 beforeSend, onInputsLocked: (value) => { locked.current = value; send("inputs_locked", { locked: value }); } }} />
