@@ -38,7 +38,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     });
     const [isMobileViewport, setIsMobileViewport] = useState(false);
 
-    const [getchatterMessage, { isLoading: isChatterLoading }] = useLazyGetchatterMessageQuery();
+    const [getchatterMessage, { isLoading: isChatterLoading, isFetching: isChatterFetching }] = useLazyGetchatterMessageQuery();
 
     useEffect(() => {
         const updateViewport = () => setIsMobileViewport(window.innerWidth <= 1199);
@@ -305,7 +305,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                                 ? 'calc(100vh - 292px)'
                                 : 'calc(100vh - 127px)'),
             }}>
-                {isChatterLoading
+                {isChatterLoading || isChatterFetching
                     ? renderLoadingState()
                     : !canViewMessages
                         ? permissionError()
