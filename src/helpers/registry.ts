@@ -104,6 +104,7 @@ import { DefaultAgentTurnCompletionWidget } from "../components/core/solid-agent
 import { DefaultAgentToolCallWidget } from "../components/core/solid-agent/widgets/DefaultAgentToolCallWidget";
 import { DefaultAgentToolGroupWidget } from "../components/core/solid-agent/widgets/DefaultAgentToolGroupWidget";
 import { DefaultAgentTurnCompletionWrapperWidget } from "../components/core/solid-agent/widgets/DefaultAgentTurnCompletionWrapperWidget";
+import { DefaultAgentChatHeaderWidget } from "../components/core/solid-agent/widgets/DefaultAgentChatHeaderWidget";
 import { DefaultErrorChatWidget } from "../components/core/solid-agent/widgets/DefaultErrorChatWidget";
 import { DefaultNoticeChatWidget } from "../components/core/solid-agent/widgets/DefaultNoticeChatWidget";
 import { DefaultUnknownChatWidget } from "../components/core/solid-agent/widgets/DefaultUnknownChatWidget";
@@ -239,6 +240,10 @@ export const getToolGroupChatWidgetName = (agentName?: string): string | null =>
 /** Resolve a UI module's assistant-turn wrapper; otherwise use the built-in layout. */
 export const getAgentTurnChatWidgetName = (agentName?: string): string | null =>
     findAgentWidget(ExtensionComponentTypes.agentTurnCompletionWrapperWidget, "agentTurn", agentName);
+
+/** Resolve a UI module's agent-chat header identity renderer. */
+export const getAgentChatHeaderWidgetName = (agentName?: string): string | null =>
+    findAgentWidget(ExtensionComponentTypes.agentChatHeaderWidget, "agentChatHeader", agentName);
 
 /** Discover agent-facing metadata from chat widgets that opt in through their metadata hook. */
 export const getAgentChatWidgetCatalog = (agentName?: string): AgentChatWidgetMetadata[] => {
@@ -576,6 +581,7 @@ registerExtensionComponent("DefaultAgentTurnCompletionWidget", DefaultAgentTurnC
 registerExtensionComponent("DefaultAgentToolCallWidget", DefaultAgentToolCallWidget, ExtensionComponentTypes.agentToolCallWidget);
 registerExtensionComponent("DefaultAgentToolGroupWidget", DefaultAgentToolGroupWidget, ExtensionComponentTypes.agentToolGroupWidget);
 registerExtensionComponent("DefaultAgentTurnCompletionWrapperWidget", DefaultAgentTurnCompletionWrapperWidget, ExtensionComponentTypes.agentTurnCompletionWrapperWidget);
+registerExtensionComponent("DefaultAgentChatHeaderWidget", DefaultAgentChatHeaderWidget, ExtensionComponentTypes.agentChatHeaderWidget);
 registerExtensionComponent("DefaultErrorChatWidget", DefaultErrorChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["error"]);
 registerExtensionComponent("DefaultNoticeChatWidget", DefaultNoticeChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
 registerExtensionComponent("DefaultThinkingChatWidget", DefaultThinkingChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);

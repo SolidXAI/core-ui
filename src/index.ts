@@ -637,6 +637,7 @@ export type {
     SolidChatWidgetProps,
     SolidToolGroupWidgetProps,
     SolidAgentTurnWidgetProps,
+    SolidAgentChatHeaderWidgetProps,
     SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidBeforeListDataLoad,
