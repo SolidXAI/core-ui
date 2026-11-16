@@ -10,6 +10,7 @@ import { useSession } from "../../../../hooks/useSession";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentDeploymentPanel, type AgentDeployment } from "./AgentDeploymentPanel";
 import { AgentPersonaHistory } from "./AgentPersonaHistory";
 import { AgentConfigVersionsPanel } from "./AgentConfigVersionsPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
@@ -30,7 +31,7 @@ import "./AgentRegistryEditorPage.css";
 type Item = { id: number; name?: string; title?: string; displayName?: string; description?: string; iconName?: string; key?: string; module?: { id?: number; displayName?: string }; [key: string]: any };
 type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; roleMetadata?: Item; secret?: Item; envVarName?: string; alwaysInclude?: boolean; requiresApproval?: boolean };
 type Input = { name: string; description: string; dataType: string; defaultValue?: unknown; optional: boolean };
-type Agent = Item & {
+type Agent = Item & AgentDeployment & {
   configVersion?: number;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
@@ -174,6 +175,7 @@ function fieldsQuery(fields: string[]): string {
 const detailFields = [
   "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
   "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
+  "runner", "minProcesses", "maxProcesses", "processCpu", "processMemory",
 ];
 
 const detailQuery = [
@@ -884,7 +886,10 @@ export function AgentRegistryEditorPage() {
       compact
       render={(item) => <div className="agent-editor__secret"><strong title={item.displayName ?? item.name ?? item.key}>{item.displayName ?? item.name ?? item.key}</strong>
         <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={16} /></button></div>} /> },
-    ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
+    ...(record?.id ? [{ value: "processes", label: "Processes", content: <div className="agent-editor__stack">
+      <AgentDeploymentPanel key={record.id} agentId={record.id} current={record} onSaved={() => void agentResult.refetch()} />
+      <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} />
+    </div> }] : []),
     ...((record?.id ? [
       ["jobs", "Jobs", jobs.currentData?.records],
     ] : []) as [string, string, Item[]][]).map(([value, label, related]) => ({ value, label, content: <section className="agent-editor__section"><h2>{label}</h2>

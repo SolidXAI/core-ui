@@ -162,7 +162,7 @@ export function AgentThread({ items, agentName, thinking, working = thinking, ha
                     activityItems = [];
                 };
                 for (const item of group.items) {
-                    if (isAssistantMessage(item)) {
+                    if (isAssistantMessage(item) || item.eventType === "HumanRequestCreated" && item.widget === "question") {
                         flushActivity(false);
                         turnContent.push(renderItem(item, false));
                     } else {
