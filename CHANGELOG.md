@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.22-beta.4] - 2026-11-16
+
+### Added
+
+- update button layout in SolidCancelButton, SolidListView, and SolidTreeView for improved responsiveness (#308)
+- enhance AgentJobsInboxPage layout and add resuming state for improved user experience
+- enhance error handling in RunDetail and add runFailureMessage function for improved user feedback
+- add human review functionality and agent deployment management
+- enhance SolidAgentChat header layout with identity slot for improved structure
+- implement agent workspace with agent selector and header actions for improved agent management
+- enhance LinkPicker and add AddLinksDialog for improved item selection and search functionality
+- enhance agent registry editor with new layout options and improved resource handling
+- Refactor SolidX Agent chat widgets and introduce new default widgets
+
+### Fixed
+
+- show and hide responsive controls with core-ui-owned classes (#307)
+- update import path for SolidTooltip in DefaultAgentChatHeaderWidget
+
+### Other
+
+- Revert "feat: update button layout in SolidCancelButton, SolidListView, and SolidTreeView for improved responsiveness (#308)"
+- Feat/env badge (#305)
+
 ## [0.1.22-beta.3] - 2026-11-04
 
 ### Added
