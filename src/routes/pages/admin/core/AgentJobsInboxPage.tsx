@@ -35,7 +35,7 @@ type RunDetail = {
   agentName?: string | null;
   result: string | null;
   requests?: RequestHistory[];
-  error?: { code?: string } | null;
+  error?: { code?: string; message?: string } | null;
   pendingRequest: HumanReview | null;
 };
 type Inbox = { runs: Run[]; hasMore: boolean };
@@ -86,6 +86,21 @@ function errorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function runFailureMessage(error: RunDetail["error"]): string | null {
+  if (!error) return null;
+  if (error.message) return error.message;
+  switch (error.code) {
+    case "model_unavailable":
+      return "The agent’s reasoning model is unavailable. Check its model selection and the provider credentials in AI Settings.";
+    case "timeout":
+      return "The agent run timed out before it could finish. Review the run and start a new job if needed.";
+    case "agent_error":
+      return "The agent run failed while continuing after a response. Check the AgentHub worker logs for the underlying error.";
+    default:
+      return "The agent run failed before it could complete. Check the AgentHub worker logs for details.";
+  }
+}
+
 function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onChange: () => void }) {
   const path = `${inboxPath}/${encodeURIComponent(run.sessionId)}`;
   const [detail, setDetail] = React.useState<RunDetail | null>(null);
@@ -106,6 +121,7 @@ function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onCh
     ? "queued" : detail?.status ?? run.status;
   const hasJob = detail?.hasJob ?? (detail ? detail.jobId !== null : run.hasJob);
   const canConnect = hasJob === true && !["completed", "failed", "cancelled", "expired"].includes(status);
+  const runFailure = runFailureMessage(detail?.error);
 
   React.useEffect(() => {
     const abort = new AbortController();
@@ -293,9 +309,7 @@ function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onCh
     <div className={styles.runBody}>
     {hasJob === false && <p className={styles.notice}>This session has no job for a worker to run.</p>}
     {error && <p className={styles.notice} role="alert">{error}</p>}
-    {detail?.error?.code === "model_unavailable" && <p className={styles.notice} role="alert">
-      The agent’s reasoning model is unavailable. Check its model selection and the provider credentials in AI Settings.
-    </p>}
+    {runFailure && <p className={styles.notice} role="alert">{runFailure}</p>}
     {answerError && <p className={styles.notice} role="alert">{answerError}</p>}
     <div className={`${chatStyles.root} ${styles.chat}`}>
       <AgentThread items={items} agentName={detail?.agentName ?? undefined} thinking={false}
