@@ -195,7 +195,7 @@ export const SolidKanbanViewConfigure = ({
                         />
                     ))}
 
-                    <div className="max-lg:flex lg:hidden flex-col gap-1">
+                    <div className="max-lg:flex solid-hide-from-lg flex-col gap-1">
                         {mobileOnlyHeaderButtons.map((button: any, index: number) => (
                             <SolidListViewHeaderContextMenuButton
                                 key={`mobile-${button?.attrs?.action ?? index}`}
