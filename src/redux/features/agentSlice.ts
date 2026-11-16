@@ -71,6 +71,7 @@ const agentSlice = createSlice({
         },
         agentConnectionChanged(state, action: PayloadAction<AgentConnection>) {
             state.connection = action.payload;
+            if (action.payload !== "open") state.reviewSubmitting = false;
             if (action.payload !== "open" && state.working) {
                 // A turn cannot finish on a dropped socket; unblock the composer.
                 state.working = false;
@@ -105,7 +106,8 @@ const agentSlice = createSlice({
         agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null }>) {
             const { items, hasMore, page, usage } = action.payload;
             // History is always older than anything already in the thread.
-            state.items = [...items, ...state.items];
+            const currentIds = new Set(state.items.map((item) => item.id));
+            state.items = [...items.filter((item) => !currentIds.has(item.id)), ...state.items];
             state.hasMoreHistory = hasMore;
             state.historyPage = page;
             if (usage && (!state.usage || state.usage.totalTokens === 0)) {

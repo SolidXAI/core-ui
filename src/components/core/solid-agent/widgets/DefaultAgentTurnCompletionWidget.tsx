@@ -7,7 +7,7 @@ import { formatChatTime } from "./chatWidgetUtils";
  * Default widget for `LlmComplete` / streamed `LlmToken` / `TurnCompleteEvent` text: the agent's
  * reply as markdown in a bordered bubble, with a blinking cursor while it streams.
  */
-export const DefaultAssistantMessageChatWidget = ({ eventData, live, timestamp, showMessageMeta = true }: SolidChatWidgetProps) => {
+export const DefaultAgentTurnCompletionWidget = ({ eventData, live, timestamp, showMessageMeta = true }: SolidChatWidgetProps) => {
     const content = String(eventData.content ?? "");
     return (
         <div className={styles.BubbleGroup}>
@@ -25,6 +25,6 @@ export const DefaultAssistantMessageChatWidget = ({ eventData, live, timestamp, 
     );
 };
 
-Object.assign(DefaultAssistantMessageChatWidget, { getExtensionMetadata: () => ({
+Object.assign(DefaultAgentTurnCompletionWidget, { getExtensionMetadata: () => ({
     chatInteraction: { role: "event-renderer", agentSelectable: false },
 }) });

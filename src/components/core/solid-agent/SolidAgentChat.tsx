@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Copy, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -26,6 +26,7 @@ import {
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
+import { humanReviewId, humanReviewText } from "./humanReview";
 import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
@@ -40,9 +41,12 @@ import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidDialog, SolidDialogBody } from "../../shad-cn-ui/SolidDialog";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
-import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui/SolidTooltip";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
+import { AgentWorkspaceHeaderActions } from "./AgentWorkspaceHeaderActions";
+import type { AgentWorkspaceControls } from "./embed/agentWorkspace";
+import { getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
+import { ExtensionComponentTypes } from "../../../types/extension-registry";
 
 export function formatProviderName(raw?: string): string {
     if (!raw) return "";
@@ -57,6 +61,7 @@ export function formatProviderName(raw?: string): string {
 type Props = {
     agentUrl: string;
     title?: string;
+    agentName?: string;
     /** AgentHub configuration version to display in the header. */
     agentVersion?: number;
     /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
@@ -81,6 +86,7 @@ type Props = {
         onRestore: () => void;
         onClose: () => void;
     };
+    workspaceControls?: AgentWorkspaceControls;
 };
 
 const DEFAULT_SUGGESTIONS = [
@@ -149,6 +155,7 @@ function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<stri
 export function SolidAgentChat({
     agentUrl,
     title = "SolidX Agent",
+    agentName,
     agentVersion,
     agentRuntime = "solidx",
     inputContext = {},
@@ -163,8 +170,11 @@ export function SolidAgentChat({
     handlesPrefill = !embedded && agentRuntime === "solidx",
     suggestions,
     windowControls,
+    workspaceControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName);
+    const review = agent.pendingReview;
+    const reviewDisabled = agent.reviewSubmitting || agent.connection !== "open";
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -686,6 +696,11 @@ export function SolidAgentChat({
     const sendWithAttachments = useCallback(
         async (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
+            if (review) {
+                const answer = humanReviewText(review, text);
+                runtime.respondToReview(answer.choice, answer.text);
+                return;
+            }
             onInputsLocked?.(true);
             try {
                 const result = await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer");
@@ -694,7 +709,7 @@ export function SolidAgentChat({
             }
             catch (error) { onInputsLocked?.(false); throw error; }
         },
-        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
+        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked, review],
     );
     useEffect(() => {
         const onEmbedCommand = (event: Event) => {
@@ -756,16 +771,9 @@ export function SolidAgentChat({
     const displaySessionId = activeSessionId
         ? (isFullScreen ? activeSessionId : (activeSessionId.length > 12 ? activeSessionId.slice(0, 8) : activeSessionId))
         : "";
-    const [copiedSession, setCopiedSession] = useState(false);
-    const handleCopySessionId = useCallback(() => {
-        if (!activeSessionId) return;
-        navigator.clipboard?.writeText(activeSessionId).then(() => {
-            setCopiedSession(true);
-            setTimeout(() => setCopiedSession(false), 2000);
-        }).catch(() => {
-            // ignore clipboard failure
-        });
-    }, [activeSessionId]);
+    const headerWidgetName = getAgentChatHeaderWidgetName(agentName) ?? "DefaultAgentChatHeaderWidget";
+    const AgentChatHeaderWidget = getExtensionComponent(headerWidgetName, ExtensionComponentTypes.agentChatHeaderWidget)
+        ?? getExtensionComponent("DefaultAgentChatHeaderWidget", ExtensionComponentTypes.agentChatHeaderWidget);
 
 
     // const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
@@ -871,49 +879,19 @@ export function SolidAgentChat({
                 </SolidDialogBody>
             </SolidDialog>
             <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`}>
-                <div className={styles.headerMark}>
-                    <Sparkles size={15} />
-                    <span className={styles.statusDot} style={{ background: statusColor }} />
-                </div>
-                <div className={styles.headerTitle}>
-                    <div className={styles.headerTitleRow}>
-                        <strong>{title}</strong>
-                        {agentRuntime === "agentHub" && agentConfigVersion != null && (
-                            <span className={styles.headerVersionTag} title={`Agent Version: v${agentConfigVersion}`}>
-                                v{agentConfigVersion}
-                            </span>
-                        )}
-                    </div>
-                    <span className={styles.headerSub}>
-                        {agentRuntime !== "agentHub" && signedIn && providerDisplayName && (
-                            <span className={styles.headerProviderTag} title={`Active Provider: ${providerDisplayName}`}>
-                                {providerDisplayName}
-                            </span>
-                        )}
-                        {signedIn && activeSessionId && (
-                            <SolidTooltip delayDuration={150}>
-                                <SolidTooltipTrigger asChild>
-                                    <button
-                                        type="button"
-                                        className={styles.headerSessionTag}
-                                        onClick={handleCopySessionId}
-                                        aria-label={`Session ID: ${activeSessionId}. Click to copy`}
-                                    >
-                                        <span className={styles.headerSessionCode}>{displaySessionId}</span>
-                                        {copiedSession ? (
-                                            <Check size={11} className={`${styles.headerSessionIcon} ${styles.headerSessionIconCopied}`} />
-                                        ) : (
-                                            <Copy size={11} className={styles.headerSessionIcon} />
-                                        )}
-                                    </button>
-                                </SolidTooltipTrigger>
-                                <SolidTooltipContent side="bottom" align="start">
-                                    {copiedSession ? "Copied Session ID!" : `Session: ${activeSessionId} (Click to copy)`}
-                                </SolidTooltipContent>
-                            </SolidTooltip>
-                        )}
-                        {statusText && <span className={styles.headerStatusText}>{statusText}</span>}
-                    </span>
+                <div className={styles.headerIdentitySlot}>
+                    {AgentChatHeaderWidget && <AgentChatHeaderWidget
+                        title={title}
+                        agentName={agentName}
+                        agentRuntime={agentRuntime}
+                        agentConfigVersion={agentConfigVersion}
+                        statusColor={statusColor}
+                        statusText={statusText}
+                        providerDisplayName={providerDisplayName}
+                        signedIn={signedIn}
+                        activeSessionId={activeSessionId}
+                        displaySessionId={displaySessionId}
+                    />}
                 </div>
                 {signedIn && (
                     <>
@@ -1021,7 +999,8 @@ export function SolidAgentChat({
                         </button>}
                     </>
                 )}
-                {(!embedded || windowControls) && (
+                {workspaceControls && <AgentWorkspaceHeaderActions {...workspaceControls} />}
+                {!workspaceControls && (!embedded || windowControls) && (
                     <>
                         {windowMode !== "docked" && (
                             <button type="button" className={styles.iconBtn} title="Dock to the side" aria-label="Dock to the side" onClick={() => windowControls ? windowControls.onDock() : setMode("docked")}>
@@ -1044,6 +1023,9 @@ export function SolidAgentChat({
                 )}
             </div>
 
+            {signedIn && review && <div className={styles.reviewStatus} role="status">
+                {review.kind === "approval" ? "Approval required" : "Waiting for your input"}
+            </div>}
             {agentAuth.status === "checking" ? (
                 externalEmbed
                     ? <div className={styles.embedWait} role="status" aria-live="polite"><div className={styles.embedWaitCard}><span className={styles.embedSpinner} aria-hidden="true" /><strong>Please wait</strong><span>Checking your connection</span></div></div>
@@ -1213,7 +1195,10 @@ export function SolidAgentChat({
                     </div>
                 ) : (
                     <AgentThread
-                        items={agent.items}
+                        items={review && reviewDisabled ? agent.items.map((item) =>
+                            item.id === humanReviewId(review.requestId)
+                                ? { ...item, eventData: { ...item.eventData, submitting: true } } : item) : agent.items}
+                        agentName={agentName}
                         thinking={agent.working && agent.thinking}
                         working={agent.working}
                         hasMore={agent.hasMoreHistory}
@@ -1227,14 +1212,16 @@ export function SolidAgentChat({
                 )}
 
                 <AgentComposer
+                    key={review?.requestId ?? "chat"}
                     working={agent.working}
-                    disabled={!!agent.authError}
-                    commands={agent.commands}
-                    seed={seed?.text}
-                    seedKey={seed?.key}
+                    disabled={!!agent.authError || agent.reviewResuming || (review ? reviewDisabled : false)}
+                    placeholder={review?.kind === "approval" ? "Type Approve or Reject…" : review ? "Type your answer…" : undefined}
+                    commands={review ? [] : agent.commands}
+                    seed={review ? undefined : seed?.text}
+                    seedKey={review ? undefined : seed?.key}
                     onSend={sendWithAttachments}
                     onStop={() => runtime?.cancel()}
-                    canAttach={canAttach}
+                    canAttach={!review && canAttach}
                     modelIndicator={
                         <AgentModelIndicator
                             assignments={modelAssignments}

@@ -1,7 +1,7 @@
 import React from "react";
 import { ArrowLeft, Eye, Pencil, RefreshCw } from "lucide-react";
 import { useDispatch } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { createSolidEntityApi } from "../../../../redux/api/solidEntityApi";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
@@ -98,6 +98,8 @@ function skillAgents(record?: SkillRecord): AgentReference[] {
 
 export function AgentSkillRegistryEditorPage() {
   const { id = "" } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const initialName = id === "new" ? searchParams.get("name") ?? "" : "";
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const entityApi = React.useMemo(() => createSolidEntityApi("agentSkillRegistry"), []);
@@ -137,7 +139,7 @@ export function AgentSkillRegistryEditorPage() {
   React.useEffect(() => {
     const nextTags = agentHubTagsFrom(record?.tags);
     const nextModule = agentHubModuleFrom(record?.module);
-    setName(record?.name ?? "");
+    setName(record?.name ?? initialName);
     setType(record?.type ?? "custom");
     setIconName(record?.iconName ?? "");
     setDescription(record?.description ?? "");

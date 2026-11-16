@@ -7,7 +7,7 @@ type ToolLine = { name: string; summary?: string; status?: "running" | "done" | 
 
 /**
  * `event_data: { widget: "tool-activity", title?, tools: [{ name, summary?, status?, duration_ms? }] }`.
- * A summary of several tool calls in one card (individual calls use DefaultToolCallChatWidget).
+ * A summary of several tool calls in one card (individual calls use DefaultAgentToolCallWidget).
  */
 export const SolidToolActivityChatWidget = ({ eventData }: SolidChatWidgetProps) => {
     const data = getChatWidgetData<{ title?: string; tools?: ToolLine[] }>(eventData);
