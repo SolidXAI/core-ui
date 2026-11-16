@@ -1251,7 +1251,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
             <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
               <div className="solid-list-toolbar-left flex w-full items-center gap-3 lg:min-w-0 lg:flex-1">
                 {/* {params.embeded !== true &&
-                  <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                  <div className="apps-icon block solid-hide-from-md cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
                   </div>
                 } 
