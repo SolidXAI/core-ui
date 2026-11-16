@@ -1324,18 +1324,20 @@ export function SolidAgentChat({
                 </SolidDialogBody>
             </SolidDialog>
             <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`} ref={headerRef}>
-                {AgentChatHeaderWidget && <AgentChatHeaderWidget
-                    title={title}
-                    agentName={agentName}
-                    agentRuntime={agentRuntime}
-                    agentConfigVersion={agentConfigVersion}
-                    statusColor={statusColor}
-                    statusText={statusText}
-                    providerDisplayName={providerDisplayName}
-                    signedIn={signedIn}
-                    activeSessionId={activeSessionId}
-                    displaySessionId={displaySessionId}
-                />}
+                <div className={styles.headerIdentitySlot}>
+                    {AgentChatHeaderWidget && <AgentChatHeaderWidget
+                        title={title}
+                        agentName={agentName}
+                        agentRuntime={agentRuntime}
+                        agentConfigVersion={agentConfigVersion}
+                        statusColor={statusColor}
+                        statusText={statusText}
+                        providerDisplayName={providerDisplayName}
+                        signedIn={signedIn}
+                        activeSessionId={activeSessionId}
+                        displaySessionId={displaySessionId}
+                    />}
+                </div>
                 {signedIn && (
                     <>
                         {(!isFullScreen || !sidebarOpen) && (
