@@ -9,8 +9,11 @@
   gap: 1rem;
   width: 100%;
   min-width: 0;
+  height: calc(100dvh - 11rem);
+  min-height: 24rem;
   padding: 1.5rem;
   color: var(--inbox-foreground);
+  box-sizing: border-box;
 }
 
 .inbox .heading, .inbox .runHeader, .inbox .pagination {
@@ -21,9 +24,12 @@
 }
 
 .inbox .heading h1 { margin: 0; font-size: 1.5rem; line-height: 1.3; }
-.inbox .columns { display: grid; grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr); align-items: start; gap: 1rem; }
-.inbox .panel { min-width: 0; border: 1px solid var(--inbox-border); border-radius: .75rem; background: var(--inbox-surface); }
+.inbox .columns { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr); align-items: stretch; gap: 1rem; }
+.inbox .panel { min-width: 0; min-height: 0; border: 1px solid var(--inbox-border); border-radius: .75rem; background: var(--inbox-surface); }
+.inbox .columns > .panel:first-child { display: flex; flex-direction: column; overflow: hidden; }
 .inbox .listHeader, .inbox .runHeader { padding: .85rem 1rem; border-bottom: 1px solid var(--inbox-border); }
+.inbox .listHeader { flex: none; }
+.inbox .listScroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .inbox .runHeader { align-items: flex-start; }
 .inbox .runHeader h2 { margin: 0 0 .35rem; font-size: 1.125rem; line-height: 1.4; }
 .inbox .runBody { display: grid; gap: 1rem; padding: 1rem; overflow-wrap: anywhere; }
@@ -75,6 +81,7 @@
 .inbox .notice[role="alert"] { color: var(--danger-color, #b91c1c); }
 
 @media (max-width: 760px) {
-  .inbox { padding: 1rem; }
-  .inbox .columns { grid-template-columns: minmax(0, 1fr); }
+  .inbox { height: auto; min-height: calc(100dvh - 8rem); padding: 1rem; }
+  .inbox .columns { flex: initial; min-height: initial; grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .inbox .columns > .panel:first-child { max-height: min(65dvh, 36rem); }
 }

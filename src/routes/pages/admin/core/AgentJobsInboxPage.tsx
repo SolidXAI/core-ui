@@ -110,6 +110,7 @@ function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onCh
   const [loadingOlder, setLoadingOlder] = React.useState(false);
   const [answerError, setAnswerError] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+  const [resuming, setResuming] = React.useState(false);
   const [accepted, setAccepted] = React.useState<RequestHistory | null>(null);
   const submitLock = React.useRef(false);
   const acceptedId = React.useRef<number | undefined>(undefined);
@@ -219,6 +220,7 @@ function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onCh
           try { frame = JSON.parse(data); } catch { return; }
           const type = frame.type ?? frame.event_type;
           if (type === "session_started") { delay = 1000; setConnection("Live"); }
+          if (type === "human_request" || type === "turn_complete" || type === "error") setResuming(false);
           if (type === "error" || type === "session_moved") { ws.close(); return; }
           if (["session_started", "job_status", "human_request", "turn_complete"].includes(type ?? "")) {
             if (refresh === undefined) refresh = window.setTimeout(() => {
@@ -245,6 +247,12 @@ function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onCh
     && detail.pendingRequest?.requestId !== accepted?.requestId ? detail.pendingRequest : null;
   const requestId = request?.requestId;
   React.useEffect(() => { setAnswerError(""); }, [requestId]);
+  React.useEffect(() => {
+    const waitingAgain = ["awaiting_input", "awaiting_approval"].includes(status)
+      && detail?.pendingRequest?.requestId !== accepted?.requestId;
+    const terminal = ["completed", "failed", "cancelled", "expired"].includes(status);
+    if (waitingAgain || terminal) setResuming(false);
+  }, [accepted?.requestId, detail?.pendingRequest?.requestId, status]);
 
   const submit = async (choice: string, text: string) => {
     if (!request || submitLock.current || acceptedId.current === request.requestId) return;
@@ -254,6 +262,7 @@ function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onCh
     try {
       await solidAxios.post(`${path}/requests/${request.requestId}/answer`, { choice, text });
       acceptedId.current = request.requestId;
+      setResuming(true);
       const historical = detail?.requests?.find((row) => row.requestId === request.requestId);
       const now = new Date().toISOString();
       setAccepted({ ...request, status: "answered", createdAt: historical?.createdAt ?? run.lastActiveAt,
@@ -312,8 +321,9 @@ function OpenRun({ run, revision, onChange }: { run: Run; revision: number; onCh
     {runFailure && <p className={styles.notice} role="alert">{runFailure}</p>}
     {answerError && <p className={styles.notice} role="alert">{answerError}</p>}
     <div className={`${chatStyles.root} ${styles.chat}`}>
-      <AgentThread items={items} agentName={detail?.agentName ?? undefined} thinking={false}
-        working={status === "running" || status === "active"}
+      <AgentThread items={items} agentName={detail?.agentName ?? undefined}
+        thinking={resuming || status === "running" || status === "active"}
+        working={resuming || status === "running" || status === "active"}
         hasMore={hasOlder} loadingOlder={loadingOlder} onLoadOlder={() => void loadOlder()}
         emptyState={<p className={styles.listMessage}>No messages yet.</p>}
         onReply={(widgetId, widget, value) => {
@@ -387,14 +397,16 @@ export function AgentJobsInboxPage() {
         <div className={styles.listHeader}><SolidCheckbox label="Needs review" checked={review} onChange={(event) => {
           setReview(event.target.checked); setOffset(0);
         }} /></div>
-        {!inbox && !error && <p className={styles.listMessage} role="status">Loading runs…</p>}
-        {inbox?.runs.length === 0 && <p className={styles.listMessage}>{review ? "No runs need your review." : "No background runs yet."}</p>}
-        {inbox?.runs.map((run) => <button type="button" key={run.sessionId} aria-pressed={selectedId === run.sessionId}
-          className={styles.row} onClick={() => setParams({ run: run.sessionId })}>
-          <strong>{run.agentTitle ?? "Agent run"}</strong>
-          <span className={styles.runMeta}><RunStatus status={run.status} hasJob={run.hasJob} />
-            <time dateTime={run.lastActiveAt}>{new Date(run.lastActiveAt).toLocaleString()}</time></span>
-        </button>)}
+        <div className={styles.listScroll}>
+          {!inbox && !error && <p className={styles.listMessage} role="status">Loading runs…</p>}
+          {inbox?.runs.length === 0 && <p className={styles.listMessage}>{review ? "No runs need your review." : "No background runs yet."}</p>}
+          {inbox?.runs.map((run) => <button type="button" key={run.sessionId} aria-pressed={selectedId === run.sessionId}
+            className={styles.row} onClick={() => setParams({ run: run.sessionId })}>
+            <strong>{run.agentTitle ?? "Agent run"}</strong>
+            <span className={styles.runMeta}><RunStatus status={run.status} hasJob={run.hasJob} />
+              <time dateTime={run.lastActiveAt}>{new Date(run.lastActiveAt).toLocaleString()}</time></span>
+          </button>)}
+        </div>
         {(offset > 0 || inbox?.hasMore) && <div className={styles.pagination}>
           <SolidButton size="sm" variant="ghost" leftIcon={<ChevronLeft size={15} />} disabled={offset === 0} onClick={() => setOffset(offset - pageSize)}>Previous</SolidButton>
           <SolidButton size="sm" variant="ghost" rightIcon={<ChevronRight size={15} />} disabled={!inbox?.hasMore} onClick={() => setOffset(offset + pageSize)}>Next</SolidButton>
