@@ -522,7 +522,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
   // Get the list view data.
-  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading,isFetching: isListViewFetching, error }] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, isFetching: isListViewFetching, error }] = useLazyGetSolidEntitiesQuery();
 
   const [
     triggerRecoverSolidEntitiesById,
@@ -1564,16 +1564,17 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     />
                   )}
                   {showArchived && selectedRecoverRecords.length > 0 && (
-                    <SolidButton
-                      type="button"
-                      size="small"
-                      variant="secondary"
-                      className="hidden lg:flex"
-                      onClick={() => setRecoverDialogVisible(true)}
-                      leftIcon={<RotateCcw size={14} />}
-                    >
-                      Recover
-                    </SolidButton>
+                    <div className="max-lg:hidden lg:flex">
+                      <SolidButton
+                        type="button"
+                        size="small"
+                        variant="secondary"
+                        onClick={() => setRecoverDialogVisible(true)}
+                        leftIcon={<RotateCcw size={14} />}
+                      >
+                        Recover
+                      </SolidButton>
+                    </div>
                   )}
 
                   {params.embeded === false &&
@@ -1583,6 +1584,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         solidListViewLayout={solidListViewLayout}
                         setShowArchived={setShowArchived}
                         showArchived={showArchived}
+                        selectedRecoverRecords={selectedRecoverRecords}
                         viewData={solidListViewMetaData}
                         sizeOptions={sizeOptions}
                         setSize={setSize}
