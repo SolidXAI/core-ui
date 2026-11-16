@@ -1983,17 +1983,16 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                   onClick={() => { void loadRootGroups(getPagination("root").offset); }}
                 />
                 {showArchived && selectedRecoverRecords.length > 0 && (
-                  <div className="max-lg:hidden lg:flex">
-                    <SolidButton
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setRecoverDialogVisible(true)}
-                      leftIcon={<RotateCcw size={14} />}
-                    >
-                      Recover
-                    </SolidButton>
-                  </div>
+                  <SolidButton
+                    type="button"
+                    size="sm"
+                    variant="secondary"
+                    className="hidden lg:flex"
+                    onClick={() => setRecoverDialogVisible(true)}
+                    leftIcon={<RotateCcw size={14} />}
+                  >
+                    Recover
+                  </SolidButton>
                 )}
 
                 {params.embeded === false &&

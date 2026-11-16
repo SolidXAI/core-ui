@@ -58,7 +58,6 @@ export const SolidListViewConfigure = (
         params,
         actionsAllowed,
         selectedRecords,
-        selectedRecoverRecords,
         setDialogVisible,
         setShowSaveFilterPopup,
         filters,
@@ -292,7 +291,7 @@ export const SolidListViewConfigure = (
                                     Show Archived Rows
                                 </SolidDropdownMenuCheckboxItem>
                             )}
-                            {showArchived && selectedRecoverRecords.length > 0 && (
+                            {showArchived && (
                                 <SolidDropdownMenuItem
                                     className="solid-header-dropdown-item lg:hidden"
                                     onSelect={() => {
