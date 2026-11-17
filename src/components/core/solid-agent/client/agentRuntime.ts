@@ -21,7 +21,7 @@ import { resolveAttachmentMedia } from "./agentAttachmentMedia";
 import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory, uploadAgentAttachments } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
-import { agentIdOf } from "./agentUrls";
+import { agentIdOf, agentNameOf } from "./agentUrls";
 
 /**
  * A live connection to one agent backend. The "solidx" runtime is shared by the floating window and
@@ -38,8 +38,10 @@ type GetAgentState = () => AgentState | undefined;
 function sessionKey(agentRuntime: AgentRuntimeType, agentUrl: string, ownerKey?: string) {
     if (agentRuntime === "solidx") return "solid-agent.session_id";
     const agentId = agentIdOf(agentUrl);
+    const agentName = agentNameOf(agentUrl);
+    const agentQualifier = agentName ?? agentId;
     const ownerSuffix = ownerKey ? `.${encodeURIComponent(ownerKey)}` : "";
-    return agentId === undefined ? `solid-agent.${agentRuntime}${ownerSuffix}.session_id` : `solid-agent.${agentRuntime}.${agentId}${ownerSuffix}.session_id`;
+    return agentQualifier === undefined ? `solid-agent.${agentRuntime}${ownerSuffix}.session_id` : `solid-agent.${agentRuntime}.${agentQualifier}${ownerSuffix}.session_id`;
 }
 
 function readSessionId(key: string): string | null {
@@ -158,7 +160,7 @@ export class AgentRuntime {
         readonly agentRuntime: AgentRuntimeType = "solidx",
         private persistSession = true,
         sessionOwnerKey?: string,
-        agentName?: string,
+        readonly agentName?: string,
     ) {
         this.sessionKey = sessionKey(agentRuntime, agentUrl, sessionOwnerKey);
         const initialProvider = getStoredProvider();
@@ -541,13 +543,23 @@ export class AgentRuntime {
 let runtime: AgentRuntime | null = null;
 
 /** Returns the shared "solidx" runtime, creating (or re-pointing) it for `agentUrl`. */
-export function ensureAgentRuntime(agentUrl: string, dispatch: Dispatch, getState: GetAgentState): AgentRuntime {
-    if (runtime && runtime.agentUrl === agentUrl) {
+export function ensureAgentRuntime(
+    agentUrl: string,
+    dispatch: Dispatch,
+    getState: GetAgentState,
+    agentRuntime: AgentRuntimeType = "solidx",
+    agentName?: string,
+): AgentRuntime {
+    if (runtime && runtime.agentUrl === agentUrl && runtime.agentRuntime === agentRuntime && runtime.agentName === agentName) {
         runtime.updateStore(dispatch, getState);
         return runtime;
     }
+    const agentChanged = runtime && (runtime.agentName !== agentName || runtime.agentUrl !== agentUrl);
     runtime?.dispose();
-    runtime = new AgentRuntime(agentUrl, dispatch, getState);
+    if (agentChanged) {
+        dispatch(agentThreadReset());
+    }
+    runtime = new AgentRuntime(agentUrl, dispatch, getState, agentRuntime, true, undefined, agentName);
     return runtime;
 }
 

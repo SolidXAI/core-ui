@@ -76,6 +76,8 @@ type Props = {
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
     handlesPrefill?: boolean;
     suggestions?: string[];
+    agents?: Array<{ name: string; title: string; id?: number }>;
+    onSelectAgent?: (agentName: string, agentId?: number) => void;
     /** Controlled window actions for an embedded chat rendered in a modal. */
     windowControls?: {
         mode: "docked" | "maximized";
@@ -164,13 +166,15 @@ export function SolidAgentChat({
     onInputsLocked,
     beforeSend,
     embedded = false,
-    // SDK prefill goes through the shared "solidx" conversation only.
-    handlesPrefill = !embedded && agentRuntime === "solidx",
+    // SDK prefill goes through the shared conversation (solidx or agentHub launcher).
+    handlesPrefill = !embedded && (agentRuntime === "solidx" || agentRuntime === "agentHub"),
     suggestions,
+    agents,
+    onSelectAgent,
     windowControls,
     workspaceControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName, embedded);
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -1336,6 +1340,8 @@ export function SolidAgentChat({
                         signedIn={signedIn}
                         activeSessionId={activeSessionId}
                         displaySessionId={displaySessionId}
+                        agents={agents}
+                        onSelectAgent={onSelectAgent}
                     />}
                 </div>
                 {signedIn && (

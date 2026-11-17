@@ -43,13 +43,14 @@ async function loadAvailability(): Promise<AgentAvailability> {
     const config = { params: { agentAvailabilityRefresh: Date.now() } };
     const [settingsRes, meRes] = await Promise.all([solidGet("/setting/wrapped", config), solidGet("/iam/me", config)]);
     const settings = getSettingsMap(settingsRes?.data);
-    const enabled = settings.solidAgentEnabled === true || settings.solidAgentEnabled === "true";
+    const enabled = settings.solidAgentEnabled === true || settings.solidAgentEnabled === "true" || settings.solidxAgentHubEnabled === true || settings.solidxAgentHubEnabled === "true";
     const agentUrls: Record<AgentRuntimeType, string | null> = {
         solidx: urlSetting(settings[URL_SETTING.solidx]),
         agentHub: urlSetting(settings[URL_SETTING.agentHub]),
     };
     const canUse = unwrapUser(meRes?.data)?.canUseAgent === true;
-    return { ready: true, enabled, loadFailed: false, agentUrl: agentUrls.solidx, agentUrls, canUse };
+    const preferredAgentUrl = agentUrls.agentHub || agentUrls.solidx;
+    return { ready: true, enabled, loadFailed: false, agentUrl: preferredAgentUrl, agentUrls, canUse };
 }
 
 /**

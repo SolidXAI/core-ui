@@ -181,22 +181,37 @@ export function getCachedProviderModels(agentUrl: string, providerId: string): P
 
 /** List installed execution providers (both native SolidX and CLI agents). */
 export async function fetchAgentProviders(agentUrl: string, checkAuth: boolean = false): Promise<AgentProviderInfo[]> {
-    const data = await agentFetch<{ providers?: AgentProviderInfo[] }>(
-        agentUrl,
-        `/api/agent/providers?check_auth=${checkAuth}`,
-        { cache: "no-store" },
-    );
-    if (!data) throw new Error("Unable to load providers");
-    const list = Array.isArray(data.providers) ? data.providers : [];
-    if (list.length > 0) {
-        providersMemoryCache.set(agentUrl, list);
+    let lastError: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
         try {
-            sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
-        } catch {
-            // ignore
+            const data = await agentFetch<{ providers?: AgentProviderInfo[] }>(
+                agentUrl,
+                `/api/agent/providers?check_auth=${checkAuth}`,
+                { cache: "no-store" },
+            );
+            if (data && Array.isArray(data.providers)) {
+                const list = data.providers;
+                if (list.length > 0) {
+                    providersMemoryCache.set(agentUrl, list);
+                    try {
+                        sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
+                    } catch {
+                        // ignore
+                    }
+                }
+                return list;
+            }
+        } catch (err) {
+            lastError = err;
+        }
+        if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 600));
         }
     }
-    return list;
+    const cached = getCachedAgentProviders(agentUrl);
+    if (cached.length > 0) return cached;
+    if (lastError instanceof Error) throw lastError;
+    throw new Error("Unable to load providers");
 }
 
 const PROVIDER_AUTH_TIMEOUT_MS = 15_000;

@@ -401,6 +401,8 @@ export type SolidAgentChatHeaderWidgetProps = {
     signedIn: boolean;
     activeSessionId: string;
     displaySessionId: string;
+    agents?: Array<{ name: string; title: string; id?: number }>;
+    onSelectAgent?: (agentName: string, agentId?: number) => void;
 }
 
 export type SolidSettingsWidgetProps = {
