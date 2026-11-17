@@ -858,6 +858,7 @@ export function AgentRegistryEditorPage() {
         </div>
         <small className="agent-editor__workflow-save-hint">Changing stage saves the current form and its linked skills, tools, roles, and secrets.</small>
       </section>
+      <AgentDeploymentPanel value={deployment} onChange={setDeployment} />
     </div> },
     { value: "persona", label: "System Prompt", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div>
       <div className="agent-editor__persona-actions"><button type="button" className="agent-editor__persona-preview-toggle" aria-pressed={previewSystemPrompt} aria-label={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} title={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} onClick={() => setPreviewSystemPrompt((current) => !current)}>
@@ -895,10 +896,7 @@ export function AgentRegistryEditorPage() {
       compact
       render={(item) => <div className="agent-editor__secret"><strong title={item.displayName ?? item.name ?? item.key}>{item.displayName ?? item.name ?? item.key}</strong>
         <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={16} /></button></div>} /> },
-    ...(record?.id ? [{ value: "processes", label: "Processes", content: <div className="agent-editor__stack">
-      <AgentDeploymentPanel value={deployment} onChange={setDeployment} />
-      <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} />
-    </div> }] : []),
+    ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
     ...((record?.id ? [
       ["jobs", "Jobs", jobs.currentData?.records],
     ] : []) as [string, string, Item[]][]).map(([value, label, related]) => ({ value, label, content: <section className="agent-editor__section"><h2>{label}</h2>
