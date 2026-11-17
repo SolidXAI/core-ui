@@ -195,6 +195,7 @@ export type AgentAction =
           provider?: string;
           model?: string;
       } & AgentSessionOptions)
+    | { action: "human_response"; session_id: string; request_id: number; choice: string; text: string }
     | { action: "cancel"; session_id: string }
     | { action: "end_session"; session_id: string };
 

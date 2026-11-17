@@ -29,6 +29,7 @@ import {
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
+import { humanReviewId, humanReviewText } from "./humanReview";
 import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
@@ -175,6 +176,8 @@ export function SolidAgentChat({
     workspaceControls,
 }: Props) {
     const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName, embedded);
+    const review = agent.pendingReview;
+    const reviewDisabled = agent.reviewSubmitting || agent.connection !== "open";
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -1050,6 +1053,11 @@ export function SolidAgentChat({
     const sendWithAttachments = useCallback(
         async (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
+            if (review) {
+                const answer = humanReviewText(review, text);
+                runtime.respondToReview(answer.choice, answer.text);
+                return;
+            }
             onInputsLocked?.(true);
             try {
                 const result = await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer");
@@ -1058,7 +1066,7 @@ export function SolidAgentChat({
             }
             catch (error) { onInputsLocked?.(false); throw error; }
         },
-        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
+        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked, review],
     );
     useEffect(() => {
         const onEmbedCommand = (event: Event) => {
@@ -1149,7 +1157,9 @@ export function SolidAgentChat({
 
     const threadComponent = (
         <AgentThread
-            items={agent.items}
+            items={review && reviewDisabled ? agent.items.map((item) =>
+                item.id === humanReviewId(review.requestId)
+                    ? { ...item, eventData: { ...item.eventData, submitting: true } } : item) : agent.items}
             agentName={agentName}
             thinking={agent.working && agent.thinking}
             working={agent.working}
@@ -1167,10 +1177,15 @@ export function SolidAgentChat({
 
     const composerComponent = (
         <AgentComposer
+            key={review?.requestId ?? "chat"}
             working={agent.working}
-            disabled={!!agent.authError || isBusyTransitioning || isSelectedProviderCheckingAuth}
+            disabled={!!agent.authError || agent.reviewResuming || (review ? reviewDisabled : false) || isBusyTransitioning || isSelectedProviderCheckingAuth}
             placeholder={
-                isViewingHistory
+                review?.kind === "approval"
+                    ? "Type Approve or Reject…"
+                    : review
+                    ? "Type your answer…"
+                    : isViewingHistory
                     ? "Select a conversation to continue…"
                     : isSelectedProviderCheckingAuth
                     ? `Checking ${providerDisplayName || "provider"} authentication…`
@@ -1182,12 +1197,12 @@ export function SolidAgentChat({
                     ? "Loading conversation..."
                     : undefined
             }
-            commands={agent.commands}
-            seed={seed?.text}
-            seedKey={seed?.key}
+            commands={review ? [] : agent.commands}
+            seed={review ? undefined : seed?.text}
+            seedKey={review ? undefined : seed?.key}
             onSend={sendWithAttachments}
             onStop={() => runtime?.cancel()}
-            canAttach={canAttach}
+            canAttach={!review && canAttach}
             modelIndicator={
                 <AgentModelIndicator
                     assignments={modelAssignments}
@@ -1443,6 +1458,9 @@ export function SolidAgentChat({
                 )}
             </div>
 
+            {signedIn && review && <div className={styles.reviewStatus} role="status">
+                {review.kind === "approval" ? "Approval required" : "Waiting for your input"}
+            </div>}
             {agentAuth.status === "checking" ? (
                 externalEmbed
                     ? <div className={styles.embedWait} role="status" aria-live="polite"><div className={styles.embedWaitCard}><span className={styles.embedSpinner} aria-hidden="true" /><strong>Please wait</strong><span>Checking your connection</span></div></div>

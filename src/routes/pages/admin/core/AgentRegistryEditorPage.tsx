@@ -10,6 +10,7 @@ import { useSession } from "../../../../hooks/useSession";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentDeploymentPanel, type AgentDeployment } from "./AgentDeploymentPanel";
 import { AgentPersonaHistory } from "./AgentPersonaHistory";
 import { AgentConfigVersionsPanel } from "./AgentConfigVersionsPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
@@ -30,7 +31,7 @@ import "./AgentRegistryEditorPage.css";
 type Item = { id: number; name?: string; title?: string; displayName?: string; description?: string; iconName?: string; key?: string; module?: { id?: number; displayName?: string }; [key: string]: any };
 type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; roleMetadata?: Item; secret?: Item; envVarName?: string; alwaysInclude?: boolean; requiresApproval?: boolean };
 type Input = { name: string; description: string; dataType: string; defaultValue?: unknown; optional: boolean };
-type Agent = Item & {
+type Agent = Item & AgentDeployment & {
   configVersion?: number;
   isBuiltin?: boolean;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
@@ -176,6 +177,7 @@ const detailFields = [
   "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
   "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
   "isBuiltin",
+  "runner", "minProcesses", "maxProcesses", "processCpu", "processMemory",
 ];
 
 const detailQuery = [
@@ -218,7 +220,9 @@ function agentFormFromRecord(record: Agent) {
   return {
     name: record.name ?? "", title: record.title ?? "", description: record.description ?? "", iconName: record.iconName ?? "",
     inputs: parseInputs(record.requiredInputs), reasoningModelKey: record.reasoningModelKey ?? "", fastModelKey: record.fastModelKey ?? "",
-    systemPrompt: record.systemPrompt ?? "", stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
+    systemPrompt: record.systemPrompt ?? "", runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0,
+    maxProcesses: record.maxProcesses ?? null, processCpu: record.processCpu ?? null, processMemory: record.processMemory ?? null,
+    stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
     costLimit: Number(record.costLimit ?? 3), tags: agentHubTagsFrom(record.tags), moduleId: agentHubModuleFrom(record.module)?.id ?? null, skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
     toolIds: tools.map((link) => link.agentToolRegistry?.id).filter(Boolean),
     roleIds: items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean),
@@ -525,6 +529,7 @@ export function AgentRegistryEditorPage() {
   const [stepLimit, setStepLimit] = React.useState(100);
   const [turnStepLimit, setTurnStepLimit] = React.useState(20);
   const [costLimit, setCostLimit] = React.useState(3);
+  const [deployment, setDeployment] = React.useState<AgentDeployment>({ runner: null, minProcesses: 0, maxProcesses: null, processCpu: null, processMemory: null });
   const [tags, setTags] = React.useState<AgentHubTag[]>([]);
   const [module, setModule] = React.useState<AgentHubModule | null>(null);
   const [creatingTag, setCreatingTag] = React.useState(false);
@@ -576,7 +581,7 @@ export function AgentRegistryEditorPage() {
     return () => window.clearInterval(timer);
   }, [activationReadyAt, id]);
 
-  const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
+  const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt, ...deployment,
     stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
     alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
@@ -588,6 +593,8 @@ export function AgentRegistryEditorPage() {
     setReasoningModelKey(record.reasoningModelKey ?? ""); setFastModelKey(record.fastModelKey ?? "");
     setSystemPrompt(record.systemPrompt ?? ""); setStepLimit(record.stepLimit ?? 100);
     setTurnStepLimit(record.turnStepLimit ?? 20); setCostLimit(Number(record.costLimit ?? 3));
+    setDeployment({ runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0, maxProcesses: record.maxProcesses ?? null,
+      processCpu: record.processCpu ?? null, processMemory: record.processMemory ?? null });
     setTags(agentHubTagsFrom(record.tags));
     setModule(agentHubModuleFrom(record.module));
     setSkillIds(items(record.agentSkills).map((link) => link.agentSkillRegistry?.id).filter(Boolean));
@@ -681,6 +688,7 @@ export function AgentRegistryEditorPage() {
     if (inputs.some((input) => !input.name.trim() || !input.dataType)) next.inputs = "Each input needs a name and data type.";
     if (new Set(inputs.map((input) => input.name.trim().toLowerCase())).size !== inputs.length) next.inputs = "Input names must be unique.";
     if (stepLimit < 1 || turnStepLimit < 1 || costLimit < 0) next.limits = "Step limits must be positive and cost limit cannot be negative.";
+    if (deployment.minProcesses != null && deployment.maxProcesses != null && deployment.minProcesses > deployment.maxProcesses) next.deployment = "Minimum processes cannot exceed maximum processes.";
     setErrors(next);
     if (Object.keys(next).length) {
       setTab(next.systemPrompt ? "persona" : next.limits && isAdmin ? "policies" : "basics");
@@ -702,6 +710,9 @@ export function AgentRegistryEditorPage() {
       requiredInputs: JSON.stringify(normalizedInputs),
       reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
+      runner: deployment.runner ?? null, minProcesses: Number(deployment.minProcesses ?? 0),
+      maxProcesses: deployment.maxProcesses ?? null, processCpu: deployment.processCpu ?? null,
+      processMemory: deployment.processMemory ?? null,
       ...agentHubTagsPayload(tags),
       ...agentHubModulePayload(module),
       status: nextStatus === "active" ? record?.status ?? "draft" : nextStatus ?? "draft",
@@ -888,7 +899,10 @@ export function AgentRegistryEditorPage() {
       compact
       render={(item) => <div className="agent-editor__secret"><strong title={item.displayName ?? item.name ?? item.key}>{item.displayName ?? item.name ?? item.key}</strong>
         <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={16} /></button></div>} /> },
-    ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
+    ...(record?.id ? [{ value: "processes", label: "Processes", content: <div className="agent-editor__stack">
+      <AgentDeploymentPanel value={deployment} onChange={setDeployment} />
+      <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} />
+    </div> }] : []),
     ...((record?.id ? [
       ["jobs", "Jobs", jobs.currentData?.records],
     ] : []) as [string, string, Item[]][]).map(([value, label, related]) => ({ value, label, content: <section className="agent-editor__section"><h2>{label}</h2>

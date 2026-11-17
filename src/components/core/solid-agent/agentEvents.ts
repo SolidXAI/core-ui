@@ -2,6 +2,7 @@ import { describeToolArgs, isLlmMetadata, parseToolResult } from "./agentFormat"
 import { parseWidgetContent, isSameAssistantContent } from "./thread/inlineWidget";
 export { isSameAssistantContent };
 import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentUsageStats, type AgentWireFrame } from "./types";
+import { humanReviewAnswerItem, humanReviewId, humanReviewItem, type HumanReview } from "./humanReview";
 
 /**
  * Turns agent events into thread items. Used by agentSlice for live socket frames and by the
@@ -28,6 +29,9 @@ export type AgentThreadState = {
     streamingId: string | null;
     turnStreamed: boolean;
     usage: AgentUsageStats | null;
+    pendingReview: HumanReview | null;
+    reviewSubmitting: boolean;
+    reviewResuming: boolean;
 };
 
 export function createThreadState(): AgentThreadState {
@@ -46,6 +50,9 @@ export function createThreadState(): AgentThreadState {
         streamingId: null,
         turnStreamed: false,
         usage: null,
+        pendingReview: null,
+        reviewSubmitting: false,
+        reviewResuming: false,
     };
 }
 
@@ -81,6 +88,30 @@ function endTurn(state: AgentThreadState) {
     stopStreaming(state);
     state.working = false;
     state.thinking = false;
+}
+
+function setPendingReview(state: AgentThreadState, data: Record<string, any> | null, at: number) {
+    const requestId = data?.request_id ?? data?.requestId;
+    if (state.pendingReview && state.pendingReview.requestId !== requestId) {
+        const previous = findItem(state, humanReviewId(state.pendingReview.requestId));
+        if (previous) previous.final = true;
+    }
+    state.pendingReview = null;
+    state.reviewSubmitting = false;
+    if (!data || !Number.isInteger(requestId) || typeof data.question !== "string"
+        || (data.kind !== "input" && data.kind !== "approval")) return;
+    const request: HumanReview = {
+        requestId, kind: data.kind, question: data.question, options: data.options,
+        context: data.context ?? null, toolName: data.tool_name ?? data.toolName ?? null,
+        toolArguments: data.tool_arguments ?? data.toolArguments ?? null,
+    };
+    const existing = findItem(state, humanReviewId(requestId));
+    const item = humanReviewItem(request, existing?.at ?? at, false);
+    if (existing) Object.assign(existing, item);
+    else state.items.push(item);
+    state.pendingReview = request;
+    state.reviewResuming = false;
+    endTurn(state);
 }
 
 function lastAssistantText(state: AgentThreadState): string | undefined {
@@ -162,8 +193,49 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 };
             }
             state.authError = null;
+            if ("pendingRequest" in frame || "pendingRequest" in eventData) {
+                setPendingReview(state, frame.pendingRequest ?? eventData.pendingRequest ?? null, at);
+                const status = frame.status ?? eventData.status;
+                state.working = status === "queued" || status === "running";
+                state.reviewResuming = state.working && !state.pendingReview;
+            }
             break;
         }
+
+        case "human_request":
+        case "HumanReviewRequested":
+            setPendingReview(state, eventData, at);
+            break;
+
+        case "human_response_submitting":
+            state.reviewSubmitting = true;
+            break;
+
+        case "human_response_accepted":
+        case "HumanReviewAnswered": {
+            const id = eventData.request_id;
+            if (!Number.isInteger(id)) break;
+            const question = findItem(state, humanReviewId(id));
+            if (question) question.final = true;
+            if (state.pendingReview?.requestId === id) {
+                state.pendingReview = null;
+                state.reviewSubmitting = false;
+                state.working = !replay;
+                state.reviewResuming = !replay;
+            }
+            const answer = humanReviewAnswerItem(id, eventData.kind, eventData.choice, eventData.text, at);
+            if (!findItem(state, answer.id)) state.items.push(answer);
+            break;
+        }
+
+        case "human_resume_finished":
+            endTurn(state);
+            state.reviewResuming = false;
+            if (eventData.status === "failed") {
+                state.items.push({ id: nextItemId("err"), at, eventType: AgentEventTypes.agentError,
+                    eventData: { error: "The agent could not resume after your response." } });
+            }
+            break;
 
         case AgentEventTypes.sessionUpdated: {
             const sessionId = frame.session_id ?? eventData.session_id ?? null;
@@ -364,6 +436,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         case AgentEventTypes.error: {
             const message: string = eventData.error ?? frame.content ?? "Unknown error";
             endTurn(state);
+            state.reviewSubmitting = false;
             if (!replay && /unauthori[sz]ed|access token|lacks required permission/i.test(message)) state.authError = message;
             state.items.push({ id: nextItemId("err"), at, eventType: AgentEventTypes.agentError, eventData: { error: message } });
             break;
@@ -378,12 +451,30 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
 /** Rebuilds thread items from stored session events (`/api/agent/sessions/{id}/messages`). */
 export function historyToItems(rows: any[]): AgentChatItem[] {
     const state = createThreadState();
+    const ids = new Map<string, string>();
     for (const row of rows) {
         const frame: AgentWireFrame = { ...row, event_type: row.event_type ?? (row.role === "user" ? AgentEventTypes.userMessage : row.role === "assistant" ? AgentEventTypes.llmComplete : "") };
-        const at = row.timestamp ? new Date(row.timestamp).getTime() : Date.now();
-        applyAgentEvent(state, normalizeAgentFrame(frame), true, at);
+        const event = normalizeAgentFrame(frame);
+        // Runtime events carry Unix seconds. Core's createdAt can be shifted when
+        // its database driver interprets a timezone-less timestamp as local time.
+        const emittedAt = event.eventData.timestamp;
+        const at = typeof emittedAt === "number" && Number.isFinite(emittedAt) && emittedAt > 0
+            ? emittedAt * 1000
+            : row.timestamp ? new Date(row.timestamp).getTime() : Date.now();
+        const start = state.items.length;
+        applyAgentEvent(state, event, true, at);
+        if (row.id != null) {
+            for (let index = start; index < state.items.length; index++) {
+                const id = state.items[index].id;
+                if (!id.startsWith("human-request-")) ids.set(id, `history-${row.id}-${index - start}`);
+            }
+        }
     }
     freezeLiveTool(state);
     stopStreaming(state);
-    return state.items;
+    if (state.pendingReview) {
+        const question = findItem(state, humanReviewId(state.pendingReview.requestId));
+        if (question) question.final = true;
+    }
+    return state.items.map((item) => ids.has(item.id) ? { ...item, id: ids.get(item.id)! } : item);
 }

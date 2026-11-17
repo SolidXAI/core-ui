@@ -259,7 +259,7 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
                 };
 
                 for (const item of group.items) {
-                    if (isAssistantMessage(item)) {
+                    if (isAssistantMessage(item) || (item.eventType === "HumanRequestCreated" && item.widget === "question")) {
                         flushActivity(false, item.at);
                         turnContent.push(renderItem(item, false));
                         currentStepStartTime = item.at;

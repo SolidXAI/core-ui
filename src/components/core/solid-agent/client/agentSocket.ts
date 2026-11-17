@@ -245,6 +245,12 @@ export class AgentSocket {
                 this.setStatus("idle");
                 return;
             }
+            if (event.code === 1012 || event.code === 4421) {
+                // A new worker needs a new token. A sent turn may already have run.
+                this.unacknowledgedMessage = null;
+                clearAgentAuth(this.agentUrl);
+                return;
+            }
             this.scheduleReconnect();
         };
 

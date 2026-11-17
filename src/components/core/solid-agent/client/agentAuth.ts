@@ -165,7 +165,7 @@ export async function signOutOfAgent(agentUrl: string) {
     setStoredActiveApiKey(null);
     if (!stored) return;
     try {
-        await fetch(`${toHttpBase(agentUrl)}/api/agent/api-keys/me`, { method: "DELETE", headers: { Authorization: `Bearer ${stored.agentToken}` } });
+        await fetch(`${stored.httpUrl.replace(/\/$/, "")}/api/agent/api-keys/me`, { method: "DELETE", headers: { Authorization: `Bearer ${stored.agentToken}` } });
     } catch {
         // Offline or unknown call: the token still expires when idle.
     }
@@ -226,12 +226,19 @@ export async function signInWithApiKey(agentUrl: string, apiKey: string): Promis
             if (agentId !== undefined) payload.agentId = agentId;
             if (agentName) payload.agentName = agentName;
 
-            const res = await fetch(`${toHttpBase(agentUrl)}/api/agent/api-keys/me`, {
+            const attempt = () => fetch(`${toHttpBase(agentUrl)}/api/agent/api-keys/me`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
-            const body = await res.json().catch(() => null);
+            let res = await attempt();
+            let body = await res.json().catch(() => null);
+            const deadline = Date.now() + 30_000;
+            while (res.status === 503 && body?.detail === "Worker is starting" && Date.now() < deadline) {
+                await new Promise<void>((resolve) => setTimeout(resolve, 3000));
+                res = await attempt();
+                body = await res.json().catch(() => null);
+            }
             if (!res.ok) {
                 const detail = typeof body?.detail === "string" ? body.detail : null;
                 return { ok: false, error: detail ?? `Sign-in failed (HTTP ${res.status}).`, status: res.status };
