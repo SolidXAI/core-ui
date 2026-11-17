@@ -6798,11 +6798,13 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 /* The docked SolidX Agent panel is fixed over the right edge. A dialog centred on the whole viewport would have its
-   right side hidden under it, so centre it in the space left of the panel and keep it narrower than that space. */
+   right side hidden under it, so centre it in the space left of the panel and keep it narrower than that space.
+   `!important` because sized dialogs set their own max-width with a more specific selector (the common dialog's
+   min(92vw, 1100px) left the module update dialog under the panel on a 1440px screen). */
 @media (min-width: 641px) {
   body.solid-agent-docked .solid-radix-dialog-content {
     left: calc((100vw - var(--solid-agent-docked-width, 420px)) / 2);
-    max-width: calc(100vw - var(--solid-agent-docked-width, 420px) - 2rem);
+    max-width: calc(100vw - var(--solid-agent-docked-width, 420px) - 2rem) !important;
   }
 }
 
