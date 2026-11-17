@@ -68,7 +68,7 @@ export const AdminHeaderActions = ({ variant, className = "" }: AdminHeaderActio
 
   if (variant === "sidebar") {
     return (
-      <div className={`solid-sidebar-mobile-actions md:hidden ${className}`.trim()}>
+      <div className={`solid-sidebar-mobile-actions solid-hide-from-md ${className}`.trim()}>
         {actions.map((action) => (
           <button
             key={action.key}

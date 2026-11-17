@@ -1905,7 +1905,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               <div className="flex lg:gap-4 items-center w-full solid-list-toolbar-left lg:min-w-0 lg:flex-1">
                 <div className="flex items-center gap-2">
                   {/* {params.embeded !== true && (
-                    <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                    <div className="apps-icon block solid-hide-from-md cursor-pointer" onClick={toggleBothSidebars}>
                       <SolidIcon name="si-th-large" />
                     </div>
                   )} */}
@@ -1987,7 +1987,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                     type="button"
                     size="sm"
                     variant="secondary"
-                    className="hidden lg:flex"
+                    className="flex solid-hide-below-lg"
                     onClick={() => setRecoverDialogVisible(true)}
                     leftIcon={<RotateCcw size={14} />}
                   >

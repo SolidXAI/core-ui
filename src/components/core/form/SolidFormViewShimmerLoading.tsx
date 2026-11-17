@@ -11,12 +11,12 @@ export const SolidFormViewShimmerLoading = () => {
             <div className="page-header pl-2 ">
                 <div className='flex items-center gap-4'>
                     <SkeletonBlock width="50px" height='1.4rem' className='rounded-lg md:h-1.3rem' />
-                    <SkeletonBlock width="300px" className='hidden rounded-lg md:flex' />
+                    <SkeletonBlock width="300px" className='rounded-lg flex solid-hide-below-md' />
                 </div>
                 <div className='flex items-center gap-4'>
                     <SkeletonBlock width="2.7rem" height="1.6rem" className="md:w-4rem md:h-2rem" />
                     <SkeletonBlock width="2.7rem" height="1.6rem" className="md:w-4rem md:h-2rem" />
-                    <SkeletonBlock width="2.7rem" height="1.6rem" className="md:w-4rem md:h-2rem flex md:hidden" />
+                    <SkeletonBlock width="2.7rem" height="1.6rem" className="md:w-4rem md:h-2rem flex solid-hide-from-md" />
                 </div>
             </div>
             <div className="page-header" style={{ borderTop: '1px solid var(--primary-light-color)' }}>

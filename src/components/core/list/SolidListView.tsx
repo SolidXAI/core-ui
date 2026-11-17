@@ -1456,7 +1456,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   {/* Here only hide the Solid list view title, LayoutGrid already commented */}
                   {/* <div className='flex items-center gap-2'>
                     {params.embeded !== true &&
-                      <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                      <div className="apps-icon block solid-hide-from-md cursor-pointer" onClick={toggleBothSidebars}>
                         <LayoutGrid size={18} />
                       </div>
                     }
@@ -1568,7 +1568,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       type="button"
                       size="small"
                       variant="secondary"
-                      className="hidden lg:flex"
+                      className="flex solid-hide-below-lg"
                       onClick={() => setRecoverDialogVisible(true)}
                       leftIcon={<RotateCcw size={14} />}
                     >
