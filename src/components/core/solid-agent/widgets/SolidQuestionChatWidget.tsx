@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "../SolidAgent.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import { asArray, getChatWidgetData } from "./chatWidgetUtils";
+import { SolidAgentMarkdown } from "../SolidAgentMarkdown";
 
 type QuestionOption = string | { label: string; value?: unknown };
 type QuestionData = {
@@ -56,7 +57,7 @@ export const SolidQuestionChatWidget = ({ eventData, final, reply }: SolidChatWi
                         )}
                     </section>
                 )}
-                {data.question && <strong>{data.question}</strong>}
+                {data.question && <SolidAgentMarkdown text={data.question} />}
                 {data.hint && <span style={{ color: "var(--agent-muted)", fontSize: 12.5 }}>{data.hint}</span>}
                 {options.map((option, index) => (
                     <button
@@ -92,5 +93,5 @@ export const SolidQuestionChatWidget = ({ eventData, final, reply }: SolidChatWi
 };
 
 Object.assign(SolidQuestionChatWidget, { getExtensionMetadata: () => ({
-    agentWidget: { name: "question", description: "Ask the user a single or multiple choice question.", propsSchema: { type: "object", properties: { question: { type: "string" }, hint: { type: "string" }, options: { type: "array", items: { anyOf: [{ type: "string" }, { type: "object", properties: { label: { type: "string" }, value: {} }, required: ["label"] }] } }, multiple: { type: "boolean" } } } },
+    agentWidget: { name: "question", description: "Ask the user a single or multiple choice question.", propsSchema: { type: "object", properties: { question: { type: "string", description: "The question as Markdown. Supports **bold**, *italic*, lists and [links](https://…)." }, hint: { type: "string" }, options: { type: "array", items: { anyOf: [{ type: "string" }, { type: "object", properties: { label: { type: "string" }, value: {} }, required: ["label"] }] } }, multiple: { type: "boolean" } } } },
 }) });
