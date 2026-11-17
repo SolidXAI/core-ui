@@ -361,6 +361,10 @@ html.dark .solid-backend-indicator[data-status="offline"] {
   /* 16px */
   --solid-panel-padding: var(--solid-space-4);
   /* 16px */
+
+  /* Individual component dimensions */
+  --solid-stepper-height: 2.125rem
+  /* 34px */
 }
 
 html,
@@ -4654,6 +4658,7 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
 .solid-select-wrap.solid-paginator-select .solid-select-trigger-label {
   flex: 1 1 auto;
   text-align: left;
+  padding-bottom: 0.125rem;
 }
 
 .solid-select-wrap.solid-paginator-select .solid-select-icon {
@@ -4692,7 +4697,6 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
   font-size: var(--solid-font-size-caption);
   font-weight: 500;
   line-height: 1;
-  padding: 0 0;
   transition:
     background 120ms ease,
     border-color 120ms ease,

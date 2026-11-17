@@ -1900,14 +1900,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <div className="page-header solid-list-toolbar solid-tree-toolbar flex-col lg:flex-row">
             <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
               <div className="flex lg:gap-4 items-center w-full solid-list-toolbar-left lg:min-w-0 lg:flex-1">
-                <div className="flex items-center gap-2">
-                  {/* {params.embeded !== true && (
+                {/* <div className="flex items-center gap-2">
+                  {params.embeded !== true && (
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                       <SolidIcon name="si-th-large" />
                     </div>
-                  )} */}
-                  {/* <p className="m-0 view-title solid-text-wrapper">{treeViewTitle}</p> */}
-                </div>
+                  )}
+                  <p className="m-0 view-title solid-text-wrapper">{treeViewTitle}</p>
+                </div> */}
 
                 {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
                   <>

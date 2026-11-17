@@ -27,6 +27,15 @@
 
 .solid-chatter-body{
   padding: var(--solid-space-3);
+  overflow-y: auto;
+}
+
+.solid-chatter-header--with-title {
+  padding-left: calc(
+    var(--solid-space-3) +
+    var(--solid-control-height-sm) +
+    var(--solid-space-3)
+  );
 }
 
 .solid-chatter-message-box {
