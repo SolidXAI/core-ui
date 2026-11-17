@@ -4,7 +4,7 @@ The admin embed reuses the routes registered by `getSolidRoutes()`, including re
 
 ## Configure the SolidX deployment
 
-1. Deploy the updated core API and UI. Set `ADMIN_EMBED_UI_URL` on the API to the base URL of the hosted UI, for example `https://portal.solidx.example`. The SDK appends `/embed/admin` to that base.
+1. Deploy the updated core API and UI. Set `ADMIN_EMBED_UI_URL` on the API to the base URL of the hosted UI, for example `https://portal.solidx.example`. The SDK appends `/embed/admin` to that base. When `ADMIN_EMBED_UI_URL` is unset, the API uses `AGENT_EMBED_UI_URL`.
 2. On the UI response for `/embed/admin`, set `Content-Security-Policy: frame-ancestors https://your-app.example`. Check that other frame restrictions in the deployment allow that origin. Use separate HTTPS origins for the UI and the host application. Add the UI origin to `SECURITY_CORS_ORIGINS` on the SolidX API when the API uses a CORS allowlist. If the host sets CSP, allow the SDK's API origin in `script-src` and the SolidX UI origin in `frame-src`.
 3. Keep the SolidX API key on the host server. Use an active SolidX account with no outstanding password change and permissions that match what the host is authorized to show. The Jobs inbox shows background runs owned by that account. Choose the API key for the authorized user's SolidX identity if the host needs per-user inboxes.
 
