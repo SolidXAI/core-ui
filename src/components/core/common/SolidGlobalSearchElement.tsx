@@ -173,6 +173,17 @@ const transformRulesToFilters = (input: any, viewData: any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
+        const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
+        
+        if (["$thisWeek", "$thisMonth"].includes(rule.matchMode)) {
+            if (!fieldMeta || !["date", "datetime"].includes(fieldMeta.type)) return null;
+            return {
+                [rule.fieldName]: {
+                    [rule.matchMode]: fieldMeta.type,
+                },
+            };
+        }
+
         if (rule.value !== undefined && rule.value !== null) {
 
             // Ensure rule.value is always an array of primitive values.
@@ -191,7 +202,6 @@ const transformRulesToFilters = (input: any, viewData: any) => {
             }
 
 
-            const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
             const isToManyRelation = fieldMeta?.type === 'relation'
                 && ['one-to-many', 'many-to-many'].includes(fieldMeta?.relationType);
 
