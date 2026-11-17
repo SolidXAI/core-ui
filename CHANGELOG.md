@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.22-beta.5] - 2026-11-17
+
+### Added
+
+- update admin embed documentation to clarify usage of AGENT_EMBED_UI_URL when ADMIN_EMBED_UI_URL is unset
+- integrate SolidAgentMarkdown for rendering question text in SolidQuestionChatWidget
+- enhance AgentJobsInboxPage with filtering, sorting, and pagination features
+- refactor AgentDeploymentPanel to use props for state management and simplify form handling
+
+### Other
+
+- keep wide dialogs clear of the docked SolidX Agent panel
+- keep dropdown menus and dialogs clear of the docked SolidX Agent panel
+
 ## [0.1.22-beta.4] - 2026-11-16
 
 ### Added
