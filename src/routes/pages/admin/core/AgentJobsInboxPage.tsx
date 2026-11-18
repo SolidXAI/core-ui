@@ -49,7 +49,7 @@ type RunDetail = {
   pendingRequest: HumanReview | null;
 };
 type Inbox = { runs: Run[]; hasMore: boolean; total: number };
-type InboxFilters = { review: boolean; agent: string; hostRefId: string; status: string; trigger: string; runtime: string; startedFrom: string; startedTo: string };
+type InboxFilters = { review: boolean; agent: string; hostRefId: string; sessionId: string; status: string; trigger: string; runtime: string; startedFrom: string; startedTo: string };
 type Message = AgentWireFrame & { id: string; timestamp: string };
 type HistoryPage = { messages: Message[]; has_more: boolean };
 
@@ -71,11 +71,11 @@ function requestItems(requests: RequestHistory[], pendingId: number | undefined,
 const inboxPath = "/agent-session/inbox";
 const initialPageSize = 25;
 const pageSizeOptions = [10, 25, 50, 100];
-const emptyFilters: InboxFilters = { review: false, agent: "", hostRefId: "", status: "", trigger: "", runtime: "", startedFrom: "", startedTo: "" };
+const emptyFilters: InboxFilters = { review: false, agent: "", hostRefId: "", sessionId: "", status: "", trigger: "", runtime: "", startedFrom: "", startedTo: "" };
 const statuses = ["queued", "running", "active", "awaiting_input", "awaiting_approval", "completed", "failed", "cancelled", "expired"];
 const triggers = ["api", "webhook"];
 const runtimes = ["solidx", "agentHub"];
-const inboxFilterKeys = ["review", "agent", "hostRefId", "status", "trigger", "runtime", "startedFrom", "startedTo"] as const;
+const inboxFilterKeys = ["review", "agent", "hostRefId", "sessionId", "status", "trigger", "runtime", "startedFrom", "startedTo"] as const;
 const sortOptions = [
   { label: "Recent activity", value: "last_active_desc" },
   { label: "Old activity", value: "last_active_asc" },
@@ -104,6 +104,7 @@ function readInboxFilters(search: string): InboxFilters {
     review: params.get("review") === "true",
     agent: params.get("agent")?.trim() ?? "",
     hostRefId: params.get("hostRefId")?.trim() ?? "",
+    sessionId: params.get("sessionId")?.trim() ?? "",
     status: readOption("status", statuses),
     trigger: readOption("trigger", triggers),
     runtime: readOption("runtime", runtimes),
@@ -460,6 +461,7 @@ export function AgentJobsInboxPage() {
             sort: currentSort,
             ...(filters.agent ? { agent: filters.agent } : {}),
             ...(filters.hostRefId ? { hostRefId: filters.hostRefId } : {}),
+            ...(filters.sessionId ? { sessionId: filters.sessionId } : {}),
             ...(filters.status ? { status: filters.status } : {}),
             ...(filters.trigger ? { trigger: filters.trigger } : {}),
             ...(filters.runtime ? { runtime: filters.runtime } : {}),
@@ -492,7 +494,8 @@ export function AgentJobsInboxPage() {
   const applyFilters = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (filterDraft.startedFrom && filterDraft.startedTo && filterDraft.startedFrom > filterDraft.startedTo) return;
-    updateFilters({ ...filterDraft, agent: filterDraft.agent.trim(), hostRefId: filterDraft.hostRefId.trim() });
+    updateFilters({ ...filterDraft, agent: filterDraft.agent.trim(), hostRefId: filterDraft.hostRefId.trim(),
+      sessionId: filterDraft.sessionId.trim() });
   };
   const clearFilters = () => {
     setFilterDraft(emptyFilters);
@@ -512,6 +515,19 @@ export function AgentJobsInboxPage() {
     nextParams.set("run", sessionId);
     setParams(nextParams);
   };
+  // A session filter narrows the list to one run, so open that run's
+  // conversation too. Runs only when the filter value changes, so the user
+  // can still pick or close a run afterwards.
+  const filteredSessionId = filters.sessionId;
+  React.useEffect(() => {
+    if (!filteredSessionId) return;
+    setParams((current) => {
+      if (current.get("run") === filteredSessionId) return current;
+      const nextParams = new URLSearchParams(current);
+      nextParams.set("run", filteredSessionId);
+      return nextParams;
+    }, { replace: true });
+  }, [filteredSessionId, setParams]);
   const first = inbox?.total ? offset + 1 : 0;
   const last = inbox ? Math.min(offset + pageSize, inbox.total) : 0;
   const reviewCountOnPage = inbox?.runs.filter((run) => ["awaiting_input", "awaiting_approval"].includes(run.status)).length ?? 0;
@@ -613,6 +629,7 @@ export function AgentJobsInboxPage() {
         <form id="agent-inbox-filter-form" className={styles.filterForm} onSubmit={applyFilters}>
           <label>Agent name<input value={filterDraft.agent} onChange={(event) => setFilterDraft((value) => ({ ...value, agent: event.currentTarget.value }))} placeholder="Search agent" /></label>
           <label>Host ref ID<input value={filterDraft.hostRefId} onChange={(event) => setFilterDraft((value) => ({ ...value, hostRefId: event.currentTarget.value }))} placeholder="Exact host reference" /></label>
+          <label>Session ID<input value={filterDraft.sessionId} onChange={(event) => setFilterDraft((value) => ({ ...value, sessionId: event.currentTarget.value }))} placeholder="Exact session ID" /></label>
           <label>Status<SelectFilter value={filterDraft.status} onChange={(status) => setFilterDraft((value) => ({ ...value, status }))}
             options={statuses} /></label>
           <label>Trigger<SelectFilter value={filterDraft.trigger} onChange={(trigger) => setFilterDraft((value) => ({ ...value, trigger }))} options={triggers} /></label>
