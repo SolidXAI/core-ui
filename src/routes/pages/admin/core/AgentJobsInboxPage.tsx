@@ -17,6 +17,7 @@ import styles from "./AgentJobsInboxPage.module.css";
 type Run = {
   id: number;
   sessionId: string;
+  hostRefId?: string | null;
   agentId?: number | null;
   agentTitle: string | null;
   status: string;
@@ -48,7 +49,7 @@ type RunDetail = {
   pendingRequest: HumanReview | null;
 };
 type Inbox = { runs: Run[]; hasMore: boolean; total: number };
-type InboxFilters = { review: boolean; agent: string; status: string; trigger: string; runtime: string; startedFrom: string; startedTo: string };
+type InboxFilters = { review: boolean; agent: string; hostRefId: string; status: string; trigger: string; runtime: string; startedFrom: string; startedTo: string };
 type Message = AgentWireFrame & { id: string; timestamp: string };
 type HistoryPage = { messages: Message[]; has_more: boolean };
 
@@ -70,11 +71,11 @@ function requestItems(requests: RequestHistory[], pendingId: number | undefined,
 const inboxPath = "/agent-session/inbox";
 const initialPageSize = 25;
 const pageSizeOptions = [10, 25, 50, 100];
-const emptyFilters: InboxFilters = { review: false, agent: "", status: "", trigger: "", runtime: "", startedFrom: "", startedTo: "" };
+const emptyFilters: InboxFilters = { review: false, agent: "", hostRefId: "", status: "", trigger: "", runtime: "", startedFrom: "", startedTo: "" };
 const statuses = ["queued", "running", "active", "awaiting_input", "awaiting_approval", "completed", "failed", "cancelled", "expired"];
 const triggers = ["api", "webhook"];
 const runtimes = ["solidx", "agentHub"];
-const inboxFilterKeys = ["review", "agent", "status", "trigger", "runtime", "startedFrom", "startedTo"] as const;
+const inboxFilterKeys = ["review", "agent", "hostRefId", "status", "trigger", "runtime", "startedFrom", "startedTo"] as const;
 const sortOptions = [
   { label: "Recent activity", value: "last_active_desc" },
   { label: "Old activity", value: "last_active_asc" },
@@ -102,6 +103,7 @@ function readInboxFilters(search: string): InboxFilters {
   return {
     review: params.get("review") === "true",
     agent: params.get("agent")?.trim() ?? "",
+    hostRefId: params.get("hostRefId")?.trim() ?? "",
     status: readOption("status", statuses),
     trigger: readOption("trigger", triggers),
     runtime: readOption("runtime", runtimes),
@@ -362,6 +364,7 @@ function OpenRun({ run, revision, onChange, hideHeader = false }: { run: Run; re
       <div><h2>{run.agentTitle ?? "Agent run"}</h2>
         <div className={styles.runMeta}><RunStatus status={status} hasJob={hasJob} />
           {canConnect && <span role="status">{connection}</span>}
+          {run.hostRefId && <span title="Host reference ID">Ref {run.hostRefId}</span>}
         </div>
       </div>
     </header>}
@@ -456,6 +459,7 @@ export function AgentJobsInboxPage() {
             ...(querySearch ? { q: querySearch } : {}),
             sort: currentSort,
             ...(filters.agent ? { agent: filters.agent } : {}),
+            ...(filters.hostRefId ? { hostRefId: filters.hostRefId } : {}),
             ...(filters.status ? { status: filters.status } : {}),
             ...(filters.trigger ? { trigger: filters.trigger } : {}),
             ...(filters.runtime ? { runtime: filters.runtime } : {}),
@@ -488,7 +492,7 @@ export function AgentJobsInboxPage() {
   const applyFilters = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (filterDraft.startedFrom && filterDraft.startedTo && filterDraft.startedFrom > filterDraft.startedTo) return;
-    updateFilters({ ...filterDraft, agent: filterDraft.agent.trim() });
+    updateFilters({ ...filterDraft, agent: filterDraft.agent.trim(), hostRefId: filterDraft.hostRefId.trim() });
   };
   const clearFilters = () => {
     setFilterDraft(emptyFilters);
@@ -550,6 +554,7 @@ export function AgentJobsInboxPage() {
             className={styles.row} onClick={() => selectRun(run.sessionId)}>
             <span className={styles.rowHeading}><strong>{run.agentTitle ?? "Agent run"}</strong><span className={styles.runId}>Run #{run.id}</span></span>
             <span className={styles.runMeta}><RunStatus status={run.status} hasJob={run.hasJob} />
+              {run.hostRefId && <span title="Host reference ID">Ref {run.hostRefId}</span>}
               <span>Last active <time dateTime={run.lastActiveAt}>{new Date(run.lastActiveAt).toLocaleString()}</time></span></span>
           </button>)}
         </div>
@@ -588,6 +593,7 @@ export function AgentJobsInboxPage() {
           rowClassName={() => styles.tableRow}
           emptyMessage={error || (filters.review ? "No runs need your review." : "No background runs match these filters.")}>
           <Column field="agentTitle" header="Agent" />
+          <Column field="hostRefId" header="Host Ref ID" body={(run: Run) => run.hostRefId || "—"} />
           <Column field="status" header="Status" body={(run: Run) => <RunStatus status={run.status} hasJob={run.hasJob} />} />
           <Column field="trigger" header="Trigger" />
           <Column field="runtime" header="Runtime" body={(run: Run) => run.runtime ?? "Unknown"} />
@@ -606,6 +612,7 @@ export function AgentJobsInboxPage() {
       <SolidDialogBody>
         <form id="agent-inbox-filter-form" className={styles.filterForm} onSubmit={applyFilters}>
           <label>Agent name<input value={filterDraft.agent} onChange={(event) => setFilterDraft((value) => ({ ...value, agent: event.currentTarget.value }))} placeholder="Search agent" /></label>
+          <label>Host ref ID<input value={filterDraft.hostRefId} onChange={(event) => setFilterDraft((value) => ({ ...value, hostRefId: event.currentTarget.value }))} placeholder="Exact host reference" /></label>
           <label>Status<SelectFilter value={filterDraft.status} onChange={(status) => setFilterDraft((value) => ({ ...value, status }))}
             options={statuses} /></label>
           <label>Trigger<SelectFilter value={filterDraft.trigger} onChange={(trigger) => setFilterDraft((value) => ({ ...value, trigger }))} options={triggers} /></label>
