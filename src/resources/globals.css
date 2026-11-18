@@ -2536,7 +2536,7 @@ li.header-li-px {
 
 .overlay-step-button {
   width: 100%;
-  padding: 0.70rem 0.85rem;
+  padding: 0.5rem 0.625rem; /* 8px 10px */
   border: none;
   background: transparent;
   text-align: left;
