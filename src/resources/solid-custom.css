@@ -361,6 +361,10 @@ html.dark .solid-backend-indicator[data-status="offline"] {
   /* 16px */
   --solid-panel-padding: var(--solid-space-4);
   /* 16px */
+
+  /* Individual component dimensions */
+  --solid-stepper-height: 2.125rem
+  /* 34px */
 }
 
 html,
@@ -837,7 +841,7 @@ textarea {
 }
 
 .solid-user-menu-trigger-name {
-  font-size: var(--solid-font-size-caption);
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.2;
   font-weight: 650;
   white-space: nowrap;
@@ -914,7 +918,7 @@ textarea {
 }
 
 .solid-user-menu-title {
-  font-size: var(--solid-font-size-caption);
+  font-size: var(--solid-font-size-body-small);
   font-weight: 650;
   line-height: 1.2;
   white-space: nowrap;
@@ -1004,7 +1008,7 @@ textarea {
   gap: 8px;
   padding: 0 8px;
   text-align: left;
-  font-size: var(--solid-font-size-caption);
+  font-size: var(--solid-font-size-body-small);
   font-weight: 500;
   cursor: pointer;
 }
@@ -2146,8 +2150,9 @@ textarea {
   text-align: left;
   border-radius: 6px;
   padding: var(--solid-space-2) var(--solid-space-2);
-  font-size: var(--solid-font-size-body-small);
-  line-height: 1.2;
+  font-size: var(--solid-font-size-control-xs);
+  line-height: 1;
+  text-align: center;
 }
 
 .solid-select-menu-item:hover,
@@ -4630,7 +4635,8 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
 
 .solid-select-wrap.solid-paginator-select {
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
   width: auto;
   min-width: 46px;
   flex: 0 0 auto;
@@ -4645,7 +4651,7 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
   /* border-radius: 8px; */
   border-color: color-mix(in srgb, var(--border) 0%, transparent);
   background: transparent;
-  font-size: var(--solid-font-size-ui-control);
+  font-size: var(--solid-font-size-control-xs);
   font-weight: 500;
   line-height: 1;
   box-shadow: none;
@@ -4692,7 +4698,6 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
   font-size: var(--solid-font-size-caption);
   font-weight: 500;
   line-height: 1;
-  padding: 0 0;
   transition:
     background 120ms ease,
     border-color 120ms ease,

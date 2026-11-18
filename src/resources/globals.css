@@ -2391,7 +2391,7 @@ li.header-li-px {
 .arrow-step-button {
   position: relative;
   box-sizing: border-box;
-  height: var(--solid-control-height);
+  height: var(--solid-stepper-height);
   min-height: var(--solid-control-height);
   padding: 0 1.30rem;
   border: none;
@@ -2505,7 +2505,7 @@ li.header-li-px {
   box-sizing: border-box;
   padding: 0.56rem 0.5rem;
   min-width: 2.25rem;
-  height: var(--solid-control-height);
+  height: var(--solid-stepper-height);
   min-height: var(--solid-control-height);
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
   background: color-mix(in srgb, var(--card) 97%, var(--background) 3%);
@@ -2536,7 +2536,7 @@ li.header-li-px {
 
 .overlay-step-button {
   width: 100%;
-  padding: 0.70rem 0.85rem;
+  padding: 0.5rem 0.625rem; /* 8px 10px */
   border: none;
   background: transparent;
   text-align: left;

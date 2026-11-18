@@ -462,7 +462,7 @@
 }
 
 .versionHint {
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   color: var(--muted-foreground);
 }
 
@@ -475,7 +475,7 @@
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 3px 8px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   background: var(--card);
 }
 
