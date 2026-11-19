@@ -263,6 +263,16 @@ export class AgentSocket {
         }
     }
 
+    /**
+     * Sends only on a ready socket and session, returning false instead of queueing: live-view input
+     * and control requests must not replay late after a reconnect.
+     */
+    sendNow(action: AgentAction): boolean {
+        if (this.closedByUser || this.ws?.readyState !== WebSocket.OPEN || !this.sessionId || !this.sessionReady) return false;
+        void this.sendRaw(action, false);
+        return true;
+    }
+
     /** Starts a fresh conversation (drops the current session id). */
     newSession(opts?: { provider?: string; model?: string } & AgentSessionOptions) {
         if (opts?.provider) this.provider = opts.provider;
@@ -364,11 +374,11 @@ export class AgentSocket {
         });
     }
 
-    private async sendRaw(action: AgentAction) {
+    private async sendRaw(action: AgentAction, queueOnFailure = true) {
         const agentToken = (await loadAgentAuth(this.agentUrl))?.agentToken;
         if (!agentToken || this.ws?.readyState !== WebSocket.OPEN) {
             if (this.debugEmbed) console.warn("[agent-embed][runtime] skipped outbound frame", { action: action.action, hasAgentToken: !!agentToken, socketOpen: this.ws?.readyState === WebSocket.OPEN });
-            if (action.action !== "start_session" && action.action !== "resume_session") this.queue.push(action);
+            if (queueOnFailure && action.action !== "start_session" && action.action !== "resume_session") this.queue.push(action);
             return;
         }
         if (this.debugEmbed) console.info("[agent-embed][runtime] sending WebSocket action", { action: action.action });

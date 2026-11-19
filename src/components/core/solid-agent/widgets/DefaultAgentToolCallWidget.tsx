@@ -7,6 +7,8 @@ import {
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import { toolDisplayName } from "../agentFormat";
+import { normalizeToolFiles } from "../toolFiles";
+import { AgentToolFiles } from "./AgentToolFiles";
 
 type ToolStatus = "running" | "success" | "warning" | "error";
 type ToolProgressStep = { label: string; status: "running" | "done"; duration_ms?: number };
@@ -37,6 +39,7 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
     const hasArgs = !!args && Object.keys(args).length > 0;
     const expandable = (hasArgs || !!output) && status !== "running";
     const isRunning = live || status === "running";
+    const files = normalizeToolFiles(eventData.files);
 
     return (
         <div className={`${styles.ToolCard} ${CARD_CLASS[status] ?? styles.ToolCardDone}`}>
@@ -64,6 +67,8 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
                     ))}
                 </div>
             )}
+
+            {files.length > 0 && <AgentToolFiles files={files} />}
 
             {expanded && (
                 <div className={styles.ToolCardExpandable}>

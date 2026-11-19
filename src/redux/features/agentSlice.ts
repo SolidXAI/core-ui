@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { applyAgentEvent, createThreadState, nextItemId, type AgentThreadState } from "../../components/core/solid-agent/agentEvents";
+import { mergeToolFileMedia, type AgentToolFileMedia } from "../../components/core/solid-agent/toolFiles";
 import {
     AgentEventTypes,
     type AgentAttachmentMeta,
@@ -120,6 +121,15 @@ const agentSlice = createSlice({
         agentEventReceived(state, action: PayloadAction<AgentChatEvent>) {
             applyAgentEvent(state, action.payload);
         },
+        /** Stored URLs for the files a tool returned, fetched after its ToolResult arrived. */
+        agentToolFilesResolved(state, action: PayloadAction<{ agentEventId: string | number; media: AgentToolFileMedia[] }>) {
+            const { agentEventId, media } = action.payload;
+            state.items.forEach((item) => {
+                if (item.eventType !== AgentEventTypes.toolCalling || String(item.eventData.agentEventId) !== String(agentEventId)
+                    || !Array.isArray(item.eventData.files)) return;
+                item.eventData = { ...item.eventData, files: mergeToolFileMedia(item.eventData.files, media) };
+            });
+        },
     },
 });
 
@@ -134,6 +144,7 @@ export const {
     agentHistoryLoadingChanged,
     agentHistoryLoaded,
     agentEventReceived,
+    agentToolFilesResolved,
 } = agentSlice.actions;
 
 export default agentSlice.reducer;
