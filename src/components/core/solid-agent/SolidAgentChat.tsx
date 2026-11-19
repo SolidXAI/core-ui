@@ -1159,7 +1159,7 @@ export function SolidAgentChat({
             items={agent.items}
             thinking={agent.working && agent.thinking}
             working={agent.working}
-            loadingHistory={agent.loadingHistory || !!resumingSessionId}
+            loadingHistory={agent.loadingHistory || !!resumingSessionId || isSwitchingProvider}
             hasMore={agent.hasMoreHistory}
             loadingOlder={agent.loadingOlder}
             loadOlderFailed={agent.olderHistoryFailed}
@@ -1408,12 +1408,12 @@ export function SolidAgentChat({
                                     <button
                                         type="button"
                                         className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
-                                        title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                        title={loadingProviders || isSwitchingProvider ? "Loading AI execution providers..." : "Select AI execution provider"}
                                         aria-label="Select AI execution provider"
                                         aria-expanded={showProviderMenu}
                                         onClick={toggleProviderMenu}
                                     >
-                                        {loadingProviders ? (
+                                        {loadingProviders || isSwitchingProvider ? (
                                             <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
                                         ) : (
                                             <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
@@ -1556,12 +1556,12 @@ export function SolidAgentChat({
                                                     <button
                                                         type="button"
                                                         className={`${styles.sidebarSplitTriggerBtn} ${showProviderMenu ? styles.sidebarSplitTriggerActive : ""}`}
-                                                        title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                                        title={loadingProviders || isSwitchingProvider ? "Loading AI execution providers..." : "Select AI execution provider"}
                                                         aria-label="Select AI execution provider"
                                                         aria-expanded={showProviderMenu}
                                                         onClick={toggleProviderMenu}
                                                     >
-                                                        {loadingProviders ? (
+                                                        {loadingProviders || isSwitchingProvider ? (
                                                             <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
                                                         ) : (
                                                             <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
