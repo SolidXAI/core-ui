@@ -194,7 +194,9 @@ export type AgentAction =
     | { action: "human_response"; session_id: string; request_id: number; choice: string; text: string }
     | { action: "cancel"; session_id: string }
     | { action: "end_session"; session_id: string }
-    | { action: "browser_preview_start" | "browser_preview_stop" | "browser_control_request"; session_id: string }
+    /** `stream` numbers this subscription; the runtime echoes it on the frames it sends for it. */
+    | { action: "browser_preview_start"; session_id: string; stream: number }
+    | { action: "browser_preview_stop" | "browser_control_request"; session_id: string }
     | { action: "browser_control_release"; session_id: string; note?: string | null }
     | { action: "browser_input"; session_id: string; event: AgentBrowserInputEvent };
 

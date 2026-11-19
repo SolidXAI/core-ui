@@ -54,7 +54,7 @@ describe("AgentBrowserChannel", () => {
         const release = channel.watch();
         assert.deepEqual(sent, [], "no browser yet");
         channel.handle("browser_status", live);
-        assert.deepEqual(sent, [{ action: "browser_preview_start", session_id: "s1" }]);
+        assert.deepEqual(sent, [{ action: "browser_preview_start", session_id: "s1", stream: 1 }]);
         assert.equal(channel.getView().watching, true);
         assert.deepEqual(channel.getView().viewport, { width: 1024, height: 640 });
         channel.handle("browser_status", live);
@@ -109,6 +109,27 @@ describe("AgentBrowserChannel", () => {
         assert.deepEqual(drawn.map(([data]) => data), ["old", "new1", "new2"]);
         assert.ok(drawn[1][1] > drawn[0][1] && drawn[2][1] > drawn[1][1], "the channel's seq keeps growing");
         assert.equal(channel.latestFrame?.data, "new2");
+        dialog();
+    });
+
+    it("drops a late frame of an earlier subscription, which would hide the new one's frames", () => {
+        const { channel, sent, runTimers } = setup();
+        const drawn: string[] = [];
+        channel.onFrame((frame) => drawn.push(frame.data));
+        channel.handle("browser_status", live);
+        const pane = channel.watch();
+        const first = sent.at(-1)!.stream;
+        channel.handle("browser_frame", { data: "old", seq: 1500, stream: first });
+        pane();
+        runTimers();
+        const dialog = channel.watch();
+        const second = sent.at(-1)!.stream;
+        assert.notEqual(second, first, "each subscription has its own number");
+        // Sent by the runtime before it handled the stop, and arriving after the new start.
+        channel.handle("browser_frame", { data: "late", seq: 1501, stream: first });
+        channel.handle("browser_frame", { data: "new1", seq: 1, stream: second });
+        channel.handle("browser_frame", { data: "new2", seq: 2, stream: second });
+        assert.deepEqual(drawn, ["old", "new1", "new2"]);
         dialog();
     });
 

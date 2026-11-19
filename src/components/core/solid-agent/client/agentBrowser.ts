@@ -95,6 +95,8 @@ export class AgentBrowserChannel {
     private frameCount = 0;
     /** The relay's number of the last frame of the current subscription; a new subscription counts from 1 again. */
     private streamSeq = 0;
+    /** This socket's number for its current subscription, which the runtime echoes on the frames. */
+    private stream = 0;
     private watchers = 0;
     /** The session whose preview this socket subscribed to, if any. */
     private previewSession: string | null = null;
@@ -233,7 +235,8 @@ export class AgentBrowserChannel {
         const sessionId = this.socket.currentSessionId;
         if (this.wantsPreview()) {
             if (!sessionId || this.previewSession === sessionId) return;
-            if (this.socket.sendNow({ action: "browser_preview_start", session_id: sessionId })) {
+            this.stream += 1;
+            if (this.socket.sendNow({ action: "browser_preview_start", session_id: sessionId, stream: this.stream })) {
                 this.previewSession = sessionId;
                 this.streamSeq = 0;
                 this.setView({ ...this.view, watching: true });
@@ -269,8 +272,10 @@ export class AgentBrowserChannel {
     }
 
     private applyFrame(data: Record<string, any>) {
-        // Frames still in flight from a stopped subscription would be numbered as the old stream.
         if (typeof data.data !== "string" || !data.data || !this.previewSession) return;
+        // A frame still on the way from an earlier subscription carries that subscription's number. Taking its
+        // seq would hide the new subscription's frames, which the relay may number from 1 again.
+        if (data.stream !== undefined && data.stream !== this.stream) return;
         const seq = Number(data.seq) || 0;
         // The relay numbers the frames of one subscription; an older one can still arrive after a newer one.
         if (seq > 0 && seq < this.streamSeq) return;
