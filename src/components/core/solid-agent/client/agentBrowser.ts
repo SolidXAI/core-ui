@@ -45,6 +45,7 @@ export type AgentBrowserView = {
     error: AgentBrowserError | null;
 };
 
+/** `seq` grows with every frame the channel accepts, also across preview restarts and reconnects. */
 export type AgentBrowserFrame = { tab: string | null; url: string | null; title: string | null; format: string; data: string; seq: number };
 
 /** What the channel needs from AgentSocket. */
@@ -91,6 +92,9 @@ export class AgentBrowserChannel {
     private listeners = new Set<() => void>();
     private frameListeners = new Set<(frame: AgentBrowserFrame) => void>();
     private frame: AgentBrowserFrame | null = null;
+    private frameCount = 0;
+    /** The relay's number of the last frame of the current subscription; a new subscription counts from 1 again. */
+    private streamSeq = 0;
     private watchers = 0;
     /** The session whose preview this socket subscribed to, if any. */
     private previewSession: string | null = null;
@@ -138,6 +142,7 @@ export class AgentBrowserChannel {
     /** The socket (re)confirmed a session. A new socket has no preview yet; another session starts empty. */
     sessionStarted(sessionId: string | null) {
         this.previewSession = null;
+        this.streamSeq = 0;
         if (sessionId !== this.view.sessionId) {
             this.frame = null;
             this.setView(initialView(sessionId, this.view.available));
@@ -152,6 +157,7 @@ export class AgentBrowserChannel {
         this.cancelStop();
         if (this.previewSession) this.socket.sendNow({ action: "browser_preview_stop", session_id: this.previewSession });
         this.previewSession = null;
+        this.streamSeq = 0;
         this.frame = null;
         this.setView(initialView(null, this.view.available));
     }
@@ -229,11 +235,13 @@ export class AgentBrowserChannel {
             if (!sessionId || this.previewSession === sessionId) return;
             if (this.socket.sendNow({ action: "browser_preview_start", session_id: sessionId })) {
                 this.previewSession = sessionId;
+                this.streamSeq = 0;
                 this.setView({ ...this.view, watching: true });
             }
         } else if (this.watchers === 0 && this.previewSession) {
             this.socket.sendNow({ action: "browser_preview_stop", session_id: this.previewSession });
             this.previewSession = null;
+            this.streamSeq = 0;
             this.setView({ ...this.view, watching: false });
         }
     }
@@ -261,13 +269,16 @@ export class AgentBrowserChannel {
     }
 
     private applyFrame(data: Record<string, any>) {
-        if (typeof data.data !== "string" || !data.data) return;
+        // Frames still in flight from a stopped subscription would be numbered as the old stream.
+        if (typeof data.data !== "string" || !data.data || !this.previewSession) return;
         const seq = Number(data.seq) || 0;
-        // The relay numbers frames per session; an older one can still arrive after a newer one.
-        if (this.frame && seq > 0 && seq < this.frame.seq) return;
+        // The relay numbers the frames of one subscription; an older one can still arrive after a newer one.
+        if (seq > 0 && seq < this.streamSeq) return;
+        if (seq > 0) this.streamSeq = seq;
+        this.frameCount += 1;
         const frame: AgentBrowserFrame = {
             tab: text(data.tab), url: text(data.url), title: text(data.title),
-            format: text(data.format) ?? "jpeg", data: data.data, seq,
+            format: text(data.format) ?? "jpeg", data: data.data, seq: this.frameCount,
         };
         this.frame = frame;
         const url = frame.url ?? this.view.url;
@@ -302,6 +313,7 @@ export class AgentBrowserChannel {
         const error = { code, message: text(data.message) ?? "The browser could not do that.", at: this.timers.now() };
         if (code === "no_browser") {
             this.previewSession = null;
+            this.streamSeq = 0;
             this.setView({ ...this.view, available: false, watching: false, error });
             return;
         }

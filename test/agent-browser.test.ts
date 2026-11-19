@@ -79,8 +79,8 @@ describe("AgentBrowserChannel", () => {
     it("subscribes again after a reconnect and starts empty for another session", () => {
         const { channel, socket, sent } = setup();
         channel.handle("browser_status", live);
-        channel.handle("browser_frame", { tab: "t1", url: "https://example.com/a", title: "A", format: "jpeg", data: "AAA", seq: 3 });
         channel.watch();
+        channel.handle("browser_frame", { tab: "t1", url: "https://example.com/a", title: "A", format: "jpeg", data: "AAA", seq: 3 });
         channel.sessionStarted("s1");
         assert.deepEqual(actions(sent), ["browser_preview_start", "browser_preview_start"]);
         assert.equal(channel.getView().hasFrame, true, "the same session keeps its last picture");
@@ -89,6 +89,39 @@ describe("AgentBrowserChannel", () => {
         assert.equal(channel.getView().state, "none");
         assert.equal(channel.latestFrame, null);
         assert.equal(sent.length, 2, "the new session has no running browser yet");
+    });
+
+    it("takes the frames of a restarted preview, which the relay numbers from 1 again", () => {
+        const { channel, runTimers } = setup();
+        const drawn: Array<[string, number]> = [];
+        channel.onFrame((frame) => drawn.push([frame.data, frame.seq]));
+        channel.handle("browser_status", live);
+        const pane = channel.watch();
+        channel.handle("browser_frame", { data: "old", seq: 1500 });
+        pane();
+        runTimers();
+        assert.equal(channel.getView().watching, false);
+        assert.equal(channel.latestFrame?.data, "old", "the last picture stays until the new preview sends one");
+        const dialog = channel.watch();
+        channel.handle("browser_frame", { data: "new1", seq: 1 });
+        channel.handle("browser_frame", { data: "new2", seq: 2 });
+        channel.handle("browser_frame", { data: "late", seq: 1 });
+        assert.deepEqual(drawn.map(([data]) => data), ["old", "new1", "new2"]);
+        assert.ok(drawn[1][1] > drawn[0][1] && drawn[2][1] > drawn[1][1], "the channel's seq keeps growing");
+        assert.equal(channel.latestFrame?.data, "new2");
+        dialog();
+    });
+
+    it("takes the frames of the new socket's preview after a reconnect", () => {
+        const { channel } = setup();
+        const drawn: string[] = [];
+        channel.onFrame((frame) => drawn.push(frame.data));
+        channel.handle("browser_status", live);
+        channel.watch();
+        channel.handle("browser_frame", { data: "before", seq: 900 });
+        channel.sessionStarted("s1");
+        channel.handle("browser_frame", { data: "after", seq: 1 });
+        assert.deepEqual(drawn, ["before", "after"]);
     });
 
     it("stops the old preview when the chat is reset", () => {
@@ -102,13 +135,15 @@ describe("AgentBrowserChannel", () => {
 
     it("draws frames in order and takes the page address from them", () => {
         const { channel } = setup();
-        const drawn: number[] = [];
-        channel.onFrame((frame) => drawn.push(frame.seq));
+        const drawn: string[] = [];
+        channel.onFrame((frame) => drawn.push(frame.data));
         channel.handle("browser_status", live);
+        channel.handle("browser_frame", { data: "unwatched", seq: 1 });
+        channel.watch();
         channel.handle("browser_frame", { url: "https://example.com/2", title: "Two", data: "B", seq: 2 });
         channel.handle("browser_frame", { url: "https://example.com/1", data: "A", seq: 1 });
         channel.handle("browser_frame", { data: "", seq: 3 });
-        assert.deepEqual(drawn, [2]);
+        assert.deepEqual(drawn, ["B"], "no frames without a subscription; older ones are dropped");
         assert.equal(channel.getView().url, "https://example.com/2");
         assert.equal(channel.getView().title, "Two");
         channel.handle("browser_status", { ...live, state: "released" });
