@@ -195,7 +195,31 @@ export type AgentAction =
       } & AgentSessionOptions)
     | { action: "human_response"; session_id: string; request_id: number; choice: string; text: string }
     | { action: "cancel"; session_id: string }
-    | { action: "end_session"; session_id: string };
+    | { action: "end_session"; session_id: string }
+    /** `stream` numbers this subscription; the runtime echoes it on the frames it sends for it. */
+    | { action: "browser_preview_start"; session_id: string; stream: number }
+    | { action: "browser_preview_stop" | "browser_control_request"; session_id: string }
+    | { action: "browser_control_release"; session_id: string; note?: string | null }
+    | { action: "browser_input"; session_id: string; event: AgentBrowserInputEvent };
+
+/** Modifier bits of a live-view input event: Alt 1, Ctrl 2, Meta 4, Shift 8. */
+export type AgentBrowserInputEvent =
+    | { kind: "mouse"; type: "mousePressed" | "mouseReleased" | "mouseMoved"; x: number; y: number;
+        button: "none" | "left" | "middle" | "right"; clickCount?: number; modifiers: number }
+    | { kind: "wheel"; x: number; y: number; deltaX: number; deltaY: number; modifiers: number }
+    | { kind: "key"; type: "keyDown" | "keyUp" | "char"; key: string; code: string; keyCode: number; modifiers: number; text?: string }
+    | { kind: "navigation"; action: "back" | "forward" | "refresh" }
+    | { kind: "navigation"; url: string };
+
+/** A file a tool returned (a screenshot or a download), stored as SolidX media on the ToolResult event. */
+export type AgentToolFile = {
+    mediaId?: number;
+    name: string;
+    mimeType: string;
+    size?: number;
+    /** Fetchable URL, set once the stored media is resolved. */
+    url?: string;
+};
 
 // ── Thread items ──────────────────────────────────────────────────────────────
 

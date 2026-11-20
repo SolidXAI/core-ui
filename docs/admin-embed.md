@@ -55,7 +55,7 @@ The SDK relays the access token to the iframe using origin-checked messages. The
 </script>
 ```
 
-The inbox accepts `review=true`, `agent`, `status`, `trigger`, `runtime`, `startedFrom`, `startedTo`, and `run`. Use `YYYY-MM-DD` for dates and a session ID for `run`. Users can edit or clear the initial filters from the inbox.
+The inbox accepts `review=true`, `agent`, `hostRefId`, `sessionId`, `status`, `trigger`, `runtime`, `startedFrom`, `startedTo`, `q`, `sort`, and `run`. Use `YYYY-MM-DD` for dates and a session ID for `run`. Pass `hostRefId` to show only the runs created with that host reference, for example `query: { hostRefId: "PR-1042" }`. Pass `sessionId` to narrow the list to one run (exact match) and open its conversation, as if it were also passed as `run`. Users can edit or clear the initial filters from the inbox.
 
 For a metadata-driven screen, use `type: "solid", moduleName: "solid-core", modelName: "agent-session", view: "list"`. The supported view values are `list`, `kanban`, `tree`, and `card`. Supply `actionId` and `menuItemId` in `query` when you want the screen to resolve the same metadata as a specific menu action. For forms, dashboards, and other registered routes, use `type: "custom"` with the route.
 

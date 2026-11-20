@@ -27,6 +27,8 @@ export const ExtensionComponentTypes = {
     agentChatHeaderWidget: "agentChatHeaderWidget",
     // Renders the wrapper around one assistant turn, including activity and responses.
     agentTurnCompletionWrapperWidget: "agentTurnCompletionWrapperWidget",
+    /** Renders the live view and controls of an AgentHub agent's browser. Receives SolidAgentBrowserPanelWidgetProps. */
+    agentBrowserPanelWidget: "agentBrowserPanelWidget",
 
     // Renders the body of a custom chatter message. Receives SolidChatterMessageWidgetProps.
     chatterMessageWidget: "chatterMessageWidget",

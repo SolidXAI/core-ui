@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, Globe, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -45,7 +45,11 @@ import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
 import { AgentWorkspaceHeaderActions } from "./AgentWorkspaceHeaderActions";
 import type { AgentWorkspaceControls } from "./embed/agentWorkspace";
-import { getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
+import { getAgentBrowserPanelWidgetName, getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
+import { isBrowserActive } from "./client/agentBrowser";
+import { useAgentBrowser } from "./browser/useAgentBrowser";
+import { AgentBrowserScreen } from "./browser/AgentBrowserScreen";
+import type { SolidAgentBrowserPanelWidgetProps } from "../../../types/solid-core";
 import { ExtensionComponentTypes } from "../../../types/extension-registry";
 
 export function formatProviderName(raw?: string): string {
@@ -88,6 +92,34 @@ type Props = {
     };
     workspaceControls?: AgentWorkspaceControls;
 };
+
+/** From this chat width the browser sits beside the thread; below it, above the thread. */
+const BROWSER_SIDE_PANE_MIN_WIDTH = 860;
+/** Limits of the user-sized side pane: the browser stays usable and the thread keeps room to read. */
+const BROWSER_SIDE_MIN = 320;
+const BROWSER_CHAT_MIN = 360;
+const BROWSER_RESIZE_STEP = 24;
+const BROWSER_SIDE_WIDTH_KEY = "solid-agent.browser.sideWidth";
+
+type BrowserLayout = "side" | "stacked";
+
+function readBrowserSideWidth(): number | null {
+    try {
+        const width = Number(localStorage.getItem(BROWSER_SIDE_WIDTH_KEY));
+        return Number.isFinite(width) && width > 0 ? width : null;
+    } catch {
+        return null;
+    }
+}
+
+function storeBrowserSideWidth(width: number | null) {
+    try {
+        if (width === null) localStorage.removeItem(BROWSER_SIDE_WIDTH_KEY);
+        else localStorage.setItem(BROWSER_SIDE_WIDTH_KEY, String(Math.round(width)));
+    } catch {
+        // ignore
+    }
+}
 
 const DEFAULT_SUGGESTIONS = [
     "What can you help me with in this app?",
@@ -175,6 +207,81 @@ export function SolidAgentChat({
     const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName);
     const review = agent.pendingReview;
     const reviewDisabled = agent.reviewSubmitting || agent.connection !== "open";
+    const browserView = useAgentBrowser(runtime?.browser);
+    // The agent handed over its browser (or the user took it mid-turn): answered from the browser panel.
+    const browserHandoff = review?.kind === "browser_control" ? review : null;
+    const browserShown = agentRuntime === "agentHub" && (isBrowserActive(browserView) || !!browserHandoff);
+    // Collapsing belongs to the layout it was done in: a collapsed stacked panel must not hide the side pane.
+    const [browserCollapsedIn, setBrowserCollapsedIn] = useState<BrowserLayout | null>(null);
+    const [browserExpanded, setBrowserExpanded] = useState(false);
+    const [browserSideWidth, setBrowserSideWidth] = useState<number | null>(readBrowserSideWidth);
+    const [browserResizing, setBrowserResizing] = useState(false);
+    const browserSideRef = useRef<HTMLElement | null>(null);
+    const browserResizeStart = useRef<{ x: number; width: number } | null>(null);
+    const [chatBody, setChatBody] = useState<HTMLDivElement | null>(null);
+    const [chatBodyWidth, setChatBodyWidth] = useState(0);
+    useEffect(() => {
+        if (!chatBody || typeof ResizeObserver === "undefined") return;
+        setChatBodyWidth(chatBody.getBoundingClientRect().width);
+        const observer = new ResizeObserver((entries) => setChatBodyWidth(entries[0]?.contentRect.width ?? 0));
+        observer.observe(chatBody);
+        return () => observer.disconnect();
+    }, [chatBody]);
+    useEffect(() => {
+        if (browserShown) setBrowserCollapsedIn(null);
+        else setBrowserExpanded(false);
+    }, [browserShown]);
+    const browserHandoffId = browserHandoff?.requestId ?? null;
+    const browserHuman = browserView.control.mode === "human";
+    useEffect(() => {
+        if (browserHandoffId !== null || browserHuman) setBrowserCollapsedIn(null);
+    }, [browserHandoffId, browserHuman]);
+    const browserLayout: BrowserLayout | null = !browserShown ? null : chatBodyWidth >= BROWSER_SIDE_PANE_MIN_WIDTH ? "side" : "stacked";
+    const browserCollapsed = browserLayout !== null && browserCollapsedIn === browserLayout;
+    useEffect(() => {
+        // Another layout starts with the browser shown.
+        setBrowserCollapsedIn((current) => (current === null || current === browserLayout ? current : null));
+    }, [browserLayout]);
+    const toggleBrowserCollapsed = () => setBrowserCollapsedIn((current) => (current === browserLayout ? null : browserLayout));
+    const browserSideMax = Math.max(BROWSER_SIDE_MIN, chatBodyWidth - BROWSER_CHAT_MIN);
+    const clampBrowserSide = (width: number) => Math.round(Math.max(BROWSER_SIDE_MIN, Math.min(browserSideMax, width)));
+    const browserSideShownWidth = browserSideWidth === null ? null : clampBrowserSide(browserSideWidth);
+    const currentBrowserSideWidth = () => browserSideShownWidth ?? browserSideRef.current?.getBoundingClientRect().width ?? BROWSER_SIDE_MIN;
+    const startBrowserResize = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        browserResizeStart.current = { x: event.clientX, width: currentBrowserSideWidth() };
+        setBrowserResizing(true);
+    };
+    const moveBrowserResize = (event: React.PointerEvent<HTMLDivElement>) => {
+        const start = browserResizeStart.current;
+        // The handle is on the pane's left edge: moving left widens the browser.
+        if (start) setBrowserSideWidth(clampBrowserSide(start.width + start.x - event.clientX));
+    };
+    const endBrowserResize = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!browserResizeStart.current) return;
+        browserResizeStart.current = null;
+        setBrowserResizing(false);
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        setBrowserSideWidth((width) => {
+            storeBrowserSideWidth(width);
+            return width;
+        });
+    };
+    const resizeBrowserByKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        const step = event.key === "ArrowLeft" ? BROWSER_RESIZE_STEP : event.key === "ArrowRight" ? -BROWSER_RESIZE_STEP : 0;
+        const width = event.key === "Home" ? BROWSER_SIDE_MIN : event.key === "End" ? browserSideMax
+            : step ? clampBrowserSide(currentBrowserSideWidth() + step) : null;
+        if (width === null) return;
+        event.preventDefault();
+        setBrowserSideWidth(width);
+        storeBrowserSideWidth(width);
+    };
+    const resetBrowserSideWidth = () => {
+        setBrowserSideWidth(null);
+        storeBrowserSideWidth(null);
+    };
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -774,6 +881,30 @@ export function SolidAgentChat({
     const headerWidgetName = getAgentChatHeaderWidgetName(agentName) ?? "DefaultAgentChatHeaderWidget";
     const AgentChatHeaderWidget = getExtensionComponent(headerWidgetName, ExtensionComponentTypes.agentChatHeaderWidget)
         ?? getExtensionComponent("DefaultAgentChatHeaderWidget", ExtensionComponentTypes.agentChatHeaderWidget);
+    const BrowserPanelWidget = getExtensionComponent(getAgentBrowserPanelWidgetName(agentName) ?? "DefaultAgentBrowserPanelWidget", ExtensionComponentTypes.agentBrowserPanelWidget)
+        ?? getExtensionComponent("DefaultAgentBrowserPanelWidget", ExtensionComponentTypes.agentBrowserPanelWidget);
+    const renderBrowserPanel = (layout: SolidAgentBrowserPanelWidgetProps["layout"], collapsed: boolean) => {
+        if (!runtime || !BrowserPanelWidget) return null;
+        const channel = runtime.browser;
+        const props: SolidAgentBrowserPanelWidgetProps = {
+            agentName,
+            browser: browserView,
+            handoff: browserHandoff ? { requestId: browserHandoff.requestId, toolName: browserHandoff.toolName ?? null, question: browserHandoff.question } : null,
+            layout,
+            connected: agent.connection === "open",
+            collapsed,
+            screen: collapsed ? null : <AgentBrowserScreen channel={channel} view={browserView} />,
+            takeControl: () => channel.requestControl(),
+            giveBack: (note) => channel.release(note),
+            navigate: (url) => channel.navigate(url),
+            navigation: (action) => channel.navigation(action),
+            dismissError: () => channel.clearError(),
+            ...(layout === "dialog"
+                ? { onClose: () => setBrowserExpanded(false) }
+                : { onToggleCollapsed: toggleBrowserCollapsed, onExpand: () => setBrowserExpanded(true) }),
+        };
+        return <BrowserPanelWidget {...props} />;
+    };
 
 
     // const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
@@ -965,6 +1096,18 @@ export function SolidAgentChat({
                                 )}
                             </div>
                         )}
+                        {browserShown && (
+                            <button
+                                type="button"
+                                className={styles.iconBtn}
+                                title={browserCollapsed ? "Show the agent's browser" : "Hide the agent's browser"}
+                                aria-label={browserCollapsed ? "Show the agent's browser" : "Hide the agent's browser"}
+                                aria-pressed={!browserCollapsed}
+                                onClick={() => { setBrowserExpanded(false); toggleBrowserCollapsed(); }}
+                            >
+                                <Globe size={15} />
+                            </button>
+                        )}
                         <button
                             type="button"
                             className={styles.iconBtn}
@@ -1024,7 +1167,7 @@ export function SolidAgentChat({
             </div>
 
             {signedIn && review && <div className={styles.reviewStatus} role="status">
-                {review.kind === "approval" ? "Approval required" : "Waiting for your input"}
+                {review.kind === "approval" ? "Approval required" : review.kind === "browser_control" ? "The agent is waiting for you in the browser" : "Waiting for your input"}
             </div>}
             {agentAuth.status === "checking" ? (
                 externalEmbed
@@ -1061,6 +1204,11 @@ export function SolidAgentChat({
                     </div>
                 )}
 
+                <div ref={setChatBody} className={`${styles.chatBody} ${browserLayout === "side" ? styles.chatBodySide : ""} ${browserResizing ? styles.chatBodyResizing : ""}`}>
+                {browserLayout === "stacked" && (
+                    <div className={styles.browserStacked}>{renderBrowserPanel("stacked", browserCollapsed || browserExpanded)}</div>
+                )}
+                <div className={styles.chatMain}>
                 {showHistory ? (
                     <div className={styles.historyPanel} aria-label="Past conversations">
                         {sessions.length > 0 && (
@@ -1214,8 +1362,8 @@ export function SolidAgentChat({
                 <AgentComposer
                     key={review?.requestId ?? "chat"}
                     working={agent.working}
-                    disabled={!!agent.authError || agent.reviewResuming || (review ? reviewDisabled : false)}
-                    placeholder={review?.kind === "approval" ? "Type Approve or Reject…" : review ? "Type your answer…" : undefined}
+                    disabled={!!agent.authError || agent.reviewResuming || !!browserHandoff || (review ? reviewDisabled : false)}
+                    placeholder={browserHandoff ? "The agent is waiting for you in the browser" : review?.kind === "approval" ? "Type Approve or Reject…" : review ? "Type your answer…" : undefined}
                     commands={review ? [] : agent.commands}
                     seed={review ? undefined : seed?.text}
                     seedKey={review ? undefined : seed?.key}
@@ -1250,6 +1398,53 @@ export function SolidAgentChat({
                         />
                     }
                 />
+                </div>
+                {browserLayout === "side" && !browserCollapsed && !browserExpanded && (
+                    <aside ref={browserSideRef} className={styles.browserSide}
+                        style={browserSideShownWidth === null ? undefined : { width: browserSideShownWidth }}>
+                        <div
+                            className={styles.browserResizer}
+                            role="separator"
+                            aria-orientation="vertical"
+                            aria-label="Resize the agent's browser"
+                            aria-valuemin={BROWSER_SIDE_MIN}
+                            aria-valuemax={browserSideMax}
+                            aria-valuenow={browserSideShownWidth ?? undefined}
+                            title="Drag to resize. Double-click to reset."
+                            tabIndex={0}
+                            onPointerDown={startBrowserResize}
+                            onPointerMove={moveBrowserResize}
+                            onPointerUp={endBrowserResize}
+                            onPointerCancel={endBrowserResize}
+                            onDoubleClick={resetBrowserSideWidth}
+                            onKeyDown={resizeBrowserByKey}
+                        />
+                        {renderBrowserPanel("side", false)}
+                    </aside>
+                )}
+                {browserLayout === "side" && browserCollapsed && !browserExpanded && (
+                    <button type="button" className={styles.browserSideTab} title="Show the agent's browser"
+                        aria-label="Show the agent's browser" onClick={toggleBrowserCollapsed}>
+                        <Globe size={14} aria-hidden="true" />
+                        <span>Browser</span>
+                    </button>
+                )}
+                </div>
+                {browserShown && (
+                    <SolidDialog
+                        open={browserExpanded}
+                        onOpenChange={setBrowserExpanded}
+                        className={`${styles.inputDialog} ${styles.browserDialog}`}
+                        overlayClassName={styles.inputDialogOverlay}
+                        showHeader={false}
+                        ariaLabel="Agent browser"
+                        style={{ width: "min(1280px, 96vw)" }}
+                    >
+                        <SolidDialogBody className={styles.browserDialogBody}>
+                            {browserExpanded && renderBrowserPanel("dialog", false)}
+                        </SolidDialogBody>
+                    </SolidDialog>
+                )}
                 </>
             )}
         </>

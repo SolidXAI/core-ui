@@ -736,6 +736,71 @@
 .historyPreview { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .historyDate { flex: 0 0 auto; font-size: 11px; color: var(--agent-muted); white-space: nowrap; }
 
+/* ── Chat body: thread and composer, with the agent's browser beside or above them ── */
+.chatBody { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.chatBodySide { flex-direction: row; }
+.chatMain { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.browserSide {
+  position: relative;
+  flex: 0 0 auto;
+  width: clamp(400px, 55%, 960px);
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--agent-border);
+}
+.browserResizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -4px;
+  z-index: 2;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+}
+.browserResizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background 0.12s ease;
+}
+.browserResizer:hover::after, .browserResizer:focus-visible::after, .chatBodyResizing .browserResizer::after {
+  background: var(--agent-primary);
+}
+.browserResizer:focus-visible { outline: none; }
+.chatBodyResizing { cursor: col-resize; user-select: none; }
+.browserSideTab {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 28px;
+  padding: 10px 0;
+  border: 0;
+  border-left: 1px solid var(--agent-border);
+  background: transparent;
+  color: var(--agent-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.browserSideTab span { writing-mode: vertical-rl; letter-spacing: 0.02em; }
+.browserSideTab:hover, .browserSideTab:focus-visible { color: var(--agent-fg); background: var(--agent-tint); }
+.browserStacked { flex: 0 0 auto; border-bottom: 1px solid var(--agent-border); }
+.browserDialog {
+  --agent-tint: color-mix(in srgb, var(--agent-primary) 10%, transparent);
+  --agent-ok: #16a34a;
+  max-width: 96vw;
+  font-size: 13.5px;
+  color: var(--agent-fg);
+}
+.browserDialogBody { padding: 12px 14px 14px; }
+
 /* ── Thread ──────────────────────────────────────────────────── */
 .thread {
   flex: 1 1 auto;

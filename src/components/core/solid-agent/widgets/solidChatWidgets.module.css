@@ -943,3 +943,39 @@
     max-height: 100%;
     border-radius: 8px;
 }
+
+/* Files a tool returned (screenshots, downloads) */
+.ToolFiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 2px 2px;
+}
+.ToolFileThumb {
+  width: 132px;
+  height: 84px;
+  padding: 0;
+  border: 1px solid var(--agent-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--agent-page);
+  cursor: zoom-in;
+}
+.ToolFileThumb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.ToolFileThumb:hover { border-color: var(--agent-primary); }
+.ToolFileChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 260px;
+  padding: 4px 9px;
+  border: 1px solid var(--agent-border);
+  border-radius: 7px;
+  background: var(--agent-bg);
+  color: var(--agent-fg);
+  font-size: 11.5px;
+  text-decoration: none;
+}
+a.ToolFileChip:hover { border-color: var(--agent-primary); color: var(--agent-primary); }
+.ToolFileName { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ToolFileSize { flex: 0 0 auto; color: var(--agent-muted); }
