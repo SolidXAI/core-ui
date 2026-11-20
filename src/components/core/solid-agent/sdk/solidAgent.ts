@@ -24,8 +24,8 @@ export type SolidAgentEventPayloads = {
     turnComplete: { sessionId: string | null; content?: string };
     widgetAction: { widgetId: string; widget: string; value: unknown };
     sessionChanged: { sessionId: string | null; agentType?: AgentRuntimeType; provider?: string; model?: string | null };
-    /** One picture of an authoring browser session (a "ui session"), sent while someone is subscribed to it. */
-    liveFrame: { uiSessionId: string; data: string; meta: { w?: number; h?: number; ts?: number } };
+    /** One picture (a JPEG) of an authoring browser session, sent many times a second while someone is subscribed to it. */
+    liveFrame: { uiSessionId: string; blob: Blob };
     /**
      * Whether a session's live picture is on. `live: true` after a subscribe the agent accepted; `live: false` when it
      * refused (an unknown or closed session, or live preview turned off) or when the session ended.
@@ -38,7 +38,9 @@ export type SolidAgentEventPayloads = {
  * SOLID_AGENT_EVENTS so the runtime and this file do not import each other.
  */
 export const LIVE_REQUEST_EVENT = "solidAgent:liveRequest";
-export type LiveRequestPayload = { uiSessionId: string; subscribe: boolean };
+/** "large" while the picture is open in a big view, "thumb" otherwise. */
+export type LivePictureSize = "thumb" | "large";
+export type LiveRequestPayload = { uiSessionId: string; subscribe: boolean; size?: LivePictureSize };
 
 function dispatch(action: any) {
     const storeDispatch = getSolidStoreDispatch();
@@ -69,8 +71,8 @@ export const solidAgent = {
      * Starts streaming the live picture of an authoring browser session into this chat. Frames arrive as the
      * "liveFrame" event. Only subscribed sessions are streamed, and streaming stops after the last unsubscribe.
      */
-    liveSubscribe(uiSessionId: string) {
-        eventBus.emit(LIVE_REQUEST_EVENT, { uiSessionId, subscribe: true } satisfies LiveRequestPayload);
+    liveSubscribe(uiSessionId: string, size: LivePictureSize = "thumb") {
+        eventBus.emit(LIVE_REQUEST_EVENT, { uiSessionId, subscribe: true, size } satisfies LiveRequestPayload);
     },
     liveUnsubscribe(uiSessionId: string) {
         eventBus.emit(LIVE_REQUEST_EVENT, { uiSessionId, subscribe: false } satisfies LiveRequestPayload);

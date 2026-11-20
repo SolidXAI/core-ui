@@ -195,7 +195,7 @@ export class AgentRuntime {
             // The SDK asks for live frames of an authoring session; the subscriptions are restored after a reconnect.
             eventBus.on(LIVE_REQUEST_EVENT, (req: LiveRequestPayload) => this.handleLiveRequest(req)),
             this.socket.onStatus((status) => {
-                if (status === "open") this.liveSubs.forEach((id) => this.socket.send({ action: "ui_live_subscribe", ui_session_id: id }));
+                if (status === "open") this.liveSubs.forEach((size, id) => this.socket.send({ action: "ui_live_subscribe", ui_session_id: id, size }));
             }),
             this.socket.onStatus((status) => {
                 queueMicrotask(() => this.dispatch(agentConnectionChanged(status)));
@@ -448,13 +448,14 @@ export class AgentRuntime {
     }
 
     /** Session ids whose live frames this chat wants, so they can be asked for again after a reconnect. */
-    private liveSubs = new Set<string>();
+    private liveSubs = new Map<string, "thumb" | "large">();
 
     private handleLiveRequest(req: LiveRequestPayload) {
         if (!req?.uiSessionId) return;
         if (req.subscribe) {
-            this.liveSubs.add(req.uiSessionId);
-            this.socket.send({ action: "ui_live_subscribe", ui_session_id: req.uiSessionId });
+            const size = req.size === "large" ? "large" : "thumb";
+            this.liveSubs.set(req.uiSessionId, size);
+            this.socket.send({ action: "ui_live_subscribe", ui_session_id: req.uiSessionId, size });
         } else if (this.liveSubs.delete(req.uiSessionId)) {
             this.socket.send({ action: "ui_live_unsubscribe", ui_session_id: req.uiSessionId });
         }
@@ -462,9 +463,9 @@ export class AgentRuntime {
 
     private handleFrame(frame: AgentWireFrame) {
         // Live-preview frames are pictures, not chat events: they are never stored in the thread or history.
-        const wire = frame as unknown as { type?: string; ui_session_id?: string; data?: unknown; meta?: { w?: number; h?: number; ts?: number } };
+        const wire = frame as unknown as { type?: string; ui_session_id?: string; data?: unknown; blob?: Blob };
         if (wire.type === "UiLiveFrame") {
-            eventBus.emit(SOLID_AGENT_EVENTS.liveFrame, { uiSessionId: wire.ui_session_id ?? "", data: typeof wire.data === "string" ? wire.data : "", meta: wire.meta ?? {} });
+            if (wire.blob) eventBus.emit(SOLID_AGENT_EVENTS.liveFrame, { uiSessionId: wire.ui_session_id ?? "", blob: wire.blob });
             return;
         }
         if (wire.type === "UiLiveStatus") {

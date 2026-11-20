@@ -175,7 +175,8 @@ export type AgentSessionOptions = {
 };
 
 export type AgentAction =
-    | { action: "ui_live_subscribe" | "ui_live_unsubscribe"; ui_session_id: string }
+    | { action: "ui_live_subscribe"; ui_session_id: string; size?: "thumb" | "large" }
+    | { action: "ui_live_unsubscribe"; ui_session_id: string }
     | ({ action: "start_session"; widget_catalog?: AgentChatWidgetMetadata[]; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
     | ({ action: "resume_session"; session_id: string; widget_catalog?: AgentChatWidgetMetadata[]; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
     | ({ action: "update_session"; session_id: string; provider?: string; model?: string; runtime?: AgentRuntimeType } & AgentSessionOptions)
