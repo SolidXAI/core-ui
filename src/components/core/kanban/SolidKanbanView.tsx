@@ -253,7 +253,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     useDeleteMultipleSolidEntitiesMutation,
     useLazyGetSolidEntitiesQuery,
     useRecoverSolidEntityByIdMutation,
-    usePatchUpdateSolidEntityMutation
+    usePatchUpdateSolidEntityWithoutListInvalidationMutation
   } = entityApi;
 
   const menuItemId = searchParams.get("menuItemId");
@@ -411,6 +411,10 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
+  const [
+    triggerLoadKanbanBoard,
+    { data: solidEntityKanbanViewData, isFetching: isKanbanFetching },
+  ] = useLazyGetSolidEntitiesQuery();
   const [triggerRecoverSolidEntityById, { isLoading: isRecoveringRecord }] = useRecoverSolidEntityByIdMutation();
 
   // Delete mutation 
@@ -426,7 +430,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
     {
       isLoading: isPatchKanbanViewLoading,
     },
-  ] = usePatchUpdateSolidEntityMutation();
+  ] = usePatchUpdateSolidEntityWithoutListInvalidationMutation();
 
   const applyArchivedQueryState = (queryData: Record<string, any>) => {
     if (showArchived) {
@@ -690,15 +694,11 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         },
       });
 
-      const response: any = await triggerGetSolidEntities(
+      await triggerLoadKanbanBoard(
         qs.stringify(queryData, {
           encodeValuesOnly: true
         })
       ).unwrap();
-
-      setServerSwimLaneCount(response?.meta?.totalRecords || 0);
-      setRawKanbanGroupRecords(response?.groupRecords || []);
-      setSelectedRecords([]);
     } catch (error: any) {
       dispatch(showToast({
         severity: "error",
@@ -712,6 +712,14 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!solidEntityKanbanViewData) return;
+
+    setServerSwimLaneCount(solidEntityKanbanViewData?.meta?.totalRecords || 0);
+    setRawKanbanGroupRecords(solidEntityKanbanViewData?.groupRecords || []);
+    setSelectedRecords([]);
+  }, [solidEntityKanbanViewData]);
 
   useEffect(() => {
     if (!queryDataLoaded || !solidKanbanViewMetaData || !groupByFieldName) return;
@@ -810,7 +818,6 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
         detail: response?.data?.message || "Record recovered successfully.",
         life: 3000,
       }));
-      await loadKanbanBoard(filters);
     } catch (error: any) {
       dispatch(showToast({
         severity: "error",
@@ -982,6 +989,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
+        await loadKanbanBoard(filters);
         setSelectedRecords((previousRecords) => previousRecords.map((record) =>
           String(record?.id) === String(updatedItem?.id) ? updatedItem : record
         ));
@@ -1179,7 +1187,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
   const entityDisplayName = solidKanbanViewMetaData?.data?.solidView?.model?.displayName || params.modelName;
-  const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : isRecoveringRecord ? "Recovering..." : loading || !queryDataLoaded ? "Loading..." : null;
+  const headerRequestStatusLabel = isDeleteSolidEntitiesLoading ? "Deleting..." : isPatchKanbanViewLoading ? "Updating..." : isRecoveringRecord ? "Recovering..." : loading || isKanbanFetching || !queryDataLoaded ? "Loading..." : null;
 
   const handleRefreshView = () => {
     if (hasAnyActiveFilters) {
@@ -1243,7 +1251,7 @@ export const SolidKanbanView = forwardRef<SolidKanbanViewHandle, SolidKanbanView
             <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center items-end">
               <div className="solid-list-toolbar-left flex w-full items-center gap-3 lg:min-w-0 lg:flex-1">
                 {/* {params.embeded !== true &&
-                  <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                  <div className="apps-icon block solid-hide-from-md cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
                   </div>
                 } 

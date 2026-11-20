@@ -4,12 +4,14 @@ import {
     agentConnectionChanged,
     agentEventReceived,
     agentHistoryLoaded,
+    agentHistoryLoadingChanged,
     agentThreadReset,
     agentUserMessageAdded,
     type AgentState,
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, isSameAssistantContent, normalizeAgentFrame } from "../agentEvents";
 import { parseWidgetContent } from "../thread/inlineWidget";
+import { humanReviewAllowsChoice, humanReviewId } from "../humanReview";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { emitBeforeUserMessageSend, type BeforeUserMessageSendContribution } from "./beforeUserMessageSend";
 import { emitAgentPublicEvent, type AgentPublicEventName, type AgentPublicEventPayloads } from "./agentPublicEvents";
@@ -155,6 +157,7 @@ export class AgentRuntime {
         readonly agentRuntime: AgentRuntimeType = "solidx",
         private persistSession = true,
         sessionOwnerKey?: string,
+        agentName?: string,
     ) {
         this.sessionKey = sessionKey(agentRuntime, agentUrl, sessionOwnerKey);
         const initialProvider = getStoredProvider();
@@ -172,7 +175,7 @@ export class AgentRuntime {
             initialProvider,
             initialModel,
             initialOptions,
-            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog() : [],
+            agentRuntime === "agentHub" ? getAgentChatWidgetCatalog(agentName) : [],
         );
         this.socket.setOnSessionExpired(() => {
             if (this.persistSession) writeSessionId(this.sessionKey, null);
@@ -185,6 +188,8 @@ export class AgentRuntime {
             this.dispatch(agentThreadReset());
         });
         this.hadPriorSession = !!this.socket.currentSessionId;
+        if (this.hadPriorSession && this.getState()?.items.length === 0)
+            this.dispatch(agentHistoryLoadingChanged(true));
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
             this.socket.onStatus((status) => {
@@ -217,6 +222,8 @@ export class AgentRuntime {
     ) {
         const content = text;
         if (!content.trim() && !attachments.length) return;
+        if (this.getState()?.pendingReview) throw new Error("Answer the agent’s pending request first.");
+        if (this.getState()?.reviewResuming) throw new Error("The agent is resuming after your response.");
         const controller = new AbortController();
         this.preparationControllers.add(controller);
         let messageContext: AgentMessageContext | undefined;
@@ -284,11 +291,32 @@ export class AgentRuntime {
     /** Answers a widget. Sent as text too, so agents without widget_reply support still understand it. */
     async replyToWidget(widgetId: string, widget: string, value: unknown,
         beforeSend?: Parameters<AgentRuntime["sendMessage"]>[4]) {
+        const state = this.getState();
+        const review = state?.pendingReview;
+        if (review) {
+            if (widgetId !== humanReviewId(review.requestId) || typeof value !== "string") return;
+            if (!state?.reviewSubmitting && state?.connection === "open" && humanReviewAllowsChoice(review, value)) {
+                this.respondToReview(value, review.kind === "approval" ? "" : value);
+            }
+            return;
+        }
+        if (widgetId.startsWith("human-request-")) return;
         const text = typeof value === "string" ? value : Array.isArray(value) ? value.join(", ") : JSON.stringify(value);
         await this.sendMessage(text, this.lastContext, [], undefined, beforeSend, "widget", { widgetId, value });
         // The text message uses the shared preparation path. Keep the structured widget
         // value as a separate event for consumers that handle widget replies.
         eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value, agentType: this.agentRuntime });
+    }
+
+    respondToReview(choice: string, text: string) {
+        const state = this.getState();
+        const review = state?.pendingReview;
+        const sessionId = this.socket.currentSessionId;
+        if (!state || !review || state.reviewSubmitting || !sessionId || state.connection !== "open") {
+            throw new Error("The review is not ready to accept a response.");
+        }
+        this.dispatch(agentEventReceived(normalizeAgentFrame({ type: "human_response_submitting" })));
+        this.socket.send({ action: "human_response", session_id: sessionId, request_id: review.requestId, choice, text });
     }
 
     cancel() {
@@ -348,6 +376,7 @@ export class AgentRuntime {
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
         this.dispatch(agentThreadReset());
+        this.dispatch(agentHistoryLoadingChanged(true));
         this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
     }
 
@@ -378,6 +407,7 @@ export class AgentRuntime {
         if (this.loadingHistoryPages.has(key) || this.loadedHistoryPages.has(key)) return;
         const generation = this.historyGeneration;
         this.loadingHistoryPages.set(key, generation);
+        this.dispatch(agentHistoryLoadingChanged(true));
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
             this.loadedHistoryPages.add(key);
@@ -407,12 +437,19 @@ export class AgentRuntime {
             this.loadedHistoryPages.add(key);
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
+            if (generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId)
+                this.dispatch(agentHistoryLoadingChanged(false));
         }
     }
 
     private handleFrame(frame: AgentWireFrame) {
         const event = normalizeAgentFrame(frame);
         if (event.eventType === AgentEventTypes.sessionStarted) {
+            const state = this.getState();
+            if (state?.pendingReview || state?.reviewResuming) {
+                this.resetHistoryLoads();
+                this.dispatch(agentThreadReset());
+            }
             const sessionId = frame.session_id ?? event.eventData.session_id ?? null;
             this.publish(this.hadPriorSession ? "onSessionResumed" : "onSessionStarted", { sessionId });
             this.hadPriorSession = true;
@@ -443,7 +480,8 @@ export class AgentRuntime {
             this.publish("onAgentTurnCompleted", { sessionId: this.socket.currentSessionId, outcome: "completed" });
         } else if (event.eventType === AgentEventTypes.agentError || event.eventType === AgentEventTypes.error) {
             this.publish("onError", { stage: "runtime", code: "agent_error", retryable: false });
-        } else if (event.eventType === "HumanRequestCreated") {
+        } else if (event.eventType === "human_request" ||
+            event.eventType === "HumanRequestCreated" && this.agentRuntime !== "agentHub") {
             const approval = event.eventData.kind === "approval";
             this.publish(approval ? "onApprovalRequested" : "onHumanInputRequested", {
                 sessionId: this.socket.currentSessionId,
@@ -490,9 +528,10 @@ export class AgentRuntime {
                 this.resetHistoryLoads();
                 this.historySessionId = historyId;
             }
-            if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
+            if (event.eventType === AgentEventTypes.sessionStarted && state &&
+                state.items.every((item) => item.id === humanReviewId(state.pendingReview?.requestId ?? 0)) && historyId) {
                 void this.loadHistory(historyId, 1);
-            }
+            } else if (event.eventType === AgentEventTypes.sessionStarted) this.dispatch(agentHistoryLoadingChanged(false));
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             const content = event.eventData.content ?? event.frame.content;
             const now = Date.now();

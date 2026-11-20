@@ -145,6 +145,14 @@ const createSolidEntityApiInternal = (entityName: string) => {
                     { type: entityName, id: 'LIST' },
                 ],
             }),
+            patchUpdateSolidEntityWithoutListInvalidation: builder.mutation({
+                query: ({ id, data }) => ({
+                    url: `/${kebabEntityName}/${id}`,
+                    method: 'PATCH',
+                    body: data,
+                }),
+                invalidatesTags: (_result, _error, { id }) => [{ type: entityName, id }],
+            }),
             publishSolidEntity: builder.mutation({
                 query: (id) => ({
                     url: `/${kebabEntityName}/${id}/publish`,

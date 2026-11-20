@@ -195,7 +195,7 @@ export const SolidKanbanViewConfigure = ({
                         />
                     ))}
 
-                    <div className="max-lg:flex lg:hidden flex-col gap-1">
+                    <div className="max-lg:flex solid-hide-from-lg flex-col gap-1">
                         {mobileOnlyHeaderButtons.map((button: any, index: number) => (
                             <SolidListViewHeaderContextMenuButton
                                 key={`mobile-${button?.attrs?.action ?? index}`}
@@ -277,7 +277,7 @@ export const SolidKanbanViewConfigure = ({
                         }}
                     >
                         <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
-                        <span className="solid-header-action-button-label">Clear cache</span>
+                        <span className="solid-header-action-button-label">Reset View</span>
                     </SolidDropdownMenuItem>
                 </SolidDropdownMenuContent>
             </SolidDropdownMenu>

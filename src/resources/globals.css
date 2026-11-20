@@ -1932,6 +1932,15 @@ li.header-li-px {
   padding: 0 1px 3px;
 }
 
+.kanban-column:not(.kanban-column-folded) > .kaban-heading-area {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-height: 36px;
+  padding: 8px 6px;
+  background: var(--card);
+}
+
 .solid-kanban-lane-selection {
   display: flex;
   align-items: center;
@@ -2480,6 +2489,11 @@ li.header-li-px {
   cursor: unset;
   opacity: 0.6;
   pointer-events: none !important;
+}
+
+.arrow-step-button.arrow-step-active:disabled,
+.overlay-step-button.active:disabled {
+  opacity: 1;
 }
 
 .arrow-step-button:disabled:hover:not(.arrow-step-active):not(.arrow-step-completed),
@@ -5591,7 +5605,7 @@ flex-shrink: 0; */
 }
 
 .solid-kanban-board-scroll-context {
-  align-items: flex-start;
+  align-items: stretch;
   overflow: visible;
   flex: 0 0 auto;
   width: max-content;

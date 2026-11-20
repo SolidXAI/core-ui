@@ -19,28 +19,53 @@ body {
     overflow: hidden;
 }
 
-/* width */
-::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-    /* For horizontal scrollbar */
+/*
+ * Auto-hiding scrollbars: invisible by default, shown only while an element is
+ * actively scrolling. AppEventListener toggles `data-scrolling` on the scrolling
+ * element and clears it after a short idle period. The thumb is made transparent
+ * (not removed) so layout doesn't shift; `scrollbar-color` is !important so it
+ * wins over per-component colours. `scrollbar-width: none` opt-outs stay hidden.
+ */
+:root {
+    --solid-scrollbar-thumb: rgba(0, 0, 0, 0.38);
 }
 
-/* Track */
-::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 5px #EFEFEF;
-    border-radius: 10px;
+html.dark,
+[data-theme="dark"] {
+    --solid-scrollbar-thumb: rgba(255, 255, 255, 0.34);
 }
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-    background: #ADADAD;
-    border-radius: 10px;
+* {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent !important;
 }
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-    background: #c7c6c6;
+[data-scrolling] {
+    scrollbar-color: var(--solid-scrollbar-thumb) transparent !important;
+}
+
+/* Older Safari (no standard scrollbar-color) falls back to WebKit pseudo-elements. */
+@supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner {
+        background: transparent;
+        box-shadow: none;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: transparent;
+        border-radius: 999px;
+    }
+
+    [data-scrolling]::-webkit-scrollbar-thumb {
+        background: var(--solid-scrollbar-thumb);
+    }
 }
 
 // .layout-wrapper {

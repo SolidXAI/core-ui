@@ -372,6 +372,9 @@
     border-collapse: collapse;
     font-size: 13px;
     margin: 0;
+    /* The bubble's break-word lets cells shrink mid-word; break at spaces and let the wrapper scroll instead. */
+    word-break: normal;
+    overflow-wrap: normal;
 }
 
 .MarkdownRoot th,

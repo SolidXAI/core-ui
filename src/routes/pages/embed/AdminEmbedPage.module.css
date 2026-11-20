@@ -1,0 +1,9 @@
+.message {
+  padding: 1rem;
+}
+
+:global(.solidx-admin-embed) {
+  min-height: 100dvh;
+  color: var(--text-color, var(--foreground));
+  background: var(--surface-ground, var(--background));
+}

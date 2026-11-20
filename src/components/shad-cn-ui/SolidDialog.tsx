@@ -34,7 +34,7 @@ function cx(...parts: Array<string | false | undefined>) {
 }
 
 const DATEPICKER_OUTSIDE_SAFE_SELECTOR =
-  "#solid-datepicker-portal, .react-datepicker, .react-datepicker-popper, .react-datepicker__portal, [class*='react-datepicker'], [data-solid-dialog-outside-safe='true']";
+  "#solid-datepicker-portal, .react-datepicker, .react-datepicker-popper, .react-datepicker__portal, [class*='react-datepicker'], .solid-autocomplete-panel, [data-solid-dialog-outside-safe='true']";
 
 function isDatePickerInteractionTarget(target: EventTarget | null): boolean {
   if (!target) return false;

@@ -75,6 +75,25 @@ describe("Agent Thread Helper Tests", () => {
             assert.equal(result?.widget, "table");
         });
 
+        it("ignores envelopes shown as example code", () => {
+            const envelope = JSON.stringify({ widgetName: "table", data: { rows: [{ id: 1 }] } });
+            const inline = `Widgets use the shape \`${envelope}\`, then a table:\n\n| A |\n|---|\n| 1 |`;
+            assert.equal(parseWidgetContent(inline), null);
+            const fenced = `Example reply:\n\n\`\`\`json\n// a table widget\n${envelope}\n\`\`\`\n\nMore notes.`;
+            assert.equal(parseWidgetContent(fenced), null);
+        });
+
+        it("still extracts an envelope fenced on its own within prose", () => {
+            const envelope = JSON.stringify({ widgetName: "table", data: { rows: [{ id: 1 }] } });
+            const raw = `Here are the rows:\n\n\`\`\`json\n${envelope}\n\`\`\`\n\nDone.`;
+            assert.equal(parseWidgetContent(raw)?.widget, "table");
+        });
+
+        it("uses the first real envelope after a quoted example", () => {
+            const example = JSON.stringify({ widgetName: "status", data: { tone: "info" } });
+            const real = JSON.stringify({ widgetName: "table", data: { rows: [] } });
+            assert.equal(parseWidgetContent(`Format: \`${example}\`\n${real}`)?.widget, "table");
+        });
         it("normalizes array data for tables into { rows }", () => {
             const raw = JSON.stringify({ widgetName: "table", data: [{ id: 1 }, { id: 2 }] });
             const result = parseWidgetContent(raw);

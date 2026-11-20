@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { memo, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, Copy } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import widgetStyles from "./widgets/solidChatWidgets.module.css";
+import { normalizeAgentMarkdown, remarkHtmlBreaks } from "./agentMarkdown";
 
 /** Only http(s), mailto and in-app paths are followed; anything else (javascript:, data:) is dropped. */
 export function safeHref(href?: string): string | undefined {
@@ -107,13 +108,13 @@ function CodeBlock({ className, children }: { className?: string; children?: Rea
 }
 
 const markdownComponents = {
-    code({ className, children, ...rest }: any) {
-        // Only named fenced blocks (```lang) become a code block; everything else is inline code.
-        if (!/language-/.test(className || "")) return <code className={widgetStyles.InlineCode} {...rest}>{children}</code>;
-        return <CodeBlock className={className}>{children}</CodeBlock>;
+    code({ className, children, node, ...rest }: any) {
+        return <code className={widgetStyles.InlineCode} {...rest}>{children}</code>;
     },
     pre({ children }: any) {
-        return <>{children}</>;
+        // Every code block (fenced with or without a language, or indented) is a <pre> around one <code>.
+        const code = React.isValidElement(children) ? (children.props as { className?: string; children?: React.ReactNode }) : {};
+        return <CodeBlock className={code.className}>{code.children}</CodeBlock>;
     },
     table({ children }: any) {
         return <div className={widgetStyles.MarkdownTableWrapper}><table>{children}</table></div>;
@@ -135,13 +136,19 @@ const markdownComponents = {
     },
 };
 
-/** Markdown for agent text. Raw HTML in the source is never rendered (react-markdown default). */
-export function SolidAgentMarkdown({ text }: { text: string }) {
+const remarkPlugins = [remarkGfm, remarkHtmlBreaks];
+
+/**
+ * Markdown for agent text. Raw HTML in the source is never rendered (react-markdown default), except
+ * `<br>`, which becomes a line break. Memoized so a streaming reply does not re-parse earlier messages.
+ */
+export const SolidAgentMarkdown = memo(function SolidAgentMarkdown({ text }: { text: string }) {
+    const source = useMemo(() => normalizeAgentMarkdown(text), [text]);
     return (
         <div className={widgetStyles.MarkdownRoot}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                {text}
+            <ReactMarkdown remarkPlugins={remarkPlugins} components={markdownComponents}>
+                {source}
             </ReactMarkdown>
         </div>
     );
-}
+});

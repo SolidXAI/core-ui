@@ -578,7 +578,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
             <div className="flex w-full flex-col-reverse  lg:flex-row lg:items-center  items-end">
               <div className="flex gap-4 items-center w-full solid-list-toolbar-left lg:min-w-0 lg:flex-1">
                 {/* {params.embeded !== true && (
-                  <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                  <div className="apps-icon block solid-hide-from-md cursor-pointer" onClick={toggleBothSidebars}>
                     <SolidIcon name="si-th-large" aria-hidden />
                   </div>
                 )} */}

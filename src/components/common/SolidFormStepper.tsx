@@ -219,7 +219,6 @@ export const SolidFormStepper = (props: Props) => {
                             <button
                                 type='button'
                                 className="overflow-button overflow-left-button"
-                                disabled={isStepperDisabled}
                             >
                                 <SolidIcon name="si-ellipsis-h" />
                             </button>
@@ -283,7 +282,6 @@ export const SolidFormStepper = (props: Props) => {
                             <button
                                 type='button'
                                 className="overflow-button overflow-right-button"
-                                disabled={isStepperDisabled}
                             >
                                 <SolidIcon name="si-ellipsis-h" />
                             </button>

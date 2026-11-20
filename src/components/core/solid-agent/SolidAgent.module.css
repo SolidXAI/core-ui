@@ -290,9 +290,26 @@
   border-radius: 999px;
   border: 2px solid var(--agent-bg);
 }
+.headerIdentitySlot {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
 .headerTitle { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; line-height: 1.3; }
 .headerTitleRow { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
 .headerTitle strong { font-size: 14px; }
+.reviewStatus {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--agent-border);
+  background: var(--agent-tint);
+  color: var(--agent-fg);
+  font-size: 12px;
+  font-weight: 600;
+}
 .headerVersionTag {
   display: inline-flex;
   align-items: center;
@@ -588,6 +605,15 @@
 
 /* ── History menu ────────────────────────────────────────────── */
 .historyPanel { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 8px; }
+.historyLoading {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--agent-muted);
+}
 .historySearchBox {
   position: relative;
   display: flex;
@@ -1499,6 +1525,14 @@
 .card { border: 1px solid var(--agent-border); border-radius: 12px; background: var(--agent-bg); overflow: hidden; }
 .cardHead { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--agent-border); font-weight: 600; font-size: 13px; }
 .cardBody { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.reviewDetails { border: 1px solid var(--agent-border); border-radius: 9px; background: var(--agent-tint); overflow: hidden; }
+.reviewDetailsHeading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border-bottom: 1px solid var(--agent-border); color: var(--agent-muted); font-size: 11px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+.reviewDetailsHeading code { color: var(--agent-fg); font: 600 12px var(--agent-mono); letter-spacing: 0; text-transform: none; }
+.reviewArgumentList { margin: 0; padding: 2px 10px; }
+.reviewArgument { display: grid; grid-template-columns: minmax(72px, 0.35fr) minmax(0, 1fr); gap: 10px; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--agent-border) 70%, transparent); }
+.reviewArgument:last-child { border-bottom: 0; }
+.reviewArgument dt { color: var(--agent-muted); font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.reviewArgument dd { margin: 0; color: var(--agent-fg); font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .cardFoot { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--agent-border); }
 .btn {
   padding: 7px 12px;
@@ -1518,6 +1552,8 @@
 .optionOn { border-color: var(--agent-primary); background: var(--agent-tint); }
 .checkRow { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; cursor: pointer; }
 .checkRow input { margin-top: 2px; accent-color: var(--agent-primary); }
+.saView { flex: 0 0 auto; padding: 0; border: 0; background: none; color: var(--agent-primary); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.saView:hover { text-decoration: none; }
 .mono { font-family: var(--agent-mono); font-size: 11.5px; }
 .pre {
   margin: 0;

@@ -10,6 +10,7 @@ export type SolidFieldProps = {
     modelName?: any,
     readOnly?: any,
     viewMode?: any
+    embeded?: boolean,
     onChange?: any,
     onBlur?: any,
     parentFieldName?: string,

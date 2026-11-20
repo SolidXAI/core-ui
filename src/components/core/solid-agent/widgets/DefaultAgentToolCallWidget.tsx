@@ -27,7 +27,7 @@ function StatusIcon({ status }: { status: ToolStatus }) {
  * Default widget for `ToolCalling`: clean borderless row. `ToolProgress` sub-steps show under the
  * header; `ToolResult` sets the status and duration. Expanding shows the Arguments and Result.
  */
-export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetProps) => {
+export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetProps) => {
     const [expanded, setExpanded] = useState(false);
     const toolName: string = eventData.tool_name ?? "tool";
     const args: Record<string, unknown> | undefined = eventData.arguments;
@@ -91,6 +91,6 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
     );
 };
 
-Object.assign(DefaultToolCallChatWidget, { getExtensionMetadata: () => ({
+Object.assign(DefaultAgentToolCallWidget, { getExtensionMetadata: () => ({
     chatInteraction: { role: "event-renderer", agentSelectable: false },
 }) });
