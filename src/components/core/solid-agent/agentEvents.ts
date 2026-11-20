@@ -193,11 +193,13 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 };
             }
             state.authError = null;
-            if ("pendingRequest" in frame || "pendingRequest" in eventData) {
+            if ("pendingRequest" in frame || "pendingRequest" in eventData || "status" in frame || "status" in eventData) {
                 setPendingReview(state, frame.pendingRequest ?? eventData.pendingRequest ?? null, at);
                 const status = frame.status ?? eventData.status;
-                state.working = status === "queued" || status === "running";
-                state.reviewResuming = state.working && !state.pendingReview;
+                if (status !== undefined) {
+                    state.working = status === "queued" || status === "running";
+                    state.reviewResuming = state.working && !state.pendingReview;
+                }
             }
             break;
         }
