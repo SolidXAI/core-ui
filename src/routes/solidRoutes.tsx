@@ -47,6 +47,7 @@ import { StudioLandingPage } from "./pages/studio/StudioLandingPage";
 import { _solidRegisterExtraRoutes } from "./SolidLayoutRegistry";
 import { SolidRouteMetadataBoundary } from "./SolidRouteMetadataBoundary";
 import { AgentEmbedPage } from "./pages/embed/AgentEmbedPage";
+import { AdminEmbedPage } from "./pages/embed/AdminEmbedPage";
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
@@ -116,6 +117,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
 
   return [
     { path: "/embed/agent/:agentId", element: <AgentEmbedPage /> },
+    { path: "/embed/admin", element: <AdminEmbedPage routes={adminChildren} authGuard={elementOverrides.authGuard} /> },
     { path: "/error", element: pick("error", <ErrorPage />) },
     { path: "/not-found", element: pick("notFound", <NotFoundPage />) },
     {

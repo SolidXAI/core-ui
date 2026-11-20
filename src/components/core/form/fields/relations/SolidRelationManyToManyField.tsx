@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { getExtensionComponent } from "../../../../../helpers/registry";
@@ -15,7 +16,6 @@ import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTo
 import qs from 'qs';
 import * as Handlebars from "handlebars";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
-import { useRouter } from "../../../../../hooks/useRouter";
 import { usePathname } from "../../../../../hooks/usePathname";
 import { camelCase, capitalize } from "lodash";
 import styles from "../solidFields.module.css";
@@ -449,7 +449,7 @@ const buildRelationCustomFilter = ({
 
 export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
-    const router = useRouter();
+    const [searchParams, setSearchParams] = useSearchParams();
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -545,9 +545,11 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
 
     const handlePopupClose = () => {
         setvisibleCreateRelationEntity(false);
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.delete('childEntity');
-        router.push(currentUrl.toString());
+        if (searchParams.has("childEntity")) {
+            const next = new URLSearchParams(searchParams);
+            next.delete("childEntity");
+            setSearchParams(next, { replace: true });
+        }
         setRefreshList((prev) => !prev);
         setListViewParams({
             moduleName: fieldContext.fieldMetadata.relationModelModuleName,

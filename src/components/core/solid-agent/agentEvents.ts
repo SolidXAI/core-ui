@@ -2,7 +2,8 @@ import { describeToolArgs, isLlmMetadata, parseToolResult } from "./agentFormat"
 import { parseWidgetContent, isSameAssistantContent } from "./thread/inlineWidget";
 export { isSameAssistantContent };
 import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentUsageStats, type AgentWireFrame } from "./types";
-import { humanReviewAnswerItem, humanReviewId, humanReviewItem, type HumanReview } from "./humanReview";
+import { humanReviewAnswerItem, humanReviewId, humanReviewItem, isHumanReviewKind, type HumanReview } from "./humanReview";
+import { normalizeToolFiles } from "./toolFiles";
 
 /**
  * Turns agent events into thread items. Used by agentSlice for live socket frames and by the
@@ -98,8 +99,7 @@ function setPendingReview(state: AgentThreadState, data: Record<string, any> | n
     }
     state.pendingReview = null;
     state.reviewSubmitting = false;
-    if (!data || !Number.isInteger(requestId) || typeof data.question !== "string"
-        || (data.kind !== "input" && data.kind !== "approval")) return;
+    if (!data || !Number.isInteger(requestId) || typeof data.question !== "string" || !isHumanReviewKind(data.kind)) return;
     const request: HumanReview = {
         requestId, kind: data.kind, question: data.question, options: data.options,
         context: data.context ?? null, toolName: data.tool_name ?? data.toolName ?? null,
@@ -353,10 +353,14 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             if (tool) {
                 const output = eventData.output ?? frame.content ?? "";
                 const parsed = output ? parseToolResult(String(output)) : null;
+                const files = normalizeToolFiles(eventData.files);
+                // agentEventId lets the UI fetch the stored files (agentEvent media) later.
+                const agentEventId = eventData.agentEventId ?? frame.id;
                 tool.eventData = {
                     ...tool.eventData,
                     duration_ms: eventData.duration_ms ?? frame.duration_ms,
                     ...(parsed ? { status: parsed.status, output: parsed.text, output_raw: String(output) } : {}),
+                    ...(files.length ? { files, ...(agentEventId != null ? { agentEventId } : {}) } : {}),
                 };
             }
             freezeLiveTool(state);

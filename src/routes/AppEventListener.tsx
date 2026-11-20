@@ -86,7 +86,7 @@ export function AppEventListener() {
 
   useEffect(() => {
     const off = eventBus.on<GlobalErrorPayload>(AppEvents.GlobalError, (payload) => {
-      if (!pathname.startsWith("/admin") && !pathname.startsWith("/auth")) {
+      if (!pathname.startsWith("/admin") && !pathname.startsWith("/auth") && pathname !== "/embed/admin") {
         return;
       }
 

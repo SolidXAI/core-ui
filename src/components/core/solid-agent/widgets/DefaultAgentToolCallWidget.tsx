@@ -7,6 +7,8 @@ import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import { describeToolArgs, toolDisplayName } from "../agentFormat";
+import { normalizeToolFiles } from "../toolFiles";
+import { AgentToolFiles } from "./AgentToolFiles";
 
 type ToolStatus = "running" | "success" | "warning" | "error";
 type ToolProgressStep = { label: string; status: "running" | "done"; duration_ms?: number };
@@ -40,6 +42,7 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
     const rawSummary: string = eventData.summary ?? "";
     const isNoisySummary = rawSummary.startsWith("const ") || rawSummary.startsWith("let ") || rawSummary.includes("tools.solidx");
     const summary = (!rawSummary || isNoisySummary) ? describeToolArgs(args, toolName) : rawSummary;
+    const files = normalizeToolFiles(eventData.files);
 
     return (
         <div className={`${styles.ToolCard} ${CARD_CLASS[status] ?? styles.ToolCardDone}`}>
@@ -70,6 +73,8 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
                     })}
                 </div>
             )}
+
+            {files.length > 0 && <AgentToolFiles files={files} />}
 
             {expanded && (
                 <div className={styles.ToolCardExpandable}>

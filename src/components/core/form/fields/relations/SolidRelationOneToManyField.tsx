@@ -2,6 +2,7 @@
 import { SolidListView } from "../../../../../components/core/list/SolidListView";
 import { camelCase, capitalize } from "lodash";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import * as Yup from 'yup';
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
@@ -186,7 +187,7 @@ const buildRelationCustomFilter = ({
 
 export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
-    const router = useRouter();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field w-full px-2 pt-2';
@@ -205,8 +206,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
     const [showSaveParentEntityConfirmationPopup, setShowSaveParentEntityConfirmationPopup] = useState(false);
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const childEntity = urlParams.get('childEntity');
+        const childEntity = searchParams.get('childEntity');
         if (childEntity === fieldLayoutInfo.attrs.name && lastPathSegment !== "new") {
             handleAddOrEditClickForEmbeddedView('new');
         }
@@ -236,9 +236,11 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
     const handlePopupClose = () => {
         setvisibleCreateRelationEntity(false);
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.delete('childEntity');
-        router.push(currentUrl.toString());
+        if (searchParams.has("childEntity")) {
+            const next = new URLSearchParams(searchParams);
+            next.delete("childEntity");
+            setSearchParams(next, { replace: true });
+        }
         setRefreshList((prev) => !prev);
         const customFilter = fieldContext.fieldMetadata.relationCoModelFieldName ? fieldContext.fieldMetadata.relationCoModelFieldName : `${fieldContext.modelName}`
         const lisviewparams = {

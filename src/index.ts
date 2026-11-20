@@ -596,8 +596,22 @@ export { DefaultAgentUserTurnCompletionWidget } from './components/core/solid-ag
 export { disposeAgentRuntime } from './components/core/solid-agent/client/agentRuntime';
 export { signInWithApiKey, clearAgentAuth, clearAllAgentAuth } from './components/core/solid-agent/client/agentAuth';
 export { default as agentReducer } from './redux/features/agentSlice';
+export { DefaultAgentBrowserPanelWidget } from './components/core/solid-agent/browser/DefaultAgentBrowserPanelWidget';
+export { AgentBrowserScreen } from './components/core/solid-agent/browser/AgentBrowserScreen';
+export { useAgentBrowser } from './components/core/solid-agent/browser/useAgentBrowser';
+export { AgentBrowserChannel, isBrowserActive } from './components/core/solid-agent/client/agentBrowser';
+export type {
+    AgentBrowserControl,
+    AgentBrowserError,
+    AgentBrowserFrame,
+    AgentBrowserState,
+    AgentBrowserTab,
+    AgentBrowserView,
+} from './components/core/solid-agent/client/agentBrowser';
 export { AgentEventTypes } from './components/core/solid-agent/types';
 export type {
+    AgentBrowserInputEvent,
+    AgentToolFile,
     AgentChatItem,
     AgentContext,
     AgentMode,
@@ -638,6 +652,7 @@ export type {
     SolidToolGroupWidgetProps,
     SolidAgentTurnWidgetProps,
     SolidAgentChatHeaderWidgetProps,
+    SolidAgentBrowserPanelWidgetProps,
     SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidBeforeListDataLoad,

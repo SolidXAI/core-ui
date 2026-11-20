@@ -35,6 +35,12 @@
 @keyframes agent-editor-version-fields-in { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
 .agent-editor__section { display:flex; flex-direction:column; gap:.9rem; padding:1rem; border:1px solid var(--surface-border,var(--border)); border-radius:.75rem; }
 .agent-editor__section h2 { margin:0; font-size:1rem; }
+.agent-editor__deployment-help { padding:.9rem 1rem; border:1px solid color-mix(in srgb, #2563eb 22%, var(--surface-border,var(--border))); border-left:3px solid #3b82f6; border-radius:.65rem; background:color-mix(in srgb, #eff6ff 74%, var(--surface-card,var(--card))); color:var(--text-color,var(--foreground)); font-size:.82rem; line-height:1.5; }
+.agent-editor__deployment-help>strong { display:block; margin-bottom:.2rem; color:color-mix(in srgb, #1d4ed8 78%, var(--text-color,var(--foreground))); font-size:.86rem; }
+.agent-editor__deployment-help p { margin:.3rem 0; font-size:inherit; }
+.agent-editor__deployment-help ul { display:grid; gap:.35rem; margin:.55rem 0; padding-left:1.2rem; }
+.agent-editor__deployment-help li { padding-left:.1rem; }
+.agent-editor__deployment-help code { padding:.05rem .25rem; border-radius:.25rem; background:color-mix(in srgb, #dbeafe 60%, var(--surface-card,var(--card))); font-size:.78rem; }
 .agent-editor__linked-count { color:var(--text-color-secondary,var(--muted-foreground)); font-size:.82rem; font-weight:600; }
 .agent-editor__workflow { gap:1.15rem; }
 .agent-editor__workflow-stages { display:flex; align-items:stretch; gap:.55rem; }

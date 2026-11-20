@@ -8,6 +8,7 @@ import {
     agentHistoryLoadingStarted,
     agentOlderHistoryFailed,
     agentThreadReset,
+    agentToolFilesResolved,
     agentUserMessageAdded,
     type AgentState,
 } from "../../../../redux/features/agentSlice";
@@ -18,7 +19,8 @@ import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { emitBeforeUserMessageSend, type BeforeUserMessageSendContribution } from "./beforeUserMessageSend";
 import { emitAgentPublicEvent, type AgentPublicEventName, type AgentPublicEventPayloads } from "./agentPublicEvents";
 import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentMessageContext, type AgentSessionOptions, type AgentWireFrame } from "../types";
-import { resolveAttachmentMedia } from "./agentAttachmentMedia";
+import { fetchToolFileMedia, resolveAttachmentMedia } from "./agentAttachmentMedia";
+import { AgentBrowserChannel } from "./agentBrowser";
 import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory, uploadAgentAttachments } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
@@ -138,8 +140,13 @@ export function setStoredSessionOptions(
     }
 }
 
+/** Linking tool files to their event can lag the live ToolResult frame by a moment. */
+const TOOL_FILE_RETRY_MS = [0, 1500, 4000];
+
 export class AgentRuntime {
     readonly socket: AgentSocket;
+    /** Live view and control of the session's browser (AgentHub browser tools). */
+    readonly browser: AgentBrowserChannel;
     private pendingDelta = "";
     private frame: number | null = null;
     private unsubscribers: Array<() => void> = [];
@@ -181,7 +188,9 @@ export class AgentRuntime {
             initialOptions,
             agentRuntime === "agentHub" ? getAgentChatWidgetCatalog(agentName) : [],
         );
+        this.browser = new AgentBrowserChannel(this.socket);
         this.socket.setOnSessionExpired(() => {
+            this.browser.reset();
             if (this.persistSession) writeSessionId(this.sessionKey, null);
             if (this.frame != null) {
                 cancelAnimationFrame(this.frame);
@@ -350,6 +359,7 @@ export class AgentRuntime {
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
         this.lastContext = undefined;
+        this.browser.reset();
         this.dispatch(agentThreadReset());
         this.socket.newSession({ ...(provider ? { provider, model } : {}), ...(opts || {}) });
     }
@@ -380,7 +390,9 @@ export class AgentRuntime {
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
+        this.browser.reset();
         this.dispatch(agentThreadReset({ loadingHistory: true, historySessionId: sessionId }));
+        this.dispatch(agentHistoryLoadingChanged(true));
         this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
         void this.loadHistory(sessionId, 1);
     }
@@ -404,6 +416,7 @@ export class AgentRuntime {
         this.resetHistoryLoads();
         this.unsubscribers.forEach((off) => off());
         if (this.frame != null) cancelAnimationFrame(this.frame);
+        this.browser.dispose();
         this.socket.close();
     }
 
@@ -455,6 +468,8 @@ export class AgentRuntime {
 
     private handleFrame(frame: AgentWireFrame) {
         const event = normalizeAgentFrame(frame);
+        // Browser frames stay out of Redux and the SDK events.
+        if (event.eventType.startsWith("browser_") && this.browser.handle(event.eventType, event.eventData)) return;
         if (event.eventType === AgentEventTypes.sessionStarted) {
             const state = this.getState();
             if (state?.pendingReview || state?.reviewResuming) {
@@ -462,6 +477,7 @@ export class AgentRuntime {
                 this.dispatch(agentThreadReset());
             }
             const sessionId = frame.session_id ?? event.eventData.session_id ?? null;
+            this.browser.sessionStarted(sessionId);
             this.publish(this.hadPriorSession ? "onSessionResumed" : "onSessionStarted", { sessionId });
             this.hadPriorSession = true;
         }
@@ -513,6 +529,27 @@ export class AgentRuntime {
         this.flushTokens();
         this.dispatch(agentEventReceived(event));
         this.emitSdkEvents(event);
+        if (event.eventType === AgentEventTypes.toolResult && this.persistSession) this.resolveToolFiles(event.eventData);
+    }
+
+    /** Fetches the stored URLs of the screenshots and downloads a tool just returned. */
+    private resolveToolFiles(eventData: Record<string, any>) {
+        const agentEventId = eventData.agentEventId;
+        const stored = Array.isArray(eventData.files) && eventData.files.some((file: any) => file?.mediaId != null);
+        if (agentEventId == null || !stored) return;
+        const generation = this.historyGeneration;
+        void (async () => {
+            for (const delay of TOOL_FILE_RETRY_MS) {
+                if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+                if (generation !== this.historyGeneration) return;
+                const media = await fetchToolFileMedia(agentEventId);
+                if (generation !== this.historyGeneration) return;
+                if (media.length) {
+                    this.dispatch(agentToolFilesResolved({ agentEventId, media }));
+                    return;
+                }
+            }
+        })();
     }
 
     private publish<E extends AgentPublicEventName>(event: E, payload: AgentPublicEventPayloads[E]) {

@@ -405,6 +405,33 @@ export type SolidAgentChatHeaderWidgetProps = {
     onSelectAgent?: (agentName: string, agentId?: number) => void;
 }
 
+/** Props of the AgentHub chat's browser panel (ExtensionComponentTypes.agentBrowserPanelWidget). */
+export type SolidAgentBrowserPanelWidgetProps = {
+    agentName?: string;
+    browser: import("../components/core/solid-agent/client/agentBrowser").AgentBrowserView;
+    /** Set while the agent waits for the user in the browser (browser_handoff, or the user took it mid-turn). */
+    handoff: { requestId: number; toolName: string | null; question: string } | null;
+    /** "side": beside the thread; "stacked": above the thread in a narrow chat; "dialog": the large view. */
+    layout: "side" | "stacked" | "dialog";
+    /** The chat socket is open; control actions are dropped otherwise. */
+    connected: boolean;
+    /** Only the header shows; the screen is not mounted, so no live view is streamed. */
+    collapsed: boolean;
+    /** The live screen, ready-wired: it streams while mounted and takes mouse and keyboard while the user has control. */
+    screen: import("react").ReactNode;
+    /** Asks for the browser; the agent hands it over after its current step. */
+    takeControl: () => boolean;
+    /** Gives the browser back (or continues a handoff without taking control). The note goes to the agent. */
+    giveBack: (note?: string) => boolean;
+    /** Opens an address in the active tab while the user has control. */
+    navigate: (url: string) => boolean;
+    navigation: (action: "back" | "forward" | "refresh") => boolean;
+    dismissError: () => void;
+    onToggleCollapsed?: () => void;
+    onExpand?: () => void;
+    onClose?: () => void;
+}
+
 export type SolidSettingsWidgetProps = {
     setting: any;
     value: any;
