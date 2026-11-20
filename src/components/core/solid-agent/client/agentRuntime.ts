@@ -13,7 +13,7 @@ import {
 import { historyToItems, isSameAssistantContent, normalizeAgentFrame } from "../agentEvents";
 import { parseWidgetContent } from "../thread/inlineWidget";
 import { humanReviewAllowsChoice, humanReviewId } from "../humanReview";
-import { LIVE_REQUEST_EVENT, SOLID_AGENT_EVENTS, type LiveRequestPayload } from "../sdk/solidAgent";
+import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { emitBeforeUserMessageSend, type BeforeUserMessageSendContribution } from "./beforeUserMessageSend";
 import { emitAgentPublicEvent, type AgentPublicEventName, type AgentPublicEventPayloads } from "./agentPublicEvents";
 import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentMessageContext, type AgentSessionOptions, type AgentWireFrame } from "../types";
@@ -201,11 +201,6 @@ export class AgentRuntime {
             this.dispatch(agentHistoryLoadingChanged(true));
         this.unsubscribers.push(
             this.socket.onEvent((frame) => this.handleFrame(frame)),
-            // The SDK asks for live frames of an authoring session; the subscriptions are restored after a reconnect.
-            eventBus.on(LIVE_REQUEST_EVENT, (req: LiveRequestPayload) => this.handleLiveRequest(req)),
-            this.socket.onStatus((status) => {
-                if (status === "open") this.liveSubs.forEach((size, id) => this.socket.send({ action: "ui_live_subscribe", ui_session_id: id, size }));
-            }),
             this.socket.onStatus((status) => {
                 queueMicrotask(() => this.dispatch(agentConnectionChanged(status)));
             }),
@@ -459,36 +454,7 @@ export class AgentRuntime {
         }
     }
 
-    /** Session ids whose live frames this chat wants, so they can be asked for again after a reconnect. */
-    private liveSubs = new Map<string, "thumb" | "large">();
-
-    private handleLiveRequest(req: LiveRequestPayload) {
-        if (!req?.uiSessionId) return;
-        if (req.subscribe) {
-            const size = req.size === "large" ? "large" : "thumb";
-            this.liveSubs.set(req.uiSessionId, size);
-            this.socket.send({ action: "ui_live_subscribe", ui_session_id: req.uiSessionId, size });
-        } else if (this.liveSubs.delete(req.uiSessionId)) {
-            this.socket.send({ action: "ui_live_unsubscribe", ui_session_id: req.uiSessionId });
-        }
-    }
-
     private handleFrame(frame: AgentWireFrame) {
-        // Live-preview frames are pictures, not chat events: they are never stored in the thread or history.
-        const wire = frame as unknown as { type?: string; ui_session_id?: string; data?: unknown; blob?: Blob };
-        if (wire.type === "UiLiveFrame") {
-            if (wire.blob) eventBus.emit(SOLID_AGENT_EVENTS.liveFrame, { uiSessionId: wire.ui_session_id ?? "", blob: wire.blob });
-            return;
-        }
-        if (wire.type === "UiLiveStatus") {
-            const status = (wire.data && typeof wire.data === "object" ? wire.data : {}) as { live?: boolean; reason?: string };
-            const uiSessionId = wire.ui_session_id ?? "";
-            // A session that is not live (closed, expired, unknown, or live preview off) must not be asked for again
-            // after every reconnect.
-            if (!status.live) this.liveSubs.delete(uiSessionId);
-            eventBus.emit(SOLID_AGENT_EVENTS.liveStatus, { uiSessionId, live: !!status.live, reason: status.reason });
-            return;
-        }
         const event = normalizeAgentFrame(frame);
         // Browser frames stay out of Redux and the SDK events.
         if (event.eventType.startsWith("browser_") && this.browser.handle(event.eventType, event.eventData)) return;

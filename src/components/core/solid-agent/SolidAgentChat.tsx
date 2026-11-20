@@ -210,7 +210,8 @@ export function SolidAgentChat({
     const browserView = useAgentBrowser(runtime?.browser);
     // The agent handed over its browser (or the user took it mid-turn): answered from the browser panel.
     const browserHandoff = review?.kind === "browser_control" ? review : null;
-    const browserShown = agentRuntime === "agentHub" && (isBrowserActive(browserView) || !!browserHandoff);
+    // Any runtime can show the browser: the panel only appears when the agent sends browser_status for it.
+    const browserShown = isBrowserActive(browserView) || !!browserHandoff;
     // Collapsing belongs to the layout it was done in: a collapsed stacked panel must not hide the side pane.
     const [browserCollapsedIn, setBrowserCollapsedIn] = useState<BrowserLayout | null>(null);
     const [browserExpanded, setBrowserExpanded] = useState(false);

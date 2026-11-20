@@ -14,18 +14,6 @@ import { agentWsUrl, clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onA
 
 const BACKOFF_MS = [1000, 2000, 4000, 8000, 15000];
 
-/**
- * One live picture of an authoring browser, as the agent sends it: a 2-byte big-endian length of the browser session id,
- * the id, then the JPEG bytes. Returns null for anything that is not that.
- */
-export function decodeLivePicture(data: unknown): { type: "UiLiveFrame"; ui_session_id: string; blob: Blob } | null {
-    if (!(data instanceof ArrayBuffer) || data.byteLength < 3) return null;
-    const idLength = new DataView(data).getUint16(0);
-    if (idLength === 0 || data.byteLength <= 2 + idLength) return null;
-    const ui_session_id = new TextDecoder().decode(new Uint8Array(data, 2, idLength));
-    return { type: "UiLiveFrame", ui_session_id, blob: new Blob([new Uint8Array(data, 2 + idLength)], { type: "image/jpeg" }) };
-}
-
 type EventListener = (frame: AgentWireFrame) => void;
 type StatusListener = (status: AgentConnection) => void;
 type SentListener = (action: AgentAction) => void;
@@ -148,8 +136,6 @@ export class AgentSocket {
         let ws: WebSocket;
         try {
             ws = new WebSocket(url);
-            // Live pictures of an authoring browser arrive as binary messages; read them as raw bytes.
-            ws.binaryType = "arraybuffer";
         } catch (error) {
             if (this.debugEmbed) console.error("[agent-embed][runtime] WebSocket construction failed", { name: error instanceof Error ? error.name : "unknown", message: error instanceof Error ? error.message : String(error) });
             this.scheduleReconnect();
@@ -168,13 +154,6 @@ export class AgentSocket {
 
         ws.onmessage = (message) => {
             if (this.ws !== ws) return;
-            if (typeof message.data !== "string") {
-                // A binary message is one live picture: [2-byte id length][session id][JPEG]. It is handed on as a
-                // "UiLiveFrame" and never goes through the chat-session filtering below.
-                const picture = decodeLivePicture(message.data);
-                if (picture) this.eventListeners.forEach((listener) => listener(picture as unknown as AgentWireFrame));
-                return;
-            }
             let frame: AgentWireFrame;
             try {
                 frame = JSON.parse(message.data);
@@ -236,11 +215,8 @@ export class AgentSocket {
                 this.unacknowledgedMessage = null;
             }
             // Drop frames for a different session (e.g. background session still running or after a switch).
-            // The live preview of an authoring browser is not part of a chat session: its frames name the browser
-            // session (ui_session_id) and go only to the socket that subscribed, so they are never filtered here.
             const frameSession = frame.session_id ?? payload?.session_id;
-            const isLivePreview = eventType === "UiLiveFrame" || eventType === "UiLiveStatus";
-            if (eventType !== "session_started" && !isLivePreview) {
+            if (eventType !== "session_started") {
                 if (frameSession && frameSession !== this.sessionId) return;
                 if (!frameSession && this.sessionId && eventType !== "error") return;
                 if (!this.sessionId && eventType !== "error") return;

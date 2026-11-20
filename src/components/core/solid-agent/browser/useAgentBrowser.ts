@@ -15,6 +15,7 @@ const EMPTY_VIEW: AgentBrowserView = {
     watching: false,
     hasFrame: false,
     error: null,
+    controllable: true,
 };
 const noSubscription = () => () => {};
 const emptyView = () => EMPTY_VIEW;

@@ -43,6 +43,8 @@ export type AgentBrowserView = {
     watching: boolean;
     hasFrame: boolean;
     error: AgentBrowserError | null;
+    /** False when the browser is only shown: the server sent browser_status with control false, so there is no "Take control". */
+    controllable: boolean;
 };
 
 /** `seq` grows with every frame the channel accepts, also across preview restarts and reconnects. */
@@ -75,6 +77,7 @@ function initialView(sessionId: string | null, available = true): AgentBrowserVi
         watching: false,
         hasFrame: false,
         error: null,
+        controllable: true,
     };
 }
 
@@ -264,6 +267,8 @@ export class AgentBrowserChannel {
             activeTab: text(data.active_tab) ?? this.view.activeTab,
             tabs: ended ? [] : this.view.tabs,
             hasFrame: ended ? false : this.view.hasFrame,
+            // Only an explicit "control: false" makes the browser view-only; a server that never sends it keeps control.
+            controllable: data.control === false ? false : data.control === true ? true : this.view.controllable,
             control: data.control_mode === "human" || data.control_mode === "agent"
                 ? { ...this.view.control, mode: data.control_mode } : this.view.control,
             restoredAt: data.restored === true ? this.timers.now() : this.view.restoredAt,
