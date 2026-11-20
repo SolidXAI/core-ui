@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onAgentAuthChange, type AgentAuth } from "./client/agentAuth";
+import { clearAgentAuth, isAgentProcessAvailable, loadAgentAuth, onAgentAuthChange, readStored, type AgentAuth } from "./client/agentAuth";
 
 export type AgentAuthState =
     | { status: "checking"; auth: null }
@@ -8,7 +8,10 @@ export type AgentAuthState =
 
 /** The agent login for `agentUrl` in this tab, kept current as the user signs in or the token expires. */
 export function useAgentAuth(agentUrl: string, checkProcessAvailability = false): AgentAuthState {
-    const [state, setState] = useState<AgentAuthState>({ status: "checking", auth: null });
+    const [state, setState] = useState<AgentAuthState>(() => {
+        const stored = readStored(agentUrl);
+        return stored ? { status: "signedIn", auth: stored } : { status: "signedOut", auth: null };
+    });
 
     useEffect(() => {
         let alive = true;

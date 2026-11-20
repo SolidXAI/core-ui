@@ -771,25 +771,12 @@ export function SolidAgentChat({
         setIsStartingNewChat(true);
         startingNewChatRef.current = true;
         try {
-            let latestSession: AgentSessionSummary | undefined;
-            if (agentRuntime === "agentHub") {
-                const latestPage = await fetchSessionList(agentUrl, { limit: 1 });
-                if (latestPage?.sessions?.length) {
-                    latestSession = latestPage.sessions[0];
-                }
-            }
-
-            if (latestSession?.has_user_message === false) {
-                setResumingSessionId(latestSession.session_id);
-                runtime.resume(latestSession.session_id);
-            } else {
-                runtime.newChat(selectedProvider, selectedModel, {
-                    thinking: isThinking,
-                    reasoning: selectedReasoning,
-                    fast: isFast,
-                    speed: selectedSpeed,
-                });
-            }
+            runtime.newChat(selectedProvider, selectedModel, {
+                thinking: isThinking,
+                reasoning: selectedReasoning,
+                fast: isFast,
+                speed: selectedSpeed,
+            });
         } finally {
             startingNewChatRef.current = false;
             setIsStartingNewChat(false);
@@ -1294,7 +1281,7 @@ export function SolidAgentChat({
             agentName={agentName}
             thinking={agent.working && agent.thinking}
             working={agent.working}
-            loadingHistory={agent.loadingHistory || !!resumingSessionId}
+            loadingHistory={agent.loadingHistory || !!resumingSessionId || isSwitchingProvider}
             hasMore={agent.hasMoreHistory}
             loadingOlder={agent.loadingOlder}
             loadOlderFailed={agent.olderHistoryFailed}
@@ -1522,12 +1509,12 @@ export function SolidAgentChat({
                                     <button
                                         type="button"
                                         className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
-                                        title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                        title={loadingProviders || isSwitchingProvider ? "Loading AI execution providers..." : "Select AI execution provider"}
                                         aria-label="Select AI execution provider"
                                         aria-expanded={showProviderMenu}
                                         onClick={toggleProviderMenu}
                                     >
-                                        {loadingProviders ? (
+                                        {loadingProviders || isSwitchingProvider ? (
                                             <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
                                         ) : (
                                             <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />

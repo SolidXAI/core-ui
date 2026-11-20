@@ -296,7 +296,7 @@ export default function SolidAgentHost() {
     const agentRuntime: AgentRuntimeType = hubUrl ? "agentHub" : "solidx";
     const baseUrl = hubUrl || agentUrls.solidx || agentUrl;
     const activeAgentUrl = hubUrl
-        ? withAgent(hubUrl, { agentName: activeAgentName, agentId: activeAgentInfo?.id ?? agent?.selectedAgentId ?? agent?.requestedAgentId ?? undefined })
+        ? withAgent(hubUrl, activeAgentName ? { agentName: activeAgentName } : { agentId: activeAgentInfo?.id ?? agent?.selectedAgentId ?? agent?.requestedAgentId ?? undefined })
         : baseUrl;
 
     const frameClass = mode === "docked" ? styles.docked : mode === "maximized" ? styles.maximized : styles.compact;

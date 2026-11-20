@@ -81,10 +81,10 @@ export function setStoredActiveApiKey(key: string | null) {
 /** One login per backend and agent. */
 function loginScope(agentUrl: string) {
     if (/[?&]embedInstance=/.test(agentUrl)) return agentUrl;
-    const agentId = agentIdOf(agentUrl);
     const agentName = agentNameOf(agentUrl);
-    if (agentId !== undefined) return `${toHttpBase(agentUrl)}?agentId=${agentId}`;
     if (agentName) return `${toHttpBase(agentUrl)}?agentName=${encodeURIComponent(agentName)}`;
+    const agentId = agentIdOf(agentUrl);
+    if (agentId !== undefined) return `${toHttpBase(agentUrl)}?agentId=${agentId}`;
     return toHttpBase(agentUrl);
 }
 
@@ -102,11 +102,18 @@ async function currentSolidUserId(): Promise<string | null> {
     return id === undefined || id === null ? null : String(id);
 }
 
-function readStored(agentUrl: string): AgentAuth | null {
+export function readStored(agentUrl: string): AgentAuth | null {
     const embed = external.get(loginScope(agentUrl));
     if (embed) return embed.auth;
     try {
-        const raw = sessionStorage.getItem(storageKey(agentUrl));
+        let raw = sessionStorage.getItem(storageKey(agentUrl));
+        if (!raw) {
+            const agentId = agentIdOf(agentUrl);
+            const agentName = agentNameOf(agentUrl);
+            if (agentName && agentId !== undefined) {
+                raw = sessionStorage.getItem(`${STORAGE_PREFIX}${toHttpBase(agentUrl)}?agentId=${agentId}`);
+            }
+        }
         const parsed = raw ? (JSON.parse(raw) as AgentAuth) : null;
         // Entries from before sign-in returned wsUrl/httpUrl are dropped, so the user signs in again.
         return parsed?.agentToken && parsed.wsUrl && parsed.httpUrl ? parsed : null;
