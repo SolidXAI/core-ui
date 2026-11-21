@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.0] - 2026-11-21
+
+### Added
+
+- Show and control the AgentHub agent's browser in the chat
+- add sessionId filter to inbox functionality and update related components
+- add hostRefId to inbox filters and display in AgentJobsInboxPage
+
+### Fixed
+
+- Drop live preview frames left over from an earlier subscription
+- Keep the agent's browser live and reachable across chat layouts
+
+### Other
+
+- Remote testrun preview (#312)
+
 ## [0.1.22] - 2026-11-20
 
 ### Added
