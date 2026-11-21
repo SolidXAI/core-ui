@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.1] - 2026-11-21
+
+### Changed
+
+- remove unused imports and adjust styles in chat widgets
+
 ## [0.1.23-beta.0] - 2026-11-21
 
 ### Added
