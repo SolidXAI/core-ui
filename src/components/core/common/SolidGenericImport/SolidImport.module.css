@@ -131,7 +131,7 @@
 
 :global(.solid-import-stepper-label) {
     min-width: 0;
-    font-size: 13px;
+    font-size: var(--solid-font-size-ui-control);
     line-height: 1.2;
     font-weight: 600;
 }

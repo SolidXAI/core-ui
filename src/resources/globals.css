@@ -901,7 +901,6 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
   color: var(--solid-title) !important;
   font-weight: 600;
   font-size: 16px;
-
 }
 
 .table-header-fs {}
@@ -3217,7 +3216,7 @@ li.header-li-px {
 
 .solid-filter-dialog-title {
   margin: 0;
-  font-size: 14px !important;
+  font-size: var(--solid-font-size-body-small);
   line-height: 1.2;
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 94%, transparent);

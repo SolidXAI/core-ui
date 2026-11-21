@@ -13,14 +13,14 @@
 
 .solid-user-section-helper {
   margin: 0;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.45;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
 
 .solid-user-section-copy {
   margin: 0 0 10px;
-  font-size: 11px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.4;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
@@ -32,7 +32,8 @@
 }
 
 .solid-user-details-stack .solid-column-panel .solid-panel-header {
-  padding: 12px 16px;
+  font-size: var(--solid-font-size-ui-control);
+  padding: 10px 16px;
 }
 
 .solid-user-details-stack .solid-column-panel .solid-panel-content {
@@ -66,7 +67,7 @@
 }
 
 .solid-user-access-copy .form-field-label {
-  font-size: 13px;
+  font-size: var(--solid-font-size-control-xs);
   font-weight: 600;
 }
 

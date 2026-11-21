@@ -3916,7 +3916,7 @@ textarea {
 }
 
 .solid-list-toolbar .view-title {
-  font-size: 15px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   line-height: 1.2;
   color: var(--foreground);
