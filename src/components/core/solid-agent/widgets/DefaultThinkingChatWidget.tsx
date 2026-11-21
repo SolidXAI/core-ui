@@ -1,4 +1,3 @@
-import { Sparkles } from "lucide-react";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 
@@ -9,7 +8,6 @@ import { SolidChatWidgetProps } from "../../../../types/solid-core";
 export const DefaultThinkingChatWidget = (_props: SolidChatWidgetProps) => {
     return (
         <div className={styles.ThinkingBubble} role="status">
-            <Sparkles size={14} className={styles.ThinkingSparkle} aria-hidden="true" />
             <span className={styles.ThinkingLabel}>Thinking…</span>
         </div>
     );
