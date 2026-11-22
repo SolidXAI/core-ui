@@ -2152,7 +2152,6 @@ textarea {
   padding: var(--solid-space-2) var(--solid-space-2);
   font-size: var(--solid-font-size-control-xs);
   line-height: 1;
-  text-align: center;
 }
 
 .solid-select-menu-item:hover,
@@ -3916,8 +3915,8 @@ textarea {
 }
 
 .solid-list-toolbar .view-title {
-  font-size: var(--solid-font-size-ui-control);
-  font-weight: 600;
+  font-size: var(--solid-font-size-body-large);
+  font-weight: 700;
   line-height: 1.2;
   color: var(--foreground);
 }
@@ -6903,7 +6902,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-radix-dialog-title {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--solid-font-size-body-large);
   line-height: 1.2;
   font-weight: 700;
   color: var(--foreground);

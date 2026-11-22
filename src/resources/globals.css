@@ -728,7 +728,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
   margin-bottom: 20px;
   align-items: center;
   text-align: center;
-  /* position: fixed !important; 
+  /* position: fixed !important;
   bottom: 20px !important; */
 }
 
@@ -2851,7 +2851,7 @@ li.header-li-px {
   padding: 12px;
 }
 
-/* 
+/*
 .solid-custom-overlay {
   position: absolute;
   top: 140px !important;
@@ -3216,7 +3216,7 @@ li.header-li-px {
 
 .solid-filter-dialog-title {
   margin: 0;
-  font-size: var(--solid-font-size-body-small);
+  font-size: var(--solid-font-size-body-large);
   line-height: 1.2;
   font-weight: 600;
   color: color-mix(in srgb, var(--foreground) 94%, transparent);
