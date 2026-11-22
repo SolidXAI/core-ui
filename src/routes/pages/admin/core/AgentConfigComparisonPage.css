@@ -33,6 +33,7 @@
 .config-compare__rows { display:flex; flex-direction:column; gap:.4rem; }
 .config-compare__cell { display:flex; flex-direction:column; justify-content:center; gap:.1rem; min-width:0; padding:.55rem .75rem; border:1px solid var(--cc-border); border-radius:.5rem; background:var(--surface-card,var(--card)); overflow-wrap:anywhere; transition:border-color .15s,background-color .15s; }
 .config-compare__cell strong { color:var(--cc-ink); font-size:.85rem; font-weight:600; }
+.config-compare__general-row .config-compare__cell strong { white-space:pre-wrap; }
 .config-compare__cell p,.config-compare__cell small { margin:0; color:var(--cc-muted); font-size:.76rem; }
 .config-compare__cell small { font-size:.7rem; font-weight:500; }
 .config-compare__cell.is-absent { border-style:dashed; background:var(--surface-ground,var(--muted)); }
@@ -52,7 +53,7 @@ button.config-compare__mark:disabled { cursor:default; opacity:.7; }
 .config-compare__change-tag.is-removed { color:var(--cc-bad); background:var(--cc-bad-bg); }
 .config-compare__model-group + .config-compare__model-group { margin-top:.8rem; }
 .config-compare__model-group h3 { margin:0 0 .4rem; color:var(--cc-muted); font-size:.68rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
-.config-compare__dialog.solid-radix-dialog-content { display:flex; flex-direction:column; width:min(72rem,calc(100vw - 3rem)); max-width:calc(100vw - 3rem); max-height:min(86dvh,52rem); padding:0; overflow:hidden; border-radius:1rem; }
+.config-compare__dialog.solid-radix-dialog-content { display:flex; flex-direction:column; width:min(96vw,110rem); max-width:min(96vw,110rem); height:min(94dvh,90rem); max-height:94dvh; padding:0; overflow:hidden; border-radius:1rem; }
 .config-compare__dialog .config-compare__dialog-header { flex:0 0 auto; align-items:center; gap:.75rem; padding:1rem 1.25rem; border-bottom:1px solid var(--cc-border); background:color-mix(in srgb,var(--cc-primary) 4%,var(--surface-card,var(--card))); }
 .config-compare__dialog .config-compare__section-icon { width:2.1rem; height:2.1rem; border-radius:.55rem; }
 .config-compare__dialog-heading { flex:1 1 auto; min-width:0; }

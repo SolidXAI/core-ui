@@ -10,7 +10,11 @@ export type ConfigComparison = {
   versions: { left: ConfigVersion; right: ConfigVersion };
   sections: {
     systemPrompt: ComparisonRow & { title: string };
+    tools?: { title: string; status: ComparisonStatus; rows: ComparisonRow[] };
     skills?: { title: string; status: ComparisonStatus; rows: ComparisonRow[] };
+    generalConfiguration?: { title: string; status: ComparisonStatus; fields: {
+      key: string; label: string; status: ComparisonStatus; left: string | number | null; right: string | number | null; emptyLabel?: string;
+    }[] };
     modelConfiguration: { title: string; status: ComparisonStatus; groups: {
       id: string; title: string; status: ComparisonStatus;
       fields: { key: string; label: string; status: ComparisonStatus; left: string | number | null; right: string | number | null }[];

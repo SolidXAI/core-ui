@@ -304,11 +304,12 @@ function ResourcePreviewDialog({ item, kind, onClose }: { item: Item; kind: "ski
 type ResourceView = "card" | "list";
 
 const itemLabel = (item: Item) => String(item.name ?? item.displayName ?? item.key ?? "");
-const itemMatches = (item: Item, query: string) => `${itemLabel(item)} ${item.description ?? ""}`.toLowerCase().includes(query);
+const itemMatches = (item: Item, query: string) => `${itemLabel(item)} ${item.key ?? ""} ${item.description ?? ""}`.toLowerCase().includes(query);
 
-function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfirm }: {
+function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfirm, onRefresh }: {
   label: string; options: Item[]; selected: Item[]; createUrl?: string;
   onClose: () => void; onConfirm: (ids: number[]) => void;
+  onRefresh?: () => void;
 }) {
   const [search, setSearch] = React.useState("");
   const [picked, setPicked] = React.useState<number[]>([]);
@@ -331,7 +332,8 @@ function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfir
     footer={<><SolidButton type="button" variant="secondary" onClick={onClose}>Cancel</SolidButton>
       <SolidButton type="button" disabled={!picked.length} onClick={() => { onConfirm(picked); onClose(); }}>{picked.length ? `Add ${picked.length} ${picked.length === 1 ? singular : plural}` : `Add ${plural}`}</SolidButton></>}>
     <SolidDialogBody><div className="agent-editor__add-dialog">
-      <SolidInput autoFocus value={search} placeholder={`Search ${plural}…`} aria-label={`Search ${plural}`} onChange={(event) => setSearch(event.target.value)} />
+      <div className="agent-editor__lookup-search"><SolidInput autoFocus value={search} placeholder={`Search ${plural}…`} aria-label={`Search ${plural}`} onChange={(event) => setSearch(event.target.value)} />
+        {onRefresh && <button type="button" className="agent-editor__icon-button" aria-label={`Refresh ${plural}`} title={`Refresh ${plural}`} onClick={onRefresh}><RefreshCw size={15} /></button>}</div>
       <div className="agent-editor__add-options" role="group" aria-label={`Available ${plural}`}>
         {visible.length > 0 && <label className="agent-editor__add-option agent-editor__add-option--all">
           <input type="checkbox" checked={allPicked} ref={(element) => { if (element) element.indeterminate = visiblePicked > 0 && !allPicked; }} onChange={toggleAll} />
@@ -350,9 +352,10 @@ function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfir
   </SolidDialog>;
 }
 
-function LinkPicker({ label, description, options, selected, onAdd, onAddMany, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor, compact, view, onViewChange, renderRow }: {
+function LinkPicker({ label, description, options, selected, onAdd, onAddMany, onRemove, createUrl, onRefresh, render, renderSettings, linkFor, onView, editUrlFor, compact, view, onViewChange, renderRow }: {
   label: string; description: string; options: Item[]; selected: Item[];
   onAdd?: (id: number) => void; onAddMany?: (ids: number[]) => void; onRemove: (id: number) => void; createUrl?: string;
+  onRefresh?: () => void;
   render: (item: Item, link?: Link) => React.ReactNode;
   renderSettings?: (item: Item, link?: Link) => React.ReactNode;
   linkFor?: (id: number) => Link | undefined;
@@ -368,7 +371,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onAddMany, o
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [addOpen, setAddOpen] = React.useState(false);
   const pickerRef = React.useRef<HTMLDivElement>(null);
-  const showAssociatedCount = label === "Skills" || label === "Tools";
+  const showAssociatedCount = label === "Skills" || label === "Tools" || label === "Secrets";
   const typedName = search.trim();
   const query = typedName.toLowerCase();
   const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id) && itemMatches(item, query)).slice(0, 20);
@@ -430,7 +433,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onAddMany, o
         </SolidDropdownMenuContent>
       </SolidDropdownMenu> : <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>}
     </div>)}</div> : <div className="agent-editor__empty">{selected.length ? `No linked ${label.toLowerCase()} match "${typedName}".` : `No ${label.toLowerCase()} linked yet.`}</div>}
-    {addOpen && onAddMany && <AddLinksDialog label={label} options={options} selected={selected} createUrl={createUrl} onClose={() => setAddOpen(false)} onConfirm={onAddMany} />}
+    {addOpen && onAddMany && <AddLinksDialog label={label} options={options} selected={selected} createUrl={createUrl} onClose={() => setAddOpen(false)} onConfirm={onAddMany} onRefresh={onRefresh} />}
   </section>;
 }
 
@@ -687,9 +690,13 @@ export function AgentRegistryEditorPage() {
     if (new Set(inputs.map((input) => input.name.trim().toLowerCase())).size !== inputs.length) next.inputs = "Input names must be unique.";
     if (stepLimit < 1 || turnStepLimit < 1 || costLimit < 0) next.limits = "Step limits must be positive and cost limit cannot be negative.";
     if (deployment.minProcesses != null && deployment.maxProcesses != null && deployment.minProcesses > deployment.maxProcesses) next.deployment = "Minimum processes cannot exceed maximum processes.";
+    const envNames = secretIds.map((id) => secretEnvVarNames[id] ?? "");
+    if (envNames.some((value) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(value) || ["APP_ENCRYPTION_KEY", "DATABASE_URL", "AGENT_HUB_MANAGER_INTERNAL_TOKEN", "AGENT_HUB_BRIDGE_PROCESS_KEY"].includes(value)) || new Set(envNames).size !== envNames.length) {
+      next.secrets = "Each linked secret needs a valid, unique environment variable name. Use the pencil icon to update it.";
+    }
     setErrors(next);
     if (Object.keys(next).length) {
-      setTab(next.systemPrompt ? "persona" : next.limits && isAdmin ? "policies" : "basics");
+      setTab(next.secrets ? "secrets" : next.systemPrompt ? "persona" : next.limits && isAdmin ? "policies" : "basics");
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(next).join(" ") }));
       return false;
     }
@@ -868,7 +875,7 @@ export function AgentRegistryEditorPage() {
         : <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />}
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
-      onAddMany={(ids) => addAll(setSkillIds, ids)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
+      onRefresh={() => void skills.refetch()} onAddMany={(ids) => addAll(setSkillIds, ids)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "skill" })} editUrlFor={(item) => `/admin/core/solid-core/agent-skill-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentSkills, "agentSkillRegistry", id)}
       view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}
@@ -876,7 +883,7 @@ export function AgentRegistryEditorPage() {
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Always include", alwaysIncludeValues[item.id] ?? true,
           (checked) => setAlwaysIncludeValues((current) => ({ ...current, [item.id]: checked })), "Add the full skill to the agent prompt. Turn off to load it on demand.")}</div>} /> },
     { value: "tools", label: "Tools", content: <LinkPicker label="Tools" description="Tools available to this agent." options={tools.records} selected={linked(toolIds, tools.records, items(record?.agentTools).map((link) => link.agentToolRegistry).filter(Boolean))}
-      onAddMany={(ids) => addAll(setToolIds, ids)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
+      onRefresh={() => void tools.refetch()} onAddMany={(ids) => addAll(setToolIds, ids)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "tool" })} editUrlFor={(item) => `/admin/core/solid-core/agent-tool-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentTools, "agentToolRegistry", id)}
       view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}
@@ -892,8 +899,11 @@ export function AgentRegistryEditorPage() {
           <label className="agent-editor__field" key={label as string}><span>{label as string}</span><input type="number" min={label === "Cost limit" ? 0 : 1} step={label === "Cost limit" ? 0.01 : 1} value={value as number} onChange={(event) => (setter as (value: number) => void)(Number(event.target.value))} />{label === "Cost limit" && <small className="agent-editor__hint">Cost is an estimate and is not guaranteed to be correct.</small>}</label>)}
       </div>{errors.limits && <small className="agent-editor__error">{errors.limits}</small>}</section></div> },
     { value: "secrets", label: "Secrets", content: <LinkPicker label="Secrets" description="Grant access to existing secrets. Secret values are never shown here." options={secrets.records} selected={linked(secretIds, secrets.records, items(record?.agentSecrets).map((link) => link.secret).filter(Boolean))}
-      onAdd={(id) => { const secret = secrets.records.find((item) => item.id === id); if (secret) beginSecretEnvVarEdit(secret); }} onRemove={(id) => toggle(setSecretIds, id)}
+      onRefresh={() => void secrets.refetch()}
+      onAddMany={(ids) => { ids.forEach((secretId) => { const secret = secrets.records.find((item) => item.id === secretId); if (secret) { setSecretIds((current) => Array.from(new Set([...current, secretId]))); setSecretEnvVarNames((current) => ({ ...current, [secretId]: String(secret.key ?? secret.name ?? secret.displayName ?? "") })); } }); }}
+      createUrl="/admin/core/solid-core/secret/form/new" onRemove={(id) => toggle(setSecretIds, id)}
       compact
+      renderSettings={() => errors.secrets ? <small className="agent-editor__error">{errors.secrets}</small> : null}
       render={(item) => <div className="agent-editor__secret"><strong title={item.displayName ?? item.name ?? item.key}>{item.displayName ?? item.name ?? item.key}</strong>
         <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={16} /></button></div>} /> },
     ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),
