@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.3] - 2026-11-23
+
+### Added
+
+- Display agent context compaction status
+
 ## [0.1.23-beta.2] - 2026-11-23
 
 ### Added
