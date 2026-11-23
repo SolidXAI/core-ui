@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Copy, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Copy } from "lucide-react";
 import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../../shad-cn-ui/SolidTooltip";
 import type { SolidAgentChatHeaderWidgetProps } from "../../../../types/solid-core";
 import styles from "../SolidAgent.module.css";
 
-export function DefaultAgentChatHeaderWidget({ title, agentName, agentRuntime, agentConfigVersion, statusColor,
+export function DefaultAgentChatHeaderWidget({ title, agentName, agentRuntime, agentConfigVersion,
     statusText, providerDisplayName, signedIn, activeSessionId, displaySessionId, agents, onSelectAgent }: SolidAgentChatHeaderWidgetProps) {
     const [copiedSession, setCopiedSession] = useState(false);
     const [openSelector, setOpenSelector] = useState(false);
@@ -41,10 +41,6 @@ export function DefaultAgentChatHeaderWidget({ title, agentName, agentRuntime, a
     const hasMultipleAgents = agents && agents.length > 1 && !!onSelectAgent;
 
     return <>
-        <div className={styles.headerMark}>
-            <Sparkles size={15} />
-            <span className={styles.statusDot} style={{ background: statusColor }} />
-        </div>
         <div className={styles.headerTitle}>
             <div className={styles.headerTitleRow}>
                 {hasMultipleAgents ? (

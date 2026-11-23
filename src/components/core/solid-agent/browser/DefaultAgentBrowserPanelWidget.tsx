@@ -133,7 +133,8 @@ export const DefaultAgentBrowserPanelWidget = ({
                         ) : (
                             <div className={styles.controlRow}>
                                 <span className={styles.hint}>
-                                    {handoff ? "The agent is waiting for you in the browser." : browser.control.pending
+                                    {!browser.controllable ? "Watching the agent's browser."
+                                        : handoff ? "The agent is waiting for you in the browser." : browser.control.pending
                                         ? "You get the browser when the agent finishes its current step." : "Watch the agent work, or take over the browser."}
                                 </span>
                                 {handoff && (
@@ -141,11 +142,13 @@ export const DefaultAgentBrowserPanelWidget = ({
                                         Continue without taking control
                                     </button>
                                 )}
-                                <button type="button" className={`${styles.btn} ${handoff ? styles.btnPrimary : ""}`}
-                                    disabled={!connected || !live || browser.control.pending} onClick={takeControl}>
-                                    <Hand size={13} aria-hidden="true" />
-                                    {browser.control.pending ? "Waiting for the agent's step…" : "Take control"}
-                                </button>
+                                {browser.controllable && (
+                                    <button type="button" className={`${styles.btn} ${handoff ? styles.btnPrimary : ""}`}
+                                        disabled={!connected || !live || browser.control.pending} onClick={takeControl}>
+                                        <Hand size={13} aria-hidden="true" />
+                                        {browser.control.pending ? "Waiting for the agent's step…" : "Take control"}
+                                    </button>
+                                )}
                             </div>
                         )}
                     </footer>

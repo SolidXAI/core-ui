@@ -4,6 +4,81 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.1] - 2026-11-21
+
+### Changed
+
+- remove unused imports and adjust styles in chat widgets
+
+## [0.1.23-beta.0] - 2026-11-21
+
+### Added
+
+- Show and control the AgentHub agent's browser in the chat
+- add sessionId filter to inbox functionality and update related components
+- add hostRefId to inbox filters and display in AgentJobsInboxPage
+
+### Fixed
+
+- Drop live preview frames left over from an earlier subscription
+- Keep the agent's browser live and reachable across chat layouts
+
+### Other
+
+- Remote testrun preview (#312)
+
+## [0.1.22] - 2026-11-20
+
+### Added
+
+- update admin embed documentation to clarify usage of AGENT_EMBED_UI_URL when ADMIN_EMBED_UI_URL is unset
+- integrate SolidAgentMarkdown for rendering question text in SolidQuestionChatWidget
+- enhance AgentJobsInboxPage with filtering, sorting, and pagination features
+- refactor AgentDeploymentPanel to use props for state management and simplify form handling
+- update button layout in SolidCancelButton, SolidListView, and SolidTreeView for improved responsiveness (#308)
+- enhance AgentJobsInboxPage layout and add resuming state for improved user experience
+- enhance error handling in RunDetail and add runFailureMessage function for improved user feedback
+- add human review functionality and agent deployment management
+- enhance SolidAgentChat header layout with identity slot for improved structure
+- implement agent workspace with agent selector and header actions for improved agent management
+- enhance LinkPicker and add AddLinksDialog for improved item selection and search functionality
+- enhance agent registry editor with new layout options and improved resource handling
+- Refactor SolidX Agent chat widgets and introduce new default widgets
+- add preview toggle for skill body with Markdown support in AgentSkillRegistryEditorPage
+- enhance AgentRegistryEditor and AgentToolRegistryEditor with admin role checks and UI improvements
+- add loading state for history in agent chat and update styles
+
+### Fixed
+
+- show and hide responsive controls with core-ui-owned classes (#307)
+- update import path for SolidTooltip in DefaultAgentChatHeaderWidget
+- update persona preview toggle button to include title attribute for better accessibility
+- enable hover effect for disabled step buttons (#296)
+- allow optional fields to be skipped in validateEmbedInputs function
+- include widget_catalog in session payloads and update skillFields
+- render agent markdown tables and code blocks reliably
+- update environment variable names to use AGENT_HUB prefix for consistency
+
+### Other
+
+- keep wide dialogs clear of the docked SolidX Agent panel
+- keep dropdown menus and dialogs clear of the docked SolidX Agent panel
+- Revert "feat: update button layout in SolidCancelButton, SolidListView, and SolidTreeView for improved responsiveness (#308)"
+- Feat/env badge (#305)
+- after record recover refresh issue fixes (#292)
+- make kanban header sticky (#293)
+- after record recover refresh issue fixes (#292)
+- make kanban header sticky (#293)
+- Reapply "module-package dialog: list locally modified files and require acknowledging them before an update"
+- Revert "module-package dialog: list locally modified files and require acknowledging them before an update"
+- module-package dialog: list locally modified files and require acknowledging them before an update
+- added Html format for import data from odoo chatter (#297)
+- 7 oct testhub feedback (#289)
+- Merge pull request #288 from SolidXAI/fix/refresh-workspace-menu-after-migration
+- Kanban dragdrop count (#283)
+- M2 m dropdown (#282)
+- Recover duplicate toast (#287)
+
 ## [0.1.22-beta.5] - 2026-11-17
 
 ### Added

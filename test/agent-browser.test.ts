@@ -48,6 +48,24 @@ function setup({ ready = true } = {}) {
 const live = { state: "live", control_mode: "agent", viewport: { width: 1024, height: 640 }, active_tab: "t1", url: "https://example.com/" };
 const actions = (sent: Sent[]) => sent.map((action) => action.action);
 
+describe("view-only browser", () => {
+    it("is controllable unless the server says control is false", () => {
+        const { channel } = setup();
+        assert.equal(channel.getView().controllable, true, "a server that never says is in control");
+        channel.handle("browser_status", { state: "live", control: false });
+        assert.equal(channel.getView().controllable, false);
+        channel.handle("browser_status", { state: "live" });
+        assert.equal(channel.getView().controllable, false, "a later status without the field keeps it");
+    });
+
+    it("becomes controllable again when the server says control is true", () => {
+        const { channel } = setup();
+        channel.handle("browser_status", { state: "live", control: false });
+        channel.handle("browser_status", { state: "live", control: true });
+        assert.equal(channel.getView().controllable, true);
+    });
+});
+
 describe("AgentBrowserChannel", () => {
     it("asks for the preview only while watched and the browser runs", () => {
         const { channel, sent } = setup();
