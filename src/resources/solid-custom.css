@@ -5673,7 +5673,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-dropdown-menu-checkbox-item,
 .solid-dropdown-menu-radio-item {
-  padding-left: 4px;
+  /* padding-left: 4px; */
 }
 
 .customize-layout-panel .solid-dropdown-menu-label {

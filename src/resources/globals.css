@@ -909,7 +909,7 @@ html.dark .solid-react-datepicker-calendar .react-datepicker__month-year-read-vi
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  /* max-width: 30ch !important; */
+  max-width: 30ch !important;
 }
 
 .form-field-label {
