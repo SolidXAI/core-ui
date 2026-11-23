@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.2] - 2026-11-23
+
+### Added
+
+- enhance agent configuration comparison with tools and general configuration sections
+
 ## [0.1.23-beta.1] - 2026-11-21
 
 ### Changed
