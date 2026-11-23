@@ -162,12 +162,28 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 };
             }
             state.authError = null;
+            const status = frame.status ?? eventData.status;
+            if (status === "running") {
+                state.working = true;
+                state.thinking = true;
+            } else if (status === "idle" || status === "active" || status === "completed" || status === "stopped") {
+                state.working = false;
+                state.thinking = false;
+            }
             break;
         }
 
         case AgentEventTypes.sessionUpdated: {
             const sessionId = frame.session_id ?? eventData.session_id ?? null;
             if (sessionId) state.sessionId = sessionId;
+            const status = frame.status ?? eventData.status;
+            if (status === "running") {
+                state.working = true;
+                state.thinking = true;
+            } else if (status === "idle" || status === "active" || status === "completed" || status === "stopped") {
+                state.working = false;
+                state.thinking = false;
+            }
             const limit = frame.context_limit ?? eventData.context_limit ?? 0;
             if (limit > 0) {
                 if (state.usage) {
@@ -229,6 +245,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         case AgentEventTypes.toolCalling: {
             freezeLiveTool(state);
             stopStreaming(state);
+            if (!replay) state.working = true;
             const toolName = eventData.tool_name ?? frame.tool_name ?? "tool";
             const args = eventData.arguments ?? {};
             const id = nextItemId("tool");
@@ -288,7 +305,10 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 };
             }
             freezeLiveTool(state);
-            if (!replay) state.thinking = true;
+            if (!replay) {
+                state.working = true;
+                state.thinking = true;
+            }
             break;
         }
 
@@ -298,6 +318,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             freezeLiveTool(state);
             state.thinking = false;
             state.turnStreamed = true;
+            if (!replay) state.working = true;
             const streaming = findItem(state, state.streamingId);
             if (streaming) {
                 streaming.eventData = { ...streaming.eventData, content: `${streaming.eventData.content ?? ""}${delta}` };
@@ -380,7 +401,8 @@ export function historyToItems(rows: any[]): AgentChatItem[] {
     const state = createThreadState();
     for (const row of rows) {
         const frame: AgentWireFrame = { ...row, event_type: row.event_type ?? (row.role === "user" ? AgentEventTypes.userMessage : row.role === "assistant" ? AgentEventTypes.llmComplete : "") };
-        const at = row.timestamp ? new Date(row.timestamp).getTime() : Date.now();
+        const rawTs = row.timestamp ? (row.timestamp.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(row.timestamp) ? row.timestamp : `${row.timestamp}Z`) : null;
+        const at = rawTs ? new Date(rawTs).getTime() : Date.now();
         applyAgentEvent(state, normalizeAgentFrame(frame), true, at);
     }
     freezeLiveTool(state);

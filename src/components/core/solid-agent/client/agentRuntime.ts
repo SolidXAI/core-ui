@@ -340,7 +340,7 @@ export class AgentRuntime {
         this.socket.updateSession(opts);
     }
 
-    resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions) {
+    resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions, isRunning?: boolean) {
         if (this.frame != null) {
             cancelAnimationFrame(this.frame);
             this.frame = null;
@@ -353,7 +353,9 @@ export class AgentRuntime {
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
-        this.dispatch(agentThreadReset({ loadingHistory: true, historySessionId: sessionId }));
+        const shouldBeWorking = isRunning ?? this.getState()?.working ?? false;
+        this.dispatch(agentThreadReset({ loadingHistory: true, historySessionId: sessionId, working: shouldBeWorking }));
+        this.dispatch(agentHistoryLoadingChanged(true));
         this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
         void this.loadHistory(sessionId, 1);
     }
@@ -400,10 +402,12 @@ export class AgentRuntime {
             if (!this.isCurrentHistoryLoad(generation, historySessionId)) return;
             this.loadedHistoryPages.add(key);
             const sessionUsage = result.session_usage;
+            const isRunning = result.is_running !== undefined ? result.is_running : (result.status ? result.status === "running" : undefined);
             this.dispatch(agentHistoryLoaded({
                 items,
                 hasMore: !!result.has_more,
                 page,
+                ...(isRunning !== undefined ? { isRunning } : {}),
                 ...(sessionUsage ? {
                     usage: {
                         totalCost: sessionUsage.total_cost ?? 0,
@@ -508,7 +512,9 @@ export class AgentRuntime {
             }
             if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
                 void this.loadHistory(historyId, 1);
-            } else if (event.eventType === AgentEventTypes.sessionStarted) this.dispatch(agentHistoryLoadingChanged(false));
+            } else if (event.eventType === AgentEventTypes.sessionStarted && this.loadingHistoryPages.size === 0) {
+                this.dispatch(agentHistoryLoadingChanged(false));
+            }
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             const content = event.eventData.content ?? event.frame.content;
             const now = Date.now();

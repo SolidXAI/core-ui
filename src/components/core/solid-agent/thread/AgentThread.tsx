@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, LoaderCircle } from "lucide-react";
 import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "../SolidAgent.module.css";
 import widgetStyles from "../widgets/solidChatWidgets.module.css";
@@ -26,7 +26,7 @@ type Props = {
     onPrompt: (text: string) => void;
 };
 
-type ItemGroup = { kind: "user"; item: AgentChatItem } | { kind: "agent"; key: string; items: AgentChatItem[] };
+type ItemGroup = { kind: "user"; item: AgentChatItem } | { kind: "agent"; key: string; items: AgentChatItem[]; startedAt?: number };
 
 const isUserItem = (item: AgentChatItem) => item.eventType === AgentEventTypes.userMessage && !item.widget;
 const ASSISTANT_MESSAGE_TYPES = new Set<string>([
@@ -57,8 +57,9 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
     const groups: ItemGroup[] = [];
     let turn: AgentChatItem[] = [];
     let turnKey = "initial-agent-turn";
+    let startedAt: number | undefined = undefined;
     const flush = () => {
-        if (turn.length) groups.push({ kind: "agent", key: turnKey, items: turn });
+        if (turn.length) groups.push({ kind: "agent", key: turnKey, items: turn, startedAt });
         turn = [];
     };
     for (const item of items) {
@@ -66,6 +67,7 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
             flush();
             groups.push({ kind: "user", item });
             turnKey = `after-${item.id}`;
+            startedAt = item.at;
         } else {
             turn.push(item);
         }
@@ -86,11 +88,13 @@ function AgentActivityDisclosure({
     turnKey,
     items,
     working,
+    startedAt,
     renderItem,
 }: {
     turnKey: string;
     items: AgentChatItem[];
     working: boolean;
+    startedAt?: number;
     renderItem: (item: AgentChatItem) => React.ReactNode;
 }) {
     const [expanded, setExpanded] = useState(working);
@@ -109,7 +113,12 @@ function AgentActivityDisclosure({
 
     const [now, setNow] = useState(() => Date.now());
     const hasLiveTimer = useRef(working);
-    const startTime = useRef(working ? Date.now() : (items[0]?.at || Date.now()));
+    const startTime = useRef(startedAt || items[0]?.at || Date.now());
+
+    useEffect(() => {
+        if (startedAt) startTime.current = startedAt;
+        else if (items[0]?.at) startTime.current = items[0].at;
+    }, [startedAt, items]);
 
     useEffect(() => {
         if (!working) {
@@ -125,13 +134,15 @@ function AgentActivityDisclosure({
     const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
     
     let recordedSeconds = 0;
-    if (items.length > 1) {
+    if (startedAt && items.length > 0) {
+        recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - startedAt) / 1000));
+    } else if (items.length > 1) {
         recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
     }
     const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);
     const toolDurationSeconds = Math.round(sumToolMs / 1000);
 
-    const seconds = hasLiveTimer.current
+    const seconds = working
         ? activeDuration
         : Math.max(recordedSeconds, toolDurationSeconds, 1);
 
@@ -157,7 +168,7 @@ function AgentActivityDisclosure({
                     setExpanded((value) => !value);
                 }}
             >
-                {working && <SolidSpinner size={13} className={widgetStyles.ActivitySpinner} aria-hidden="true" />}
+                {working && <LoaderCircle size={13} className={widgetStyles.ActivitySpinner} aria-hidden="true" />}
                 <span className={widgetStyles.ActivitySummaryText}>{summary}</span>
                 <ChevronRight size={13} className={`${widgetStyles.ActivityChevron} ${expanded ? widgetStyles.ActivityChevronOpen : ""}`} aria-hidden="true" />
             </button>
@@ -246,6 +257,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
             kind: "agent",
             key: lastGroup?.kind === "user" ? `after-${lastGroup.item.id}` : "working-turn",
             items: [],
+            startedAt: lastGroup?.kind === "user" ? lastGroup.item.at : undefined,
         });
     }
     const renderItem = (item: AgentChatItem, showMessageMeta?: boolean) => (
@@ -283,6 +295,7 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                     .find((content) => content !== null && content.length > 0);
                 const turnContent: React.ReactNode[] = [];
                 let activityItems: AgentChatItem[] = [];
+                let hasTrailingActivity = false;
                 const flushActivity = (isLatest: boolean) => {
                     if (!activityItems.length) return;
                     const activityKey = `${group.key}-${activityItems[0].id}`;
@@ -292,27 +305,33 @@ export function AgentThread({ items, thinking, working = thinking, loadingHistor
                             turnKey={activityKey}
                             items={activityItems}
                             working={isCurrentTurn && isLatest}
+                            startedAt={group.startedAt}
                             renderItem={renderItem}
                         />,
                     );
                     activityItems = [];
+                    if (isLatest) {
+                        hasTrailingActivity = true;
+                    }
                 };
                 for (const item of group.items) {
                     if (isAssistantMessage(item)) {
                         flushActivity(false);
                         turnContent.push(renderItem(item, false));
+                        hasTrailingActivity = false;
                     } else {
                         activityItems.push(item);
                     }
                 }
                 flushActivity(true);
-                if (isCurrentTurn && thinking && group.items.length === 0) {
+                if (isCurrentTurn && (working || thinking) && !hasTrailingActivity) {
                     turnContent.push(
                         <AgentActivityDisclosure
-                            key={`activity-${group.key}`}
-                            turnKey={group.key}
+                            key={`activity-working-${group.key}`}
+                            turnKey={`${group.key}-working`}
                             items={[]}
                             working
+                            startedAt={group.startedAt}
                             renderItem={renderItem}
                         />,
                     );

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Check, ChevronDown, Copy, History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
-import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
+import { agentModeChanged, agentPrefillConsumed, agentThreadReset } from "../../../redux/features/agentSlice";
 import {
     deleteSession,
     fetchAgentConfigVersionStatus,
@@ -598,7 +598,7 @@ export function SolidAgentChat({
         if (!resumingSessionId) return;
 
         // Clear resuming state once the target session has been loaded into Redux
-        if (agent.historySessionId === resumingSessionId && !agent.loadingHistory) {
+        if (agent.historySessionId === resumingSessionId && !agent.loadingHistory && !agent.loadingOlder) {
             setResumingSessionId(null);
             return;
         }
@@ -609,7 +609,7 @@ export function SolidAgentChat({
         }, 15000);
 
         return () => clearTimeout(timer);
-    }, [agent.loadingHistory, agent.historySessionId, resumingSessionId]);
+    }, [agent.loadingHistory, agent.loadingOlder, agent.historySessionId, resumingSessionId]);
 
     const handleSelectProvider = async (providerId: string) => {
         if (providerId === selectedProvider && !isSwitchingProvider) {
@@ -661,25 +661,12 @@ export function SolidAgentChat({
         setIsStartingNewChat(true);
         startingNewChatRef.current = true;
         try {
-            let latestSession: AgentSessionSummary | undefined;
-            if (agentRuntime === "agentHub") {
-                const latestPage = await fetchSessionList(agentUrl, { limit: 1 });
-                if (latestPage?.sessions?.length) {
-                    latestSession = latestPage.sessions[0];
-                }
-            }
-
-            if (latestSession?.has_user_message === false) {
-                setResumingSessionId(latestSession.session_id);
-                runtime.resume(latestSession.session_id);
-            } else {
-                runtime.newChat(selectedProvider, selectedModel, {
-                    thinking: isThinking,
-                    reasoning: selectedReasoning,
-                    fast: isFast,
-                    speed: selectedSpeed,
-                });
-            }
+            runtime.newChat(selectedProvider, selectedModel, {
+                thinking: isThinking,
+                reasoning: selectedReasoning,
+                fast: isFast,
+                speed: selectedSpeed,
+            });
         } finally {
             startingNewChatRef.current = false;
             setIsStartingNewChat(false);
@@ -709,7 +696,9 @@ export function SolidAgentChat({
             return;
         }
 
+        const isRunning = session.status === "running" || (session as any).is_running === true;
         setResumingSessionId(session.session_id);
+        dispatch(agentThreadReset({ loadingHistory: true, historySessionId: session.session_id, working: isRunning }));
         setShowHistory(false);
         setHistorySearchQuery("");
         try {
@@ -746,7 +735,7 @@ export function SolidAgentChat({
                 reasoning: nextReasoning,
                 fast: nextFast,
                 speed: nextSpeed,
-            });
+            }, isRunning);
         } catch (err) {
             console.error("Failed to resume session:", err);
             setResumingSessionId(null);

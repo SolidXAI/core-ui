@@ -96,13 +96,16 @@ const agentSlice = createSlice({
             state.liveToolId = null;
             state.authError = null;
         },
-        agentThreadReset(state, action: PayloadAction<{ loadingHistory?: boolean; historySessionId?: string | null } | undefined>) {
+        agentThreadReset(state, action: PayloadAction<{ loadingHistory?: boolean; historySessionId?: string | null; working?: boolean } | undefined>) {
+            const isWorking = action?.payload?.working ?? false;
             Object.assign(state, createThreadState(), {
                 commands: state.commands,
                 hasMoreHistory: false,
                 historyPage: 1,
                 historySessionId: action?.payload?.historySessionId ?? null,
                 loadingHistory: action?.payload?.loadingHistory ?? false,
+                working: isWorking,
+                thinking: isWorking,
             });
         },
         agentHistoryLoadingStarted(state, action: PayloadAction<{ isOlder?: boolean } | undefined>) {
@@ -121,8 +124,8 @@ const agentSlice = createSlice({
             state.loadingHistory = action.payload;
             if (!action.payload) state.loadingOlder = false;
         },
-        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null }>) {
-            const { items, hasMore, page, usage } = action.payload;
+        agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null; isRunning?: boolean }>) {
+            const { items, hasMore, page, usage, isRunning } = action.payload;
             // History is always older than anything already in the thread.
             state.items = [...items, ...state.items];
             state.hasMoreHistory = hasMore;
@@ -130,6 +133,22 @@ const agentSlice = createSlice({
             state.loadingHistory = false;
             state.loadingOlder = false;
             state.olderHistoryFailed = false;
+            if (isRunning !== undefined) {
+                state.working = isRunning;
+                if (isRunning && !state.liveToolId) {
+                    state.thinking = true;
+                }
+            } else {
+                const lastItem = items[items.length - 1];
+                const hasUnfinishedTurn = lastItem && (
+                    lastItem.eventType === AgentEventTypes.userMessage ||
+                    lastItem.eventType === AgentEventTypes.toolCalling ||
+                    lastItem.eventType === AgentEventTypes.toolResult
+                );
+                if (hasUnfinishedTurn && state.working) {
+                    state.thinking = true;
+                }
+            }
             if (usage && (!state.usage || state.usage.totalTokens === 0)) {
                 state.usage = {
                     ...usage,

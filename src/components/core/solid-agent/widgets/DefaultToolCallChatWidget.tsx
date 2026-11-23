@@ -35,7 +35,7 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
     const status: ToolStatus = live ? "running" : (eventData.status as ToolStatus) ?? "success";
     const output: string | undefined = eventData.output_raw ?? eventData.output;
     const hasArgs = !!args && Object.keys(args).length > 0;
-    const expandable = (hasArgs || !!output) && status !== "running";
+    const expandable = (hasArgs || !!output || progress.length > 0) && status !== "running";
     const isRunning = live || status === "running";
     const rawSummary: string = eventData.summary ?? "";
     const isNoisySummary = rawSummary.startsWith("const ") || rawSummary.startsWith("let ") || rawSummary.includes("tools.solidx");
@@ -56,8 +56,8 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
                 {expandable && <ChevronRight size={11} className={`${styles.ToolCardChevron} ${expanded ? styles.ToolCardChevronOpen : ""}`} />}
             </button>
 
-            {/* Progress sub-steps: visible only while running */}
-            {isRunning && progress.length > 0 && (
+            {/* Progress sub-steps: visible while running or when expanded */}
+            {(isRunning || expanded) && progress.length > 0 && (
                 <div className={styles.ToolCardProgress}>
                     {progress.map((step, index) => (
                         <div key={index} className={`${styles.ToolProgressItem} ${step.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
