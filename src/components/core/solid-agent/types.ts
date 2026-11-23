@@ -89,6 +89,8 @@ export interface AgentUsageStats {
     totalTokens: number;
     contextTokens: number;
     contextLimit: number;
+    /** Context size at which the runtime compacts automatically (AgentHub); null when it does not. */
+    compactAt?: number | null;
 }
 
 /** A slash command advertised by the agent in `session_started`. */
@@ -137,6 +139,7 @@ export const AgentEventTypes = {
     executionCancelledLegacy: "execution_cancelled",
     agentError: "AgentError",
     error: "error",
+    contextCompacted: "ContextCompacted",
 } as const;
 
 // ── Outbound ──────────────────────────────────────────────────────────────────

@@ -108,6 +108,23 @@ function setPendingReview(state: AgentThreadState, data: Record<string, any> | n
     endTurn(state);
 }
 
+/**
+ * Applies the context-window figures AgentHub sends on StepComplete and ContextCompacted, so the
+ * usage ring follows a long turn instead of updating only when it ends.
+ */
+function applyContextWindow(state: AgentThreadState, data: Record<string, any>, tokens?: unknown) {
+    const limit = data.context_limit ?? data.context_window;
+    if (typeof limit !== "number" || limit <= 0) return;
+    const used = tokens ?? data.context_tokens;
+    const compactAt = data.compaction_threshold !== undefined ? data.compaction_threshold : data.trigger_tokens;
+    state.usage = {
+        ...(state.usage ?? { totalCost: 0, totalInputTokens: 0, totalOutputTokens: 0, totalTokens: 0, contextTokens: 0, contextLimit: 0 }),
+        contextLimit: limit,
+        ...(typeof used === "number" && used >= 0 ? { contextTokens: used } : {}),
+        ...(compactAt !== undefined ? { compactAt: typeof compactAt === "number" && compactAt > 0 ? compactAt : null } : {}),
+    };
+}
+
 function lastAssistantText(state: AgentThreadState): string | undefined {
     for (let i = state.items.length - 1; i >= 0; i--) {
         const item = state.items[i];
@@ -184,6 +201,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                     totalTokens: frame.total_tokens ?? eventData.total_tokens ?? (inTok + outTok),
                     contextTokens: frame.context_tokens ?? eventData.context_tokens ?? 0,
                     contextLimit: limit,
+                    compactAt: frame.compaction_threshold ?? eventData.compaction_threshold ?? null,
                 };
             }
             state.authError = null;
@@ -288,8 +306,31 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             break;
 
         case AgentEventTypes.stepComplete:
+            freezeLiveTool(state);
+            applyContextWindow(state, eventData);
+            break;
+
         case AgentEventTypes.agentComplete:
             freezeLiveTool(state);
+            break;
+
+        case AgentEventTypes.contextCompacted:
+            freezeLiveTool(state);
+            stopStreaming(state);
+            state.items.push({
+                id: nextItemId("compact"),
+                at,
+                eventType,
+                eventData: {
+                    strategy: eventData.strategy,
+                    trigger: eventData.trigger,
+                    tokens_before: eventData.tokens_before,
+                    tokens_after: eventData.tokens_after,
+                    archived_items: eventData.archived_items,
+                    context_window: eventData.context_window,
+                },
+            });
+            applyContextWindow(state, eventData, eventData.tokens_after);
             break;
 
         case AgentEventTypes.toolCalling: {
@@ -417,6 +458,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                     totalTokens: eventData.total_tokens ?? frame.total_tokens ?? (inTok + outTok),
                     contextTokens: ctxTok,
                     contextLimit: limit,
+                    compactAt: eventData.compaction_threshold !== undefined ? eventData.compaction_threshold : state.usage?.compactAt ?? null,
                 };
             }
             endTurn(state);

@@ -108,6 +108,7 @@ import { DefaultAgentChatHeaderWidget } from "../components/core/solid-agent/wid
 import { DefaultAgentBrowserPanelWidget } from "../components/core/solid-agent/browser/DefaultAgentBrowserPanelWidget";
 import { DefaultErrorChatWidget } from "../components/core/solid-agent/widgets/DefaultErrorChatWidget";
 import { DefaultNoticeChatWidget } from "../components/core/solid-agent/widgets/DefaultNoticeChatWidget";
+import { DefaultContextCompactedChatWidget } from "../components/core/solid-agent/widgets/DefaultContextCompactedChatWidget";
 import { DefaultUnknownChatWidget } from "../components/core/solid-agent/widgets/DefaultUnknownChatWidget";
 import { DefaultThinkingChatWidget } from "../components/core/solid-agent/widgets/DefaultThinkingChatWidget";
 import { SolidMarkdownChatWidget } from "../components/core/solid-agent/widgets/SolidMarkdownChatWidget";
@@ -590,6 +591,7 @@ registerExtensionComponent("DefaultAgentChatHeaderWidget", DefaultAgentChatHeade
 registerExtensionComponent("DefaultAgentBrowserPanelWidget", DefaultAgentBrowserPanelWidget, ExtensionComponentTypes.agentBrowserPanelWidget);
 registerExtensionComponent("DefaultErrorChatWidget", DefaultErrorChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget, ["error"]);
 registerExtensionComponent("DefaultNoticeChatWidget", DefaultNoticeChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
+registerExtensionComponent("DefaultContextCompactedChatWidget", DefaultContextCompactedChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
 registerExtensionComponent("DefaultThinkingChatWidget", DefaultThinkingChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
 registerExtensionComponent("DefaultUnknownChatWidget", DefaultUnknownChatWidget, ExtensionComponentTypes.agentTurnCompletionWidget);
 // Named widgets, chosen by event_data.widget (full name or the short alias).

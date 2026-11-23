@@ -26,6 +26,8 @@ export const getDefaultChatWidgetName = (eventType: string): string => {
         case AgentEventTypes.executionCancelled:
         case AgentEventTypes.executionCancelledLegacy:
             return "DefaultNoticeChatWidget";
+        case AgentEventTypes.contextCompacted:
+            return "DefaultContextCompactedChatWidget";
         case AgentEventTypes.agentStarted:
         case AgentEventTypes.stepStarted:
         case AgentEventTypes.agentThinking:

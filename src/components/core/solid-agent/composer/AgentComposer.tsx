@@ -260,22 +260,24 @@ export function AgentComposer({
                         </button>
                     )}
                     {modelIndicator}
-                    {contextPill}
-                    {working ? (
-                        <button
-                            type="button"
-                            className={styles.stopBtn}
-                            onClick={onStop}
-                            aria-label="Stop the agent"
-                            title="Stop the agent"
-                        >
-                            <Square size={12} fill="currentColor" />
-                        </button>
-                    ) : (
-                        <button type="button" className={styles.sendBtn} onClick={submit} disabled={!canSend} aria-label="Send">
-                            <ArrowUp size={16} />
-                        </button>
-                    )}
+                    <div className={styles.composerTrailing}>
+                        {contextPill}
+                        {working ? (
+                            <button
+                                type="button"
+                                className={styles.stopBtn}
+                                onClick={onStop}
+                                aria-label="Stop the agent"
+                                title="Stop the agent"
+                            >
+                                <Square size={12} fill="currentColor" />
+                            </button>
+                        ) : (
+                            <button type="button" className={styles.sendBtn} onClick={submit} disabled={!canSend} aria-label="Send">
+                                <ArrowUp size={16} />
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -979,3 +979,33 @@
 a.ToolFileChip:hover { border-color: var(--agent-primary); color: var(--agent-primary); }
 .ToolFileName { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .ToolFileSize { flex: 0 0 auto; color: var(--agent-muted); }
+
+/* AgentHub context compaction divider */
+.ContextCompacted {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  color: var(--agent-muted);
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+.ContextCompactedLine {
+  flex: 1 1 auto;
+  min-width: 16px;
+  height: 1px;
+  background: var(--agent-border);
+}
+.ContextCompactedLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ContextCompactedSizes {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
