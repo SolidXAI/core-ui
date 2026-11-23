@@ -18,14 +18,14 @@
 }
 
 .solid-api-keys-title {
-  font-size: 18px;
+  font-size: var(--solid-font-size-body-large);
   font-weight: 700;
   color: var(--foreground);
 }
 
 .solid-api-keys-subtitle {
   max-width: 700px;
-  font-size: 13px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.5;
   color: var(--muted-foreground);
 }
@@ -90,7 +90,7 @@
 }
 
 .solid-api-keys-empty-title {
-  font-size: 16px;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 700;
   color: var(--foreground);
 }
@@ -98,7 +98,7 @@
 .solid-api-keys-empty-copy {
   max-width: 360px;
   margin-top: 6px;
-  font-size: 13px;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.5;
   color: var(--muted-foreground);
 }

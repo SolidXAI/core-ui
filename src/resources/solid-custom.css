@@ -701,6 +701,7 @@ textarea {
 
 .solid-sidebar-tree-label {
   font-size: var(--solid-font-size-body-small);
+  font-weight: 500;
   line-height: 1.2;
 }
 
@@ -2150,9 +2151,8 @@ textarea {
   text-align: left;
   border-radius: 6px;
   padding: var(--solid-space-2) var(--solid-space-2);
-  font-size: var(--solid-font-size-control-xs);
+  font-size: var(--solid-font-size-ui-control);
   line-height: 1;
-  text-align: center;
 }
 
 .solid-select-menu-item:hover,
@@ -3916,8 +3916,8 @@ textarea {
 }
 
 .solid-list-toolbar .view-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--solid-font-size-body-large);
+  font-weight: 700;
   line-height: 1.2;
   color: var(--foreground);
 }
@@ -4614,7 +4614,7 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
 
 .solid-paginator-label,
 .solid-paginator-report {
-  font-size: var(--solid-font-size-caption);
+  font-size: var(--solid-font-size-body-small);
   line-height: 1;
   color: color-mix(in srgb, var(--foreground) 82%, transparent);
   font-weight: 500;
@@ -4651,7 +4651,7 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
   /* border-radius: 8px; */
   border-color: color-mix(in srgb, var(--border) 0%, transparent);
   background: transparent;
-  font-size: var(--solid-font-size-control-xs);
+  font-size: var(--solid-font-size-body-small);
   font-weight: 500;
   line-height: 1;
   box-shadow: none;
@@ -4695,7 +4695,7 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   background: var(--background);
   color: var(--foreground);
-  font-size: var(--solid-font-size-caption);
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 500;
   line-height: 1;
   transition:
@@ -6903,7 +6903,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-radix-dialog-title {
   margin: 0;
-  font-size: 18px;
+  font-size: var(--solid-font-size-component-title);
   line-height: 1.2;
   font-weight: 700;
   color: var(--foreground);

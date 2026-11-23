@@ -341,7 +341,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                         {modelDisplayName && (
                             <p className={`${styles.solidChatterMeta} m-0`}>
                                 {modelDisplayName}
-                                {modelUserKey && <> · <span className='font-medium'>{modelUserKey}</span></>}
+                                {modelUserKey && <> · <span>{modelUserKey}</span></>}
                             </p>
                         )}
                         {(localMessage || (chatterMessage && isChatterMessageWidget(messageType, messageSubType))) && !isEditing && (
