@@ -417,7 +417,7 @@ const CreateModule = ({ params, data }: any) => {
               <div className="field w-full px-2 pt-2">
                 <div className={`${styles.fieldWrapper} relative`}>
                   <label htmlFor="menuIconUrl" className={`${styles.fieldLabel} form-field-label`}>
-                    Menu Icon <small className="text-red-500 helper-text">(only png and jpeg are allowed)</small>
+                    Menu Icon <small className="text-red-500 text-xs">(only png and jpeg are allowed)</small>
                   </label>
                   <div {...getRootPropsmenuIcon()} className="solid-dropzone-wrapper">
                     <input {...getInputPropsmenuIcon()} />

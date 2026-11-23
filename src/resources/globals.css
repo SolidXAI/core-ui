@@ -3596,7 +3596,7 @@ li.header-li-px {
 }
 
 .solid-filter-section-title {
-  font-size: var(--solid-font-size-caption);
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 700;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
@@ -3671,7 +3671,7 @@ li.header-li-px {
 
 .solid-grouping-rule-title,
 .solid-aggregation-row-title {
-  font-size: var(--solid-font-size-caption);
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   line-height: 1.3;
   color: color-mix(in srgb, var(--foreground) 94%, transparent);
@@ -4688,6 +4688,7 @@ li.header-li-px {
   /* border-radius: 6px;
   overflow: hidden;
   border: 1px solid #d1d5db; */
+  font-size: var(--solid-font-size-body-small);
 }
 
 .solid-custom-editor .ql-toolbar.ql-snow {
@@ -4698,6 +4699,10 @@ li.header-li-px {
 .solid-custom-editor .ql-container.ql-snow {
   border-bottom-right-radius: 6px;
   border-bottom-left-radius: 6px;
+}
+
+.solid-custom-editor .ql-container.ql-snow .ql-editor {
+  font-size: var(--solid-font-size-ui-control);
 }
 
 .view-media-button {
@@ -5981,7 +5986,7 @@ html.dark .solid-media-card-widget__kind,
 }
 
 .solid-empty-listview-header-title {
-  font-size: 1.05rem;
+  font-size: var(--solid-font-size-component-title);
   font-weight: 700;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 94%, transparent);

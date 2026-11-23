@@ -99,7 +99,7 @@
 }
 
 .solid-locale-section-title {
-  font-size: 0.82rem;
+  font-size: var(--solid-font-size-ui-control);
   line-height: 1.25;
   font-weight: 700;
   color: color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground) 12%);
@@ -182,7 +182,7 @@
 }
 
 .solid-locale-i18n-subtitle {
-  margin-top: 0.16rem;
+  margin-top: var(--solid-font-size-caption);
   color: var(--muted-foreground);
   font-size: 0.65rem;
   line-height: 1.25;
@@ -217,7 +217,7 @@
 
 .solid-locale-i18n-label {
   color: color-mix(in srgb, var(--muted-foreground) 86%, var(--foreground) 14%);
-  font-size: 0.64rem;
+  font-size: var(--solid-font-size-micro);
   font-weight: 500;
   line-height: 1.25;
 }

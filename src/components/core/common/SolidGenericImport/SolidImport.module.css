@@ -37,7 +37,7 @@
 }
 
 :global(.solid-import-dialog-title) {
-    font-size: 18px;
+    font-size: var(--solid-font-size-component-title);
     line-height: 1.15;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -349,7 +349,7 @@
 }
 
 :global(.solid-import-dropzone-title) {
-    font-size: 15px;
+    font-size: var(--solid-font-size-body-small);
     margin-bottom: 2px;
 }
 
