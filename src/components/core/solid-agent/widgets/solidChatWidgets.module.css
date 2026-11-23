@@ -5,7 +5,7 @@
 .AiTurnGroup {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: 0;
     /* max-width: 800px; */
     width: 100%;
 }
@@ -649,8 +649,8 @@
 .ThinkingBubble {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 2px 6px;
+    gap: 0;
+    padding: 2px 0;
     background: transparent;
     border: 0;
     width: fit-content;
