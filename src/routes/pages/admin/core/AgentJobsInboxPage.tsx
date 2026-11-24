@@ -84,7 +84,7 @@ const sortOptions = [
   { label: "Agent A–Z", value: "agent_asc" },
 ];
 type InboxSort = (typeof sortOptions)[number]["value"];
-const defaultSort: InboxSort = "last_active_desc";
+const defaultSort: InboxSort = "started_desc";
 
 function readInboxFilters(search: string): InboxFilters {
   const params = new URLSearchParams(search);
