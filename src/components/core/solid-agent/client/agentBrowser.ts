@@ -257,10 +257,17 @@ export class AgentBrowserChannel {
         const width = Number(data.viewport?.width);
         const height = Number(data.viewport?.height);
         const ended = state === "none" || state === "released" || state === "state_saved";
-        if (ended) this.frame = null;
+        if (ended) {
+            this.frame = null;
+            // The server drops this socket's preview when the browser is released. Forget it here too, so the
+            // next "live" status subscribes again (a held panel stays mounted and would otherwise stay blank).
+            this.previewSession = null;
+            this.streamSeq = 0;
+        }
         this.setView({
             ...this.view,
             state,
+            watching: ended ? false : this.view.watching,
             viewport: width > 0 && height > 0 ? { width, height } : this.view.viewport,
             url: text(data.url) ?? (ended ? null : this.view.url),
             title: ended ? null : this.view.title,

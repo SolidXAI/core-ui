@@ -211,7 +211,18 @@ export function SolidAgentChat({
     // The agent handed over its browser (or the user took it mid-turn): answered from the browser panel.
     const browserHandoff = review?.kind === "browser_control" ? review : null;
     // Any runtime can show the browser: the panel only appears when the agent sends browser_status for it.
-    const browserShown = isBrowserActive(browserView) || !!browserHandoff;
+    const browserActive = isBrowserActive(browserView) || !!browserHandoff;
+    // Held: a browser was shown during this turn. Between two scenarios the agent closes one browser and starts
+    // the next; keep the panel (and its enlarged view) until the turn ends instead of flashing it away.
+    const [browserHeld, setBrowserHeld] = useState(false);
+    useEffect(() => {
+        if (browserActive && agent.working) setBrowserHeld(true);
+    }, [browserActive, agent.working]);
+    useEffect(() => {
+        if (!agent.working) setBrowserHeld(false);
+    }, [agent.working]);
+    const browserShown = browserActive || browserHeld;
+    const browserBetween = browserHeld && !browserActive;
     // Collapsing belongs to the layout it was done in: a collapsed stacked panel must not hide the side pane.
     const [browserCollapsedIn, setBrowserCollapsedIn] = useState<BrowserLayout | null>(null);
     const [browserExpanded, setBrowserExpanded] = useState(false);
@@ -894,7 +905,7 @@ export function SolidAgentChat({
             layout,
             connected: agent.connection === "open",
             collapsed,
-            screen: collapsed ? null : <AgentBrowserScreen channel={channel} view={browserView} />,
+            screen: collapsed ? null : <AgentBrowserScreen channel={channel} view={browserView} between={browserBetween} />,
             takeControl: () => channel.requestControl(),
             giveBack: (note) => channel.release(note),
             navigate: (url) => channel.navigate(url),

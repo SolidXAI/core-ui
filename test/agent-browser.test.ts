@@ -80,6 +80,19 @@ describe("AgentBrowserChannel", () => {
         release();
     });
 
+    it("subscribes again when the browser goes live after being released", () => {
+        const { channel, sent } = setup();
+        const release = channel.watch();
+        channel.handle("browser_status", live);
+        channel.handle("browser_status", { ...live, state: "released" });
+        assert.equal(channel.getView().watching, false);
+        assert.deepEqual(actions(sent), ["browser_preview_start"], "the server already stopped it; no stop is sent");
+        channel.handle("browser_status", live);
+        assert.deepEqual(actions(sent), ["browser_preview_start", "browser_preview_start"]);
+        assert.equal(channel.getView().watching, true);
+        release();
+    });
+
     it("keeps the preview across a quick viewer swap and stops it after the last viewer leaves", () => {
         const { channel, sent, runTimers } = setup();
         channel.handle("browser_status", live);

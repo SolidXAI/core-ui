@@ -7,6 +7,8 @@ type Props = {
     channel: AgentBrowserChannel;
     view: AgentBrowserView;
     className?: string;
+    /** The agent has closed one browser and has not started the next yet. */
+    between?: boolean;
 };
 
 const BUTTONS = ["left", "middle", "right"] as const;
@@ -40,7 +42,7 @@ function keyEvent(type: "keyDown" | "keyUp" | "char", event: React.KeyboardEvent
  * The agent's browser, drawn from live-view frames. While the user has control, the canvas takes the
  * pointer and the keyboard and forwards them as viewport-pixel input events.
  */
-export function AgentBrowserScreen({ channel, view, className }: Props) {
+export function AgentBrowserScreen({ channel, view, className, between = false }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const drawnSeq = useRef(0);
     const moveQueued = useRef<AgentBrowserInputEvent | null>(null);
@@ -156,7 +158,13 @@ export function AgentBrowserScreen({ channel, view, className }: Props) {
                 onKeyDown={onKeyDown}
                 onKeyUp={onKeyUp}
             />
-            {placeholder && <div className={styles.screenPlaceholder} role="status">{placeholder}</div>}
+            {between && (
+                <div className={styles.screenBetween} role="status">
+                    <span className={styles.betweenSpinner} aria-hidden="true" />
+                    Preparing the next scenario…
+                </div>
+            )}
+            {placeholder && !between && <div className={styles.screenPlaceholder} role="status">{placeholder}</div>}
         </div>
     );
 }
