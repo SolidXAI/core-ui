@@ -492,7 +492,6 @@ export class AgentRuntime {
                     sessionId: this.socket.currentSessionId,
                 });
             }
-            this.publish("onAgentTurnCompleted", { sessionId: this.socket.currentSessionId, outcome: "completed" });
         } else if (event.eventType === AgentEventTypes.agentError || event.eventType === AgentEventTypes.error) {
             this.publish("onError", { stage: "runtime", code: "agent_error", retryable: false });
         } else if (event.eventType === "human_request" ||
@@ -546,11 +545,13 @@ export class AgentRuntime {
 
     private lastTurnCompleteContent: string | null = null;
     private lastTurnCompleteTime = 0;
+    private turnCompletionPublished = false;
 
     private emitSdkEvents(event: AgentChatEvent) {
         if (event.eventType === AgentEventTypes.userMessage || event.eventType === AgentEventTypes.agentStarted) {
             this.lastTurnCompleteContent = null;
             this.lastTurnCompleteTime = 0;
+            this.turnCompletionPublished = false;
         } else if (event.eventType === AgentEventTypes.sessionStarted || event.eventType === AgentEventTypes.sessionUpdated) {
             const sessionId = event.frame.session_id ?? event.eventData.session_id ?? null;
             const provider = event.frame.provider ?? event.eventData.provider ?? this.socket.currentProvider;
@@ -576,6 +577,16 @@ export class AgentRuntime {
             }
             this.lastTurnCompleteTime = now;
             this.lastTurnCompleteContent = typeof content === "string" ? content : null;
+            // Publish only for a new live completion, never while loading history.
+            if (!this.turnCompletionPublished) {
+                this.turnCompletionPublished = true;
+                const widget = parseWidgetContent(content);
+                this.publish("onAgentTurnCompleted", {
+                    sessionId: this.socket.currentSessionId,
+                    outcome: "completed",
+                    ...(widget ? { widget: { name: widget.widget, data: widget.data } } : {}),
+                });
+            }
             eventBus.emit(SOLID_AGENT_EVENTS.turnComplete, {
                 sessionId: this.socket.currentSessionId,
                 agentType: this.agentRuntime,
