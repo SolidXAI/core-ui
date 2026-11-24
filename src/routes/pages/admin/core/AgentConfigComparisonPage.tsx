@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, ArrowRight, Check, CircleHelp, Cpu, EqualNot, FileText, GitCompareArrows, Puzzle, Settings, Wrench, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, CircleHelp, Cpu, EqualNot, FileText, GitCompareArrows, Puzzle, Settings, Wrench, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../../../components/shad-cn-ui";
@@ -41,7 +41,8 @@ function SectionHeader({ icon, title, count, changes }: { icon: React.ReactNode;
   </header>;
 }
 
-function DiffContent({ comparison, diffKey }: { comparison: ConfigComparison; diffKey: string }) {
+function DiffContent({ comparison, diffKey, onChanges }: { comparison: ConfigComparison; diffKey: string; onChanges: (changes: HTMLElement[]) => void }) {
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const [detail, setDetail] = React.useState<ConfigDiff | null>(null);
   const [error, setError] = React.useState("");
   const [attempt, setAttempt] = React.useState(0);
@@ -55,14 +56,25 @@ function DiffContent({ comparison, diffKey }: { comparison: ConfigComparison; di
       .catch((reason) => { if (active) setError(reason instanceof Error ? reason.message : "The diff could not be loaded."); });
     return () => { active = false; controller.abort(); };
   }, [comparison.agent.id, left.id, right.id, diffKey, attempt]);
+  React.useEffect(() => {
+    const changes: HTMLElement[] = [];
+    contentRef.current?.querySelectorAll<HTMLElement>(".config-compare__value-change:not(.is-same), .config-compare__diff-viewer tr").forEach((row) => {
+      const changed = row.matches(".config-compare__value-change") || !!row.querySelector('[data-config-diff-change="true"]');
+      // Adjacent changed table rows form one change, including both sides of a replacement.
+      if (changed && (!row.previousElementSibling || !row.previousElementSibling.querySelector('[data-config-diff-change="true"]'))) changes.push(row);
+    });
+    onChanges(changes);
+    return () => onChanges([]);
+  }, [detail, error, onChanges]);
   if (error) return <div className="config-compare__empty" role="alert">{error} <button type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button></div>;
   if (!detail) return <div className="config-compare__empty" role="status">Loading diff…</div>;
   const rows = detail.rows ?? [{ id: diffKey, title: detail.title, oldValue: detail.oldValue, newValue: detail.newValue }];
-  return <div className="config-compare__diff">{rows.map((row) => <section key={row.id} className="config-compare__diff-block" aria-label={row.title}>
+  return <div ref={contentRef} className="config-compare__diff">{rows.map((row) => <section key={row.id} className="config-compare__diff-block" aria-label={row.title}>
     <header className="config-compare__diff-block-head"><h3>{row.title}</h3><StatusMark matched={row.oldValue === row.newValue} label={row.title} interactive={false} /></header>
     {isFlagChange(row.oldValue, row.newValue) ? <div className={`config-compare__value-change${row.oldValue === row.newValue ? " is-same" : ""}`}>
       <ValueSide version={left} value={row.oldValue} tone="old" /><span className="config-compare__arrow" aria-hidden="true"><ArrowRight size={14} /></span><ValueSide version={right} value={row.newValue} tone="new" />
     </div> : <div className="config-compare__diff-viewer"><ReactDiffViewer oldValue={row.oldValue} newValue={row.newValue} splitView compareMethod={DiffMethod.WORDS} styles={diffViewerStyles}
+      renderGutter={({ type }) => <td hidden data-config-diff-change={type !== 0} />}
       leftTitle={`v${left.versionNumber} · ${left.name || "Older version"}`} rightTitle={`v${right.versionNumber} · ${right.name || "Newer version"}`} showDiffOnly={false} /></div>}
   </section>)}</div>;
 }
@@ -90,16 +102,38 @@ const diffViewerStyles = {
 
 function DiffDialog({ open, onOpenChange, comparison, diffKey, icon, title, subtitle }: { open: boolean; onOpenChange: (open: boolean) => void; comparison: ConfigComparison; diffKey: string; icon: React.ReactNode; title: string; subtitle: string }) {
   const { left, right } = comparison.versions;
+  const [changes, setChanges] = React.useState<HTMLElement[]>([]);
+  const [activeChange, setActiveChange] = React.useState(-1);
+  React.useEffect(() => { setActiveChange(-1); }, [changes]);
+  React.useEffect(() => {
+    const target = changes[activeChange];
+    if (!target) return;
+    target.dataset.configDiffActive = "true";
+    return () => { delete target.dataset.configDiffActive; };
+  }, [changes, activeChange]);
+  const navigateChange = (direction: -1 | 1) => {
+    const index = activeChange < 0 ? (direction === 1 ? 0 : changes.length - 1) : activeChange + direction;
+    const target = changes[index];
+    const scroller = target?.closest<HTMLElement>(".config-compare__diff");
+    if (!target || !scroller) return;
+    setActiveChange(index);
+    scroller.scrollTo({ top: scroller.scrollTop + target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 16, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
   return <SolidDialog open={open} onOpenChange={onOpenChange} showHeader={false} ariaLabel={`${title} differences`} className="config-compare__dialog">
     <SolidDialogHeader className="config-compare__dialog-header">
       <span className="config-compare__section-icon">{icon}</span>
       <div className="config-compare__dialog-heading"><SolidDialogTitle>{title}</SolidDialogTitle><SolidDialogDescription>{subtitle}</SolidDialogDescription></div>
+      <nav className="config-compare__diff-navigation" aria-label="Diff navigation">
+        <span className="config-compare__diff-position" role="status" aria-live="polite">{activeChange < 0 ? `${changes.length} changes` : `${activeChange + 1} / ${changes.length}`}</span>
+        <button type="button" aria-label="Previous change" title="Previous change" disabled={!changes.length || activeChange === 0} onClick={() => navigateChange(-1)}><ArrowUp size={16} /></button>
+        <button type="button" aria-label="Next change" title="Next change" disabled={!changes.length || activeChange === changes.length - 1} onClick={() => navigateChange(1)}><ArrowDown size={16} /></button>
+      </nav>
       <div className="config-compare__dialog-versions" aria-label={`Comparing version ${left.versionNumber} with version ${right.versionNumber}`}>
         <span className="config-compare__version-badge">v{left.versionNumber}</span><ArrowRight size={13} /><span className="config-compare__version-badge is-newer">v{right.versionNumber}</span>
       </div>
       <SolidDialogClose aria-label="Close" />
     </SolidDialogHeader>
-    <SolidDialogBody>{open && <DiffContent comparison={comparison} diffKey={diffKey} />}</SolidDialogBody>
+    <SolidDialogBody>{open && <DiffContent comparison={comparison} diffKey={diffKey} onChanges={setChanges} />}</SolidDialogBody>
   </SolidDialog>;
 }
 
