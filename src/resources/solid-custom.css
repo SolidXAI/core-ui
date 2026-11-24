@@ -3658,6 +3658,7 @@ textarea {
   padding: 0.75rem;
   border: 1px solid var(--solid-border-subtle);
   text-align: left;
+   font-size: var(--solid-font-size-ui-control);
 }
 
 .solid-simple-table th {

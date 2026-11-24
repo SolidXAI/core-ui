@@ -37,7 +37,7 @@
 
 .subtitle {
   color: var(--muted-foreground);
-  font-size: 0.9rem;
+  font-size: var(--solid-font-size-body-small);
   margin: 0;
 }
 
@@ -56,7 +56,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   background: color-mix(in srgb, var(--surface-ground, var(--card)) 78%, var(--card) 22%);
   color: var(--muted-foreground);
-  font-size: 0.74rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 600;
 }
 
@@ -220,7 +220,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.78rem;
+  font-size: var(--solid-font-size-control-sm);
   font-weight: 700;
   color: var(--primary-color, #4f46e5);
   background: color-mix(in srgb, var(--primary-color, #4f46e5) 14%, var(--card) 86%);
@@ -236,13 +236,13 @@
 }
 
 .moduleTabLabel {
-  font-size: 0.89rem;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   line-height: 1.2;
 }
 
 .moduleTabMeta {
-  font-size: 0.72rem;
+  font-size: var(--solid-font-size-caption);
   color: var(--muted-foreground);
 }
 
@@ -277,13 +277,13 @@
 
 .groupTitle {
   margin: 0;
-  font-size: 0.94rem;
+  font-size: var(--solid-font-size-body);
   font-weight: 700;
   color: var(--solid-form-title, #0f172a);
 }
 
 .groupMeta {
-  font-size: 0.74rem;
+  font-size: var(--solid-font-size-caption);
   color: var(--muted-foreground);
 }
 
@@ -318,7 +318,7 @@
 
 .settingLabel {
   margin: 0;
-  font-size: 0.86rem;
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 600;
   color: var(--solid-form-title, #0f172a);
 }
@@ -358,7 +358,7 @@
 .settingDescription {
   margin: 0;
   color: var(--muted-foreground);
-  font-size: 0.79rem;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.35;
   max-width: 20rem;
 }
@@ -369,6 +369,7 @@
   display: flex;
   align-items: center;
   color: var(--foreground);
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 500;
   padding: 0.55rem 0.7rem;
   border-radius: 0.9rem;
@@ -463,7 +464,7 @@
 }
 
 .boolText {
-  font-size: 0.84rem;
+  font-size: var(--solid-font-size-caption);
   color: var(--muted-foreground);
 }
 
@@ -544,6 +545,7 @@
 
 .pageHeader :global(.form-wrapper-title) {
   color: var(--foreground) !important;
+  font-size: var(--solid-font-size-component-title) !important;
 }
 
 .workspace :global(.solid-notebook-tab-trigger) {
