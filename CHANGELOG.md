@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.4] - 2026-11-24
+
+### Added
+
+- enable dynamic field to respect disabled and readonly attributes (#313)
+
+## [0.1.23-beta.3] - 2026-11-23
+
+### Added
+
+- Display agent context compaction status
+
+## [0.1.23-beta.2] - 2026-11-23
+
+### Added
+
+- enhance agent configuration comparison with tools and general configuration sections
+
 ## [0.1.23-beta.1] - 2026-11-21
 
 ### Changed

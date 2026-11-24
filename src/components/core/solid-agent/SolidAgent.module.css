@@ -1918,9 +1918,14 @@
   gap: 4px;
   padding: 4px 8px 8px 8px;
 }
-/* Send / Stop sit at the right edge, whatever comes before them in the row. */
-.composerRow > .sendBtn,
-.composerRow > .stopBtn { margin-left: auto; }
+/* The context ring and Send / Stop sit at the right edge, whatever comes before them in the row. */
+.composerTrailing {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
 .composerDragging { background: transparent; }
 .iconBtn:disabled { opacity: 0.45; cursor: not-allowed; }
 

@@ -58,6 +58,13 @@ export function AgentContextPill({
     const showCost = (activeProvider !== "antigravity" && activeProvider !== "agy" && activeProvider !== "copilot") || totalCost > 0;
 
     const pct = Math.min(100, Math.max(0, Math.round((contextTokens / contextLimit) * 100)));
+    const compactAt = usage.compactAt && usage.compactAt > 0 ? usage.compactAt : null;
+    // With auto-compaction the ring warns as the context nears the compaction point, not the hard limit.
+    const level = compactAt
+        ? (contextTokens >= compactAt ? "danger" : contextTokens >= compactAt * 0.75 ? "warn" : "ok")
+        : (pct >= 90 ? "danger" : pct >= 70 ? "warn" : "ok");
+    const progressClass = level === "danger" ? styles.contextProgressDanger : level === "warn" ? styles.contextProgressWarn : "";
+    const barClass = level === "danger" ? styles.contextPopoverBarDanger : level === "warn" ? styles.contextPopoverBarWarn : "";
 
     // SVG circular ring geometry (radius = 7.5, viewBox 0 0 20 20)
     const radius = 7.5;
@@ -117,7 +124,7 @@ export function AgentContextPill({
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                     onKeyDown={handleKeyDown}
-                    aria-label={`Context window usage: ${pct}%. ${contextTokens.toLocaleString()} of ${formatLimit(contextLimit)} tokens`}
+                    aria-label={`Context window usage: ${pct}%. ${contextTokens.toLocaleString()} of ${formatLimit(contextLimit)} tokens${compactAt ? `. Compacts automatically at ${formatLimit(compactAt)}` : ""}`}
                     disabled={disabled}
                 >
                     <svg className={styles.contextRingSvg} viewBox="0 0 20 20" aria-hidden="true">
@@ -132,7 +139,7 @@ export function AgentContextPill({
                             cx="10"
                             cy="10"
                             r={radius}
-                            className={styles.contextRingProgress}
+                            className={`${styles.contextRingProgress} ${progressClass}`}
                             strokeWidth="2.2"
                             strokeDasharray={circumference}
                             strokeDashoffset={strokeDashoffset}
@@ -155,16 +162,27 @@ export function AgentContextPill({
                     <span className={styles.contextCardLabel}>Context</span>
                     <span className={styles.contextCardValue}>{pct}%</span>
                 </div>
+                <div className={styles.contextPopoverBarTrack} aria-hidden="true">
+                    <div className={`${styles.contextPopoverBarFill} ${barClass}`} style={{ width: `${pct}%` }} />
+                </div>
                 <div className={styles.contextCardRow}>
                     <span className={styles.contextCardLabel}>Tokens</span>
                     <span className={styles.contextCardValue}>
                         {contextTokens.toLocaleString()} / {formatLimit(contextLimit)}
                     </span>
                 </div>
-                <div className={styles.contextCardRow}>
-                    <span className={styles.contextCardLabel}>Session Total</span>
-                    <span className={styles.contextCardValue}>{totalTokens.toLocaleString()}</span>
-                </div>
+                {compactAt && (
+                    <div className={styles.contextCardRow}>
+                        <span className={styles.contextCardLabel}>Auto-compacts at</span>
+                        <span className={styles.contextCardValue}>{formatLimit(compactAt)}</span>
+                    </div>
+                )}
+                {totalTokens > 0 && (
+                    <div className={styles.contextCardRow}>
+                        <span className={styles.contextCardLabel}>Session Total</span>
+                        <span className={styles.contextCardValue}>{totalTokens.toLocaleString()}</span>
+                    </div>
+                )}
                 {showCost && (
                     <div className={styles.contextCardRow}>
                         <span className={styles.contextCardLabel}>Cost</span>

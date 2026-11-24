@@ -259,7 +259,12 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
                 };
 
                 for (const item of group.items) {
-                    if (isAssistantMessage(item) || (item.eventType === "HumanRequestCreated" && item.widget === "question")) {
+                    // A compaction divider must stay visible, not fold into the collapsed activity group.
+                    if (
+                        isAssistantMessage(item) ||
+                        (item.eventType === "HumanRequestCreated" && item.widget === "question") ||
+                        (item.eventType === AgentEventTypes.contextCompacted && !item.widget)
+                    ) {
                         flushActivity(false, item.at);
                         turnContent.push(renderItem(item, false));
                         currentStepStartTime = item.at;
