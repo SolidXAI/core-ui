@@ -64,6 +64,18 @@ describe("view-only browser", () => {
         channel.handle("browser_status", { state: "live", control: true });
         assert.equal(channel.getView().controllable, true);
     });
+
+    it("does not let transient none status drop an in-progress starting state", () => {
+        const { channel } = setup();
+        channel.handle("browser_status", { state: "starting" });
+        assert.equal(channel.getView().state, "starting");
+        assert.equal(isBrowserActive(channel.getView()), true);
+        channel.handle("browser_status", { state: "none" });
+        assert.equal(channel.getView().state, "starting", "transient none during starting ignored to prevent flicker");
+        assert.equal(isBrowserActive(channel.getView()), true);
+        channel.handle("browser_status", live);
+        assert.equal(channel.getView().state, "live");
+    });
 });
 
 describe("AgentBrowserChannel", () => {

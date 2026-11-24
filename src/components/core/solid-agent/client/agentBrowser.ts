@@ -253,7 +253,11 @@ export class AgentBrowserChannel {
     }
 
     private applyStatus(data: Record<string, any>) {
-        const state: AgentBrowserState = STATES.includes(data.state) ? data.state : this.view.state;
+        let state: AgentBrowserState = STATES.includes(data.state) ? data.state : this.view.state;
+        // Do not let a transient 'none' status frame override an in-progress 'starting' state.
+        if (this.view.state === "starting" && state === "none") {
+            state = "starting";
+        }
         const width = Number(data.viewport?.width);
         const height = Number(data.viewport?.height);
         const ended = state === "none" || state === "released" || state === "state_saved";
