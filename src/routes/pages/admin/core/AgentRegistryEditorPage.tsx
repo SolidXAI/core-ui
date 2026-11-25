@@ -33,11 +33,27 @@ type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; r
 type Input = { name: string; description: string; dataType: string; defaultValue?: unknown; optional: boolean };
 type Agent = Item & AgentDeployment & {
   configVersion?: number;
+  isBuiltin?: boolean;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
   tags?: AgentHubTag[];
 };
+const generationFields = [
+  ["temperatureReasoningModel", "Temperature", 2], ["topPReasoningModel", "Top P", 1],
+  ["reasoningEffortReasoningModel", "Reasoning effort", null],
+  ["temperatureFastModel", "Temperature", 2], ["topPFastModel", "Top P", 1],
+  ["reasoningEffortFastModel", "Reasoning effort", null],
+] as const;
+type GenerationField = typeof generationFields[number][0];
+type GenerationSettings = Record<GenerationField, number | string | null>;
+const reasoningEfforts = ["none", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
+function generationSettingsFrom(record: Partial<Agent>): GenerationSettings {
+  return Object.fromEntries(generationFields.map(([key, , max]) => [
+    key, record[key] == null ? null : max === null ? String(record[key]) : Number(record[key]),
+  ])) as GenerationSettings;
+}
+
 type ProviderModelOption = { provider: string; providerLabel: string; model: string; value: string; note?: string };
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -174,8 +190,10 @@ function fieldsQuery(fields: string[]): string {
 
 const detailFields = [
   "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
+  ...generationFields.map(([key]) => key),
   "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
   "runner", "minProcesses", "maxProcesses", "processCpu", "processMemory",
+  "isBuiltin",
 ];
 
 const detailQuery = [
@@ -218,6 +236,7 @@ function agentFormFromRecord(record: Agent) {
   return {
     name: record.name ?? "", title: record.title ?? "", description: record.description ?? "", iconName: record.iconName ?? "",
     inputs: parseInputs(record.requiredInputs), reasoningModelKey: record.reasoningModelKey ?? "", fastModelKey: record.fastModelKey ?? "",
+    ...generationSettingsFrom(record),
     systemPrompt: record.systemPrompt ?? "", runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0,
     maxProcesses: record.maxProcesses ?? null, processCpu: record.processCpu ?? null, processMemory: record.processMemory ?? null,
     stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
@@ -526,6 +545,7 @@ export function AgentRegistryEditorPage() {
   const [inputs, setInputs] = React.useState<Input[]>([]);
   const [reasoningModelKey, setReasoningModelKey] = React.useState("");
   const [fastModelKey, setFastModelKey] = React.useState("");
+  const [generationSettings, setGenerationSettings] = React.useState<GenerationSettings>(() => generationSettingsFrom({}));
   const [systemPrompt, setSystemPrompt] = React.useState("");
   const [stepLimit, setStepLimit] = React.useState(100);
   const [turnStepLimit, setTurnStepLimit] = React.useState(20);
@@ -582,7 +602,7 @@ export function AgentRegistryEditorPage() {
     return () => window.clearInterval(timer);
   }, [activationReadyAt, id]);
 
-  const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt, ...deployment,
+  const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, ...generationSettings, systemPrompt, ...deployment,
     stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
     alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
@@ -592,6 +612,7 @@ export function AgentRegistryEditorPage() {
     setName(record.name ?? ""); setTitle(record.title ?? ""); setDescription(record.description ?? "");
     setIconName(record.iconName ?? ""); setInputs(parseInputs(record.requiredInputs));
     setReasoningModelKey(record.reasoningModelKey ?? ""); setFastModelKey(record.fastModelKey ?? "");
+    setGenerationSettings(generationSettingsFrom(record));
     setSystemPrompt(record.systemPrompt ?? ""); setStepLimit(record.stepLimit ?? 100);
     setTurnStepLimit(record.turnStepLimit ?? 20); setCostLimit(Number(record.costLimit ?? 3));
     setDeployment({ runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0, maxProcesses: record.maxProcesses ?? null,
@@ -686,6 +707,14 @@ export function AgentRegistryEditorPage() {
     if (!systemPrompt.trim()) next.systemPrompt = "Persona instructions are required.";
     if (!isValidModelKey(reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
     if (!isValidModelKey(fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
+    for (const [key, label, max] of generationFields) {
+      const value = generationSettings[key];
+      if (value === null) continue;
+      if (max === null ? !reasoningEfforts.includes(value as typeof reasoningEfforts[number])
+        : typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > max) {
+        next[key] = max === null ? "Choose a valid reasoning effort." : `${label} must be between 0 and ${max}.`;
+      }
+    }
     if (inputs.some((input) => !input.name.trim() || !input.dataType)) next.inputs = "Each input needs a name and data type.";
     if (new Set(inputs.map((input) => input.name.trim().toLowerCase())).size !== inputs.length) next.inputs = "Input names must be unique.";
     if (stepLimit < 1 || turnStepLimit < 1 || costLimit < 0) next.limits = "Step limits must be positive and cost limit cannot be negative.";
@@ -713,7 +742,7 @@ export function AgentRegistryEditorPage() {
     const payload = {
       name: name.trim(), title: title.trim(), description: description.trim(), iconName,
       requiredInputs: JSON.stringify(normalizedInputs),
-      reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
+      reasoningModelKey, fastModelKey, ...generationSettings, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
       runner: deployment.runner ?? null, minProcesses: Number(deployment.minProcesses ?? 0),
       maxProcesses: deployment.maxProcesses ?? null, processCpu: deployment.processCpu ?? null,
@@ -764,9 +793,11 @@ export function AgentRegistryEditorPage() {
     }
   };
 
-  const field = (label: string, value: string, setValue: (value: string) => void, key: string, required = false) =>
+  const isBuiltin = Boolean(record?.isBuiltin ?? (record as any)?.is_builtin);
+
+  const field = (label: string, value: string, setValue: (value: string) => void, key: string, required = false, disabled = false) =>
     <label className="agent-editor__field"><span>{label}{required && " *"}</span>
-      <SolidInput value={value} aria-invalid={Boolean(errors[key])} onChange={(event) => { setValue(event.target.value); setErrors((current) => ({ ...current, [key]: "" })); }} />
+      <SolidInput value={value} disabled={disabled} aria-invalid={Boolean(errors[key])} onChange={(event) => { setValue(event.target.value); setErrors((current) => ({ ...current, [key]: "" })); }} />
       {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}
     </label>;
   const linked = (ids: number[], catalog: Item[], fallback: Item[] = []) =>
@@ -810,9 +841,9 @@ export function AgentRegistryEditorPage() {
   const activationWaiting = agentStatus === "draft" && activationRemainingSeconds > 0;
   const tabs = [
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
-      <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
+      <div className="agent-editor__grid">{field("Name", name, setName, "name", true, isBuiltin)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
-        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError} clearable={false} required error={errors.module} />
+        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError || isBuiltin} clearable={false} required error={errors.module} />
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
@@ -833,7 +864,21 @@ export function AgentRegistryEditorPage() {
       <section className="agent-editor__section agent-editor__models"><h2>Models</h2><p>Choose a configured provider and model for each role. Select Other to enter a model ID manually.</p><div className="agent-editor__grid">
         {([["Reasoning model", reasoningModelKey, setReasoningModelKey, "reasoningModelKey"], ["Fast model", fastModelKey, setFastModelKey, "fastModelKey"]] as const).map(([label, value, setter, key]) =>
           <div className="agent-editor__field" key={key}><span>{label}</span><ModelPicker value={value} options={modelOptions} providers={providerOptions} providerConfig={aiConfig.providers ?? {}} onChange={setter} />
-            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</div>)}
+            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}
+            {value && <div className="agent-editor__generation-settings">
+              <p className="agent-editor__hint">Advanced settings · Leave blank for provider defaults.</p>
+              {generationFields.filter(([field]) => field.endsWith(key === "reasoningModelKey" ? "ReasoningModel" : "FastModel")).map(([field, fieldLabel, max]) =>
+                <label className="agent-editor__field" key={field}><span>{fieldLabel}</span>
+                  {max === null ? <select aria-label={`${label} ${fieldLabel}`} value={generationSettings[field] ?? ""}
+                    onChange={(event) => setGenerationSettings((current) => ({ ...current, [field]: event.target.value || null }))}>
+                    <option value="">Provider default</option>
+                    {reasoningEfforts.map((effort) => <option key={effort} value={effort}>{effort}</option>)}
+                  </select> : <SolidInput aria-label={`${label} ${fieldLabel}`} type="number" min={0} max={max} step="any"
+                    placeholder="Provider default" value={generationSettings[field] ?? ""}
+                    onChange={(event) => setGenerationSettings((current) => ({ ...current, [field]: event.target.value === "" ? null : Number(event.target.value) }))} />}
+                  {errors[field] && <small className="agent-editor__error">{errors[field]}</small>}
+                </label>)}
+            </div>}</div>)}
       </div>{settingsError ? <p className="agent-editor__hint">Settings could not be loaded. Try refreshing this page.</p>
         : !providerOptions.length && <p className="agent-editor__hint">No enabled providers are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
       <section className="agent-editor__section agent-editor__workflow" aria-labelledby="agent-lifecycle-title">

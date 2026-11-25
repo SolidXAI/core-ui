@@ -35,8 +35,10 @@ export function SolidListViewRowActionsMenu({
         isButtonVisibleInCurrentEnv(rb?.attrs)
     ) ?? [];
 
+  const canDeleteRow = hasDeleteInContextMenu && !params.embeded && rowData?.isBuiltin !== true;
+
   const hasAnyItems =
-    hasEditInContextMenu || (hasDeleteInContextMenu && !params.embeded) || visibleCustomButtons.length > 0;
+    hasEditInContextMenu || canDeleteRow || visibleCustomButtons.length > 0;
 
   if (!hasAnyItems) return null;
 
@@ -77,7 +79,7 @@ export function SolidListViewRowActionsMenu({
             </button>
           )}
 
-          {hasDeleteInContextMenu && !params.embeded && (
+          {canDeleteRow && (
             <button
               type="button"
               className="solid-row-action-button solid-row-action-button-danger"
