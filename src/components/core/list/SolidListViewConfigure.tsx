@@ -266,7 +266,7 @@ export const SolidListViewConfigure = (
                                         onActionComplete={() => setIsCogMenuOpen(false)}
                                     />
                                 ))}
-                            <div className="max-lg:flex lg:hidden flex-col gap-1">
+                            <div className="max-lg:flex solid-hide-from-lg flex-col gap-1">
                                 {mobileOnlyHeaderButtons
                                     ?.map((button: any, index: number) => (
                                         <SolidListViewHeaderContextMenuButton
@@ -293,7 +293,7 @@ export const SolidListViewConfigure = (
                             )}
                             {showArchived && (
                                 <SolidDropdownMenuItem
-                                    className="solid-header-dropdown-item lg:hidden"
+                                    className="solid-header-dropdown-item solid-hide-from-lg"
                                     onSelect={() => {
                                         setRecoverDialogVisible(true);
                                         setIsCogMenuOpen(false);

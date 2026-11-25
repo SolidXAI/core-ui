@@ -18,7 +18,20 @@ export const ExtensionComponentTypes = {
     workflowNodePaletteCard: "workflowNodePaletteCard",
     // Rendered inside the SolidX Agent chat when the agent emits a UiWidget event
     // whose `widget` equals the registered name. Receives ChatWidgetProps.
-    chatInteractionWidget: "chatInteractionWidget",
+    agentTurnCompletionWidget: "agentTurnCompletionWidget",
+    // Renders a disclosure around consecutive agent activity items in one turn.
+    agentToolGroupWidget: "agentToolGroupWidget",
+    agentToolCallWidget: "agentToolCallWidget",
+    agentUserTurnCompletionWidget: "agentUserTurnCompletionWidget",
+    /** Renders the agent identity area on the left side of the chat header. */
+    agentChatHeaderWidget: "agentChatHeaderWidget",
+    /** Renders the welcome screen of an empty agent conversation. */
+    agentChatEmptyStateWidget: "agentChatEmptyStateWidget",
+    // Renders the wrapper around one assistant turn, including activity and responses.
+    agentTurnCompletionWrapperWidget: "agentTurnCompletionWrapperWidget",
+    /** Renders the live view and controls of an AgentHub agent's browser. Receives SolidAgentBrowserPanelWidgetProps. */
+    agentBrowserPanelWidget: "agentBrowserPanelWidget",
+
     // Renders the body of a custom chatter message. Receives SolidChatterMessageWidgetProps.
     chatterMessageWidget: "chatterMessageWidget",
 } as const;

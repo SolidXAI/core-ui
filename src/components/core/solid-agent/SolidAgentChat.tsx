@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Copy, History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, Sparkles, WifiOff, X } from "lucide-react";
+import { ChevronDown, Globe, History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed, agentThreadReset } from "../../../redux/features/agentSlice";
 import {
@@ -29,6 +29,7 @@ import {
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
 import { AgentComposer } from "./composer/AgentComposer";
+import { humanReviewId, humanReviewText } from "./humanReview";
 import type { AgentAttachment, AgentMode, AgentProviderInfo, AgentRuntimeType, ProviderModelInfo } from "./types";
 import type { AgentInputContext } from "./useAdminInputContext";
 import { useAgentChat } from "./useAgentChat";
@@ -47,6 +48,14 @@ import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../sh
 import { SolidSpinner } from "../../shad-cn-ui/SolidSpinner";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
+import { AgentWorkspaceHeaderActions } from "./AgentWorkspaceHeaderActions";
+import type { AgentWorkspaceControls } from "./embed/agentWorkspace";
+import { getAgentBrowserPanelWidgetName, getAgentChatEmptyStateWidgetName, getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
+import { isBrowserActive } from "./client/agentBrowser";
+import { useAgentBrowser } from "./browser/useAgentBrowser";
+import { AgentBrowserScreen } from "./browser/AgentBrowserScreen";
+import type { SolidAgentBrowserPanelWidgetProps } from "../../../types/solid-core";
+import { ExtensionComponentTypes } from "../../../types/extension-registry";
 import { AgentProviderDropdown, formatProviderName, getProviderAuthStatus } from "./AgentProviderDropdown";
 import { AgentSessionList, AgentSessionSearch } from "./AgentSessionList";
 
@@ -55,6 +64,7 @@ export { formatProviderName };
 type Props = {
     agentUrl: string;
     title?: string;
+    agentName?: string;
     /** AgentHub configuration version to display in the header. */
     agentVersion?: number;
     /** Which agent backend `agentUrl` belongs to (default "solidx", shared with the launcher). */
@@ -79,7 +89,36 @@ type Props = {
         onRestore: () => void;
         onClose: () => void;
     };
+    workspaceControls?: AgentWorkspaceControls;
 };
+
+/** From this chat width the browser sits beside the thread; below it, above the thread. */
+const BROWSER_SIDE_PANE_MIN_WIDTH = 860;
+/** Limits of the user-sized side pane: the browser stays usable and the thread keeps room to read. */
+const BROWSER_SIDE_MIN = 320;
+const BROWSER_CHAT_MIN = 360;
+const BROWSER_RESIZE_STEP = 24;
+const BROWSER_SIDE_WIDTH_KEY = "solid-agent.browser.sideWidth";
+
+type BrowserLayout = "side" | "stacked";
+
+function readBrowserSideWidth(): number | null {
+    try {
+        const width = Number(localStorage.getItem(BROWSER_SIDE_WIDTH_KEY));
+        return Number.isFinite(width) && width > 0 ? width : null;
+    } catch {
+        return null;
+    }
+}
+
+function storeBrowserSideWidth(width: number | null) {
+    try {
+        if (width === null) localStorage.removeItem(BROWSER_SIDE_WIDTH_KEY);
+        else localStorage.setItem(BROWSER_SIDE_WIDTH_KEY, String(Math.round(width)));
+    } catch {
+        // ignore
+    }
+}
 
 const DEFAULT_SUGGESTIONS = [
     "What can you help me with in this app?",
@@ -147,6 +186,7 @@ function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<stri
 export function SolidAgentChat({
     agentUrl,
     title = "SolidX Agent",
+    agentName,
     agentVersion,
     agentRuntime = "solidx",
     inputContext = {},
@@ -161,8 +201,87 @@ export function SolidAgentChat({
     handlesPrefill = !embedded && agentRuntime === "solidx",
     suggestions,
     windowControls,
+    workspaceControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName);
+    const review = agent.pendingReview;
+    const reviewDisabled = agent.reviewSubmitting || agent.connection !== "open";
+    const browserView = useAgentBrowser(runtime?.browser);
+    // The agent handed over its browser (or the user took it mid-turn): answered from the browser panel.
+    const browserHandoff = review?.kind === "browser_control" ? review : null;
+    // Any runtime can show the browser: the panel only appears when the agent sends browser_status for it.
+    const browserShown = isBrowserActive(browserView) || !!browserHandoff;
+    // Collapsing belongs to the layout it was done in: a collapsed stacked panel must not hide the side pane.
+    const [browserCollapsedIn, setBrowserCollapsedIn] = useState<BrowserLayout | null>(null);
+    const [browserExpanded, setBrowserExpanded] = useState(false);
+    const [browserSideWidth, setBrowserSideWidth] = useState<number | null>(readBrowserSideWidth);
+    const [browserResizing, setBrowserResizing] = useState(false);
+    const browserSideRef = useRef<HTMLElement | null>(null);
+    const browserResizeStart = useRef<{ x: number; width: number } | null>(null);
+    const [chatBody, setChatBody] = useState<HTMLDivElement | null>(null);
+    const [chatBodyWidth, setChatBodyWidth] = useState(0);
+    useEffect(() => {
+        if (!chatBody || typeof ResizeObserver === "undefined") return;
+        setChatBodyWidth(chatBody.getBoundingClientRect().width);
+        const observer = new ResizeObserver((entries) => setChatBodyWidth(entries[0]?.contentRect.width ?? 0));
+        observer.observe(chatBody);
+        return () => observer.disconnect();
+    }, [chatBody]);
+    useEffect(() => {
+        if (browserShown) setBrowserCollapsedIn(null);
+        else setBrowserExpanded(false);
+    }, [browserShown]);
+    const browserHandoffId = browserHandoff?.requestId ?? null;
+    const browserHuman = browserView.control.mode === "human";
+    useEffect(() => {
+        if (browserHandoffId !== null || browserHuman) setBrowserCollapsedIn(null);
+    }, [browserHandoffId, browserHuman]);
+    const browserLayout: BrowserLayout | null = !browserShown ? null : chatBodyWidth >= BROWSER_SIDE_PANE_MIN_WIDTH ? "side" : "stacked";
+    const browserCollapsed = browserLayout !== null && browserCollapsedIn === browserLayout;
+    useEffect(() => {
+        // Another layout starts with the browser shown.
+        setBrowserCollapsedIn((current) => (current === null || current === browserLayout ? current : null));
+    }, [browserLayout]);
+    const toggleBrowserCollapsed = () => setBrowserCollapsedIn((current) => (current === browserLayout ? null : browserLayout));
+    const browserSideMax = Math.max(BROWSER_SIDE_MIN, chatBodyWidth - BROWSER_CHAT_MIN);
+    const clampBrowserSide = (width: number) => Math.round(Math.max(BROWSER_SIDE_MIN, Math.min(browserSideMax, width)));
+    const browserSideShownWidth = browserSideWidth === null ? null : clampBrowserSide(browserSideWidth);
+    const currentBrowserSideWidth = () => browserSideShownWidth ?? browserSideRef.current?.getBoundingClientRect().width ?? BROWSER_SIDE_MIN;
+    const startBrowserResize = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        browserResizeStart.current = { x: event.clientX, width: currentBrowserSideWidth() };
+        setBrowserResizing(true);
+    };
+    const moveBrowserResize = (event: React.PointerEvent<HTMLDivElement>) => {
+        const start = browserResizeStart.current;
+        // The handle is on the pane's left edge: moving left widens the browser.
+        if (start) setBrowserSideWidth(clampBrowserSide(start.width + start.x - event.clientX));
+    };
+    const endBrowserResize = (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!browserResizeStart.current) return;
+        browserResizeStart.current = null;
+        setBrowserResizing(false);
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+        setBrowserSideWidth((width) => {
+            storeBrowserSideWidth(width);
+            return width;
+        });
+    };
+    const resizeBrowserByKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        const step = event.key === "ArrowLeft" ? BROWSER_RESIZE_STEP : event.key === "ArrowRight" ? -BROWSER_RESIZE_STEP : 0;
+        const width = event.key === "Home" ? BROWSER_SIDE_MIN : event.key === "End" ? browserSideMax
+            : step ? clampBrowserSide(currentBrowserSideWidth() + step) : null;
+        if (width === null) return;
+        event.preventDefault();
+        setBrowserSideWidth(width);
+        storeBrowserSideWidth(width);
+    };
+    const resetBrowserSideWidth = () => {
+        setBrowserSideWidth(null);
+        storeBrowserSideWidth(null);
+    };
     // Agent login (API key → agentToken in sessionStorage); the chat is usable once signed in.
     const agentAuth = useAgentAuth(agentUrl, agentRuntime === "agentHub");
     const signedIn = agentAuth.status === "signedIn";
@@ -1039,6 +1158,11 @@ export function SolidAgentChat({
     const sendWithAttachments = useCallback(
         async (text: string, attachments: AgentAttachment[]) => {
             if ((!text.trim() && !attachments.length) || !runtime) return;
+            if (review) {
+                const answer = humanReviewText(review, text);
+                runtime.respondToReview(answer.choice, answer.text);
+                return;
+            }
             onInputsLocked?.(true);
             try {
                 const result = await runtime.sendMessage(text, inputContext, attachments, messageInputs, beforeSend, "composer");
@@ -1047,7 +1171,7 @@ export function SolidAgentChat({
             }
             catch (error) { onInputsLocked?.(false); throw error; }
         },
-        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked],
+        [runtime, inputContext, messageInputs, beforeSend, onInputsLocked, review],
     );
     useEffect(() => {
         const onEmbedCommand = (event: Event) => {
@@ -1105,47 +1229,58 @@ export function SolidAgentChat({
     const displaySessionId = activeSessionId
         ? (isFullScreen ? activeSessionId : (activeSessionId.length > 12 ? activeSessionId.slice(0, 8) : activeSessionId))
         : "";
-    const [copiedSession, setCopiedSession] = useState(false);
-    const handleCopySessionId = useCallback(() => {
-        if (!activeSessionId) return;
-        navigator.clipboard?.writeText(activeSessionId).then(() => {
-            setCopiedSession(true);
-            setTimeout(() => setCopiedSession(false), 2000);
-        }).catch(() => {
-            // ignore clipboard failure
-        });
-    }, [activeSessionId]);
+    const headerWidgetName = getAgentChatHeaderWidgetName(agentName) ?? "DefaultAgentChatHeaderWidget";
+    const AgentChatHeaderWidget = getExtensionComponent(headerWidgetName, ExtensionComponentTypes.agentChatHeaderWidget)
+        ?? getExtensionComponent("DefaultAgentChatHeaderWidget", ExtensionComponentTypes.agentChatHeaderWidget);
+    const BrowserPanelWidget = getExtensionComponent(getAgentBrowserPanelWidgetName(agentName) ?? "DefaultAgentBrowserPanelWidget", ExtensionComponentTypes.agentBrowserPanelWidget)
+        ?? getExtensionComponent("DefaultAgentBrowserPanelWidget", ExtensionComponentTypes.agentBrowserPanelWidget);
+    const renderBrowserPanel = (layout: SolidAgentBrowserPanelWidgetProps["layout"], collapsed: boolean) => {
+        if (!runtime || !BrowserPanelWidget) return null;
+        const channel = runtime.browser;
+        const props: SolidAgentBrowserPanelWidgetProps = {
+            agentName,
+            browser: browserView,
+            handoff: browserHandoff ? { requestId: browserHandoff.requestId, toolName: browserHandoff.toolName ?? null, question: browserHandoff.question } : null,
+            layout,
+            connected: agent.connection === "open",
+            collapsed,
+            screen: collapsed ? null : <AgentBrowserScreen channel={channel} view={browserView} />,
+            takeControl: () => channel.requestControl(),
+            giveBack: (note) => channel.release(note),
+            navigate: (url) => channel.navigate(url),
+            navigation: (action) => channel.navigation(action),
+            dismissError: () => channel.clearError(),
+            ...(layout === "dialog"
+                ? { onClose: () => setBrowserExpanded(false) }
+                : { onToggleCollapsed: toggleBrowserCollapsed, onExpand: () => setBrowserExpanded(true) }),
+        };
+        return <BrowserPanelWidget {...props} />;
+    };
 
-    const empty = (
-        <div className={styles.empty}>
-            <div className={styles.emptyMark}><Sparkles size={24} /></div>
-            <div>
-                <h2 className={styles.emptyTitle}>{agentRuntime === "agentHub" ? `Start a conversation with ${title}` : "How can I help?"}</h2>
-                <p className={styles.emptyText}>{agentRuntime === "agentHub"
-                    ? "Ask this agent for help with its configured capabilities. It can use the tools and knowledge available to it."
-                    : "Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you."}</p>
-                {agentRuntime !== "agentHub" && providerDisplayName && (
-                    <div className={styles.emptyProviderBadge}>
-                        Using <strong>{providerDisplayName}</strong>
-                    </div>
-                )}
-            </div>
-            <div className={styles.suggestions}>
-                {emptyStateSuggestions.map((text) => (
-                    <button key={text} type="button" className={styles.suggestion} onClick={() => send(text)}>
-                        {text}
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
+    const EmptyStateWidget = getExtensionComponent(
+        getAgentChatEmptyStateWidgetName(agentName) ?? "DefaultAgentChatEmptyStateWidget",
+        ExtensionComponentTypes.agentChatEmptyStateWidget,
+    ) ?? getExtensionComponent("DefaultAgentChatEmptyStateWidget", ExtensionComponentTypes.agentChatEmptyStateWidget);
+    const empty = EmptyStateWidget ? (
+        <EmptyStateWidget
+            title={title}
+            agentName={agentName}
+            agentRuntime={agentRuntime}
+            providerDisplayName={providerDisplayName}
+            suggestions={emptyStateSuggestions}
+            sendPrompt={send}
+        />
+    ) : null;
 
     const isViewingHistory = !isFullScreen && showHistory;
     const isBusyTransitioning = isSwitchingProvider || isStartingNewChat || agent.loadingHistory || !!resumingSessionId || isViewingHistory;
 
     const threadComponent = (
         <AgentThread
-            items={agent.items}
+            items={review && reviewDisabled ? agent.items.map((item) =>
+                item.id === humanReviewId(review.requestId)
+                    ? { ...item, eventData: { ...item.eventData, submitting: true } } : item) : agent.items}
+            agentName={agentName}
             thinking={agent.working && agent.thinking}
             working={agent.working}
             loadingHistory={agent.loadingHistory || !!resumingSessionId || isSwitchingProvider}
@@ -1157,32 +1292,40 @@ export function SolidAgentChat({
             onLoadOlder={() => void runtime?.loadOlder()}
             onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
             onPrompt={send}
+            onStartNewSession={!agent.working && !review && !agent.reviewResuming && agent.connection === "open" ? handleStartNewChat : undefined}
         />
     );
 
     const composerComponent = (
         <AgentComposer
+            key={review?.requestId ?? "chat"}
             working={agent.working}
-            disabled={!!agent.authError || isBusyTransitioning || isSelectedProviderCheckingAuth}
+            disabled={!!agent.authError || agent.reviewResuming || !!browserHandoff || (review ? reviewDisabled : false) || isBusyTransitioning || isSelectedProviderCheckingAuth}
             placeholder={
                 isViewingHistory
                     ? "Select a conversation to continue…"
                     : isSelectedProviderCheckingAuth
                     ? `Checking ${providerDisplayName || "provider"} authentication…`
+                    : browserHandoff
+                    ? "The agent is waiting for you in the browser"
+                    : review?.kind === "approval"
+                    ? "Type Approve or Reject…"
+                    : review
+                    ? "Type your answer…"
                     : isSwitchingProvider
                     ? "Connecting..."
                     : isStartingNewChat
                     ? "Starting new chat..."
                     : (agent.loadingHistory || !!resumingSessionId)
                     ? "Loading conversation..."
-                    : undefined
+                    : `Ask ${title}…`
             }
-            commands={agent.commands}
-            seed={seed?.text}
-            seedKey={seed?.key}
+            commands={review ? [] : agent.commands}
+            seed={review ? undefined : seed?.text}
+            seedKey={review ? undefined : seed?.key}
             onSend={sendWithAttachments}
             onStop={() => runtime?.cancel()}
-            canAttach={canAttach}
+            canAttach={!review && canAttach}
             modelIndicator={
                 <AgentModelIndicator
                     assignments={modelAssignments}
@@ -1245,6 +1388,47 @@ export function SolidAgentChat({
         onRetry: handleRetryHistory,
         onLoadMore: loadMoreSessions,
     };
+
+    const renderChatBody = (mainContent: React.ReactNode) => (
+        <div ref={setChatBody} className={`${styles.chatBody} ${browserLayout === "side" ? styles.chatBodySide : ""} ${browserResizing ? styles.chatBodyResizing : ""}`}>
+            {browserLayout === "stacked" && (
+                <div className={styles.browserStacked}>{renderBrowserPanel("stacked", browserCollapsed || browserExpanded)}</div>
+            )}
+            <div className={styles.chatMain}>
+                {mainContent}
+            </div>
+            {browserLayout === "side" && !browserCollapsed && !browserExpanded && (
+                <aside ref={browserSideRef} className={styles.browserSide}
+                    style={browserSideShownWidth === null ? undefined : { width: browserSideShownWidth }}>
+                    <div
+                        className={styles.browserResizer}
+                        role="separator"
+                        aria-orientation="vertical"
+                        aria-label="Resize the agent's browser"
+                        aria-valuemin={BROWSER_SIDE_MIN}
+                        aria-valuemax={browserSideMax}
+                        aria-valuenow={browserSideShownWidth ?? undefined}
+                        title="Drag to resize. Double-click to reset."
+                        tabIndex={0}
+                        onPointerDown={startBrowserResize}
+                        onPointerMove={moveBrowserResize}
+                        onPointerUp={endBrowserResize}
+                        onPointerCancel={endBrowserResize}
+                        onDoubleClick={resetBrowserSideWidth}
+                        onKeyDown={resizeBrowserByKey}
+                    />
+                    {renderBrowserPanel("side", false)}
+                </aside>
+            )}
+            {browserLayout === "side" && browserCollapsed && !browserExpanded && (
+                <button type="button" className={styles.browserSideTab} title="Show the agent's browser"
+                    aria-label="Show the agent's browser" onClick={toggleBrowserCollapsed}>
+                    <Globe size={14} aria-hidden="true" />
+                    <span>Browser</span>
+                </button>
+            )}
+        </div>
+    );
 
     return (
         <>
@@ -1323,49 +1507,19 @@ export function SolidAgentChat({
                 </SolidDialogBody>
             </SolidDialog>
             <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`} ref={headerRef}>
-                <div className={styles.headerMark}>
-                    <Sparkles size={15} />
-                    <span className={styles.statusDot} style={{ background: statusColor }} />
-                </div>
-                <div className={styles.headerTitle}>
-                    <div className={styles.headerTitleRow}>
-                        <strong>{title}</strong>
-                        {agentRuntime === "agentHub" && agentConfigVersion != null && (
-                            <span className={styles.headerVersionTag} title={`Agent Version: v${agentConfigVersion}`}>
-                                v{agentConfigVersion}
-                            </span>
-                        )}
-                    </div>
-                    <span className={styles.headerSub}>
-                        {agentRuntime !== "agentHub" && signedIn && providerDisplayName && (
-                            <span className={styles.headerProviderTag} title={`Active Provider: ${providerDisplayName}`}>
-                                {providerDisplayName}
-                            </span>
-                        )}
-                        {signedIn && activeSessionId && (
-                            <SolidTooltip delayDuration={150}>
-                                <SolidTooltipTrigger asChild>
-                                    <button
-                                        type="button"
-                                        className={styles.headerSessionTag}
-                                        onClick={handleCopySessionId}
-                                        aria-label={`Session ID: ${activeSessionId}. Click to copy`}
-                                    >
-                                        <span className={styles.headerSessionCode}>{displaySessionId}</span>
-                                        {copiedSession ? (
-                                            <Check size={11} className={`${styles.headerSessionIcon} ${styles.headerSessionIconCopied}`} />
-                                        ) : (
-                                            <Copy size={11} className={styles.headerSessionIcon} />
-                                        )}
-                                    </button>
-                                </SolidTooltipTrigger>
-                                <SolidTooltipContent side="bottom" align="start">
-                                    {copiedSession ? "Copied Session ID!" : `Session: ${activeSessionId} (Click to copy)`}
-                                </SolidTooltipContent>
-                            </SolidTooltip>
-                        )}
-                        {statusText && <span className={styles.headerStatusText}>{statusText}</span>}
-                    </span>
+                <div className={styles.headerIdentitySlot}>
+                    {AgentChatHeaderWidget && <AgentChatHeaderWidget
+                        title={title}
+                        agentName={agentName}
+                        agentRuntime={agentRuntime}
+                        agentConfigVersion={agentConfigVersion}
+                        statusColor={statusColor}
+                        statusText={statusText}
+                        providerDisplayName={providerDisplayName}
+                        signedIn={signedIn}
+                        activeSessionId={activeSessionId}
+                        displaySessionId={displaySessionId}
+                    />}
                 </div>
                 {signedIn && (
                     <>
@@ -1412,6 +1566,18 @@ export function SolidAgentChat({
                                 </div>
                             )
                         )}
+                        {browserShown && (
+                            <button
+                                type="button"
+                                className={styles.iconBtn}
+                                title={browserCollapsed ? "Show the agent's browser" : "Hide the agent's browser"}
+                                aria-label={browserCollapsed ? "Show the agent's browser" : "Hide the agent's browser"}
+                                aria-pressed={!browserCollapsed}
+                                onClick={() => { setBrowserExpanded(false); toggleBrowserCollapsed(); }}
+                            >
+                                <Globe size={15} />
+                            </button>
+                        )}
                         {!isFullScreen && (
                             <button
                                 type="button"
@@ -1442,7 +1608,8 @@ export function SolidAgentChat({
                         </button>}
                     </>
                 )}
-                {(!embedded || windowControls) && (
+                {workspaceControls && <AgentWorkspaceHeaderActions {...workspaceControls} />}
+                {!workspaceControls && (!embedded || windowControls) && (
                     <>
                         {windowMode !== "docked" && (
                             <button type="button" className={styles.iconBtn} title="Dock to the side" aria-label="Dock to the side" onClick={() => windowControls ? windowControls.onDock() : setMode("docked")}>
@@ -1465,6 +1632,9 @@ export function SolidAgentChat({
                 )}
             </div>
 
+            {signedIn && review && <div className={styles.reviewStatus} role="status">
+                {review.kind === "approval" ? "Approval required" : review.kind === "browser_control" ? "The agent is waiting for you in the browser" : "Waiting for your input"}
+            </div>}
             {agentAuth.status === "checking" ? (
                 externalEmbed
                     ? <div className={styles.embedWait} role="status" aria-live="polite"><div className={styles.embedWaitCard}><span className={styles.embedSpinner} aria-hidden="true" /><strong>Please wait</strong><span>Checking your connection</span></div></div>
@@ -1501,8 +1671,8 @@ export function SolidAgentChat({
                 )}
 
                 {isFullScreen ? (
-                            <div className={styles.fullScreenLayout} ref={fullScreenLayoutRef}>
-                                {sidebarOpen && (
+                    <div className={styles.fullScreenLayout} ref={fullScreenLayoutRef}>
+                        {sidebarOpen && (
                                     <>
                                         <aside
                                             className={styles.fullScreenSidebar}
@@ -1602,12 +1772,14 @@ export function SolidAgentChat({
                                             {sidebarOpen ? "Close sidebar" : "Open sidebar"}
                                         </SolidTooltipContent>
                                     </SolidTooltip>
-                                    {threadComponent}
-                                    {composerComponent}
+                                    {renderChatBody(<>
+                                        {threadComponent}
+                                        {composerComponent}
+                                    </>)}
                                 </div>
                             </div>
                 ) : (
-                    <>
+                    renderChatBody(<>
                         {showHistory ? (
                             <div className={styles.historyPanel} aria-label="Past conversations">
                                 {showSessionSearch && sessionSearch}
@@ -1617,7 +1789,22 @@ export function SolidAgentChat({
                             threadComponent
                         )}
                         {composerComponent}
-                    </>
+                    </>)
+                )}
+                {browserShown && (
+                    <SolidDialog
+                        open={browserExpanded}
+                        onOpenChange={setBrowserExpanded}
+                        className={`${styles.inputDialog} ${styles.browserDialog}`}
+                        overlayClassName={styles.inputDialogOverlay}
+                        showHeader={false}
+                        ariaLabel="Agent browser"
+                        style={{ width: "min(1280px, 96vw)" }}
+                    >
+                        <SolidDialogBody className={styles.browserDialogBody}>
+                            {browserExpanded && renderBrowserPanel("dialog", false)}
+                        </SolidDialogBody>
+                    </SolidDialog>
                 )}
                 </>
             )}

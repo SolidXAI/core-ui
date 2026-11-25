@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { applyAgentEvent, createThreadState, nextItemId, type AgentThreadState } from "../../components/core/solid-agent/agentEvents";
+import { mergeToolFileMedia, type AgentToolFileMedia } from "../../components/core/solid-agent/toolFiles";
 import {
     AgentEventTypes,
     type AgentAttachmentMeta,
@@ -71,6 +72,7 @@ const agentSlice = createSlice({
         },
         agentConnectionChanged(state, action: PayloadAction<AgentConnection>) {
             state.connection = action.payload;
+            if (action.payload !== "open") state.reviewSubmitting = false;
             if (action.payload !== "open" && state.working) {
                 // A turn cannot finish on a dropped socket; unblock the composer.
                 state.working = false;
@@ -127,7 +129,8 @@ const agentSlice = createSlice({
         agentHistoryLoaded(state, action: PayloadAction<{ items: AgentChatItem[]; hasMore: boolean; page: number; usage?: AgentUsageStats | null; isRunning?: boolean }>) {
             const { items, hasMore, page, usage, isRunning } = action.payload;
             // History is always older than anything already in the thread.
-            state.items = [...items, ...state.items];
+            const currentIds = new Set(state.items.map((item) => item.id));
+            state.items = [...items.filter((item) => !currentIds.has(item.id)), ...state.items];
             state.hasMoreHistory = hasMore;
             state.historyPage = page;
             state.loadingHistory = false;
@@ -135,7 +138,7 @@ const agentSlice = createSlice({
             state.olderHistoryFailed = false;
             if (isRunning !== undefined) {
                 state.working = isRunning;
-                if (isRunning && !state.liveToolId) {
+                if (isRunning && !state.liveToolId && !state.pendingReview) {
                     state.thinking = true;
                 }
             } else {
@@ -145,7 +148,7 @@ const agentSlice = createSlice({
                     lastItem.eventType === AgentEventTypes.toolCalling ||
                     lastItem.eventType === AgentEventTypes.toolResult
                 );
-                if (hasUnfinishedTurn && state.working) {
+                if (hasUnfinishedTurn && state.working && !state.pendingReview) {
                     state.thinking = true;
                 }
             }
@@ -158,6 +161,15 @@ const agentSlice = createSlice({
         },
         agentEventReceived(state, action: PayloadAction<AgentChatEvent>) {
             applyAgentEvent(state, action.payload);
+        },
+        /** Stored URLs for the files a tool returned, fetched after its ToolResult arrived. */
+        agentToolFilesResolved(state, action: PayloadAction<{ agentEventId: string | number; media: AgentToolFileMedia[] }>) {
+            const { agentEventId, media } = action.payload;
+            state.items.forEach((item) => {
+                if (item.eventType !== AgentEventTypes.toolCalling || String(item.eventData.agentEventId) !== String(agentEventId)
+                    || !Array.isArray(item.eventData.files)) return;
+                item.eventData = { ...item.eventData, files: mergeToolFileMedia(item.eventData.files, media) };
+            });
         },
     },
 });
@@ -175,6 +187,7 @@ export const {
     agentHistoryLoadingChanged,
     agentHistoryLoaded,
     agentEventReceived,
+    agentToolFilesResolved,
 } = agentSlice.actions;
 
 export default agentSlice.reducer;

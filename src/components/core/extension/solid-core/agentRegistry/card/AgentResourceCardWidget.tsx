@@ -8,18 +8,27 @@ function toTags(value: unknown): string[] {
     .filter((name): name is string => typeof name === "string").map((name) => name.trim()).filter(Boolean);
 }
 
-/** Compact shared card renderer for agent skill and tool records. */
-export function AgentResourceCardWidget({ rowData }: SolidKanbanCardWidgetProps) {
+function resourceFields(rowData: SolidKanbanCardWidgetProps["rowData"]) {
   const iconName = typeof rowData?.iconName === "string" && rowData.iconName.trim()
     ? rowData.iconName.trim()
     : rowData?.type ? "build" : "psychology";
   const name = typeof rowData?.name === "string" && rowData.name.trim() ? rowData.name.trim() : "Untitled";
   const description = typeof rowData?.description === "string" ? rowData.description.trim() : "";
-  const tags = toTags(rowData?.tags);
   const status = typeof rowData?.status === "string" && rowData.status.trim() ? rowData.status.trim() : "";
   const loadError = status === "load_failed" && typeof rowData?.lastLoadError === "string"
     ? rowData.lastLoadError.trim()
     : "";
+  return { iconName, name, description, status, loadError };
+}
+
+function ResourceStatus({ status }: { status: string }) {
+  return <span className={`${styles.status} ${styles[`status_${status.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`] || ""}`}>{status.replace(/[_-]+/g, " ")}</span>;
+}
+
+/** Compact shared card renderer for agent skill and tool records. */
+export function AgentResourceCardWidget({ rowData }: SolidKanbanCardWidgetProps) {
+  const { iconName, name, description, status, loadError } = resourceFields(rowData);
+  const tags = toTags(rowData?.tags);
   const kind = typeof rowData?.type === "string" && rowData.type.trim() ? rowData.type.trim() : "";
 
   return (
@@ -28,7 +37,7 @@ export function AgentResourceCardWidget({ rowData }: SolidKanbanCardWidgetProps)
         <div className={styles.iconBadge} aria-label={`${name} icon`}>
           <SolidMaterialSymbol name={iconName} size={22} aria-hidden="true" />
         </div>
-        {status && <span className={`${styles.status} ${styles[`status_${status.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`] || ""}`}>{status.replace(/[_-]+/g, " ")}</span>}
+        {status && <ResourceStatus status={status} />}
       </div>
       <div className={styles.heading}><h3 className={styles.title} title={name}>{name}</h3></div>
       <p className={styles.description} title={description || undefined}>{description || "No description provided."}</p>
@@ -38,5 +47,24 @@ export function AgentResourceCardWidget({ rowData }: SolidKanbanCardWidgetProps)
         {tags.length > 0 && <div className={styles.tags}>{tags.slice(0, 3).map((tag) => <span className={styles.tag} key={tag}>{tag}</span>)}</div>}
       </div>}
     </article>
+  );
+}
+
+/** Single-line list row for the same agent skill and tool records. */
+export function AgentResourceRowWidget({ rowData }: Pick<SolidKanbanCardWidgetProps, "rowData">) {
+  const { iconName, name, description, status, loadError } = resourceFields(rowData);
+  const detail = loadError || description;
+
+  return (
+    <div className={styles.row}>
+      <div className={styles.iconBadge} aria-label={`${name} icon`}>
+        <SolidMaterialSymbol name={iconName} size={18} aria-hidden="true" />
+      </div>
+      <div className={styles.rowText}>
+        <h3 className={styles.title} title={name}>{name}</h3>
+        <p className={`${styles.rowDetail} ${loadError ? styles.rowDetailError : ""}`} title={detail || undefined}>{detail || "No description provided."}</p>
+      </div>
+      {status && <ResourceStatus status={status} />}
+    </div>
   );
 }

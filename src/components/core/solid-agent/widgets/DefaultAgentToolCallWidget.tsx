@@ -7,6 +7,8 @@ import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import { describeToolArgs, toolDisplayName } from "../agentFormat";
+import { normalizeToolFiles } from "../toolFiles";
+import { AgentToolFiles } from "./AgentToolFiles";
 
 type ToolStatus = "running" | "success" | "warning" | "error";
 type ToolProgressStep = { label: string; status: "running" | "done"; duration_ms?: number };
@@ -27,7 +29,7 @@ function StatusIcon({ status }: { status: ToolStatus }) {
  * Default widget for `ToolCalling`: clean borderless row. `ToolProgress` sub-steps show under the
  * header; `ToolResult` sets the status and duration. Expanding shows the Arguments and Result.
  */
-export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetProps) => {
+export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetProps) => {
     const [expanded, setExpanded] = useState(false);
     const toolName: string = eventData.tool_name ?? "tool";
     const args: Record<string, unknown> | undefined = eventData.arguments;
@@ -37,6 +39,7 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
     const hasArgs = !!args && Object.keys(args).length > 0;
     const expandable = (hasArgs || !!output || progress.length > 0) && status !== "running";
     const isRunning = live || status === "running";
+    const files = normalizeToolFiles(eventData.files);
     const rawSummary: string = eventData.summary ?? "";
     const isNoisySummary = rawSummary.startsWith("const ") || rawSummary.startsWith("let ") || rawSummary.includes("tools.solidx");
     const summary = (!rawSummary || isNoisySummary) ? describeToolArgs(args, toolName) : rawSummary;
@@ -68,6 +71,8 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
                 </div>
             )}
 
+            {files.length > 0 && <AgentToolFiles files={files} />}
+
             {expanded && (
                 <div className={styles.ToolCardExpandable}>
                     {hasArgs && (
@@ -94,6 +99,6 @@ export const DefaultToolCallChatWidget = ({ eventData, live }: SolidChatWidgetPr
     );
 };
 
-Object.assign(DefaultToolCallChatWidget, { getExtensionMetadata: () => ({
+Object.assign(DefaultAgentToolCallWidget, { getExtensionMetadata: () => ({
     chatInteraction: { role: "event-renderer", agentSelectable: false },
 }) });

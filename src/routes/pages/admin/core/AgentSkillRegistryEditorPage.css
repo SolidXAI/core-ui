@@ -191,9 +191,38 @@
 }
 
 .agent-skill-editor__panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   padding: 0.9rem 1rem;
   border-bottom: 1px solid var(--surface-border, var(--border));
 }
+
+.agent-skill-editor__preview-toggle {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
+  border: 1px solid var(--surface-border, var(--border));
+  border-radius: 0.6rem;
+  background: var(--surface-card, var(--card));
+  color: var(--text-color-secondary, var(--muted-foreground));
+  cursor: pointer;
+}
+
+.agent-skill-editor__preview-toggle:hover,
+.agent-skill-editor__preview-toggle[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 42%, var(--surface-border, var(--border)));
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 7%, var(--surface-card, var(--card)));
+  color: var(--primary-color, var(--primary));
+}
+
+.agent-skill-editor__preview-toggle:focus-visible { outline: 2px solid var(--primary-color, var(--primary)); outline-offset: 2px; }
+.agent-skill-editor__preview { box-sizing: border-box; min-height: max(32rem, calc(100dvh - 18rem)); padding: 1.25rem; background: var(--surface-ground, var(--background)); }
+.agent-skill-editor__preview-empty { color: var(--text-color-secondary, var(--muted-foreground)); }
 
 .agent-skill-editor__panel h2,
 .agent-skill-editor__agents h2 {

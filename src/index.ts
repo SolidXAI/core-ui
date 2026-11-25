@@ -592,11 +592,26 @@ export { SolidAgentMount } from './components/core/solid-agent/SolidAgentMount';
 export { SolidAgentMarkdown, SolidAgentCopyButton } from './components/core/solid-agent/SolidAgentMarkdown';
 export { SolidAgentChatItem, getDefaultChatWidgetName } from './components/core/solid-agent/thread/SolidAgentChatItem';
 export { getChatWidgetData } from './components/core/solid-agent/widgets/chatWidgetUtils';
+export { DefaultAgentUserTurnCompletionWidget } from './components/core/solid-agent/widgets/DefaultAgentUserTurnCompletionWidget';
 export { disposeAgentRuntime } from './components/core/solid-agent/client/agentRuntime';
 export { signInWithApiKey, clearAgentAuth, clearAllAgentAuth } from './components/core/solid-agent/client/agentAuth';
 export { default as agentReducer } from './redux/features/agentSlice';
+export { DefaultAgentBrowserPanelWidget } from './components/core/solid-agent/browser/DefaultAgentBrowserPanelWidget';
+export { AgentBrowserScreen } from './components/core/solid-agent/browser/AgentBrowserScreen';
+export { useAgentBrowser } from './components/core/solid-agent/browser/useAgentBrowser';
+export { AgentBrowserChannel, isBrowserActive } from './components/core/solid-agent/client/agentBrowser';
+export type {
+    AgentBrowserControl,
+    AgentBrowserError,
+    AgentBrowserFrame,
+    AgentBrowserState,
+    AgentBrowserTab,
+    AgentBrowserView,
+} from './components/core/solid-agent/client/agentBrowser';
 export { AgentEventTypes } from './components/core/solid-agent/types';
 export type {
+    AgentBrowserInputEvent,
+    AgentToolFile,
     AgentChatItem,
     AgentContext,
     AgentMode,
@@ -634,6 +649,11 @@ export type {
     SolidFormFieldWidgetProps,
     SolidChatterMessageWidgetProps,
     SolidChatWidgetProps,
+    SolidToolGroupWidgetProps,
+    SolidAgentTurnWidgetProps,
+    SolidAgentChatHeaderWidgetProps,
+    SolidAgentChatEmptyStateWidgetProps,
+    SolidAgentBrowserPanelWidgetProps,
     SolidKanbanCardWidgetProps,
     SolidChartRendererProps,
     SolidBeforeListDataLoad,

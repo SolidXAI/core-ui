@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, ArrowRight, Check, CircleHelp, Cpu, EqualNot, FileText, GitCompareArrows, Puzzle, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Check, CircleHelp, Cpu, EqualNot, FileText, GitCompareArrows, Puzzle, Settings, Wrench, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import ReactDiffViewer, { DiffMethod } from "react-diff-viewer-continued";
 import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogDescription, SolidDialogHeader, SolidDialogTitle, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../../../components/shad-cn-ui";
@@ -30,7 +30,7 @@ const StatusMark = React.forwardRef<HTMLButtonElement, StatusMarkProps>(({ match
 });
 StatusMark.displayName = "StatusMark";
 
-function SectionHeader({ icon, title, count, changes }: { icon: React.ReactNode; title: string; count?: number; changes: number }) {
+function SectionHeader({ icon, title, count, changes }: { icon: React.ReactNode; title: string; count?: string; changes: number }) {
   return <header className="config-compare__section-head">
     <span className="config-compare__section-icon">{icon}</span>
     <h2>{title}</h2>
@@ -41,7 +41,8 @@ function SectionHeader({ icon, title, count, changes }: { icon: React.ReactNode;
   </header>;
 }
 
-function DiffContent({ comparison, diffKey }: { comparison: ConfigComparison; diffKey: string }) {
+function DiffContent({ comparison, diffKey, onChanges }: { comparison: ConfigComparison; diffKey: string; onChanges: (changes: HTMLElement[]) => void }) {
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const [detail, setDetail] = React.useState<ConfigDiff | null>(null);
   const [error, setError] = React.useState("");
   const [attempt, setAttempt] = React.useState(0);
@@ -55,14 +56,25 @@ function DiffContent({ comparison, diffKey }: { comparison: ConfigComparison; di
       .catch((reason) => { if (active) setError(reason instanceof Error ? reason.message : "The diff could not be loaded."); });
     return () => { active = false; controller.abort(); };
   }, [comparison.agent.id, left.id, right.id, diffKey, attempt]);
+  React.useEffect(() => {
+    const changes: HTMLElement[] = [];
+    contentRef.current?.querySelectorAll<HTMLElement>(".config-compare__value-change:not(.is-same), .config-compare__diff-viewer tr").forEach((row) => {
+      const changed = row.matches(".config-compare__value-change") || !!row.querySelector('[data-config-diff-change="true"]');
+      // Adjacent changed table rows form one change, including both sides of a replacement.
+      if (changed && (!row.previousElementSibling || !row.previousElementSibling.querySelector('[data-config-diff-change="true"]'))) changes.push(row);
+    });
+    onChanges(changes);
+    return () => onChanges([]);
+  }, [detail, error, onChanges]);
   if (error) return <div className="config-compare__empty" role="alert">{error} <button type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button></div>;
   if (!detail) return <div className="config-compare__empty" role="status">Loading diff…</div>;
   const rows = detail.rows ?? [{ id: diffKey, title: detail.title, oldValue: detail.oldValue, newValue: detail.newValue }];
-  return <div className="config-compare__diff">{rows.map((row) => <section key={row.id} className="config-compare__diff-block" aria-label={row.title}>
+  return <div ref={contentRef} className="config-compare__diff">{rows.map((row) => <section key={row.id} className="config-compare__diff-block" aria-label={row.title}>
     <header className="config-compare__diff-block-head"><h3>{row.title}</h3><StatusMark matched={row.oldValue === row.newValue} label={row.title} interactive={false} /></header>
     {isFlagChange(row.oldValue, row.newValue) ? <div className={`config-compare__value-change${row.oldValue === row.newValue ? " is-same" : ""}`}>
       <ValueSide version={left} value={row.oldValue} tone="old" /><span className="config-compare__arrow" aria-hidden="true"><ArrowRight size={14} /></span><ValueSide version={right} value={row.newValue} tone="new" />
     </div> : <div className="config-compare__diff-viewer"><ReactDiffViewer oldValue={row.oldValue} newValue={row.newValue} splitView compareMethod={DiffMethod.WORDS} styles={diffViewerStyles}
+      renderGutter={({ type }) => <td hidden data-config-diff-change={type !== 0} />}
       leftTitle={`v${left.versionNumber} · ${left.name || "Older version"}`} rightTitle={`v${right.versionNumber} · ${right.name || "Newer version"}`} showDiffOnly={false} /></div>}
   </section>)}</div>;
 }
@@ -90,28 +102,51 @@ const diffViewerStyles = {
 
 function DiffDialog({ open, onOpenChange, comparison, diffKey, icon, title, subtitle }: { open: boolean; onOpenChange: (open: boolean) => void; comparison: ConfigComparison; diffKey: string; icon: React.ReactNode; title: string; subtitle: string }) {
   const { left, right } = comparison.versions;
+  const [changes, setChanges] = React.useState<HTMLElement[]>([]);
+  const [activeChange, setActiveChange] = React.useState(-1);
+  React.useEffect(() => { setActiveChange(-1); }, [changes]);
+  React.useEffect(() => {
+    const target = changes[activeChange];
+    if (!target) return;
+    target.dataset.configDiffActive = "true";
+    return () => { delete target.dataset.configDiffActive; };
+  }, [changes, activeChange]);
+  const navigateChange = (direction: -1 | 1) => {
+    const index = activeChange < 0 ? (direction === 1 ? 0 : changes.length - 1) : activeChange + direction;
+    const target = changes[index];
+    const scroller = target?.closest<HTMLElement>(".config-compare__diff");
+    if (!target || !scroller) return;
+    setActiveChange(index);
+    scroller.scrollTo({ top: scroller.scrollTop + target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - 16, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
   return <SolidDialog open={open} onOpenChange={onOpenChange} showHeader={false} ariaLabel={`${title} differences`} className="config-compare__dialog">
     <SolidDialogHeader className="config-compare__dialog-header">
       <span className="config-compare__section-icon">{icon}</span>
       <div className="config-compare__dialog-heading"><SolidDialogTitle>{title}</SolidDialogTitle><SolidDialogDescription>{subtitle}</SolidDialogDescription></div>
+      <nav className="config-compare__diff-navigation" aria-label="Diff navigation">
+        <span className="config-compare__diff-position" role="status" aria-live="polite">{activeChange < 0 ? `${changes.length} changes` : `${activeChange + 1} / ${changes.length}`}</span>
+        <button type="button" aria-label="Previous change" title="Previous change" disabled={!changes.length || activeChange === 0} onClick={() => navigateChange(-1)}><ArrowUp size={16} /></button>
+        <button type="button" aria-label="Next change" title="Next change" disabled={!changes.length || activeChange === changes.length - 1} onClick={() => navigateChange(1)}><ArrowDown size={16} /></button>
+      </nav>
       <div className="config-compare__dialog-versions" aria-label={`Comparing version ${left.versionNumber} with version ${right.versionNumber}`}>
         <span className="config-compare__version-badge">v{left.versionNumber}</span><ArrowRight size={13} /><span className="config-compare__version-badge is-newer">v{right.versionNumber}</span>
       </div>
       <SolidDialogClose aria-label="Close" />
     </SolidDialogHeader>
-    <SolidDialogBody>{open && <DiffContent comparison={comparison} diffKey={diffKey} />}</SolidDialogBody>
+    <SolidDialogBody>{open && <DiffContent comparison={comparison} diffKey={diffKey} onChanges={setChanges} />}</SolidDialogBody>
   </SolidDialog>;
 }
 
-function ComparisonRowView({ row, comparison, kind }: { row: ComparisonRow; comparison: ConfigComparison; kind: "prompt" | "skill" }) {
+function ComparisonRowView({ row, comparison, kind }: { row: ComparisonRow; comparison: ConfigComparison; kind: "prompt" | "skill" | "tool" }) {
   const [open, setOpen] = React.useState(false);
   const matched = row.status === "matched";
   const label = row.right?.label || row.left?.label || "Configuration";
-  const subtitle = kind === "prompt" ? "System prompt changes" : row.status === "added" ? "Skill added" : row.status === "removed" ? "Skill removed" : "Skill changes";
+  const item = kind === "tool" ? "Tool" : "Skill";
+  const subtitle = kind === "prompt" ? "System prompt changes" : `${item} ${row.status === "added" ? "added" : row.status === "removed" ? "removed" : "changes"}`;
   return <div className={`config-compare__row is-${row.status}`}>
     {(["left", "right"] as const).map((side) => <React.Fragment key={side}>
       {side === "right" && <div className="config-compare__center"><StatusMark matched={matched} label={label} disabled={!row.diffKey} aria-haspopup="dialog" onClick={() => setOpen(true)} />
-        {!matched && row.diffKey && <DiffDialog open={open} onOpenChange={setOpen} comparison={comparison} diffKey={row.diffKey} title={label} subtitle={subtitle} icon={kind === "prompt" ? <FileText size={16} /> : <Puzzle size={16} />} />}</div>}
+        {!matched && row.diffKey && <DiffDialog open={open} onOpenChange={setOpen} comparison={comparison} diffKey={row.diffKey} title={label} subtitle={subtitle} icon={kind === "prompt" ? <FileText size={16} /> : kind === "tool" ? <Wrench size={16} /> : <Puzzle size={16} />} />}</div>}
       <div className={`config-compare__cell${!row[side] ? " is-absent" : ""}`}>
         {row[side] ? <><div className="config-compare__cell-title"><strong>{row[side]!.label}</strong>{((side === "right" && row.status === "added") || (side === "left" && row.status === "removed")) && <span className={`config-compare__change-tag is-${row.status}`}>{row.status === "added" ? "Added" : "Removed"}</span>}</div>
           {row[side]!.summary && <p>{row[side]!.summary}</p>}</> : <span className="config-compare__sr-only">Not included in this version</span>}
@@ -146,8 +181,10 @@ export function AgentConfigComparisonPage() {
     return <main className="config-compare"><SolidButton variant="secondary" onClick={back}><ArrowLeft size={15} /> Back to agent</SolidButton><div className="config-compare__empty" role={failed ? "alert" : "status"}>{failed || "Loading comparison…"}
       {error && <button type="button" onClick={() => setAttempt((value) => value + 1)}>Retry</button>}</div></main>;
   }
-  const { systemPrompt, skills, modelConfiguration } = comparison.sections;
-  const skillChanges = skills?.rows.filter((row) => row.status !== "matched").length ?? 0;
+  const { systemPrompt, skills, tools, generalConfiguration, modelConfiguration } = comparison.sections;
+  const changedSkills = skills?.rows.filter((row) => row.status !== "matched") ?? [];
+  const changedTools = tools?.rows.filter((row) => row.status !== "matched") ?? [];
+  const generalChanges = generalConfiguration?.fields.filter((field) => field.status !== "matched") ?? [];
   const modelChanges = modelConfiguration.groups.reduce((total, group) => total + group.fields.filter((field) => field.status !== "matched").length, 0);
   const subtitle = comparison.agent.title && comparison.agent.title !== comparison.agent.name ? comparison.agent.title : null;
   return <main className="config-compare">
@@ -155,7 +192,17 @@ export function AgentConfigComparisonPage() {
     <div className="config-compare__sheet">
       <div className="config-compare__version-headers"><VersionHeader version={comparison.versions.left} side="Older" /><span className="config-compare__center"><span className="config-compare__arrow"><ArrowRight size={14} /></span></span><VersionHeader version={comparison.versions.right} side="Newer" /></div>
       <section className="config-compare__section"><SectionHeader icon={<FileText size={15} />} title={systemPrompt.title} changes={systemPrompt.status === "matched" ? 0 : 1} />{systemPrompt.status === "matched" ? <p className="config-compare__empty">No changes to persona</p> : <ComparisonRowView comparison={comparison} row={systemPrompt} kind="prompt" />}</section>
-      <section className="config-compare__section"><SectionHeader icon={<Puzzle size={15} />} title={skills?.title ?? "Skills"} count={skills?.rows.length} changes={skillChanges} />{!skills ? <p className="config-compare__empty">Skill comparison is not available yet.</p> : skills.rows.length ? <div className="config-compare__rows">{skills.rows.map((row) => <ComparisonRowView key={row.id} comparison={comparison} row={row} kind="skill" />)}</div> : <p className="config-compare__empty">No changes to skills</p>}</section>
+      <section className="config-compare__section"><SectionHeader icon={<Puzzle size={15} />} title={skills?.title ?? "Skills"} count={skills?.rows.length ? `${changedSkills.length} of ${skills.rows.length}` : undefined} changes={changedSkills.length} />{!skills ? <p className="config-compare__empty">Skill comparison is not available yet.</p> : changedSkills.length ? <div className="config-compare__rows">{changedSkills.map((row) => <ComparisonRowView key={row.id} comparison={comparison} row={row} kind="skill" />)}</div> : <p className="config-compare__empty">No changes to skills</p>}</section>
+      <section className="config-compare__section"><SectionHeader icon={<Wrench size={15} />} title={tools?.title ?? "Tools"} count={tools?.rows.length ? `${changedTools.length} of ${tools.rows.length}` : undefined} changes={changedTools.length} />{!tools ? <p className="config-compare__empty">Tool comparison is not available yet.</p> : changedTools.length ? <div className="config-compare__rows">{changedTools.map((row) => <ComparisonRowView key={row.id} comparison={comparison} row={row} kind="tool" />)}</div> : <p className="config-compare__empty">No changes to tools</p>}</section>
+      <section className="config-compare__section">
+        <SectionHeader icon={<Settings size={15} />} title={generalConfiguration?.title ?? "General configuration"} changes={generalChanges.length} />
+        {!generalConfiguration ? <p className="config-compare__empty">General configuration comparison is not available yet.</p>
+          : generalChanges.length ? <div className="config-compare__rows">{generalChanges.map((field) => <div className={`config-compare__row config-compare__general-row is-${field.status}`} key={field.key}>
+            <div className="config-compare__cell"><small>{field.label}</small><strong>{field.left ?? field.emptyLabel ?? "Not set"}</strong></div>
+            <div className="config-compare__center"><StatusMark matched={false} label={field.label} interactive={false} /></div>
+            <div className="config-compare__cell"><small>{field.label}</small><strong>{field.right ?? field.emptyLabel ?? "Not set"}</strong></div>
+          </div>)}</div> : <p className="config-compare__empty">No changes to general configuration</p>}
+      </section>
       <section className="config-compare__section"><SectionHeader icon={<Cpu size={15} />} title={modelConfiguration.title} changes={modelChanges} />{modelChanges === 0 ? <p className="config-compare__empty">No changes to model configuration</p> : modelConfiguration.groups.map((group) => <div className="config-compare__model-group" key={group.id}><h3>{group.title}</h3><div className="config-compare__rows">{group.fields.map((field) => <div className={`config-compare__row config-compare__model-row is-${field.status}`} key={field.key}>
         <div className="config-compare__cell"><small>{field.label}</small><strong>{field.left ?? "—"}</strong></div><div className="config-compare__center"><StatusMark matched={field.status === "matched"} label={field.label} interactive={false} /></div><div className="config-compare__cell"><small>{field.label}</small><strong>{field.right ?? "—"}</strong></div>
       </div>)}</div></div>)}</section>

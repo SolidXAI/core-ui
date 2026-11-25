@@ -1,6 +1,7 @@
 import type { AgentConnection, AgentRuntimeType } from "../types";
 
 export type AgentPublicEventPayloads = {
+    onWidgetEvent: { event: string; payload: Record<string, unknown> };
     onConnectionStateChanged: { state: AgentConnection };
     onAfterUserMessageSend: { sessionId: string | null; source: "composer" | "sdk" | "prefill" | "widget"; deliveryStage: "sent" };
     onUserMessageFailed: { stage: "context" | "upload"; code: string; retryable: boolean };
@@ -13,7 +14,11 @@ export type AgentPublicEventPayloads = {
     onAgentTurnStarted: { sessionId: string | null };
     onAgentResponseStarted: { sessionId: string | null };
     onAgentResponseCompleted: { sessionId: string | null };
-    onAgentTurnCompleted: { sessionId: string | null; outcome: "completed" };
+    onAgentTurnCompleted: {
+        sessionId: string | null;
+        outcome: "completed";
+        widget?: { name: string; data: Record<string, unknown> };
+    };
     onAgentNavigationRequested: {
         schemaVersion: 1;
         kind: string;

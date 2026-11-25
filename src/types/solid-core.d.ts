@@ -344,8 +344,9 @@ export type SolidChatterMessageWidgetProps = {
 };
 
 /**
- * Props of a SolidX Agent chat widget (ExtensionComponentTypes.chatInteractionWidget).
- * Resolved from `event_data.widget`, or from the default widget for `eventType`.
+ * Props of a SolidX Agent chat widget (agentTurnCompletionWidget, agentToolCallWidget, or agentUserTurnCompletionWidget).
+ * Resolved from `event_data.widget`, tool-name metadata for ToolCalling events,
+ * or the default widget for `eventType`.
  */
 export type SolidChatWidgetProps = {
     /** Agent event type, e.g. "ToolCalling", "LlmComplete", "UserMessage". */
@@ -366,8 +367,76 @@ export type SolidChatWidgetProps = {
     reply: (value: unknown) => void;
     /** Posts a new user message, e.g. from a "Fix with agent" button. */
     sendPrompt: (text: string) => void;
+    /** Starts a session in this widget's chat. Unavailable while the chat cannot switch sessions. */
+    startNewSession?: () => void | Promise<void>;
     /** Page context the conversation was started with (module, model, record). */
     agentContext?: import("../components/core/solid-agent/types").AgentContext;
+}
+
+/** Props of an activity-group widget (ExtensionComponentTypes.agentToolGroupWidget). */
+export type SolidToolGroupWidgetProps = {
+    turnKey: string;
+    items: import("../components/core/solid-agent/types").AgentChatItem[];
+    working: boolean;
+    startedAt?: number;
+    renderItem: (item: import("../components/core/solid-agent/types").AgentChatItem) => import("react").ReactNode;
+}
+
+/** Props of an assistant-turn wrapper (ExtensionComponentTypes.agentTurnCompletionWrapperWidget). */
+export type SolidAgentTurnWidgetProps = {
+    children: import("react").ReactNode;
+}
+
+/** Props for the left identity section of the agent chat header. */
+export type SolidAgentChatHeaderWidgetProps = {
+    title: string;
+    agentName?: string;
+    agentRuntime: "solidx" | "agentHub";
+    agentConfigVersion?: number | null;
+    statusColor: string;
+    statusText: string;
+    providerDisplayName: string;
+    signedIn: boolean;
+    activeSessionId: string;
+    displaySessionId: string;
+}
+
+/** Props of the new-conversation screen (ExtensionComponentTypes.agentChatEmptyStateWidget). */
+export type SolidAgentChatEmptyStateWidgetProps = {
+    title: string;
+    agentName?: string;
+    agentRuntime: "solidx" | "agentHub";
+    providerDisplayName: string;
+    suggestions: string[];
+    /** Posts a new user message through the chat's context and before-send hooks. */
+    sendPrompt: (text: string) => void;
+}
+
+/** Props of the AgentHub chat's browser panel (ExtensionComponentTypes.agentBrowserPanelWidget). */
+export type SolidAgentBrowserPanelWidgetProps = {
+    agentName?: string;
+    browser: import("../components/core/solid-agent/client/agentBrowser").AgentBrowserView;
+    /** Set while the agent waits for the user in the browser (browser_handoff, or the user took it mid-turn). */
+    handoff: { requestId: number; toolName: string | null; question: string } | null;
+    /** "side": beside the thread; "stacked": above the thread in a narrow chat; "dialog": the large view. */
+    layout: "side" | "stacked" | "dialog";
+    /** The chat socket is open; control actions are dropped otherwise. */
+    connected: boolean;
+    /** Only the header shows; the screen is not mounted, so no live view is streamed. */
+    collapsed: boolean;
+    /** The live screen, ready-wired: it streams while mounted and takes mouse and keyboard while the user has control. */
+    screen: import("react").ReactNode;
+    /** Asks for the browser; the agent hands it over after its current step. */
+    takeControl: () => boolean;
+    /** Gives the browser back (or continues a handoff without taking control). The note goes to the agent. */
+    giveBack: (note?: string) => boolean;
+    /** Opens an address in the active tab while the user has control. */
+    navigate: (url: string) => boolean;
+    navigation: (action: "back" | "forward" | "refresh") => boolean;
+    dismissError: () => void;
+    onToggleCollapsed?: () => void;
+    onExpand?: () => void;
+    onClose?: () => void;
 }
 
 export type SolidSettingsWidgetProps = {

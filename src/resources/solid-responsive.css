@@ -873,3 +873,16 @@
 
     }
 }
+
+/* Visibility guards. Hide below or from a breakpoint. Core-ui owns these names, so a host app's
+   Tailwind build can never override them (it would win over plain utilities such as hidden lg:flex,
+   because the host's CSS loads after core-ui's). They only hide: outside the range the element
+   keeps its normal display. Breakpoints match tailwind.config.js. */
+@media (max-width: 575.98px)  { .solid-hide-below-sm { display: none !important; } }
+@media (max-width: 767.98px)  { .solid-hide-below-md { display: none !important; } }
+@media (max-width: 991.98px)  { .solid-hide-below-lg { display: none !important; } }
+@media (max-width: 1199.98px) { .solid-hide-below-xl { display: none !important; } }
+@media (min-width: 576px)  { .solid-hide-from-sm { display: none !important; } }
+@media (min-width: 768px)  { .solid-hide-from-md { display: none !important; } }
+@media (min-width: 992px)  { .solid-hide-from-lg { display: none !important; } }
+@media (min-width: 1200px) { .solid-hide-from-xl { display: none !important; } }

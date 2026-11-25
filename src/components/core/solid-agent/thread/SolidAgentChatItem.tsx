@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { getExtensionComponent } from "../../../../helpers/registry";
+import { getExtensionComponent, getToolCallChatWidgetName, getUserMessageChatWidgetName, isAgentWidgetAvailable } from "../../../../helpers/registry";
+import { ExtensionComponentTypes } from "../../../../types/extension-registry";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import styles from "../SolidAgent.module.css";
 import { AgentEventTypes, type AgentChatItem, type AgentContext } from "../types";
@@ -11,20 +12,22 @@ export { classifyWidgetContent, parseWidgetContent, type InlineChatWidget, type 
 export const getDefaultChatWidgetName = (eventType: string): string => {
     switch (eventType) {
         case AgentEventTypes.userMessage:
-            return "DefaultUserMessageChatWidget";
+            return "DefaultAgentUserTurnCompletionWidget";
         case AgentEventTypes.llmToken:
         case AgentEventTypes.llmComplete:
         case AgentEventTypes.turnComplete:
         case AgentEventTypes.turnCompleteLegacy:
-            return "DefaultAssistantMessageChatWidget";
+            return "DefaultAgentTurnCompletionWidget";
         case AgentEventTypes.toolCalling:
-            return "DefaultToolCallChatWidget";
+            return "DefaultAgentToolCallWidget";
         case AgentEventTypes.agentError:
         case AgentEventTypes.error:
             return "DefaultErrorChatWidget";
         case AgentEventTypes.executionCancelled:
         case AgentEventTypes.executionCancelledLegacy:
             return "DefaultNoticeChatWidget";
+        case AgentEventTypes.contextCompacted:
+            return "DefaultContextCompactedChatWidget";
         case AgentEventTypes.agentStarted:
         case AgentEventTypes.stepStarted:
         case AgentEventTypes.agentThinking:
@@ -75,20 +78,23 @@ export class SolidChatWidgetErrorBoundary extends React.Component<ErrorBoundaryP
 
 type SolidAgentChatItemProps = {
     item: AgentChatItem;
+    agentName?: string;
     agentContext?: AgentContext;
     showMessageMeta?: boolean;
     onReply: (widgetId: string, widget: string, value: unknown) => void;
     onPrompt: (text: string) => void;
+    onStartNewSession?: () => void | Promise<void>;
 };
 
 /**
  * Renders one thread item. The widget named in `event_data.widget` wins; then a widget the agent
  * sent as its text reply (`{"widgetName", "data"}`, see parseWidgetContent; a reply that does not
- * parse renders as text, unchanged); otherwise the default widget for the event type. All resolve
+ * parse renders as text, unchanged); then a tool-name or user-message metadata match; otherwise
+ * the default widget for the event type. All resolve
  * through the extension registry, so a UI module can register new chat widgets or override a
  * default by registering the same name.
  */
-export const SolidAgentChatItem = ({ item, agentContext, showMessageMeta, onReply, onPrompt }: SolidAgentChatItemProps) => {
+export const SolidAgentChatItem = ({ item, agentName, agentContext, showMessageMeta, onReply, onPrompt, onStartNewSession }: SolidAgentChatItemProps) => {
     const isText = !item.widget && TEXT_EVENT_TYPES.has(item.eventType);
     const content = item.eventData?.content;
     const inlineState = useMemo(
@@ -101,8 +107,28 @@ export const SolidAgentChatItem = ({ item, agentContext, showMessageMeta, onRepl
     // Keep it out of the markdown fallback during that live-only interval.
     if (item.live && inlineState.state === "pending") return null;
 
-    const widgetName = item.widget ?? inline?.widget ?? getDefaultChatWidgetName(item.eventType);
-    const DynamicWidget = getExtensionComponent(widgetName) ?? getExtensionComponent("DefaultUnknownChatWidget");
+    const toolWidgetName = item.eventType === AgentEventTypes.toolCalling
+        ? getToolCallChatWidgetName(item.eventData?.tool_name)
+        : null;
+    const userWidgetName = item.eventType === AgentEventTypes.userMessage
+        ? getUserMessageChatWidgetName(agentName)
+        : null;
+    const widgetName = item.widget ?? inline?.widget ?? toolWidgetName ?? userWidgetName ?? getDefaultChatWidgetName(item.eventType);
+    const widgetType = item.eventType === AgentEventTypes.toolCalling
+        ? ExtensionComponentTypes.agentToolCallWidget
+        : item.eventType === AgentEventTypes.userMessage
+            ? ExtensionComponentTypes.agentUserTurnCompletionWidget
+            : ExtensionComponentTypes.agentTurnCompletionWidget;
+    const fallbackWidgetName = item.eventType === AgentEventTypes.toolCalling
+        ? "DefaultAgentToolCallWidget"
+        : item.eventType === AgentEventTypes.userMessage
+            ? "DefaultAgentUserTurnCompletionWidget"
+            : "DefaultUnknownChatWidget";
+    const selectedWidget = (widgetType === ExtensionComponentTypes.agentToolCallWidget || isAgentWidgetAvailable(widgetName, agentName))
+        ? getExtensionComponent(widgetName, widgetType)
+        : null;
+    const resolvedWidgetName = selectedWidget ? widgetName : fallbackWidgetName;
+    const DynamicWidget = selectedWidget ?? getExtensionComponent(fallbackWidgetName, widgetType);
     const widgetId = item.widgetId ?? item.id;
     const eventData = inline ? inline.data : item.eventData;
 
@@ -114,13 +140,14 @@ export const SolidAgentChatItem = ({ item, agentContext, showMessageMeta, onRepl
         final: !!item.final,
         timestamp: item.at,
         showMessageMeta,
-        reply: (value: unknown) => onReply(widgetId, widgetName, value),
+        reply: (value: unknown) => onReply(widgetId, resolvedWidgetName, value),
         sendPrompt: onPrompt,
+        startNewSession: item.live ? undefined : onStartNewSession,
         agentContext,
     };
 
     return (
-        <SolidChatWidgetErrorBoundary widget={widgetName} eventData={eventData}>
+        <SolidChatWidgetErrorBoundary widget={resolvedWidgetName} eventData={eventData}>
             {DynamicWidget && <DynamicWidget {...widgetProps} />}
         </SolidChatWidgetErrorBoundary>
     );

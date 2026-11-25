@@ -2,6 +2,8 @@ import { describeToolArgs, isLlmMetadata, parseToolResult } from "./agentFormat"
 import { parseWidgetContent, isSameAssistantContent } from "./thread/inlineWidget";
 export { isSameAssistantContent };
 import { AgentEventTypes, type AgentChatEvent, type AgentChatItem, type AgentCommand, type AgentUsageStats, type AgentWireFrame } from "./types";
+import { humanReviewAnswerItem, humanReviewId, humanReviewItem, isHumanReviewKind, type HumanReview } from "./humanReview";
+import { normalizeToolFiles } from "./toolFiles";
 
 /**
  * Turns agent events into thread items. Used by agentSlice for live socket frames and by the
@@ -28,6 +30,9 @@ export type AgentThreadState = {
     streamingId: string | null;
     turnStreamed: boolean;
     usage: AgentUsageStats | null;
+    pendingReview: HumanReview | null;
+    reviewSubmitting: boolean;
+    reviewResuming: boolean;
 };
 
 export function createThreadState(): AgentThreadState {
@@ -46,6 +51,9 @@ export function createThreadState(): AgentThreadState {
         streamingId: null,
         turnStreamed: false,
         usage: null,
+        pendingReview: null,
+        reviewSubmitting: false,
+        reviewResuming: false,
     };
 }
 
@@ -81,6 +89,46 @@ function endTurn(state: AgentThreadState) {
     stopStreaming(state);
     state.working = false;
     state.thinking = false;
+}
+
+function setPendingReview(state: AgentThreadState, data: Record<string, any> | null, at: number) {
+    const requestId = data?.request_id ?? data?.requestId;
+    if (state.pendingReview && state.pendingReview.requestId !== requestId) {
+        const previous = findItem(state, humanReviewId(state.pendingReview.requestId));
+        if (previous) previous.final = true;
+    }
+    state.pendingReview = null;
+    state.reviewSubmitting = false;
+    if (!data || !Number.isInteger(requestId) || typeof data.question !== "string" || !isHumanReviewKind(data.kind)) return;
+    const request: HumanReview = {
+        requestId, kind: data.kind, question: data.question, options: data.options,
+        context: data.context ?? null, toolName: data.tool_name ?? data.toolName ?? null,
+        toolArguments: data.tool_arguments ?? data.toolArguments ?? null,
+    };
+    const existing = findItem(state, humanReviewId(requestId));
+    const item = humanReviewItem(request, existing?.at ?? at, false);
+    if (existing) Object.assign(existing, item);
+    else state.items.push(item);
+    state.pendingReview = request;
+    state.reviewResuming = false;
+    endTurn(state);
+}
+
+/**
+ * Applies the context-window figures AgentHub sends on StepComplete and ContextCompacted, so the
+ * usage ring follows a long turn instead of updating only when it ends.
+ */
+function applyContextWindow(state: AgentThreadState, data: Record<string, any>, tokens?: unknown) {
+    const limit = data.context_limit ?? data.context_window;
+    if (typeof limit !== "number" || limit <= 0) return;
+    const used = tokens ?? data.context_tokens;
+    const compactAt = data.compaction_threshold !== undefined ? data.compaction_threshold : data.trigger_tokens;
+    state.usage = {
+        ...(state.usage ?? { totalCost: 0, totalInputTokens: 0, totalOutputTokens: 0, totalTokens: 0, contextTokens: 0, contextLimit: 0 }),
+        contextLimit: limit,
+        ...(typeof used === "number" && used >= 0 ? { contextTokens: used } : {}),
+        ...(compactAt !== undefined ? { compactAt: typeof compactAt === "number" && compactAt > 0 ? compactAt : null } : {}),
+    };
 }
 
 function lastAssistantText(state: AgentThreadState): string | undefined {
@@ -159,6 +207,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                     totalTokens: frame.total_tokens ?? eventData.total_tokens ?? (inTok + outTok),
                     contextTokens: frame.context_tokens ?? eventData.context_tokens ?? 0,
                     contextLimit: limit,
+                    compactAt: frame.compaction_threshold ?? eventData.compaction_threshold ?? null,
                 };
             }
             state.authError = null;
@@ -170,8 +219,48 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 state.working = false;
                 state.thinking = false;
             }
+            if ("pendingRequest" in frame || "pendingRequest" in eventData) {
+                setPendingReview(state, frame.pendingRequest ?? eventData.pendingRequest ?? null, at);
+                state.working = status === "queued" || status === "running";
+                state.reviewResuming = state.working && !state.pendingReview;
+            }
             break;
         }
+
+        case "human_request":
+        case "HumanReviewRequested":
+            setPendingReview(state, eventData, at);
+            break;
+
+        case "human_response_submitting":
+            state.reviewSubmitting = true;
+            break;
+
+        case "human_response_accepted":
+        case "HumanReviewAnswered": {
+            const id = eventData.request_id;
+            if (!Number.isInteger(id)) break;
+            const question = findItem(state, humanReviewId(id));
+            if (question) question.final = true;
+            if (state.pendingReview?.requestId === id) {
+                state.pendingReview = null;
+                state.reviewSubmitting = false;
+                state.working = !replay;
+                state.reviewResuming = !replay;
+            }
+            const answer = humanReviewAnswerItem(id, eventData.kind, eventData.choice, eventData.text, at);
+            if (!findItem(state, answer.id)) state.items.push(answer);
+            break;
+        }
+
+        case "human_resume_finished":
+            endTurn(state);
+            state.reviewResuming = false;
+            if (eventData.status === "failed") {
+                state.items.push({ id: nextItemId("err"), at, eventType: AgentEventTypes.agentError,
+                    eventData: { error: "The agent could not resume after your response." } });
+            }
+            break;
 
         case AgentEventTypes.sessionUpdated: {
             const sessionId = frame.session_id ?? eventData.session_id ?? null;
@@ -238,8 +327,31 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             break;
 
         case AgentEventTypes.stepComplete:
+            freezeLiveTool(state);
+            applyContextWindow(state, eventData);
+            break;
+
         case AgentEventTypes.agentComplete:
             freezeLiveTool(state);
+            break;
+
+        case AgentEventTypes.contextCompacted:
+            freezeLiveTool(state);
+            stopStreaming(state);
+            state.items.push({
+                id: nextItemId("compact"),
+                at,
+                eventType,
+                eventData: {
+                    strategy: eventData.strategy,
+                    trigger: eventData.trigger,
+                    tokens_before: eventData.tokens_before,
+                    tokens_after: eventData.tokens_after,
+                    archived_items: eventData.archived_items,
+                    context_window: eventData.context_window,
+                },
+            });
+            applyContextWindow(state, eventData, eventData.tokens_after);
             break;
 
         case AgentEventTypes.toolCalling: {
@@ -298,10 +410,14 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             if (tool) {
                 const output = eventData.output ?? frame.content ?? "";
                 const parsed = output ? parseToolResult(String(output)) : null;
+                const files = normalizeToolFiles(eventData.files);
+                // agentEventId lets the UI fetch the stored files (agentEvent media) later.
+                const agentEventId = eventData.agentEventId ?? frame.id;
                 tool.eventData = {
                     ...tool.eventData,
                     duration_ms: eventData.duration_ms ?? frame.duration_ms,
                     ...(parsed ? { status: parsed.status, output: parsed.text, output_raw: String(output) } : {}),
+                    ...(files.length ? { files, ...(agentEventId != null ? { agentEventId } : {}) } : {}),
                 };
             }
             freezeLiveTool(state);
@@ -368,6 +484,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                     totalTokens: eventData.total_tokens ?? frame.total_tokens ?? (inTok + outTok),
                     contextTokens: ctxTok,
                     contextLimit: limit,
+                    compactAt: eventData.compaction_threshold !== undefined ? eventData.compaction_threshold : state.usage?.compactAt ?? null,
                 };
             }
             endTurn(state);
@@ -385,6 +502,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         case AgentEventTypes.error: {
             const message: string = eventData.error ?? frame.content ?? "Unknown error";
             endTurn(state);
+            state.reviewSubmitting = false;
             if (!replay && /unauthori[sz]ed|access token|lacks required permission/i.test(message)) state.authError = message;
             state.items.push({ id: nextItemId("err"), at, eventType: AgentEventTypes.agentError, eventData: { error: message } });
             break;
@@ -399,13 +517,33 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
 /** Rebuilds thread items from stored session events (`/api/agent/sessions/{id}/messages`). */
 export function historyToItems(rows: any[]): AgentChatItem[] {
     const state = createThreadState();
+    const ids = new Map<string, string>();
     for (const row of rows) {
         const frame: AgentWireFrame = { ...row, event_type: row.event_type ?? (row.role === "user" ? AgentEventTypes.userMessage : row.role === "assistant" ? AgentEventTypes.llmComplete : "") };
-        const rawTs = row.timestamp ? (row.timestamp.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(row.timestamp) ? row.timestamp : `${row.timestamp}Z`) : null;
-        const at = rawTs ? new Date(rawTs).getTime() : Date.now();
-        applyAgentEvent(state, normalizeAgentFrame(frame), true, at);
+        const event = normalizeAgentFrame(frame);
+        // Runtime events carry Unix seconds. Core's createdAt can be shifted when
+        // its database driver interprets a timezone-less timestamp as local time.
+        const emittedAt = event.eventData.timestamp;
+        const rawTs = typeof row.timestamp === "string"
+            ? (row.timestamp.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(row.timestamp) ? row.timestamp : `${row.timestamp}Z`)
+            : row.timestamp;
+        const at = typeof emittedAt === "number" && Number.isFinite(emittedAt) && emittedAt > 0
+            ? emittedAt * 1000
+            : rawTs ? new Date(rawTs).getTime() : Date.now();
+        const start = state.items.length;
+        applyAgentEvent(state, event, true, at);
+        if (row.id != null) {
+            for (let index = start; index < state.items.length; index++) {
+                const id = state.items[index].id;
+                if (!id.startsWith("human-request-")) ids.set(id, `history-${row.id}-${index - start}`);
+            }
+        }
     }
     freezeLiveTool(state);
     stopStreaming(state);
-    return state.items;
+    if (state.pendingReview) {
+        const question = findItem(state, humanReviewId(state.pendingReview.requestId));
+        if (question) question.final = true;
+    }
+    return state.items.map((item) => ids.has(item.id) ? { ...item, id: ids.get(item.id)! } : item);
 }
