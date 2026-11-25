@@ -25,6 +25,7 @@ type Props = {
     onLoadOlder: () => void;
     onReply: (widgetId: string, widget: string, value: unknown) => void;
     onPrompt: (text: string) => void;
+    onStartNewSession?: () => void | Promise<void>;
 };
 
 type ItemGroup = { kind: "user"; item: AgentChatItem } | { kind: "agent"; key: string; items: AgentChatItem[] };
@@ -76,7 +77,7 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
 }
 
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
-export function AgentThread({ items, agentName, thinking, working = thinking, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt }: Props) {
+export function AgentThread({ items, agentName, thinking, working = thinking, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt, onStartNewSession }: Props) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const pinned = useRef(true);
     const prevHeight = useRef(0);
@@ -121,7 +122,7 @@ export function AgentThread({ items, agentName, thinking, working = thinking, ha
         });
     }
     const renderItem = (item: AgentChatItem, showMessageMeta?: boolean) => (
-        <SolidAgentChatItem key={item.id} item={item} agentName={agentName} agentContext={context} showMessageMeta={showMessageMeta} onReply={onReply} onPrompt={onPrompt} />
+        <SolidAgentChatItem key={item.id} item={item} agentName={agentName} agentContext={context} showMessageMeta={showMessageMeta} onReply={onReply} onPrompt={onPrompt} onStartNewSession={onStartNewSession} />
     );
     const toolGroupWidgetName = getToolGroupChatWidgetName(agentName) ?? "DefaultAgentToolGroupWidget";
     const ToolGroupWidget = getExtensionComponent(toolGroupWidgetName, ExtensionComponentTypes.agentToolGroupWidget)

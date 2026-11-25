@@ -60,6 +60,13 @@ button.config-compare__mark:disabled { cursor:default; opacity:.7; }
 .config-compare__dialog .solid-radix-dialog-title { color:var(--cc-ink); font-size:1.05rem; font-weight:700; letter-spacing:-.01em; overflow-wrap:anywhere; }
 .config-compare__dialog .solid-radix-dialog-description { margin:.15rem 0 0; color:var(--cc-muted); font-size:.78rem; }
 .config-compare__dialog-versions { display:flex; align-items:center; gap:.35rem; flex:0 0 auto; color:var(--cc-muted); }
+.config-compare__diff-navigation { display:flex; align-items:center; gap:.25rem; flex:0 0 auto; }
+.config-compare__diff-position { min-width:4rem; margin-right:.25rem; color:var(--cc-muted); font-size:.75rem; text-align:center; font-variant-numeric:tabular-nums; }
+.config-compare__diff-navigation button { display:grid; place-items:center; width:2rem; height:2rem; padding:0; border:1px solid var(--cc-border); border-radius:.4rem; background:var(--surface-card,var(--card)); color:var(--cc-ink); cursor:pointer; }
+.config-compare__diff-navigation button:hover:not(:disabled) { color:var(--cc-primary); background:color-mix(in srgb,var(--cc-primary) 8%,var(--surface-card,var(--card))); }
+.config-compare__diff-navigation button:focus-visible { outline:2px solid var(--cc-primary); outline-offset:2px; }
+.config-compare__diff-navigation button:disabled { opacity:.35; cursor:default; }
+.config-compare__diff [data-config-diff-active="true"] { outline:2px solid var(--cc-primary); outline-offset:-2px; }
 .config-compare__dialog-versions .config-compare__version-badge { min-width:1.9rem; height:1.6rem; font-size:.72rem; border-radius:.4rem; }
 .config-compare__version-badge.is-newer { background:var(--cc-primary); color:var(--primary-foreground,#fff); }
 .config-compare__dialog .solid-radix-dialog-close { flex:0 0 auto; }

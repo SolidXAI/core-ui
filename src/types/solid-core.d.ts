@@ -367,6 +367,8 @@ export type SolidChatWidgetProps = {
     reply: (value: unknown) => void;
     /** Posts a new user message, e.g. from a "Fix with agent" button. */
     sendPrompt: (text: string) => void;
+    /** Starts a session in this widget's chat. Unavailable while the chat cannot switch sessions. */
+    startNewSession?: () => void | Promise<void>;
     /** Page context the conversation was started with (module, model, record). */
     agentContext?: import("../components/core/solid-agent/types").AgentContext;
 }
@@ -396,6 +398,17 @@ export type SolidAgentChatHeaderWidgetProps = {
     signedIn: boolean;
     activeSessionId: string;
     displaySessionId: string;
+}
+
+/** Props of the new-conversation screen (ExtensionComponentTypes.agentChatEmptyStateWidget). */
+export type SolidAgentChatEmptyStateWidgetProps = {
+    title: string;
+    agentName?: string;
+    agentRuntime: "solidx" | "agentHub";
+    providerDisplayName: string;
+    suggestions: string[];
+    /** Posts a new user message through the chat's context and before-send hooks. */
+    sendPrompt: (text: string) => void;
 }
 
 /** Props of the AgentHub chat's browser panel (ExtensionComponentTypes.agentBrowserPanelWidget). */

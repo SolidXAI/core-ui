@@ -9,6 +9,8 @@ import { registerExternalAgentAuth, renewExternalAgentAuth, type AgentAuth } fro
 import { EMBED_CHANNEL, EMBED_PUBLIC_PROTOCOL_VERSION, MissingAgentInputsError, validateBootstrap, validateEmbedInputs, validateMessageContext, type AgentEmbedBootstrap, type BeforeUserMessageSendRequest, type EmbedMessageContext } from "../../../components/core/solid-agent/embed/agentEmbedProtocol";
 import { parseAgentWorkspaceState, type AgentWorkspaceState } from "../../../components/core/solid-agent/embed/agentWorkspace";
 import styles from "./AgentEmbedPage.module.css";
+import { eventBus } from "../../../helpers/eventBus";
+import type { AgentPublicEventPayloads } from "../../../components/core/solid-agent/client/agentPublicEvents";
 
 /** Request IDs correlate iframe messages; they are not credentials and need not be cryptographic. */
 function createEmbedRequestId(): string {
@@ -172,6 +174,12 @@ export function AgentEmbedPage() {
         };
         window.addEventListener("message", receive);
         const unsubscribePublicEvents = onAgentPublicEvent(relayRuntimeEvent);
+        const unsubscribeWidgetEvents = eventBus.on<AgentPublicEventPayloads["onWidgetEvent"]>("onWidgetEvent", (event) => {
+            if (!event || typeof event.event !== "string" || !event.payload
+                || typeof event.payload !== "object" || Array.isArray(event.payload)) return;
+            send("public_event", { protocolVersion: EMBED_PUBLIC_PROTOCOL_VERSION,
+                event: "onWidgetEvent", payload: event });
+        });
         const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") send("close"); };
         window.addEventListener("keydown", onKey);
         send("ready", { protocolVersion: EMBED_PUBLIC_PROTOCOL_VERSION,
@@ -185,6 +193,7 @@ export function AgentEmbedPage() {
             disposed = true;
             window.removeEventListener("message", receive);
             unsubscribePublicEvents();
+            unsubscribeWidgetEvents();
             window.removeEventListener("keydown", onKey);
             if (pending) { clearTimeout(pending.timer); pending.reject(new Error("Embed closed.")); pending = null; }
             contextRequests.current.forEach((request) => request.reject(new Error("Embed closed.")));
