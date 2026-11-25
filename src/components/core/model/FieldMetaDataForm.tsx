@@ -502,7 +502,7 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
   }
 
   if (currentFields.includes("relationCreateInverse")) {
-    transformedPayload.relationCreateInverse = values.relationCreateInverse == false ? false : true
+    transformedPayload.relationCreateInverse = values.relationCreateInverse === true || values.relationCreateInverse === "true"
   }
   if (transformedPayload.relationType == "many-to-one") {
     transformedPayload.relationCascade = values.relationCascade;
