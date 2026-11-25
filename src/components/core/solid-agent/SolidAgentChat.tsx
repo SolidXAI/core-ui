@@ -1348,6 +1348,7 @@ export function SolidAgentChat({
                         onLoadOlder={() => void runtime?.loadOlder()}
                         onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
                         onPrompt={send}
+                        onStartNewSession={!agent.working && !review && !agent.reviewResuming && agent.connection === "open" ? handleStartNewChat : undefined}
                     />
                 )}
 
@@ -1355,7 +1356,7 @@ export function SolidAgentChat({
                     key={review?.requestId ?? "chat"}
                     working={agent.working}
                     disabled={!!agent.authError || agent.reviewResuming || !!browserHandoff || (review ? reviewDisabled : false)}
-                    placeholder={browserHandoff ? "The agent is waiting for you in the browser" : review?.kind === "approval" ? "Type Approve or Reject…" : review ? "Type your answer…" : undefined}
+                    placeholder={browserHandoff ? "The agent is waiting for you in the browser" : review?.kind === "approval" ? "Type Approve or Reject…" : review ? "Type your answer…" : `Ask ${title}…`}
                     commands={review ? [] : agent.commands}
                     seed={review ? undefined : seed?.text}
                     seedKey={review ? undefined : seed?.key}

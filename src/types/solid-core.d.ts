@@ -367,6 +367,8 @@ export type SolidChatWidgetProps = {
     reply: (value: unknown) => void;
     /** Posts a new user message, e.g. from a "Fix with agent" button. */
     sendPrompt: (text: string) => void;
+    /** Starts a session in this widget's chat. Unavailable while the chat cannot switch sessions. */
+    startNewSession?: () => void | Promise<void>;
     /** Page context the conversation was started with (module, model, record). */
     agentContext?: import("../components/core/solid-agent/types").AgentContext;
 }

@@ -83,6 +83,7 @@ type SolidAgentChatItemProps = {
     showMessageMeta?: boolean;
     onReply: (widgetId: string, widget: string, value: unknown) => void;
     onPrompt: (text: string) => void;
+    onStartNewSession?: () => void | Promise<void>;
 };
 
 /**
@@ -93,7 +94,7 @@ type SolidAgentChatItemProps = {
  * through the extension registry, so a UI module can register new chat widgets or override a
  * default by registering the same name.
  */
-export const SolidAgentChatItem = ({ item, agentName, agentContext, showMessageMeta, onReply, onPrompt }: SolidAgentChatItemProps) => {
+export const SolidAgentChatItem = ({ item, agentName, agentContext, showMessageMeta, onReply, onPrompt, onStartNewSession }: SolidAgentChatItemProps) => {
     const isText = !item.widget && TEXT_EVENT_TYPES.has(item.eventType);
     const content = item.eventData?.content;
     const inlineState = useMemo(
@@ -141,6 +142,7 @@ export const SolidAgentChatItem = ({ item, agentName, agentContext, showMessageM
         showMessageMeta,
         reply: (value: unknown) => onReply(widgetId, resolvedWidgetName, value),
         sendPrompt: onPrompt,
+        startNewSession: item.live ? undefined : onStartNewSession,
         agentContext,
     };
 
