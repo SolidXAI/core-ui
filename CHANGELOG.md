@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.5] - 2026-11-25
+
+### Added
+
+- add generation settings to AgentRegistryEditorPage and enhance row button handling in SolidListView
+- add onStartNewSession prop to chat components for session management
+- implement default empty state widget for agent chat and update registry
+- update default inbox sorting to started date
+- Enhance agent event handling with widget support and public event subscription
+- add navigation for diff changes in comparison dialog
+
+### Fixed
+
+- alignment issue from start to center (#300)
+- make user role popover scrollable (#301)
+- preserve false relationCreateInverse in table mapping (#303)
+- show loading state when refreshing audit trail. (#304)
+
+### Other
+
+- Fix/computed field blank screen (#298)
+- (#316)
+- Ft cli provider changes (#317)
+- Active filter order (#306)
+
 ## [0.1.23-beta.4] - 2026-11-24
 
 ### Added
