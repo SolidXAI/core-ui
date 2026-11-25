@@ -182,9 +182,9 @@
 }
 
 .solid-locale-i18n-subtitle {
-  margin-top: var(--solid-font-size-caption);
+  margin-top: 0.16rem;
   color: var(--muted-foreground);
-  font-size: 0.65rem;
+  font-size: var(--solid-font-size-caption);
   line-height: 1.25;
 }
 
@@ -199,7 +199,7 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--primary) 8%, var(--card) 92%);
   color: color-mix(in srgb, var(--primary) 78%, var(--foreground) 22%);
-  font-size: 0.66rem;
+  font-size: var(--solid-font-size-caption);
   font-weight: 700;
   line-height: 1;
   overflow: hidden;
@@ -217,7 +217,7 @@
 
 .solid-locale-i18n-label {
   color: color-mix(in srgb, var(--muted-foreground) 86%, var(--foreground) 14%);
-  font-size: var(--solid-font-size-micro);
+  font-size: var(--solid-font-size-ui-control);
   font-weight: 500;
   line-height: 1.25;
 }
