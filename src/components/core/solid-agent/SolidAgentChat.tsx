@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ChevronDown, Globe, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Sparkles, Trash2, WifiOff, X } from "lucide-react";
+import { Check, ChevronDown, Globe, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
@@ -45,7 +45,7 @@ import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
 import { AgentWorkspaceHeaderActions } from "./AgentWorkspaceHeaderActions";
 import type { AgentWorkspaceControls } from "./embed/agentWorkspace";
-import { getAgentBrowserPanelWidgetName, getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
+import { getAgentBrowserPanelWidgetName, getAgentChatEmptyStateWidgetName, getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
 import { isBrowserActive } from "./client/agentBrowser";
 import { useAgentBrowser } from "./browser/useAgentBrowser";
 import { AgentBrowserScreen } from "./browser/AgentBrowserScreen";
@@ -910,29 +910,20 @@ export function SolidAgentChat({
 
     // const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
 
-    const empty = (
-        <div className={styles.empty}>
-            <div className={styles.emptyMark}><Sparkles size={24} /></div>
-            <div>
-                <h2 className={styles.emptyTitle}>{agentRuntime === "agentHub" ? `Start a conversation with ${title}` : "How can I help?"}</h2>
-                <p className={styles.emptyText}>{agentRuntime === "agentHub"
-                    ? "Ask this agent for help with its configured capabilities. It can use the tools and knowledge available to it."
-                    : "Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you."}</p>
-                {agentRuntime !== "agentHub" && providerDisplayName && (
-                    <div className={styles.emptyProviderBadge}>
-                        Using <strong>{providerDisplayName}</strong>
-                    </div>
-                )}
-            </div>
-            <div className={styles.suggestions}>
-                {emptyStateSuggestions.map((text) => (
-                    <button key={text} type="button" className={styles.suggestion} onClick={() => send(text)}>
-                        {text}
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
+    const EmptyStateWidget = getExtensionComponent(
+        getAgentChatEmptyStateWidgetName(agentName) ?? "DefaultAgentChatEmptyStateWidget",
+        ExtensionComponentTypes.agentChatEmptyStateWidget,
+    ) ?? getExtensionComponent("DefaultAgentChatEmptyStateWidget", ExtensionComponentTypes.agentChatEmptyStateWidget);
+    const empty = EmptyStateWidget ? (
+        <EmptyStateWidget
+            title={title}
+            agentName={agentName}
+            agentRuntime={agentRuntime}
+            providerDisplayName={providerDisplayName}
+            suggestions={emptyStateSuggestions}
+            sendPrompt={send}
+        />
+    ) : null;
 
     return (
         <>
