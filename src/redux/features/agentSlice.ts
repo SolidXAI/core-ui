@@ -32,6 +32,10 @@ export type AgentState = AgentThreadState & {
     loadingHistory: boolean;
     /** Context of the last prompt sent from outside the chat (e.g. a Test Hub button). */
     context: AgentContext | null;
+    requestedAgentName?: string | null;
+    requestedAgentId?: number | null;
+    selectedAgentName?: string | null;
+    selectedAgentId?: number | null;
 };
 
 const initialState: AgentState = {
@@ -44,6 +48,10 @@ const initialState: AgentState = {
     historyPage: 1,
     loadingHistory: false,
     context: null,
+    requestedAgentName: null,
+    requestedAgentId: null,
+    selectedAgentName: null,
+    selectedAgentId: null,
 };
 
 const agentSlice = createSlice({
@@ -58,10 +66,50 @@ const agentSlice = createSlice({
                 state.prefill = { prompt: options.prompt, context: options.context, autoSend: options.autoSend, newSession: options.newSession, nonce: Date.now() };
             }
             if (options.context) state.context = options.context;
+            if (options.agentName !== undefined) {
+                const agentChanged = state.selectedAgentName && state.selectedAgentName !== options.agentName;
+                state.requestedAgentName = options.agentName;
+                state.selectedAgentName = options.agentName;
+                if (agentChanged) {
+                    Object.assign(state, createThreadState(), {
+                        commands: state.commands,
+                        hasMoreHistory: false,
+                        historyPage: 1,
+                        historySessionId: null,
+                        loadingHistory: false,
+                    });
+                }
+            }
+            if (options.agentId !== undefined) {
+                state.requestedAgentId = options.agentId;
+                state.selectedAgentId = options.agentId;
+            }
+        },
+        agentSelected(state, action: PayloadAction<{ agentName: string; agentId?: number }>) {
+            const agentChanged = state.selectedAgentName && state.selectedAgentName !== action.payload.agentName;
+            state.selectedAgentName = action.payload.agentName;
+            state.requestedAgentName = action.payload.agentName;
+            if (action.payload.agentId !== undefined) {
+                state.selectedAgentId = action.payload.agentId;
+                state.requestedAgentId = action.payload.agentId;
+            }
+            if (agentChanged) {
+                Object.assign(state, createThreadState(), {
+                    commands: state.commands,
+                    hasMoreHistory: false,
+                    historyPage: 1,
+                    historySessionId: null,
+                    loadingHistory: false,
+                });
+            }
         },
         agentClosed(state) {
             state.open = false;
             state.mode = "bubble";
+            state.requestedAgentName = null;
+            state.requestedAgentId = null;
+            state.selectedAgentName = null;
+            state.selectedAgentId = null;
         },
         agentModeChanged(state, action: PayloadAction<AgentMode>) {
             state.mode = action.payload;
@@ -176,6 +224,7 @@ const agentSlice = createSlice({
 
 export const {
     agentOpenRequested,
+    agentSelected,
     agentClosed,
     agentModeChanged,
     agentPrefillConsumed,

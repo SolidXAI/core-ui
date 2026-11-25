@@ -219,10 +219,12 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 state.working = false;
                 state.thinking = false;
             }
-            if ("pendingRequest" in frame || "pendingRequest" in eventData) {
+            if ("pendingRequest" in frame || "pendingRequest" in eventData || "status" in frame || "status" in eventData) {
                 setPendingReview(state, frame.pendingRequest ?? eventData.pendingRequest ?? null, at);
-                state.working = status === "queued" || status === "running";
-                state.reviewResuming = state.working && !state.pendingReview;
+                if (status !== undefined) {
+                    state.working = status === "queued" || status === "running";
+                    state.reviewResuming = state.working && !state.pendingReview;
+                }
             }
             break;
         }

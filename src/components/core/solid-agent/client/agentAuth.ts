@@ -1,5 +1,5 @@
 import { getSession } from "../../../../adapters/auth/getSession";
-import { agentIdOf, toHttpBase } from "./agentUrls";
+import { agentIdOf, agentNameOf, toHttpBase } from "./agentUrls";
 
 /**
  * Agent login (same flow as the SolidX agent-ui).
@@ -61,11 +61,31 @@ export async function renewExternalAgentAuth(agentUrl: string): Promise<void> {
     return entry.pending;
 }
 
+const ACTIVE_API_KEY_STORAGE = "solidx.active-agent-api-key";
+let inMemoryActiveApiKey: string | null = null;
+
+export function getStoredActiveApiKey(): string | null {
+    return inMemoryActiveApiKey;
+}
+
+export function setStoredActiveApiKey(key: string | null) {
+    inMemoryActiveApiKey = key;
+    try {
+        // Ensure raw API key is never persisted in browser storage
+        sessionStorage.removeItem(ACTIVE_API_KEY_STORAGE);
+    } catch {
+        // ignore
+    }
+}
+
 /** One login per backend and agent. */
 function loginScope(agentUrl: string) {
     if (/[?&]embedInstance=/.test(agentUrl)) return agentUrl;
+    const agentName = agentNameOf(agentUrl);
+    if (agentName) return `${toHttpBase(agentUrl)}?agentName=${encodeURIComponent(agentName)}`;
     const agentId = agentIdOf(agentUrl);
-    return agentId === undefined ? toHttpBase(agentUrl) : `${toHttpBase(agentUrl)}?agentId=${agentId}`;
+    if (agentId !== undefined) return `${toHttpBase(agentUrl)}?agentId=${agentId}`;
+    return toHttpBase(agentUrl);
 }
 
 function storageKey(agentUrl: string) {
@@ -82,11 +102,18 @@ async function currentSolidUserId(): Promise<string | null> {
     return id === undefined || id === null ? null : String(id);
 }
 
-function readStored(agentUrl: string): AgentAuth | null {
+export function readStored(agentUrl: string): AgentAuth | null {
     const embed = external.get(loginScope(agentUrl));
     if (embed) return embed.auth;
     try {
-        const raw = sessionStorage.getItem(storageKey(agentUrl));
+        let raw = sessionStorage.getItem(storageKey(agentUrl));
+        if (!raw) {
+            const agentId = agentIdOf(agentUrl);
+            const agentName = agentNameOf(agentUrl);
+            if (agentName && agentId !== undefined) {
+                raw = sessionStorage.getItem(`${STORAGE_PREFIX}${toHttpBase(agentUrl)}?agentId=${agentId}`);
+            }
+        }
         const parsed = raw ? (JSON.parse(raw) as AgentAuth) : null;
         // Entries from before sign-in returned wsUrl/httpUrl are dropped, so the user signs in again.
         return parsed?.agentToken && parsed.wsUrl && parsed.httpUrl ? parsed : null;
@@ -100,12 +127,23 @@ export async function loadAgentAuth(agentUrl: string): Promise<AgentAuth | null>
     const embed = external.get(loginScope(agentUrl));
     if (embed) return embed.auth;
     const stored = readStored(agentUrl);
-    if (!stored) return null;
-    if (stored.solidUserId !== (await currentSolidUserId())) {
-        clearAgentAuth(agentUrl);
-        return null;
+    const userId = await currentSolidUserId();
+    if (stored) {
+        if (stored.solidUserId !== userId) {
+            clearAgentAuth(agentUrl);
+            return null;
+        }
+        return stored;
     }
-    return stored;
+    // Shared tab auth: if we have the active API key stored for this tab, silently obtain token for this agent
+    const activeKey = getStoredActiveApiKey();
+    if (activeKey) {
+        const res = await signInWithApiKey(agentUrl, activeKey);
+        if (res.ok) {
+            return readStored(agentUrl);
+        }
+    }
+    return null;
 }
 
 export function clearAgentAuth(agentUrl: string) {
@@ -131,6 +169,7 @@ export function clearAgentAuth(agentUrl: string) {
 export async function signOutOfAgent(agentUrl: string) {
     const stored = readStored(agentUrl);
     clearAgentAuth(agentUrl);
+    setStoredActiveApiKey(null);
     if (!stored) return;
     try {
         await fetch(`${stored.httpUrl.replace(/\/$/, "")}/api/agent/api-keys/me`, { method: "DELETE", headers: { Authorization: `Bearer ${stored.agentToken}` } });
@@ -141,6 +180,7 @@ export async function signOutOfAgent(agentUrl: string) {
 
 /** Forget every agent login in this tab (e.g. on logout). */
 export function clearAllAgentAuth() {
+    setStoredActiveApiKey(null);
     try {
         Object.keys(sessionStorage)
             .filter((key) => key.startsWith(STORAGE_PREFIX))
@@ -175,47 +215,67 @@ export async function isAgentProcessAvailable(auth: AgentAuth): Promise<boolean>
     }
 }
 
+const pendingSignIns = new Map<string, Promise<AgentSignInResult>>();
+
 /** Exchanges a Solid API key for an agentToken and stores it for this tab. */
 export async function signInWithApiKey(agentUrl: string, apiKey: string): Promise<AgentSignInResult> {
     const key = apiKey.trim();
     if (!key) return { ok: false, error: "Enter your API key.", status: 0 };
-    try {
-        const attempt = () => fetch(`${toHttpBase(agentUrl)}/api/agent/api-keys/me`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ apiKey: key, agentId: agentIdOf(agentUrl) }),
-        });
-        let res = await attempt();
-        let body = await res.json().catch(() => null);
-        const deadline = Date.now() + 30_000;
-        while (res.status === 503 && body?.detail === "Worker is starting" && Date.now() < deadline) {
-            await new Promise<void>((resolve) => setTimeout(resolve, 3000));
-            res = await attempt();
-            body = await res.json().catch(() => null);
+    const scope = loginScope(agentUrl);
+    const inFlight = pendingSignIns.get(scope);
+    if (inFlight) return inFlight;
+
+    const promise: Promise<AgentSignInResult> = (async (): Promise<AgentSignInResult> => {
+        try {
+            const payload: Record<string, unknown> = { apiKey: key };
+            const agentId = agentIdOf(agentUrl);
+            const agentName = agentNameOf(agentUrl);
+            if (agentId !== undefined) payload.agentId = agentId;
+            if (agentName) payload.agentName = agentName;
+
+            const attempt = () => fetch(`${toHttpBase(agentUrl)}/api/agent/api-keys/me`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            let res = await attempt();
+            let body = await res.json().catch(() => null);
+            const deadline = Date.now() + 30_000;
+            while (res.status === 503 && body?.detail === "Worker is starting" && Date.now() < deadline) {
+                await new Promise<void>((resolve) => setTimeout(resolve, 3000));
+                res = await attempt();
+                body = await res.json().catch(() => null);
+            }
+            if (!res.ok) {
+                const detail = typeof body?.detail === "string" ? body.detail : null;
+                return { ok: false, error: detail ?? `Sign-in failed (HTTP ${res.status}).`, status: res.status };
+            }
+            if (typeof body?.agentToken !== "string" || !body.agentToken) {
+                return { ok: false, error: "The agent did not return a token.", status: res.status };
+            }
+            if (typeof body.wsUrl !== "string" || !body.wsUrl || typeof body.httpUrl !== "string" || !body.httpUrl) {
+                return { ok: false, error: "The agent did not say where to connect.", status: res.status };
+            }
+            const auth: AgentAuth = {
+                agentToken: body.agentToken,
+                user: body.user ?? {},
+                solidUserId: await currentSolidUserId(),
+                wsUrl: body.wsUrl,
+                httpUrl: body.httpUrl,
+            };
+            sessionStorage.setItem(storageKey(agentUrl), JSON.stringify(auth));
+            setStoredActiveApiKey(key);
+            notify(agentUrl);
+            return { ok: true };
+        } catch (error) {
+            return { ok: false, error: error instanceof Error ? error.message : "Could not reach the agent.", status: 0 };
+        } finally {
+            pendingSignIns.delete(scope);
         }
-        if (!res.ok) {
-            const detail = typeof body?.detail === "string" ? body.detail : null;
-            return { ok: false, error: detail ?? `Sign-in failed (HTTP ${res.status}).`, status: res.status };
-        }
-        if (typeof body?.agentToken !== "string" || !body.agentToken) {
-            return { ok: false, error: "The agent did not return a token.", status: res.status };
-        }
-        if (typeof body.wsUrl !== "string" || !body.wsUrl || typeof body.httpUrl !== "string" || !body.httpUrl) {
-            return { ok: false, error: "The agent did not say where to connect.", status: res.status };
-        }
-        const auth: AgentAuth = {
-            agentToken: body.agentToken,
-            user: body.user ?? {},
-            solidUserId: await currentSolidUserId(),
-            wsUrl: body.wsUrl,
-            httpUrl: body.httpUrl,
-        };
-        sessionStorage.setItem(storageKey(agentUrl), JSON.stringify(auth));
-        notify(agentUrl);
-        return { ok: true };
-    } catch (error) {
-        return { ok: false, error: error instanceof Error ? error.message : "Could not reach the agent.", status: 0 };
-    }
+    })();
+
+    pendingSignIns.set(scope, promise);
+    return promise;
 }
 
 /** Calls `listener` whenever this agent backend's login is stored or cleared. Returns an unsubscribe. */

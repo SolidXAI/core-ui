@@ -26,11 +26,11 @@ export function AgentSignIn({ agentUrl, expired = false }: Props) {
         setBusy(true);
         setError(null);
         const result = await signInWithApiKey(agentUrl, apiKey);
-        setBusy(false);
         if (result.ok) {
             setApiKey("");
             return;
         }
+        setBusy(false);
         setError(
             result.status === 401
                 ? "That API key was not accepted. Check it and try again."

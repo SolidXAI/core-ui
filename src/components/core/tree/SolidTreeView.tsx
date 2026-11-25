@@ -1657,6 +1657,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const canDeleteRow = (rowData: any, inContextMenu = false) =>
     !rowData?.deletedAt &&
+    rowData?.isBuiltin !== true &&
+    rowData?.is_builtin !== true &&
     actionsAllowed.includes(permissionExpression(params.modelName, "delete")) &&
     solidTreeViewLayout?.attrs?.delete !== false &&
     (!inContextMenu

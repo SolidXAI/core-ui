@@ -12,7 +12,7 @@ export function DefaultAgentChatEmptyStateWidget({ title, agentRuntime, provider
                 <p className={styles.emptyText}>{agentRuntime === "agentHub"
                     ? "Ask this agent for help with its configured capabilities. It can use the tools and knowledge available to it."
                     : "Ask in plain English. I can read this app's metadata and data, and run the agent's tools for you."}</p>
-                {agentRuntime !== "agentHub" && providerDisplayName && (
+                {providerDisplayName && (
                     <div className={styles.emptyProviderBadge}>
                         Using <strong>{providerDisplayName}</strong>
                     </div>

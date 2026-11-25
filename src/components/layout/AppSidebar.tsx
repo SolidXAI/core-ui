@@ -312,9 +312,11 @@ const AppSidebar = () => {
         if (typeof window === "undefined") return;
         if (!selectedWorkspaceKey) {
             window.localStorage.removeItem(SELECTED_WORKSPACE_STORAGE_KEY);
+            window.dispatchEvent(new CustomEvent("solidx:workspace-change", { detail: "" }));
             return;
         }
         window.localStorage.setItem(SELECTED_WORKSPACE_STORAGE_KEY, selectedWorkspaceKey);
+        window.dispatchEvent(new CustomEvent("solidx:workspace-change", { detail: selectedWorkspaceKey }));
     }, [selectedWorkspaceKey]);
 
     useEffect(() => {

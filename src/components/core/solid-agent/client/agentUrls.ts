@@ -1,16 +1,36 @@
 /**
  * A chat's agent URL is the configured backend URL (used only to sign in), plus the agent it talks to
- * when one is given (`<backend>?agentId=5`): required for the Agent Hub, optional for SolidX.
+ * when one is given (`<backend>?agentId=5` or `<backend>?agentName=testhub`): required for the Agent Hub, optional for SolidX.
  * Each agent URL has its own login.
  */
 export function withAgentId(url: string, agentId?: number): string {
     return agentId === undefined ? url : `${toHttpBase(url)}?agentId=${agentId}`;
 }
 
+export function withAgentName(url: string, agentName?: string): string {
+    return !agentName ? url : `${toHttpBase(url)}?agentName=${encodeURIComponent(agentName)}`;
+}
+
+export function withAgent(url: string, target?: { agentId?: number; agentName?: string }): string {
+    if (!target || (target.agentId === undefined && !target.agentName)) return url;
+    const base = toHttpBase(url);
+    const params = new URLSearchParams();
+    if (target.agentId !== undefined) params.set("agentId", String(target.agentId));
+    if (target.agentName) params.set("agentName", target.agentName);
+    const qs = params.toString();
+    return qs ? `${base}?${qs}` : base;
+}
+
 /** The agent id named by an agent URL, if any. */
 export function agentIdOf(url: string): number | undefined {
     const match = url.match(/[?&]agentId=(\d+)/);
     return match ? Number(match[1]) : undefined;
+}
+
+/** The agent name named by an agent URL, if any. */
+export function agentNameOf(url: string): string | undefined {
+    const match = url.match(/[?&]agentName=([^&]+)/);
+    return match ? decodeURIComponent(match[1]) : undefined;
 }
 
 /** `http(s)://host[:port]` of the sign-in backend, from a configured agent URL (http or ws, trailing slash ok). */

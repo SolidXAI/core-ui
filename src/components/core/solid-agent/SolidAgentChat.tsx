@@ -48,6 +48,8 @@ import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../sh
 import { SolidSpinner } from "../../shad-cn-ui/SolidSpinner";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
+import { AgentProviderDropdown, formatProviderName, getProviderAuthStatus } from "./AgentProviderDropdown";
+import { AgentSessionList, AgentSessionSearch } from "./AgentSessionList";
 import { AgentWorkspaceHeaderActions } from "./AgentWorkspaceHeaderActions";
 import type { AgentWorkspaceControls } from "./embed/agentWorkspace";
 import { getAgentBrowserPanelWidgetName, getAgentChatEmptyStateWidgetName, getAgentChatHeaderWidgetName, getExtensionComponent } from "../../../helpers/registry";
@@ -56,8 +58,6 @@ import { useAgentBrowser } from "./browser/useAgentBrowser";
 import { AgentBrowserScreen } from "./browser/AgentBrowserScreen";
 import type { SolidAgentBrowserPanelWidgetProps } from "../../../types/solid-core";
 import { ExtensionComponentTypes } from "../../../types/extension-registry";
-import { AgentProviderDropdown, formatProviderName, getProviderAuthStatus } from "./AgentProviderDropdown";
-import { AgentSessionList, AgentSessionSearch } from "./AgentSessionList";
 
 export { formatProviderName };
 
@@ -81,6 +81,8 @@ type Props = {
     /** Only one mounted chat should act on SDK prefill requests; the floating window does by default. */
     handlesPrefill?: boolean;
     suggestions?: string[];
+    agents?: Array<{ name: string; title: string; id?: number }>;
+    onSelectAgent?: (agentName: string, agentId?: number) => void;
     /** Controlled window actions for an embedded chat rendered in a modal. */
     windowControls?: {
         mode: "docked" | "maximized";
@@ -197,13 +199,15 @@ export function SolidAgentChat({
     onInputsLocked,
     beforeSend,
     embedded = false,
-    // SDK prefill goes through the shared "solidx" conversation only.
-    handlesPrefill = !embedded && agentRuntime === "solidx",
+    // SDK prefill goes through the shared conversation (solidx or agentHub launcher).
+    handlesPrefill = !embedded && (agentRuntime === "solidx" || agentRuntime === "agentHub"),
     suggestions,
+    agents,
+    onSelectAgent,
     windowControls,
     workspaceControls,
 }: Props) {
-    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName);
+    const { agent, dispatch, runtime } = useAgentChat(agentRuntime, agentUrl, externalEmbed, sessionOwnerKey, agentName, embedded);
     const review = agent.pendingReview;
     const reviewDisabled = agent.reviewSubmitting || agent.connection !== "open";
     const browserView = useAgentBrowser(runtime?.browser);
@@ -329,26 +333,21 @@ export function SolidAgentChat({
     const [agentConfigVersion, setAgentConfigVersion] = useState<number | null>(() => agentVersion ?? null);
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
     const [providers, setProviders] = useState<AgentProviderInfo[]>(() => {
-        if (agentRuntime === "agentHub") {
-            return [{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }];
-        }
         return getCachedAgentProviders(agentUrl).map((provider) => provider.id === "solidx"
             ? { ...provider, authenticated: true, authStatus: "authenticated" }
             : { ...provider, authenticated: null, authStatus: "checking" });
     });
     const [loadingProviders, setLoadingProviders] = useState<boolean>(() => {
-        if (agentRuntime === "agentHub") return false;
         return getCachedAgentProviders(agentUrl).length === 0;
     });
     const [providersLoadError, setProvidersLoadError] = useState(false);
     const [providersReloadKey, setProvidersReloadKey] = useState(0);
-    const [selectedProvider, setSelectedProvider] = useState<string>(() => (agentRuntime === "agentHub" ? "solidx" : getStoredProvider()));
+    const [selectedProvider, setSelectedProvider] = useState<string>(() => getStoredProvider());
     const [models, setModels] = useState<ProviderModelInfo[]>(() => {
-        if (agentRuntime === "agentHub") return [];
         const cached = getCachedProviderModels(agentUrl, getStoredProvider());
         return cached?.models || [];
     });
-    const [selectedModel, setSelectedModel] = useState<string>(() => (agentRuntime === "agentHub" ? "" : getStoredModel(getStoredProvider()) || ""));
+    const [selectedModel, setSelectedModel] = useState<string>(() => getStoredModel(getStoredProvider()) || "");
     const [isThinking, setIsThinking] = useState<boolean>(() => getStoredThinking(getStoredProvider()));
     const [selectedReasoning, setSelectedReasoning] = useState<string>(() => getStoredReasoning(getStoredProvider()) || "");
     const [isFast, setIsFast] = useState<boolean>(() => getStoredFast(getStoredProvider()));
@@ -458,13 +457,6 @@ export function SolidAgentChat({
     }, [agentUrl, signedIn]);
 
     useEffect(() => {
-        if (agentRuntime === "agentHub") {
-            setProviders([{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }]);
-            setSelectedProvider("solidx");
-            setLoadingProviders(false);
-            setProvidersLoadError(false);
-            return;
-        }
         if (!signedIn) {
             setLoadingProviders(false);
             return;
@@ -542,7 +534,7 @@ export function SolidAgentChat({
     }, [agentUrl]);
 
     useEffect(() => {
-        if (!selectedProvider || agentRuntime === "agentHub") return;
+        if (!selectedProvider) return;
         if (skipProviderEffectRef.current === selectedProvider) {
             skipProviderEffectRef.current = null;
             return;
@@ -1302,16 +1294,16 @@ export function SolidAgentChat({
             working={agent.working}
             disabled={!!agent.authError || agent.reviewResuming || !!browserHandoff || (review ? reviewDisabled : false) || isBusyTransitioning || isSelectedProviderCheckingAuth}
             placeholder={
-                isViewingHistory
-                    ? "Select a conversation to continue…"
-                    : isSelectedProviderCheckingAuth
-                    ? `Checking ${providerDisplayName || "provider"} authentication…`
-                    : browserHandoff
+                browserHandoff
                     ? "The agent is waiting for you in the browser"
                     : review?.kind === "approval"
                     ? "Type Approve or Reject…"
                     : review
                     ? "Type your answer…"
+                    : isViewingHistory
+                    ? "Select a conversation to continue…"
+                    : isSelectedProviderCheckingAuth
+                    ? `Checking ${providerDisplayName || "provider"} authentication…`
                     : isSwitchingProvider
                     ? "Connecting..."
                     : isStartingNewChat
@@ -1388,47 +1380,6 @@ export function SolidAgentChat({
         onRetry: handleRetryHistory,
         onLoadMore: loadMoreSessions,
     };
-
-    const renderChatBody = (mainContent: React.ReactNode) => (
-        <div ref={setChatBody} className={`${styles.chatBody} ${browserLayout === "side" ? styles.chatBodySide : ""} ${browserResizing ? styles.chatBodyResizing : ""}`}>
-            {browserLayout === "stacked" && (
-                <div className={styles.browserStacked}>{renderBrowserPanel("stacked", browserCollapsed || browserExpanded)}</div>
-            )}
-            <div className={styles.chatMain}>
-                {mainContent}
-            </div>
-            {browserLayout === "side" && !browserCollapsed && !browserExpanded && (
-                <aside ref={browserSideRef} className={styles.browserSide}
-                    style={browserSideShownWidth === null ? undefined : { width: browserSideShownWidth }}>
-                    <div
-                        className={styles.browserResizer}
-                        role="separator"
-                        aria-orientation="vertical"
-                        aria-label="Resize the agent's browser"
-                        aria-valuemin={BROWSER_SIDE_MIN}
-                        aria-valuemax={browserSideMax}
-                        aria-valuenow={browserSideShownWidth ?? undefined}
-                        title="Drag to resize. Double-click to reset."
-                        tabIndex={0}
-                        onPointerDown={startBrowserResize}
-                        onPointerMove={moveBrowserResize}
-                        onPointerUp={endBrowserResize}
-                        onPointerCancel={endBrowserResize}
-                        onDoubleClick={resetBrowserSideWidth}
-                        onKeyDown={resizeBrowserByKey}
-                    />
-                    {renderBrowserPanel("side", false)}
-                </aside>
-            )}
-            {browserLayout === "side" && browserCollapsed && !browserExpanded && (
-                <button type="button" className={styles.browserSideTab} title="Show the agent's browser"
-                    aria-label="Show the agent's browser" onClick={toggleBrowserCollapsed}>
-                    <Globe size={14} aria-hidden="true" />
-                    <span>Browser</span>
-                </button>
-            )}
-        </div>
-    );
 
     return (
         <>
@@ -1519,12 +1470,14 @@ export function SolidAgentChat({
                         signedIn={signedIn}
                         activeSessionId={activeSessionId}
                         displaySessionId={displaySessionId}
+                        agents={agents}
+                        onSelectAgent={onSelectAgent}
                     />}
                 </div>
                 {signedIn && (
                     <>
                         {(!isFullScreen || !sidebarOpen) && (
-                            agentRuntime === "agentHub" || providers.length <= 1 ? (
+                            providers.length <= 1 ? (
                                 <button
                                     type="button"
                                     className={styles.iconBtn}
@@ -1670,9 +1623,14 @@ export function SolidAgentChat({
                     </div>
                 )}
 
-                {isFullScreen ? (
-                    <div className={styles.fullScreenLayout} ref={fullScreenLayoutRef}>
-                        {sidebarOpen && (
+                <div ref={setChatBody} className={`${styles.chatBody} ${browserLayout === "side" ? styles.chatBodySide : ""} ${browserResizing ? styles.chatBodyResizing : ""}`}>
+                    {browserLayout === "stacked" && (
+                        <div className={styles.browserStacked}>{renderBrowserPanel("stacked", browserCollapsed || browserExpanded)}</div>
+                    )}
+                    <div className={styles.chatMain}>
+                        {isFullScreen ? (
+                            <div className={styles.fullScreenLayout} ref={fullScreenLayoutRef}>
+                                {sidebarOpen && (
                                     <>
                                         <aside
                                             className={styles.fullScreenSidebar}
@@ -1684,74 +1642,74 @@ export function SolidAgentChat({
                                             }}
                                             aria-label="Conversation sidebar"
                                         >
-                                        <div className={styles.sidebarHeader}>
-                                            {agentRuntime === "agentHub" || providers.length <= 1 ? (
-                                                <button
-                                                    type="button"
-                                                    className={styles.sidebarNewChatBtn}
-                                                    title="New chat"
-                                                    aria-label="New chat"
-                                                    disabled={isStartingNewChat || !!resumingSessionId}
-                                                    onClick={handleStartNewChat}
-                                                >
-                                                    <span className={styles.sidebarNewChatLabel}>
-                                                        {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
-                                                        <span>New chat</span>
-                                                    </span>
-                                                </button>
-                                            ) : (
-                                                <div className={styles.sidebarNewChatSplit} ref={providerMenuRef}>
+                                            <div className={styles.sidebarHeader}>
+                                                {providers.length <= 1 ? (
                                                     <button
                                                         type="button"
-                                                        className={styles.sidebarSplitActionBtn}
-                                                        title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
+                                                        className={styles.sidebarNewChatBtn}
+                                                        title="New chat"
                                                         aria-label="New chat"
                                                         disabled={isStartingNewChat || !!resumingSessionId}
                                                         onClick={handleStartNewChat}
                                                     >
-                                                        {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
-                                                        <span>New chat</span>
+                                                        <span className={styles.sidebarNewChatLabel}>
+                                                            {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
+                                                            <span>New chat</span>
+                                                        </span>
                                                     </button>
-                                                    <button
-                                                        type="button"
-                                                        className={`${styles.sidebarSplitTriggerBtn} ${showProviderMenu ? styles.sidebarSplitTriggerActive : ""}`}
-                                                        title={loadingProviders || isSwitchingProvider ? "Loading AI execution providers..." : "Select AI execution provider"}
-                                                        aria-label="Select AI execution provider"
-                                                        aria-expanded={showProviderMenu}
-                                                        onClick={toggleProviderMenu}
-                                                    >
-                                                        {loadingProviders || isSwitchingProvider ? (
-                                                            <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
-                                                        ) : (
-                                                            <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
-                                                        )}
-                                                    </button>
-                                                    {providerDropdown}
+                                                ) : (
+                                                    <div className={styles.sidebarNewChatSplit} ref={providerMenuRef}>
+                                                        <button
+                                                            type="button"
+                                                            className={styles.sidebarSplitActionBtn}
+                                                            title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
+                                                            aria-label="New chat"
+                                                            disabled={isStartingNewChat || !!resumingSessionId}
+                                                            onClick={handleStartNewChat}
+                                                        >
+                                                            {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
+                                                            <span>New chat</span>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            className={`${styles.sidebarSplitTriggerBtn} ${showProviderMenu ? styles.sidebarSplitTriggerActive : ""}`}
+                                                            title={loadingProviders || isSwitchingProvider ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                                            aria-label="Select AI execution provider"
+                                                            aria-expanded={showProviderMenu}
+                                                            onClick={toggleProviderMenu}
+                                                        >
+                                                            {loadingProviders || isSwitchingProvider ? (
+                                                                <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
+                                                            ) : (
+                                                                <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
+                                                            )}
+                                                        </button>
+                                                        {providerDropdown}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {showSessionSearch && (
+                                                <div className={styles.sidebarSearchWrap}>
+                                                    {sessionSearch}
                                                 </div>
                                             )}
-                                        </div>
-                                        {showSessionSearch && (
-                                            <div className={styles.sidebarSearchWrap}>
-                                                {sessionSearch}
-                                            </div>
-                                        )}
-                                        <AgentSessionList className={styles.sidebarSessions} sectionTitle="Recents" {...sessionListProps} />
-                                    </aside>
-                                    <div
-                                        className={`${styles.sidebarResizer} ${isDraggingSidebar ? styles.sidebarResizerActive : ""}`}
-                                        role="separator"
-                                        aria-orientation="vertical"
-                                        aria-label="Resize sidebar"
-                                        aria-valuenow={sidebarWidth}
-                                        aria-valuemin={MIN_SIDEBAR_WIDTH}
-                                        aria-valuemax={MAX_SIDEBAR_WIDTH}
-                                        tabIndex={0}
-                                        onPointerDown={handleSidebarResizeStart}
-                                        onKeyDown={handleSidebarResizeKeyDown}
-                                    />
-                                </>
-                            )}
-                            <div className={styles.fullScreenMain}>
+                                            <AgentSessionList className={styles.sidebarSessions} sectionTitle="Recents" {...sessionListProps} />
+                                        </aside>
+                                        <div
+                                            className={`${styles.sidebarResizer} ${isDraggingSidebar ? styles.sidebarResizerActive : ""}`}
+                                            role="separator"
+                                            aria-orientation="vertical"
+                                            aria-label="Resize sidebar"
+                                            aria-valuenow={sidebarWidth}
+                                            aria-valuemin={MIN_SIDEBAR_WIDTH}
+                                            aria-valuemax={MAX_SIDEBAR_WIDTH}
+                                            tabIndex={0}
+                                            onPointerDown={handleSidebarResizeStart}
+                                            onKeyDown={handleSidebarResizeKeyDown}
+                                        />
+                                    </>
+                                )}
+                                <div className={styles.fullScreenMain}>
                                     <SolidTooltip delayDuration={150}>
                                         <SolidTooltipTrigger asChild>
                                             <button
@@ -1772,25 +1730,55 @@ export function SolidAgentChat({
                                             {sidebarOpen ? "Close sidebar" : "Open sidebar"}
                                         </SolidTooltipContent>
                                     </SolidTooltip>
-                                    {renderChatBody(<>
-                                        {threadComponent}
-                                        {composerComponent}
-                                    </>)}
+                                    {threadComponent}
+                                    {composerComponent}
                                 </div>
                             </div>
-                ) : (
-                    renderChatBody(<>
-                        {showHistory ? (
-                            <div className={styles.historyPanel} aria-label="Past conversations">
-                                {showSessionSearch && sessionSearch}
-                                <AgentSessionList className={styles.historyList} {...sessionListProps} />
-                            </div>
                         ) : (
-                            threadComponent
+                            <>
+                                {showHistory ? (
+                                    <div className={styles.historyPanel} aria-label="Past conversations">
+                                        {showSessionSearch && sessionSearch}
+                                        <AgentSessionList className={styles.historyList} {...sessionListProps} />
+                                    </div>
+                                ) : (
+                                    threadComponent
+                                )}
+                                {composerComponent}
+                            </>
                         )}
-                        {composerComponent}
-                    </>)
-                )}
+                    </div>
+                    {browserLayout === "side" && !browserCollapsed && !browserExpanded && (
+                        <aside ref={browserSideRef} className={styles.browserSide}
+                            style={browserSideShownWidth === null ? undefined : { width: browserSideShownWidth }}>
+                            <div
+                                className={styles.browserResizer}
+                                role="separator"
+                                aria-orientation="vertical"
+                                aria-label="Resize the agent's browser"
+                                aria-valuemin={BROWSER_SIDE_MIN}
+                                aria-valuemax={browserSideMax}
+                                aria-valuenow={browserSideShownWidth ?? undefined}
+                                title="Drag to resize. Double-click to reset."
+                                tabIndex={0}
+                                onPointerDown={startBrowserResize}
+                                onPointerMove={moveBrowserResize}
+                                onPointerUp={endBrowserResize}
+                                onPointerCancel={endBrowserResize}
+                                onDoubleClick={resetBrowserSideWidth}
+                                onKeyDown={resizeBrowserByKey}
+                            />
+                            {renderBrowserPanel("side", false)}
+                        </aside>
+                    )}
+                    {browserLayout === "side" && browserCollapsed && !browserExpanded && (
+                        <button type="button" className={styles.browserSideTab} title="Show the agent's browser"
+                            aria-label="Show the agent's browser" onClick={toggleBrowserCollapsed}>
+                            <Globe size={14} aria-hidden="true" />
+                            <span>Browser</span>
+                        </button>
+                    )}
+                </div>
                 {browserShown && (
                     <SolidDialog
                         open={browserExpanded}

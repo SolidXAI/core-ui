@@ -171,13 +171,15 @@ export function AgentModelIndicator({
     const activeProviderInfo = providers.find((p) => p.id === activeProvider);
     const activeModelInfo = models.find((m) => m.id === activeModel) || (models.length > 0 ? models[0] : undefined);
 
-    let rawModelLabel = "Models";
+    let rawModelLabel = "Native";
     if (activeProviderInfo && activeProviderInfo.id !== "solidx") {
         rawModelLabel = activeModelInfo ? activeModelInfo.name || activeModelInfo.id : activeProviderInfo.name;
     } else if (assignments?.reasoning?.model) {
         rawModelLabel = assignments.reasoning.model;
     } else if (activeModel) {
         rawModelLabel = activeModel;
+    } else if (activeProviderInfo?.name) {
+        rawModelLabel = activeProviderInfo.name;
     }
 
     const displayModelLabel = formatSelectedModelLabel(rawModelLabel);

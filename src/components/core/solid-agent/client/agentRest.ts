@@ -1,4 +1,5 @@
 import { clearAgentAuth, loadAgentAuth, isExternalAgentAuth, renewExternalAgentAuth } from "./agentAuth";
+import { toHttpBase, agentIdOf } from "./agentUrls";
 import type { AgentUploadedAttachment, AgentModelAssignments, AgentProviderInfo, ProviderModelInfo, AgentRuntimeType } from "../types";
 
 export const HISTORY_PAGE_SIZE = 50;
@@ -109,12 +110,28 @@ export function fetchAgentConfigVersionStatus(agentUrl: string) {
 export async function fetchAgentModelAssignments(agentUrl: string): Promise<AgentModelAssignments | null> {
     try {
         const auth = await loadAgentAuth(agentUrl);
-        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
+        const aid = agentIdOf(agentUrl);
         const headers: Record<string, string> = {};
         if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
-        const res = await fetch(`${baseUrl}/api/agent/models`, { headers, cache: "no-store" });
-        if (!res.ok) return null;
-        return ((await res.json()) as AgentModelAssignments) ?? null;
+
+        if (auth?.httpUrl) {
+            const workerUrl = `${auth.httpUrl.replace(/\/$/, "")}/api/agent/models`;
+            try {
+                const res = await fetch(workerUrl, { headers, cache: "no-store" });
+                if (res.ok) {
+                    const data = ((await res.json()) as AgentModelAssignments) ?? null;
+                    if (data && (data.reasoning || data.fast)) return data;
+                }
+            } catch {
+                // fallback to manager url
+            }
+        }
+
+        const managerBase = toHttpBase(agentUrl).replace(/\/$/, "");
+        const managerUrl = aid !== undefined ? `${managerBase}/api/agent/models?agentId=${aid}` : `${managerBase}/api/agent/models`;
+        const mRes = await fetch(managerUrl, { headers, cache: "no-store" });
+        if (!mRes.ok) return null;
+        return ((await mRes.json()) as AgentModelAssignments) ?? null;
     } catch {
         return null;
     }
@@ -164,22 +181,37 @@ export function getCachedProviderModels(agentUrl: string, providerId: string): P
 
 /** List installed execution providers (both native SolidX and CLI agents). */
 export async function fetchAgentProviders(agentUrl: string, checkAuth: boolean = false): Promise<AgentProviderInfo[]> {
-    const data = await agentFetch<{ providers?: AgentProviderInfo[] }>(
-        agentUrl,
-        `/api/agent/providers?check_auth=${checkAuth}`,
-        { cache: "no-store" },
-    );
-    if (!data) throw new Error("Unable to load providers");
-    const list = Array.isArray(data.providers) ? data.providers : [];
-    if (list.length > 0) {
-        providersMemoryCache.set(agentUrl, list);
+    let lastError: unknown = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
         try {
-            sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
-        } catch {
-            // ignore
+            const data = await agentFetch<{ providers?: AgentProviderInfo[] }>(
+                agentUrl,
+                `/api/agent/providers?check_auth=${checkAuth}`,
+                { cache: "no-store" },
+            );
+            if (data && Array.isArray(data.providers)) {
+                const list = data.providers;
+                if (list.length > 0) {
+                    providersMemoryCache.set(agentUrl, list);
+                    try {
+                        sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
+                    } catch {
+                        // ignore
+                    }
+                }
+                return list;
+            }
+        } catch (err) {
+            lastError = err;
+        }
+        if (attempt < 2) {
+            await new Promise((resolve) => setTimeout(resolve, 600));
         }
     }
-    return list;
+    const cached = getCachedAgentProviders(agentUrl);
+    if (cached.length > 0) return cached;
+    if (lastError instanceof Error) throw lastError;
+    throw new Error("Unable to load providers");
 }
 
 const PROVIDER_AUTH_TIMEOUT_MS = 15_000;

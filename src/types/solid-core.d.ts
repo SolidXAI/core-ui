@@ -379,6 +379,10 @@ export type SolidToolGroupWidgetProps = {
     items: import("../components/core/solid-agent/types").AgentChatItem[];
     working: boolean;
     startedAt?: number;
+    endedAt?: number;
+    totalStartedAt?: number;
+    isLastActivity?: boolean;
+    hasMultipleActivities?: boolean;
     renderItem: (item: import("../components/core/solid-agent/types").AgentChatItem) => import("react").ReactNode;
 }
 
@@ -399,6 +403,8 @@ export type SolidAgentChatHeaderWidgetProps = {
     signedIn: boolean;
     activeSessionId: string;
     displaySessionId: string;
+    agents?: Array<{ name: string; title: string; id?: number }>;
+    onSelectAgent?: (agentName: string, agentId?: number) => void;
 }
 
 /** Props of the new-conversation screen (ExtensionComponentTypes.agentChatEmptyStateWidget). */

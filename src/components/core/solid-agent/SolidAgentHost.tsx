@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Sparkles } from "lucide-react";
 import styles from "./SolidAgent.module.css";
-import { agentModeChanged, agentOpenRequested, type AgentState } from "../../../redux/features/agentSlice";
+import { agentModeChanged, agentOpenRequested, agentSelected, type AgentState } from "../../../redux/features/agentSlice";
 import { SolidAgentChat } from "./SolidAgentChat";
 import { useAgentAvailability } from "./useAgentAvailability";
 import { useAdminInputContext } from "./useAdminInputContext";
 import { onBeforeUserMessageSend } from "./client/beforeUserMessageSend";
 import { onAgentPublicEvent } from "./client/agentPublicEvents";
-import type { AgentMessageContext, AgentMode } from "./types";
+import { withAgent } from "./client/agentUrls";
+import { solidGet } from "../../../http/solidHttp";
+import type { AgentMessageContext, AgentMode, AgentRuntimeType } from "./types";
 import { buildAdminCustomPath, buildAdminDashboardPath, buildAdminModelViewPath, buildAdminRecordFormPath } from "../../../helpers/routePaths";
 import { requestAdminViewRefresh } from "../../../helpers/adminViewRefresh";
 
@@ -43,20 +45,80 @@ function writePrefs(prefs: Partial<WindowPrefs>) {
  * is on, `solidxAgentBackendUrl` is set and the user has agent:invoke. Ctrl/Cmd+J toggles the window,
  * Esc inside it minimizes back to the bubble.
  */
+const DEFAULT_AGENTS = [
+    { name: "solidx-native", title: "Solid Native Agent", isBuiltin: true },
+    { name: "testhub", title: "TestHub Quality Engineer", isBuiltin: true },
+];
+
 export default function SolidAgentHost() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { ready, enabled, agentUrl, canUse } = useAgentAvailability();
+    const location = useLocation();
+    const { ready, enabled, agentUrl, agentUrls, canUse } = useAgentAvailability();
     const inputContext = useAdminInputContext();
     const inputContextRef = useRef(inputContext);
     inputContextRef.current = inputContext;
     const agent = useSelector((state: any) => state.solidAgent as AgentState | undefined);
     const [dockWidth, setDockWidth] = useState(() => readPrefs().dockWidth);
+    const [registeredAgents, setRegisteredAgents] = useState<Array<{ name: string; title: string; id?: number; isBuiltin?: boolean }>>(DEFAULT_AGENTS);
     const prefsHydrated = useRef(false);
     const skipNextPrefsWrite = useRef(false);
     const lastDispatch = useRef(dispatch);
     const windowRef = useRef<HTMLDivElement>(null);
     const openerRef = useRef<Element | null>(null);
+
+    const [sidebarWorkspace, setSidebarWorkspace] = useState<string>(() => {
+        try {
+            return localStorage.getItem("solidx.sidebar.selected-workspace") || "";
+        } catch {
+            return "";
+        }
+    });
+
+    useEffect(() => {
+        const handleWorkspace = (e: Event) => {
+            const customEvent = e as CustomEvent<string>;
+            if (typeof customEvent.detail === "string") {
+                setSidebarWorkspace(customEvent.detail);
+            } else {
+                try {
+                    setSidebarWorkspace(localStorage.getItem("solidx.sidebar.selected-workspace") || "");
+                } catch {}
+            }
+        };
+        window.addEventListener("solidx:workspace-change", handleWorkspace);
+        window.addEventListener("storage", handleWorkspace);
+        return () => {
+            window.removeEventListener("solidx:workspace-change", handleWorkspace);
+            window.removeEventListener("storage", handleWorkspace);
+        };
+    }, []);
+
+    useEffect(() => {
+        let alive = true;
+        solidGet("/agent-registry?limit=100")
+            .then((res: any) => {
+                if (!alive) return;
+                const records = Array.isArray(res?.data?.records)
+                    ? res.data.records
+                    : Array.isArray(res?.data?.data)
+                    ? res.data.data
+                    : Array.isArray(res?.data)
+                    ? res.data
+                    : [];
+                const validRecords = records.filter((r: any) => r && r.name && r.status !== "archived");
+                if (validRecords.length > 0) {
+                    setRegisteredAgents(validRecords.map((r: any) => ({
+                        id: r.id,
+                        name: r.name,
+                        title: r.title || r.name,
+                        isBuiltin: r.isBuiltin ?? r.is_builtin,
+                    })));
+                }
+            })
+            .catch(() => {});
+        return () => { alive = false; };
+    }, []);
 
     useEffect(() => onBeforeUserMessageSend((_request, signal) => {
         if (signal.aborted) throw new Error("Message preparation was cancelled.");
@@ -203,7 +265,39 @@ export default function SolidAgentHost() {
         window.addEventListener("pointerup", onUp);
     };
 
+    const handleSelectAgent = useCallback((name: string, id?: number) => {
+        dispatch(agentSelected({ agentName: name, agentId: id }));
+    }, [dispatch]);
+
+    const isTestHub = (() => {
+        if (inputContext.moduleName === "test-hub" || inputContext.moduleName === "test_hub") return true;
+        const segments = location.pathname.split("/").filter(Boolean);
+        if (segments.includes("test-hub") || segments.includes("test_hub")) return true;
+        if (sidebarWorkspace === "test-hub" || sidebarWorkspace === "test_hub") return true;
+        return false;
+    })();
+
+    const prevIsTestHubRef = useRef(isTestHub);
+    useEffect(() => {
+        if (prevIsTestHubRef.current !== isTestHub) {
+            dispatch(agentSelected({ agentName: isTestHub ? "testhub" : "solidx-native" }));
+        }
+        prevIsTestHubRef.current = isTestHub;
+    }, [isTestHub, dispatch]);
+
     if (!available || !agentUrl) return null;
+
+    const defaultAgentName = isTestHub ? "testhub" : "solidx-native";
+    const activeAgentName = agent?.selectedAgentName || agent?.requestedAgentName || defaultAgentName;
+    const activeAgentInfo = registeredAgents.find((a) => a.name === activeAgentName);
+    const activeAgentTitle = activeAgentInfo?.title || (activeAgentName === "testhub" ? "TestHub Quality Engineer" : "Solid Native Agent");
+
+    const hubUrl = agentUrls.agentHub;
+    const agentRuntime: AgentRuntimeType = hubUrl ? "agentHub" : "solidx";
+    const baseUrl = hubUrl || agentUrls.solidx || agentUrl;
+    const activeAgentUrl = hubUrl
+        ? withAgent(hubUrl, activeAgentName ? { agentName: activeAgentName } : { agentId: activeAgentInfo?.id ?? agent?.selectedAgentId ?? agent?.requestedAgentId ?? undefined })
+        : baseUrl;
 
     const frameClass = mode === "docked" ? styles.docked : mode === "maximized" ? styles.maximized : styles.compact;
 
@@ -215,7 +309,7 @@ export default function SolidAgentHost() {
                     className={`${styles.window} ${frameClass}`}
                     style={mode === "docked" ? { width: dockWidth } : undefined}
                     role="complementary"
-                    aria-label="SolidX Agent"
+                    aria-label={activeAgentTitle}
                     onKeyDown={(event) => {
                         if (event.key === "Escape") {
                             event.stopPropagation();
@@ -224,10 +318,17 @@ export default function SolidAgentHost() {
                     }}
                 >
                     {mode === "docked" && <div className={styles.resizeHandle} onPointerDown={startResize} aria-hidden="true" />}
-                    <SolidAgentChat agentUrl={agentUrl} />
+                    <SolidAgentChat
+                        agentUrl={activeAgentUrl}
+                        agentName={activeAgentName}
+                        agentRuntime={agentRuntime}
+                        title={activeAgentTitle}
+                        agents={registeredAgents}
+                        onSelectAgent={handleSelectAgent}
+                    />
                 </div>
             ) : (
-                <button type="button" className={styles.bubble} onClick={toggle} aria-label="Open the SolidX Agent (Ctrl+J)" title="SolidX Agent (Ctrl+J)">
+                <button type="button" className={styles.bubble} onClick={toggle} aria-label={`Open ${activeAgentTitle} (Ctrl+J)`} title={`${activeAgentTitle} (Ctrl+J)`}>
                     <Sparkles size={22} />
                     {agent?.working && <span className={styles.bubbleBadge} aria-label="Agent is working" />}
                 </button>

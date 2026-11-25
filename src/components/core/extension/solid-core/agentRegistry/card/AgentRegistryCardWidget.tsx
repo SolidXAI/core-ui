@@ -121,6 +121,7 @@ export function AgentRegistryCardWidget({ rowData }: SolidKanbanCardWidgetProps)
   const title = typeof rowData?.title === "string" && rowData.title.trim() ? rowData.title.trim() : name;
   const description = typeof rowData?.description === "string" ? rowData.description.trim() : "";
   const status = typeof rowData?.status === "string" && rowData.status.trim() ? rowData.status.trim() : "";
+  const isBuiltin = Boolean(rowData?.isBuiltin ?? (rowData as any)?.is_builtin);
   const configVersion = Number(rowData?.configVersion);
   const normalizedDescription = description.toLocaleLowerCase();
   const summary = normalizedDescription === title.toLocaleLowerCase() || normalizedDescription === name.toLocaleLowerCase() ? "" : description;
@@ -153,6 +154,7 @@ export function AgentRegistryCardWidget({ rowData }: SolidKanbanCardWidgetProps)
       <div className={styles.footer}>
         <div className={styles.meta}>
           {status && <span className={`${styles.status} ${styles[`status_${status.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`] || ""}`}>{status.replace(/[_-]+/g, " ")}</span>}
+          {isBuiltin && <span className={styles.badge}>Built-in</span>}
           {Number.isFinite(configVersion) && configVersion > 0 && <span className={styles.badge} aria-label={`Configuration version ${configVersion}`}>Config v{configVersion}</span>}
         </div>
       </div>

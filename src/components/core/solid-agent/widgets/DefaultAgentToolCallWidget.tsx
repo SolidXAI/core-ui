@@ -39,10 +39,10 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
     const hasArgs = !!args && Object.keys(args).length > 0;
     const expandable = (hasArgs || !!output || progress.length > 0) && status !== "running";
     const isRunning = live || status === "running";
-    const files = normalizeToolFiles(eventData.files);
     const rawSummary: string = eventData.summary ?? "";
     const isNoisySummary = rawSummary.startsWith("const ") || rawSummary.startsWith("let ") || rawSummary.includes("tools.solidx");
     const summary = (!rawSummary || isNoisySummary) ? describeToolArgs(args, toolName) : rawSummary;
+    const files = normalizeToolFiles(eventData.files);
 
     return (
         <div className={`${styles.ToolCard} ${CARD_CLASS[status] ?? styles.ToolCardDone}`}>
@@ -62,12 +62,15 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
             {/* Progress sub-steps: visible while running or when expanded */}
             {(isRunning || expanded) && progress.length > 0 && (
                 <div className={styles.ToolCardProgress}>
-                    {progress.map((step, index) => (
-                        <div key={index} className={`${styles.ToolProgressItem} ${step.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
-                            {step.status === "running" && <SolidSpinner size={10} className={styles.Spin} />}
-                            <span className={styles.ToolProgressLabel}>{step.label}</span>
-                        </div>
-                    ))}
+                    {progress.map((step, index) => {
+                        const isStepRunning = isRunning && step.status === "running";
+                        return (
+                            <div key={index} className={`${styles.ToolProgressItem} ${isStepRunning ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
+                                {isStepRunning && <SolidSpinner size={10} className={styles.Spin} />}
+                                <span className={styles.ToolProgressLabel}>{step.label}</span>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 

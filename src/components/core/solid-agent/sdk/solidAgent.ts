@@ -1,6 +1,6 @@
 import { eventBus } from "../../../../helpers/eventBus";
 import { getSolidStoreDispatch } from "../../../../redux/store/solidEntityApiPool";
-import { agentClosed, agentModeChanged, agentOpenRequested } from "../../../../redux/features/agentSlice";
+import { agentClosed, agentModeChanged, agentOpenRequested, agentSelected } from "../../../../redux/features/agentSlice";
 import type { AgentContext, AgentRuntimeType, SolidAgentOpenOptions } from "../types";
 
 /**
@@ -37,6 +37,10 @@ export const solidAgent = {
     /** Opens the chat window, optionally prefilling (and sending) a prompt with page context. */
     open(options?: SolidAgentOpenOptions) {
         dispatch(agentOpenRequested(options));
+    },
+    /** Switches active agent target. */
+    selectAgent(agentName: string, agentId?: number) {
+        dispatch(agentSelected({ agentName, agentId }));
     },
     /** Sends a prompt straight away (opens the window if it is closed). */
     send(prompt: string, context?: AgentContext) {

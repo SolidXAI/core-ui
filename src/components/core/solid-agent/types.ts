@@ -255,4 +255,6 @@ export type SolidAgentOpenOptions = {
     newSession?: boolean;
     context?: AgentContext;
     mode?: Exclude<AgentMode, "bubble">;
+    agentName?: string;
+    agentId?: number;
 };
