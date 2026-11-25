@@ -40,6 +40,9 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
     switch (matchMode) {
         case '$between':
             return 2;
+        case '$thisWeek':
+        case '$thisMonth':
+            return 2;
         case '$in':
         case '$notIn':
             return null;
