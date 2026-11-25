@@ -1437,6 +1437,69 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowEditAsIconOnly === true;
   const showRowDeleteAsIconOnly =
     showRowActionsAsIconOnly || solidListViewLayout?.attrs?.showRowDeleteAsIconOnly === true;
+  // Row actions default to the right; layouts can place them before the data columns.
+  const rowButtonColumns = (
+    solidListViewLayout?.attrs?.rowButtons &&
+    solidListViewLayout?.attrs?.rowButtons
+      .filter((rb: any) => {
+        const roles = rb?.attrs?.roles || [];
+        const isInContextMenu =
+          rb.attrs.actionInContextMenu === true;
+
+        // Only check hasAnyRole if roles are provided
+        const isAllowed =
+          roles.length === 0 ||
+          hasAnyRole(user?.roles, roles);
+
+        const isVisible = rb?.attrs?.visible !== false;
+        const isVisibleInCurrentEnv = isButtonVisibleInCurrentEnv(rb?.attrs);
+
+        return !isInContextMenu && isAllowed && isVisible && isVisibleInCurrentEnv;
+      })
+      .map((button: any, index: number) => {
+
+        return (
+          <Column
+            key={index}
+            header={button.attrs.label}
+            body={(rowData) => {
+              return (
+                (() => {
+                  const allowedRowStates = button?.attrs?.visibleWhenFieldIn;
+                  const currentRowState = rowData?.[button?.attrs?.visibleWhenField];
+                  if (Array.isArray(allowedRowStates) && allowedRowStates.length > 0 &&
+                    currentRowState !== undefined && currentRowState !== null && currentRowState !== "" &&
+                    !allowedRowStates.includes(String(currentRowState))) return null;
+                  const presentation = resolveButtonPresentation(button?.attrs);
+                  if (!presentation.showIcon && !presentation.showLabel) return null;
+                  return (
+                    <SolidButton
+                      type="button"
+                      icon={presentation.icon}
+                      iconPos={presentation.iconPos}
+                      label={presentation.label}
+                      tooltip={presentation.tooltip}
+                      aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
+                      className={[
+                        "solid-inline-row-button w-full text-left gap-2",
+                        presentation.isIconOnly ? "solid-icon-button" : "",
+                        presentation.buttonClassName ? presentation.buttonClassName : ""
+                      ].filter(Boolean).join(" ")}
+                      size="small"
+                      variant="ghost"
+                      onClick={() => {
+                        handleRowActionClick(button, rowData);
+                      }}
+                    />
+                  );
+                })()
+              );
+            }}
+          />
+        );
+      })
+  );
+
   // const toggleBothSidebars = () => {
   //   if (visibleNavbar) {
   //     dispatch(toggleNavbar());   // close both
@@ -1714,66 +1777,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         headerStyle={{ width: "3em" }}
                       />
                     )}
+                    {solidListViewLayout?.attrs?.rowButtonsPosition === "left" && rowButtonColumns}
                     {solidListViewMetaData && solidListViewLayout && renderColumnsDynamically(solidListViewMetaData, solidListViewLayout)}
-                    {solidListViewLayout?.attrs?.rowButtons &&
-                      solidListViewLayout?.attrs?.rowButtons
-                        .filter((rb: any) => {
-                          const roles = rb?.attrs?.roles || [];
-                          const isInContextMenu =
-                            rb.attrs.actionInContextMenu === true;
-
-                          // Only check hasAnyRole if roles are provided
-                          const isAllowed =
-                            roles.length === 0 ||
-                            hasAnyRole(user?.roles, roles);
-
-                          const isVisible = rb?.attrs?.visible !== false;
-                          const isVisibleInCurrentEnv = isButtonVisibleInCurrentEnv(rb?.attrs);
-
-                          return !isInContextMenu && isAllowed && isVisible && isVisibleInCurrentEnv;
-                        })
-                        .map((button: any, index: number) => {
-
-                          return (
-                            <Column
-                              key={index}
-                              header={button.attrs.label}
-                              body={(rowData) => {
-                                return (
-                                  (() => {
-                                    const allowedRowStates = button?.attrs?.visibleWhenFieldIn;
-                                    const currentRowState = rowData?.[button?.attrs?.visibleWhenField];
-                                    if (Array.isArray(allowedRowStates) && allowedRowStates.length > 0 &&
-                                      currentRowState !== undefined && currentRowState !== null && currentRowState !== "" &&
-                                      !allowedRowStates.includes(String(currentRowState))) return null;
-                                    const presentation = resolveButtonPresentation(button?.attrs);
-                                    if (!presentation.showIcon && !presentation.showLabel) return null;
-                                    return (
-                                      <SolidButton
-                                        type="button"
-                                        icon={presentation.icon}
-                                        iconPos={presentation.iconPos}
-                                        label={presentation.label}
-                                        tooltip={presentation.tooltip}
-                                        aria-label={presentation.isIconOnly ? (presentation.tooltip ?? button?.attrs?.action ?? "Action") : undefined}
-                                        className={[
-                                          "solid-inline-row-button w-full text-left gap-2",
-                                          presentation.isIconOnly ? "solid-icon-button" : "",
-                                          presentation.buttonClassName ? presentation.buttonClassName : ""
-                                        ].filter(Boolean).join(" ")}
-                                        size="small"
-                                        variant="ghost"
-                                        onClick={() => {
-                                          handleRowActionClick(button, rowData);
-                                        }}
-                                      />
-                                    );
-                                  })()
-                                );
-                              }}
-                            />
-                          );
-                        })}
+                    {solidListViewLayout?.attrs?.rowButtonsPosition !== "left" && rowButtonColumns}
 
                     {actionsAllowed.includes(
                       `${permissionExpression(params.modelName, 'update')}`
