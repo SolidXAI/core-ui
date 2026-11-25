@@ -1726,6 +1726,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       params.embeded === true ? undefined : onSelectionChange
                     }
                     selectionMode={params.embeded === true ? null : "checkbox"}
+                    isRowSelectable={(rowData: any) => rowData?.isBuiltin !== true}
                     removableSort={solidListViewLayout?.attrs?.removableSort ?? true}
                     sortMode="single"
                     paginatorTemplate="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
@@ -1834,7 +1835,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         <Column
                           header={showRowDeleteAsIconOnly ? "" : "Delete"}
                           body={(rowData) => {
-                            const shouldHideEditOrDeleteButton = isArchivedListRow(isDraftPublishWorkflowEnabled, rowData);
+                            const shouldHideEditOrDeleteButton =
+                              isArchivedListRow(isDraftPublishWorkflowEnabled, rowData) ||
+                              rowData?.isBuiltin === true;
                             return (
                               <>
                                 {(!shouldHideEditOrDeleteButton) && (
@@ -1891,7 +1894,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     <SolidListViewRowActionsMenu
                                       rowData={rowData}
                                       hasEditInContextMenu={hasEditInContextMenu}
-                                      hasDeleteInContextMenu={hasDeleteInContextMenu}
+                                      hasDeleteInContextMenu={
+                                        hasDeleteInContextMenu && rowData?.isBuiltin !== true
+                                      }
                                       hasCustomContextMenuButtons={hasCustomContextMenuButtons}
                                       solidListViewLayout={solidListViewLayout}
                                       solidListViewMetaData={solidListViewMetaData}

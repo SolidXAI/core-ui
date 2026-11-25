@@ -5,6 +5,8 @@ import {
     agentEventReceived,
     agentHistoryLoaded,
     agentHistoryLoadingChanged,
+    agentHistoryLoadingStarted,
+    agentOlderHistoryFailed,
     agentThreadReset,
     agentToolFilesResolved,
     agentUserMessageAdded,
@@ -373,7 +375,7 @@ export class AgentRuntime {
         this.socket.updateSession(opts);
     }
 
-    resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions) {
+    resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions, isRunning?: boolean) {
         if (this.frame != null) {
             cancelAnimationFrame(this.frame);
             this.frame = null;
@@ -382,13 +384,16 @@ export class AgentRuntime {
         this.responseStarted = false;
         this.hadPriorSession = true;
         this.resetHistoryLoads();
+        this.historySessionId = sessionId;
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
         this.browser.reset();
-        this.dispatch(agentThreadReset());
+        const shouldBeWorking = isRunning ?? this.getState()?.working ?? false;
+        this.dispatch(agentThreadReset({ loadingHistory: true, historySessionId: sessionId, working: shouldBeWorking }));
         this.dispatch(agentHistoryLoadingChanged(true));
         this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
+        void this.loadHistory(sessionId, 1);
     }
 
     async loadOlder() {
@@ -414,25 +419,32 @@ export class AgentRuntime {
         this.socket.close();
     }
 
+    private isCurrentHistoryLoad(generation: number, historySessionId: string) {
+        return generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId;
+    }
+
     private async loadHistory(historySessionId: string, page: number) {
         const key = `${historySessionId}:${page}`;
         if (this.loadingHistoryPages.has(key) || this.loadedHistoryPages.has(key)) return;
         const generation = this.historyGeneration;
+        const isOlder = page > 1;
         this.loadingHistoryPages.set(key, generation);
-        this.dispatch(agentHistoryLoadingChanged(true));
+        this.dispatch(agentHistoryLoadingStarted({ isOlder }));
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
-            this.loadedHistoryPages.add(key);
-            if (!result) return;
+            if (!result) throw new Error("History page unavailable");
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
             const rawItems = historyToItems(result.messages ?? []);
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
-            if (generation !== this.historyGeneration || this.getState()?.historySessionId !== historySessionId) return;
+            if (!this.isCurrentHistoryLoad(generation, historySessionId)) return;
+            this.loadedHistoryPages.add(key);
             const sessionUsage = result.session_usage;
+            const isRunning = result.is_running !== undefined ? result.is_running : (result.status ? result.status === "running" : undefined);
             this.dispatch(agentHistoryLoaded({
                 items,
                 hasMore: !!result.has_more,
                 page,
+                ...(isRunning !== undefined ? { isRunning } : {}),
                 ...(sessionUsage ? {
                     usage: {
                         totalCost: sessionUsage.total_cost ?? 0,
@@ -446,11 +458,12 @@ export class AgentRuntime {
             }));
         } catch {
             // History is a convenience; the live session still works without it.
-            this.loadedHistoryPages.add(key);
+            // A failed older page stays retryable from the thread.
+            if (!isOlder) this.loadedHistoryPages.add(key);
+            else if (this.isCurrentHistoryLoad(generation, historySessionId)) this.dispatch(agentOlderHistoryFailed());
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
-            if (generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId)
-                this.dispatch(agentHistoryLoadingChanged(false));
+            if (this.isCurrentHistoryLoad(generation, historySessionId)) this.dispatch(agentHistoryLoadingChanged(false));
         }
     }
 
@@ -568,7 +581,9 @@ export class AgentRuntime {
             if (event.eventType === AgentEventTypes.sessionStarted && state &&
                 state.items.every((item) => item.id === humanReviewId(state.pendingReview?.requestId ?? 0)) && historyId) {
                 void this.loadHistory(historyId, 1);
-            } else if (event.eventType === AgentEventTypes.sessionStarted) this.dispatch(agentHistoryLoadingChanged(false));
+            } else if (event.eventType === AgentEventTypes.sessionStarted && this.loadingHistoryPages.size === 0) {
+                this.dispatch(agentHistoryLoadingChanged(false));
+            }
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             const content = event.eventData.content ?? event.frame.content;
             const now = Date.now();

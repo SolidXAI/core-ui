@@ -1,12 +1,12 @@
 import { useState } from "react";
 import {
     ChevronRight,
-    Loader2,
     XCircle,
 } from "lucide-react";
+import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
 import styles from "./solidChatWidgets.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
-import { toolDisplayName } from "../agentFormat";
+import { describeToolArgs, toolDisplayName } from "../agentFormat";
 import { normalizeToolFiles } from "../toolFiles";
 import { AgentToolFiles } from "./AgentToolFiles";
 
@@ -37,9 +37,12 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
     const status: ToolStatus = live ? "running" : (eventData.status as ToolStatus) ?? "success";
     const output: string | undefined = eventData.output_raw ?? eventData.output;
     const hasArgs = !!args && Object.keys(args).length > 0;
-    const expandable = (hasArgs || !!output) && status !== "running";
+    const expandable = (hasArgs || !!output || progress.length > 0) && status !== "running";
     const isRunning = live || status === "running";
     const files = normalizeToolFiles(eventData.files);
+    const rawSummary: string = eventData.summary ?? "";
+    const isNoisySummary = rawSummary.startsWith("const ") || rawSummary.startsWith("let ") || rawSummary.includes("tools.solidx");
+    const summary = (!rawSummary || isNoisySummary) ? describeToolArgs(args, toolName) : rawSummary;
 
     return (
         <div className={`${styles.ToolCard} ${CARD_CLASS[status] ?? styles.ToolCardDone}`}>
@@ -52,16 +55,16 @@ export const DefaultAgentToolCallWidget = ({ eventData, live }: SolidChatWidgetP
             >
                 <StatusIcon status={status} />
                 <span className={styles.ToolCardName}>{live ? `Invoking ${toolDisplayName(toolName, args)}…` : toolDisplayName(toolName, args)}</span>
-                {eventData.summary && <span className={styles.ToolCardDesc} title={eventData.summary}>{eventData.summary}</span>}
+                {summary && <span className={styles.ToolCardDesc} title={summary}>{summary}</span>}
                 {expandable && <ChevronRight size={11} className={`${styles.ToolCardChevron} ${expanded ? styles.ToolCardChevronOpen : ""}`} />}
             </button>
 
-            {/* Progress sub-steps: visible only while running */}
-            {isRunning && progress.length > 0 && (
+            {/* Progress sub-steps: visible while running or when expanded */}
+            {(isRunning || expanded) && progress.length > 0 && (
                 <div className={styles.ToolCardProgress}>
                     {progress.map((step, index) => (
                         <div key={index} className={`${styles.ToolProgressItem} ${step.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
-                            {step.status === "running" && <Loader2 size={10} className={styles.Spin} />}
+                            {step.status === "running" && <SolidSpinner size={10} className={styles.Spin} />}
                             <span className={styles.ToolProgressLabel}>{step.label}</span>
                         </div>
                     ))}

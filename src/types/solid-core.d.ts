@@ -378,6 +378,7 @@ export type SolidToolGroupWidgetProps = {
     turnKey: string;
     items: import("../components/core/solid-agent/types").AgentChatItem[];
     working: boolean;
+    startedAt?: number;
     renderItem: (item: import("../components/core/solid-agent/types").AgentChatItem) => import("react").ReactNode;
 }
 
