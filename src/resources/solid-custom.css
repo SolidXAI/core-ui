@@ -808,9 +808,9 @@ textarea {
   justify-content: center;
   min-height: 18px;
   padding: 0 5px;
-  border: 1px solid var(--primary);
-  border-radius: 999px;
-  background: var(--primary);
+  border: 1px solid var(--destructive);
+  border-radius: 6px;
+  background: var(--destructive);
   color: var(--primary-foreground);
   font-size: 9px;
   font-weight: 700;

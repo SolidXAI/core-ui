@@ -22,7 +22,7 @@ const SolidEnvironmentBadge = () => {
       title="Development environment"
       aria-label="Development environment"
     >
-      DEV
+      Dev Mode
     </span>
   );
 };
