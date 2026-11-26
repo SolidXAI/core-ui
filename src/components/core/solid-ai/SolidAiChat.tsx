@@ -656,6 +656,21 @@ export const SolidAiChat: React.FC = () => {
                                         update.toolStatus = status;
                                         update.toolOutput = text;
                                         update.toolOutputRaw = outputStr;
+                                        try {
+                                            const parsed = JSON.parse(outputStr);
+                                            const textContent = parsed.content?.[0]?.text;
+                                            const body = textContent ? JSON.parse(textContent) : parsed;
+                                            const steps = body?.result?.steps || body?.steps;
+                                            if (Array.isArray(steps) && steps.length > 0) {
+                                                update.toolProgress = steps.map((s: any) => ({
+                                                    label: s.label,
+                                                    status: s.status === "success" || s.status === "done" ? "done" : "running",
+                                                    durationMs: s.duration_ms,
+                                                }));
+                                            }
+                                        } catch {
+                                            // Ignore parsing errors for raw text outputs
+                                        }
                                     }
                                     return { ...m, ...update };
                                 }
@@ -1107,7 +1122,7 @@ export const SolidAiChat: React.FC = () => {
                                                     status === "success" ? styles.ToolCardStatusDone :
                                                         styles.ToolCardStatusIcon;
 
-                                            const hasExpandable = !!msg.toolOutput || !!msg.toolArgs;
+                                            const hasExpandable = !!msg.toolOutput || !!msg.toolArgs || !!(msg.toolProgress && msg.toolProgress.length > 0);
                                             const isExpanded = expandedToolIds.has(msg.id);
                                             const toggleExpand = hasExpandable && status !== "running"
                                                 ? () => setExpandedToolIds((prev) => {
@@ -1151,8 +1166,8 @@ export const SolidAiChat: React.FC = () => {
                                                             />
                                                         )}
                                                     </button>
-                                                    {/* Progress substeps: visible only while running */}
-                                                    {status === "running" && msg.toolProgress && msg.toolProgress.length > 0 && (
+                                                    {/* Progress substeps: visible while running or when expanded */}
+                                                    {(status === "running" || isExpanded) && msg.toolProgress && msg.toolProgress.length > 0 && (
                                                         <div className={styles.ToolCardProgress}>
                                                             {msg.toolProgress.map((p, i) => (
                                                                 <div key={i} className={`${styles.ToolProgressItem} ${p.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
