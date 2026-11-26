@@ -278,7 +278,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     );
 
     return (
-        <div className='h-full'>
+        <div className='solid-chatter-panel h-full'>
             <SolidChatterHeader
                 id={id}
                 refetch={fetchData}
@@ -291,7 +291,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 title={title}
                 modelUserKey={modelUserKey}
             />
-            <div className='solid-chatter-body' style={{
+            <div className='solid-chatter-body solid-chatter-activity' style={{
                 height:
                     isMobileViewport
                         ? (visibleBox === 'email-message'
