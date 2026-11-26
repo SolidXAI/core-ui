@@ -33,7 +33,6 @@ type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; r
 type Input = { name: string; description: string; dataType: string; defaultValue?: unknown; optional: boolean };
 type Agent = Item & AgentDeployment & {
   configVersion?: number;
-  isBuiltin?: boolean;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
@@ -177,7 +176,6 @@ const detailFields = [
   "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
   "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
   "runner", "minProcesses", "maxProcesses", "processCpu", "processMemory",
-  "isBuiltin",
 ];
 
 const detailQuery = [
@@ -766,11 +764,9 @@ export function AgentRegistryEditorPage() {
     }
   };
 
-  const isBuiltin = Boolean(record?.isBuiltin ?? (record as any)?.is_builtin);
-
-  const field = (label: string, value: string, setValue: (value: string) => void, key: string, required = false, disabled = false) =>
+  const field = (label: string, value: string, setValue: (value: string) => void, key: string, required = false) =>
     <label className="agent-editor__field"><span>{label}{required && " *"}</span>
-      <SolidInput value={value} disabled={disabled} aria-invalid={Boolean(errors[key])} onChange={(event) => { setValue(event.target.value); setErrors((current) => ({ ...current, [key]: "" })); }} />
+      <SolidInput value={value} aria-invalid={Boolean(errors[key])} onChange={(event) => { setValue(event.target.value); setErrors((current) => ({ ...current, [key]: "" })); }} />
       {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}
     </label>;
   const linked = (ids: number[], catalog: Item[], fallback: Item[] = []) =>
@@ -814,9 +810,9 @@ export function AgentRegistryEditorPage() {
   const activationWaiting = agentStatus === "draft" && activationRemainingSeconds > 0;
   const tabs = [
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
-      <div className="agent-editor__grid">{field("Name", name, setName, "name", true, isBuiltin)}{field("Title", title, setTitle, "title", true)}
+      <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
-        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError || isBuiltin} clearable={false} required error={errors.module} />
+        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError} clearable={false} required error={errors.module} />
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
