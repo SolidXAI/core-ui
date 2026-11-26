@@ -1,4 +1,5 @@
-import { loadSession, saveSession, clearSession } from "./storage";
+import { loadSession, saveSession, clearSession, isAdminEmbedDocument } from "./storage";
+import { getAdminEmbedSession } from "./adminEmbedSession";
 import { refreshAccessToken } from "./refreshAccessToken";
 import { eventBus, AppEvents } from "../../helpers/eventBus";
 import type { Session } from "./types";
@@ -9,6 +10,8 @@ import { signOut } from "./signOut";
 let refreshPromise: Promise<any> | null = null;
 
 export async function getSession(): Promise<Session> {
+  if (isAdminEmbedDocument) return getAdminEmbedSession();
+
   const session = loadSession();
   if (!session?.user?.accessToken) return null;
 

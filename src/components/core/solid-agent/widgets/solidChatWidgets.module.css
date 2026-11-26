@@ -5,7 +5,7 @@
 .AiTurnGroup {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: 0;
     /* max-width: 800px; */
     width: 100%;
 }
@@ -649,8 +649,8 @@
 .ThinkingBubble {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 2px 6px;
+    gap: 0;
+    padding: 2px 0;
     background: transparent;
     border: 0;
     width: fit-content;
@@ -942,4 +942,70 @@
     max-width: 100%;
     max-height: 100%;
     border-radius: 8px;
+}
+
+/* Files a tool returned (screenshots, downloads) */
+.ToolFiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 2px 2px;
+}
+.ToolFileThumb {
+  width: 132px;
+  height: 84px;
+  padding: 0;
+  border: 1px solid var(--agent-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--agent-page);
+  cursor: zoom-in;
+}
+.ToolFileThumb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.ToolFileThumb:hover { border-color: var(--agent-primary); }
+.ToolFileChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 260px;
+  padding: 4px 9px;
+  border: 1px solid var(--agent-border);
+  border-radius: 7px;
+  background: var(--agent-bg);
+  color: var(--agent-fg);
+  font-size: 11.5px;
+  text-decoration: none;
+}
+a.ToolFileChip:hover { border-color: var(--agent-primary); color: var(--agent-primary); }
+.ToolFileName { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ToolFileSize { flex: 0 0 auto; color: var(--agent-muted); }
+
+/* AgentHub context compaction divider */
+.ContextCompacted {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  color: var(--agent-muted);
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+.ContextCompactedLine {
+  flex: 1 1 auto;
+  min-width: 16px;
+  height: 1px;
+  background: var(--agent-border);
+}
+.ContextCompactedLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ContextCompactedSizes {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
 }

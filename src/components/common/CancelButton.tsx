@@ -53,14 +53,14 @@ export const SolidCancelButton = () => {
     };
     return (
         <>
-            {/* <div className="hidden lg:flex"> */}
+            {/* <div className="flex solid-hide-below-lg"> */}
             {/* <div> */}
-            <SolidButton variant="outline" type="button" onClick={handleGoBack} className='hidden bg-[var(--primary-color-text)] lg:flex' style={{ minWidth: 66 }}>
+            <SolidButton variant="outline" type="button" onClick={handleGoBack} className='bg-[var(--primary-color-text)] flex solid-hide-below-lg' style={{ minWidth: 66 }}>
                 Close
             </SolidButton>
             {/* </div> */}
             {/* </div> */}
-            <SolidButton type="button" leftIcon={<X size={14} />} onClick={handleGoBack} className='solid-icon-button flex bg-[var(--primary-color-text)] lg:hidden' />
+            <SolidButton type="button" leftIcon={<X size={14} />} onClick={handleGoBack} className='solid-icon-button flex bg-[var(--primary-color-text)] solid-hide-from-lg' />
         </>
     )
 }

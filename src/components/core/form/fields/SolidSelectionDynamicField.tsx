@@ -275,6 +275,8 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 className={`solid-standard-autocomplete ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalidControl : ""}`}
                 value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
                 dropdown
+                disabled={formDisabled || fieldDisabled}
+                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                 suggestions={selectionDynamicItems}
                 completeMethod={(e) => selectionDynamicSearch(e)}
                 emptyMessage="No records found"

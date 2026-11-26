@@ -5,17 +5,22 @@ import {
     agentEventReceived,
     agentHistoryLoaded,
     agentHistoryLoadingChanged,
+    agentHistoryLoadingStarted,
+    agentOlderHistoryFailed,
     agentThreadReset,
+    agentToolFilesResolved,
     agentUserMessageAdded,
     type AgentState,
 } from "../../../../redux/features/agentSlice";
 import { historyToItems, isSameAssistantContent, normalizeAgentFrame } from "../agentEvents";
 import { parseWidgetContent } from "../thread/inlineWidget";
+import { humanReviewAllowsChoice, humanReviewId } from "../humanReview";
 import { SOLID_AGENT_EVENTS } from "../sdk/solidAgent";
 import { emitBeforeUserMessageSend, type BeforeUserMessageSendContribution } from "./beforeUserMessageSend";
 import { emitAgentPublicEvent, type AgentPublicEventName, type AgentPublicEventPayloads } from "./agentPublicEvents";
 import { AgentEventTypes, type AgentRuntimeType, type AgentAttachment, type AgentChatEvent, type AgentContext, type AgentMessageContext, type AgentSessionOptions, type AgentWireFrame } from "../types";
-import { resolveAttachmentMedia } from "./agentAttachmentMedia";
+import { fetchToolFileMedia, resolveAttachmentMedia } from "./agentAttachmentMedia";
+import { AgentBrowserChannel } from "./agentBrowser";
 import { clearAllAgentAuth } from "./agentAuth";
 import { fetchSessionHistory, uploadAgentAttachments } from "./agentRest";
 import { AgentSocket } from "./agentSocket";
@@ -133,8 +138,13 @@ export function setStoredSessionOptions(
     }
 }
 
+/** Linking tool files to their event can lag the live ToolResult frame by a moment. */
+const TOOL_FILE_RETRY_MS = [0, 1500, 4000];
+
 export class AgentRuntime {
     readonly socket: AgentSocket;
+    /** Live view and control of the session's browser (AgentHub browser tools). */
+    readonly browser: AgentBrowserChannel;
     private pendingDelta = "";
     private frame: number | null = null;
     private unsubscribers: Array<() => void> = [];
@@ -176,7 +186,9 @@ export class AgentRuntime {
             initialOptions,
             agentRuntime === "agentHub" ? getAgentChatWidgetCatalog(agentName) : [],
         );
+        this.browser = new AgentBrowserChannel(this.socket);
         this.socket.setOnSessionExpired(() => {
+            this.browser.reset();
             if (this.persistSession) writeSessionId(this.sessionKey, null);
             if (this.frame != null) {
                 cancelAnimationFrame(this.frame);
@@ -221,6 +233,8 @@ export class AgentRuntime {
     ) {
         const content = text;
         if (!content.trim() && !attachments.length) return;
+        if (this.getState()?.pendingReview) throw new Error("Answer the agent’s pending request first.");
+        if (this.getState()?.reviewResuming) throw new Error("The agent is resuming after your response.");
         const controller = new AbortController();
         this.preparationControllers.add(controller);
         let messageContext: AgentMessageContext | undefined;
@@ -288,11 +302,32 @@ export class AgentRuntime {
     /** Answers a widget. Sent as text too, so agents without widget_reply support still understand it. */
     async replyToWidget(widgetId: string, widget: string, value: unknown,
         beforeSend?: Parameters<AgentRuntime["sendMessage"]>[4]) {
+        const state = this.getState();
+        const review = state?.pendingReview;
+        if (review) {
+            if (widgetId !== humanReviewId(review.requestId) || typeof value !== "string") return;
+            if (!state?.reviewSubmitting && state?.connection === "open" && humanReviewAllowsChoice(review, value)) {
+                this.respondToReview(value, review.kind === "approval" ? "" : value);
+            }
+            return;
+        }
+        if (widgetId.startsWith("human-request-")) return;
         const text = typeof value === "string" ? value : Array.isArray(value) ? value.join(", ") : JSON.stringify(value);
         await this.sendMessage(text, this.lastContext, [], undefined, beforeSend, "widget", { widgetId, value });
         // The text message uses the shared preparation path. Keep the structured widget
         // value as a separate event for consumers that handle widget replies.
         eventBus.emit(SOLID_AGENT_EVENTS.widgetAction, { widgetId, widget, value, agentType: this.agentRuntime });
+    }
+
+    respondToReview(choice: string, text: string) {
+        const state = this.getState();
+        const review = state?.pendingReview;
+        const sessionId = this.socket.currentSessionId;
+        if (!state || !review || state.reviewSubmitting || !sessionId || state.connection !== "open") {
+            throw new Error("The review is not ready to accept a response.");
+        }
+        this.dispatch(agentEventReceived(normalizeAgentFrame({ type: "human_response_submitting" })));
+        this.socket.send({ action: "human_response", session_id: sessionId, request_id: review.requestId, choice, text });
     }
 
     cancel() {
@@ -322,6 +357,7 @@ export class AgentRuntime {
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
         this.lastContext = undefined;
+        this.browser.reset();
         this.dispatch(agentThreadReset());
         this.socket.newSession({ ...(provider ? { provider, model } : {}), ...(opts || {}) });
     }
@@ -339,7 +375,7 @@ export class AgentRuntime {
         this.socket.updateSession(opts);
     }
 
-    resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions) {
+    resume(sessionId: string, provider?: string, model?: string, opts?: AgentSessionOptions, isRunning?: boolean) {
         if (this.frame != null) {
             cancelAnimationFrame(this.frame);
             this.frame = null;
@@ -348,12 +384,16 @@ export class AgentRuntime {
         this.responseStarted = false;
         this.hadPriorSession = true;
         this.resetHistoryLoads();
+        this.historySessionId = sessionId;
         if (this.persistSession) writeSessionId(this.sessionKey, sessionId);
         if (provider) setStoredProviderAndModel(provider, model);
         if (provider && opts) setStoredSessionOptions(provider, opts);
-        this.dispatch(agentThreadReset());
+        this.browser.reset();
+        const shouldBeWorking = isRunning ?? this.getState()?.working ?? false;
+        this.dispatch(agentThreadReset({ loadingHistory: true, historySessionId: sessionId, working: shouldBeWorking }));
         this.dispatch(agentHistoryLoadingChanged(true));
         this.socket.resume(sessionId, { ...(provider ? { provider, model } : {}), ...(opts || {}) });
+        void this.loadHistory(sessionId, 1);
     }
 
     async loadOlder() {
@@ -375,28 +415,36 @@ export class AgentRuntime {
         this.resetHistoryLoads();
         this.unsubscribers.forEach((off) => off());
         if (this.frame != null) cancelAnimationFrame(this.frame);
+        this.browser.dispose();
         this.socket.close();
+    }
+
+    private isCurrentHistoryLoad(generation: number, historySessionId: string) {
+        return generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId;
     }
 
     private async loadHistory(historySessionId: string, page: number) {
         const key = `${historySessionId}:${page}`;
         if (this.loadingHistoryPages.has(key) || this.loadedHistoryPages.has(key)) return;
         const generation = this.historyGeneration;
+        const isOlder = page > 1;
         this.loadingHistoryPages.set(key, generation);
-        this.dispatch(agentHistoryLoadingChanged(true));
+        this.dispatch(agentHistoryLoadingStarted({ isOlder }));
         try {
             const result = await fetchSessionHistory(this.agentUrl, historySessionId, page);
-            this.loadedHistoryPages.add(key);
-            if (!result) return;
+            if (!result) throw new Error("History page unavailable");
             // Attached files are stored in Solid media storage; resolve their URLs before showing.
             const rawItems = historyToItems(result.messages ?? []);
             const items = this.persistSession ? await resolveAttachmentMedia(rawItems) : rawItems;
-            if (generation !== this.historyGeneration || this.getState()?.historySessionId !== historySessionId) return;
+            if (!this.isCurrentHistoryLoad(generation, historySessionId)) return;
+            this.loadedHistoryPages.add(key);
             const sessionUsage = result.session_usage;
+            const isRunning = result.is_running !== undefined ? result.is_running : (result.status ? result.status === "running" : undefined);
             this.dispatch(agentHistoryLoaded({
                 items,
                 hasMore: !!result.has_more,
                 page,
+                ...(isRunning !== undefined ? { isRunning } : {}),
                 ...(sessionUsage ? {
                     usage: {
                         totalCost: sessionUsage.total_cost ?? 0,
@@ -410,18 +458,27 @@ export class AgentRuntime {
             }));
         } catch {
             // History is a convenience; the live session still works without it.
-            this.loadedHistoryPages.add(key);
+            // A failed older page stays retryable from the thread.
+            if (!isOlder) this.loadedHistoryPages.add(key);
+            else if (this.isCurrentHistoryLoad(generation, historySessionId)) this.dispatch(agentOlderHistoryFailed());
         } finally {
             if (this.loadingHistoryPages.get(key) === generation) this.loadingHistoryPages.delete(key);
-            if (generation === this.historyGeneration && this.getState()?.historySessionId === historySessionId)
-                this.dispatch(agentHistoryLoadingChanged(false));
+            if (this.isCurrentHistoryLoad(generation, historySessionId)) this.dispatch(agentHistoryLoadingChanged(false));
         }
     }
 
     private handleFrame(frame: AgentWireFrame) {
         const event = normalizeAgentFrame(frame);
+        // Browser frames stay out of Redux and the SDK events.
+        if (event.eventType.startsWith("browser_") && this.browser.handle(event.eventType, event.eventData)) return;
         if (event.eventType === AgentEventTypes.sessionStarted) {
+            const state = this.getState();
+            if (state?.pendingReview || state?.reviewResuming) {
+                this.resetHistoryLoads();
+                this.dispatch(agentThreadReset());
+            }
             const sessionId = frame.session_id ?? event.eventData.session_id ?? null;
+            this.browser.sessionStarted(sessionId);
             this.publish(this.hadPriorSession ? "onSessionResumed" : "onSessionStarted", { sessionId });
             this.hadPriorSession = true;
         }
@@ -448,10 +505,10 @@ export class AgentRuntime {
                     sessionId: this.socket.currentSessionId,
                 });
             }
-            this.publish("onAgentTurnCompleted", { sessionId: this.socket.currentSessionId, outcome: "completed" });
         } else if (event.eventType === AgentEventTypes.agentError || event.eventType === AgentEventTypes.error) {
             this.publish("onError", { stage: "runtime", code: "agent_error", retryable: false });
-        } else if (event.eventType === "HumanRequestCreated") {
+        } else if (event.eventType === "human_request" ||
+            event.eventType === "HumanRequestCreated" && this.agentRuntime !== "agentHub") {
             const approval = event.eventData.kind === "approval";
             this.publish(approval ? "onApprovalRequested" : "onHumanInputRequested", {
                 sessionId: this.socket.currentSessionId,
@@ -472,6 +529,27 @@ export class AgentRuntime {
         this.flushTokens();
         this.dispatch(agentEventReceived(event));
         this.emitSdkEvents(event);
+        if (event.eventType === AgentEventTypes.toolResult && this.persistSession) this.resolveToolFiles(event.eventData);
+    }
+
+    /** Fetches the stored URLs of the screenshots and downloads a tool just returned. */
+    private resolveToolFiles(eventData: Record<string, any>) {
+        const agentEventId = eventData.agentEventId;
+        const stored = Array.isArray(eventData.files) && eventData.files.some((file: any) => file?.mediaId != null);
+        if (agentEventId == null || !stored) return;
+        const generation = this.historyGeneration;
+        void (async () => {
+            for (const delay of TOOL_FILE_RETRY_MS) {
+                if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+                if (generation !== this.historyGeneration) return;
+                const media = await fetchToolFileMedia(agentEventId);
+                if (generation !== this.historyGeneration) return;
+                if (media.length) {
+                    this.dispatch(agentToolFilesResolved({ agentEventId, media }));
+                    return;
+                }
+            }
+        })();
     }
 
     private publish<E extends AgentPublicEventName>(event: E, payload: AgentPublicEventPayloads[E]) {
@@ -480,11 +558,13 @@ export class AgentRuntime {
 
     private lastTurnCompleteContent: string | null = null;
     private lastTurnCompleteTime = 0;
+    private turnCompletionPublished = false;
 
     private emitSdkEvents(event: AgentChatEvent) {
         if (event.eventType === AgentEventTypes.userMessage || event.eventType === AgentEventTypes.agentStarted) {
             this.lastTurnCompleteContent = null;
             this.lastTurnCompleteTime = 0;
+            this.turnCompletionPublished = false;
         } else if (event.eventType === AgentEventTypes.sessionStarted || event.eventType === AgentEventTypes.sessionUpdated) {
             const sessionId = event.frame.session_id ?? event.eventData.session_id ?? null;
             const provider = event.frame.provider ?? event.eventData.provider ?? this.socket.currentProvider;
@@ -498,9 +578,12 @@ export class AgentRuntime {
                 this.resetHistoryLoads();
                 this.historySessionId = historyId;
             }
-            if (event.eventType === AgentEventTypes.sessionStarted && state && state.items.length === 0 && historyId) {
+            if (event.eventType === AgentEventTypes.sessionStarted && state &&
+                state.items.every((item) => item.id === humanReviewId(state.pendingReview?.requestId ?? 0)) && historyId) {
                 void this.loadHistory(historyId, 1);
-            } else if (event.eventType === AgentEventTypes.sessionStarted) this.dispatch(agentHistoryLoadingChanged(false));
+            } else if (event.eventType === AgentEventTypes.sessionStarted && this.loadingHistoryPages.size === 0) {
+                this.dispatch(agentHistoryLoadingChanged(false));
+            }
         } else if (event.eventType === AgentEventTypes.turnComplete || event.eventType === AgentEventTypes.turnCompleteLegacy) {
             const content = event.eventData.content ?? event.frame.content;
             const now = Date.now();
@@ -509,6 +592,16 @@ export class AgentRuntime {
             }
             this.lastTurnCompleteTime = now;
             this.lastTurnCompleteContent = typeof content === "string" ? content : null;
+            // Publish only for a new live completion, never while loading history.
+            if (!this.turnCompletionPublished) {
+                this.turnCompletionPublished = true;
+                const widget = parseWidgetContent(content);
+                this.publish("onAgentTurnCompleted", {
+                    sessionId: this.socket.currentSessionId,
+                    outcome: "completed",
+                    ...(widget ? { widget: { name: widget.widget, data: widget.data } } : {}),
+                });
+            }
             eventBus.emit(SOLID_AGENT_EVENTS.turnComplete, {
                 sessionId: this.socket.currentSessionId,
                 agentType: this.agentRuntime,

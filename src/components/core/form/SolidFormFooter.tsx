@@ -73,7 +73,7 @@ export const SolidFormFooter = ({ params, internationalisationEnabled = false }:
     // Helper: update local storage
     // -----------------------------
     const updatePaginationInLocalStorage = (offset: number, limit: number) => {
-        const listPath = window.location.pathname.replace(
+        const listPath = pathname.replace(
             /\/form\/[^/]+/,
             "/list",
         );
@@ -139,7 +139,7 @@ export const SolidFormFooter = ({ params, internationalisationEnabled = false }:
         if (params.id !== "new") {
 
             const fetchNavigation = async () => {
-                const listPath = window.location.pathname.replace(
+                const listPath = pathname.replace(
                     /\/form\/[^/]+/,
                     "/list",
                 );

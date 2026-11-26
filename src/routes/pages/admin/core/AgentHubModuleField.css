@@ -13,3 +13,10 @@
   font-weight: 400;
   line-height: 1.35;
 }
+
+.agent-hub-module-field select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+

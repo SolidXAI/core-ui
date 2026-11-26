@@ -8,6 +8,7 @@ import { withAgentId } from "./client/agentUrls";
 import { useAdminInputContext, type AgentInputContext } from "./useAdminInputContext";
 import type { AgentInputDefinition } from "./embed/agentEmbedProtocol";
 import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/agentEmbedProtocol";
+import type { AgentWorkspaceControls } from "./embed/agentWorkspace";
 
 type SharedProps = {
     title?: string;
@@ -40,6 +41,7 @@ type SharedProps = {
         onRestore: () => void;
         onClose: () => void;
     };
+    workspaceControls?: AgentWorkspaceControls;
 };
 
 type Props = SharedProps & (
@@ -113,7 +115,7 @@ export function SolidAgentEmbedded(props: Props) {
                 inputs={props.inputs} requiredInputs={props.requiredInputs} externalEmbed={!!props.externalEmbed} onInputsLocked={props.externalEmbed?.onInputsLocked}
                 sessionOwnerKey={props.externalEmbed?.sessionOwnerKey}
                 beforeSend={props.externalEmbed?.beforeSend}
-                embedded suggestions={suggestions} windowControls={windowControls} />
+                embedded suggestions={suggestions} windowControls={windowControls} workspaceControls={props.workspaceControls} />
         </div>
     );
 }

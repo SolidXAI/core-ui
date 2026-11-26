@@ -10,6 +10,7 @@ import { useSession } from "../../../../hooks/useSession";
 import { getSettingsMap } from "../../../../helpers/settingsPayload";
 import { showToast } from "../../../../redux/features/toastSlice";
 import { AgentRegistryAuditPanel } from "./AgentRegistryAuditPanel";
+import { AgentDeploymentPanel, type AgentDeployment } from "./AgentDeploymentPanel";
 import { AgentPersonaHistory } from "./AgentPersonaHistory";
 import { AgentConfigVersionsPanel } from "./AgentConfigVersionsPanel";
 import { AgentHubTagsField, agentHubTagsFrom, agentHubTagsPayload, type AgentHubTag } from "./AgentHubTagsField";
@@ -30,13 +31,29 @@ import "./AgentRegistryEditorPage.css";
 type Item = { id: number; name?: string; title?: string; displayName?: string; description?: string; iconName?: string; key?: string; module?: { id?: number; displayName?: string }; [key: string]: any };
 type Link = { id: number; agentSkillRegistry?: Item; agentToolRegistry?: Item; roleMetadata?: Item; secret?: Item; envVarName?: string; alwaysInclude?: boolean; requiresApproval?: boolean };
 type Input = { name: string; description: string; dataType: string; defaultValue?: unknown; optional: boolean };
-type Agent = Item & {
+type Agent = Item & AgentDeployment & {
   configVersion?: number;
+  isBuiltin?: boolean;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
   stepLimit?: number; turnStepLimit?: number; costLimit?: number;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
   tags?: AgentHubTag[];
 };
+const generationFields = [
+  ["temperatureReasoningModel", "Temperature", 2], ["topPReasoningModel", "Top P", 1],
+  ["reasoningEffortReasoningModel", "Reasoning effort", null],
+  ["temperatureFastModel", "Temperature", 2], ["topPFastModel", "Top P", 1],
+  ["reasoningEffortFastModel", "Reasoning effort", null],
+] as const;
+type GenerationField = typeof generationFields[number][0];
+type GenerationSettings = Record<GenerationField, number | string | null>;
+const reasoningEfforts = ["none", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
+function generationSettingsFrom(record: Partial<Agent>): GenerationSettings {
+  return Object.fromEntries(generationFields.map(([key, , max]) => [
+    key, record[key] == null ? null : max === null ? String(record[key]) : Number(record[key]),
+  ])) as GenerationSettings;
+}
+
 type ProviderModelOption = { provider: string; providerLabel: string; model: string; value: string; note?: string };
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -173,7 +190,10 @@ function fieldsQuery(fields: string[]): string {
 
 const detailFields = [
   "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
+  ...generationFields.map(([key]) => key),
   "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
+  "runner", "minProcesses", "maxProcesses", "processCpu", "processMemory",
+  "isBuiltin",
 ];
 
 const detailQuery = [
@@ -216,7 +236,10 @@ function agentFormFromRecord(record: Agent) {
   return {
     name: record.name ?? "", title: record.title ?? "", description: record.description ?? "", iconName: record.iconName ?? "",
     inputs: parseInputs(record.requiredInputs), reasoningModelKey: record.reasoningModelKey ?? "", fastModelKey: record.fastModelKey ?? "",
-    systemPrompt: record.systemPrompt ?? "", stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
+    ...generationSettingsFrom(record),
+    systemPrompt: record.systemPrompt ?? "", runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0,
+    maxProcesses: record.maxProcesses ?? null, processCpu: record.processCpu ?? null, processMemory: record.processMemory ?? null,
+    stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
     costLimit: Number(record.costLimit ?? 3), tags: agentHubTagsFrom(record.tags), moduleId: agentHubModuleFrom(record.module)?.id ?? null, skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
     toolIds: tools.map((link) => link.agentToolRegistry?.id).filter(Boolean),
     roleIds: items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean),
@@ -300,11 +323,12 @@ function ResourcePreviewDialog({ item, kind, onClose }: { item: Item; kind: "ski
 type ResourceView = "card" | "list";
 
 const itemLabel = (item: Item) => String(item.name ?? item.displayName ?? item.key ?? "");
-const itemMatches = (item: Item, query: string) => `${itemLabel(item)} ${item.description ?? ""}`.toLowerCase().includes(query);
+const itemMatches = (item: Item, query: string) => `${itemLabel(item)} ${item.key ?? ""} ${item.description ?? ""}`.toLowerCase().includes(query);
 
-function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfirm }: {
+function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfirm, onRefresh }: {
   label: string; options: Item[]; selected: Item[]; createUrl?: string;
   onClose: () => void; onConfirm: (ids: number[]) => void;
+  onRefresh?: () => void;
 }) {
   const [search, setSearch] = React.useState("");
   const [picked, setPicked] = React.useState<number[]>([]);
@@ -327,7 +351,8 @@ function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfir
     footer={<><SolidButton type="button" variant="secondary" onClick={onClose}>Cancel</SolidButton>
       <SolidButton type="button" disabled={!picked.length} onClick={() => { onConfirm(picked); onClose(); }}>{picked.length ? `Add ${picked.length} ${picked.length === 1 ? singular : plural}` : `Add ${plural}`}</SolidButton></>}>
     <SolidDialogBody><div className="agent-editor__add-dialog">
-      <SolidInput autoFocus value={search} placeholder={`Search ${plural}…`} aria-label={`Search ${plural}`} onChange={(event) => setSearch(event.target.value)} />
+      <div className="agent-editor__lookup-search"><SolidInput autoFocus value={search} placeholder={`Search ${plural}…`} aria-label={`Search ${plural}`} onChange={(event) => setSearch(event.target.value)} />
+        {onRefresh && <button type="button" className="agent-editor__icon-button" aria-label={`Refresh ${plural}`} title={`Refresh ${plural}`} onClick={onRefresh}><RefreshCw size={15} /></button>}</div>
       <div className="agent-editor__add-options" role="group" aria-label={`Available ${plural}`}>
         {visible.length > 0 && <label className="agent-editor__add-option agent-editor__add-option--all">
           <input type="checkbox" checked={allPicked} ref={(element) => { if (element) element.indeterminate = visiblePicked > 0 && !allPicked; }} onChange={toggleAll} />
@@ -346,9 +371,10 @@ function AddLinksDialog({ label, options, selected, createUrl, onClose, onConfir
   </SolidDialog>;
 }
 
-function LinkPicker({ label, description, options, selected, onAdd, onAddMany, onRemove, createUrl, render, renderSettings, linkFor, onView, editUrlFor, compact, view, onViewChange, renderRow }: {
+function LinkPicker({ label, description, options, selected, onAdd, onAddMany, onRemove, createUrl, onRefresh, render, renderSettings, linkFor, onView, editUrlFor, compact, view, onViewChange, renderRow }: {
   label: string; description: string; options: Item[]; selected: Item[];
   onAdd?: (id: number) => void; onAddMany?: (ids: number[]) => void; onRemove: (id: number) => void; createUrl?: string;
+  onRefresh?: () => void;
   render: (item: Item, link?: Link) => React.ReactNode;
   renderSettings?: (item: Item, link?: Link) => React.ReactNode;
   linkFor?: (id: number) => Link | undefined;
@@ -364,7 +390,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onAddMany, o
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [addOpen, setAddOpen] = React.useState(false);
   const pickerRef = React.useRef<HTMLDivElement>(null);
-  const showAssociatedCount = label === "Skills" || label === "Tools";
+  const showAssociatedCount = label === "Skills" || label === "Tools" || label === "Secrets";
   const typedName = search.trim();
   const query = typedName.toLowerCase();
   const available = options.filter((item) => !selected.some((selectedItem) => selectedItem.id === item.id) && itemMatches(item, query)).slice(0, 20);
@@ -426,7 +452,7 @@ function LinkPicker({ label, description, options, selected, onAdd, onAddMany, o
         </SolidDropdownMenuContent>
       </SolidDropdownMenu> : <button type="button" aria-label={`Remove ${item.name ?? item.displayName ?? item.key}`} onClick={() => onRemove(item.id)}><Trash2 size={16} /></button>}
     </div>)}</div> : <div className="agent-editor__empty">{selected.length ? `No linked ${label.toLowerCase()} match "${typedName}".` : `No ${label.toLowerCase()} linked yet.`}</div>}
-    {addOpen && onAddMany && <AddLinksDialog label={label} options={options} selected={selected} createUrl={createUrl} onClose={() => setAddOpen(false)} onConfirm={onAddMany} />}
+    {addOpen && onAddMany && <AddLinksDialog label={label} options={options} selected={selected} createUrl={createUrl} onClose={() => setAddOpen(false)} onConfirm={onAddMany} onRefresh={onRefresh} />}
   </section>;
 }
 
@@ -519,10 +545,12 @@ export function AgentRegistryEditorPage() {
   const [inputs, setInputs] = React.useState<Input[]>([]);
   const [reasoningModelKey, setReasoningModelKey] = React.useState("");
   const [fastModelKey, setFastModelKey] = React.useState("");
+  const [generationSettings, setGenerationSettings] = React.useState<GenerationSettings>(() => generationSettingsFrom({}));
   const [systemPrompt, setSystemPrompt] = React.useState("");
   const [stepLimit, setStepLimit] = React.useState(100);
   const [turnStepLimit, setTurnStepLimit] = React.useState(20);
   const [costLimit, setCostLimit] = React.useState(3);
+  const [deployment, setDeployment] = React.useState<AgentDeployment>({ runner: null, minProcesses: 0, maxProcesses: null, processCpu: null, processMemory: null });
   const [tags, setTags] = React.useState<AgentHubTag[]>([]);
   const [module, setModule] = React.useState<AgentHubModule | null>(null);
   const [creatingTag, setCreatingTag] = React.useState(false);
@@ -574,7 +602,7 @@ export function AgentRegistryEditorPage() {
     return () => window.clearInterval(timer);
   }, [activationReadyAt, id]);
 
-  const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, systemPrompt,
+  const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, ...generationSettings, systemPrompt, ...deployment,
     stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
     alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
@@ -584,8 +612,11 @@ export function AgentRegistryEditorPage() {
     setName(record.name ?? ""); setTitle(record.title ?? ""); setDescription(record.description ?? "");
     setIconName(record.iconName ?? ""); setInputs(parseInputs(record.requiredInputs));
     setReasoningModelKey(record.reasoningModelKey ?? ""); setFastModelKey(record.fastModelKey ?? "");
+    setGenerationSettings(generationSettingsFrom(record));
     setSystemPrompt(record.systemPrompt ?? ""); setStepLimit(record.stepLimit ?? 100);
     setTurnStepLimit(record.turnStepLimit ?? 20); setCostLimit(Number(record.costLimit ?? 3));
+    setDeployment({ runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0, maxProcesses: record.maxProcesses ?? null,
+      processCpu: record.processCpu ?? null, processMemory: record.processMemory ?? null });
     setTags(agentHubTagsFrom(record.tags));
     setModule(agentHubModuleFrom(record.module));
     setSkillIds(items(record.agentSkills).map((link) => link.agentSkillRegistry?.id).filter(Boolean));
@@ -676,12 +707,25 @@ export function AgentRegistryEditorPage() {
     if (!systemPrompt.trim()) next.systemPrompt = "Persona instructions are required.";
     if (!isValidModelKey(reasoningModelKey)) next.reasoningModelKey = "Choose an enabled reasoning provider and model.";
     if (!isValidModelKey(fastModelKey)) next.fastModelKey = "Choose an enabled fast provider and model.";
+    for (const [key, label, max] of generationFields) {
+      const value = generationSettings[key];
+      if (value === null) continue;
+      if (max === null ? !reasoningEfforts.includes(value as typeof reasoningEfforts[number])
+        : typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > max) {
+        next[key] = max === null ? "Choose a valid reasoning effort." : `${label} must be between 0 and ${max}.`;
+      }
+    }
     if (inputs.some((input) => !input.name.trim() || !input.dataType)) next.inputs = "Each input needs a name and data type.";
     if (new Set(inputs.map((input) => input.name.trim().toLowerCase())).size !== inputs.length) next.inputs = "Input names must be unique.";
     if (stepLimit < 1 || turnStepLimit < 1 || costLimit < 0) next.limits = "Step limits must be positive and cost limit cannot be negative.";
+    if (deployment.minProcesses != null && deployment.maxProcesses != null && deployment.minProcesses > deployment.maxProcesses) next.deployment = "Minimum processes cannot exceed maximum processes.";
+    const envNames = secretIds.map((id) => secretEnvVarNames[id] ?? "");
+    if (envNames.some((value) => !/^[A-Za-z_][A-Za-z0-9_]*$/.test(value) || ["APP_ENCRYPTION_KEY", "DATABASE_URL", "AGENT_HUB_MANAGER_INTERNAL_TOKEN", "AGENT_HUB_BRIDGE_PROCESS_KEY"].includes(value)) || new Set(envNames).size !== envNames.length) {
+      next.secrets = "Each linked secret needs a valid, unique environment variable name. Use the pencil icon to update it.";
+    }
     setErrors(next);
     if (Object.keys(next).length) {
-      setTab(next.systemPrompt ? "persona" : next.limits && isAdmin ? "policies" : "basics");
+      setTab(next.secrets ? "secrets" : next.systemPrompt ? "persona" : next.limits && isAdmin ? "policies" : "basics");
       dispatch(showToast({ severity: "error", summary: "Missing information", detail: Object.values(next).join(" ") }));
       return false;
     }
@@ -698,8 +742,11 @@ export function AgentRegistryEditorPage() {
     const payload = {
       name: name.trim(), title: title.trim(), description: description.trim(), iconName,
       requiredInputs: JSON.stringify(normalizedInputs),
-      reasoningModelKey, fastModelKey, systemPrompt, stepLimit: Number(stepLimit),
+      reasoningModelKey, fastModelKey, ...generationSettings, systemPrompt, stepLimit: Number(stepLimit),
       turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
+      runner: deployment.runner ?? null, minProcesses: Number(deployment.minProcesses ?? 0),
+      maxProcesses: deployment.maxProcesses ?? null, processCpu: deployment.processCpu ?? null,
+      processMemory: deployment.processMemory ?? null,
       ...agentHubTagsPayload(tags),
       ...agentHubModulePayload(module),
       status: nextStatus === "active" ? record?.status ?? "draft" : nextStatus ?? "draft",
@@ -746,9 +793,11 @@ export function AgentRegistryEditorPage() {
     }
   };
 
-  const field = (label: string, value: string, setValue: (value: string) => void, key: string, required = false) =>
+  const isBuiltin = Boolean(record?.isBuiltin ?? (record as any)?.is_builtin);
+
+  const field = (label: string, value: string, setValue: (value: string) => void, key: string, required = false, disabled = false) =>
     <label className="agent-editor__field"><span>{label}{required && " *"}</span>
-      <SolidInput value={value} aria-invalid={Boolean(errors[key])} onChange={(event) => { setValue(event.target.value); setErrors((current) => ({ ...current, [key]: "" })); }} />
+      <SolidInput value={value} disabled={disabled} aria-invalid={Boolean(errors[key])} onChange={(event) => { setValue(event.target.value); setErrors((current) => ({ ...current, [key]: "" })); }} />
       {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}
     </label>;
   const linked = (ids: number[], catalog: Item[], fallback: Item[] = []) =>
@@ -792,9 +841,9 @@ export function AgentRegistryEditorPage() {
   const activationWaiting = agentStatus === "draft" && activationRemainingSeconds > 0;
   const tabs = [
     { value: "basics", label: "Basics", content: <div className="agent-editor__stack">
-      <div className="agent-editor__grid">{field("Name", name, setName, "name", true)}{field("Title", title, setTitle, "title", true)}
+      <div className="agent-editor__grid">{field("Name", name, setName, "name", true, isBuiltin)}{field("Title", title, setTitle, "title", true)}
         {field("Description", description, setDescription, "description")}<div className="agent-editor__field"><span>Icon</span><SolidIconPicker value={iconName} onChange={setIconName} /></div>
-        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError} clearable={false} required error={errors.module} />
+        <AgentHubModuleField className="agent-editor__field" value={module} onChange={(value) => { setModule(value); setErrors((current) => ({ ...current, module: "" })); }} disabled={creating || updating || isLoading || isFetching || isError || isBuiltin} clearable={false} required error={errors.module} />
       </div>
       <AgentHubTagsField value={tags} onChange={setTags} module={module} disabled={creating || updating || isLoading || isFetching || isError} onBusyChange={setCreatingTag} />
       <section className="agent-editor__section"><div className="agent-editor__section-head"><div><h2>Inputs</h2><p>Define the variables this agent can use. Mark inputs optional or provide a default value when people do not need to enter them.</p></div>
@@ -815,7 +864,21 @@ export function AgentRegistryEditorPage() {
       <section className="agent-editor__section agent-editor__models"><h2>Models</h2><p>Choose a configured provider and model for each role. Select Other to enter a model ID manually.</p><div className="agent-editor__grid">
         {([["Reasoning model", reasoningModelKey, setReasoningModelKey, "reasoningModelKey"], ["Fast model", fastModelKey, setFastModelKey, "fastModelKey"]] as const).map(([label, value, setter, key]) =>
           <div className="agent-editor__field" key={key}><span>{label}</span><ModelPicker value={value} options={modelOptions} providers={providerOptions} providerConfig={aiConfig.providers ?? {}} onChange={setter} />
-            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}</div>)}
+            {errors[key] && <small className="agent-editor__error">{errors[key]}</small>}
+            {value && <div className="agent-editor__generation-settings">
+              <p className="agent-editor__hint">Advanced settings · Leave blank for provider defaults.</p>
+              {generationFields.filter(([field]) => field.endsWith(key === "reasoningModelKey" ? "ReasoningModel" : "FastModel")).map(([field, fieldLabel, max]) =>
+                <label className="agent-editor__field" key={field}><span>{fieldLabel}</span>
+                  {max === null ? <select aria-label={`${label} ${fieldLabel}`} value={generationSettings[field] ?? ""}
+                    onChange={(event) => setGenerationSettings((current) => ({ ...current, [field]: event.target.value || null }))}>
+                    <option value="">Provider default</option>
+                    {reasoningEfforts.map((effort) => <option key={effort} value={effort}>{effort}</option>)}
+                  </select> : <SolidInput aria-label={`${label} ${fieldLabel}`} type="number" min={0} max={max} step="any"
+                    placeholder="Provider default" value={generationSettings[field] ?? ""}
+                    onChange={(event) => setGenerationSettings((current) => ({ ...current, [field]: event.target.value === "" ? null : Number(event.target.value) }))} />}
+                  {errors[field] && <small className="agent-editor__error">{errors[field]}</small>}
+                </label>)}
+            </div>}</div>)}
       </div>{settingsError ? <p className="agent-editor__hint">Settings could not be loaded. Try refreshing this page.</p>
         : !providerOptions.length && <p className="agent-editor__hint">No enabled providers are available. Check the AI settings and your permission to view encrypted settings.</p>}</section>
       <section className="agent-editor__section agent-editor__workflow" aria-labelledby="agent-lifecycle-title">
@@ -847,6 +910,7 @@ export function AgentRegistryEditorPage() {
         </div>
         <small className="agent-editor__workflow-save-hint">Changing stage saves the current form and its linked skills, tools, roles, and secrets.</small>
       </section>
+      <AgentDeploymentPanel value={deployment} onChange={setDeployment} />
     </div> },
     { value: "persona", label: "System Prompt", content: <section className="agent-editor__section agent-editor__persona"><div className="agent-editor__section-head"><div><h2>System prompt *</h2><p>Describe the agent's role, behavior, and instructions in Markdown.</p></div>
       <div className="agent-editor__persona-actions"><button type="button" className="agent-editor__persona-preview-toggle" aria-pressed={previewSystemPrompt} aria-label={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} title={previewSystemPrompt ? "Edit system prompt" : "Preview system prompt"} onClick={() => setPreviewSystemPrompt((current) => !current)}>
@@ -856,7 +920,7 @@ export function AgentRegistryEditorPage() {
         : <SolidCodeEditor value={systemPrompt} onChange={(value) => { setSystemPrompt(value ?? ""); setErrors((current) => ({ ...current, systemPrompt: "" })); }} language="markdown" wordWrap="on" fontSize={11} height="max(34rem, calc(100dvh - 18rem))" />}
       {errors.systemPrompt && <small className="agent-editor__error">{errors.systemPrompt}</small>}</section> },
     { value: "skills", label: "Skills", content: <LinkPicker label="Skills" description="Skills available to this agent." options={skills.records} selected={linked(skillIds, skills.records, items(record?.agentSkills).map((link) => link.agentSkillRegistry).filter(Boolean))}
-      onAddMany={(ids) => addAll(setSkillIds, ids)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
+      onRefresh={() => void skills.refetch()} onAddMany={(ids) => addAll(setSkillIds, ids)} onRemove={(id) => toggle(setSkillIds, id)} createUrl="/admin/core/solid-core/agent-skill-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "skill" })} editUrlFor={(item) => `/admin/core/solid-core/agent-skill-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentSkills, "agentSkillRegistry", id)}
       view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}
@@ -864,7 +928,7 @@ export function AgentRegistryEditorPage() {
       renderSettings={(item) => <div className="agent-editor__link-settings">{linkSetting("Always include", alwaysIncludeValues[item.id] ?? true,
           (checked) => setAlwaysIncludeValues((current) => ({ ...current, [item.id]: checked })), "Add the full skill to the agent prompt. Turn off to load it on demand.")}</div>} /> },
     { value: "tools", label: "Tools", content: <LinkPicker label="Tools" description="Tools available to this agent." options={tools.records} selected={linked(toolIds, tools.records, items(record?.agentTools).map((link) => link.agentToolRegistry).filter(Boolean))}
-      onAddMany={(ids) => addAll(setToolIds, ids)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
+      onRefresh={() => void tools.refetch()} onAddMany={(ids) => addAll(setToolIds, ids)} onRemove={(id) => toggle(setToolIds, id)} createUrl="/admin/core/solid-core/agent-tool-registry/editor/new"
       onView={(item) => setPreview({ item, kind: "tool" })} editUrlFor={(item) => `/admin/core/solid-core/agent-tool-registry/editor/${item.id}`}
       linkFor={(id) => linkForTarget(record?.agentTools, "agentToolRegistry", id)}
       view={resourceView} onViewChange={setResourceView} renderRow={(item) => <AgentResourceRowWidget rowData={item} />}
@@ -880,8 +944,11 @@ export function AgentRegistryEditorPage() {
           <label className="agent-editor__field" key={label as string}><span>{label as string}</span><input type="number" min={label === "Cost limit" ? 0 : 1} step={label === "Cost limit" ? 0.01 : 1} value={value as number} onChange={(event) => (setter as (value: number) => void)(Number(event.target.value))} />{label === "Cost limit" && <small className="agent-editor__hint">Cost is an estimate and is not guaranteed to be correct.</small>}</label>)}
       </div>{errors.limits && <small className="agent-editor__error">{errors.limits}</small>}</section></div> },
     { value: "secrets", label: "Secrets", content: <LinkPicker label="Secrets" description="Grant access to existing secrets. Secret values are never shown here." options={secrets.records} selected={linked(secretIds, secrets.records, items(record?.agentSecrets).map((link) => link.secret).filter(Boolean))}
-      onAdd={(id) => { const secret = secrets.records.find((item) => item.id === id); if (secret) beginSecretEnvVarEdit(secret); }} onRemove={(id) => toggle(setSecretIds, id)}
+      onRefresh={() => void secrets.refetch()}
+      onAddMany={(ids) => { ids.forEach((secretId) => { const secret = secrets.records.find((item) => item.id === secretId); if (secret) { setSecretIds((current) => Array.from(new Set([...current, secretId]))); setSecretEnvVarNames((current) => ({ ...current, [secretId]: String(secret.key ?? secret.name ?? secret.displayName ?? "") })); } }); }}
+      createUrl="/admin/core/solid-core/secret/form/new" onRemove={(id) => toggle(setSecretIds, id)}
       compact
+      renderSettings={() => errors.secrets ? <small className="agent-editor__error">{errors.secrets}</small> : null}
       render={(item) => <div className="agent-editor__secret"><strong title={item.displayName ?? item.name ?? item.key}>{item.displayName ?? item.name ?? item.key}</strong>
         <button type="button" aria-label={`Edit environment variable name for ${item.displayName ?? item.key}`} onClick={() => beginSecretEnvVarEdit(item)}><Pencil size={16} /></button></div>} /> },
     ...(record?.id ? [{ value: "processes", label: "Processes", content: <AgentProcessesPanel agentId={record.id} agentLabel={record.name ?? record.title} /> }] : []),

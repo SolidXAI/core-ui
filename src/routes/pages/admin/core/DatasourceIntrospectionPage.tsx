@@ -969,6 +969,7 @@ export function DatasourceIntrospectionPage() {
       max: suggestedMax ?? undefined,
       min: configured.min ?? undefined,
       private: configured.private ?? false,
+      relationCreateInverse: configured.relationCreateInverse ?? false,
       isSystem: false,
       isPrimaryKey: activeFieldConfigColumn.isPrimaryKey,
       isUserKey: drawerDraft.userKeyField === activeFieldConfigColumn.fieldName,

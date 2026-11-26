@@ -1,8 +1,16 @@
 import type { Session } from "./types";
 
 const STORAGE_KEY = "solidx.session";
+let embedSession: Session = null;
+
+export const isAdminEmbedDocument =
+  typeof window !== "undefined" && /\/embed\/admin\/?$/.test(window.location.pathname);
 
 export function saveSession(session: Session) {
+  if (isAdminEmbedDocument) {
+    embedSession = session;
+    return;
+  }
   if (typeof window === "undefined") return;
   if (!session) {
     window.localStorage.removeItem(STORAGE_KEY);
@@ -12,6 +20,7 @@ export function saveSession(session: Session) {
 }
 
 export function loadSession(): Session {
+  if (isAdminEmbedDocument) return embedSession;
   if (typeof window === "undefined") return null;
   const raw = window.localStorage.getItem(STORAGE_KEY);
   if (!raw) return null;
@@ -23,6 +32,5 @@ export function loadSession(): Session {
 }
 
 export function clearSession() {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(STORAGE_KEY);
+  saveSession(null);
 }

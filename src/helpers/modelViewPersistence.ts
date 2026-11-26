@@ -1,3 +1,5 @@
+import { isAdminEmbedDocument } from "../adapters/auth/storage";
+
 const MODEL_VIEW_STORAGE_KEY = "solidx.model.last-view";
 
 const MODEL_VIEW_ROUTE_REGEX =
@@ -118,7 +120,7 @@ const writeStoredModelViews = (next: StoredModelViewMap) => {
 // This lets us reopen the most useful last-selected view even when the user
 // returns through a slightly different sidebar/menu link.
 export const persistLastModelViewRoute = (target: string) => {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || isAdminEmbedDocument) return;
 
   const route = parseModelViewRoute(target);
   if (!route) return;
@@ -140,7 +142,7 @@ export const persistLastModelViewRoute = (target: string) => {
 // Resolve the best saved route for the current model context.
 // We prefer the newest entry and use scope priority as a tie-breaker.
 export const getPersistedLastModelViewRoute = (target: string): string | null => {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined" || isAdminEmbedDocument) return null;
 
   const route = parseModelViewRoute(target);
   if (!route) return null;
@@ -224,11 +226,11 @@ export const getMenuContextForActiveRoute = (
 
 // Copy menu identity between routes belonging to the same model. This keeps
 // active sidebar state in the URL for new navigation while preserving legacy forms.
-export const preserveModelMenuContext = (target: string): string => {
+export const preserveModelMenuContext = (target: string, current?: string): string => {
   if (typeof window === "undefined" || !target || target.startsWith("#")) return target;
 
   try {
-    const currentUrl = new URL(window.location.href);
+    const currentUrl = new URL(current || window.location.href, window.location.origin);
     const targetUrl = new URL(target, currentUrl.href);
     const currentModelKey = getModelRouteKey(currentUrl.pathname);
     const targetModelKey = getModelRouteKey(targetUrl.pathname);

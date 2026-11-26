@@ -13,7 +13,7 @@ function formatWorkedDuration(seconds: number): string {
 }
 
 /** Default disclosure for consecutive agent activity items within one turn. */
-export function DefaultAgentToolGroupWidget({ turnKey, items, working, renderItem }: SolidToolGroupWidgetProps) {
+export function DefaultAgentToolGroupWidget({ turnKey, items, working, startedAt, renderItem }: SolidToolGroupWidgetProps) {
     const [expanded, setExpanded] = useState(working);
     const prevWorkingRef = useRef(working);
 
@@ -25,7 +25,12 @@ export function DefaultAgentToolGroupWidget({ turnKey, items, working, renderIte
 
     const [now, setNow] = useState(() => Date.now());
     const hasLiveTimer = useRef(working);
-    const startTime = useRef(working ? Date.now() : (items[0]?.at || Date.now()));
+    const startTime = useRef(startedAt || items[0]?.at || Date.now());
+
+    useEffect(() => {
+        if (startedAt) startTime.current = startedAt;
+        else if (items[0]?.at) startTime.current = items[0].at;
+    }, [startedAt, items]);
 
     useEffect(() => {
         if (!working) {
@@ -40,7 +45,9 @@ export function DefaultAgentToolGroupWidget({ turnKey, items, working, renderIte
     const toolCount = items.filter((item) => item.eventType === AgentEventTypes.toolCalling).length;
     const activeDuration = Math.max(0, Math.floor((now - startTime.current) / 1000));
     let recordedSeconds = 0;
-    if (items.length > 1) {
+    if (startedAt && items.length > 0) {
+        recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - startedAt) / 1000));
+    } else if (items.length > 1) {
         recordedSeconds = Math.max(0, Math.floor((items[items.length - 1].at - items[0].at) / 1000));
     }
     const sumToolMs = items.reduce((acc, item) => acc + (Number(item.eventData?.duration_ms) || 0), 0);

@@ -35,6 +35,12 @@
 @keyframes agent-editor-version-fields-in { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
 .agent-editor__section { display:flex; flex-direction:column; gap:.9rem; padding:1rem; border:1px solid var(--surface-border,var(--border)); border-radius:.75rem; }
 .agent-editor__section h2 { margin:0; font-size:1rem; }
+.agent-editor__deployment-help { padding:.9rem 1rem; border:1px solid color-mix(in srgb, #2563eb 22%, var(--surface-border,var(--border))); border-left:3px solid #3b82f6; border-radius:.65rem; background:color-mix(in srgb, #eff6ff 74%, var(--surface-card,var(--card))); color:var(--text-color,var(--foreground)); font-size:.82rem; line-height:1.5; }
+.agent-editor__deployment-help>strong { display:block; margin-bottom:.2rem; color:color-mix(in srgb, #1d4ed8 78%, var(--text-color,var(--foreground))); font-size:.86rem; }
+.agent-editor__deployment-help p { margin:.3rem 0; font-size:inherit; }
+.agent-editor__deployment-help ul { display:grid; gap:.35rem; margin:.55rem 0; padding-left:1.2rem; }
+.agent-editor__deployment-help li { padding-left:.1rem; }
+.agent-editor__deployment-help code { padding:.05rem .25rem; border-radius:.25rem; background:color-mix(in srgb, #dbeafe 60%, var(--surface-card,var(--card))); font-size:.78rem; }
 .agent-editor__linked-count { color:var(--text-color-secondary,var(--muted-foreground)); font-size:.82rem; font-weight:600; }
 .agent-editor__workflow { gap:1.15rem; }
 .agent-editor__workflow-stages { display:flex; align-items:stretch; gap:.55rem; }
@@ -102,6 +108,8 @@
 .agent-editor__icon-button[aria-expanded=true] { color:var(--primary-color,var(--primary)); }
 .agent-editor__icon-button:focus-visible { outline:2px solid var(--primary-color,var(--primary)); outline-offset:1px; }
 .agent-editor__add-dialog { display:flex; flex-direction:column; gap:.6rem; }
+.agent-editor__lookup-search { display:flex; align-items:center; gap:.4rem; }
+.agent-editor__lookup-search > :first-child { flex:1; min-width:0; }
 .agent-editor__add-options { display:flex; flex-direction:column; height:20rem; max-height:50vh; overflow:auto; padding:0 .25rem .25rem; border:1px solid var(--surface-border,var(--border)); border-radius:.55rem; }
 .agent-editor__add-option { display:flex; flex:0 0 auto; align-items:flex-start; gap:.6rem; padding:.5rem .6rem; border-radius:.35rem; cursor:pointer; }
 .agent-editor__add-option:hover { background:var(--surface-hover,#f2f3f4); }
