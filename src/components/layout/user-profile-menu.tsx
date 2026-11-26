@@ -22,6 +22,7 @@ const SolidEnvironmentBadge = () => {
       title="Development environment"
       aria-label="Development environment"
     >
+      <span className="solid-user-menu-environment-badge-dot" aria-hidden="true" />
       Dev Mode
     </span>
   );
