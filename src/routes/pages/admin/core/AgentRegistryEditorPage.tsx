@@ -193,7 +193,6 @@ const detailFields = [
   ...generationFields.map(([key]) => key),
   "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
   "runner", "minProcesses", "maxProcesses", "processCpu", "processMemory",
-  "isBuiltin",
 ];
 
 const detailQuery = [
