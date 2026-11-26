@@ -465,7 +465,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         {fileDetails.length - 1} items
                     </p>
                     <div>
-                        <SolidButton type="button" size="sm" variant="ghost" onClick={() => setShowAllFiles(true)}>
+                        <SolidButton type="button" variant="ghost" onClick={() => setShowAllFiles(true)}>
                             View
                         </SolidButton>
                     </div>
@@ -551,10 +551,10 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     <p className="solid-shadcn-dialog-text">Are you sure you want to delete this file?</p>
                 </SolidDialogBody>
                 <SolidDialogFooter className="solid-shadcn-dialog-actions">
-                    <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteFile}>
+                    <SolidButton variant="destructive" autoFocus onClick={deleteFile}>
                         Delete
                     </SolidButton>
-                    <SolidButton variant="outline" size="sm" onClick={() => setDeleteImageDialogVisible(false)}>
+                    <SolidButton variant="outline" onClick={() => setDeleteImageDialogVisible(false)}>
                         Cancel
                     </SolidButton>
                 </SolidDialogFooter>
@@ -701,7 +701,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         {fileDetails.length - 1} items
                     </p>
                     <div>
-                        <SolidButton type="button" size="sm" variant="ghost" onClick={() => setShowAllFiles(true)}>
+                        <SolidButton type="button" variant="ghost" onClick={() => setShowAllFiles(true)}>
                             View
                         </SolidButton>
                     </div>

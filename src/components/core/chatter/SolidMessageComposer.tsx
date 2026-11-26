@@ -174,7 +174,6 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                         <SolidButton
                             type="button"
                             variant="outline"
-                            size="sm"
                             className="solid-icon-button"
                             leftIcon={<Paperclip size={14} />}
                             onClick={() => fileInputRef.current?.click()}
@@ -186,7 +185,6 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                     <div className='flex items-center gap-2'>
                         <SolidButton
                             type='submit'
-                            size='sm'
                             className='gap-2 solid-purple-button'
                             variant='primary'
                             loading={isLoading}
@@ -196,7 +194,6 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                         </SolidButton>
                         <SolidButton
                             type='button'
-                            size='sm'
                             variant='ghost'
                             onClick={resetComposer}
                         >
@@ -219,7 +216,6 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                             <SolidButton
                                 type="button"
                                 variant="ghost"
-                                size="sm"
                                 className="solid-icon-button"
                                 leftIcon={<X size={12} />}
                                 onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== index))}

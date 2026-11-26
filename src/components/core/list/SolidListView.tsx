@@ -1487,7 +1487,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         presentation.isIconOnly ? "solid-icon-button" : "",
                         presentation.buttonClassName ? presentation.buttonClassName : ""
                       ].filter(Boolean).join(" ")}
-                      size="small"
                       variant="ghost"
                       onClick={() => {
                         handleRowActionClick(button, rowData);
@@ -1561,8 +1560,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     <div className="solid-list-search-toggle">
                       <SolidButton
                         type="button"
-                        size="small"
-                        variant="outline"
+                        variant="surface"
                         className="solid-icon-button"
                         onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
                         leftIcon={<Search size={14} />}
@@ -1609,7 +1607,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         icon={solidListViewLayout?.attrs?.addButtonIcon}
                         leftIcon={!solidListViewLayout?.attrs?.addButtonIcon ? <Plus size={14} /> : undefined}
                         className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
-                        size="small"
                         onClick={() => params.handleAddClickForEmbeddedView("new")}
                       >
                         {solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"}
@@ -1619,8 +1616,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   {params.embeded !== true && (
                     <SolidButton
                       type="button"
-                      size="small"
-                      variant="outline"
+                      variant="surface"
                       className="solid-icon-button "
                       onClick={() => {
                         setQueryString();
@@ -1631,7 +1627,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   {showArchived && selectedRecoverRecords.length > 0 && (
                     <SolidButton
                       type="button"
-                      size="small"
                       variant="secondary"
                       className="flex solid-hide-below-lg"
                       onClick={() => setRecoverDialogVisible(true)}
@@ -1799,7 +1794,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     type="button"
                                     variant="ghost"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
-                                    size="small"
                                     leftIcon={showRowEditAsIconOnly ? <ArrowRight size={14} /> : <Pencil size={14} />}
                                     tooltip={showRowEditAsIconOnly ? "Edit" : undefined}
                                     aria-label="Edit"
@@ -1841,7 +1835,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                   <SolidButton
                                     type="button"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
-                                    size="small"
                                     variant="ghost"
                                     leftIcon={<Trash2 size={14} />}
                                     tooltip={showRowDeleteAsIconOnly ? "Delete" : undefined}
@@ -1973,10 +1966,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           <p className="solid-shadcn-dialog-text">Are you sure you want to recover all records?</p>
         </SolidDialogBody>
         <SolidDialogFooter className="solid-shadcn-dialog-actions">
-          <SolidButton variant="destructive" size="sm" autoFocus onClick={recoverAll}>
+          <SolidButton variant="destructive" autoFocus onClick={recoverAll}>
             Yes
           </SolidButton>
-          <SolidButton variant="outline" size="sm" onClick={() => setRecoverDialogVisible(false)}>
+          <SolidButton variant="outline" onClick={() => setRecoverDialogVisible(false)}>
             No
           </SolidButton>
         </SolidDialogFooter>

@@ -283,7 +283,6 @@ export const ModuleListViewData = () => {
           <SolidButton
             type="button"
             label="Delete"
-            size="small"
             severity="danger"
             className="small-button"
             onClick={() => setDialogVisible(true)}
@@ -299,8 +298,8 @@ export const ModuleListViewData = () => {
           className="w-full md:w-20rem"
         />
         <div className="flex items-center gap-2">
-          <SolidButton size="small" onClick={applyFilters} label="Apply" />
-          <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
+          <SolidButton onClick={applyFilters} label="Apply" />
+          <SolidButton variant="ghost" onClick={clearFilters} label="Clear" />
         </div>
       </div>
 
@@ -312,7 +311,7 @@ export const ModuleListViewData = () => {
 
       <SolidDataTable
         value={moduleMetadata}
-        size="small"
+        size="normal"
         paginator
         rows={rows}
         rowsPerPageOptions={[10, 25, 50]}

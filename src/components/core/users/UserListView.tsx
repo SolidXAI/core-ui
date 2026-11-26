@@ -204,7 +204,6 @@ export const UserListView = () => {
           <SolidButton
             type="button"
             label="Delete"
-            size="small"
             severity="danger"
             className="small-button"
             onClick={() => setDialogVisible(true)}
@@ -230,8 +229,8 @@ export const UserListView = () => {
           </div>
         ))}
         <div className="field w-full px-2 pt-2 flex items-center gap-2">
-          <SolidButton size="small" onClick={applyFilters} label="Apply" />
-          <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
+          <SolidButton onClick={applyFilters} label="Apply" />
+          <SolidButton variant="ghost" onClick={clearFilters} label="Clear" />
         </div>
       </div>
 
@@ -243,7 +242,7 @@ export const UserListView = () => {
 
       <SolidDataTable
         value={users}
-        size="small"
+        size="normal"
         paginator
         rows={rows}
         rowsPerPageOptions={[10, 25, 50]}

@@ -125,11 +125,11 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
 
         <div className="solid-delete-model-popup__actions">
           {allowDelete ? (
-            <SolidButton size="small" autoFocus loading={isDeleting} disabled={getModelsLoading || isDeleting} onClick={deleteModuleHandler}>
+            <SolidButton autoFocus loading={isDeleting} disabled={getModelsLoading || isDeleting} onClick={deleteModuleHandler}>
               Apply
             </SolidButton>
           ) : null}
-          <SolidButton size="small" variant="outline" onClick={() => dispatch(closePopup())}>
+          <SolidButton variant="outline" onClick={() => dispatch(closePopup())}>
             {allowDelete ? "Cancel" : "Close"}
           </SolidButton>
         </div>

@@ -12,7 +12,7 @@ export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponen
             {columns.map((column) => (
               <th
                 key={column.field}
-                style={{ textAlign: "left", borderBottom: "1px solid #eceff3", padding: "6px 8px", fontSize: "0.84rem" }}
+                style={{ textAlign: "left", borderBottom: "1px solid #eceff3", padding: "6px 8px", fontSize: "var(--solid-font-size-ui-control)" }}
               >
                 {column.header}
               </th>
@@ -25,7 +25,7 @@ export function DefaultDashboardTableWidget({ runtime }: DashboardWidgetComponen
               {columns.map((column) => (
                 <td
                   key={`${index}-${column.field}`}
-                  style={{ textAlign: "left", borderBottom: "1px solid #f3f4f6", padding: "6px 8px", fontSize: "0.83rem", whiteSpace: "nowrap" }}
+                  style={{ textAlign: "left", borderBottom: "1px solid #f3f4f6", padding: "6px 8px", fontSize: "var(--solid-font-size-ui-control)", whiteSpace: "nowrap" }}
                 >
                   {`${record?.[column.field] ?? ""}`}
                 </td>

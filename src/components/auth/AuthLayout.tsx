@@ -273,7 +273,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     className="solid-confirm-dialog"
                     footer={
                         <div className="flex items-center justify-start">
-                            <SolidButton size="sm" onClick={handleRegistration}>Close</SolidButton>
+                            <SolidButton onClick={handleRegistration}>Close</SolidButton>
                         </div>
                     }
                 >

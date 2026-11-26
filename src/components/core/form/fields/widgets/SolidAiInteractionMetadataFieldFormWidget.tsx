@@ -79,7 +79,7 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
                             <summary className="solid-accordion-header flex justify-between items-center gap-2 p-3 cursor-pointer">
                                 <span className="font-medium">{headerTitle}</span>
                                 {isDoc && (
-                                    <SolidButton variant="ghost" size="sm" onClick={openDoc} aria-label="Open documentation">
+                                    <SolidButton variant="ghost" onClick={openDoc} aria-label="Open documentation">
                                         <SolidIcon name="si-external-link" aria-hidden />
                                     </SolidButton>
                                 )}

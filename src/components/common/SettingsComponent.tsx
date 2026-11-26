@@ -558,7 +558,7 @@ export function SettingsComponent() {
             >
               <SolidTag tone="warn">Read only</SolidTag>
             </button>
-            <span className={filterMode === "read-only" ? styles.legendLabelActive : undefined}>
+            <span className={`${filterMode === "read-only" ? styles.legendLabelActive : undefined} text-xs`}>
               {filterMode === "read-only" ? "Read-only filter active" : "System-managed value"}
             </span>
             <SolidTooltip>
@@ -572,7 +572,7 @@ export function SettingsComponent() {
               </SolidTooltipContent>
             </SolidTooltip>
           </div>
-          <SolidButton size="sm" type="button" loading={false} onClick={handleSave} disabled={!hasChanges}>
+          <SolidButton type="button" loading={false} onClick={handleSave} disabled={!hasChanges}>
             Save
           </SolidButton>
         </div>

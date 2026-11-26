@@ -850,7 +850,6 @@ export function ModuleMetadataExplorer({
                 </div>
                 {!isReadOnlyExplorer && (
                   <SolidButton
-                    size="sm"
                     leftIcon={<Save size={14} />}
                     onClick={handleSave}
                     loading={isSavingSection}
@@ -863,7 +862,6 @@ export function ModuleMetadataExplorer({
                   <SolidDropdownMenuTrigger asChild>
                     <SolidButton
                       variant="ghost"
-                      size="sm"
                       className="solid-icon-button"
                       aria-label="Explorer actions"
                     >
@@ -997,10 +995,10 @@ export function ModuleMetadataExplorer({
           </div>
         </SolidDialogBody>
         <SolidDialogFooter>
-          <SolidButton variant="outline" size="sm" onClick={() => setIsSeedDialogOpen(false)} disabled={isSeedingModule}>
+          <SolidButton variant="outline" onClick={() => setIsSeedDialogOpen(false)} disabled={isSeedingModule}>
             Cancel
           </SolidButton>
-          <SolidButton size="sm" onClick={handleSeedModule} loading={isSeedingModule} disabled={!moduleId}>
+          <SolidButton onClick={handleSeedModule} loading={isSeedingModule} disabled={!moduleId}>
             Seed
           </SolidButton>
         </SolidDialogFooter>

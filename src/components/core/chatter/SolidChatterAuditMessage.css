@@ -3,6 +3,14 @@
   min-width: 0;
 }
 
+.solid-audit-right-arrow {
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  margin-top: 0.05rem;
+  color: color-mix(in srgb, var(--foreground) 76%, var(--primary) 24%);
+}
+
 .solid-audit-field-name {
   flex: 0 0 auto;
   white-space: nowrap;

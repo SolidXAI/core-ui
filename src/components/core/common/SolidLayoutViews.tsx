@@ -44,7 +44,6 @@ export const SolidLayoutViews = ({ sizeOptions, setSize, size, viewModes, setVie
             <SolidPopoverTrigger asChild>
                 <SolidButton
                     type="button"
-                    size='sm'
                     variant='secondary'
                     className='custom-icon-button'
                     leftIcon={

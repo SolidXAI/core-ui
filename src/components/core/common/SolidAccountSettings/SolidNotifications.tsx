@@ -77,7 +77,7 @@ export const SolidNotifications = () => {
       </div>
 
       <div className={styles.footerActions}>
-        <SolidButton type="submit" size="sm" loading={formik.isSubmitting}>
+        <SolidButton type="submit" loading={formik.isSubmitting}>
           Save
         </SolidButton>
       </div>

@@ -79,7 +79,6 @@ export function SolidFormViewContextMenuHeaderButton({
                     presentation.buttonClassName ? presentation.buttonClassName : ""
                 ].filter(Boolean).join(" ")}
                 label={presentation.label}
-                size="sm"
                 icon={presentation.icon}
                 iconPos={presentation.iconPos}
                 tooltip={presentation.tooltip}

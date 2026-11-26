@@ -318,7 +318,6 @@ export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any
             <div className="solid-export-toolbar-actions">
               <SolidButton
                 variant="outline"
-                size="small"
                 leftIcon={<Save size={14} />}
                 onClick={() => setIsSaveDialogVisible(true)}
               >
@@ -326,7 +325,6 @@ export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any
               </SolidButton>
               <SolidButton
                 variant="outline"
-                size="small"
                 leftIcon={<Trash2 size={14} />}
                 onClick={handleDeleteTemplate}
                 disabled={!selectedTemplate || isDeletingTemplate}
@@ -335,7 +333,6 @@ export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any
                 Delete
               </SolidButton>
               <SolidButton
-                size="small"
                 leftIcon={<Download size={14} />}
                 onClick={handleDownload}
                 disabled={selectedColumns.length === 0}
@@ -388,7 +385,6 @@ export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any
                     </div>
                     <SolidButton
                       variant="ghost"
-                      size="small"
                       className="solid-export-list-row-action"
                       leftIcon={<Plus size={14} />}
                       aria-label={`Add ${item.name}`}
@@ -426,7 +422,6 @@ export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any
                     </div>
                     <SolidButton
                       variant="ghost"
-                      size="small"
                       className="solid-export-list-row-action is-remove"
                       leftIcon={<Trash2 size={14} />}
                       aria-label={`Remove ${item.name}`}
@@ -476,7 +471,6 @@ export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any
         <SolidDialogFooter className="solid-export-save-footer">
           <SolidButton
             type="button"
-            size="small"
             variant="outline"
             onClick={() => {
               setNewTemplateName("");
@@ -487,7 +481,6 @@ export const SolidExport = ({ listViewMetaData, filters, onExportComplete }: any
           </SolidButton>
           <SolidButton
             type="button"
-            size="small"
             loading={isSavingTemplate}
             disabled={!newTemplateName.trim() || isSavingTemplate}
             onClick={handleAddTemplate}

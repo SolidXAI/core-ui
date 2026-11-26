@@ -82,7 +82,6 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                                     outlined
                                     aria-label="Add"
                                     type="button"
-                                    size="sm"
                                     onClick={() =>
                                         setVisibleDialogs((prev) => ({
                                             ...prev,

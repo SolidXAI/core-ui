@@ -15,7 +15,6 @@ export const CreateButton = () => {
             <SolidButton
                 type="button"
                 label="Add"
-                size='small'
                 onClick={() => router.push(createPAth)}
                 className='small-button'
             />

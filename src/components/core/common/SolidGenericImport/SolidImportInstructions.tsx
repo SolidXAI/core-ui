@@ -83,10 +83,10 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                     <li>
                                         <p className='solid-import-instruction-title'>Download a starter template</p>
                                         <div className='solid-import-template-actions'>
-                                            <SolidButton type="button" variant="outline" size="sm" leftIcon={<Download size={14} />} onClick={() => handleTemplateDownload('csv')}>
+                                            <SolidButton type="button" variant="outline" leftIcon={<Download size={14} />} onClick={() => handleTemplateDownload('csv')}>
                                                 CSV Template
                                             </SolidButton>
-                                            <SolidButton type="button" variant="outline" size="sm" leftIcon={<FileSpreadsheet size={14} />} onClick={() => handleTemplateDownload('excel')}>
+                                            <SolidButton type="button" variant="outline" leftIcon={<FileSpreadsheet size={14} />} onClick={() => handleTemplateDownload('excel')}>
                                                 Excel Template
                                             </SolidButton>
                                         </div>
@@ -150,7 +150,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
             </div>
             <div className='solid-import-actions'>
                 <p className="solid-import-actions-copy">Review the template guidance before uploading your file.</p>
-                <SolidButton type="button" size='sm' onClick={() => setImportStep(2)} rightIcon={<MoveRight size={14} />}>
+                <SolidButton type="button" onClick={() => setImportStep(2)} rightIcon={<MoveRight size={14} />}>
                     Continue
                 </SolidButton>
             </div>

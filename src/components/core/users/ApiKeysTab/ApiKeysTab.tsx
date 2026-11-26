@@ -205,7 +205,7 @@ export function ApiKeysTab({ userId, canCreate = false }: ApiKeysTabProps) {
           <div className="solid-api-keys-actions">
             <span className="solid-api-keys-count">{keys.length} key{keys.length === 1 ? "" : "s"}</span>
             {canCreate ? (
-              <SolidButton size="small" type="button" onClick={() => setShowGenerate(true)}>
+              <SolidButton type="button" onClick={() => setShowGenerate(true)}>
                 <Plus size={14} />
                 Generate Key
               </SolidButton>

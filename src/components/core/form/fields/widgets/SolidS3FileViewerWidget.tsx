@@ -153,7 +153,6 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                             loading={isLoading}
                             tooltip={value}
                             disabled={isLoading}
-                            size="sm"
                             iconPos="left"
                             onClick={handleView}
                         >
@@ -162,7 +161,6 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                     )}
                     {downloadAllowed && (
                         <SolidButton
-                            size="sm"
                             type="button"
                             icon="si si-download"
                             tooltip={`Download ${value?.split("/").pop()}`}

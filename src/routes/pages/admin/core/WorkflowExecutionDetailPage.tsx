@@ -523,7 +523,6 @@ function WorkflowExecutionPagination({
       </div>
       <div className="workflow-editor-execution-pagination__actions">
         <SolidButton
-          size="small"
           variant="ghost"
           leftIcon={<ChevronFirst size={14} />}
           aria-label="First page"
@@ -531,7 +530,6 @@ function WorkflowExecutionPagination({
           onClick={() => goToPage(1)}
         />
         <SolidButton
-          size="small"
           variant="ghost"
           leftIcon={<ChevronLeft size={14} />}
           aria-label="Previous page"
@@ -540,7 +538,6 @@ function WorkflowExecutionPagination({
         />
         <span>Page {currentPage} of {totalPages}</span>
         <SolidButton
-          size="small"
           variant="ghost"
           leftIcon={<ChevronRight size={14} />}
           aria-label="Next page"
@@ -548,7 +545,6 @@ function WorkflowExecutionPagination({
           onClick={() => goToPage(currentPage + 1)}
         />
         <SolidButton
-          size="small"
           variant="ghost"
           leftIcon={<ChevronLast size={14} />}
           aria-label="Last page"
@@ -845,7 +841,6 @@ export function WorkflowExecutionDetailPage() {
       <div className="workflow-editor-header">
         <div className="workflow-editor-header-main">
           <SolidButton
-            size="small"
             variant="ghost"
             leftIcon={<ArrowLeft size={16} />}
             onClick={() => navigate(-1)}

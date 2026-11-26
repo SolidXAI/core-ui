@@ -54,12 +54,11 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
                     }}
                 />
                 <div className="pt-3 flex gap-2">
-                    <SolidButton type="submit" label="Apply" size="sm" />
+                    <SolidButton type="submit" label="Apply" />
                     <SolidButton
                         type="button"
                         variant="outline"
                         label="Cancel"
-                        size="sm"
                         onClick={() => setLayoutDialogVisible(false)}
                     />
                 </div>

@@ -1,9 +1,3 @@
-.chatterTitle {
-    padding: 0.2rem 0 0.55rem 2.75rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-}
-
-
 .chatterMessageComposer .chatterMessageInput {
     background-color: var(--background);
     border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
@@ -70,7 +64,7 @@
 
 .chatterComposerHelp {
     margin: -0.2rem 0 0;
-    font-size: 0.68rem;
+    font-size: var(--solid-font-size-caption);
     font-style: italic;
     line-height: 1.3;
     color: var(--muted-foreground);
@@ -121,7 +115,7 @@
     background: color-mix(in srgb, var(--card) 96%, var(--background) 4%);
     padding: 0.25rem 0.5rem;
     text-wrap: nowrap;
-    font-size: 0.625rem;
+    font-size: var(--solid-font-size-caption);
     font-weight: 600;
     color: var(--muted-foreground);
 }
@@ -156,11 +150,6 @@
 :global(.solid-purple-button:hover) {
     --solid-btn-bg: color-mix(in srgb, var(--primary-color, var(--primary)) 86%, #0f172a);
     --solid-btn-border: color-mix(in srgb, var(--primary-color, var(--primary)) 86%, #0f172a);
-}
-
-.solidChatterMessageBox {
-    margin-top: 0px;
-    padding-left: 0.3rem;
 }
 
 .solidChatterMessageCard {
@@ -207,19 +196,19 @@
 
 .solidChatterUser {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: var(--solid-font-size-body-small);
     font-weight: 600;
     color: var(--foreground);
 }
 
 .solidChatterMeta {
     margin: 0;
-    font-size: 0.70rem;
+    font-size: var(--solid-font-size-caption);
     color: var(--muted-foreground);
 }
 
 .solidChatterTime {
-    font-size: 0.70rem;
+    font-size: var(--solid-font-size-caption);
     color: var(--muted-foreground);
     white-space: nowrap;
 }
@@ -315,11 +304,6 @@
     background: rgba(114, 46, 209, 0.08);
 }
 
-:global(.solid-chatter-body) {
-    padding: 0.35rem 0.85rem 1rem 0.2rem;
-    overflow-y: auto;
-    scrollbar-gutter: stable;
-}
 :global(.solidMessageWrapper .solidMessageText) {
     margin: 0;
     font-size: inherit;

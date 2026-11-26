@@ -123,7 +123,6 @@ const NavbarOne = () => {
                         {isSearchShow === false && (
                             <SolidButton
                                 variant="ghost"
-                                size="sm"
                                 aria-label="Search"
                                 className="transparent-background min-w-0 rounded border border-[var(--surface-200)] px-2 py-1"
                                 onClick={() => setSearchShow(true)}

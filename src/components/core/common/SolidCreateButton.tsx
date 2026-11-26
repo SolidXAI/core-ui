@@ -37,7 +37,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                     icon={icon}
                     leftIcon={!icon ? defaultIcon : undefined}
                     className={`${className} flex solid-hide-below-lg`}
-                    size='sm'
                 >
                     {label}
                 </SolidButton>
@@ -45,10 +44,10 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                 {/* Mobile Version */}
                 <SolidButton
                     type="button"
+                    variant="surface"
                     icon={icon}
                     leftIcon={!icon ? defaultIcon : undefined}
                     className={`${className} solid-hide-from-lg solid-icon-button`}
-                    size='sm'
                 />
 
                 {/* {responsiveIconOnly ? (
@@ -58,7 +57,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                             icon={icon}
                             leftIcon={!icon ? defaultIcon : undefined}
                             className={`${className} solid-hide-from-lg solid-icon-button`}
-                            size='sm'
                         />
 
                         <SolidButton
@@ -66,7 +64,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                             icon={icon}
                             leftIcon={!icon ? defaultIcon : undefined}
                             className={`${className} inline-flex solid-hide-below-lg`}
-                            size='sm'
                         >
                             {label}
                         </SolidButton>
@@ -77,7 +74,6 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
                         icon={icon}
                         leftIcon={!icon ? defaultIcon : undefined}
                         className={`${className}`}
-                        size='sm'
                     >
                         {label}
                     </SolidButton>

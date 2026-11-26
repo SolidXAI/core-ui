@@ -5052,7 +5052,6 @@ export function WorkflowDefinitionEditorPage() {
             <SolidButton
               key={example.value}
               variant="outline"
-              size="small"
               onClick={() =>
                 updateWorkflowTriggerConfiguration(index, {
                   cronExpression: example.value,
@@ -5271,7 +5270,6 @@ export function WorkflowDefinitionEditorPage() {
       </pre>
       <SolidButton
         variant="outline"
-        size="small"
         onClick={() => void copyWorkflowTriggerExample(value)}
       >
         <Copy size={14} />
@@ -5321,7 +5319,6 @@ export function WorkflowDefinitionEditorPage() {
           <div className="workflow-editor-authoring-card-actions">
             <SolidButton
               variant="ghost"
-              size="small"
               onClick={() => removeWorkflowTrigger(index)}
             >
               Remove Trigger
@@ -5518,7 +5515,6 @@ export function WorkflowDefinitionEditorPage() {
               executionStatusFilter !== "all" ||
               executionSearchFilter) && (
               <SolidButton
-                size="small"
                 variant="ghost"
                 onClick={() => {
                   setOverviewStartDate(null);
@@ -5699,7 +5695,6 @@ export function WorkflowDefinitionEditorPage() {
                         </td>
                         <td>
                           <SolidButton
-                            size="small"
                             variant="outline"
                             onClick={(event) => {
                               event.stopPropagation();
@@ -5721,7 +5716,6 @@ export function WorkflowDefinitionEditorPage() {
                 </span>
                 <div className="workflow-editor-execution-pagination__actions">
                   <SolidButton
-                    size="small"
                     variant="outline"
                     disabled={executionPage <= 1}
                     onClick={() => setExecutionPage((current) => Math.max(1, current - 1))}
@@ -5732,7 +5726,6 @@ export function WorkflowDefinitionEditorPage() {
                     Page {executionPage} of {executionTotalPages}
                   </SolidTag>
                   <SolidButton
-                    size="small"
                     variant="outline"
                     disabled={executionPage >= executionTotalPages}
                     onClick={() =>
@@ -5772,7 +5765,6 @@ export function WorkflowDefinitionEditorPage() {
             <pre>{codeError}</pre>
             {!topologyYamlViewOpen ? (
               <SolidButton
-                size="small"
                 variant="outline"
                 onClick={() => setTopologyYamlViewOpen(true)}
               >
@@ -5980,7 +5972,6 @@ export function WorkflowDefinitionEditorPage() {
       <div className="workflow-editor-header">
         <div className="workflow-editor-header-main">
           <SolidButton
-            size="small"
             variant="ghost"
             leftIcon={<ArrowLeft size={16} />}
             onClick={() =>
@@ -5992,7 +5983,6 @@ export function WorkflowDefinitionEditorPage() {
         </div>
         <div className="workflow-editor-header-actions">
           <SolidButton
-            size="small"
             variant="outline"
             leftIcon={<ShieldCheck size={16} />}
             loading={isServerValidating}
@@ -6001,7 +5991,6 @@ export function WorkflowDefinitionEditorPage() {
             Validate
           </SolidButton>
           <SolidButton
-            size="small"
             variant="outline"
             leftIcon={<Play size={16} />}
             loading={isExecuting}
@@ -6010,7 +5999,6 @@ export function WorkflowDefinitionEditorPage() {
             Run
           </SolidButton>
           <SolidButton
-            size="small"
             leftIcon={<Save size={16} />}
             loading={isSaving || isCreating}
             onClick={handleSave}

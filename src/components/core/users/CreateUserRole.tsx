@@ -122,7 +122,7 @@ const CreateUserRole = ({ data }: any) => {
               <div className="form-wrapper-title"> Create User Role</div>
               <div className="flex gap-4">
                 <div>
-                  <SolidButton label="Save" size="sm" onClick={() => showError()} type="submit" className='small-button' />
+                  <SolidButton label="Save" onClick={() => showError()} type="submit" className='small-button' />
                 </div>
                 <CancelButton />
               </div>
@@ -131,7 +131,7 @@ const CreateUserRole = ({ data }: any) => {
                 <h1 className="m-0"> Edit User</h1>
                 <div className="flex gap-4">
                   <div>
-                    <SolidButton label="Save" onClick={() => showError()} type="submit" size="sm" className='small-button' />
+                    <SolidButton label="Save" onClick={() => showError()} type="submit" className='small-button' />
                   </div>
                   <div>
                     {/* <Button label="Delete" severity="danger" type="button" /> */}

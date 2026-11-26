@@ -64,8 +64,8 @@
     /* ================================= Menu ============================= */
 
     .navbar-menu {
-        gap: 12px !important;
-        margin-top: 8px !important;
+        gap: var(--solid-space-3) !important;
+        margin-top: var(--solid-space-2) !important;
     }
 
 
@@ -123,15 +123,15 @@
 
     /* ========================= Home ========================== */
     .solidModuleWelcomeSection {
-        padding: 16px !important;
+        padding: var(--solid-panel-padding) !important;
     }
 
     .solidModuleHomeColorCards {
-        padding: 16px !important;
+        padding: var(--solid-panel-padding) !important;
     }
 
     .solidModuleHomeActionCard {
-        padding: 16px !important;
+        padding: var(--solid-panel-padding) !important;
     }
 
 

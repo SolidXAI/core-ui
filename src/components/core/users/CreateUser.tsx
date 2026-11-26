@@ -237,18 +237,17 @@ const CreateUser = ({ data, params }: any) => {
             </div>
             <div className="flex gap-4 flex-wrap">
               {isEditMode && failedAttempts > 0 ? (
-                <SolidButton size="small" type="button" variant="outline" loading={isUserUpdating} onClick={handleUnblockUser}>
+                <SolidButton type="button" variant="outline" loading={isUserUpdating} onClick={handleUnblockUser}>
                   Unblock User
                 </SolidButton>
               ) : null}
               {formik.dirty ? (
-                <SolidButton size="small" type="submit" loading={isSaving}>
+                <SolidButton type="submit" loading={isSaving}>
                   Save
                 </SolidButton>
               ) : null}
               {data ? (
                 <SolidButton
-                  size="small"
                   type="button"
                   variant="destructive"
                   loading={isUserDeleting}

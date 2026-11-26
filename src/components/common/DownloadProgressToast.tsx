@@ -48,7 +48,7 @@ export const DownloadProgressToast = ({
       )}
       {status === "success" && (
         <div className="solid-export-progress-actions">
-          <SolidButton size="small" variant="outline" onClick={onClose}>
+          <SolidButton variant="outline" onClick={onClose}>
             Dismiss
           </SolidButton>
         </div>

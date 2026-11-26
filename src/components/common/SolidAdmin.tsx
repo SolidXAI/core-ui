@@ -65,7 +65,7 @@ export const SolidAdmin = () => {
         }
 
         .welcome-desc {
-          font-size: 14px;
+          font-size: var(--solid-font-size-body-small);
           color: var(--muted-foreground);
           line-height: 1.6;
           margin-bottom: 12px;
@@ -91,12 +91,12 @@ export const SolidAdmin = () => {
 
         .chat-hint p {
           margin: 0;
-          font-size: 13px;
+          font-size: var(--solid-font-size-caption);
           color: var(--muted-foreground);
         }
 
         .hint {
-          font-size: 12px;
+          font-size: var(--solid-font-size-caption);
           color: var(--muted-foreground);
           opacity: 0.8;
         }

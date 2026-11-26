@@ -60,7 +60,6 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
         {rowData.isSystem !== true && rowData.isMarkedForRemoval !== true &&
           <SolidButton
             variant="ghost"
-            size="sm"
             className="solid-icon-button"
             aria-label="Edit field"
             leftIcon={<Pencil size={14} />}
@@ -92,7 +91,6 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
         {(pathname.includes('create') || (rowData.isSystem !== true && rowData.isMarkedForRemoval !== true)) &&
           <SolidButton
             variant="ghost"
-            size="sm"
             className="solid-icon-button"
             style={{ color: "var(--solid-danger, #ef4444)" }}
             aria-label="Delete field"
@@ -143,7 +141,6 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
           <div className="flex justify-end gap-2" style={{ marginBottom: '0.5rem' }}>
             {showSaveButton && (
               <SolidButton
-                size="sm"
                 onClick={onSave}
               >
                 Save
@@ -151,7 +148,6 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
             )}
             {modelMetaData.isSystem !== true && !hideAddButton &&
               <SolidButton
-                size="sm"
                 leftIcon={<Plus size={14} />}
                 onClick={() => {
                   if (!modelMetaData?.dataSourceType) {
@@ -170,7 +166,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
             <DataTable
               value={fieldMetaData}
               dataKey="id"
-              size="small"
+              size="normal"
               emptyMessage="No fields configured"
               rowClassName={(rowData) => rowData.isMarkedForRemoval === true ? "greyed-out-row" : ""}
             >
@@ -224,7 +220,7 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
               <p className="solid-field-confirm-message">If there is data against this model this operation might not work and manual intervention will be required.</p>
             </SolidDialogBody>
             <SolidDialogFooter className="solid-field-confirm-actions">
-              <SolidButton size="sm" onClick={() => setIsRequiredPopUp(false)}>
+              <SolidButton onClick={() => setIsRequiredPopUp(false)}>
                 Ok
               </SolidButton>
             </SolidDialogFooter>
@@ -273,7 +269,6 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
             </SolidDialogBody>
             <SolidDialogFooter className="solid-shadcn-dialog-actions solid-field-delete-flow-actions">
               <SolidButton
-                size="sm"
                 onClick={() => {
                   if (rowToDelete) {
                     deleteRow(rowToDelete);
@@ -285,7 +280,6 @@ const FieldMetaData = ({ setIsDirty, setFieldDeleted, modelMetaData, fieldMetaDa
                 Ok
               </SolidButton>
               <SolidButton
-                size="sm"
                 variant="outline"
                 onClick={() => {
                   setDeleteAlertPopup(false);

@@ -63,7 +63,6 @@ const SolidPopupContainer = () => {
                 <SolidButton
                   key={`${button.label}-${index}`}
                   type="button"
-                  size="sm"
                   variant={button.variant as any}
                   className={button.className}
                   icon={button.icon}

@@ -50,10 +50,10 @@ export function SolidConfirmDialog({
       {showSeparator ? <SolidDialogSeparator className={separatorClassName} /> : null}
       <SolidDialogBody className={bodyClassName}>{message}</SolidDialogBody>
       <SolidDialogFooter className={footerClassName}>
-        <SolidButton variant="outline" size="sm" onClick={onCancel}>
+        <SolidButton variant="outline" onClick={onCancel}>
           {cancelLabel}
         </SolidButton>
-        <SolidButton variant="destructive" size="sm" onClick={onConfirm}>
+        <SolidButton variant="destructive" onClick={onConfirm}>
           {confirmLabel}
         </SolidButton>
       </SolidDialogFooter>

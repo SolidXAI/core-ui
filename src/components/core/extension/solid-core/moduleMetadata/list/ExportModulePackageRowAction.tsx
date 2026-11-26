@@ -197,7 +197,6 @@ const ExportModulePackageRowAction = (event: SolidListRowdataDynamicFunctionProp
 
         <div className="solid-generate-code-popup__actions">
           <SolidButton
-            size="small"
             autoFocus
             leftIcon={<Download size={14} />}
             onClick={handleExport}
@@ -205,7 +204,7 @@ const ExportModulePackageRowAction = (event: SolidListRowdataDynamicFunctionProp
           >
             Export v{exportVersion || "?"}
           </SolidButton>
-          <SolidButton size="small" variant="outline" onClick={() => dispatch(closePopup())}>
+          <SolidButton variant="outline" onClick={() => dispatch(closePopup())}>
             Cancel
           </SolidButton>
         </div>

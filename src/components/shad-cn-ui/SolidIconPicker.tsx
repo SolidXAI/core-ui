@@ -29,10 +29,10 @@ export function SolidIconPicker({ value, onChange }: SolidIconPickerProps) {
   return (
     <div className="flex items-center gap-3">
       {value ? <SolidMaterialSymbol name={value} size={32} aria-label={formatIconName(value)} /> : <span className="text-sm opacity-70">No icon selected</span>}
-      <SolidButton type="button" size="small" variant="outline" onClick={() => setOpen(true)}>
+      <SolidButton type="button" variant="outline" onClick={() => setOpen(true)}>
         {value ? "Change icon" : "Select icon"}
       </SolidButton>
-      {value && <SolidButton type="button" size="small" variant="ghost" onClick={() => onChange("")}>Remove</SolidButton>}
+      {value && <SolidButton type="button" variant="ghost" onClick={() => onChange("")}>Remove</SolidButton>}
 
       <SolidDialog open={open} onOpenChange={setOpen} className="p-0" style={{ width: "min(900px, 94vw)", maxHeight: "85vh" }}>
         <SolidDialogHeader>
@@ -41,7 +41,7 @@ export function SolidIconPicker({ value, onChange }: SolidIconPickerProps) {
         <SolidDialogBody className="p-4">
           <div className="flex flex-wrap gap-2 mb-4">
             {categories.map((item) => (
-              <SolidButton key={item} type="button" size="small" variant={category === item ? "primary" : "outline"} onClick={() => setCategory(item)}>
+              <SolidButton key={item} type="button" variant={category === item ? "primary" : "outline"} onClick={() => setCategory(item)}>
                 {item}
               </SolidButton>
             ))}

@@ -125,7 +125,6 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
         {importedCount > 0 &&
           <SolidButton
             type='button'
-            size='small'
             leftIcon={<Eye size={14} />}
             onClick={() => {
               if (status === "import_failed" && importedCount > 0) {
@@ -142,7 +141,6 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
         {status === "import_failed" && transactionId &&
           <SolidButton
             type='button'
-            size='small'
             leftIcon={<Download size={14} />}
             variant='outline'
             onClick={() => handleDownloadFailedRecords(transactionId)}
@@ -171,12 +169,11 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
           <p>Do you want to download failed records before viewing the successful imports?</p>
         </SolidDialogBody>
         <SolidDialogFooter className="solid-import-confirm-dialog-footer">
-          <SolidButton type="button" size='small' leftIcon={<Download size={14} />} onClick={handlePartialDialogConfirm}>
+          <SolidButton type="button" leftIcon={<Download size={14} />} onClick={handlePartialDialogConfirm}>
             Yes
           </SolidButton>
           <SolidButton
             type="button"
-            size='small'
             variant="outline"
             leftIcon={<CircleX size={14} />}
             onClick={() => {

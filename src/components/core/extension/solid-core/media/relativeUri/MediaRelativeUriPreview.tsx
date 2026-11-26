@@ -127,7 +127,6 @@ const MediaRelativeUriPreview = ({
           <>
             <SolidButton
               type="button"
-              size="sm"
               variant="outline"
               className="solid-media-relative-uri-preview__button"
               tooltip={details.fileName}
@@ -139,7 +138,6 @@ const MediaRelativeUriPreview = ({
             {hasInlinePreview && (
               <SolidButton
                 type="button"
-                size="sm"
                 variant="ghost"
                 className="solid-media-relative-uri-preview__external solid-icon-button"
                 tooltip="Open in new tab"
@@ -153,7 +151,6 @@ const MediaRelativeUriPreview = ({
         ) : (
           <SolidButton
             type="button"
-            size="sm"
             variant="outline"
             className="solid-media-relative-uri-preview__button"
             disabled

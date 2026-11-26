@@ -59,13 +59,11 @@ export const SolidSaveCustomFilterForm: React.FC<SolidSaveCustomFilterFormProps>
             <div className="solid-save-filter-actions">
                 <SolidButton
                     type="submit"
-                    size="sm"
                 >
                     {currentSavedFilterData ? "Update" : "Save"}
                 </SolidButton>
                 <SolidButton
                     type="button"
-                    size="sm"
                     variant="outline"
                     onClick={() => closeDialog()}
                 >

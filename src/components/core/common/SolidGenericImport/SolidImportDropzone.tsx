@@ -91,7 +91,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                             </span>
                         </div>
                         <div className='mt-4 flex justify-center'>
-                            <SolidButton type="button" variant="outline" size="small" leftIcon={<Upload size={14} />} onClick={(event) => {
+                            <SolidButton type="button" variant="outline" leftIcon={<Upload size={14} />} onClick={(event) => {
                                 event.stopPropagation();
                                 open();
                             }}>
@@ -111,7 +111,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                                     <p className='m-0 solid-import-file-caption'>{formatBytes(file.size)}</p>
                                 </div>
                             </div>
-                            <SolidButton type="button" variant="ghost" size="small" className="solid-import-file-remove" leftIcon={<Trash2 size={14} />} onClick={removeFile} />
+                            <SolidButton type="button" variant="ghost" className="solid-import-file-remove" leftIcon={<Trash2 size={14} />} onClick={removeFile} />
                         </div>
                     }
                 </div>
@@ -120,7 +120,6 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                 <p className="solid-import-actions-copy">Upload one source file and continue to field mapping.</p>
                 <SolidButton
                     type="button"
-                    size='small'
                     onClick={() => {
                         if (!file) {
                             dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.MISSING_FILE, detail: ERROR_MESSAGES.FAILED_UPLOAD_FILE }));

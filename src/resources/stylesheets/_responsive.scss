@@ -13,7 +13,7 @@
         &.layout-overlay {
             .layout-main-container {
                 margin-left: 0;
-                padding-left: 2rem;
+                padding-left: var(--solid-space-8);
             }
 
             .layout-sidebar {
@@ -45,7 +45,7 @@
 
                 .layout-main-container {
                     margin-left: 0;
-                    padding-left: 2rem;
+                    padding-left: var(--solid-space-8);
                 }
             }
         }
@@ -64,7 +64,7 @@
     .layout-wrapper {
         .layout-main-container {
             margin-left: 0;
-            padding-left: 2rem;
+            padding-left: var(--solid-space-8);
         }
 
         .layout-sidebar {

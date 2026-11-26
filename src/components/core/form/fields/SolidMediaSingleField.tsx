@@ -483,10 +483,10 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     <p className="solid-shadcn-dialog-text">Are you sure you want to delete media?</p>
                 </SolidDialogBody>
                 <SolidDialogFooter className="solid-shadcn-dialog-actions">
-                    <SolidButton variant="destructive" size="sm" autoFocus onClick={handleCancelUpload}>
+                    <SolidButton variant="destructive" autoFocus onClick={handleCancelUpload}>
                         Delete
                     </SolidButton>
-                    <SolidButton variant="outline" size="sm" onClick={() => setDeleteImageDialogVisible(false)}>
+                    <SolidButton variant="outline" onClick={() => setDeleteImageDialogVisible(false)}>
                         Cancel
                     </SolidButton>
                 </SolidDialogFooter>
@@ -505,10 +505,10 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     <p className="solid-shadcn-dialog-text">A media file is already uploaded. Do you want to delete it and upload a new one?</p>
                 </SolidDialogBody>
                 <SolidDialogFooter className="solid-shadcn-dialog-actions">
-                    <SolidButton variant="destructive" size="sm" onClick={handleReplaceFile}>
+                    <SolidButton variant="destructive" onClick={handleReplaceFile}>
                         Replace
                     </SolidButton>
-                    <SolidButton variant="outline" size="sm" onClick={() => setReplaceImageDialogVisible(false)}>
+                    <SolidButton variant="outline" onClick={() => setReplaceImageDialogVisible(false)}>
                         Cancel
                     </SolidButton>
                 </SolidDialogFooter>

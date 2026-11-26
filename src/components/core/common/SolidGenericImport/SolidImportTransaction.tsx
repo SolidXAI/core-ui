@@ -351,7 +351,6 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                 <p className="solid-import-actions-copy">Confirm the mapping and start the import.</p>
                 <SolidButton
                     type="button"
-                    size='small'
                     onClick={handleImportTransaction}
                     loading={isImporting}
                     disabled={isImporting || isMappingInfoError || mappingInfo?.data?.sampleImportedRecordInfo?.length === 0}

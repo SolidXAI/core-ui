@@ -234,7 +234,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
       </div>
 
       <div className={styles.footerActions}>
-        <SolidButton type="submit" size="sm" loading={formik.isSubmitting} disabled={isChangePasswordDisabled}>
+        <SolidButton type="submit" loading={formik.isSubmitting} disabled={isChangePasswordDisabled}>
           Change Password
         </SolidButton>
       </div>

@@ -52,13 +52,12 @@ export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogV
                     }}
                 />
                 <div className="pt-3 flex gap-2">
-                    <SolidButton type="submit" size="sm">
+                    <SolidButton type="submit">
                         Apply
                     </SolidButton>
                     <SolidButton
                         type="button"
                         variant="outline"
-                        size="sm"
                         onClick={() => setLayoutDialogVisible(false)}
                     >
                         Cancel

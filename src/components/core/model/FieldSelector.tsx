@@ -153,7 +153,6 @@ const FieldSelector = ({
       {requireExplicitContinue ? (
         <div className="mt-4 flex justify-end">
           <SolidButton
-            size="small"
             leftIcon={<ArrowRight size={14} />}
             onClick={handleContinue}
             disabled={!selectedField}

@@ -121,7 +121,6 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                     ) : (
                         <SolidButton
                             type="button"
-                            size="sm"
                             variant="outline"
                             onClick={() => setOpenIconDialog(true)}
                         >
@@ -177,7 +176,6 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                             <SolidButton
                                                 type='button'
                                                 key={tab}
-                                                size="sm"
                                                 onClick={() => {
                                                     setSelectedCategory(tab);
                                                     setSearchIcon("");
@@ -287,10 +285,10 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                     </div>
                 </SolidDialogBody>
                 <SolidDialogFooter className="gap-4">
-                    <SolidButton type="button" size="sm" onClick={() => setOpenIconDialog(false)}>
+                    <SolidButton type="button" onClick={() => setOpenIconDialog(false)}>
                         Select
                     </SolidButton>
-                    <SolidButton type="button" size="sm" variant="outline" onClick={() => setOpenIconDialog(false)}>
+                    <SolidButton type="button" variant="outline" onClick={() => setOpenIconDialog(false)}>
                         Cancel
                     </SolidButton>
                 </SolidDialogFooter>

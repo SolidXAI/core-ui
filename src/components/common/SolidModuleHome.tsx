@@ -96,7 +96,6 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                                             <SolidButton
                                                 outlined
                                                 label='Explore'
-                                                size='small'
                                                 icon="si si-arrow-right"
                                                 iconPos='right'
                                                 className="font-bold"
@@ -107,7 +106,6 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                                         <SolidButton
                                             outlined
                                             label='Open'
-                                            size='small'
                                             icon="si si-cog"
                                             iconPos='right'
                                             className="font-bold"

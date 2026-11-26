@@ -605,8 +605,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
                 <div className="solid-list-search-toggle">
                   <SolidButton
                     type="button"
-                    variant="outline"
-                    size="sm"
+                    variant="surface"
                     className="solid-icon-button"
                     onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
                     aria-label="Toggle search"
@@ -641,8 +640,7 @@ export const SolidCardView = forwardRef<SolidCardViewHandle, SolidCardViewParams
 
                 <SolidButton
                   type="button"
-                  variant="outline"
-                  size="sm"
+                  variant="surface"
                   className="solid-icon-button"
                   onClick={() => handleFetchUpdatedRecords()}
                   aria-label="Refresh cards"

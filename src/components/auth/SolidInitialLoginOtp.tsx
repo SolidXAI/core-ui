@@ -167,7 +167,6 @@ const SolidInitialLoginOtp = () => {
                                         <SolidButton
                                             type="button"
                                             variant="outline"
-                                            size="sm"
                                             className="solid-auth-otp-resend"
                                             onClick={handleResendOtp}
                                             disabled={!resendEnabled}

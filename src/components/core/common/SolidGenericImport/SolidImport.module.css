@@ -37,7 +37,7 @@
 }
 
 :global(.solid-import-dialog-title) {
-    font-size: 18px;
+    font-size: var(--solid-font-size-component-title);
     line-height: 1.15;
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -113,7 +113,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: var(--solid-font-size-control-xs);
     font-weight: 700;
 }
 
@@ -131,7 +131,7 @@
 
 :global(.solid-import-stepper-label) {
     min-width: 0;
-    font-size: 13px;
+    font-size: var(--solid-font-size-ui-control);
     line-height: 1.2;
     font-weight: 600;
 }
@@ -185,7 +185,7 @@
 }
 
 :global(.solid-import-section-copy) {
-    font-size: 12.5px;
+    font-size: var(--solid-font-size-caption);
     line-height: 1.6;
     color: color-mix(in srgb, var(--foreground) 76%, transparent);
 }
@@ -236,7 +236,7 @@
 
 :global(.solid-import-instruction-title) {
     margin: 0 0 6px;
-    font-size: 13px;
+    font-size: var(--solid-font-size-ui-control);
     line-height: 1.4;
     font-weight: 650;
     letter-spacing: -0.01em;
@@ -250,7 +250,7 @@
 
 :global(.solid-import-panel-grid.is-single-column .solid-import-instruction-title::before) {
     content: counter(solid-import-instruction) ". ";
-    color: color-mix(in srgb, var(--foreground) 66%, transparent);
+    color: color-mix(in srgb, var(--foreground) 96%, transparent);
     font-variant-numeric: tabular-nums;
 }
 
@@ -285,7 +285,7 @@
     border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
     background: color-mix(in srgb, var(--accent) 28%, transparent);
     color: color-mix(in srgb, var(--foreground) 86%, transparent);
-    font-size: 11.5px;
+    font-size: var(--solid-font-size-caption);
     line-height: 1.3;
     font-weight: 500;
 }
@@ -343,13 +343,13 @@
     border-radius: 999px;
     background: color-mix(in srgb, var(--primary) 10%, transparent);
     color: color-mix(in srgb, var(--primary) 82%, var(--foreground));
-    font-size: 11px;
+    font-size: var(--solid-font-size-caption);
     font-weight: 600;
     letter-spacing: 0.02em;
 }
 
 :global(.solid-import-dropzone-title) {
-    font-size: 15px;
+    font-size: var(--solid-font-size-body-small);
     margin-bottom: 2px;
 }
 
@@ -370,7 +370,7 @@
     border-radius: 999px;
     border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
     background: color-mix(in srgb, var(--accent) 44%, transparent);
-    font-size: 11px;
+    font-size: var(--solid-font-size-caption);
     font-weight: 600;
     color: color-mix(in srgb, var(--foreground) 82%, transparent);
 }
@@ -412,7 +412,7 @@
 }
 
 :global(.solid-import-file-name) {
-    font-size: 12px;
+    font-size: var(--solid-font-size-ui-control);
     font-weight: 600;
     color: var(--foreground);
     white-space: nowrap;
@@ -421,7 +421,7 @@
 }
 
 :global(.solid-import-file-caption) {
-    font-size: 11px;
+    font-size: var(--solid-font-size-caption);
     line-height: 1.4;
     color: color-mix(in srgb, var(--foreground) 68%, transparent);
 }
@@ -440,7 +440,7 @@
 
 :global(.solid-import-actions-copy) {
     margin: 0;
-    font-size: 11.5px;
+    font-size: var(--solid-font-size-caption);
     line-height: 1.5;
     color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
@@ -459,14 +459,14 @@
 
 :global(.solid-import-empty-state h4) {
     margin: 0;
-    font-size: 16px;
+    font-size: var(--solid-font-size-body);
     line-height: 1.3;
     color: var(--foreground);
 }
 
 :global(.solid-import-empty-state p) {
     margin: 0;
-    font-size: 12.5px;
+    font-size: var(--solid-font-size-caption);
     line-height: 1.6;
     color: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
@@ -495,7 +495,7 @@
     border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
     display: inline-flex;
     align-items: center;
-    font-size: 11px;
+    font-size: var(--solid-font-size-caption);
     font-weight: 600;
     white-space: nowrap;
     color: color-mix(in srgb, var(--foreground) 78%, transparent);
@@ -534,7 +534,7 @@
 
 :global(.solid-import-mapping-alert-title) {
     margin: 0;
-    font-size: 12.5px;
+    font-size: var(--solid-font-size-ui-control);
     line-height: 1.35;
     font-weight: 700;
     color: color-mix(in srgb, var(--foreground) 96%, transparent);
@@ -542,7 +542,7 @@
 
 :global(.solid-import-mapping-alert-text) {
     margin: 3px 0 0;
-    font-size: 12px;
+    font-size: var(--solid-font-size-caption);
     line-height: 1.6;
     color: color-mix(in srgb, var(--foreground) 74%, transparent);
 }
@@ -564,7 +564,7 @@
 
 :global(.solid-import-mapping-head-cell) {
     padding: 11px 14px;
-    font-size: 11px;
+    font-size: var(--solid-font-size-ui-control);
     font-weight: 700;
     letter-spacing: 0.02em;
     text-transform: uppercase;
@@ -590,14 +590,14 @@
 }
 
 :global(.solid-import-mapping-source-title) {
-    font-size: 12px;
+    font-size: var(--solid-font-size-ui-control);
     font-weight: 600;
     color: var(--foreground);
 }
 
 :global(.solid-import-mapping-source-value) {
     margin-top: 4px;
-    font-size: 11px;
+    font-size: var(--solid-font-size-caption);
     line-height: 1.45;
     color: color-mix(in srgb, var(--foreground) 64%, transparent);
     word-break: break-word;
@@ -844,7 +844,7 @@
     }
 
     .solid-import-dropzone-title {
-        font-size: 14px;
+        font-size: var(--solid-font-size-body-small);
         line-height: 1.3;
     }
 
