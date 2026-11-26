@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "../SolidAgent.module.css";
 import { SolidChatWidgetProps } from "../../../../types/solid-core";
 import { getChatWidgetData } from "./chatWidgetUtils";
+import { SolidAgentMarkdown } from "../SolidAgentMarkdown";
 
 type Tone = "success" | "warning" | "error" | "info";
 type StatusData = {
@@ -40,7 +41,7 @@ export const SolidStatusChatWidget = ({ eventData, sendPrompt }: SolidChatWidget
             <Icon size={16} style={{ flex: "0 0 auto", marginTop: 2 }} />
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {data.title && <strong>{data.title}</strong>}
-                {data.message && <span>{data.message}</span>}
+                {data.message && <SolidAgentMarkdown text={data.message} />}
                 {route && (
                     <button type="button" className={styles.saView} style={{ alignSelf: "flex-start" }} onClick={() => navigate(route)}>
                         View
@@ -57,5 +58,5 @@ export const SolidStatusChatWidget = ({ eventData, sendPrompt }: SolidChatWidget
 };
 
 Object.assign(SolidStatusChatWidget, { getExtensionMetadata: () => ({
-    agentWidget: { name: "status", description: "Show the outcome of one operation with a status, title, and detail.", propsSchema: { type: "object", properties: { tone: { type: "string", enum: ["success", "warning", "error", "info"] }, title: { type: "string" }, message: { type: "string" }, action: { type: "object", properties: { label: { type: "string" }, prompt: { type: "string" } }, required: ["label", "prompt"] } } } },
+    agentWidget: { name: "status", description: "Show the outcome of one operation with a status, plain-text title, and Markdown message supporting bold, links, and lists.", propsSchema: { type: "object", properties: { tone: { type: "string", enum: ["success", "warning", "error", "info"] }, title: { type: "string" }, message: { type: "string", description: "Markdown detail text. Use Markdown for formatting, links, and lists." }, action: { type: "object", properties: { label: { type: "string" }, prompt: { type: "string" } }, required: ["label", "prompt"] } } } },
 }) });
