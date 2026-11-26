@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.8] - 2026-11-26
+
+### Added
+
+- add error handling with toast notifications in useRelationEntityHandler (#320)
+
 ## [0.1.23-beta.7] - 2026-11-26
 
 ## [0.1.23-beta.6] - 2026-11-26
