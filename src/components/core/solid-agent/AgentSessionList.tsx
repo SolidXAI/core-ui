@@ -17,7 +17,7 @@ function formatSessionTime(iso: string | null): string {
     return `${date.toLocaleDateString([], { month: "short", day: "numeric" })}, ${timeStr}`;
 }
 
-const sessionLabel = (session: AgentSessionSummary) => session.title || session.preview || "New conversation";
+const sessionLabel = (session: AgentSessionSummary) => session.title || session.preview || "New session";
 
 export function AgentSessionSearch({ value, onChange }: { value: string; onChange: (value: string) => void }) {
     return (
