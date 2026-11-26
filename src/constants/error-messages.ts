@@ -20,6 +20,7 @@ export const ERROR_MESSAGES = {
   MUST_MATCH: "Passwords must match",
   FORCE_PASSWORD_CHANGE: "Force Password Change Success",
   PASSWORD_CHANGE: 'Password Change Successfully',
+  PASSWORD_REUSED: 'New password cannot be the same as the current password',
 
   /* ---------------------------------- OTP ----------------------------------- */
   INAVLID_OTP: "Invalid OTP",

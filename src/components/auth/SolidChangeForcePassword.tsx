@@ -27,12 +27,22 @@ const SolidChangeForcePassword = () => {
         console.error(ERROR_MESSAGES.INVALID_PASSWORD_REGX, error);
     }
 
-    const newPasswordValidation = passwordRegex
+    const isSystemAdmin = session?.data?.user?.username === 'sa';
+
+    let newPasswordValidation = passwordRegex
         ? Yup.string()
             .matches(passwordRegex, ERROR_MESSAGES.PASSWORD_DO_NOT_MEET)
             .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))
-        : Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
+        : Yup.string()
+            .min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
             .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'));
+
+    if (!isSystemAdmin) {
+        newPasswordValidation = newPasswordValidation.notOneOf(
+            [Yup.ref('currentPassword')],
+            ERROR_MESSAGES.PASSWORD_REUSED,
+        );
+    }
 
     const validationSchema = Yup.object({
         email: Yup.string().email(ERROR_MESSAGES.FIELD_INAVLID_FORMAT('email')).required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
