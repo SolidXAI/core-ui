@@ -972,7 +972,7 @@ export const SolidAiChat: React.FC = () => {
                                             onClick={() => handleSelectSession(s.session_id)}
                                         >
                                             <div className={styles.SessionItemMain}>
-                                                <span className={styles.SessionItemPreview}>{s.preview || "New conversation"}</span>
+                                                <span className={styles.SessionItemPreview}>{s.preview || "New session"}</span>
                                                 <span className={styles.SessionItemMeta}>
                                                     {formatSessionDate(s.created_at)}
                                                     {s.totalSteps > 0 && ` · ${s.totalSteps} turn${s.totalSteps !== 1 ? "s" : ""}`}

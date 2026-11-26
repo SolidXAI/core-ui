@@ -762,7 +762,7 @@ export function SolidAgentChat({
             const storedTitles = getStoredSessionTitles(agentUrl);
             const enriched = (list ?? []).map((s) => ({
                 ...s,
-                title: storedTitles[s.session_id] || s.title || s.preview || "New conversation",
+                title: storedTitles[s.session_id] || s.title || s.preview || "New session",
             }));
             setSessions(enriched);
         });
@@ -1284,7 +1284,7 @@ export function SolidAgentChat({
                                             title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
                                         >
                                             <span className={styles.historyPreview}>
-                                                {session.title || session.preview || "New conversation"}
+                                                {session.title || session.preview || "New session"}
                                             </span>
                                             {session.provider && (
                                                 <span
@@ -1305,7 +1305,7 @@ export function SolidAgentChat({
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setEditingSessionId(session.session_id);
-                                                    setEditingTitle(session.title || session.preview || "New conversation");
+                                                    setEditingTitle(session.title || session.preview || "New session");
                                                 }}
                                             >
                                                 <Pencil size={13} />
