@@ -4,6 +4,58 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.1.23-beta.6] - 2026-11-26
+
+### Added
+
+- integrate SolidAgentMarkdown for rendering Markdown messages in SolidStatusChatWidget
+- lock name/module and prevent deletion of built-in agents
+- extract provider dropdown and session list components
+- add granular provider authentication status tracking and retry UI in SolidAgentChat
+- add asynchronous provider authentication status checking spinner
+- added unauthenticated icon in provider dropdown
+- add unauthenticated badge to provider list
+- implement infinite scroll pagination and server search Replace client-side page slicing with IntersectionObserver streaming and debounced search.
+- added pill for copilot
+- added pill for claude
+- added pill for antigravity
+
+### Fixed
+
+- update default session title from "New conversation" to "New session" in AgentSessionList and SolidAgentChat components
+- update default session title from "New conversation" to "New session" in SolidAgentChat and SolidAiChat components
+- show live execution loader and accurate timer on session resume
+- include isSwitchingProvider in loading states for chat history and provider dropdowns
+- update unauthenticated provider tooltip messages in SolidAgentChat
+- hover animation issue
+- added SolidSpinner and improve history loading state handling
+- the flickering of auto loader in chat
+- persist selected model preferences and improve sorting for models and reasoning efforts
+- hovering issue in chat history
+- chat hover issue
+- enhance full-screen sidebar UX and layout
+
+### Changed
+
+- remove isBuiltin from detailFields in AgentRegistryEditorPage
+- remove builtin agent restrictions and row selection logic
+- improve chat history row menu hover states and styling in SolidAgent component
+
+### Other
+
+- Refactor typography styles and variables for improved accessibility a… (#302)
+- removed isBuiltin
+- fix the tool call nooormalization of opencode
+- fix the poper css for the provider
+- fix the tool call normalization opencode latest version
+- fixed the input bar ui issues related to session history
+- added auto-loader for session chat messages
+- update sidebar resizer hover styles
+- fixed the gap of session history loading
+- redesign full screen mode of agent
+- added pagination support for agent
+- cleaned the session history with minimal ui changes and fixed the provider dropdown overflow
+
 ## [0.1.23-beta.5] - 2026-11-25
 
 ### Added
