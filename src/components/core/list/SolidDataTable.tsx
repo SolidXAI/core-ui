@@ -55,7 +55,6 @@ type SolidDataTableProps = {
   paginatorClassName?: string;
   paginatorLeft?: React.ReactNode;
   currentPageReportTemplate?: string;
-  isRowSelectable?: (rowData: any) => boolean;
   [key: string]: any;
 };
 
@@ -132,23 +131,12 @@ export function SolidDataTable({
   paginatorClassName,
   paginatorLeft,
   currentPageReportTemplate = "{first} - {last} of {totalRecords}",
-  isRowSelectable,
 }: SolidDataTableProps) {
   const columns = normalizeColumns(children);
   const pageRows = value ?? [];
 
-  const isSelectableRow = (rowData: any) => {
-    if (typeof isRowSelectable === "function") {
-      return Boolean(isRowSelectable(rowData));
-    }
-    return true;
-  };
-
   const selectedKeys = new Set((selection || []).map((row: any) => String(row?.[dataKey])));
-  const selectablePageRows = pageRows.filter((row: any) => isSelectableRow(row));
-  const allSelected =
-    selectablePageRows.length > 0 &&
-    selectablePageRows.every((row: any) => selectedKeys.has(String(row?.[dataKey])));
+  const allSelected = pageRows.length > 0 && pageRows.every((row: any) => selectedKeys.has(String(row?.[dataKey])));
 
   const start = totalRecords === 0 ? 0 : first + 1;
   const end = Math.min(first + rows, totalRecords);
@@ -173,7 +161,6 @@ export function SolidDataTable({
     const merged = [...(selection || [])];
     const mergedKeys = new Set(merged.map((row: any) => String(row?.[dataKey])));
     pageRows.forEach((row: any) => {
-      if (!isSelectableRow(row)) return;
       const key = String(row?.[dataKey]);
       if (!mergedKeys.has(key)) merged.push(row);
     });
@@ -181,7 +168,6 @@ export function SolidDataTable({
   };
 
   const toggleRowSelection = (rowData: any, checked: boolean) => {
-    if (!isSelectableRow(rowData)) return;
     const key = String(rowData?.[dataKey]);
     if (!checked) {
       emitSelection((selection || []).filter((row: any) => String(row?.[dataKey]) !== key));
@@ -283,13 +269,11 @@ export function SolidDataTable({
                     {columns.map((column, index) => {
                       const props = column.props;
                       const isSelectionColumn = props.selectionMode === "multiple";
-                      const isRowDisabled = !isSelectableRow(rowData);
                       const content = isSelectionColumn
                         ? (
                           <input
                             type="checkbox"
                             checked={rowSelected}
-                            disabled={isRowDisabled}
                             onChange={(e) => toggleRowSelection(rowData, e.currentTarget.checked)}
                             onClick={(e) => e.stopPropagation()}
                             aria-label="Select row"
