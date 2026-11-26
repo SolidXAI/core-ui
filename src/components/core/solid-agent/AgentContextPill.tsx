@@ -39,14 +39,15 @@ export function AgentContextPill({
     const [pinned, setPinned] = useState(false);
     const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // Clean up close timer on unmount
     useEffect(() => {
         return () => {
             if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
         };
     }, []);
 
-    // Only show pill for supported providers (Solid Native, Pi, Antigravity, Claude, Copilot). Hide completely if unmapped/unknown context limit.
-    const ALLOWED_PROVIDERS = new Set(["solidx", "pi", "antigravity", "agy", "claude", "copilot"]);
+    // Only show pill for supported providers (Solid Native, Pi). Hide completely if unmapped/unknown context limit.
+    const ALLOWED_PROVIDERS = new Set(["solidx", "pi"]);
     if (!ALLOWED_PROVIDERS.has(activeProvider) || !usage?.contextLimit || usage.contextLimit <= 0) {
         return null;
     }
@@ -55,7 +56,6 @@ export function AgentContextPill({
     const contextTokens = usage.contextTokens || 0;
     const totalTokens = usage.totalTokens || 0;
     const totalCost = usage.totalCost || 0;
-    const showCost = (activeProvider !== "antigravity" && activeProvider !== "agy" && activeProvider !== "copilot") || totalCost > 0;
 
     const pct = Math.min(100, Math.max(0, Math.round((contextTokens / contextLimit) * 100)));
     const compactAt = usage.compactAt && usage.compactAt > 0 ? usage.compactAt : null;
@@ -183,12 +183,10 @@ export function AgentContextPill({
                         <span className={styles.contextCardValue}>{totalTokens.toLocaleString()}</span>
                     </div>
                 )}
-                {showCost && (
-                    <div className={styles.contextCardRow}>
-                        <span className={styles.contextCardLabel}>Cost</span>
-                        <span className={styles.contextCardValue}>{formatCost(totalCost)}</span>
-                    </div>
-                )}
+                <div className={styles.contextCardRow}>
+                    <span className={styles.contextCardLabel}>Cost</span>
+                    <span className={styles.contextCardValue}>{formatCost(totalCost)}</span>
+                </div>
             </SolidPopoverContent>
         </SolidPopover>
     );

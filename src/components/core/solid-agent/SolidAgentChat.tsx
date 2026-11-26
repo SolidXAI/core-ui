@@ -1,20 +1,18 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Globe, History, LogOut, Maximize2, Minimize2, Minus, PanelRight, Plus, WifiOff, X } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Check, ChevronDown, Globe, History, Loader2, LogOut, Maximize2, Minimize2, Minus, PanelRight, Pencil, Plus, Search, Trash2, WifiOff, X } from "lucide-react";
 import styles from "./SolidAgent.module.css";
-import { agentModeChanged, agentPrefillConsumed, agentThreadReset } from "../../../redux/features/agentSlice";
+import { agentModeChanged, agentPrefillConsumed } from "../../../redux/features/agentSlice";
 import {
     deleteSession,
     fetchAgentConfigVersionStatus,
     fetchAgentModelAssignments,
     fetchAgentProviders,
-    fetchProviderAuth,
     fetchProviderModels,
     fetchSessionList,
     getCachedAgentProviders,
     getCachedProviderModels,
     getStoredSessionTitles,
     renameSession,
-    type AgentSessionPage,
     type AgentSessionSummary,
 } from "./client/agentRest";
 import {
@@ -24,7 +22,6 @@ import {
     getStoredReasoning,
     getStoredSpeed,
     getStoredThinking,
-    setStoredProviderAndModel,
     setStoredSessionOptions,
 } from "./client/agentRuntime";
 import { AgentThread } from "./thread/AgentThread";
@@ -44,8 +41,6 @@ import type { BeforeUserMessageSendRequest, EmbedMessageContext } from "./embed/
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidDialog, SolidDialogBody } from "../../shad-cn-ui/SolidDialog";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
-import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui/SolidTooltip";
-import { SolidSpinner } from "../../shad-cn-ui/SolidSpinner";
 import { eventBus } from "../../../helpers/eventBus";
 import { SOLID_AGENT_EVENTS } from "./sdk/solidAgent";
 import { AgentWorkspaceHeaderActions } from "./AgentWorkspaceHeaderActions";
@@ -56,10 +51,16 @@ import { useAgentBrowser } from "./browser/useAgentBrowser";
 import { AgentBrowserScreen } from "./browser/AgentBrowserScreen";
 import type { SolidAgentBrowserPanelWidgetProps } from "../../../types/solid-core";
 import { ExtensionComponentTypes } from "../../../types/extension-registry";
-import { AgentProviderDropdown, formatProviderName, getProviderAuthStatus } from "./AgentProviderDropdown";
-import { AgentSessionList, AgentSessionSearch } from "./AgentSessionList";
 
-export { formatProviderName };
+export function formatProviderName(raw?: string): string {
+    if (!raw) return "";
+    const trimmed = raw.trim();
+    const lower = trimmed.toLowerCase();
+    if (lower.includes("copilot")) return "Copilot";
+    if (lower.includes("droid")) return "Droid";
+    if (lower.includes("claude")) return "Claude";
+    return trimmed;
+}
 
 type Props = {
     agentUrl: string;
@@ -132,14 +133,14 @@ const AGENT_HUB_DEFAULT_SUGGESTIONS = [
     "Summarize your capabilities",
 ];
 
-const SIDEBAR_WIDTH_STORAGE_KEY = "solid-agent.sidebar-width";
-const DEFAULT_SIDEBAR_WIDTH = 270;
-const MIN_SIDEBAR_WIDTH = 220;
-const MAX_SIDEBAR_WIDTH = 420;
-const HISTORY_PAGE_LIMIT = 20;
-
-function withStoredTitle(session: AgentSessionSummary, storedTitles: Record<string, string>): AgentSessionSummary {
-    return { ...session, title: storedTitles[session.session_id] || session.title || session.preview || "New session" };
+function formatDate(iso: string | null) {
+    if (!iso) return "";
+    const date = new Date(iso);
+    const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+    if (days === 0) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    if (days === 1) return "Yesterday";
+    if (days < 7) return date.toLocaleDateString([], { weekday: "short" });
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
 function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<string, string>): { values?: Record<string, unknown>; error?: string } {
@@ -288,60 +289,27 @@ export function SolidAgentChat({
     const signedInAs = agentAuth.auth?.user?.email ?? agentAuth.auth?.user?.username;
     const emptyStateSuggestions = suggestions ?? (agentRuntime === "agentHub" ? AGENT_HUB_DEFAULT_SUGGESTIONS : DEFAULT_SUGGESTIONS);
 
-    const windowMode = windowControls?.mode ?? agent.mode;
-    const isFullScreen = windowMode === "maximized";
     const [showHistory, setShowHistory] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
-        if (typeof window === "undefined") return DEFAULT_SIDEBAR_WIDTH;
-        try {
-            const stored = localStorage.getItem(SIDEBAR_WIDTH_STORAGE_KEY);
-            if (stored) {
-                const num = parseInt(stored, 10);
-                if (!isNaN(num) && num >= MIN_SIDEBAR_WIDTH && num <= MAX_SIDEBAR_WIDTH) {
-                    return num;
-                }
-            }
-        } catch {}
-        return DEFAULT_SIDEBAR_WIDTH;
-    });
-    const [isDraggingSidebar, setIsDraggingSidebar] = useState(false);
-    const isResizingSidebarRef = useRef(false);
-    const sidebarWidthRef = useRef(sidebarWidth);
-    sidebarWidthRef.current = sidebarWidth;
-    const fullScreenLayoutRef = useRef<HTMLDivElement>(null);
     const [sessions, setSessions] = useState<AgentSessionSummary[]>([]);
-    const [historyNextCursor, setHistoryNextCursor] = useState<string | null>(null);
-    const [historyHasMore, setHistoryHasMore] = useState(false);
-    const [historyInitialLoading, setHistoryInitialLoading] = useState(false);
-    const [historyLoadingMore, setHistoryLoadingMore] = useState(false);
-    const [historyLoadError, setHistoryLoadError] = useState<string | null>(null);
-    const [debouncedHistorySearch, setDebouncedHistorySearch] = useState("");
-
-    const historyGenerationRef = useRef(0);
-    const historyAbortRef = useRef<AbortController | null>(null);
-    const historyInFlightRef = useRef(false);
     const [sessionToDelete, setSessionToDelete] = useState<AgentSessionSummary | null>(null);
     const startingNewChatRef = useRef(false);
     const [historySearchQuery, setHistorySearchQuery] = useState("");
+    const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+    const [editingTitle, setEditingTitle] = useState("");
     const [seed, setSeed] = useState<{ text: string; key: number } | null>(null);
     const [staleAgentConfig, setStaleAgentConfig] = useState(false);
     const [agentConfigVersion, setAgentConfigVersion] = useState<number | null>(() => agentVersion ?? null);
     const [modelAssignments, setModelAssignments] = useState<AgentModelAssignments | null>(null);
     const [providers, setProviders] = useState<AgentProviderInfo[]>(() => {
         if (agentRuntime === "agentHub") {
-            return [{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }];
+            return [{ id: "solidx", name: "Native", installed: true, version: "" }];
         }
-        return getCachedAgentProviders(agentUrl).map((provider) => provider.id === "solidx"
-            ? { ...provider, authenticated: true, authStatus: "authenticated" }
-            : { ...provider, authenticated: null, authStatus: "checking" });
+        return getCachedAgentProviders(agentUrl);
     });
     const [loadingProviders, setLoadingProviders] = useState<boolean>(() => {
         if (agentRuntime === "agentHub") return false;
         return getCachedAgentProviders(agentUrl).length === 0;
     });
-    const [providersLoadError, setProvidersLoadError] = useState(false);
-    const [providersReloadKey, setProvidersReloadKey] = useState(0);
     const [selectedProvider, setSelectedProvider] = useState<string>(() => (agentRuntime === "agentHub" ? "solidx" : getStoredProvider()));
     const [models, setModels] = useState<ProviderModelInfo[]>(() => {
         if (agentRuntime === "agentHub") return [];
@@ -353,14 +321,8 @@ export function SolidAgentChat({
     const [selectedReasoning, setSelectedReasoning] = useState<string>(() => getStoredReasoning(getStoredProvider()) || "");
     const [isFast, setIsFast] = useState<boolean>(() => getStoredFast(getStoredProvider()));
     const [selectedSpeed, setSelectedSpeed] = useState<string>(() => getStoredSpeed(getStoredProvider()) || "standard");
-    const [isSwitchingProvider, setIsSwitchingProvider] = useState(false);
-    const [resumingSessionId, setResumingSessionId] = useState<string | null>(null);
-    const [isStartingNewChat, setIsStartingNewChat] = useState(false);
-    const skipProviderEffectRef = useRef<string | null>(null);
     const [showProviderMenu, setShowProviderMenu] = useState(false);
     const providerMenuRef = useRef<HTMLDivElement>(null);
-    const headerRef = useRef<HTMLDivElement>(null);
-    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
 
     useEffect(() => {
         if (agentVersion != null) setAgentConfigVersion(agentVersion);
@@ -459,24 +421,18 @@ export function SolidAgentChat({
 
     useEffect(() => {
         if (agentRuntime === "agentHub") {
-            setProviders([{ id: "solidx", name: "Native", installed: true, authenticated: true, authStatus: "authenticated", version: "" }]);
+            setProviders([{ id: "solidx", name: "Native", installed: true, version: "" }]);
             setSelectedProvider("solidx");
-            setLoadingProviders(false);
-            setProvidersLoadError(false);
-            return;
-        }
-        if (!signedIn) {
             setLoadingProviders(false);
             return;
         }
         let alive = true;
-        setLoadingProviders(true);
-        setProvidersLoadError(false);
-        fetchAgentProviders(agentUrl, false).then((list) => {
+        if (providers.length === 0) {
+            setLoadingProviders(true);
+        }
+        fetchAgentProviders(agentUrl).then((list) => {
             if (!alive) return;
-            const installed = (list || []).filter((p) => p.installed).map((provider) => provider.id === "solidx"
-                ? { ...provider, authenticated: true, authStatus: "authenticated" as const }
-                : { ...provider, authenticated: null, authStatus: "checking" as const });
+            const installed = (list || []).filter((p) => p.installed);
             setProviders(installed);
             if (installed.length > 0) {
                 const current = getStoredProvider();
@@ -485,68 +441,16 @@ export function SolidAgentChat({
                     setSelectedProvider(installed[0].id);
                 }
             }
-            // Authentication is intentionally loaded separately from fast provider discovery.
-            installed.forEach((p) => {
-                if (p.id === "solidx") return;
-                fetchProviderAuth(agentUrl, p.id)
-                    .then((result) => {
-                        if (!alive) return;
-                        setProviders((prev) =>
-                            prev.map((item) => (item.id === p.id ? {
-                                ...item,
-                                authenticated: result.authenticated,
-                                authStatus: result.status === "unknown" ? "error" : result.status,
-                            } : item))
-                        );
-                    })
-                    .catch(() => {
-                        if (!alive) return;
-                        setProviders((prev) =>
-                            prev.map((item) => (item.id === p.id ? { ...item, authenticated: null, authStatus: "error" } : item))
-                        );
-                    });
-            });
         }).catch(() => {
-            if (!alive) return;
-            setProvidersLoadError(true);
-            setProviders((prev) => prev.map((provider) => provider.id === "solidx"
-                ? { ...provider, authenticated: true, authStatus: "authenticated" }
-                : { ...provider, authenticated: null, authStatus: "error" }));
+            if (alive && providers.length === 0) setProviders([]);
         }).finally(() => {
-            if (alive) {
-                setLoadingProviders(false);
-            }
+            if (alive) setLoadingProviders(false);
         });
         return () => { alive = false; };
-    }, [agentRuntime, agentUrl, signedIn, providersReloadKey]);
-
-    const retryProviders = useCallback(() => {
-        setProvidersReloadKey((value) => value + 1);
-    }, []);
-
-    const retryProviderAuth = useCallback((providerId: string) => {
-        setProviders((prev) => prev.map((provider) => provider.id === providerId
-            ? { ...provider, authenticated: null, authStatus: "checking" }
-            : provider));
-        void fetchProviderAuth(agentUrl, providerId, true).then((result) => {
-            setProviders((prev) => prev.map((provider) => provider.id === providerId ? {
-                ...provider,
-                authenticated: result.authenticated,
-                authStatus: result.status === "unknown" ? "error" : result.status,
-            } : provider));
-        }).catch(() => {
-            setProviders((prev) => prev.map((provider) => provider.id === providerId
-                ? { ...provider, authenticated: null, authStatus: "error" }
-                : provider));
-        });
-    }, [agentUrl]);
+    }, [agentRuntime, agentUrl, signedIn]);
 
     useEffect(() => {
         if (!selectedProvider || agentRuntime === "agentHub") return;
-        if (skipProviderEffectRef.current === selectedProvider) {
-            skipProviderEffectRef.current = null;
-            return;
-        }
         let alive = true;
         fetchProviderModels(agentUrl, selectedProvider).then((res) => {
             if (!alive) return;
@@ -563,135 +467,6 @@ export function SolidAgentChat({
         });
         return () => { alive = false; };
     }, [agentRuntime, agentUrl, signedIn, selectedProvider]);
-
-    const updateDropdownPosition = useCallback(() => {
-        if (!providerMenuRef.current) return;
-        const btnRect = providerMenuRef.current.getBoundingClientRect();
-        const isInSidebar = isFullScreen && sidebarOpen;
-        const container = isInSidebar
-            ? (providerMenuRef.current.closest(`.${styles.fullScreenSidebar}`) || document.body)
-            : (headerRef.current || providerMenuRef.current.closest(`.${styles.header}`) || document.body);
-        const containerRect = container.getBoundingClientRect();
-
-        const menuWidth = 220;
-        const padding = 8;
-
-        const boundaryLeft = Math.max(containerRect.left, 0);
-        const boundaryRight = Math.min(containerRect.right, window.innerWidth);
-        const maxAllowedWidth = Math.max(160, boundaryRight - boundaryLeft - padding * 2);
-        const effectiveWidth = Math.min(menuWidth, maxAllowedWidth);
-
-        // Start with natural alignment to the left of the button (offset = 0)
-        let leftOffset = 0;
-        const naturalLeft = btnRect.left;
-        const naturalRight = naturalLeft + effectiveWidth;
-
-        if (naturalRight > boundaryRight - padding) {
-            // Overflows right side of boundary, shift left so right edge fits comfortably
-            const overflow = naturalRight - (boundaryRight - padding);
-            leftOffset -= overflow;
-        }
-
-        // Check if after shifting left (or initially), it overflows left boundary
-        if (btnRect.left + leftOffset < boundaryLeft + padding) {
-            leftOffset = (boundaryLeft + padding) - btnRect.left;
-        }
-
-        setDropdownStyle({
-            left: `${Math.round(leftOffset)}px`,
-            right: "auto",
-            width: `${effectiveWidth}px`,
-            maxWidth: `${effectiveWidth}px`,
-        });
-    }, [isFullScreen, sidebarOpen, sidebarWidth]);
-
-    const handleSidebarResizeStart = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-        if (e.button !== 0) return;
-        e.preventDefault();
-        isResizingSidebarRef.current = true;
-        setIsDraggingSidebar(true);
-
-        const layoutEl = fullScreenLayoutRef.current;
-        const layoutRect = layoutEl ? layoutEl.getBoundingClientRect() : { left: 0 };
-
-        const handlePointerMove = (moveEvent: PointerEvent) => {
-            if (!isResizingSidebarRef.current) return;
-            const rawWidth = Math.round(moveEvent.clientX - layoutRect.left);
-            const clampedWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, rawWidth));
-            sidebarWidthRef.current = clampedWidth;
-            setSidebarWidth(clampedWidth);
-        };
-
-        const handlePointerUp = () => {
-            if (!isResizingSidebarRef.current) return;
-            isResizingSidebarRef.current = false;
-            setIsDraggingSidebar(false);
-            document.removeEventListener("pointermove", handlePointerMove);
-            document.removeEventListener("pointerup", handlePointerUp);
-            document.removeEventListener("pointercancel", handlePointerUp);
-            document.body.style.removeProperty("cursor");
-            document.body.style.removeProperty("user-select");
-
-            try {
-                localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(sidebarWidthRef.current));
-            } catch {}
-        };
-
-        document.body.style.setProperty("cursor", "col-resize");
-        document.body.style.setProperty("user-select", "none");
-        document.addEventListener("pointermove", handlePointerMove);
-        document.addEventListener("pointerup", handlePointerUp);
-        document.addEventListener("pointercancel", handlePointerUp);
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            document.body.style.removeProperty("cursor");
-            document.body.style.removeProperty("user-select");
-        };
-    }, []);
-
-    const handleSidebarResizeKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-        let delta = 0;
-        if (e.key === "ArrowLeft") delta = -10;
-        else if (e.key === "ArrowRight") delta = 10;
-        else if (e.key === "Home") {
-            e.preventDefault();
-            setSidebarWidth(MIN_SIDEBAR_WIDTH);
-            try { localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(MIN_SIDEBAR_WIDTH)); } catch {}
-            return;
-        } else if (e.key === "End") {
-            e.preventDefault();
-            setSidebarWidth(MAX_SIDEBAR_WIDTH);
-            try { localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(MAX_SIDEBAR_WIDTH)); } catch {}
-            return;
-        }
-        if (delta !== 0) {
-            e.preventDefault();
-            setSidebarWidth((prev) => {
-                const next = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, prev + delta));
-                try { localStorage.setItem(SIDEBAR_WIDTH_STORAGE_KEY, String(next)); } catch {}
-                return next;
-            });
-        }
-    }, []);
-
-    useLayoutEffect(() => {
-        if (showProviderMenu) {
-            updateDropdownPosition();
-        }
-    }, [showProviderMenu, updateDropdownPosition]);
-
-    useEffect(() => {
-        if (!showProviderMenu) return;
-        updateDropdownPosition();
-        window.addEventListener("resize", updateDropdownPosition);
-        window.addEventListener("scroll", updateDropdownPosition, true);
-        return () => {
-            window.removeEventListener("resize", updateDropdownPosition);
-            window.removeEventListener("scroll", updateDropdownPosition, true);
-        };
-    }, [showProviderMenu, updateDropdownPosition]);
 
     useEffect(() => {
         if (!showProviderMenu) return;
@@ -713,41 +488,14 @@ export function SolidAgentChat({
         };
     }, [showProviderMenu]);
 
-    useEffect(() => {
-        if (!resumingSessionId) return;
-
-        // Clear resuming state once the target session has been loaded into Redux
-        if (agent.historySessionId === resumingSessionId && !agent.loadingHistory && !agent.loadingOlder) {
-            setResumingSessionId(null);
-            return;
-        }
-
-        // Safety timeout to prevent UI lock if network hangs or fails silently
-        const timer = setTimeout(() => {
-            setResumingSessionId((curr) => (curr === resumingSessionId ? null : curr));
-        }, 15000);
-
-        return () => clearTimeout(timer);
-    }, [agent.loadingHistory, agent.loadingOlder, agent.historySessionId, resumingSessionId]);
-
-    const handleSelectProvider = async (providerId: string) => {
-        if (providerId === selectedProvider && !isSwitchingProvider) {
-            setShowProviderMenu(false);
-            return;
-        }
-        setIsSwitchingProvider(true);
+    const handleSelectProvider = (providerId: string) => {
+        setSelectedProvider(providerId);
         setShowProviderMenu(false);
-        try {
-            const res = await fetchProviderModels(agentUrl, providerId);
+        fetchProviderModels(agentUrl, providerId).then((res) => {
             const nextModels = res?.models || [];
             setModels(nextModels);
-            skipProviderEffectRef.current = providerId;
-            setSelectedProvider(providerId);
-            const savedModel = getStoredModel(providerId);
-            const matchedModel = nextModels.find((m) => m.id === savedModel);
-            const targetModel = matchedModel ? matchedModel.id : (res?.default_model || nextModels[0]?.id || "");
+            const targetModel = res?.default_model || nextModels[0]?.id || "";
             setSelectedModel(targetModel);
-            setStoredProviderAndModel(providerId, targetModel);
             const nextThinking = getStoredThinking(providerId);
             const nextReasoning = getStoredReasoning(providerId) ?? undefined;
             const nextFast = getStoredFast(providerId);
@@ -768,27 +516,34 @@ export function SolidAgentChat({
                 setCollectedInputs(null);
                 setInputError("");
             }
-        } catch (err) {
-            console.error("Failed to switch provider:", err);
-        } finally {
-            setIsSwitchingProvider(false);
-        }
+        });
     };
 
     const handleStartNewChat = async () => {
-        if (!runtime || startingNewChatRef.current || isStartingNewChat || !!resumingSessionId) return;
-        setIsStartingNewChat(true);
+        if (!runtime || startingNewChatRef.current) return;
         startingNewChatRef.current = true;
         try {
-            runtime.newChat(selectedProvider, selectedModel, {
-                thinking: isThinking,
-                reasoning: selectedReasoning,
-                fast: isFast,
-                speed: selectedSpeed,
-            });
+            let latestSession: AgentSessionSummary | undefined;
+            if (agentRuntime === "agentHub") {
+                const latestSessions = await fetchSessionList(agentUrl);
+                if (latestSessions) {
+                    setSessions(latestSessions);
+                    latestSession = latestSessions[0];
+                }
+            }
+
+            if (latestSession?.has_user_message === false) {
+                runtime.resume(latestSession.session_id);
+            } else {
+                runtime.newChat(selectedProvider, selectedModel, {
+                    thinking: isThinking,
+                    reasoning: selectedReasoning,
+                    fast: isFast,
+                    speed: selectedSpeed,
+                });
+            }
         } finally {
             startingNewChatRef.current = false;
-            setIsStartingNewChat(false);
         }
         setShowHistory(false);
         setShowProviderMenu(false);
@@ -807,72 +562,83 @@ export function SolidAgentChat({
     }, [providers]);
 
     const handleResumeSession = async (session: AgentSessionSummary) => {
-        if (!session.session_id || resumingSessionId) return;
-        const currentActiveId = agent.historySessionId || agent.sessionId;
-        if (session.session_id === currentActiveId) {
-            setShowHistory(false);
-            setHistorySearchQuery("");
-            return;
+        const targetProvider = session.provider || selectedProvider;
+        const targetModel = session.model || selectedModel;
+
+        if (targetProvider && targetProvider !== selectedProvider) {
+            setSelectedProvider(targetProvider);
         }
 
-        const isRunning = session.status === "running" || (session as any).is_running === true;
-        setResumingSessionId(session.session_id);
-        dispatch(agentThreadReset({ loadingHistory: true, historySessionId: session.session_id, working: isRunning }));
+        let targetModels = models;
+        if (targetProvider && targetProvider !== selectedProvider) {
+            const res = await fetchProviderModels(agentUrl, targetProvider);
+            targetModels = res?.models || [];
+            if (targetModels.length > 0) {
+                setModels(targetModels);
+            }
+        }
+
+        const resolvedModel = targetModel || targetModels[0]?.id || "";
+        if (resolvedModel) {
+            setSelectedModel(resolvedModel);
+        }
+
+        const nextThinking = getStoredThinking(targetProvider);
+        const nextReasoning = getStoredReasoning(targetProvider) ?? undefined;
+        const nextFast = getStoredFast(targetProvider);
+        const nextSpeed = getStoredSpeed(targetProvider) ?? undefined;
+        setIsThinking(nextThinking);
+        setSelectedReasoning(nextReasoning ?? "");
+        setIsFast(nextFast);
+        setSelectedSpeed(nextSpeed ?? "standard");
+
+        runtime?.resume(session.session_id, targetProvider, resolvedModel, {
+            thinking: nextThinking,
+            reasoning: nextReasoning,
+            fast: nextFast,
+            speed: nextSpeed,
+        });
         setShowHistory(false);
         setHistorySearchQuery("");
-        try {
-            const targetProvider = session.provider || selectedProvider;
-            const targetModel = session.model || selectedModel;
-
-            let targetModels = models;
-            if (targetProvider && targetProvider !== selectedProvider) {
-                const res = await fetchProviderModels(agentUrl, targetProvider);
-                targetModels = res?.models || [];
-                skipProviderEffectRef.current = targetProvider;
-                setSelectedProvider(targetProvider);
-                if (targetModels.length > 0) {
-                    setModels(targetModels);
-                }
-            }
-
-            const resolvedModel = targetModel || targetModels[0]?.id || "";
-            if (resolvedModel) {
-                setSelectedModel(resolvedModel);
-            }
-
-            const nextThinking = getStoredThinking(targetProvider);
-            const nextReasoning = getStoredReasoning(targetProvider) ?? undefined;
-            const nextFast = getStoredFast(targetProvider);
-            const nextSpeed = getStoredSpeed(targetProvider) ?? undefined;
-            setIsThinking(nextThinking);
-            setSelectedReasoning(nextReasoning ?? "");
-            setIsFast(nextFast);
-            setSelectedSpeed(nextSpeed ?? "standard");
-
-            runtime?.resume(session.session_id, targetProvider, resolvedModel, {
-                thinking: nextThinking,
-                reasoning: nextReasoning,
-                fast: nextFast,
-                speed: nextSpeed,
-            }, isRunning);
-        } catch (err) {
-            console.error("Failed to resume session:", err);
-            setResumingSessionId(null);
-        }
+        setEditingSessionId(null);
     };
 
     const handleSaveRename = async (sessionId: string, newTitle: string) => {
         const trimmed = newTitle.trim();
-        if (!trimmed) return;
+        if (!trimmed) {
+            setEditingSessionId(null);
+            return;
+        }
         setSessions((prev) =>
             prev.map((s) => (s.session_id === sessionId ? { ...s, title: trimmed } : s))
         );
+        setEditingSessionId(null);
         await renameSession(agentUrl, sessionId, trimmed);
     };
 
+    const filteredSessions = useMemo(() => {
+        const rawQ = historySearchQuery.trim().toLowerCase();
+        if (!rawQ) return sessions;
+        const cleanQ = rawQ.replace(/^(session[-_:]?|id[:=]?|#)/i, "").trim() || rawQ;
+        return sessions.filter((s) => {
+            const title = (s.title || s.preview || "").toLowerCase();
+            const sessionId = (s.session_id || "").toLowerCase();
+            const provider = (s.provider || "").toLowerCase();
+            const model = (s.model || "").toLowerCase();
+            const dateStr = s.created_at ? formatDate(s.created_at).toLowerCase() : "";
+            return (
+                title.includes(rawQ) ||
+                sessionId.includes(rawQ) ||
+                sessionId.includes(cleanQ) ||
+                provider.includes(rawQ) ||
+                model.includes(rawQ) ||
+                dateStr.includes(rawQ)
+            );
+        });
+    }, [sessions, historySearchQuery]);
+
     const handleModelChange = (modelId: string) => {
         setSelectedModel(modelId);
-        setStoredProviderAndModel(selectedProvider, modelId);
         runtime?.updateModel(modelId, selectedProvider, {
             thinking: isThinking,
             reasoning: selectedReasoning,
@@ -989,132 +755,21 @@ export function SolidAgentChat({
     }, [agent.prefill, signedIn, handlesPrefill, dispatch, runtime, inputContext, onInputsLocked, messageInputs, beforeSend]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedHistorySearch(historySearchQuery.trim());
-        }, 250);
-        return () => clearTimeout(timer);
-    }, [historySearchQuery]);
-
-    const loadSessionPage = useCallback(async (
-        cursor: string | null = null,
-        search: string = "",
-        replace: boolean = false,
-    ): Promise<AgentSessionPage | null> => {
-        if (!replace && historyInFlightRef.current) return null;
-        historyInFlightRef.current = true;
-
-        if (replace) {
-            historyAbortRef.current?.abort();
-            setHistoryLoadingMore(false);
-            setSessions([]);
-            setHistoryNextCursor(null);
-            setHistoryHasMore(false);
-            setHistoryLoadError(null);
-            setHistoryInitialLoading(true);
-        } else {
-            setHistoryLoadingMore(true);
-        }
-
-        const generation = ++historyGenerationRef.current;
-        const controller = new AbortController();
-        historyAbortRef.current = controller;
-
-        try {
-            const page = await fetchSessionList(agentUrl, {
-                cursor,
-                search: search || undefined,
-                limit: HISTORY_PAGE_LIMIT,
-                signal: controller.signal,
-            });
-
-            if (generation !== historyGenerationRef.current || controller.signal.aborted) return null;
-            if (!page) {
-                setHistoryLoadError("Failed to load conversations.");
-                return null;
-            }
-
-            setHistoryLoadError(null);
+        if (!showHistory || !signedIn) return;
+        let alive = true;
+        fetchSessionList(agentUrl).then((list) => {
+            if (!alive) return;
             const storedTitles = getStoredSessionTitles(agentUrl);
-            const enriched = page.sessions.map((s) => withStoredTitle(s, storedTitles));
-
-            if (replace) {
-                setSessions(enriched);
-            } else {
-                setSessions((prev) => {
-                    const seen = new Set(prev.map((item) => item.session_id));
-                    return [...prev, ...enriched.filter((item) => !seen.has(item.session_id))];
-                });
-            }
-            setHistoryNextCursor(page.next_cursor);
-            setHistoryHasMore(page.has_more);
-            return page;
-        } catch (err: any) {
-            if (err?.name === "AbortError" || controller.signal.aborted) return null;
-            if (generation === historyGenerationRef.current) {
-                setHistoryLoadError("Failed to load conversations.");
-            }
-            return null;
-        } finally {
-            if (generation === historyGenerationRef.current) {
-                historyInFlightRef.current = false;
-                if (replace) setHistoryInitialLoading(false);
-                else setHistoryLoadingMore(false);
-            }
-        }
-    }, [agentUrl]);
-
-    const shouldLoadHistory = (showHistory || isFullScreen) && signedIn;
-    useEffect(() => {
-        if (!shouldLoadHistory) {
-            historyAbortRef.current?.abort();
-            historyGenerationRef.current += 1;
-            historyInFlightRef.current = false;
-            setHistoryInitialLoading(false);
-            setHistoryLoadingMore(false);
-            return;
-        }
-        void loadSessionPage(null, debouncedHistorySearch, true);
-        return () => {
-            historyAbortRef.current?.abort();
-            historyGenerationRef.current += 1;
-            historyInFlightRef.current = false;
-        };
-    }, [shouldLoadHistory, debouncedHistorySearch, loadSessionPage]);
-
-    const loadMoreSessions = useCallback(() => {
-        if (historyNextCursor) void loadSessionPage(historyNextCursor, debouncedHistorySearch, false);
-    }, [historyNextCursor, debouncedHistorySearch, loadSessionPage]);
-
-    const handleRetryHistory = useCallback(() => {
-        setHistoryLoadError(null);
-        void loadSessionPage(historyNextCursor, debouncedHistorySearch, sessions.length === 0);
-    }, [historyNextCursor, debouncedHistorySearch, sessions.length, loadSessionPage]);
-
-    const sessionsRef = useRef(sessions);
-    sessionsRef.current = sessions;
-    // Only a visible, unfiltered list needs live updates; opening the list or clearing the search reloads it.
-    const historyListLiveRef = useRef(false);
-    historyListLiveRef.current = shouldLoadHistory && !debouncedHistorySearch;
-
-    useEffect(() => {
-        return eventBus.on(SOLID_AGENT_EVENTS.turnComplete, (payload) => {
-            if (payload?.agentType && payload.agentType !== agentRuntime) return;
-            const sessionId = payload?.sessionId;
-            if (!sessionId || !historyListLiveRef.current) return;
-            if (sessionsRef.current.some((s) => s.session_id === sessionId)) return;
-            fetchSessionList(agentUrl, { limit: HISTORY_PAGE_LIMIT }).then((page) => {
-                if (!page?.sessions.length) return;
-                const storedTitles = getStoredSessionTitles(agentUrl);
-                setSessions((prev) => {
-                    const seen = new Set(prev.map((s) => s.session_id));
-                    const fresh = page.sessions
-                        .filter((s) => !seen.has(s.session_id))
-                        .map((s) => withStoredTitle(s, storedTitles));
-                    return fresh.length ? [...fresh, ...prev] : prev;
-                });
-            }).catch(() => undefined);
+            const enriched = (list ?? []).map((s) => ({
+                ...s,
+                title: storedTitles[s.session_id] || s.title || s.preview || "New session",
+            }));
+            setSessions(enriched);
         });
-    }, [agentRuntime, agentUrl]);
+        return () => {
+            alive = false;
+        };
+    }, [showHistory, agentUrl, signedIn]);
 
     useEffect(() => {
         return eventBus.on(SOLID_AGENT_EVENTS.sessionChanged, (payload) => {
@@ -1127,11 +782,8 @@ export function SolidAgentChat({
                     if (nextModels.length > 0) setModels(nextModels);
                     if (payload.model) {
                         setSelectedModel(payload.model);
-                        setStoredProviderAndModel(payload.provider, payload.model);
                     } else {
-                        const saved = getStoredModel(payload.provider);
-                        const matched = nextModels.find((m) => m.id === saved);
-                        const fallback = matched ? matched.id : (res?.default_model || nextModels[0]?.id || "");
+                        const fallback = res?.default_model || nextModels[0]?.id || "";
                         if (fallback) setSelectedModel(fallback);
                     }
                 });
@@ -1141,14 +793,8 @@ export function SolidAgentChat({
         });
     }, [agentUrl, selectedProvider, selectedModel]);
 
-    const activeProviderObj = providers.find((p) => p.id === selectedProvider);
-    const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
-    const isSelectedProviderCheckingAuth =
-        selectedProvider !== "solidx" &&
-        !!activeProviderObj &&
-        getProviderAuthStatus(activeProviderObj) === "checking";
-
     const setMode = (mode: AgentMode) => dispatch(agentModeChanged(mode));
+    const windowMode = windowControls?.mode ?? agent.mode;
     const send = useCallback(async (text: string) => {
         if (!text.trim() || !runtime) return;
         onInputsLocked?.(true);
@@ -1223,9 +869,13 @@ export function SolidAgentChat({
         : agent.connection === "connecting" ? "Connecting…"
         : offline ? "Reconnecting…" : "";
 
+    const activeProviderObj = providers.find((p) => p.id === selectedProvider);
+    // const providerDisplayName = activeProviderObj?.name || (selectedProvider ? selectedProvider.charAt(0).toUpperCase() + selectedProvider.slice(1) : "");
+    const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
 
 
     const activeSessionId = agent.historySessionId || agent.sessionId;
+    const isFullScreen = windowMode === "maximized";
     const displaySessionId = activeSessionId
         ? (isFullScreen ? activeSessionId : (activeSessionId.length > 12 ? activeSessionId.slice(0, 8) : activeSessionId))
         : "";
@@ -1257,6 +907,9 @@ export function SolidAgentChat({
         return <BrowserPanelWidget {...props} />;
     };
 
+
+    // const providerDisplayName = formatProviderName(activeProviderObj?.name) || (selectedProvider ? formatProviderName(selectedProvider) : "");
+
     const EmptyStateWidget = getExtensionComponent(
         getAgentChatEmptyStateWidgetName(agentName) ?? "DefaultAgentChatEmptyStateWidget",
         ExtensionComponentTypes.agentChatEmptyStateWidget,
@@ -1271,164 +924,6 @@ export function SolidAgentChat({
             sendPrompt={send}
         />
     ) : null;
-
-    const isViewingHistory = !isFullScreen && showHistory;
-    const isBusyTransitioning = isSwitchingProvider || isStartingNewChat || agent.loadingHistory || !!resumingSessionId || isViewingHistory;
-
-    const threadComponent = (
-        <AgentThread
-            items={review && reviewDisabled ? agent.items.map((item) =>
-                item.id === humanReviewId(review.requestId)
-                    ? { ...item, eventData: { ...item.eventData, submitting: true } } : item) : agent.items}
-            agentName={agentName}
-            thinking={agent.working && agent.thinking}
-            working={agent.working}
-            loadingHistory={agent.loadingHistory || !!resumingSessionId || isSwitchingProvider}
-            hasMore={agent.hasMoreHistory}
-            loadingOlder={agent.loadingOlder}
-            loadOlderFailed={agent.olderHistoryFailed}
-            context={agent.context ?? undefined}
-            emptyState={empty}
-            onLoadOlder={() => void runtime?.loadOlder()}
-            onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
-            onPrompt={send}
-            onStartNewSession={!agent.working && !review && !agent.reviewResuming && agent.connection === "open" ? handleStartNewChat : undefined}
-        />
-    );
-
-    const composerComponent = (
-        <AgentComposer
-            key={review?.requestId ?? "chat"}
-            working={agent.working}
-            disabled={!!agent.authError || agent.reviewResuming || !!browserHandoff || (review ? reviewDisabled : false) || isBusyTransitioning || isSelectedProviderCheckingAuth}
-            placeholder={
-                isViewingHistory
-                    ? "Select a conversation to continue…"
-                    : isSelectedProviderCheckingAuth
-                    ? `Checking ${providerDisplayName || "provider"} authentication…`
-                    : browserHandoff
-                    ? "The agent is waiting for you in the browser"
-                    : review?.kind === "approval"
-                    ? "Type Approve or Reject…"
-                    : review
-                    ? "Type your answer…"
-                    : isSwitchingProvider
-                    ? "Connecting..."
-                    : isStartingNewChat
-                    ? "Starting new chat..."
-                    : (agent.loadingHistory || !!resumingSessionId)
-                    ? "Loading conversation..."
-                    : `Ask ${title}…`
-            }
-            commands={review ? [] : agent.commands}
-            seed={review ? undefined : seed?.text}
-            seedKey={review ? undefined : seed?.key}
-            onSend={sendWithAttachments}
-            onStop={() => runtime?.cancel()}
-            canAttach={!review && canAttach}
-            modelIndicator={
-                <AgentModelIndicator
-                    assignments={modelAssignments}
-                    activeProvider={selectedProvider}
-                    activeModel={selectedModel}
-                    providers={providers}
-                    models={models}
-                    onModelSelect={handleModelChange}
-                    disabled={agent.working || isBusyTransitioning}
-                    isThinking={isThinking}
-                    isFast={isFast}
-                    selectedReasoning={selectedReasoning}
-                    selectedSpeed={selectedSpeed}
-                    onThinkingToggle={handleThinkingToggle}
-                    onFastToggle={handleFastToggle}
-                    onReasoningSelect={handleReasoningChange}
-                    onSpeedSelect={handleSpeedChange}
-                />
-            }
-            contextPill={
-                <AgentContextPill
-                    usage={agent.usage}
-                    activeProvider={selectedProvider}
-                    modelName={selectedModel}
-                    disabled={agent.working || isBusyTransitioning}
-                />
-            }
-        />
-    );
-
-    const toggleProviderMenu = () => setShowProviderMenu((open) => !open);
-    const providerDropdown = showProviderMenu && (
-        <AgentProviderDropdown
-            providers={providers}
-            selectedProvider={selectedProvider}
-            loading={loadingProviders}
-            loadError={providersLoadError}
-            style={dropdownStyle}
-            onSelect={(providerId) => void handleSelectProvider(providerId)}
-            onRetryProviders={retryProviders}
-            onRetryAuth={retryProviderAuth}
-        />
-    );
-
-    const showSessionSearch = historyInitialLoading || sessions.length > 0 || !!historySearchQuery;
-    const sessionSearch = <AgentSessionSearch value={historySearchQuery} onChange={setHistorySearchQuery} />;
-    const sessionListProps = {
-        sessions,
-        loading: historyInitialLoading,
-        loadingMore: historyLoadingMore,
-        error: historyLoadError,
-        hasMore: historyHasMore,
-        searchQuery: debouncedHistorySearch,
-        activeSessionId: resumingSessionId || activeSessionId,
-        resumingSessionId,
-        providerLabel: getProviderBadgeLabel,
-        onResume: (session: AgentSessionSummary) => void handleResumeSession(session),
-        onRename: (sessionId: string, title: string) => void handleSaveRename(sessionId, title),
-        onDelete: setSessionToDelete,
-        onRetry: handleRetryHistory,
-        onLoadMore: loadMoreSessions,
-    };
-
-    const renderChatBody = (mainContent: React.ReactNode) => (
-        <div ref={setChatBody} className={`${styles.chatBody} ${browserLayout === "side" ? styles.chatBodySide : ""} ${browserResizing ? styles.chatBodyResizing : ""}`}>
-            {browserLayout === "stacked" && (
-                <div className={styles.browserStacked}>{renderBrowserPanel("stacked", browserCollapsed || browserExpanded)}</div>
-            )}
-            <div className={styles.chatMain}>
-                {mainContent}
-            </div>
-            {browserLayout === "side" && !browserCollapsed && !browserExpanded && (
-                <aside ref={browserSideRef} className={styles.browserSide}
-                    style={browserSideShownWidth === null ? undefined : { width: browserSideShownWidth }}>
-                    <div
-                        className={styles.browserResizer}
-                        role="separator"
-                        aria-orientation="vertical"
-                        aria-label="Resize the agent's browser"
-                        aria-valuemin={BROWSER_SIDE_MIN}
-                        aria-valuemax={browserSideMax}
-                        aria-valuenow={browserSideShownWidth ?? undefined}
-                        title="Drag to resize. Double-click to reset."
-                        tabIndex={0}
-                        onPointerDown={startBrowserResize}
-                        onPointerMove={moveBrowserResize}
-                        onPointerUp={endBrowserResize}
-                        onPointerCancel={endBrowserResize}
-                        onDoubleClick={resetBrowserSideWidth}
-                        onKeyDown={resizeBrowserByKey}
-                    />
-                    {renderBrowserPanel("side", false)}
-                </aside>
-            )}
-            {browserLayout === "side" && browserCollapsed && !browserExpanded && (
-                <button type="button" className={styles.browserSideTab} title="Show the agent's browser"
-                    aria-label="Show the agent's browser" onClick={toggleBrowserCollapsed}>
-                    <Globe size={14} aria-hidden="true" />
-                    <span>Browser</span>
-                </button>
-            )}
-        </div>
-    );
 
     return (
         <>
@@ -1506,7 +1001,7 @@ export function SolidAgentChat({
                     </div>
                 </SolidDialogBody>
             </SolidDialog>
-            <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`} ref={headerRef}>
+            <div className={`${styles.header} ${externalEmbed ? styles.externalEmbedHeader : ""}`}>
                 <div className={styles.headerIdentitySlot}>
                     {AgentChatHeaderWidget && <AgentChatHeaderWidget
                         title={title}
@@ -1523,48 +1018,75 @@ export function SolidAgentChat({
                 </div>
                 {signedIn && (
                     <>
-                        {(!isFullScreen || !sidebarOpen) && (
-                            agentRuntime === "agentHub" || providers.length <= 1 ? (
+                        {agentRuntime === "agentHub" || providers.length <= 1 ? (
+                            <button
+                                type="button"
+                                className={styles.iconBtn}
+                                title="New chat"
+                                aria-label="New chat"
+                                onClick={handleStartNewChat}
+                            >
+                                <Plus size={16} />
+                            </button>
+                        ) : (
+                            <div className={styles.newChatSplit} ref={providerMenuRef}>
                                 <button
                                     type="button"
-                                    className={styles.iconBtn}
-                                    title="New chat"
+                                    className={styles.splitActionBtn}
+                                    title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
                                     aria-label="New chat"
-                                    disabled={isStartingNewChat || !!resumingSessionId}
                                     onClick={handleStartNewChat}
                                 >
-                                    {isStartingNewChat ? <SolidSpinner size={15} className={styles.inlineSolidSpinner} /> : <Plus size={16} />}
+                                    <Plus size={15} />
                                 </button>
-                            ) : (
-                                <div className={styles.newChatSplit} ref={providerMenuRef}>
-                                    <button
-                                        type="button"
-                                        className={styles.splitActionBtn}
-                                        title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
-                                        aria-label="New chat"
-                                        disabled={isStartingNewChat || !!resumingSessionId}
-                                        onClick={handleStartNewChat}
-                                    >
-                                        {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
-                                    </button>
-                                    <span className={styles.splitDivider} />
-                                    <button
-                                        type="button"
-                                        className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
-                                        title={loadingProviders || isSwitchingProvider ? "Loading AI execution providers..." : "Select AI execution provider"}
-                                        aria-label="Select AI execution provider"
-                                        aria-expanded={showProviderMenu}
-                                        onClick={toggleProviderMenu}
-                                    >
-                                        {loadingProviders || isSwitchingProvider ? (
-                                            <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
+                                <span className={styles.splitDivider} />
+                                <button
+                                    type="button"
+                                    className={`${styles.splitTriggerBtn} ${showProviderMenu ? styles.splitTriggerActive : ""}`}
+                                    title={loadingProviders ? "Loading AI execution providers..." : "Select AI execution provider"}
+                                    aria-label="Select AI execution provider"
+                                    aria-expanded={showProviderMenu}
+                                    onClick={() => setShowProviderMenu((prev) => !prev)}
+                                >
+                                    {loadingProviders ? (
+                                        <Loader2 size={12} className={styles.spinIcon} />
+                                    ) : (
+                                        <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
+                                    )}
+                                </button>
+                                {showProviderMenu && (
+                                    <div className={styles.providerDropdown} role="menu">
+                                        <div className={styles.providerDropdownHeader}>
+                                            <strong>Select AI Provider</strong>
+                                        </div>
+                                        {loadingProviders ? (
+                                            <div className={styles.providerLoadingItem}>
+                                                <Loader2 size={13} className={styles.spinIcon} />
+                                                <span>Loading providers...</span>
+                                            </div>
                                         ) : (
-                                            <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
+                                            <div className={styles.providerList}>
+                                                {providers.map((p) => {
+                                                    const isSelected = p.id === selectedProvider;
+                                                    return (
+                                                        <button
+                                                            key={p.id}
+                                                            type="button"
+                                                            className={`${styles.providerItem} ${isSelected ? styles.providerItemActive : ""}`}
+                                                            onClick={() => handleSelectProvider(p.id)}
+                                                        >
+                                                            <div className={styles.providerItemMeta}>
+                                                                <span className={styles.providerItemName}>{formatProviderName(p.name)}</span>
+                                                            </div>
+                                                            {isSelected && <Check size={14} className={styles.providerCheck} />}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
                                         )}
-                                    </button>
-                                    {providerDropdown}
-                                </div>
-                            )
+                                    </div>
+                                )}
+                            </div>
                         )}
                         {browserShown && (
                             <button
@@ -1578,21 +1100,24 @@ export function SolidAgentChat({
                                 <Globe size={15} />
                             </button>
                         )}
-                        {!isFullScreen && (
-                            <button
-                                type="button"
-                                className={styles.iconBtn}
-                                title="History"
-                                aria-label="Chat history"
-                                aria-pressed={showHistory}
-                                onClick={() => {
-                                    if (!showHistory) setHistorySearchQuery("");
-                                    setShowHistory(!showHistory);
-                                }}
-                            >
-                                <History size={16} />
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            className={styles.iconBtn}
+                            title="History"
+                            aria-label="Chat history"
+                            aria-pressed={showHistory}
+                            onClick={() => {
+                                setShowHistory((v) => {
+                                    if (!v) {
+                                        setHistorySearchQuery("");
+                                        setEditingSessionId(null);
+                                    }
+                                    return !v;
+                                });
+                            }}
+                        >
+                            <History size={16} />
+                        </button>
                         {!externalEmbed && <button
                             type="button"
                             className={styles.iconBtn}
@@ -1601,6 +1126,7 @@ export function SolidAgentChat({
                             onClick={() => {
                                 setShowHistory(false);
                                 setHistorySearchQuery("");
+                                setEditingSessionId(null);
                                 void signOutOfAgent(agentUrl);
                             }}
                         >
@@ -1670,127 +1196,233 @@ export function SolidAgentChat({
                     </div>
                 )}
 
-                {isFullScreen ? (
-                    <div className={styles.fullScreenLayout} ref={fullScreenLayoutRef}>
-                        {sidebarOpen && (
-                                    <>
-                                        <aside
-                                            className={styles.fullScreenSidebar}
-                                            style={{
-                                                width: sidebarWidth,
-                                                minWidth: sidebarWidth,
-                                                maxWidth: sidebarWidth,
-                                                transition: isDraggingSidebar ? "none" : undefined,
-                                            }}
-                                            aria-label="Conversation sidebar"
-                                        >
-                                        <div className={styles.sidebarHeader}>
-                                            {agentRuntime === "agentHub" || providers.length <= 1 ? (
-                                                <button
-                                                    type="button"
-                                                    className={styles.sidebarNewChatBtn}
-                                                    title="New chat"
-                                                    aria-label="New chat"
-                                                    disabled={isStartingNewChat || !!resumingSessionId}
-                                                    onClick={handleStartNewChat}
-                                                >
-                                                    <span className={styles.sidebarNewChatLabel}>
-                                                        {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
-                                                        <span>New chat</span>
-                                                    </span>
-                                                </button>
-                                            ) : (
-                                                <div className={styles.sidebarNewChatSplit} ref={providerMenuRef}>
-                                                    <button
-                                                        type="button"
-                                                        className={styles.sidebarSplitActionBtn}
-                                                        title={`New chat (${formatProviderName(providers.find((p) => p.id === selectedProvider)?.name) || "Native"})`}
-                                                        aria-label="New chat"
-                                                        disabled={isStartingNewChat || !!resumingSessionId}
-                                                        onClick={handleStartNewChat}
-                                                    >
-                                                        {isStartingNewChat ? <SolidSpinner size={14} className={styles.inlineSolidSpinner} /> : <Plus size={15} />}
-                                                        <span>New chat</span>
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        className={`${styles.sidebarSplitTriggerBtn} ${showProviderMenu ? styles.sidebarSplitTriggerActive : ""}`}
-                                                        title={loadingProviders || isSwitchingProvider ? "Loading AI execution providers..." : "Select AI execution provider"}
-                                                        aria-label="Select AI execution provider"
-                                                        aria-expanded={showProviderMenu}
-                                                        onClick={toggleProviderMenu}
-                                                    >
-                                                        {loadingProviders || isSwitchingProvider ? (
-                                                            <SolidSpinner size={12} className={styles.inlineSolidSpinner} />
-                                                        ) : (
-                                                            <ChevronDown size={13} className={`${styles.splitChevron} ${showProviderMenu ? styles.splitChevronOpen : ""}`} />
-                                                        )}
-                                                    </button>
-                                                    {providerDropdown}
-                                                </div>
-                                            )}
-                                        </div>
-                                        {showSessionSearch && (
-                                            <div className={styles.sidebarSearchWrap}>
-                                                {sessionSearch}
-                                            </div>
-                                        )}
-                                        <AgentSessionList className={styles.sidebarSessions} sectionTitle="Recents" {...sessionListProps} />
-                                    </aside>
+                <div ref={setChatBody} className={`${styles.chatBody} ${browserLayout === "side" ? styles.chatBodySide : ""} ${browserResizing ? styles.chatBodyResizing : ""}`}>
+                {browserLayout === "stacked" && (
+                    <div className={styles.browserStacked}>{renderBrowserPanel("stacked", browserCollapsed || browserExpanded)}</div>
+                )}
+                <div className={styles.chatMain}>
+                {showHistory ? (
+                    <div className={styles.historyPanel} aria-label="Past conversations">
+                        {sessions.length > 0 && (
+                            <div className={styles.historySearchBox}>
+                                <Search size={13} className={styles.historySearchIcon} />
+                                <input
+                                    type="text"
+                                    className={styles.historySearchInput}
+                                    placeholder="Search by title, message, or session ID…"
+                                    value={historySearchQuery}
+                                    onChange={(e) => setHistorySearchQuery(e.target.value)}
+                                    aria-label="Search past conversations"
+                                />
+                                {historySearchQuery && (
+                                    <button
+                                        type="button"
+                                        className={styles.historySearchClear}
+                                        onClick={() => setHistorySearchQuery("")}
+                                        title="Clear search"
+                                        aria-label="Clear search"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                        {sessions.length === 0 && <div className={styles.notice}>No past conversations.</div>}
+                        {sessions.length > 0 && filteredSessions.length === 0 && (
+                            <div className={styles.notice}>No conversations match &ldquo;{historySearchQuery}&rdquo;</div>
+                        )}
+                        {filteredSessions.map((session) => (
+                            <div key={session.session_id} className={styles.historyRow}>
+                                {editingSessionId === session.session_id ? (
                                     <div
-                                        className={`${styles.sidebarResizer} ${isDraggingSidebar ? styles.sidebarResizerActive : ""}`}
-                                        role="separator"
-                                        aria-orientation="vertical"
-                                        aria-label="Resize sidebar"
-                                        aria-valuenow={sidebarWidth}
-                                        aria-valuemin={MIN_SIDEBAR_WIDTH}
-                                        aria-valuemax={MAX_SIDEBAR_WIDTH}
-                                        tabIndex={0}
-                                        onPointerDown={handleSidebarResizeStart}
-                                        onKeyDown={handleSidebarResizeKeyDown}
-                                    />
-                                </>
-                            )}
-                            <div className={styles.fullScreenMain}>
-                                    <SolidTooltip delayDuration={150}>
-                                        <SolidTooltipTrigger asChild>
+                                        className={styles.historyRenameForm}
+                                    >
+                                        <input
+                                            type="text"
+                                            className={styles.historyRenameInput}
+                                            value={editingTitle}
+                                            onChange={(e) => setEditingTitle(e.target.value)}
+                                            autoFocus
+                                            onFocus={(e) => e.target.select()}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                    e.preventDefault();
+                                                    void handleSaveRename(session.session_id, editingTitle);
+                                                }
+                                                if (e.key === "Escape") {
+                                                    e.stopPropagation();
+                                                    setEditingSessionId(null);
+                                                }
+                                            }}
+                                            aria-label="Rename conversation"
+                                        />
+                                        <button
+                                            type="button"
+                                            className={styles.iconBtn}
+                                            aria-label="Save title"
+                                            title="Save"
+                                            onClick={() => void handleSaveRename(session.session_id, editingTitle)}
+                                        >
+                                            <Check size={14} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className={styles.iconBtn}
+                                            aria-label="Cancel rename"
+                                            title="Cancel"
+                                            onClick={() => setEditingSessionId(null)}
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className={`${styles.historyItem} ${session.session_id === agent.historySessionId ? styles.historyItemActive : ""}`}
+                                            onClick={() => void handleResumeSession(session)}
+                                            title={session.session_id ? `${session.title || session.preview || "Conversation"} (ID: ${session.session_id})` : undefined}
+                                        >
+                                            <span className={styles.historyPreview}>
+                                                {session.title || session.preview || "New session"}
+                                            </span>
+                                            {session.provider && (
+                                                <span
+                                                    className={styles.providerBadge}
+                                                    title={session.model ? `${getProviderBadgeLabel(session.provider)} (${session.model})` : getProviderBadgeLabel(session.provider)}
+                                                >
+                                                    {getProviderBadgeLabel(session.provider)}
+                                                </span>
+                                            )}
+                                            <span className={styles.historyDate}>{formatDate(session.created_at)}</span>
+                                        </button>
+                                        <div className={styles.historyActions}>
                                             <button
                                                 type="button"
-                                                className={styles.sidebarTriggerFloating}
-                                                onClick={() => setSidebarOpen((v) => !v)}
-                                                title={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-                                                aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+                                                className={styles.iconBtn}
+                                                aria-label="Rename conversation"
+                                                title="Rename"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setEditingSessionId(session.session_id);
+                                                    setEditingTitle(session.title || session.preview || "New session");
+                                                }}
                                             >
-                                                <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                                                    <rect x="1.5" y="2" width="13" height="12" rx="2" stroke="currentColor" />
-                                                    <path d="M5.5 2V14" stroke="currentColor" />
-                                                    <rect x="8" y="5.25" width="4.5" height="5.5" rx="0.9" stroke="currentColor" />
-                                                </svg>
+                                                <Pencil size={13} />
                                             </button>
-                                        </SolidTooltipTrigger>
-                                        <SolidTooltipContent side="right" align="center">
-                                            {sidebarOpen ? "Close sidebar" : "Open sidebar"}
-                                        </SolidTooltipContent>
-                                    </SolidTooltip>
-                                    {renderChatBody(<>
-                                        {threadComponent}
-                                        {composerComponent}
-                                    </>)}
-                                </div>
+                                            <button
+                                                type="button"
+                                                className={styles.iconBtn}
+                                                aria-label="Delete conversation"
+                                                title="Delete"
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    setSessionToDelete(session);
+                                                }}
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
+                        ))}
+                    </div>
+                ) : agent.loadingHistory && agent.items.length === 0 ? (
+                    <div className={styles.historyLoading} role="status" aria-live="polite">
+                        <Loader2 size={18} className={styles.spinIcon} aria-hidden="true" />
+                        <span>Loading conversation…</span>
+                    </div>
                 ) : (
-                    renderChatBody(<>
-                        {showHistory ? (
-                            <div className={styles.historyPanel} aria-label="Past conversations">
-                                {showSessionSearch && sessionSearch}
-                                <AgentSessionList className={styles.historyList} {...sessionListProps} />
-                            </div>
-                        ) : (
-                            threadComponent
-                        )}
-                        {composerComponent}
-                    </>)
+                    <AgentThread
+                        items={review && reviewDisabled ? agent.items.map((item) =>
+                            item.id === humanReviewId(review.requestId)
+                                ? { ...item, eventData: { ...item.eventData, submitting: true } } : item) : agent.items}
+                        agentName={agentName}
+                        thinking={agent.working && agent.thinking}
+                        working={agent.working}
+                        hasMore={agent.hasMoreHistory}
+                        loadingOlder={agent.loadingHistory}
+                        context={agent.context ?? undefined}
+                        emptyState={empty}
+                        onLoadOlder={() => void runtime?.loadOlder()}
+                        onReply={(widgetId, widget, value) => runtime?.replyToWidget(widgetId, widget, value, beforeSend)}
+                        onPrompt={send}
+                        onStartNewSession={!agent.working && !review && !agent.reviewResuming && agent.connection === "open" ? handleStartNewChat : undefined}
+                    />
                 )}
+
+                <AgentComposer
+                    key={review?.requestId ?? "chat"}
+                    working={agent.working}
+                    disabled={!!agent.authError || agent.reviewResuming || !!browserHandoff || (review ? reviewDisabled : false)}
+                    placeholder={browserHandoff ? "The agent is waiting for you in the browser" : review?.kind === "approval" ? "Type Approve or Reject…" : review ? "Type your answer…" : `Ask ${title}…`}
+                    commands={review ? [] : agent.commands}
+                    seed={review ? undefined : seed?.text}
+                    seedKey={review ? undefined : seed?.key}
+                    onSend={sendWithAttachments}
+                    onStop={() => runtime?.cancel()}
+                    canAttach={!review && canAttach}
+                    modelIndicator={
+                        <AgentModelIndicator
+                            assignments={modelAssignments}
+                            activeProvider={selectedProvider}
+                            activeModel={selectedModel}
+                            providers={providers}
+                            models={models}
+                            onModelSelect={handleModelChange}
+                            disabled={agent.working}
+                            isThinking={isThinking}
+                            isFast={isFast}
+                            selectedReasoning={selectedReasoning}
+                            selectedSpeed={selectedSpeed}
+                            onThinkingToggle={handleThinkingToggle}
+                            onFastToggle={handleFastToggle}
+                            onReasoningSelect={handleReasoningChange}
+                            onSpeedSelect={handleSpeedChange}
+                        />
+                    }
+                    contextPill={
+                        <AgentContextPill
+                            usage={agent.usage}
+                            activeProvider={selectedProvider}
+                            modelName={selectedModel}
+                            disabled={agent.working}
+                        />
+                    }
+                />
+                </div>
+                {browserLayout === "side" && !browserCollapsed && !browserExpanded && (
+                    <aside ref={browserSideRef} className={styles.browserSide}
+                        style={browserSideShownWidth === null ? undefined : { width: browserSideShownWidth }}>
+                        <div
+                            className={styles.browserResizer}
+                            role="separator"
+                            aria-orientation="vertical"
+                            aria-label="Resize the agent's browser"
+                            aria-valuemin={BROWSER_SIDE_MIN}
+                            aria-valuemax={browserSideMax}
+                            aria-valuenow={browserSideShownWidth ?? undefined}
+                            title="Drag to resize. Double-click to reset."
+                            tabIndex={0}
+                            onPointerDown={startBrowserResize}
+                            onPointerMove={moveBrowserResize}
+                            onPointerUp={endBrowserResize}
+                            onPointerCancel={endBrowserResize}
+                            onDoubleClick={resetBrowserSideWidth}
+                            onKeyDown={resizeBrowserByKey}
+                        />
+                        {renderBrowserPanel("side", false)}
+                    </aside>
+                )}
+                {browserLayout === "side" && browserCollapsed && !browserExpanded && (
+                    <button type="button" className={styles.browserSideTab} title="Show the agent's browser"
+                        aria-label="Show the agent's browser" onClick={toggleBrowserCollapsed}>
+                        <Globe size={14} aria-hidden="true" />
+                        <span>Browser</span>
+                    </button>
+                )}
+                </div>
                 {browserShown && (
                     <SolidDialog
                         open={browserExpanded}

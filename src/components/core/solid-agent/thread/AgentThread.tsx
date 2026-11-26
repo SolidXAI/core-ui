@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { SolidSpinner } from "../../../shad-cn-ui/SolidSpinner";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
+import { LoaderCircle } from "lucide-react";
 import { getAgentTurnChatWidgetName, getExtensionComponent, getToolGroupChatWidgetName } from "../../../../helpers/registry";
 import { ExtensionComponentTypes } from "../../../../types/extension-registry";
 import styles from "../SolidAgent.module.css";
@@ -18,11 +18,8 @@ type Props = {
     agentName?: string;
     thinking: boolean;
     working?: boolean;
-    loadingHistory?: boolean;
     hasMore: boolean;
     loadingOlder?: boolean;
-    /** The last older-page load failed; auto-loading pauses until the user retries. */
-    loadOlderFailed?: boolean;
     context?: AgentContext;
     emptyState?: React.ReactNode;
     onLoadOlder: () => void;
@@ -31,7 +28,7 @@ type Props = {
     onStartNewSession?: () => void | Promise<void>;
 };
 
-type ItemGroup = { kind: "user"; item: AgentChatItem } | { kind: "agent"; key: string; items: AgentChatItem[]; startedAt?: number };
+type ItemGroup = { kind: "user"; item: AgentChatItem } | { kind: "agent"; key: string; items: AgentChatItem[] };
 
 const isUserItem = (item: AgentChatItem) => item.eventType === AgentEventTypes.userMessage && !item.widget;
 const ASSISTANT_MESSAGE_TYPES = new Set<string>([
@@ -62,9 +59,8 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
     const groups: ItemGroup[] = [];
     let turn: AgentChatItem[] = [];
     let turnKey = "initial-agent-turn";
-    let startedAt: number | undefined = undefined;
     const flush = () => {
-        if (turn.length) groups.push({ kind: "agent", key: turnKey, items: turn, startedAt });
+        if (turn.length) groups.push({ kind: "agent", key: turnKey, items: turn });
         turn = [];
     };
     for (const item of items) {
@@ -72,7 +68,6 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
             flush();
             groups.push({ kind: "user", item });
             turnKey = `after-${item.id}`;
-            startedAt = item.at;
         } else {
             turn.push(item);
         }
@@ -82,23 +77,14 @@ function groupItems(items: AgentChatItem[]): ItemGroup[] {
 }
 
 /** Renders thread items; sticks to the bottom while new content streams unless the user scrolled up. */
-export function AgentThread({ items, agentName, thinking, working = thinking, loadingHistory = false, hasMore, loadingOlder = false, loadOlderFailed = false, context, emptyState, onLoadOlder, onReply, onPrompt, onStartNewSession }: Props) {
-    // The scroll container unmounts while history loads or the empty state shows, so it is tracked as state.
-    const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
-    const topSentinelRef = useRef<HTMLDivElement>(null);
+export function AgentThread({ items, agentName, thinking, working = thinking, hasMore, loadingOlder = false, context, emptyState, onLoadOlder, onReply, onPrompt, onStartNewSession }: Props) {
+    const scrollRef = useRef<HTMLDivElement>(null);
     const pinned = useRef(true);
     const prevHeight = useRef(0);
     const prevFirstId = useRef<string | undefined>(undefined);
-    const attachScrollEl = useCallback((el: HTMLDivElement | null) => {
-        if (el) pinned.current = true;
-        setScrollEl(el);
-    }, []);
-
-    const onLoadOlderRef = useRef(onLoadOlder);
-    onLoadOlderRef.current = onLoadOlder;
 
     useLayoutEffect(() => {
-        const el = scrollEl;
+        const el = scrollRef.current;
         if (!el) return;
         const firstId = items[0]?.id;
         if (prevFirstId.current && firstId !== prevFirstId.current && prevHeight.current) {
@@ -109,10 +95,10 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
         }
         prevFirstId.current = firstId;
         prevHeight.current = el.scrollHeight;
-    }, [items, scrollEl]);
+    }, [items]);
 
     useEffect(() => {
-        const el = scrollEl;
+        const el = scrollRef.current;
         if (!el) return;
         const onScroll = () => {
             pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
@@ -120,31 +106,7 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
         };
         el.addEventListener("scroll", onScroll, { passive: true });
         return () => el.removeEventListener("scroll", onScroll);
-    }, [scrollEl]);
-
-    useEffect(() => {
-        const sentinelEl = topSentinelRef.current;
-        if (!scrollEl || !sentinelEl || !hasMore || loadingOlder || loadOlderFailed) return;
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries.some((entry) => entry.isIntersecting)) onLoadOlderRef.current();
-            },
-            { root: scrollEl, rootMargin: "80px 0px 0px 0px", threshold: 0 },
-        );
-        observer.observe(sentinelEl);
-        return () => observer.disconnect();
-    }, [scrollEl, hasMore, loadingOlder, loadOlderFailed]);
-
-    if (loadingHistory) {
-        return (
-            <div className={`${styles.thread} ${styles.threadCenterLoading}`} role="status" aria-live="polite" aria-label="Loading conversation">
-                <div className={styles.centerSpinnerWrapper}>
-                    <SolidSpinner size={28} />
-                </div>
-            </div>
-        );
-    }
+    }, []);
 
     if (!items.length && !thinking && emptyState) {
         return <div className={styles.thread}>{emptyState}</div>;
@@ -157,7 +119,6 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
             kind: "agent",
             key: lastGroup?.kind === "user" ? `after-${lastGroup.item.id}` : "working-turn",
             items: [],
-            startedAt: lastGroup?.kind === "user" ? lastGroup.item.at : undefined,
         });
     }
     const renderItem = (item: AgentChatItem, showMessageMeta?: boolean) => (
@@ -171,29 +132,15 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
         ?? DefaultAgentTurnCompletionWrapperWidget;
 
     return (
-        <div ref={attachScrollEl} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
-            {hasMore && <div ref={topSentinelRef} className={styles.loadOlderSentinel} aria-hidden="true" />}
-            {loadingOlder ? (
-                <div className={`${styles.notice} ${styles.loadOlderStatus}`} role="status">
-                    <SolidSpinner size={14} className={styles.inlineSolidSpinner} aria-hidden="true" />
-                    <span>Loading earlier messages…</span>
-                </div>
-            ) : hasMore && loadOlderFailed ? (
-                <div className={`${styles.historyErrorRow} ${styles.loadOlderError}`} role="alert">
-                    <span>Couldn&rsquo;t load earlier messages.</span>
-                    <button type="button" className={styles.historyRetryBtn} onClick={() => onLoadOlderRef.current()}>
-                        Retry
-                    </button>
-                </div>
-            ) : null}
+        <div ref={scrollRef} className={styles.thread} role="log" aria-live="polite" aria-relevant="additions">
+            {hasMore && (
+                <button type="button" className={`${styles.btn} ${styles.loadMore}`} onClick={onLoadOlder} disabled={loadingOlder}
+                    aria-label={loadingOlder ? "Loading earlier messages" : "Load earlier messages"} title={loadingOlder ? "Loading earlier messages" : undefined}>
+                    {loadingOlder ? <LoaderCircle size={14} className={styles.spinIcon} aria-hidden="true" /> : "Load earlier messages"}
+                </button>
+            )}
             {groups.map((group) => {
-                if (group.kind === "user") {
-                    return (
-                        <div key={group.item.id} className={styles.userTurn}>
-                            {renderItem(group.item)}
-                        </div>
-                    );
-                }
+                if (group.kind === "user") return renderItem(group.item);
 
                 const isCurrentTurn = working && group === groups[groups.length - 1];
                 const assistantCopyText = [...group.items].reverse()
@@ -201,7 +148,6 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
                     .find((content) => content !== null && content.length > 0);
                 const turnContent: React.ReactNode[] = [];
                 let activityItems: AgentChatItem[] = [];
-                let hasTrailingActivity = false;
                 const flushActivity = (isLatest: boolean) => {
                     if (!activityItems.length) return;
                     const activityKey = `${group.key}-${activityItems[0].id}`;
@@ -211,14 +157,10 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
                             turnKey={activityKey}
                             items={activityItems}
                             working={isCurrentTurn && isLatest}
-                            startedAt={group.startedAt}
                             renderItem={renderItem}
                         />,
                     );
                     activityItems = [];
-                    if (isLatest) {
-                        hasTrailingActivity = true;
-                    }
                 };
                 for (const item of group.items) {
                     // A compaction divider must stay visible, not fold into the collapsed activity group.
@@ -226,20 +168,18 @@ export function AgentThread({ items, agentName, thinking, working = thinking, lo
                         || item.eventType === AgentEventTypes.contextCompacted && !item.widget) {
                         flushActivity(false);
                         turnContent.push(renderItem(item, false));
-                        hasTrailingActivity = false;
                     } else {
                         activityItems.push(item);
                     }
                 }
                 flushActivity(true);
-                if (isCurrentTurn && (working || thinking) && !hasTrailingActivity) {
+                if (isCurrentTurn && thinking && group.items.length === 0) {
                     turnContent.push(
                         <ToolGroupWidget
                             key={`activity-${group.key}`}
                             turnKey={group.key}
                             items={[]}
                             working
-                            startedAt={group.startedAt}
                             renderItem={renderItem}
                         />,
                     );

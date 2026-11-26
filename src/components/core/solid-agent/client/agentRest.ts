@@ -16,18 +16,7 @@ export type AgentSessionSummary = {
     runtime?: AgentRuntimeType;
 };
 
-export type AgentHistoryPage = { messages: any[]; has_more: boolean; session_usage?: Record<string, any>; status?: string; is_running?: boolean };
-export type AgentSessionPage = {
-    sessions: AgentSessionSummary[];
-    next_cursor: string | null;
-    has_more: boolean;
-};
-export type FetchSessionListOptions = {
-    cursor?: string | null;
-    search?: string;
-    limit?: number;
-    signal?: AbortSignal;
-};
+export type AgentHistoryPage = { messages: any[]; has_more: boolean; session_usage?: Record<string, any> };
 export type AgentConfigVersionStatus = {
     processConfigVersion: number;
     latestConfigVersion: number;
@@ -38,12 +27,6 @@ export type ProviderModelsResponse = {
     provider: string;
     default_model?: string;
     models: ProviderModelInfo[];
-};
-
-export type ProviderAuthResponse = {
-    providerId: string;
-    authenticated: boolean | null;
-    status: "authenticated" | "unauthenticated" | "unknown";
 };
 
 /** Calls the agent at the `httpUrl` named at sign-in, with `Authorization: Bearer <agentToken>`; null when signed out or on error. */
@@ -75,30 +58,8 @@ export function fetchSessionHistory(agentUrl: string, sessionId: string, page = 
 }
 
 /** The current user's past conversations (the agent derives the user from the token). */
-export async function fetchSessionList(
-    agentUrl: string,
-    options?: FetchSessionListOptions,
-): Promise<AgentSessionPage | null> {
-    const params = new URLSearchParams();
-    params.set("paginated", "true");
-    if (options?.cursor) params.set("cursor", options.cursor);
-    if (options?.search) params.set("search", options.search);
-    if (options?.limit) params.set("limit", String(options.limit));
-
-    const res = await agentFetch<AgentSessionPage | AgentSessionSummary[]>(
-        agentUrl,
-        `/api/agent/sessions/history?${params.toString()}`,
-        { signal: options?.signal },
-    );
-    if (!res) return null;
-    if (Array.isArray(res)) {
-        return { sessions: res, next_cursor: null, has_more: false };
-    }
-    return {
-        sessions: Array.isArray(res.sessions) ? res.sessions : [],
-        next_cursor: res.next_cursor ?? null,
-        has_more: Boolean(res.has_more),
-    };
+export function fetchSessionList(agentUrl: string) {
+    return agentFetch<AgentSessionSummary[]>(agentUrl, "/api/agent/sessions/history");
 }
 
 export function fetchAgentConfigVersionStatus(agentUrl: string) {
@@ -163,59 +124,28 @@ export function getCachedProviderModels(agentUrl: string, providerId: string): P
 }
 
 /** List installed execution providers (both native SolidX and CLI agents). */
-export async function fetchAgentProviders(agentUrl: string, checkAuth: boolean = false): Promise<AgentProviderInfo[]> {
-    const data = await agentFetch<{ providers?: AgentProviderInfo[] }>(
-        agentUrl,
-        `/api/agent/providers?check_auth=${checkAuth}`,
-        { cache: "no-store" },
-    );
-    if (!data) throw new Error("Unable to load providers");
-    const list = Array.isArray(data.providers) ? data.providers : [];
-    if (list.length > 0) {
-        providersMemoryCache.set(agentUrl, list);
-        try {
-            sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
-        } catch {
-            // ignore
-        }
-    }
-    return list;
-}
-
-const PROVIDER_AUTH_TIMEOUT_MS = 15_000;
-
-/** Check authentication for a specific provider on-demand. */
-export async function fetchProviderAuth(
-    agentUrl: string,
-    providerId: string,
-    forceRefresh: boolean = false,
-): Promise<ProviderAuthResponse> {
-    if (providerId.toLowerCase() === "solidx" || providerId.toLowerCase() === "default") {
-        return { providerId: "solidx", authenticated: true, status: "authenticated" };
-    }
-    // CLI auth checks can hang; give up so the composer does not stay locked.
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), PROVIDER_AUTH_TIMEOUT_MS);
-    let data: { id?: string; authenticated?: boolean | null; status?: string } | null;
+export async function fetchAgentProviders(agentUrl: string): Promise<AgentProviderInfo[]> {
     try {
-        data = await agentFetch(
-            agentUrl,
-            `/api/agent/providers/${encodeURIComponent(providerId)}/auth?force_refresh=${forceRefresh}`,
-            { cache: "no-store", signal: controller.signal },
-        );
-    } finally {
-        clearTimeout(timer);
+        const auth = await loadAgentAuth(agentUrl);
+        const baseUrl = (auth?.httpUrl || agentUrl).replace(/\/$/, "");
+        const headers: Record<string, string> = {};
+        if (auth?.agentToken) headers.Authorization = `Bearer ${auth.agentToken}`;
+        const res = await fetch(`${baseUrl}/api/agent/providers`, { headers });
+        if (!res.ok) return getCachedAgentProviders(agentUrl);
+        const data = await res.json();
+        const list = Array.isArray(data?.providers) ? data.providers : [];
+        if (list.length > 0) {
+            providersMemoryCache.set(agentUrl, list);
+            try {
+                sessionStorage.setItem(`solid-agent.cached-providers.${agentUrl}`, JSON.stringify(list));
+            } catch {
+                // ignore
+            }
+        }
+        return list;
+    } catch {
+        return getCachedAgentProviders(agentUrl);
     }
-    if (!data) throw new Error(`Unable to verify ${providerId} authentication`);
-    const authenticated = data.authenticated === true ? true : data.authenticated === false ? false : null;
-    const status = data.status === "authenticated" || data.status === "unauthenticated" || data.status === "unknown"
-        ? data.status
-        : authenticated === true
-        ? "authenticated"
-        : authenticated === false
-        ? "unauthenticated"
-        : "unknown";
-    return { providerId: data.id || providerId, authenticated, status };
 }
 
 /** Return model catalog for a specific provider. */

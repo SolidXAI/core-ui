@@ -41,7 +41,6 @@ type SessionComparisonData = {
   page?: number;
   hasMore?: boolean;
   loadingOlder?: boolean;
-  loadOlderFailed?: boolean;
   error?: string;
 };
 
@@ -100,7 +99,6 @@ function SessionMessages({ data, onLoadOlder }: { data: SessionComparisonData; o
         working={false}
         hasMore={data.hasMore ?? false}
         loadingOlder={data.loadingOlder}
-        loadOlderFailed={data.loadOlderFailed}
         onLoadOlder={onLoadOlder}
         onReply={noOp}
         onPrompt={noOp}
@@ -189,7 +187,7 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
     const nextPage = (current.page ?? 1) + 1;
 
     setComparisonData((items) => items.map((item) =>
-      String(item.session.id) === String(sessionId) ? { ...item, loadingOlder: true, loadOlderFailed: false } : item,
+      String(item.session.id) === String(sessionId) ? { ...item, loadingOlder: true } : item,
     ));
 
     try {
@@ -208,7 +206,7 @@ export default function AgentSessionComparisonHeaderAction({ selectedRecords, so
       ));
     } catch {
       setComparisonData((items) => items.map((item) =>
-        String(item.session.id) === String(sessionId) ? { ...item, loadingOlder: false, loadOlderFailed: true } : item,
+        String(item.session.id) === String(sessionId) ? { ...item, loadingOlder: false } : item,
       ));
     }
   }, [comparisonData]);

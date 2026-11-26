@@ -78,35 +78,6 @@ export function formatSelectedModelLabel(raw: string): string {
     return candidate.trim() || trimmed;
 }
 
-const EFFORT_RANK_ORDER: Record<string, number> = {
-    minimal: 10,
-    min: 10,
-    low: 20,
-    light: 25,
-    normal: 30,
-    standard: 30,
-    medium: 40,
-    med: 40,
-    high: 50,
-    xhigh: 60,
-    "extra high": 60,
-    extra_high: 60,
-    extreme: 70,
-    max: 80,
-    maximum: 80,
-    full: 90,
-};
-
-function getEffortRank(effort: { id?: string; name?: string }): number {
-    const idKey = (effort.id || "").toLowerCase().trim();
-    const nameKey = (effort.name || "").toLowerCase().trim();
-    if (EFFORT_RANK_ORDER[idKey] !== undefined) return EFFORT_RANK_ORDER[idKey];
-    if (EFFORT_RANK_ORDER[nameKey] !== undefined) return EFFORT_RANK_ORDER[nameKey];
-    const num = parseFloat(idKey) || parseFloat(nameKey);
-    if (!isNaN(num)) return num;
-    return 100;
-}
-
 export function AgentModelIndicator({
     assignments,
     activeProvider = "solidx",
@@ -212,35 +183,23 @@ export function AgentModelIndicator({
     const reasoningEfforts = activeModelInfo?.reasoning_efforts || [];
     const providerOffEffort = reasoningEfforts.find(isOffEffort);
     const offEffortId = providerOffEffort?.id || "none";
-    const nonOffEfforts = useMemo(() => {
-        const list = reasoningEfforts.filter((r) => !isOffEffort(r));
-        return [...list].sort((a, b) => {
-            const rankA = getEffortRank(a);
-            const rankB = getEffortRank(b);
-            if (rankA !== rankB) return rankA - rankB;
-            const nameA = a.name || a.id || "";
-            const nameB = b.name || b.id || "";
-            return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: "base" });
-        });
-    }, [reasoningEfforts]);
+    const nonOffEfforts = useMemo(
+        () => reasoningEfforts.filter((r) => !isOffEffort(r)),
+        [reasoningEfforts]
+    );
 
     const isOffActive =
         !isThinking ||
         !selectedReasoning ||
         isOffEffort({ id: selectedReasoning, name: selectedReasoning });
 
-    const isAntigravity = activeProvider === "antigravity";
-    const isGemini = (activeModel || activeModelInfo?.id || "").toLowerCase().includes("gemini");
-
     const hasReasoningSupport =
         !isNativeProvider &&
         !isAutoModel &&
-        (isAntigravity
-            ? isGemini && reasoningEfforts.length > 0
-            : (reasoningEfforts.length > 0 ||
-                Boolean(activeModelInfo?.supports_thinking) ||
-                REASONING_PROVIDERS.has(activeProvider) ||
-                (activeModel?.includes("thinking") ?? false)));
+        (reasoningEfforts.length > 0 ||
+            Boolean(activeModelInfo?.supports_thinking) ||
+            REASONING_PROVIDERS.has(activeProvider) ||
+            (activeModel?.includes("thinking") ?? false));
 
     const visionModels = useMemo(() => {
         return models.filter((m) => isVisionModel(m));
@@ -259,26 +218,13 @@ export function AgentModelIndicator({
             Boolean(activeModelInfo?.supports_fast) ||
             SPEED_PROVIDERS.has(activeProvider));
 
-    const sortedModels = useMemo(() => {
-        return [...models].sort((a, b) => {
-            const aIsAuto = a.id.toLowerCase() === "auto" || Boolean(a.is_default);
-            const bIsAuto = b.id.toLowerCase() === "auto" || Boolean(b.is_default);
-            if (aIsAuto && !bIsAuto) return -1;
-            if (!aIsAuto && bIsAuto) return 1;
-
-            const nameA = a.name || a.id || "";
-            const nameB = b.name || b.id || "";
-            return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: "base" });
-        });
-    }, [models]);
-
     const filteredModels = useMemo(() => {
-        if (!searchQuery.trim()) return sortedModels;
+        if (!searchQuery.trim()) return models;
         const q = searchQuery.toLowerCase().trim();
-        return sortedModels.filter((m) =>
+        return models.filter((m) =>
             (m.name || m.id).toLowerCase().includes(q)
         );
-    }, [sortedModels, searchQuery]);
+    }, [models, searchQuery]);
 
     const activeEffortObj = reasoningEfforts.find((r) => r.id === selectedReasoning);
     const effortName =

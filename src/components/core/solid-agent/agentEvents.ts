@@ -22,9 +22,6 @@ export type AgentThreadState = {
     commands: AgentCommand[];
     working: boolean;
     thinking: boolean;
-    loadingHistory: boolean;
-    loadingOlder: boolean;
-    olderHistoryFailed: boolean;
     authError: string | null;
     liveToolId: string | null;
     streamingId: string | null;
@@ -43,9 +40,6 @@ export function createThreadState(): AgentThreadState {
         commands: [],
         working: false,
         thinking: false,
-        loadingHistory: false,
-        loadingOlder: false,
-        olderHistoryFailed: false,
         authError: null,
         liveToolId: null,
         streamingId: null,
@@ -211,16 +205,9 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 };
             }
             state.authError = null;
-            const status = frame.status ?? eventData.status;
-            if (status === "running") {
-                state.working = true;
-                state.thinking = true;
-            } else if (status === "idle" || status === "active" || status === "completed" || status === "stopped") {
-                state.working = false;
-                state.thinking = false;
-            }
             if ("pendingRequest" in frame || "pendingRequest" in eventData) {
                 setPendingReview(state, frame.pendingRequest ?? eventData.pendingRequest ?? null, at);
+                const status = frame.status ?? eventData.status;
                 state.working = status === "queued" || status === "running";
                 state.reviewResuming = state.working && !state.pendingReview;
             }
@@ -265,14 +252,6 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         case AgentEventTypes.sessionUpdated: {
             const sessionId = frame.session_id ?? eventData.session_id ?? null;
             if (sessionId) state.sessionId = sessionId;
-            const status = frame.status ?? eventData.status;
-            if (status === "running") {
-                state.working = true;
-                state.thinking = true;
-            } else if (status === "idle" || status === "active" || status === "completed" || status === "stopped") {
-                state.working = false;
-                state.thinking = false;
-            }
             const limit = frame.context_limit ?? eventData.context_limit ?? 0;
             if (limit > 0) {
                 if (state.usage) {
@@ -357,7 +336,6 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
         case AgentEventTypes.toolCalling: {
             freezeLiveTool(state);
             stopStreaming(state);
-            if (!replay) state.working = true;
             const toolName = eventData.tool_name ?? frame.tool_name ?? "tool";
             const args = eventData.arguments ?? {};
             const id = nextItemId("tool");
@@ -421,10 +399,7 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
                 };
             }
             freezeLiveTool(state);
-            if (!replay) {
-                state.working = true;
-                state.thinking = true;
-            }
+            if (!replay) state.thinking = true;
             break;
         }
 
@@ -434,7 +409,6 @@ export function applyAgentEvent(state: AgentThreadState, event: AgentChatEvent, 
             freezeLiveTool(state);
             state.thinking = false;
             state.turnStreamed = true;
-            if (!replay) state.working = true;
             const streaming = findItem(state, state.streamingId);
             if (streaming) {
                 streaming.eventData = { ...streaming.eventData, content: `${streaming.eventData.content ?? ""}${delta}` };
@@ -524,12 +498,9 @@ export function historyToItems(rows: any[]): AgentChatItem[] {
         // Runtime events carry Unix seconds. Core's createdAt can be shifted when
         // its database driver interprets a timezone-less timestamp as local time.
         const emittedAt = event.eventData.timestamp;
-        const rawTs = typeof row.timestamp === "string"
-            ? (row.timestamp.endsWith("Z") || /[+-]\d{2}:\d{2}$/.test(row.timestamp) ? row.timestamp : `${row.timestamp}Z`)
-            : row.timestamp;
         const at = typeof emittedAt === "number" && Number.isFinite(emittedAt) && emittedAt > 0
             ? emittedAt * 1000
-            : rawTs ? new Date(rawTs).getTime() : Date.now();
+            : row.timestamp ? new Date(row.timestamp).getTime() : Date.now();
         const start = state.items.length;
         applyAgentEvent(state, event, true, at);
         if (row.id != null) {

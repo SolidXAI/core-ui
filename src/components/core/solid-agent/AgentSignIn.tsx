@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { Eye, EyeOff, KeyRound } from "lucide-react";
-import { SolidSpinner } from "../../shad-cn-ui/SolidSpinner";
+import { Eye, EyeOff, KeyRound, Loader2 } from "lucide-react";
 import styles from "./SolidAgent.module.css";
 import { signInWithApiKey } from "./client/agentAuth";
 
@@ -83,7 +82,7 @@ export function AgentSignIn({ agentUrl, expired = false }: Props) {
                     </div>
                 )}
                 <button type="submit" className={styles.signInBtn} disabled={busy || !apiKey.trim()}>
-                    {busy ? <SolidSpinner size={15} className={styles.inlineSolidSpinner} /> : null}
+                    {busy ? <Loader2 size={15} className={styles.spinIcon} /> : null}
                     {busy ? "Signing in…" : "Sign in"}
                 </button>
             </form>
