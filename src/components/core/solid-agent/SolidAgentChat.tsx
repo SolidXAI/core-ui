@@ -139,7 +139,7 @@ const MAX_SIDEBAR_WIDTH = 420;
 const HISTORY_PAGE_LIMIT = 20;
 
 function withStoredTitle(session: AgentSessionSummary, storedTitles: Record<string, string>): AgentSessionSummary {
-    return { ...session, title: storedTitles[session.session_id] || session.title || session.preview || "New conversation" };
+    return { ...session, title: storedTitles[session.session_id] || session.title || session.preview || "New session" };
 }
 
 function parseInputValues(fields: AgentInputDefinition[], rawValues: Record<string, string>): { values?: Record<string, unknown>; error?: string } {
