@@ -1,5 +1,7 @@
 import { useState } from "react";
 import qs from "qs";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../../../../../redux/features/toastSlice";
 import { createSolidEntityApi } from "../../../../../../../redux/api/solidEntityApi";
 
 export type RelationItem = {
@@ -19,6 +21,13 @@ export const useRelationEntityHandler = ({ fieldContext, autoCompleteLimit = 100
   const parentEntityApi = createSolidEntityApi(fieldContext.modelName);
   const { usePatchUpdateSolidEntityMutation, useUpdateSolidEntityMutation } = parentEntityApi;
   const [updateSolidEntity] = usePatchUpdateSolidEntityMutation();
+  const dispatch = useDispatch();
+
+  const showErrorToast = (error: any, fallback: string) => {
+    const message = error?.data?.message ?? error?.message ?? fallback;
+    const detail = Array.isArray(message) ? message.join(", ") : message;
+    dispatch(showToast({ severity: "error", summary: "Error", detail }));
+  };
 
   /**
    * AUTOCOMPLETE & CHECKBOX:
@@ -99,7 +108,7 @@ export const useRelationEntityHandler = ({ fieldContext, autoCompleteLimit = 100
         prev.some((s) => s.value === item.value) ? prev : [...prev, item]
       );
     } catch (error: any) {
-      console.error(error?.data?.message || error?.message || `Failed to link ${fieldMetadata.displayName}`);
+      showErrorToast(error, `Failed to link ${fieldMetadata.displayName}`);
     }
   };
 
@@ -112,7 +121,7 @@ export const useRelationEntityHandler = ({ fieldContext, autoCompleteLimit = 100
       await sendLinkCommand(item, "unlink");
       setCurrentValues((prev) => prev.filter((s) => s.value !== item.value));
     } catch (error: any) {
-      console.error(error?.data?.message || error?.message || `Failed to unlink ${fieldMetadata.displayName}`);
+      showErrorToast(error, `Failed to unlink ${fieldMetadata.displayName}`);
     }
   };
 
