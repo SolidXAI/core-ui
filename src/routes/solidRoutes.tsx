@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import type { RouteObject } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { AuthGuard } from "./guards/AuthGuard";
@@ -48,6 +49,8 @@ import { _solidRegisterExtraRoutes } from "./SolidLayoutRegistry";
 import { SolidRouteMetadataBoundary } from "./SolidRouteMetadataBoundary";
 import { AgentEmbedPage } from "./pages/embed/AgentEmbedPage";
 import { AdminEmbedPage } from "./pages/embed/AdminEmbedPage";
+
+const AgentDashboardPage = lazy(() => import("./pages/admin/core/agent-dashboard/AgentDashboardPage"));
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
@@ -107,6 +110,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/solid-core/agent-skill-registry/editor/:id", element: <AgentSkillRegistryEditorPage />, handle: { title: "Agent Skill Registry Editor", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/agent-tool-registry/editor/:id", element: <AgentToolRegistryEditorPage />, handle: { title: "Agent Tool Registry Editor", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/agent-registry/editor/:id", element: <AgentRegistryEditorPage />, handle: { title: "Agent Registry Editor", manageDocumentMeta: true } },
+    { path: "/admin/core/solid-core/agent/dashboard", element: <Suspense fallback="Loading agent analytics…"><AgentDashboardPage /></Suspense>, handle: { title: "Agent dashboard", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/agent-session/inbox", element: <AgentJobsInboxPage />, handle: { title: "Jobs inbox", manageDocumentMeta: true } },
     { path: "/admin/core/solid-core/agent-registry/editor/compare-config", element: <AgentConfigComparisonPage />, handle: { title: "Compare Agent Config Versions", manageDocumentMeta: true } },
     { path: "/admin/core/settings", element: pick("settings", <SettingsPage />), handle: { title: "Settings", manageDocumentMeta: true } },

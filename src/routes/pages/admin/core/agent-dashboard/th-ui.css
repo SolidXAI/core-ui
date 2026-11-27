@@ -1,0 +1,149 @@
+.agent-analytics.thx {
+  --th-bg: #fbfbfc;
+  --th-surface: #ffffff;
+  --th-surface-2: #f6f6f8;
+  --th-surface-3: #efeff2;
+  --th-border: #e7e7ec;
+  --th-border-strong: #d6d6de;
+  --th-text: #1b1b21;
+  --th-text-2: #5d5f6b;
+  --th-text-3: #8b8d99;
+
+  --th-accent: #5b5bd6;
+  --th-accent-hover: #4f4fc8;
+  --th-accent-soft: #efeffd;
+  --th-accent-text: #4545bd;
+  --th-accent-ring: rgba(91, 91, 214, .28);
+  --th-on-accent: #ffffff;
+
+  --th-ok: #24935f;   --th-ok-soft: #e7f6ee;   --th-ok-line: #b8e3cb;
+  --th-err: #d93d42;  --th-err-soft: #fdecec;  --th-err-line: #f6c3c5;
+  --th-warn: #b26b00; --th-warn-soft: #fff5dc; --th-warn-line: #f5d999; --th-warn-dot: #e6a118;
+  --th-info: #0c6fc4; --th-info-soft: #e7f3fd; --th-info-line: #b9dbf7;
+  --th-critical: #c2185b;
+
+  --th-shadow-xs: 0 1px 0 rgba(20, 20, 40, .04);
+  --th-shadow-sm: 0 1px 2px rgba(20, 20, 40, .06), 0 0 0 1px rgba(20, 20, 40, .02);
+  --th-shadow-md: 0 4px 12px -2px rgba(20, 20, 40, .08), 0 2px 4px -2px rgba(20, 20, 40, .05);
+  --th-shadow-lg: 0 18px 40px -12px rgba(20, 20, 40, .22), 0 6px 14px -6px rgba(20, 20, 40, .10);
+  --th-scrim: rgba(15, 15, 25, .18);
+  --th-tooltip-bg: #1b1b21;
+
+  --th-r-xs: 4px; --th-r-sm: 6px; --th-r-md: 8px; --th-r-lg: 12px; --th-r-xl: 16px;
+
+  --th-ease: cubic-bezier(.2, .8, .2, 1);
+  --th-ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --th-d-1: 120ms; --th-d-2: 180ms; --th-d-3: 260ms;
+
+  --th-font: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --th-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  font-family: var(--th-font);
+  font-feature-settings: "cv11", "ss01", "ss03";
+  color: var(--th-text);
+  -webkit-font-smoothing: antialiased;
+}
+.agent-analytics.thx { font-family: var(--th-font); color: var(--th-text); -webkit-font-smoothing: antialiased; }
+:where(.agent-analytics.thx) button { appearance: none; margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; }
+
+html.dark .agent-analytics.thx, [data-theme="dark"] .agent-analytics.thx {
+  --th-bg: #111113;
+  --th-surface: #18191b;
+  --th-surface-2: #1f2023;
+  --th-surface-3: #27282c;
+  --th-border: #2b2d31;
+  --th-border-strong: #3a3c42;
+  --th-text: #ededf0;
+  --th-text-2: #b1b4bb;
+  --th-text-3: #7a7e88;
+
+  --th-accent: #6e6ade;
+  --th-accent-hover: #7f7be6;
+  --th-accent-soft: rgba(110, 106, 222, .16);
+  --th-accent-text: #b3aeff;
+  --th-accent-ring: rgba(127, 123, 230, .38);
+
+  --th-ok: #3dd68c;   --th-ok-soft: rgba(61, 214, 140, .11);  --th-ok-line: rgba(61, 214, 140, .28);
+  --th-err: #ff6b70;  --th-err-soft: rgba(255, 107, 112, .11); --th-err-line: rgba(255, 107, 112, .3);
+  --th-warn: #f5c04a; --th-warn-soft: rgba(245, 192, 74, .10); --th-warn-line: rgba(245, 192, 74, .28); --th-warn-dot: #f5c04a;
+  --th-info: #70b8ff; --th-info-soft: rgba(112, 184, 255, .11); --th-info-line: rgba(112, 184, 255, .28);
+  --th-critical: #f06292;
+
+  --th-shadow-xs: 0 1px 0 rgba(0, 0, 0, .3);
+  --th-shadow-sm: 0 1px 2px rgba(0, 0, 0, .4), 0 0 0 1px rgba(255, 255, 255, .02);
+  --th-shadow-md: 0 6px 16px -4px rgba(0, 0, 0, .5);
+  --th-shadow-lg: 0 24px 48px -12px rgba(0, 0, 0, .7);
+  --th-scrim: rgba(0, 0, 0, .45);
+  --th-tooltip-bg: #33353b;
+}
+
+.agent-analytics.thx .thx-mono { font-family: var(--th-mono); font-feature-settings: normal; }
+.agent-analytics.thx .thx-tnum { font-variant-numeric: tabular-nums; }
+.agent-analytics.thx :focus-visible { outline: none; box-shadow: 0 0 0 3px var(--th-accent-ring); }
+
+
+.agent-analytics.thx .thx-card { background: var(--th-surface); border: 1px solid var(--th-border); border-radius: var(--th-r-lg); box-shadow: var(--th-shadow-xs); }
+.agent-analytics.thx .thx-card-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 12px; min-height: 56px; padding: 10px 16px; border-bottom: 1px solid var(--th-border); }
+.agent-analytics.thx .thx-card-title { margin: 0; font-size: 14px; font-weight: 600; color: var(--th-text); }
+.agent-analytics.thx .thx-card-sub { font-size: 12.5px; color: var(--th-text-3); }
+
+/* ---- stat cards ---- */
+.agent-analytics.thx .thx-stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+.agent-analytics.thx .thx-stat { padding: 14px 16px 12px; overflow: hidden; transition: border-color var(--th-d-1) var(--th-ease), box-shadow var(--th-d-1) var(--th-ease); }
+.agent-analytics.thx .thx-stat:hover { border-color: var(--th-border-strong); box-shadow: var(--th-shadow-sm); }
+.agent-analytics.thx .thx-stat-l { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px; font-weight: 500; color: var(--th-text-2); }
+.agent-analytics.thx .thx-stat-v { margin-top: 4px; font-size: 22px; font-weight: 650; letter-spacing: -.02em; line-height: 1.3; color: var(--th-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 920px) { .agent-analytics.thx .thx-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .agent-analytics.thx .thx-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.agent-analytics.thx .thx-table-wrap { overflow-x: auto; }
+.agent-analytics.thx .thx-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.agent-analytics.thx .thx-table th { padding: 9px 12px; text-align: left; font-size: 12px; font-weight: 550; color: var(--th-text-3); white-space: nowrap; background: var(--th-surface-2); border-bottom: 1px solid var(--th-border); }
+.agent-analytics.thx .thx-table td { height: 44px; padding: 0 12px; color: var(--th-text); white-space: nowrap; border-bottom: 1px solid var(--th-border); }
+.agent-analytics.thx .thx-table th:first-child, .agent-analytics.thx .thx-table td:first-child { padding-left: 16px; }
+.agent-analytics.thx .thx-table th:last-child, .agent-analytics.thx .thx-table td:last-child { padding-right: 16px; }
+.agent-analytics.thx .thx-table tbody tr:last-child td { border-bottom: 0; }
+.agent-analytics.thx .thx-seg { position: relative; display: inline-flex; max-width: 100%; padding: 2px; border: 1px solid var(--th-border); border-radius: var(--th-r-md); background: var(--th-surface-2); }
+.agent-analytics.thx .thx-seg-btn { position: relative; z-index: 1; height: 26px; padding: 0 11px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--th-text-2); white-space: nowrap; cursor: pointer; transition: color var(--th-d-2) var(--th-ease); }
+.agent-analytics.thx .thx-seg-btn:hover { color: var(--th-text); }
+.agent-analytics.thx .thx-seg-btn:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--th-accent-ring); }
+.agent-analytics.thx .thx-seg-btn.is-active { color: var(--th-text); font-weight: 550; }
+.agent-analytics.thx .thx-seg-thumb { position: absolute; top: 2px; bottom: 2px; left: 0; border-radius: 6px; background: var(--th-surface); box-shadow: 0 0 0 1px var(--th-border-strong), 0 1px 2px rgba(16, 16, 24, .06); transition: transform var(--th-d-2) var(--th-ease), width var(--th-d-2) var(--th-ease); }
+html.dark .agent-analytics.thx .thx-seg-thumb, [data-theme="dark"] .agent-analytics.thx .thx-seg-thumb { background: var(--th-surface-3); }
+.agent-analytics.thx .thx-skel { display: block; border-radius: var(--th-r-sm); background: linear-gradient(90deg, var(--th-surface-3) 0%, var(--th-surface-2) 40%, var(--th-surface-3) 80%); background-size: 600px 100%; animation: thx-shimmer 1.4s linear infinite; }
+.agent-analytics.thx {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.agent-analytics .thx-page { background:var(--th-bg); padding:24px clamp(14px,3vw,36px) 48px; font-size:13px; line-height:1.5; min-height:100%; }
+.agent-analytics header,.agent-analytics .toolbar,.agent-analytics .axis,.agent-analytics dl div,.agent-analytics .series-values div {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.agent-analytics h1 {font-size:20px;letter-spacing:-.025em;font-weight:650;margin:0}
+.agent-analytics header p,.agent-analytics small,.agent-analytics .axis,.agent-analytics details {font-size:12px;color:var(--th-text-2)}
+.agent-analytics header p {margin:3px 0}
+.agent-analytics a {color:var(--th-accent-text);font-weight:550}
+.agent-analytics .toolbar {justify-content:flex-start; flex-wrap:wrap; margin:20px 0 14px}
+.agent-analytics .thx-input,.agent-analytics .refresh {height:32px;border:1px solid var(--th-border-strong);border-radius:var(--th-r-md);padding:0 10px;background:var(--th-surface);color:var(--th-text);max-width:100%;font:inherit}
+.agent-analytics .refresh {margin-left:auto;cursor:pointer}
+.agent-analytics .panels {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0;align-items:start}
+.agent-analytics .thx-card {overflow:hidden;min-width:0}
+.agent-analytics .thx-stat small {display:block;margin-top:6px}
+.agent-analytics dl,.agent-analytics .chart-body,.agent-analytics .breakdown {margin:0;padding:14px 16px}
+.agent-analytics dl div,.agent-analytics .series-values div {padding:8px 0;border-bottom:1px solid var(--th-border)}
+.agent-analytics dd,.agent-analytics strong {font-weight:550;font-variant-numeric:tabular-nums}
+.agent-analytics .plot {display:flex;gap:10px;height:100px;margin-top:16px;font-size:11px;color:var(--th-text-2)}
+.agent-analytics .bars {display:flex;align-items:end;gap:2px;flex:1;border-bottom:1px solid var(--th-border);background:repeating-linear-gradient(to top,transparent 0 24px,var(--th-border) 24px 25px)}
+.agent-analytics .bars div,.agent-analytics .track i {background:var(--th-accent);border-radius:2px;min-width:0}
+.agent-analytics .bars div {flex:1}
+.agent-analytics .axis {padding:6px 0}
+.agent-analytics summary {cursor:pointer;color:var(--th-accent-text)}
+.agent-analytics .series-values,.agent-analytics .breakdown {max-height:300px;overflow:auto}
+.agent-analytics .rank {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 12px;margin-bottom:12px}
+.agent-analytics .rank:last-child {margin-bottom:0}
+.agent-analytics .rank span {overflow-wrap:anywhere}
+.agent-analytics .track,.agent-analytics .rank small {grid-column:1/-1}
+.agent-analytics .track {height:4px;background:var(--th-surface-3);border-radius:2px}
+.agent-analytics .track i {display:block;height:100%}
+.agent-analytics .notice {padding:10px 16px;color:var(--th-text-2)}
+.agent-analytics.thx .thx-table :is(td,th):not(:first-child) {text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.agent-analytics .panels{grid-template-columns:minmax(0,1fr)}}
