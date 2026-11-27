@@ -1514,8 +1514,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const report = `${start} - ${end} of ${total}`;
 
     return (
-      <div className="w-full solid-table-paginator solid-table-paginator-align-end solid-tree-root-paginator flex flex-wrap items-center justify-between gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background">
-        <div className="solid-paginator-meta solid-tree-root-paginator-meta flex flex-wrap items-center gap-2 sm:ml-auto">
+      <div className="w-full solid-table-paginator solid-tree-root-paginator flex flex-wrap items-center justify-center gap-3 text-sm rounded-md border border-border/60 px-2 sm:px-3 py-1.5 bg-background">
+        <div className="solid-paginator-meta solid-tree-root-paginator-meta flex flex-wrap items-center gap-2">
           <span className="solid-paginator-label">Rows</span>
           <SolidSelect
             value={limit}

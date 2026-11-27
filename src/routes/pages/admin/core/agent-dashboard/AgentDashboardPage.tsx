@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { loadAgents, loadReport, type Agent, type Group, type Period, type Report, type Result } from "./analytics";
 import { Card, CardHeader, Segmented, Skeleton } from "./ui";
 import { formatCost, formatCount, formatDurationMs, formatTokens } from "./format";
+import { Breakdown } from "./Breakdown";
 import "./th-ui.css";
 
 const periods: { value: Period; label: string }[] = [
@@ -19,22 +20,11 @@ const comparisonColumns = [
 
 const value = (row: Group | undefined, field = "count") => Number(row?.[field] ?? 0);
 const sum = (source: Result, field = "count") => source.rows.reduce((n, r) => n + value(r, field), 0);
-const desc = (rows: Group[]) => [...rows].sort((a, b) => value(b) - value(a));
 const label = (r: Group) => String(r.groupValue ?? "Unspecified");
 
 function Panel({ title, sub, source, children, empty = !source.rows.length }: { title: string; sub?: string; source: Result; empty?: boolean; children: ReactNode }) {
   return <Card><CardHeader title={title} sub={sub} />{source.issue || empty
     ? <p className="notice">{source.issue ?? "No matching activity."}</p> : children}</Card>;
-}
-
-function Breakdown({ title, source, sub, detail }: { title: string; source: Result; sub?: string; detail?: (r: Group) => string }) {
-  const ordered = desc(source.rows);
-  const peak = value(ordered[0]) || 1;
-  return <Panel title={title} sub={sub} source={source}><div className="breakdown">{ordered.map(r =>
-    <div className="rank" key={label(r)}><span>{label(r)}</span><strong>{formatCount(value(r))}</strong>
-      <div className="track"><i style={{ width: (100 * value(r) / peak) + "%" }} /></div>
-      {detail && <small>{detail(r)}</small>}
-    </div>)}</div></Panel>;
 }
 
 function Trend({ source, period, sessions }: { source: Result; period: Period; sessions: boolean }) {
@@ -98,16 +88,16 @@ function ReportBody({ report: r, agents, selected, period }: { report: Report; a
           <td key={field}>{format(value(usage.get(id), field))}</td>)}</tr>)}</tbody></table></div>
     </Panel>
     <div className="panels">
-      <Breakdown title="Reasoning models" sub="Recorded responses by reasoning key" source={r.reasoning} detail={row => formatTokens(value(row,"inputTokens_sum")) + " input · " + formatTokens(value(row,"outputTokens_sum")) + " output tokens"} />
-      <Breakdown title="Fast models" sub="Recorded responses by fast-model key" source={r.fast} />
-      <Breakdown title="Session status" source={r.sessionStatus} /><Breakdown title="Session triggers" source={r.triggers} />
-      <Breakdown title="Background jobs" source={r.jobs} detail={row => formatCount(value(row,"attempts_sum")) + " dispatch attempts"} />
-      <Breakdown title="Human requests" source={r.requests} />
+      <Breakdown pie title="Reasoning models" sub="Recorded responses by reasoning key" source={r.reasoning} detail={row => formatTokens(value(row,"inputTokens_sum")) + " input · " + formatTokens(value(row,"outputTokens_sum")) + " output tokens"} />
+      <Breakdown pie title="Fast models" sub="Recorded responses by fast-model key" source={r.fast} />
+      <Breakdown pie initialView="pie" title="Session status" source={r.sessionStatus} /><Breakdown title="Session triggers" source={r.triggers} />
+      <Breakdown pie initialView="pie" title="Background jobs" source={r.jobs} detail={row => formatCount(value(row,"attempts_sum")) + " dispatch attempts"} />
+      <Breakdown pie initialView="pie" title="Human requests" source={r.requests} />
       <Breakdown title="Tool results" source={r.tools} detail={row => row.durationMs_avg == null ? "Duration unavailable" : formatDurationMs(value(row,"durationMs_avg")) + " ms average"} />
-      <Breakdown title="Tool return codes" sub="Zero indicates success" source={r.toolCodes} />
+      <Breakdown pie initialView="pie" title="Tool return codes" sub="Zero indicates success" source={r.toolCodes} />
       <Breakdown title="Browser sessions" source={r.browsers} />
       <Breakdown title="Context archives" source={r.archives} detail={row => formatTokens(value(row,"tokenEstimate_sum")) + " estimated tokens"} />
-      <Breakdown title="Configured reasoning models" sub="Sessions by model key" source={r.configured} />
+      <Breakdown pie title="Configured reasoning models" sub="Sessions by model key" source={r.configured} />
       <Breakdown title="Event types" source={r.events} />
     </div>
   </>;

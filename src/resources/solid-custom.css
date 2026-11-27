@@ -4637,6 +4637,34 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
   white-space: nowrap;
 }
 
+.solid-list-paginator {
+  position: relative;
+}
+
+.solid-list-paginator .solid-paginator-left {
+  margin-right: auto;
+}
+
+.solid-list-paginator-controls {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .solid-list-paginator {
+    flex-wrap: wrap;
+  }
+
+  .solid-list-paginator-controls {
+    position: static;
+    width: 100%;
+    transform: none;
+    flex-wrap: wrap;
+  }
+}
+
 .solid-list-selection-clear {
   border: 0;
   padding: 2px 5px;
@@ -5186,7 +5214,7 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center !important;
   gap: 1rem;
   padding: 0.625rem 0.85rem;
   overflow: visible;
@@ -5199,6 +5227,10 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
   display: flex;
   align-items: center;
   gap: 0.55rem;
+}
+
+.solid-tree-root-paginator-meta {
+  margin-left: 0 !important;
 }
 
 .solid-tree-page-size-select {

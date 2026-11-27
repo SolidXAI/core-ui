@@ -144,6 +144,18 @@ html.dark .agent-analytics.thx .thx-seg-thumb, [data-theme="dark"] .agent-analyt
 .agent-analytics .track,.agent-analytics .rank small {grid-column:1/-1}
 .agent-analytics .track {height:4px;background:var(--th-surface-3);border-radius:2px}
 .agent-analytics .track i {display:block;height:100%}
+.agent-analytics .breakdown-view-pie {display:grid;grid-template-columns:minmax(140px, 36%) minmax(0,1fr);align-items:center}
+.agent-analytics .breakdown-donut {padding:16px 0 16px 16px}
+.agent-analytics .breakdown-donut svg {display:block;width:100%;max-width:220px;margin:auto;overflow:visible}
+.agent-analytics .donut-total {fill:var(--th-text);font-size:22px;font-weight:650;font-variant-numeric:tabular-nums}
+.agent-analytics .donut-caption {fill:var(--th-text-2);font-size:12px}
+.agent-analytics .rank-dot {display:inline-block;width:8px;height:8px;flex-shrink:0;border-radius:50%;margin-right:7px}
+.agent-analytics .rank-share {display:block;text-align:right;font-weight:400}
+.agent-analytics .breakdown-bars .track {height:18px;background:var(--th-surface-2);border-radius:4px;overflow:hidden}
+.agent-analytics .breakdown-bars .track i {border-radius:4px}
+.agent-analytics .breakdown-view-pie .rank {padding:6px 0;border-bottom:1px solid var(--th-border);margin-bottom:4px}
+.agent-analytics .breakdown-view-pie .rank:last-child {border-bottom:0}
+@media(max-width:460px){.agent-analytics .breakdown-view-pie{grid-template-columns:minmax(0,1fr)}.agent-analytics .breakdown-donut{padding:16px 16px 0}.agent-analytics .thx-card-h>.thx-seg{margin-left:auto}}
 .agent-analytics .notice {padding:10px 16px;color:var(--th-text-2)}
 .agent-analytics.thx .thx-table :is(td,th):not(:first-child) {text-align:right;font-variant-numeric:tabular-nums}
 @media(max-width:760px){.agent-analytics .panels{grid-template-columns:minmax(0,1fr)}}

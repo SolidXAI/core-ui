@@ -1990,7 +1990,9 @@ li.header-li-px {
 }
 
 .solid-kanban-statusbar-board {
-  margin-left: auto;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: var(--solid-font-size-caption);
 }
 
@@ -2016,7 +2018,9 @@ li.header-li-px {
 
   .solid-kanban-statusbar-board {
     width: 100%;
-    justify-content: flex-end;
+    position: static;
+    justify-content: center;
+    transform: none;
   }
 }
 
@@ -5591,11 +5595,12 @@ flex-shrink: 0; */
   padding: 0;
   flex-shrink: 0;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .solid-card-view-pagination-bar {
-  width: fit-content;
+  width: 100%;
+  justify-content: flex-start;
 }
 
 html.dark .solid-kanban-surface,
