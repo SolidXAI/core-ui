@@ -368,6 +368,7 @@
 
   .solid-data-table-td {
     background: #2c3448;
+    --solid-table-sticky-bg: #2c3448;
     border-top: 1px solid rgba(65, 76, 104, 0.46);
     border-bottom: 1px solid rgba(65, 76, 104, 0.46);
     box-shadow: none;
@@ -387,12 +388,14 @@
 
   .solid-data-table-row:hover .solid-data-table-td {
     background: #31384d;
+    --solid-table-sticky-bg: #31384d;
     border-color: rgba(249, 115, 22, 0.22);
     transform: none;
   }
 
   .solid-data-table-row:has(input[type="checkbox"]:checked) .solid-data-table-td {
     background: #353d52;
+    --solid-table-sticky-bg: #353d52;
     border-color: rgba(249, 115, 22, 0.24);
   }
 

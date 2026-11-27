@@ -95,7 +95,7 @@ function getFrozenCellStyle(
   const stickyStyle: React.CSSProperties = {
     position: "sticky",
     zIndex: isHeader ? 12 : 3,
-    background: props.frozenBackground ?? "var(--card)",
+    background: props.frozenBackground ?? "var(--solid-table-sticky-bg, var(--card))",
   };
 
   if (props.alignFrozen === "right") {
