@@ -133,7 +133,11 @@
 .inbox .empty p, .inbox .listMessage { margin: 0; }
 .inbox .listMessage { padding: 1rem; }
 .inbox .notice { margin: 0; padding: .7rem .85rem; border: 1px solid var(--inbox-border); border-radius: .5rem; color: var(--inbox-muted); font-size: .875rem; }
-.inbox .notice[role="alert"] { color: var(--danger-color, #b91c1c); }
+.inbox .notice[role="alert"] {
+  border-color: color-mix(in srgb, var(--danger-color, #b91c1c) 28%, var(--inbox-border));
+  background: color-mix(in srgb, var(--danger-color, #b91c1c) 8%, var(--inbox-surface));
+  color: var(--danger-color, #b91c1c);
+}
 .filterDialog {
   --inbox-surface: var(--surface-card, var(--card));
   --inbox-border: var(--surface-border, var(--border));

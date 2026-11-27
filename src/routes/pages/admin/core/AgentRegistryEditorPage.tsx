@@ -34,7 +34,7 @@ type Input = { name: string; description: string; dataType: string; defaultValue
 type Agent = Item & AgentDeployment & {
   configVersion?: number;
   systemPrompt?: string; requiredInputs?: string; reasoningModelKey?: string; fastModelKey?: string; status?: string;
-  stepLimit?: number; turnStepLimit?: number; costLimit?: number;
+  stepLimit?: number; turnStepLimit?: number; costLimit?: number; webhookUrl?: string | null;
   agentSkills?: Link[]; agentTools?: Link[]; agentRoles?: Link[]; agentSecrets?: Link[];
   tags?: AgentHubTag[];
 };
@@ -190,7 +190,7 @@ function fieldsQuery(fields: string[]): string {
 const detailFields = [
   "id", "name", "title", "description", "iconName", "systemPrompt", "requiredInputs",
   ...generationFields.map(([key]) => key),
-  "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "configVersion",
+  "reasoningModelKey", "fastModelKey", "status", "stepLimit", "turnStepLimit", "costLimit", "webhookUrl", "configVersion",
   "runner", "minProcesses", "maxProcesses", "processCpu", "processMemory",
 ];
 
@@ -238,7 +238,7 @@ function agentFormFromRecord(record: Agent) {
     systemPrompt: record.systemPrompt ?? "", runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0,
     maxProcesses: record.maxProcesses ?? null, processCpu: record.processCpu ?? null, processMemory: record.processMemory ?? null,
     stepLimit: record.stepLimit ?? 100, turnStepLimit: record.turnStepLimit ?? 20,
-    costLimit: Number(record.costLimit ?? 3), tags: agentHubTagsFrom(record.tags), moduleId: agentHubModuleFrom(record.module)?.id ?? null, skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
+    costLimit: Number(record.costLimit ?? 3), webhookUrl: record.webhookUrl ?? "", tags: agentHubTagsFrom(record.tags), moduleId: agentHubModuleFrom(record.module)?.id ?? null, skillIds: skills.map((link) => link.agentSkillRegistry?.id).filter(Boolean),
     toolIds: tools.map((link) => link.agentToolRegistry?.id).filter(Boolean),
     roleIds: items(record.agentRoles).map((link) => link.roleMetadata?.id).filter(Boolean),
     secretIds: secrets.map((link) => link.secret?.id).filter(Boolean),
@@ -548,6 +548,7 @@ export function AgentRegistryEditorPage() {
   const [stepLimit, setStepLimit] = React.useState(100);
   const [turnStepLimit, setTurnStepLimit] = React.useState(20);
   const [costLimit, setCostLimit] = React.useState(3);
+  const [webhookUrl, setWebhookUrl] = React.useState("");
   const [deployment, setDeployment] = React.useState<AgentDeployment>({ runner: null, minProcesses: 0, maxProcesses: null, processCpu: null, processMemory: null });
   const [tags, setTags] = React.useState<AgentHubTag[]>([]);
   const [module, setModule] = React.useState<AgentHubModule | null>(null);
@@ -601,7 +602,7 @@ export function AgentRegistryEditorPage() {
   }, [activationReadyAt, id]);
 
   const currentForm = () => JSON.stringify({ name, title, description, iconName, inputs, reasoningModelKey, fastModelKey, ...generationSettings, systemPrompt, ...deployment,
-    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
+    stepLimit: Number(stepLimit), turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), webhookUrl: webhookUrl.trim(), tags, moduleId: module?.id ?? null, skillIds, toolIds, roleIds, secretIds,
     alwaysIncludeValues, requiresApprovalValues, secretEnvVarNames });
 
   React.useEffect(() => {
@@ -613,6 +614,7 @@ export function AgentRegistryEditorPage() {
     setGenerationSettings(generationSettingsFrom(record));
     setSystemPrompt(record.systemPrompt ?? ""); setStepLimit(record.stepLimit ?? 100);
     setTurnStepLimit(record.turnStepLimit ?? 20); setCostLimit(Number(record.costLimit ?? 3));
+    setWebhookUrl(record.webhookUrl ?? "");
     setDeployment({ runner: record.runner ?? null, minProcesses: record.minProcesses ?? 0, maxProcesses: record.maxProcesses ?? null,
       processCpu: record.processCpu ?? null, processMemory: record.processMemory ?? null });
     setTags(agentHubTagsFrom(record.tags));
@@ -741,7 +743,7 @@ export function AgentRegistryEditorPage() {
       name: name.trim(), title: title.trim(), description: description.trim(), iconName,
       requiredInputs: JSON.stringify(normalizedInputs),
       reasoningModelKey, fastModelKey, ...generationSettings, systemPrompt, stepLimit: Number(stepLimit),
-      turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit),
+      turnStepLimit: Number(turnStepLimit), costLimit: Number(costLimit), webhookUrl: webhookUrl.trim() || null,
       runner: deployment.runner ?? null, minProcesses: Number(deployment.minProcesses ?? 0),
       maxProcesses: deployment.maxProcesses ?? null, processCpu: deployment.processCpu ?? null,
       processMemory: deployment.processMemory ?? null,
@@ -938,7 +940,10 @@ export function AgentRegistryEditorPage() {
       <section className="agent-editor__section"><h2>Execution limits</h2><div className="agent-editor__grid">
         {[["Step limit", stepLimit, setStepLimit], ["Turn step limit", turnStepLimit, setTurnStepLimit], ["Cost limit", costLimit, setCostLimit]].map(([label, value, setter]) =>
           <label className="agent-editor__field" key={label as string}><span>{label as string}</span><input type="number" min={label === "Cost limit" ? 0 : 1} step={label === "Cost limit" ? 0.01 : 1} value={value as number} onChange={(event) => (setter as (value: number) => void)(Number(event.target.value))} />{label === "Cost limit" && <small className="agent-editor__hint">Cost is an estimate and is not guaranteed to be correct.</small>}</label>)}
-      </div>{errors.limits && <small className="agent-editor__error">{errors.limits}</small>}</section></div> },
+      </div>{errors.limits && <small className="agent-editor__error">{errors.limits}</small>}</section>
+      <section className="agent-editor__section"><h2>Session completion webhook</h2><p>AgentHub sends signed session summary events to this URL when a session finishes.</p>
+        <label className="agent-editor__field"><span>Webhook URL</span><input type="url" value={webhookUrl} placeholder="https://your-service.example/api/webhooks/agenthub/session-finished" onChange={(event) => setWebhookUrl(event.target.value)} /></label>
+      </section></div> },
     { value: "secrets", label: "Secrets", content: <LinkPicker label="Secrets" description="Grant access to existing secrets. Secret values are never shown here." options={secrets.records} selected={linked(secretIds, secrets.records, items(record?.agentSecrets).map((link) => link.secret).filter(Boolean))}
       onRefresh={() => void secrets.refetch()}
       onAddMany={(ids) => { ids.forEach((secretId) => { const secret = secrets.records.find((item) => item.id === secretId); if (secret) { setSecretIds((current) => Array.from(new Set([...current, secretId]))); setSecretEnvVarNames((current) => ({ ...current, [secretId]: String(secret.key ?? secret.name ?? secret.displayName ?? "") })); } }); }}
