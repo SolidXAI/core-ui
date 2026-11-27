@@ -4531,6 +4531,7 @@ html.dark .solid-header-cog-trigger:not(.solid-btn):hover,
 
 .solid-data-table-row:hover {
   background: color-mix(in srgb, var(--accent) 46%, transparent);
+  --solid-table-sticky-bg: color-mix(in srgb, var(--accent) 46%, var(--card));
 }
 
 .solid-table-density-compact .solid-data-table-th,
@@ -4839,6 +4840,7 @@ html.dark .solid-data-table-row:nth-child(even),
 html.dark .solid-data-table-row:hover,
 [data-theme="dark"] .solid-data-table-row:hover {
   background: color-mix(in srgb, var(--accent) 34%, #1e293b 18%);
+  --solid-table-sticky-bg: color-mix(in srgb, var(--accent) 34%, color-mix(in srgb, #1e293b 27%, color-mix(in srgb, var(--card) 88%, #0b1220 12%) 73%));
 }
 
 html.dark .solid-data-table-row:has(input[type="checkbox"]:checked),
@@ -5060,6 +5062,10 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-tree-sticky-cell {
   background: var(--background);
+}
+
+.solid-data-table-root .solid-data-table-td.solid-tree-sticky-cell {
+  transition: background-color 140ms ease;
 }
 
 .solid-data-table-head .solid-tree-sticky-cell {
